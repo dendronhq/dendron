@@ -259,18 +259,23 @@ export interface BulkResp<T> {
   error: DendronCompositeError | null;
 }
 
+export type RespV3ErrorResp = {
+  error: IDendronError;
+  data?: never;
+};
+
+type RespV3SuccessResp<T> = {
+  error?: never;
+  data: T;
+};
+
 /**
- * This lets us use a discriminate union to see if result has error or data
+ * This lets us use a discriminated union to see if result has error or data
+ *
+ * If you need to make sure it is an error (or a success),
+ * use {@link ErrorUtils.isErrorResp} type guard to help typescript narrow it down.
  */
-export type RespV3<T> =
-  | {
-      error: IDendronError;
-      data?: never;
-    }
-  | {
-      error?: never;
-      data: T;
-    };
+export type RespV3<T> = RespV3ErrorResp | RespV3SuccessResp<T>;
 
 export type BooleanResp =
   | { data: true; error: null }

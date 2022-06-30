@@ -51,6 +51,7 @@ import {
   NoteFnameDictUtils,
   FindNoteOpts,
   isNotNull,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -713,12 +714,19 @@ export class FileStorage implements DStore {
     oldLoc: DNoteLoc;
     newLoc: DNoteLoc;
   }): Promise<NoteChangeUpdateEntry | undefined> {
+    const ctx = "store:processNoteChangedByRename";
     const prevNote = { ...note };
     const vault = note.vault;
     const vaultPath = vault2Path({ vault, wsRoot: this.wsRoot });
 
     // read note in case its changed
-    const _n = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
+    const resp = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
+    if (ErrorUtils.isErrorResp(resp)) {
+      // couldn't read note. log it and return.
+      this.logger.error({ ctx, error: stringifyError(resp.error) });
+      return;
+    }
+    const _n = resp.data;
     const foundLinks = LinkUtils.findLinks({
       note: _n,
       engine: this.engine,
@@ -883,7 +891,11 @@ export class FileStorage implements DStore {
 
     // TODO: Move this business logic to engine so we can update metadata
     // read from disk since contents might have changed
-    const noteRaw = file2Note(oldLocPath, oldVault);
+    const resp = file2Note(oldLocPath, oldVault);
+    if (ErrorUtils.isErrorResp(resp)) {
+      throw new DendronError({ message: "file not found" });
+    }
+    const noteRaw = resp.data;
     const oldNote = NoteUtils.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],

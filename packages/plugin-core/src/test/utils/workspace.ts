@@ -97,6 +97,7 @@ export class WorkspaceTestUtils {
         maxPreviewsCached: 10,
         maxNoteLength: 204800,
         enableFullHierarchyNoteTitle: false,
+        enableSmartRefs: true,
       },
       preview: {
         enableFMTitle: true,

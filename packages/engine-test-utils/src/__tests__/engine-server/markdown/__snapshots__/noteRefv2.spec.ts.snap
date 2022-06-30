@@ -1,12 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`noteRefV2 WHEN parse section AND section header has space "MD_DENDRON: THEN header is parsed correctly: REGULAR" 1`] = `
+exports[`noteRefV2 WHEN parse header AND parse from end header "MD_REGULAR: THEN parse end header and sub headers: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo
 
 # Foo Bar
 
-![[foo#header-2]]
+## Header 3
+
+task3
+
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -16,7 +19,26 @@ VFile {
 }
 `;
 
-exports[`noteRefV2 WHEN parse section AND section header has space "MD_REGULAR: THEN header is parsed correctly: REGULAR" 1`] = `
+exports[`noteRefV2 WHEN parse header AND parse from end header "MD_REGULAR: THEN parse end header and sub headers: REGULAR" 2`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+## Header 3
+
+task3
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse header AND parse from middle header "MD_REGULAR: THEN parse middle header and sub headers: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo
 
@@ -39,7 +61,7 @@ task2.1
 }
 `;
 
-exports[`noteRefV2 WHEN parse section AND section header has space "MD_REGULAR: THEN header is parsed correctly: REGULAR" 2`] = `
+exports[`noteRefV2 WHEN parse header AND parse from middle header "MD_REGULAR: THEN parse middle header and sub headers: REGULAR" 2`] = `
 VFile {
   "contents": "# Foo
 
@@ -52,6 +74,52 @@ task2
 ### Header 2.1
 
 task2.1
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse header AND parse from start header "MD_REGULAR: THEN parse start header and sub headers: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+## Header 1
+
+task1
+
+### Header 1.1
+
+task1.1
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse header AND parse from start header "MD_REGULAR: THEN parse start header and sub headers: REGULAR" 2`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+## Header 1
+
+task1
+
+### Header 1.1
+
+task1.1
 
 
 ",

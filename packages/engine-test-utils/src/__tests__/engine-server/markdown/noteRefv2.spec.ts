@@ -9,6 +9,7 @@ import {
 import {
   AssertUtils,
   NoteTestUtilsV4,
+  PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { MDUtilsV5 } from "@dendronhq/engine-server";
@@ -83,11 +84,43 @@ describe("noteRefV2", () => {
     });
   };
 
-  describe.only("WHEN parse section", () => {
-    describe("AND section header has space", () => {
+  describe("WHEN parse header", () => {
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await ANCHOR_WITH_SPACE_PRE_SETUP(opts);
+      TestConfigUtils.withConfig((config) => {
+        config.workspace.enableSmartRefs = true;
+        return config;
+      }, opts);
+    };
+    describe("AND parse from start header", () => {
       runTestCases(
         createProcCompileTests({
-          name: "THEN header is parsed correctly",
+          name: "THEN parse start header and sub headers",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-1]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "task1", "task1.1");
+                await checkNotInVFile(resp, "task2", "task3");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND parse from middle header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse middle header and sub headers",
           fname: "foo",
           setup: async (opts) => {
             const text = "# Foo Bar\n![[foo#header-2]]";
@@ -103,14 +136,33 @@ describe("noteRefV2", () => {
                 await checkNotInVFile(resp, "task1", "task3");
               },
             },
-            [DendronASTDest.MD_DENDRON]: {
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND parse from end header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse end header and sub headers",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-3]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
               [ProcFlavor.REGULAR]: async ({ extra }) => {
                 const { resp } = extra;
-                await checkVFile(resp, "![[foo#header-2]]");
+                await checkVFile(resp, "task3");
+                await checkNotInVFile(resp, "task1");
               },
             },
           },
-          preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
+          preSetupHook: preSetupHookForHeaders,
         })
       );
     });

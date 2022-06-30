@@ -574,11 +574,13 @@ function prepareNoteRefIndices<T>({
   anchorEnd,
   bodyAST,
   makeErrorData,
+  enableSmartRef,
 }: {
   anchorStart?: string;
   anchorEnd?: string;
   bodyAST: DendronASTNode;
   makeErrorData: (anchorName: string, anchorType: "Start" | "End") => T;
+  enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;
@@ -638,7 +640,7 @@ function prepareNoteRefIndices<T>({
   }
 
   // TODO: check for smark blocks
-  if (!anchorEnd && start.type === "header" && start.node) {
+  if (!anchorEnd && start.type === "header" && start.node && enableSmartRef) {
     // anchor end is next header that is smaller or equal
     const nodes = RemarkUtils.extractHeaderBlock(
       bodyAST,
@@ -688,7 +690,7 @@ function convertNoteRefHelperAST(
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
   // Workaround until all usages of MDUtilsV4 are removed
-  const engine = MDUtilsV5.getProcData(proc).engine;
+  const { engine, config } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -719,6 +721,7 @@ function convertNoteRefHelperAST(
 
   const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
+    enableSmartRef: ConfigUtils.getWorkspace(config).enableSmartRefs,
     anchorEnd,
     bodyAST,
     makeErrorData: (anchorName, anchorType) => {

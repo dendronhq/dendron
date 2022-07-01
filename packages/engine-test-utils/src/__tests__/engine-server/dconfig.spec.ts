@@ -8,7 +8,7 @@ import { TestWorkspaceUtils } from "../../utils/workspace";
 
 function getDefaultConfig() {
   const defaultConfig: IntermediateDendronConfig = {
-    ...ConfigUtils.genDefaultConfig(),
+    ...ConfigUtils.genLatestConfig(),
   };
   defaultConfig.publishing.duplicateNoteBehavior = {
     action: "useVault",

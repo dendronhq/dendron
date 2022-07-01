@@ -90,7 +90,7 @@ export class GoToSiblingCommand extends BasicCommand<
     const numericNodes = _.filter(respNodes, (o) => {
       const leafName = DNodeUtils.getLeafName(o);
       return isNumeric(leafName);
-    }) as NoteProps[];
+    });
 
     // determine how much we want to zero-pad the numeric-only node names
     let padLength = 0;

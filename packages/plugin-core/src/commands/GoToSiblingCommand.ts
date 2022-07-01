@@ -3,6 +3,7 @@ import {
   DNodeUtils,
   isNumeric,
   NoteProps,
+  NotePropsByIdDict,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -71,9 +72,7 @@ export class GoToSiblingCommand extends BasicCommand<
         engine,
       });
       if (!_.isUndefined(note)) {
-        respNodes = engine.notes[note.parent as string].children
-          .map((id) => engine.notes[id])
-          .filter((ent) => _.isUndefined(ent.stub));
+        respNodes = getSiblings(engine.notes, note);
       }
     }
 
@@ -119,11 +118,13 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     let siblingNote;
     if (opts.direction === "next") {
+      //TODO: Here don't wrap, but instead find out if next month exists
       siblingNote =
         indexOfCurrentNote === respNodes.length - 1
           ? sorted[0]
           : sorted[indexOfCurrentNote + 1];
     } else {
+      //TODO: Should I also move a month back?
       siblingNote =
         indexOfCurrentNote === 0
           ? sorted.slice(-1)[0]
@@ -139,3 +140,31 @@ export class GoToSiblingCommand extends BasicCommand<
     return { msg: "ok" as const };
   }
 }
+
+const journalMonthCheck = (
+  allNotes: NotePropsByIdDict,
+  sortedNotes: NoteProps[],
+  idx: number
+) => {
+  const currentNote = sortedNotes[idx];
+
+  //TODO: Check if constant exists for this string
+  if (currentNote?.traits?.includes("journalNote")) {
+    const isEndOfMonth = idx === sortedNotes.length - 1;
+    if (isEndOfMonth) {
+      const monthSiblings = getSiblings(allNotes, currentNote);
+    }
+  }
+};
+
+// How to get siblings of upper level
+
+const getSiblings = (
+  notes: NotePropsByIdDict,
+  note: NoteProps
+): NoteProps[] => {
+  if (!note.parent) return [];
+  return notes[note.parent].children
+    .map((id) => notes[id])
+    .filter((ent) => _.isUndefined(ent.stub));
+};

@@ -85,9 +85,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
   }
 
-  private async goToNoteLink(
-    noteLink: Awaited<ReturnType<typeof getLinkFromSelectionWithWorkspace>>
-  ): Promise<CommandOutput> {
+  private async goToNoteLink(noteLink: any): Promise<CommandOutput> {
     const { vaults, engine } = ExtensionProvider.getDWorkspace();
 
     // get vault

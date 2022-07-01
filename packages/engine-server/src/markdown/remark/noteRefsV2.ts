@@ -639,7 +639,6 @@ function prepareNoteRefIndices<T>({
     end = { ...start };
   }
 
-  // TODO: check for smark blocks
   if (!anchorEnd && start.type === "header" && start.node && enableSmartRef) {
     // anchor end is next header that is smaller or equal
     const nodes = RemarkUtils.extractHeaderBlock(

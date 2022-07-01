@@ -29,7 +29,6 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts?: { uri?: string }) {
-    console.log("OpenLink is being executed");
     showDepreciationWarnign();
 
     const ctx = DENDRON_COMMANDS.OPEN_LINK;
@@ -98,7 +97,6 @@ const showDepreciationWarnign = () => {
       "See whats changed"
     )
     .then((resp) => {
-      console.log(resp);
       if (resp === "See whats changed") {
         AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeAccept, {
           source: DENDRON_COMMANDS.OPEN_LINK.key,

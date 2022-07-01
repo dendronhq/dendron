@@ -162,7 +162,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const note = notes[0];
 
       // if note doesn't have url, run goto note command
-      if (_.isUndefined(note.custom[GOTO_KEY])) {
+      if (_.isUndefined(note.custom?.[GOTO_KEY])) {
         const resp = await new GotoNoteCommand(this._ext).execute({
           qs: note.fname,
           vault: note.vault,
@@ -182,10 +182,10 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       };
     };
 
-    if (externalLink) {
-      return goToExternalLink();
-    } else {
+    if (noteLink) {
       return goToNoteLink();
+    } else {
+      return goToExternalLink();
     }
   }
 

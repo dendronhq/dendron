@@ -12,7 +12,7 @@ import { describeMultiWS } from "../testUtilsV3";
 
 const executeGotoCmd = async (ext: IDendronExtension) => {
   // return vscode.commands.executeCommand(DENDRON_COMMANDS.GOTO.key);
-  return await new GotoCommand(ext).execute();
+  return new GotoCommand(ext).execute();
 };
 
 /* Before each candidate */

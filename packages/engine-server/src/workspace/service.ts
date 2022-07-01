@@ -193,6 +193,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     }
   }
 
+  /**
+   * @deprecated: not applicable for self cotnained vaults
+   */
   static getOrCreateConfig(wsRoot: string) {
     return DConfig.getOrCreate(wsRoot);
   }
@@ -454,12 +457,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       if (vault.name) selfContainedVaultConfig.name = vault.name;
 
       // create dendron.yml
-      DConfig.getOrCreate(vaultPath, {
-        dev: {
-          enableSelfContainedVaults: true,
-        },
-        workspace: {
-          vaults: [selfContainedVaultConfig],
+      DConfig.createSync({
+        wsRoot: vaultPath,
+        defaults: {
+          dev: {
+            enableSelfContainedVaults: true,
+          },
+          workspace: {
+            vaults: [selfContainedVaultConfig],
+          },
         },
       });
       // create dendron.code-workspace
@@ -1083,7 +1089,9 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
     // this creates `dendron.yml`
-    ws.createConfig();
+    DConfig.createSync({
+      wsRoot,
+    });
     // add gitignore
     WorkspaceService.createGitIgnore(wsRoot);
     if (opts.createCodeWorkspace) {

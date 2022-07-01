@@ -77,7 +77,9 @@ export class CopyNoteRefCommand extends BasicCommand<
       if (!_.isUndefined(startAnchor) && !isBlockAnchor(startAnchor)) {
         // if a header is selected, skip the header itself
         linkData.anchorStart = slugger.slug(startAnchor);
-        linkData.anchorStartOffset = 1;
+        if (!opts.enableSmartRefs) {
+          linkData.anchorStartOffset = 1;
+        }
       }
       linkData.anchorEnd = endAnchor;
       if (!_.isUndefined(endAnchor) && !isBlockAnchor(endAnchor)) {

@@ -39,6 +39,7 @@ suite("CopyNoteRef", function () {
           return config;
         }, opts);
       };
+      let suffix = enableSmartRef ? "" : ",1:#*";
 
       describe("WHEN enableSmartRef is " + enableSmartRef, () => {
         describeMultiWS(
@@ -54,8 +55,7 @@ suite("CopyNoteRef", function () {
               const editor = await WSUtils.openNote(note);
               editor.selection = new vscode.Selection(7, 0, 7, 12);
               const link = await new CopyNoteRefCommand().run();
-              const suffix = enableSmartRef ? "" : ":#*";
-              expect(link).toEqual(`![[bar#foo,1${suffix}]]`);
+              expect(link).toEqual(`![[bar#foo${suffix}]]`);
             });
           }
         );
@@ -73,8 +73,7 @@ suite("CopyNoteRef", function () {
               const editor = await WSUtils.openNote(note);
               editor.selection = new vscode.Selection(7, 0, 7, 4);
               const link = await new CopyNoteRefCommand().run();
-              const suffix = enableSmartRef ? "" : ":#*";
-              expect(link).toEqual(`![[bar#foo,1${suffix}]]`);
+              expect(link).toEqual(`![[bar#foo${suffix}]]`);
             });
           }
         );
@@ -104,7 +103,8 @@ suite("CopyNoteRef", function () {
               const editor = await WSUtils.openNote(note);
               editor.selection = new vscode.Selection(7, 0, 7, 12);
               const link = await new CopyNoteRefCommand().run();
-              expect(link).toEqual(`![[bar#foo,1]]`);
+              suffix = enableSmartRef ? "" : ",1";
+              expect(link).toEqual(`![[bar#foo${suffix}]]`);
             });
           }
         );
@@ -292,7 +292,7 @@ suite("CopyNoteRef", function () {
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
             const link = await new CopyNoteRefCommand().run();
-            expect(link).toEqual("![[bar#foo,1]]");
+            expect(link).toEqual("![[bar#foo,1:#*]]");
           });
         }
       );

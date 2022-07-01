@@ -78,6 +78,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
     enableFullHierarchyNoteTitle: false,
-    enableSmartRefs: true,
+    enableSmartRefs: false,
   };
 }

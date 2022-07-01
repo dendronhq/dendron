@@ -568,6 +568,32 @@ export class ConfigUtils {
     } as StrictConfigV5;
   }
 
+  /**
+   * This is different from {@link genDefaultConfig}
+   * as it includes updated settings that we don't want to set as
+   * defaults for backward compatibility reasons
+   */
+  static genLatestConfig(
+    defaults?: DeepPartial<StrictConfigV5>
+  ): StrictConfigV5 {
+    const common = {
+      dev: {
+        enablePreviewV2: true,
+      },
+    };
+    return _.merge(
+      {
+        version: 5,
+        ...common,
+        commands: genDefaultCommandConfig(),
+        workspace: { ...genDefaultWorkspaceConfig(), enableSmartRefs: true },
+        preview: genDefaultPreviewConfig(),
+        publishing: genDefaultPublishingConfig(),
+      } as StrictConfigV5,
+      defaults
+    );
+  }
+
   // get
   static getProp<K extends keyof StrictConfigV5>(
     config: IntermediateDendronConfig,

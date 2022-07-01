@@ -1,4 +1,8 @@
-import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
+import {
+  DendronError,
+  ERROR_STATUS,
+  ExtensionEvents,
+} from "@dendronhq/common-all";
 import { resolvePath, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -7,6 +11,7 @@ import path from "path";
 import { env, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { AnalyticsUtils } from "../utils/analytics";
 import { getURLAt } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
@@ -24,6 +29,9 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts?: { uri?: string }) {
+    console.log("OpenLink is being executed");
+    showDepreciationWarnign();
+
     const ctx = DENDRON_COMMANDS.OPEN_LINK;
     this.L.info({ ctx });
 
@@ -79,3 +87,26 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { filepath: assetPath };
   }
 }
+
+const showDepreciationWarnign = () => {
+  AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
+    source: DENDRON_COMMANDS.OPEN_LINK.key,
+  });
+  window
+    .showWarningMessage(
+      "Heads up that OpenLink is being deprecated and will be replaced with the 'Goto' command",
+      "See whats changed"
+    )
+    .then((resp) => {
+      console.log(resp);
+      if (resp === "See whats changed") {
+        AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeAccept, {
+          source: DENDRON_COMMANDS.OPEN_LINK.key,
+        });
+        VSCodeUtils.openLink(
+          //TODO: This link needs to be updated
+          "https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6"
+        );
+      }
+    });
+};

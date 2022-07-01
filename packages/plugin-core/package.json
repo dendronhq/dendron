@@ -125,7 +125,7 @@
         "displayName": "Dendron Editor",
         "selector": [
           {
-            "filenamePattern": "*.tmd"
+            "filenamePattern": "*.md"
           }
         ]
       }

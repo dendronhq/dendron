@@ -1,6 +1,7 @@
 import {
   DMessageEnum,
   DMessageSource,
+  EditorMessageEnum,
   GraphThemeEnum,
   GraphViewMessageEnum,
   LookupViewMessageEnum,
@@ -132,6 +133,10 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         break;
       }
+
+      // case EditorMessageEnum.initialDocumentState: {
+
+      // }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

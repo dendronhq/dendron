@@ -9,17 +9,28 @@ import {
   NodeKey,
   $isLineBreakNode,
   $isTextNode,
+  $getSelection,
+  $isNodeSelection,
+  $isRangeSelection,
 } from "lexical";
 
 import { $isElementNode } from "lexical";
 import { useEffect } from "react";
-import { postVSCodeMessage } from "../../utils/vscode";
+import { postVSCodeMessage } from "../../../utils/vscode";
 import {
   DMessageSource,
   EditorChange,
-  EditorMessage,
+  EditorChangeMessage,
   EditorMessageEnum,
 } from "@dendronhq/common-all";
+import { $isFormattableNode, FormattableNode } from "../nodes/FormattableNode";
+import _ from "lodash";
+import {
+  $isMatchTextTwoStateNode,
+  $setDisplayMode,
+  MatchTextTwoStateNode,
+} from "../nodes/MatchTextTwoStateNode";
+import { TwoStateNodeMode } from "../nodes/TwoStateNode";
 
 type LineCountSearchPayload = {
   count: number;
@@ -99,6 +110,79 @@ export default function UpdateListener() {
 
         const msgToSend: EditorChange[] = [];
 
+        const nodesLosingFocus: MatchTextTwoStateNode[] = [];
+        const nodesGainingFocus: MatchTextTwoStateNode[] = [];
+
+        prevEditorState.read(() => {
+          const selection = $getSelection();
+
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+
+            console.log("Node(s) out of selection:");
+            nodes.forEach((node) => {
+              console.log(` - ${node.getKey()}`);
+              if ($isMatchTextTwoStateNode(node)) {
+                console.log(`Formattable Node ${node.getKey()} out of focus`);
+                nodesLosingFocus.push(node);
+              }
+            });
+          }
+        });
+
+        editorState.read(() => {
+          const selection = $getSelection();
+
+          if ($isRangeSelection(selection)) {
+            const nodes = selection.getNodes();
+
+            console.log(`${nodes.length} node(s) in selection:`);
+            nodes.forEach((node) => {
+              console.log(` - ${node.getKey()}`);
+              if ($isMatchTextTwoStateNode(node)) {
+                console.log(`Formattable Node ${node.getKey()} in focus`);
+                nodesGainingFocus.push(node);
+              }
+            });
+          }
+        });
+
+        // _.difference(nodesGainingFocus, nodesLosingFocus);
+        const nodesToUpdateGainingFocus = _.differenceWith(
+          nodesGainingFocus,
+          nodesLosingFocus,
+          (left, right) => {
+            return left.getKey() === right.getKey();
+          }
+        );
+
+        const nodesToUpdateLosingFocus = _.differenceWith(
+          nodesLosingFocus,
+          nodesGainingFocus,
+          (left, right) => {
+            return left.getKey() === right.getKey();
+          }
+        );
+
+        editor.update(() => {
+          console.log(
+            `Node Count to update gaining focus: ${nodesToUpdateGainingFocus.length}`
+          );
+          nodesToUpdateGainingFocus.forEach((node) => {
+            console.log(`Dummy update on node ${node.getKey()} gaining focus`);
+            $setDisplayMode(node, TwoStateNodeMode.raw);
+          });
+
+          console.log(
+            `Node Count to update losing focus: ${nodesToUpdateLosingFocus.length}`
+          );
+          nodesToUpdateLosingFocus.forEach((node) => {
+            console.log(`Dummy update on node ${node.getKey()} losing focus`);
+            $setDisplayMode(node, TwoStateNodeMode.formatted);
+          });
+        });
+
+        // Send updates back to VS Code based on changes:
         for (const value of dirtyLeaves.values()) {
           console.log(` - Dirty Leaf: ${value}`);
 
@@ -191,7 +275,7 @@ export default function UpdateListener() {
         }
 
         if (msgToSend.length > 0) {
-          const msg: EditorMessage = {
+          const msg: EditorChangeMessage = {
             type: EditorMessageEnum.documentChanged,
             data: msgToSend,
             source: DMessageSource.webClient,

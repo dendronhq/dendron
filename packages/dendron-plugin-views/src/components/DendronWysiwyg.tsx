@@ -20,22 +20,42 @@ import {
 } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
-import { $getRoot, $getSelection, $getNodeByKey } from "lexical";
+import { $getRoot, $getSelection, $getNodeByKey, LexicalEditor } from "lexical";
 import { useEffect } from "react";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { BOLD_STAR, TEXT_MATCH_TRANSFORMERS } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 
 import { RootNode } from "lexical";
 import { TextNode } from "lexical";
 
 import { TreeView } from "@lexical/react/LexicalTreeView";
-import UpdateListener from "./lexical/UpdateListener";
+import UpdateListener from "./lexical/plugins/UpdateListener";
+import FormatConverterPlugin from "./lexical/plugins/FormatConverterPlugin";
+import { FormattableNode } from "./lexical/nodes/FormattableNode";
+
+import { TRANSFORMERS, ITALIC_UNDERSCORE, LINK } from "@lexical/markdown";
+import {
+  DENDRON_BOLD,
+  JY_HEADING,
+  JY_LINK,
+} from "./lexical/nodes/Transformers";
+
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { MatchTextTwoStateNode } from "./lexical/nodes/MatchTextTwoStateNode";
+import TwoStatePlugin from "./lexical/plugins/TwoStatePlugin";
 
 // --- Start Lexical Code Block
 
@@ -55,106 +75,6 @@ function onChange(editorState: any) {
     // console.log(root, selection);
   });
 }
-
-// Lexical React plugins are React components, which makes them
-// highly composable. Furthermore, you can lazy load plugins if
-// desired, so you don't pay the cost for plugins until you
-// actually use them.
-function MyCustomAutoFocusPlugin() {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    // Focus the editor when the effect fires!
-    editor.focus();
-  }, [editor]);
-
-  return null;
-}
-
-function JYMutationListener() {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    console.log("Inside JYMutationListener");
-    const removeMutationListener = editor.registerMutationListener(
-      TextNode,
-      (mutatedNodes) => {
-        console.log(
-          "Inside JYMutationListener callback. Size is " + mutatedNodes.size
-        );
-        // mutatedNodes is a Map where each key is the NodeKey, and the value is the state of mutation.
-        for (var key in mutatedNodes) {
-          console.log("found mutatedNode");
-          console.log(key, mutatedNodes.get(key));
-        }
-      }
-    );
-
-    return () => {
-      removeMutationListener();
-    };
-  }, [editor]);
-
-  return null;
-}
-
-// function UpdateListener() {
-//   const [editor] = useLexicalComposerContext();
-
-//   useEffect(() => {
-//     console.log("Inside UpdateListener");
-//     const removeUpdateListener = editor.registerUpdateListener(
-//       ({ editorState, dirtyElements, dirtyLeaves }) => {
-//         console.log("Editor State Changed");
-//         console.log(`Dirty Leaves Count: ${dirtyLeaves.size}`);
-//         console.log(`Dirty Elements Count: ${dirtyElements.size}`);
-
-//         // The latest EditorState can be found as `editorState`.
-//         // To read the contents of the EditorState, use the following API:
-
-//         // for (const [key, value] of dirtyElements.entries()) {
-//         //   console.log("found dirtyElement");
-//         //   console.log(key, value);
-//         // }
-
-//         for (const value of dirtyLeaves.values()) {
-//           console.log("found dirtyLeaf");
-//           const node = editorState._nodeMap.get(value);
-//           // debugger;
-//           console.log(value);
-//           console.log(node?.__text);
-//           // debugger;
-//         }
-
-//         // debugger;
-
-//         const foo = "outside var";
-
-//         editorState.read(() => {
-//           console.log("Inside editor State Read");
-//           console.log(foo);
-
-//           debugger;
-//           for (const value in dirtyLeaves.values()) {
-//             console.log("found dirtyLeaf inside read");
-//             debugger;
-//             const node = $getNodeByKey(value);
-//             debugger;
-//           }
-
-//           // Just like editor.update(), .read() expects a closure where you can use
-//           // the $ prefixed
-//         });
-//       }
-//     );
-
-//     return () => {
-//       removeUpdateListener();
-//     };
-//   }, [editor]);
-
-//   return null;
-// }
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -188,25 +108,48 @@ const DendronWysiwyg: DendronComponent = (props) => {
   const { useConfig } = engineHooks;
   useConfig({ opts: workspace });
 
+  function InitEditor(editor: LexicalEditor): void {
+    console.log(`Init Editor; Note Props Body is ${noteProps?.body}`);
+    // editor.setEditorState();
+  }
+
   const initialConfig = {
     namespace: "MyEditor",
     theme,
     onError,
+    nodes: [
+      MatchTextTwoStateNode,
+      FormattableNode,
+      HeadingNode,
+      ListNode,
+      ListItemNode,
+      QuoteNode,
+      CodeNode,
+      CodeHighlightNode,
+      TableNode,
+      TableCellNode,
+      TableRowNode,
+      AutoLinkNode,
+      LinkNode,
+    ],
   };
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <PlainTextPlugin
+      <RichTextPlugin
         contentEditable={<ContentEditable />}
         placeholder={<div>Enter some text...</div>}
+        initialEditorState={InitEditor}
       />
       <OnChangePlugin onChange={onChange} />
       <HistoryPlugin />
-      <MyCustomAutoFocusPlugin />
-      <MarkdownShortcutPlugin />
+      <MarkdownShortcutPlugin
+        transformers={[DENDRON_BOLD, JY_HEADING, ITALIC_UNDERSCORE, JY_LINK]}
+      />
       <TreeViewPlugin />
-      {/* <JYMutationListener /> */}
       <UpdateListener />
+      <TwoStatePlugin />
+      {/* <FormatConverterPlugin /> */}
     </LexicalComposer>
   );
 };

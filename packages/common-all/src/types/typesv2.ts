@@ -821,6 +821,7 @@ export enum LookupViewMessageEnum {
 
 export enum EditorMessageEnum {
   documentChanged = "documentChanged",
+  initialDocumentState = "initialDocumentState",
 }
 
 export enum ThemeMessageType {
@@ -907,7 +908,8 @@ export type EditorChange = {
   nodeType: "text" | "lineBreak";
 };
 
-export type EditorMessage = DMessage<EditorMessageType, EditorChange[]>;
+export type EditorChangeMessage = DMessage<EditorMessageType, EditorChange[]>;
+export type EditorInitMessage = DMessage<EditorMessageType, string>;
 
 /** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;

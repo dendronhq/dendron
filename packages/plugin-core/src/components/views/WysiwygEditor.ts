@@ -1,20 +1,32 @@
 import {
   ConfigUtils,
   DendronEditorViewKey,
-  EditorMessage,
+  DMessageEnum,
+  DMessageSource,
+  EditorChangeMessage,
+  EditorInitMessage,
   EditorMessageEnum,
   EditorMessageType,
   getWebEditorViewEntry,
+  OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
+import {
+  ITextDocumentService,
+  TextDocumentService,
+} from "../../services/TextDocumentService";
+import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
 import { WebViewUtils } from "../../views/utils";
 
 export class WysiwygEditor implements vscode.CustomTextEditorProvider {
   private _ext: IDendronExtension;
+  _textDocumentService: ITextDocumentService;
 
   constructor({ extension }: { extension: IDendronExtension }) {
     this._ext = extension;
+
+    this._textDocumentService = TextDocumentServiceFactory.create(this._ext);
   }
 
   async resolveCustomTextEditor(
@@ -55,6 +67,32 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
     });
 
     webviewPanel.webview.html = html;
+
+    this.sendInitialState(webviewPanel.webview, document);
+  }
+
+  private async sendInitialState(
+    webview: vscode.Webview,
+    document: vscode.TextDocument
+  ) {
+    const note = await this._textDocumentService.processTextDocument(document);
+    // note = this.rewriteImageUrls(note, panel);
+
+    webview.postMessage({
+      type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+      data: {
+        note,
+        syncChangedNote: false,
+      },
+      source: "vscode",
+    } as OnDidChangeActiveTextEditorMsg);
+
+    // const msg: EditorInitMessage = {
+    //   type: EditorMessageEnum.initialDocumentState,
+    //   data: document.getText(),
+    //   source: DMessageSource.vscode,
+    // };
+    // return webview.postMessage(msg);
   }
 
   private setupCallbacks(
@@ -62,7 +100,7 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
     document: vscode.TextDocument
   ): void {
     // Callback on getting a message back from the webview
-    webview.onDidReceiveMessage(async (msg: EditorMessage) => {
+    webview.onDidReceiveMessage(async (msg: EditorChangeMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
       switch (msg.type) {
         case EditorMessageEnum.documentChanged: {
@@ -87,11 +125,11 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
 
             if (editorChange.editType === "insertion") {
               if (editorChange.nodeType === "text") {
-                console.log(
-                  `Doing Replace. Existing Line: ${
-                    document.lineAt(zeroIndexedLineNumber).text
-                  }`
-                );
+                // console.log(
+                //   `Doing Replace. Existing Line: ${
+                //     document.lineAt(zeroIndexedLineNumber).text
+                //   }`
+                // );
                 edit.replace(
                   document.uri,
                   new vscode.Range(

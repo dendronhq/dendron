@@ -40,6 +40,8 @@ export interface ITextDocumentService extends Disposable {
     event: TextDocumentChangeEvent
   ): Promise<NoteProps | undefined>;
 
+  processTextDocument(event: TextDocument): Promise<NoteProps | undefined>;
+
   /**
    * Apply content from a TextDocument to an existing note
    *
@@ -213,6 +215,66 @@ export class TextDocumentService implements ITextDocumentService {
         this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });
         fmChangeOnly = true;
       }
+    }
+
+    this.L.debug({ ctx, uri: uri.fsPath });
+    const engine = this._extension.getEngine();
+    const vault = VaultUtils.getVaultByFilePath({
+      vaults: engine.vaults,
+      wsRoot: this._extension.getEngine().wsRoot,
+      fsPath: uri.fsPath,
+    });
+    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
+      fname,
+      vault,
+      engine,
+    });
+    if (_.isUndefined(noteHydrated)) {
+      return;
+    }
+
+    const content = document.getText();
+    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+      this.L.debug({
+        ctx,
+        uri: uri.fsPath,
+        msg: "note content unchanged, ignoring",
+      });
+      return noteHydrated;
+    }
+
+    return this.updateNoteContents({
+      oldNote: noteHydrated,
+      content,
+      fmChangeOnly,
+      fname,
+      vault,
+    });
+  }
+
+  /**
+   * See {@link ITextDocumentService.processTextDocumentChangeEvent}
+   */
+  public async processTextDocument(event: TextDocument) {
+    const document = event;
+
+    const ctx = "TextDocumentService:processTextDocumentChangeEvent";
+    const uri = document.uri;
+    const fname = path.basename(uri.fsPath, ".md");
+
+    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    if (
+      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+    ) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return;
+    }
+
+    const maybePos = await this.getFrontmatterPosition(document);
+    const fmChangeOnly = false;
+    if (!maybePos) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
+      return;
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });

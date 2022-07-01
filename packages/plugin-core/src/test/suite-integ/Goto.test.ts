@@ -91,8 +91,8 @@ suite("GotoNote", function () {
 
           /* Prevent the test to actually open the link */
           const avoidPopUp = sinon.stub(vscode.env, "openExternal");
-          const cmdOutput = await executeGotoCmd(ext);
-          expect(cmdOutput).toEqual({ fsPath: "https://www.dendron.so/" });
+          const { data } = await executeGotoCmd(ext);
+          expect(data).toEqual({ fsPath: "https://www.dendron.so/" });
           avoidPopUp.restore();
         });
       }

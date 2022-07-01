@@ -27,10 +27,7 @@ import { OpenLinkCommand } from "./OpenLink";
 
 type CommandOpts = {};
 
-type CommandOutput =
-  | RespV3<GoToNoteCommandOutput>
-  | { error?: DendronError; fsPath?: string }
-  | undefined;
+type CommandOutput = RespV3<GoToNoteCommandOutput | { fsPath: string }>;
 
 const GOTO_KEY = "uri";
 
@@ -173,7 +170,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
         return { error };
       });
     }
-    return { fsPath: assetPath };
+    return { data: { fsPath: assetPath } };
   }
 
   private openLink(uri: string) {

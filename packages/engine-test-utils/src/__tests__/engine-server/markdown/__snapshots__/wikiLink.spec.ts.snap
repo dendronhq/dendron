@@ -547,6 +547,32 @@ VFile {
 }
 `;
 
+exports[`wikiLinks parse cross vault wikilink with spaces 1`] = `
+Object {
+  "data": Object {
+    "alias": "foo",
+    "anchorHeader": undefined,
+    "sameFile": false,
+    "vaultName": "vault1",
+  },
+  "position": Position {
+    "end": Object {
+      "column": 31,
+      "line": 1,
+      "offset": 30,
+    },
+    "indent": Array [],
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "wikiLink",
+  "value": "foo",
+}
+`;
+
 exports[`wikiLinks parse fail: bad format 1`] = `
 Object {
   "children": Array [

@@ -474,12 +474,13 @@ export class LinkUtils {
       if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
       if (value) {
+        // remove spaces
+        value = _.trim(value);
         ({ vaultName, link: value } = parseDendronURI(value));
         if (!alias && !explicitAlias) {
           alias = value;
         }
         alias = _.trim(alias);
-        value = _.trim(value);
       }
       return {
         alias,

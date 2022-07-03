@@ -983,6 +983,11 @@ export class NoteUtils {
     return props.title === NoteUtils.genTitle(props.fname);
   }
 
+  /**
+   * Remove `.md` extension if exists and remove spaces
+   * @param nodePath
+   * @returns
+   */
   static normalizeFname(nodePath: string) {
     nodePath = _.trim(nodePath);
     if (nodePath.endsWith(".md")) {

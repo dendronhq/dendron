@@ -52,6 +52,15 @@ describe("wikiLinks", () => {
       });
     });
 
+    test("cross vault wikilink with spaces", () => {
+      const resp = proc().parse(`[[foo | dendron://vault1/foo]]`);
+      expect(getWikiLink(resp)).toMatchSnapshot();
+      expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
+        type: DendronASTTypes.WIKI_LINK,
+        value: "foo",
+      });
+    });
+
     test("fail: bad format", () => {
       const resp = proc().parse(`[[[foo bar]]]`);
       expect(resp).toMatchSnapshot();

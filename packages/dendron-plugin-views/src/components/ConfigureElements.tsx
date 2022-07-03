@@ -6,13 +6,13 @@ const ConfigureElement = (props: any) => {
   const { Option } = Select;
   const { Paragraph } = Typography;
 
-  const handleSelectChange = debounce(async (e: any, name: string) => {
+  const handleSelectChange = debounce((e: any, name: string) => {
     props.postMessage({ key: name, value: e });
   }, 500);
-  const handleInputChange = debounce(async (e: any) => {
+  const handleInputChange = debounce((e: any) => {
     props.postMessage({ key: e.target.name, value: e.target.value });
   }, 500);
-  const handleCheckboxChange = debounce(async (e: any) => {
+  const handleCheckboxChange = debounce((e: any) => {
     props.postMessage({ key: e.target.name, value: e.target.checked });
   }, 500);
 

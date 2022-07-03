@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "antd/dist/antd.css";
 import { Layout, Menu, Input, Card, Typography } from "antd";
 import { DendronComponent, DendronProps } from "../types";
@@ -12,13 +12,21 @@ import {
 import { postVSCodeMessage } from "../utils/vscode";
 import { getSchemaConfig } from "../utils/config";
 import ConfigureElement from "./ConfigureElements";
-import _ from "lodash";
+import _, { debounce } from "lodash";
 
 const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   const config = _.cloneDeep(engine.config);
+  const [searchString, setSearchString] = useState("");
   const [workspace] = useWorkspaceProps();
   const { useConfig } = engineHooks;
   useConfig({ opts: workspace });
+  // useEffect(() => {
+  //   console.log("searchString", searchString);
+  //   const filterObj = schemaConfig.filter(
+  //     (config) => !config.label.includes(searchString)
+  //   );
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [searchString]);
   if (!config) return <></>;
   const schemaConfig = getSchemaConfig(config);
   const { Header, Content, Sider } = Layout;
@@ -44,13 +52,15 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
     element?.scrollIntoView(true);
   };
 
+  const handleSearch = debounce((e: any) => {
+    console.log(e.target.value);
+    setSearchString(e.target.value);
+  }, 500);
+
   return (
-    <Layout className="settingslayout site-layout-background">
-      <Header className="header site-layout-background">
-        <Input
-          style={{ background: "#383838", color: "white" }}
-          placeholder="Basic usage"
-        />{" "}
+    <Layout className="site-layout-background">
+      <Header className="header">
+        <Input placeholder="search config" onChange={handleSearch} />
       </Header>
       <Layout>
         <Sider width={200} className="site-layout-background">
@@ -71,6 +81,8 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
               padding: 24,
               margin: 0,
               minHeight: 280,
+              height: "100%",
+              overflowY: "scroll",
             }}
           >
             {schemaConfig.map((conf) => (

@@ -85,97 +85,93 @@ export const getSchemaConfig = (config: IntermediateDendronConfig) => [
                 default: config.commands.lookup.note.vaultSelectionModeOnCreate,
                 enum: ["smart", "alwaysPrompt"],
               },
+            ],
+          },
+        ],
+      },
+      {
+        label: "randomNote",
+        description: "Namespace for configuring  {@link  RandomNoteCommand }",
+        type: "object",
+        children: [
+          {
+            label: "include",
+            type: "array",
+            items: {
+              type: "string",
+            },
+            default: config.commands.randomNote.include,
+          },
+          {
+            label: "exclude",
+            type: "array",
+            items: {
+              type: "string",
+            },
+            default: config.commands.randomNote.exclude,
+          },
+        ],
+      },
+      {
+        label: "insertNoteLink",
+        description:
+          "Namespace for configuring  {@link  InsertNoteLinkCommand }",
+        type: "object",
+        children: [
+          {
+            label: "aliasMode",
+            type: "enum",
+            default: config.commands.insertNoteLink.aliasMode,
+            enum: ["snippet", "selection", "title", "prompt", "none"],
+            description: "Enum definitions of possible alias mode values",
+          },
+          {
+            label: "enableMultiSelect",
+            type: "boolean",
+            default: config.commands.insertNoteLink.enableMultiSelect,
+          },
+        ],
+      },
+      {
+        label: "insertNoteIndex",
+        description:
+          "Namespace for configuring  {@link  InsertNoteIndexCommand }",
+        type: "object",
+        children: [
+          {
+            label: "enableMarker",
+            type: "boolean",
+            default: config.commands.insertNoteIndex.enableMarker,
+          },
+        ],
+      },
+      {
+        label: "copyNoteLink",
+        type: "object",
+        description: "Namespace for configuring  {@link  CopyNoteLinkCommand }",
+        children: [
+          {
+            label: "nonNoteFile",
+            type: "object",
+            children: [
               {
-                label: "randomNote",
+                label: "anchorType",
+                type: "enum",
+                default: config.commands.copyNoteLink.nonNoteFile?.anchorType,
+                enum: ["line", "block", "prompt"],
                 description:
-                  "Namespace for configuring  {@link  RandomNoteCommand }",
-                type: "object",
-                children: [
-                  {
-                    label: "include",
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                    default: config.commands.randomNote.include,
-                  },
-                  {
-                    label: "exclude",
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                    default: config.commands.randomNote.exclude,
-                  },
-                ],
-              },
-              {
-                label: "insertNoteLink",
-                description:
-                  "Namespace for configuring  {@link  InsertNoteLinkCommand }",
-                type: "object",
-                children: [
-                  {
-                    label: "aliasMode",
-                    type: "enum",
-                    default: config.commands.insertNoteLink.aliasMode,
-                    enum: ["snippet", "selection", "title", "prompt", "none"],
-                    description:
-                      "Enum definitions of possible alias mode values",
-                  },
-                  {
-                    label: "enableMultiSelect",
-                    type: "boolean",
-                    default: config.commands.insertNoteLink.enableMultiSelect,
-                  },
-                ],
-              },
-              {
-                label: "insertNoteIndex",
-                description:
-                  "Namespace for configuring  {@link  InsertNoteIndexCommand }",
-                type: "object",
-                children: [
-                  {
-                    label: "enableMarker",
-                    type: "boolean",
-                    default: config.commands.insertNoteIndex.enableMarker,
-                  },
-                ],
-              },
-              {
-                label: "copyNoteLink",
-                type: "object",
-                description:
-                  "Namespace for configuring  {@link  CopyNoteLinkCommand }",
-                children: [
-                  {
-                    label: "nonNoteFile",
-                    type: "object",
-                    children: [
-                      {
-                        label: "anchorType",
-                        type: "enum",
-                        default:
-                          config.commands.copyNoteLink.nonNoteFile?.anchorType,
-                        enum: ["line", "block", "prompt"],
-                        description:
-                          '"line" uses line numbers (`L23`), "block" inserts block anchors (`^xf1g...`). "prompt" means prompt the user to select one.',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                label: "templateHierarchy",
-                type: "string",
-                default: config.commands.templateHierarchy,
-                description:
-                  "Default template hiearchy used when running commands like `Apply template`",
+                  '"line" uses line numbers (`L23`), "block" inserts block anchors (`^xf1g...`). "prompt" means prompt the user to select one.',
               },
             ],
           },
         ],
+      },
+      {
+        label: "templateHierarchy",
+        type: "string",
+        default: config.commands.templateHierarchy,
+        description:
+          "Default template hiearchy used when running commands like `Apply template`",
       },
     ],
   },

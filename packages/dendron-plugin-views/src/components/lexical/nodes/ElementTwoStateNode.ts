@@ -6,6 +6,8 @@ import {
   $isLineBreakNode,
   $isTextNode,
   $createTextNode,
+  $createParagraphNode,
+  $isParagraphNode,
 } from "lexical";
 import _ from "lodash";
 import {
@@ -14,8 +16,10 @@ import {
   TwoStateNodeMode as TwoStateNodeState,
 } from "./TwoStateNode";
 
+import { $isHeadingNode } from "@lexical/rich-text";
+
 //TODO: Support partial bolded line: *this part is bolded* but this is not
-export class MatchTextTwoStateNode extends TwoStateNode {
+export class ElementTwoStateNode extends TwoStateNode {
   // public __regex: RegExp = /\*\*(.*?)\*\*/;
   // public tag = "**";
 
@@ -40,7 +44,7 @@ export class MatchTextTwoStateNode extends TwoStateNode {
     key?: NodeKey
   ) {
     super(
-      MatchTextTwoStateNode.convertRawTextToFormatted(rawText, tag),
+      ElementTwoStateNode.convertRawTextToFormatted(rawText, tag),
       rawText,
       state,
       key
@@ -58,11 +62,11 @@ export class MatchTextTwoStateNode extends TwoStateNode {
   }
 
   static getType(): string {
-    return "MatchTextTwoStateNode";
+    return "ElementTwoStateNode";
   }
 
-  static clone(node: MatchTextTwoStateNode): MatchTextTwoStateNode {
-    return new MatchTextTwoStateNode(
+  static clone(node: ElementTwoStateNode): ElementTwoStateNode {
+    return new ElementTwoStateNode(
       node.__rawText,
       node.__regex,
       node.tag,
@@ -70,6 +74,10 @@ export class MatchTextTwoStateNode extends TwoStateNode {
       node.__formattedNumber,
       node.__key
     );
+  }
+
+  getCursorOffset(): number {
+    return this.tag.length;
   }
 
   override setDisplayMode(mode: TwoStateNodeState) {
@@ -85,10 +93,6 @@ export class MatchTextTwoStateNode extends TwoStateNode {
     }
   }
 
-  getCursorOffset(): number {
-    return this.tag.length;
-  }
-
   updateInternalTexts() {
     const self = this.getLatest();
     if (self.__state === TwoStateNodeState.raw) {
@@ -96,7 +100,7 @@ export class MatchTextTwoStateNode extends TwoStateNode {
       self.__formattedText = _.trim(self.__text, this.tag);
     } else {
       self.__formattedText = self.__text;
-      self.__rawText = `${this.tag}${self.__text}${this.tag}`;
+      self.__rawText = `${this.tag}${self.__text}`;
     }
   }
 
@@ -119,13 +123,13 @@ export class MatchTextTwoStateNode extends TwoStateNode {
   // }
 }
 
-export function $createMatchTextTwoStateNode(
+export function $createElementTwoStateNode(
   rawText: string,
   regex: RegExp,
   tag: string,
   formatNumber: number
-): MatchTextTwoStateNode {
-  return new MatchTextTwoStateNode(
+): ElementTwoStateNode {
+  return new ElementTwoStateNode(
     rawText,
     regex,
     tag,
@@ -134,81 +138,48 @@ export function $createMatchTextTwoStateNode(
   );
 }
 
-export enum onModificationResult {
-  createdNodeBefore,
-  createdNodeAfter,
-  noop,
-  revertToTextNode,
-  updatedTexts,
-}
-
-export function $onModification(
-  node: MatchTextTwoStateNode
-): onModificationResult {
+export function $onElementTwoStateNodeModification(node: ElementTwoStateNode) {
   // Don't do anything unless we're in raw mode - i.e. the user has the cursor inside the node
   if (node.getDisplayMode() === TwoStateNodeState.formatted) {
-    return onModificationResult.noop;
+    return;
   }
 
   const matches = node.__text.match(node.__regex);
 
   // First check if there's any regex match, if not, then convert back to text node and we're done.
   if (!matches || matches.length === 0) {
+    console.log(`onModification - trying to remove parent`);
+    const parent = node.getParent();
+    if (parent && !$isParagraphNode(parent)) {
+      const newParent = $createParagraphNode();
+      newParent.append(...parent.getChildren());
+
+      parent.replace(newParent);
+      return;
+    }
+
     console.log(`onModification - doing a replace back to textNode`);
-    node.replace($createTextNode(node.getTextContent()));
-    return onModificationResult.revertToTextNode;
+    const newNode = $createTextNode(node.getRawText());
+    node.replace(newNode);
+
+    console.log(`onModification - returning`);
+    // return newNode;
   }
 
-  console.log(
-    `onModification - matches length: ${matches?.length} | matches index: ${matches.index} | node text: ${node.__text}, matches[0]: ${matches[0]}`
-  );
-  if (matches.index && matches.index > 0) {
-    console.log(`onModification - Slicing Before`);
-    const existing = node.__text;
-    node.__text = node.__text.slice(matches.index);
-    node.insertBefore($createTextNode(existing.slice(0, matches.index)));
-    return onModificationResult.createdNodeBefore;
-  }
-
-  console.log(
-    `derp ${matches.index} | ${matches[0].length} | ${node.__text.length} | ${node.__text}`
-  );
-  if (
-    matches.index !== undefined &&
-    matches.index + matches[0].length < node.__text.length
-  ) {
-    console.log(`onModification - Slicing After`);
-    const existing = node.__text;
-    node.__text = node.__text.slice(
-      matches.index,
-      matches.index + matches[0].length
-    );
-
-    const nextNodeLength = matches.index + matches[0].length;
-    node.insertAfter($createTextNode(existing.slice(nextNodeLength)));
-    return onModificationResult.createdNodeAfter;
-  }
-
-  // TODO: Do we need to maybe mark nodes as dirty in if statements above?
   node.updateInternalTexts();
-
-  // console.log(`Performing selection. Length: ${node.__rawText.length}`);
-  // Move the cursor
-  // node.select(node.__rawText.length, node.__rawText.length);
-  return onModificationResult.updatedTexts;
 }
 
-export function $isMatchTextTwoStateNode(
+export function $isElementTwoStateNode(
   node: LexicalNode | null | undefined
-): node is MatchTextTwoStateNode {
-  return node instanceof MatchTextTwoStateNode;
+): node is ElementTwoStateNode {
+  return node instanceof ElementTwoStateNode;
 }
 
-// export function $setDisplayMode(
-//   node: MatchTextTwoStateNode,
-//   mode: TwoStateNodeState
-// ) {
-//   if (node.getDisplayMode() !== mode) {
-//     node.setDisplayMode(mode);
-//   }
-// }
+export function $setDisplayMode(
+  node: ElementTwoStateNode,
+  mode: TwoStateNodeState
+) {
+  if (node.getDisplayMode() !== mode) {
+    node.setDisplayMode(mode);
+  }
+}

@@ -10,6 +10,7 @@ import {
   getWebEditorViewEntry,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import {
@@ -130,13 +131,27 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
                 //     document.lineAt(zeroIndexedLineNumber).text
                 //   }`
                 // );
+                const lineDiff = zeroIndexedLineNumber - document.lineCount + 1;
+
+                if (lineDiff > 0) {
+                  edit.insert(
+                    document.uri,
+                    new vscode.Position(
+                      document.lineCount - 1,
+                      document.lineAt(document.lineCount - 1).text.length
+                    ),
+                    _.repeat("\n", lineDiff)
+                  );
+                }
                 edit.replace(
                   document.uri,
                   new vscode.Range(
                     zeroIndexedLineNumber,
                     0,
                     zeroIndexedLineNumber,
-                    document.lineAt(zeroIndexedLineNumber).text.length
+                    lineDiff > 0
+                      ? 0
+                      : document.lineAt(zeroIndexedLineNumber).text.length
                   ),
                   editorChange.text
                 );

@@ -1,36 +1,24 @@
-import { $getRoot, $getNodeByKey } from "lexical";
+import { $getNodeByKey, $getRoot } from "lexical";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 import {
-  EditorState,
-  ElementNode,
-  LexicalNode,
-  NodeKey,
   $isLineBreakNode,
   $isTextNode,
-  $getSelection,
-  $isNodeSelection,
-  $isRangeSelection,
+  EditorState,
+  LexicalNode,
+  NodeKey,
 } from "lexical";
 
-import { $isElementNode } from "lexical";
-import { useEffect } from "react";
-import { postVSCodeMessage } from "../../../utils/vscode";
 import {
   DMessageSource,
   EditorChange,
   EditorChangeMessage,
   EditorMessageEnum,
 } from "@dendronhq/common-all";
-import { $isFormattableNode, FormattableNode } from "../nodes/FormattableNode";
-import _ from "lodash";
-import {
-  $isMatchTextTwoStateNode,
-  $setDisplayMode,
-  MatchTextTwoStateNode,
-} from "../nodes/MatchTextTwoStateNode";
-import { TwoStateNodeMode } from "../nodes/TwoStateNode";
+import { $isElementNode } from "lexical";
+import { useEffect } from "react";
+import { postVSCodeMessage } from "../../../utils/vscode";
 
 type LineCountSearchPayload = {
   count: number;
@@ -105,86 +93,14 @@ export default function UpdateListener() {
     console.log("Inside UpdateListener");
     const removeUpdateListener = editor.registerUpdateListener(
       ({ editorState, dirtyElements, dirtyLeaves, prevEditorState }) => {
-        console.log("Editor State Changed");
-        console.log(`Dirty Leaves Count: ${dirtyLeaves.size}`);
+        // console.log("Editor State Changed");
+        // console.log(`Dirty Leaves Count: ${dirtyLeaves.size}`);
 
         const msgToSend: EditorChange[] = [];
 
-        const nodesLosingFocus: MatchTextTwoStateNode[] = [];
-        const nodesGainingFocus: MatchTextTwoStateNode[] = [];
-
-        prevEditorState.read(() => {
-          const selection = $getSelection();
-
-          if ($isRangeSelection(selection)) {
-            const nodes = selection.getNodes();
-
-            console.log("Node(s) out of selection:");
-            nodes.forEach((node) => {
-              console.log(` - ${node.getKey()}`);
-              if ($isMatchTextTwoStateNode(node)) {
-                console.log(`Formattable Node ${node.getKey()} out of focus`);
-                nodesLosingFocus.push(node);
-              }
-            });
-          }
-        });
-
-        editorState.read(() => {
-          const selection = $getSelection();
-
-          if ($isRangeSelection(selection)) {
-            const nodes = selection.getNodes();
-
-            console.log(`${nodes.length} node(s) in selection:`);
-            nodes.forEach((node) => {
-              console.log(` - ${node.getKey()}`);
-              if ($isMatchTextTwoStateNode(node)) {
-                console.log(`Formattable Node ${node.getKey()} in focus`);
-                nodesGainingFocus.push(node);
-              }
-            });
-          }
-        });
-
-        // _.difference(nodesGainingFocus, nodesLosingFocus);
-        const nodesToUpdateGainingFocus = _.differenceWith(
-          nodesGainingFocus,
-          nodesLosingFocus,
-          (left, right) => {
-            return left.getKey() === right.getKey();
-          }
-        );
-
-        const nodesToUpdateLosingFocus = _.differenceWith(
-          nodesLosingFocus,
-          nodesGainingFocus,
-          (left, right) => {
-            return left.getKey() === right.getKey();
-          }
-        );
-
-        editor.update(() => {
-          console.log(
-            `Node Count to update gaining focus: ${nodesToUpdateGainingFocus.length}`
-          );
-          nodesToUpdateGainingFocus.forEach((node) => {
-            console.log(`Dummy update on node ${node.getKey()} gaining focus`);
-            $setDisplayMode(node, TwoStateNodeMode.raw);
-          });
-
-          console.log(
-            `Node Count to update losing focus: ${nodesToUpdateLosingFocus.length}`
-          );
-          nodesToUpdateLosingFocus.forEach((node) => {
-            console.log(`Dummy update on node ${node.getKey()} losing focus`);
-            $setDisplayMode(node, TwoStateNodeMode.formatted);
-          });
-        });
-
         // Send updates back to VS Code based on changes:
         for (const value of dirtyLeaves.values()) {
-          console.log(` - Dirty Leaf: ${value}`);
+          // console.log(` - Dirty Leaf: ${value}`);
 
           editorState.read(() => {
             const node = $getNodeByKey(value);
@@ -230,7 +146,7 @@ export default function UpdateListener() {
                     nodeType,
                   });
                 } else {
-                  console.log(
+                  console.error(
                     `JY_ERROR: Unable to find node with value ${value}`
                   );
                 }
@@ -243,7 +159,7 @@ export default function UpdateListener() {
                 const node = $getNodeByKey(value);
 
                 if (!node) {
-                  console.log(
+                  console.error(
                     `JY_ERROR: Unable to find node with value ${value} in prevEditorState!`
                   );
                   //return;
@@ -251,7 +167,7 @@ export default function UpdateListener() {
                   const result = getLineNumber(prevEditorState, value);
 
                   if (!result) {
-                    console.log(
+                    console.error(
                       `JY_ERROR: Unable to get line number for node with value ${value} in prevEditorState!`
                     );
                   } else {

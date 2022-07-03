@@ -42,7 +42,7 @@ export abstract class TwoStateNode extends TextNode {
   //   );
   // }
 
-  getDisplayText(): string {
+  getFormattedText(): string {
     const self = this.getLatest();
     return self.__formattedText;
   }
@@ -61,6 +61,9 @@ export abstract class TwoStateNode extends TextNode {
     const self = this.getLatest();
     self.__state = mode;
   }
+
+  //TODO: Cleanup
+  abstract getCursorOffset(): number;
 
   // createDOM(config: EditorConfig): HTMLElement {
   //   const element = super.createDOM(config);
@@ -97,12 +100,5 @@ export function $isTwoStateNode(
 export function $setDisplayMode(node: TwoStateNode, mode: TwoStateNodeMode) {
   if (node.getDisplayMode() !== mode) {
     node.setDisplayMode(mode);
-    // if (mode === "raw") {
-    //   node.setTextContent(node.getRawText());
-    //   node.setFormat(0);
-    // } else {
-    //   node.setTextContent(node.getDisplayText());
-    //   node.setFormat(1);
-    // }
   }
 }

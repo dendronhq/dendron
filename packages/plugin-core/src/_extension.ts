@@ -559,7 +559,6 @@ async function _setupCommands({
         )
       );
   });
-  console.log("existing", existingCommands);
   // ---
   if (requireActiveWorkspace === true) {
     if (!existingCommands.includes(DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key)) {
@@ -638,10 +637,8 @@ async function _setupCommands({
         )
       );
     }
-    console.log("there");
 
     if (!existingCommands.includes(DENDRON_COMMANDS.CONFIGURE_UI.key)) {
-      console.log("here");
       context.subscriptions.push(
         vscode.commands.registerCommand(
           DENDRON_COMMANDS.CONFIGURE_UI.key,

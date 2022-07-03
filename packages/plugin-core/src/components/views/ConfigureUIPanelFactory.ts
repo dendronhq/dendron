@@ -1,4 +1,6 @@
 import {
+  ConfigureUIMessage,
+  ConfigureUIMessageEnum,
   DendronEditorViewKey,
   getWebEditorViewEntry,
 } from "@dendronhq/common-all";
@@ -29,6 +31,20 @@ export class ConfigureUIPanelFactory {
           localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
         }
       );
+      this.panel.webview.onDidReceiveMessage((msg: ConfigureUIMessage) => {
+        const engine = ext.getEngine();
+        // eslint-disable-next-line default-case
+        switch (msg.type) {
+          case ConfigureUIMessageEnum.onUpdateConfig:
+            {
+              const { config } = msg.data;
+              engine.writeConfig({ config });
+            }
+            break;
+          default:
+            return;
+        }
+      });
 
       this.panel.onDidDispose(() => {
         this.panel = undefined;

@@ -1,46 +1,60 @@
-import { Input, InputNumber, Checkbox, Select, Card, Typography } from "antd";
+import {
+  Input,
+  InputNumber,
+  Checkbox,
+  Select,
+  List,
+  Button,
+  Typography,
+} from "antd";
 import { debounce } from "lodash";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Config } from "../utils/dendronConfig";
+import "antd/dist/antd.css";
+import { DeleteOutlined } from "@ant-design/icons";
 
-const ConfigureElement = (props: any) => {
+type ConfigureElementProps = Config & {
+  postMessage: ({ key, value }: { key: string; value: string }) => void;
+  name: string;
+};
+
+const ConfigureElement = (props: ConfigureElementProps) => {
   const { Option } = Select;
-  const { Paragraph } = Typography;
+  const { name, postMessage } = props;
 
   const handleSelectChange = debounce((e: any, name: string) => {
-    props.postMessage({ key: name, value: e });
+    postMessage({ key: name, value: e });
   }, 500);
   const handleInputChange = debounce((e: any) => {
-    props.postMessage({ key: e.target.name, value: e.target.value });
+    postMessage({ key: e.target.name, value: e.target.value });
   }, 500);
   const handleCheckboxChange = debounce((e: any) => {
-    props.postMessage({ key: e.target.name, value: e.target.checked });
+    postMessage({ key: e.target.name, value: e.target.checked });
   }, 500);
 
   switch (props.type) {
     case "number":
       return (
         <InputNumber
-          name={`${props.parentLabel}.${props.label}`}
+          name={name}
           defaultValue={props.default}
-          onChange={(e) =>
-            handleSelectChange(e, `${props.parentLabel}.${props.label}`)
-          }
+          onChange={(e) => handleSelectChange(e, props.name)}
         />
       );
     case "boolean":
       return (
         <Checkbox
-          name={`${props.parentLabel}.${props.label}`}
+          name={name}
           defaultChecked={props.default}
           onChange={handleCheckboxChange}
         >
-          {props.label}
+          {props.description}
         </Checkbox>
       );
     case "string":
       return (
         <Input
-          name={`${props.parentLabel}.${props.label}`}
+          name={name}
           defaultValue={props.default}
           onChange={handleInputChange}
         />
@@ -50,29 +64,82 @@ const ConfigureElement = (props: any) => {
         <Select
           style={{ width: "100%" }}
           defaultValue={props.default}
-          onChange={(e) =>
-            handleSelectChange(e, `${props.parentLabel}.${props.label}`)
-          }
+          onChange={(e) => handleSelectChange(e, props.name)}
         >
-          {props.enum.map((val: any) => (
+          {props.enum?.map((val: any) => (
             <Option value={val}>{val}</Option>
           ))}
         </Select>
       );
-    case "object":
-      return props.children.map((child: any) => (
-        <Card type="inner" title={child.label}>
-          <Paragraph>{child.description ? child.description : null}</Paragraph>
-          <ConfigureElement
-            {...child}
-            parentLabel={`${props.parentLabel}.${props.label}`}
-            postMessage={props.postMessage}
-          />
-        </Card>
-      ));
+    case "array":
+      return <ArrayConfig {...props} />;
     default:
       return <></>;
   }
+};
+
+const ArrayConfig = (props: any) => {
+  const [listItems, setListItems] = useState(props.default || []);
+  const [addItems, setAddItems] = useState("");
+  const deleteItem = (item: string) => {
+    setListItems(listItems.filter((data: string) => data !== item));
+  };
+
+  const handleChange = (e: any) => {
+    e.target.value && setAddItems(e.target.value);
+  };
+
+  const addItem = () => {
+    setListItems([...listItems, addItems]);
+    setAddItems("");
+  };
+
+  useEffect(() => {
+    props.postMessage({ key: props.name, value: listItems });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listItems]);
+
+  return (
+    <>
+      {listItems.length > 0 && (
+        <List
+          itemLayout="vertical"
+          dataSource={listItems as string[]}
+          bordered
+          size="small"
+          renderItem={(item) => (
+            <List.Item
+              key={item}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography.Paragraph>{item}</Typography.Paragraph>
+              <Button
+                icon={<DeleteOutlined />}
+                onClick={() => deleteItem(item)}
+              />
+            </List.Item>
+          )}
+        />
+      )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "10px",
+        }}
+      >
+        <Input
+          value={addItems}
+          style={{ width: "75%" }}
+          onChange={handleChange}
+        ></Input>
+        <Button onClick={addItem}>Add Item</Button>
+      </div>
+    </>
+  );
 };
 
 export default ConfigureElement;

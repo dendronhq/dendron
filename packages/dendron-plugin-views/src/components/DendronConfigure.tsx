@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "antd/dist/antd.css";
-import { Layout, Menu, Input, Card, Typography } from "antd";
+import { Layout, Menu, Input, Card, Typography, Space, Divider } from "antd";
 import { DendronComponent, DendronProps } from "../types";
 import { useWorkspaceProps } from "../hooks";
 import { engineHooks } from "@dendronhq/common-frontend";
@@ -10,35 +10,44 @@ import {
   DMessageSource,
 } from "@dendronhq/common-all";
 import { postVSCodeMessage } from "../utils/vscode";
-import { getSchemaConfig } from "../utils/config";
 import ConfigureElement from "./ConfigureElements";
 import _, { debounce } from "lodash";
+import { dendronConfig } from "../utils/dendronConfig";
 
 const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   const config = _.cloneDeep(engine.config);
   const [searchString, setSearchString] = useState("");
   const [workspace] = useWorkspaceProps();
   const { useConfig } = engineHooks;
-  useConfig({ opts: workspace });
-  // useEffect(() => {
-  //   console.log("searchString", searchString);
-  //   const filterObj = schemaConfig.filter(
-  //     (config) => !config.label.includes(searchString)
-  //   );
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [searchString]);
-  if (!config) return <></>;
-  const schemaConfig = getSchemaConfig(config);
-  const { Header, Content, Sider } = Layout;
-  const items2 = schemaConfig.map((conf) => {
-    return {
-      key: conf.label,
-      label: conf.label,
-    };
-  });
+  const configGroupMap = new Map<string, string>();
 
-  const postMessage = (e: any) => {
-    const { key, value } = e;
+  useConfig({ opts: workspace });
+  if (!config) return <></>;
+  Object.keys(dendronConfig).forEach(
+    (key) => (dendronConfig[key].default = _.get(config, key))
+  );
+  const { Header, Content, Sider } = Layout;
+  const items = Object.keys(dendronConfig)
+    .sort()
+    .map((conf) => {
+      return {
+        key: conf,
+        label: _.startCase(dendronConfig[conf].group),
+      };
+    });
+  const menuItems = items.filter(
+    (value, index, self) =>
+      index === self.findIndex((t) => t.label === value.label)
+  );
+
+  const cleanTitle = (title: string) => {
+    return title
+      .split(".")
+      .map((k) => _.startCase(k))
+      .join(" > ");
+  };
+
+  const postMessage = ({ key, value }: { key: string; value: any }) => {
     _.set(config, key, value);
     postVSCodeMessage({
       type: ConfigureUIMessageEnum.onUpdateConfig,
@@ -48,7 +57,8 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   };
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    const element = document.getElementById(key);
+    const id = dendronConfig[key].group;
+    const element = document.getElementById(id);
     element?.scrollIntoView(true);
   };
 
@@ -58,25 +68,25 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   }, 500);
 
   return (
-    <Layout className="site-layout-background">
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
       <Header className="header">
         <Input placeholder="search config" onChange={handleSearch} />
       </Header>
       <Layout>
-        <Sider width={200} className="site-layout-background">
+        <Sider width={200}>
           <Menu
             mode="inline"
             style={{
               height: "100%",
               borderRight: "1px solid #383838",
+              margin: 0,
             }}
-            items={items2}
+            items={menuItems}
             onClick={handleMenuClick}
           ></Menu>
         </Sider>
         <Layout>
           <Content
-            className="site-layout-background"
             style={{
               padding: 24,
               margin: 0,
@@ -85,24 +95,46 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
               overflowY: "scroll",
             }}
           >
-            {schemaConfig.map((conf) => (
-              <Card title={conf.label} id={conf.label}>
-                {conf.children.map((child: any) => (
-                  <>
-                    <Card type="inner" title={child.label}>
-                      <Typography.Paragraph>
-                        {child.description ? child.description : null}
-                      </Typography.Paragraph>
-                      <ConfigureElement
-                        {...child}
-                        parentLabel={conf.label}
-                        postMessage={postMessage}
-                      />
-                    </Card>
-                  </>
-                ))}
-              </Card>
-            ))}
+            <Space
+              direction="vertical"
+              size="middle"
+              style={{ display: "flex" }}
+            >
+              {Object.keys(dendronConfig)
+                .sort()
+                .filter((conf) =>
+                  _.lowerCase(conf).includes(_.lowerCase(searchString))
+                )
+                .map((conf) => {
+                  return (
+                    <>
+                      {!configGroupMap.has(dendronConfig[conf]?.group) &&
+                      configGroupMap.set(dendronConfig[conf]?.group, "") ? (
+                        <Divider orientation="left">
+                          <Typography.Title
+                            level={2}
+                            id={dendronConfig[conf]?.group}
+                          >
+                            {_.startCase(dendronConfig[conf]?.group)}
+                          </Typography.Title>
+                        </Divider>
+                      ) : null}
+                      <Card title={cleanTitle(conf)} id={conf}>
+                        <Typography.Paragraph>
+                          {dendronConfig[conf]?.type !== "boolean"
+                            ? dendronConfig[conf]?.description
+                            : null}
+                        </Typography.Paragraph>
+                        <ConfigureElement
+                          {...dendronConfig[conf]}
+                          name={conf}
+                          postMessage={postMessage}
+                        />
+                      </Card>
+                    </>
+                  );
+                })}
+            </Space>
           </Content>
         </Layout>
       </Layout>

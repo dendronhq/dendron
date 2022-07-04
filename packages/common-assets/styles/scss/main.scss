@@ -71,3 +71,9 @@ $text-color: #111 !default;
   opacity: 0.8;
   margin-right: 0.5rem;
 }
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}

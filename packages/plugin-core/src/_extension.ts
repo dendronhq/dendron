@@ -473,8 +473,7 @@ async function showWelcomeOrWhatsNew({
         AnalyticsUtils.showTelemetryNotice();
       }
       // show the welcome page ^ygtm7ofzezwd
-      showWelcome(assetUri);
-      break;
+      return showWelcome(assetUri);
     }
     case InstallStatus.UPGRADED: {
       Logger.info({

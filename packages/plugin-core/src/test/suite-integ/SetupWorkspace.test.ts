@@ -15,6 +15,7 @@ import {
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
+import { Duration } from "luxon";
 import * as mocha from "mocha";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
@@ -253,7 +254,9 @@ suite("GIVEN SetupWorkspace Command", function () {
       test("Workspace Not Initialized; Message Never Sent; > 1 Day ago", (done) => {
         lapsedMessageTest({
           done,
-          firstInstall: 1,
+          firstInstall: Time.now()
+            .minus(Duration.fromObject({ hours: 28 }))
+            .toSeconds(),
           shouldDisplayMessage: true,
         });
       });
@@ -261,7 +264,9 @@ suite("GIVEN SetupWorkspace Command", function () {
       test("Workspace Not Initialized; Message Never Sent; < 1 Day ago", (done) => {
         lapsedMessageTest({
           done,
-          firstInstall: Time.now().toSeconds(),
+          firstInstall: Time.now()
+            .minus(Duration.fromObject({ hours: 23 }))
+            .toSeconds(),
           shouldDisplayMessage: false,
         });
       });

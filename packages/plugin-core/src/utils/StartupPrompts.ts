@@ -36,17 +36,18 @@ export class StartupPrompts {
       );
     }
 
+    const timeFromFirstInstall = CUR_TIME.minus(
+      Duration.fromObject({ seconds: metaData.firstInstall })
+    );
+    const timeFromLastLapsedUserMsg = CUR_TIME.minus(
+      Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
+    );
+
     const refreshMsg =
       (metaData.lapsedUserMsgSendTime === undefined &&
-        ONE_DAY <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.firstInstall })
-          )) ||
+        ONE_DAY <= timeFromFirstInstall) ||
       (metaData.lapsedUserMsgSendTime !== undefined &&
-        ONE_WEEK <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
-          ));
+        ONE_WEEK <= timeFromLastLapsedUserMsg);
 
     // If the user has never initialized, has never activated a dendron workspace,
     // and it's time to refresh the lapsed user message

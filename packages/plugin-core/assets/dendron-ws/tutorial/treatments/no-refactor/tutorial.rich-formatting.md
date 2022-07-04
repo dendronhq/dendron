@@ -48,7 +48,7 @@ Result:
 Math typesetting can be written through [Katex](https://wiki.dendron.so/notes/b1919663-cc48-4054-b0cf-4b26fe444907.html)
 
 $$
-\int\_{-\infty}^\infty f(x)dx
+\int_{-\infty}^\infty f(x)dx
 $$
 
 ## Diagrams

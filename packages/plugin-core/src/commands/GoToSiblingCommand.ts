@@ -120,7 +120,10 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     let siblingNote: null | NoteProps = null;
     if (opts.direction === "next") {
-      if (siblingNotes[indexOfCurrentNote].traitIds?.includes("journalNote")) {
+      const isJournalNote = NoteUtils.getNoteTraits(
+        siblingNotes[indexOfCurrentNote]
+      ).includes("journalNote");
+      if (isJournalNote) {
         console.log("the note is handled as a journal note...");
         siblingNote = await journalMonthCheck(
           engine,
@@ -156,11 +159,11 @@ export class GoToSiblingCommand extends BasicCommand<
 
 // This is a trial func for moving back and forward throug journal notes
 // not just for months
-const handleJournalNotes = async (
-  journalNote: NoteProps
-): Promise<NoteProps | null> => {
-  return null;
-};
+// const handleJournalNotes = async (
+//   journalNote: NoteProps
+// ): Promise<NoteProps | null> => {
+//   return null;
+// };
 
 const journalMonthCheck = async (
   engine: DEngineClient,

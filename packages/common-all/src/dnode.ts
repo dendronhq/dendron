@@ -270,6 +270,10 @@ export class NoteUtils {
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
+  static getNoteTraits(note: NoteProps): string[] {
+    return _.get(note, "traitIds", []);
+  }
+
   /** Adds a backlink by mutating the 'to' argument in place.
    *
    *  @param from note that the link is pointing from.

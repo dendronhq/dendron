@@ -67,6 +67,7 @@ export default function TwoStatePlugin() {
       }
     });
 
+    // TODO: Register unsubscribers
     editor.registerNodeTransform(ElementTwoStateNode, (node) => {
       if (!$isElementTwoStateNode(node)) {
         return;

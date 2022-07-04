@@ -50,6 +50,7 @@ import {
 import {
   DENDRON_BOLD,
   DENDRON_ITALICS,
+  // DENDRON_NOTE_REF,
   JY_HEADING,
   JY_LINK,
 } from "./lexical/nodes/Transformers";
@@ -59,6 +60,9 @@ import {
   $convertToMarkdownString,
   TRANSFORMERS,
 } from "@lexical/markdown";
+
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+// import { TableCellActionMenuPlugin } from "@lexical/react/TableCellActionMenuPlugin";
 
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { ListItemNode, ListNode } from "@lexical/list";
@@ -71,6 +75,8 @@ import { ElementTwoStateNode } from "./lexical/nodes/ElementTwoStateNode";
 import DendronTreeViewPlugin from "./lexical/components/DendronTreeViewPlugin";
 import UpdateVSCodePlugin from "./lexical/plugins/UpdateVSCodePlugin";
 import ExampleThemes from "./lexical/themes/ExampleThemes";
+import { NoteRefNode } from "./lexical/nodes/NoteRefNode";
+import NoteRefPlugin from "./lexical/plugins/NoteRefPlugin";
 
 // --- Start Lexical Code Block
 
@@ -117,6 +123,13 @@ const DendronWysiwyg: DendronComponent = (props) => {
   const { useConfig } = engineHooks;
   useConfig({ opts: workspace });
 
+  const { useEngine } = engineHooks;
+  // initialize engine. This is necessary because graph view require full engine state.
+  useEngine({
+    engineState: props.engine,
+    opts: { url: workspace.url, ws: workspace.ws },
+  });
+
   function InitEditor(editor: LexicalEditor): void {
     console.log(`Init Editor; Note Props Body is ${noteProps?.body}`);
 
@@ -132,6 +145,7 @@ const DendronWysiwyg: DendronComponent = (props) => {
     nodes: [
       ElementTwoStateNode,
       MatchTextTwoStateNode,
+      NoteRefNode,
       HeadingNode,
       ListNode,
       ListItemNode,
@@ -166,13 +180,20 @@ const DendronWysiwyg: DendronComponent = (props) => {
             STRIKETHROUGH, // Needed to get around the undefined error
             UNORDERED_LIST,
             ORDERED_LIST,
+            // DENDRON_NOTE_REF,
           ]}
         />
         <DendronTreeViewPlugin />
         <UpdateVSCodePlugin />
         <TwoStatePlugin />
+        <NoteRefPlugin engine={props.engine} />
         <ListPlugin />
         <CodeHighlightPlugin />
+
+        <TablePlugin />
+
+        {/* <TableCellActionMenuPlugin /> */}
+        {/* <TableCellResizer /> */}
       </LexicalComposer>
     </div>
   );

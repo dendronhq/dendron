@@ -1,4 +1,4 @@
-import { $getRoot, $getNodeByKey, TextNode } from "lexical";
+import { $getRoot, $getNodeByKey, TextNode, $isDecoratorNode } from "lexical";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $isListItemNode, $isListNode } from "@lexical/list";
@@ -36,6 +36,7 @@ import {
   TwoStateNode,
   TwoStateNodeMode,
 } from "../nodes/TwoStateNode";
+import { isMarkdownSerializable } from "../nodes/MarkdownSerializable";
 
 function calculateNodeHeight(node: LexicalNode): number {
   if ($isLineBreakNode(node)) {
@@ -108,28 +109,31 @@ function getLineNumber(editorState: EditorState, nodeKey: NodeKey) {
 }
 
 // Need to take into account siblings under the same parent
-function getFullLineOfTextForNode(node: TextNode): string {
-  let nodeList: TextNode[] = [];
+function getFullLineOfTextForNode(node: LexicalNode): string {
+  let nodeList: LexicalNode[] = [];
 
-  const prevTextNodes = node
-    .getPreviousSiblings()
-    .filter((node) => $isTextNode(node)) as TextNode[];
+  const prevTextNodes = node.getPreviousSiblings();
+  // .filter((node) => $isTextNode(node)) as TextNode[];
 
-  const nextTextNodes = node
-    .getNextSiblings()
-    .filter((node) => $isTextNode(node)) as TextNode[];
+  const nextTextNodes = node.getNextSiblings();
+  // .filter((node) => $isTextNode(node)) as TextNode[];
 
   nodeList.push(...prevTextNodes);
   nodeList.push(node);
   nodeList.push(...nextTextNodes);
 
-  const unformmatedText = nodeList
+  const unformattedText = nodeList
     .map((node) => {
-      if ($isTwoStateNode(node)) {
-        return node.getRawText();
-      } else {
-        return node.getTextContent();
+      if (isMarkdownSerializable(node)) {
+        return node.serialize();
+      } else if ($isTextNode(node)) {
+        if ($isTwoStateNode(node)) {
+          return node.getRawText();
+        } else {
+          return node.getTextContent();
+        }
       }
+      return "";
     })
     .join("");
 
@@ -142,7 +146,7 @@ function getFullLineOfTextForNode(node: TextNode): string {
 
     if (!grandParentNode || !$isListNode(grandParentNode)) {
       console.error(`List Item Node's Parent isn't a ListNode?`);
-      return unformmatedText;
+      return unformattedText;
     }
 
     const listType = grandParentNode.getListType();
@@ -172,7 +176,7 @@ function getFullLineOfTextForNode(node: TextNode): string {
     prefix = `${_.repeat(" ", SPACES_FOR_INDENT * indentLevel)}${marker} `;
   }
 
-  return `${prefix}${unformmatedText}`;
+  return `${prefix}${unformattedText}`;
 }
 
 export default function UpdateVSCodePlugin() {
@@ -215,18 +219,25 @@ export default function UpdateVSCodePlugin() {
                 }
               }
 
-              if ($isTextNode(node) || $isLineBreakNode(node)) {
+              if (
+                $isTextNode(node) ||
+                $isLineBreakNode(node) ||
+                $isDecoratorNode(node)
+              ) {
                 const result = getLineNumber(editorState, value);
 
                 console.log(`Line Number for Node ${value} is ${result}`);
 
                 if (result) {
-                  const text = $isTextNode(node)
-                    ? getFullLineOfTextForNode(node)
-                    : ""; // TODO: Check parameter for getTextContent
+                  const text =
+                    $isTextNode(node) || $isDecoratorNode(node)
+                      ? getFullLineOfTextForNode(node)
+                      : ""; // TODO: Check parameter for getTextContent
                   const lineNumber = result;
 
-                  const nodeType = $isTextNode(node) ? "text" : "lineBreak";
+                  const nodeType = $isLineBreakNode(node)
+                    ? "lineBreak"
+                    : "text";
 
                   console.log(
                     `postVSCodeMessage. lineNumber: ${lineNumber}, editType: insertion, text: ${text}, nodeType: ${nodeType}`
@@ -263,7 +274,9 @@ export default function UpdateVSCodePlugin() {
                       `JY_ERROR: Unable to get line number for node with value ${value} in prevEditorState!`
                     );
                   } else {
-                    const nodeType = $isTextNode(node) ? "text" : "lineBreak";
+                    const nodeType = $isLineBreakNode(node)
+                      ? "lineBreak"
+                      : "text";
                     const lineNumber = result;
 
                     console.log(
@@ -283,7 +296,7 @@ export default function UpdateVSCodePlugin() {
         }
 
         for (const key of dirtyElements.keys()) {
-          console.log(`Processing Dirty Element with key ${key}`);
+          console.log(`- Dirty Element: ${key}`);
 
           editorState.read(() => {
             const node = $getNodeByKey(key);
@@ -306,7 +319,9 @@ export default function UpdateVSCodePlugin() {
                       `JY_ERROR: Unable to get line number for node with key ${key} in prevEditorState!`
                     );
                   } else {
-                    const nodeType = $isTextNode(node) ? "text" : "lineBreak";
+                    const nodeType = $isLineBreakNode(node)
+                      ? "lineBreak"
+                      : "text";
                     const lineNumber = result;
 
                     console.log(
@@ -342,10 +357,16 @@ export default function UpdateVSCodePlugin() {
               console.log(`Line Number for Node ${key} is ${result}`);
 
               if (result) {
-                const text = $isTextNode(node) ? node.getTextContent(true) : ""; // TODO: Check parameter for getTextContent
+                let text = "";
+
+                if (isMarkdownSerializable(node)) {
+                  text = node.serialize();
+                } else if ($isTextNode(node)) {
+                  text = node.getTextContent(true); // TODO: Check parameter for getTextContent
+                }
                 const lineNumber = result;
 
-                const nodeType = $isTextNode(node) ? "text" : "lineBreak";
+                const nodeType = $isLineBreakNode(node) ? "lineBreak" : "text";
 
                 console.log(
                   `postVSCodeMessage. lineNumber: ${lineNumber}, editType: insertion, text: ${text}, nodeType: ${nodeType}`

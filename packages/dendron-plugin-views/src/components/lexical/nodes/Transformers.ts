@@ -51,6 +51,8 @@ import {
 } from "./MatchTextTwoStateNode";
 import { $createElementTwoStateNode } from "./ElementTwoStateNode";
 import { $setDisplayMode, TwoStateNodeMode } from "./TwoStateNode";
+import { $createNoteRefNode } from "./NoteRefNode";
+import { useEffect } from "react";
 
 export const BOLD_STAR: TextFormatTransformer = {
   format: ["bold"],
@@ -106,7 +108,6 @@ export const JY_HEADING: ElementTransformer = {
 
     console.log(`pref is ${prefix}`);
 
-    debugger;
     // headingNode.selectNext(prefix.length, prefix.length);
     headingNode.selectEnd();
 
@@ -237,3 +238,19 @@ export const DENDRON_ITALICS: TextMatchTransformer = {
   trigger: "_",
   type: "text-match",
 };
+
+// export const DENDRON_NOTE_REF: TextMatchTransformer = {
+//   export: (node, exportChildren, exportFormat) => {
+//     throw new Error(`DENDRON_NOTE_REF export not implemented yet`);
+//   },
+//   importRegExp: /!\[\[(.*?)\]\]/,
+//   regExp: /!\[\[(.*?)\]\]/,
+//   replace: (textNode, match) => {
+//     console.log("Inside DENDRON_NOTE_REF");
+//     //TODO: Remove hardcoding to 'root' note:
+//     const node = $createNoteRefNode("test-note-ref-node", "root");
+//     textNode.replace(node);
+//   },
+//   trigger: "]",
+//   type: "text-match",
+// };

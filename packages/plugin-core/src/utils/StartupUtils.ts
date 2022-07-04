@@ -59,7 +59,7 @@ export class StartupUtils {
   static showManualUpgradeMessage() {
     const SHOW_ME_HOW = "Show Me How";
     const MESSAGE =
-      "You are upgrading from a really old version of Dendron. Please follow the instructions to manually migrate your configurations.";
+      "You are upgrading from a legacy version of Dendron. Please follow the instructions below to manually migrate your configuration.";
     vscode.window
       .showInformationMessage(MESSAGE, SHOW_ME_HOW)
       .then(async (resp) => {
@@ -73,13 +73,13 @@ export class StartupUtils {
             "",
             "You are upgrading from a version that is below 0.63.0, which we do not support direct automatic migration.",
             "",
-            "You can either perform a stepped upgrade, or manually move the migrated configurations to the correct location.",
+            "you can either manually update the configuration or revert to a compatible older version before upgrading to the current version",
             "",
             "If you have not set custom values for the deprecated configurations listed in [this link](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/), you may safely ignore this warning.",
             "",
             "Please follow the steps below:",
             "",
-            "## Stepped Upgrade",
+            "## Method 1: Reverting to a compatible version",
             "",
             "- This instruction reverts you to the last version of Dendron that supported automatic migration.",
             "",
@@ -96,7 +96,7 @@ export class StartupUtils {
             `5. Update Dendron back to the latest version`,
             `6. Confirm that configurations are migrated correctly`,
             "",
-            "## Manual Migration",
+            "## Method 2: Manual Migration",
             "",
             `1. Open [\`dendron.code-workspace\`](${vscode.Uri.parse(
               `command:workbench.action.openWorkspaceSettingsFile`

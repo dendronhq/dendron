@@ -5,6 +5,7 @@ import { CodeCommandConstructor } from "./base";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
+import { ConfigureLocalOverride } from "./ConfigureLocalOverride";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { ConfigureNoteTraitsCommand } from "./ConfigureNoteTraitsCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
@@ -93,6 +94,7 @@ const ALL_COMMANDS = [
   BrowseNoteCommand,
   ChangeWorkspaceCommand,
   ConfigureCommand,
+  ConfigureLocalOverride,
   ConfigurePodCommand,
   ConfigureServiceConnection,
   ConfigureExportPodV2,

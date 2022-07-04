@@ -74,12 +74,10 @@ function getVault({
   engine,
 }: {
   vaultName?: string;
-  vaultMissingBehavior?: VaultMissingBehavior;
+  vaultMissingBehavior: VaultMissingBehavior;
   vault: DVault;
   engine: DEngineClient;
 }) {
-  vaultMissingBehavior =
-    vaultMissingBehavior || VaultMissingBehavior.THROW_ERROR;
   if (vaultName) {
     try {
       vault = VaultUtils.getVaultByNameOrThrow({

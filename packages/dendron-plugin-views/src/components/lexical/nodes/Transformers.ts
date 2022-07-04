@@ -238,19 +238,3 @@ export const DENDRON_ITALICS: TextMatchTransformer = {
   trigger: "_",
   type: "text-match",
 };
-
-// export const DENDRON_NOTE_REF: TextMatchTransformer = {
-//   export: (node, exportChildren, exportFormat) => {
-//     throw new Error(`DENDRON_NOTE_REF export not implemented yet`);
-//   },
-//   importRegExp: /!\[\[(.*?)\]\]/,
-//   regExp: /!\[\[(.*?)\]\]/,
-//   replace: (textNode, match) => {
-//     console.log("Inside DENDRON_NOTE_REF");
-//     //TODO: Remove hardcoding to 'root' note:
-//     const node = $createNoteRefNode("test-note-ref-node", "root");
-//     textNode.replace(node);
-//   },
-//   trigger: "]",
-//   type: "text-match",
-// };

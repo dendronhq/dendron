@@ -47,6 +47,7 @@ import {
   UNORDERED_LIST,
   ORDERED_LIST,
 } from "@lexical/markdown";
+
 import {
   DENDRON_BOLD,
   DENDRON_ITALICS,
@@ -77,6 +78,10 @@ import UpdateVSCodePlugin from "./lexical/plugins/UpdateVSCodePlugin";
 import ExampleThemes from "./lexical/themes/ExampleThemes";
 import { NoteRefNode } from "./lexical/nodes/NoteRefNode";
 import NoteRefPlugin from "./lexical/plugins/NoteRefPlugin";
+import { TABLE } from "./lexical/nodes/TableTransformer";
+import TableCreationTriggerPlugin from "./lexical/plugins/TableCreationTriggerPlugin";
+import TableActionMenuPlugin from "./lexical/plugins/TableActionMenuPlugin";
+import TableCellResizerPlugin from "./lexical/plugins/TableCellResizer";
 
 // --- Start Lexical Code Block
 
@@ -180,7 +185,7 @@ const DendronWysiwyg: DendronComponent = (props) => {
             STRIKETHROUGH, // Needed to get around the undefined error
             UNORDERED_LIST,
             ORDERED_LIST,
-            // DENDRON_NOTE_REF,
+            // TABLE,
           ]}
         />
         <DendronTreeViewPlugin />
@@ -191,9 +196,9 @@ const DendronWysiwyg: DendronComponent = (props) => {
         <CodeHighlightPlugin />
 
         <TablePlugin />
-
-        {/* <TableCellActionMenuPlugin /> */}
-        {/* <TableCellResizer /> */}
+        <TableCreationTriggerPlugin />
+        <TableCellResizerPlugin />
+        <TableActionMenuPlugin />
       </LexicalComposer>
     </div>
   );

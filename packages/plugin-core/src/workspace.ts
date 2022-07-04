@@ -709,7 +709,7 @@ export class DendronExtension implements IDendronExtension {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const { wsRoot } = getDWorkspace();
+    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     if (!wsRoot) {
       throw new Error(`rootDir not set when activating Watcher`);
     }
@@ -733,21 +733,19 @@ export class DendronExtension implements IDendronExtension {
 
     const wsFolders = DendronExtension.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
-      this.L.error({
+      this.L.info({
         ctx,
         msg: "no folders set for workspace",
       });
-      throw Error("no folders set for workspace");
     }
-    const realVaults = getDWorkspace().vaults;
     const fileWatcher = new FileWatcher({
       workspaceOpts: {
         wsRoot,
-        vaults: realVaults,
+        vaults,
       },
     });
 
-    fileWatcher.activate(getExtension().context);
+    fileWatcher.activate(ExtensionProvider.getExtension().context);
     this.fileWatcher = fileWatcher;
   }
 

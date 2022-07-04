@@ -8,8 +8,6 @@ currentStep: 0
 totalSteps: 0
 ---
 
-# Quickstart
-
 Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you manage information using flexible hierarchies!
 
 ## Create a Note

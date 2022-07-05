@@ -216,7 +216,7 @@ export class GoToSiblingCommand extends BasicCommand<
   ): NoteProps[] {
     return notes[parentNoteId].children
       .map((id) => notes[id])
-      .filter((ent) => _.isUndefined(ent.stub));
+      .filter((note) => !note.stub);
   }
 
   private sortNotes(notes: NoteProps[]) {

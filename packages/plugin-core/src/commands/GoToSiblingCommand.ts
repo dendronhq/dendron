@@ -178,7 +178,7 @@ export class GoToSiblingCommand extends BasicCommand<
     ctx: string
   ): { sibling: NoteProps | null; msg: CommandOutput["msg"] | null } {
     // Get sibling notes
-    const siblingNotes = this.getSiblings(workspace.engine.notes, note.parent!);
+    const siblingNotes = this.getSiblings(workspace.engine.notes, note);
     // Check if there is any sibling notes
     if (siblingNotes.length <= 1) {
       VSCodeUtils.showMessage(
@@ -212,9 +212,12 @@ export class GoToSiblingCommand extends BasicCommand<
 
   private getSiblings(
     notes: NotePropsByIdDict,
-    parentNoteId: string
+    currNote: NoteProps
   ): NoteProps[] {
-    return notes[parentNoteId].children
+    if (currNote.fname === "root") {
+      return currNote.children.map((id) => notes[id]).concat(currNote);
+    }
+    return notes[currNote.parent!].children
       .map((id) => notes[id])
       .filter((note) => !note.stub);
   }

@@ -282,11 +282,6 @@ export async function _activate(
     context.subscriptions.push(setupHelpFeedbackTreeView());
     context.subscriptions.push(setupRecentWorkspacesTreeView());
 
-    // Tmp Show of v100 Product hunt Message:
-    if (getStage() === "prod") {
-      StartupUtils.maybeShowProductHuntMessage();
-    }
-
     if (await DendronExtension.isDendronWorkspace()) {
       const activator = new WorkspaceActivator();
       const maybeWsRoot = await activator.getOrPromptWsRoot({
@@ -478,8 +473,7 @@ async function showWelcomeOrWhatsNew({
         AnalyticsUtils.showTelemetryNotice();
       }
       // show the welcome page ^ygtm7ofzezwd
-      showWelcome(assetUri);
-      break;
+      return showWelcome(assetUri);
     }
     case InstallStatus.UPGRADED: {
       Logger.info({

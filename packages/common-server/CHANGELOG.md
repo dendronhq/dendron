@@ -3,6 +3,226 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.102.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.102.1) (2022-07-05)
+
+
+
+# 0.102.0 (2022-07-05)
+
+
+
+# 0.101.0 (2022-06-28)
+
+
+
+## 0.100.1 (2022-06-23)
+
+
+
+# 0.100.0 (2022-06-21)
+
+
+
+# 0.99.0 (2022-06-14)
+
+
+
+# 0.98.0 (2022-06-07)
+
+
+### Bug Fixes
+
+* **views:** bullet points missing in new theme-matching style ([#3023](https://github.com/dendronhq/dendron/issues/3023)) ([ab674d2](https://github.com/dendronhq/dendron/commit/ab674d2a8fc59da8ebfbf64ae88d918c5fb11c41))
+
+
+### Features Dendron
+
+* **edit:** introduce apply template command ([#2982](https://github.com/dendronhq/dendron/issues/2982)) ([c57ab3d](https://github.com/dendronhq/dendron/commit/c57ab3dda91082f544e53e12aa201aa72f6b30e4))
+* **edit:** template helpers ([#3029](https://github.com/dendronhq/dendron/issues/3029)) ([6881c97](https://github.com/dendronhq/dendron/commit/6881c97a6de3def469ac663b69289bb045a03502))
+* **views:** Preview setting for light, dark, or custom themes ([294bf1e](https://github.com/dendronhq/dendron/commit/294bf1e18646cd74e6d656fd12964506d77a1a5c))
+* **views:** Preview uses your VSCode theme colors, and supports custom themes ([c14c6f0](https://github.com/dendronhq/dendron/commit/c14c6f0703eab185de280c4a7bc3f4cecd2bdb4c))
+
+
+
+# 0.96.0 (2022-05-24)
+
+
+
+## 0.95.1 (2022-05-18)
+
+
+
+# 0.95.0 (2022-05-17)
+
+
+
+# 0.94.0 (2022-05-10)
+
+
+### Bug Fixes
+
+* self contained vaults get cloned into the wrong directory ([#2873](https://github.com/dendronhq/dendron/issues/2873)) ([9c7ac1c](https://github.com/dendronhq/dendron/commit/9c7ac1cfff4fb07bc689b42ea04677df5d2a927b))
+
+
+### Features Dendron
+
+* add goto command ([#2852](https://github.com/dendronhq/dendron/issues/2852)) ([3586707](https://github.com/dendronhq/dendron/commit/3586707bd3e7ffd352797308ed8e9c0e31b6f3ef)), closes [#2843](https://github.com/dendronhq/dendron/issues/2843) [#2845](https://github.com/dendronhq/dendron/issues/2845) [#2843](https://github.com/dendronhq/dendron/issues/2843)
+
+
+
+# 0.93.0 (2022-05-03)
+
+
+
+## 0.92.1 (2022-04-28)
+
+
+### Bug Fixes
+
+* **views:** second pass of treeview v1 sync issue ([#2805](https://github.com/dendronhq/dendron/issues/2805)) ([64e0970](https://github.com/dendronhq/dendron/commit/64e0970382d11694bb52f65a50f4c7de8fdd0a0c))
+
+
+
+# 0.91.0 (2022-04-19)
+
+
+### Bug Fixes
+
+* **view:** apply current theme when vscode reduce motion setting is on ([#2749](https://github.com/dendronhq/dendron/issues/2749)) ([15c3f05](https://github.com/dendronhq/dendron/commit/15c3f050e6ebecb1aeaf34da5b01ac9917ae6e1e))
+* typo "hierarchy", "should" ([#2699](https://github.com/dendronhq/dendron/issues/2699)) ([a3b2eff](https://github.com/dendronhq/dendron/commit/a3b2eff276892ea344c7bc0552af9ab5030aaed5))
+
+
+
+# 0.88.0 (2022-03-29)
+
+
+### Bug Fixes
+
+* **views:** Pass in a port-forwarded URL to preview for remote workspaces ([#2624](https://github.com/dendronhq/dendron/issues/2624)) ([d2f460b](https://github.com/dendronhq/dendron/commit/d2f460b36d836ed187e9da9a67d9ca2d48102b87)), closes [#2606](https://github.com/dendronhq/dendron/issues/2606)
+
+
+### Reverts
+
+* Revert "Pass in a port-forwarded URL to preview for remote workspaces" ([64f0cf6](https://github.com/dendronhq/dendron/commit/64f0cf678e0db7ac4e5533e24cfad8a6153ee9bf))
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+### Bug Fixes
+
+* **preview:** Code blocks and spans in preview are html encoded ([#2471](https://github.com/dendronhq/dendron/issues/2471)) ([4a29e46](https://github.com/dendronhq/dendron/commit/4a29e4678b55b13ecf43d57044a919ca105d1a90)), closes [#2301](https://github.com/dendronhq/dendron/issues/2301)
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+### Bug Fixes
+
+* **workspace:** Dendron will try to parse non-dendron files in `onFirstOpen` ([#2405](https://github.com/dendronhq/dendron/issues/2405)) ([d913a7f](https://github.com/dendronhq/dendron/commit/d913a7fe6e251f5e45925c591310ddd6e1031274))
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+### Bug Fixes
+
+* for handling diamond shape schema relationships ([ca2d5af](https://github.com/dendronhq/dendron/commit/ca2d5af94acbf62885e0230f0ef28f384395b6f8))
+* **views:** enable copy plaintext from preview ([#2152](https://github.com/dendronhq/dendron/issues/2152)) ([a54b63b](https://github.com/dendronhq/dendron/commit/a54b63bb0c66b8e4dc31dbe5c9c51835b4fd4ec9))
+
+
+### Features Dendron
+
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+* **navigation:** non-note file enhancements ([#1895](https://github.com/dendronhq/dendron/issues/1895)) ([90e083b](https://github.com/dendronhq/dendron/commit/90e083b5e10073acbc8967ad9649c0008aae381c))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+* **schemas:** yaml expansions in schemas ([#1726](https://github.com/dendronhq/dendron/issues/1726)) ([0bd94bb](https://github.com/dendronhq/dendron/commit/0bd94bb86489aa23ce970b1b0c9bfe224d77d1ff))
+* ajv warning messages printed to console ([#1722](https://github.com/dendronhq/dendron/issues/1722)) ([1aae27b](https://github.com/dendronhq/dendron/commit/1aae27bb0924f649af131ca7664da3f914044c31))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **workspace:** vault add avoids adding duplicate lines & vault remove cleans up gitignore lines ([#1689](https://github.com/dendronhq/dendron/issues/1689)) ([2a79fdd](https://github.com/dendronhq/dendron/commit/2a79fdd6ebedb0c312dca5d0b2f465a22be0f953))
+* replace auto generated ids (coming from inline schemas) with patterns ([#1632](https://github.com/dendronhq/dendron/issues/1632)) ([af28cf6](https://github.com/dendronhq/dendron/commit/af28cf6ef1d085d22069695e9df128477c024d1b))
+
+
+### Features Dendron
+
+* decorator improvements ([#1770](https://github.com/dendronhq/dendron/issues/1770)) ([a7227fd](https://github.com/dendronhq/dendron/commit/a7227fd4d8991e44729989c821a22560dcb8348b))
+* Native workspace enhancements ([#1670](https://github.com/dendronhq/dendron/issues/1670)) ([7a392bb](https://github.com/dendronhq/dendron/commit/7a392bb47c69b562d54fa15479a184f1441e129e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+
+
+
+# 0.102.0 (2022-07-05)
+
+**Note:** Version bump only for package @dendronhq/common-server
+
+
+
+
+
 # 0.101.0 (2022-06-28)
 
 

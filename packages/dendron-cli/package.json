@@ -46,6 +46,7 @@
     "@dendronhq/common-server": "^0.102.0",
     "@dendronhq/engine-server": "^0.102.0",
     "@dendronhq/pods-core": "^0.102.0",
+    "@dendronhq/dendron-viz": "^0.102.0",
     "@jcoreio/async-throttle": "^1.3.2",
     "@types/prompts": "^2.0.14",
     "clipboardy": "2.3.0",

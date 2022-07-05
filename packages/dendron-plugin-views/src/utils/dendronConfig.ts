@@ -12,6 +12,41 @@ export const dendronConfig: { [key: string]: Config } = {
     group: "global",
     description: "version number",
   },
+  enableFMTitle: {
+    type: "boolean",
+    group: "global",
+    description: "Insert frontmatter title of note to the body",
+  },
+  enableNoteTitleForLink: {
+    type: "boolean",
+    group: "global",
+    description: "Enable rendering of naked links as the title of the note",
+  },
+  enableMermaid: {
+    type: "boolean",
+    group: "global",
+    description: "Enable the use of mermaid for rendering diagrams.",
+  },
+  enablePrettyRefs: {
+    type: "boolean",
+    group: "global",
+    description: "Enable rendering note references as pretty refs.",
+  },
+  enableKatex: {
+    type: "boolean",
+    group: "global",
+    description: "Enable the use of katex for rendering math.",
+  },
+  enableBackLinks: {
+    type: "boolean",
+    group: "global",
+    description: "Notes will render backlinks",
+  },
+  enableChildLinks: {
+    type: "boolean",
+    group: "global",
+    description: "Notes will render child links",
+  },
   "dev.enablePreviewV2": {
     type: "boolean",
     group: "dev",
@@ -234,6 +269,26 @@ export const dendronConfig: { [key: string]: Config } = {
     group: "workspace",
     description:
       "If the note state is set to any of these values, the note is considered to be done.",
+  },
+  "workspace.vaults": {
+    type: "object",
+    group: "workspace",
+    description: "Vaults in workspace",
+  },
+  "workspace.hooks": {
+    type: "object",
+    group: "workspace",
+    description: "Hooks",
+  },
+  "workspace.seeds": {
+    type: "object",
+    group: "workspace",
+    description: "Seeds",
+  },
+  "workspace.workspaces": {
+    type: "object",
+    group: "workspace",
+    description: "Workspaces",
   },
   "workspace.graph.zoomSpeed": {
     type: "number",
@@ -605,5 +660,16 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "string",
     group: "publishing",
     description: "Add a custom banner to the site. EXPERIMENTAL: do not use",
+  },
+  "publishing.duplicateNoteBehavior": {
+    type: "object",
+    group: "publishing",
+    description:
+      "How duplicate notes are handled when publishing a multi-vault workspace.",
+  },
+  "publishing.hierarchy": {
+    type: "object",
+    group: "publishing",
+    description: "Control publication on a per-hierarchy basis",
   },
 };

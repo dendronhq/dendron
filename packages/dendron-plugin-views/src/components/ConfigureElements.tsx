@@ -6,15 +6,22 @@ import {
   List,
   Button,
   Typography,
+  Table,
 } from "antd";
 import { debounce } from "lodash";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Config } from "../utils/dendronConfig";
 import "antd/dist/antd.css";
 import { DeleteOutlined } from "@ant-design/icons";
+import { postVSCodeMessage } from "../utils/vscode";
+import {
+  ConfigureUIMessage,
+  ConfigureUIMessageEnum,
+  DMessageSource,
+} from "@dendronhq/common-all";
 
 type ConfigureElementProps = Config & {
-  postMessage: ({ key, value }: { key: string; value: string }) => void;
+  postMessage: ({ key, value }: { key: string; value: any }) => void;
   name: string;
 };
 
@@ -31,6 +38,13 @@ const ConfigureElement = (props: ConfigureElementProps) => {
   const handleCheckboxChange = debounce((e: any) => {
     postMessage({ key: e.target.name, value: e.target.checked });
   }, 500);
+
+  const handleLink = () => {
+    postVSCodeMessage({
+      type: ConfigureUIMessageEnum.openDendronConfigYaml,
+      source: DMessageSource.webClient,
+    } as ConfigureUIMessage);
+  };
 
   switch (props.type) {
     case "number":
@@ -72,17 +86,28 @@ const ConfigureElement = (props: ConfigureElementProps) => {
         </Select>
       );
     case "array":
-      return <ArrayConfig {...props} />;
+      return <ListView {...props} />;
+    case "list":
+      return <TableView {...props} />;
+
+    case "object":
+      return (
+        <Typography.Link onClick={handleLink}>
+          Edit in dendron.yml
+        </Typography.Link>
+      );
     default:
       return <></>;
   }
 };
 
-const ArrayConfig = (props: any) => {
+const ListView = (props: ConfigureElementProps) => {
   const [listItems, setListItems] = useState(props.default || []);
   const [addItems, setAddItems] = useState("");
-  const deleteItem = (item: string) => {
-    setListItems(listItems.filter((data: string) => data !== item));
+  const deleteListItem = (item: string) => {
+    const newListItems = listItems.filter((data: string) => data !== item);
+    setListItems(newListItems);
+    props.postMessage({ key: props.name, value: newListItems });
   };
 
   const handleChange = (e: any) => {
@@ -90,14 +115,11 @@ const ArrayConfig = (props: any) => {
   };
 
   const addItem = () => {
-    setListItems([...listItems, addItems]);
+    const newListItems = [...listItems, addItems];
+    setListItems(newListItems);
+    props.postMessage({ key: props.name, value: newListItems });
     setAddItems("");
   };
-
-  useEffect(() => {
-    props.postMessage({ key: props.name, value: listItems });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listItems]);
 
   return (
     <>
@@ -118,7 +140,7 @@ const ArrayConfig = (props: any) => {
               <Typography.Paragraph>{item}</Typography.Paragraph>
               <Button
                 icon={<DeleteOutlined />}
-                onClick={() => deleteItem(item)}
+                onClick={() => deleteListItem(item)}
               />
             </List.Item>
           )}
@@ -138,6 +160,54 @@ const ArrayConfig = (props: any) => {
         ></Input>
         <Button onClick={addItem}>Add Item</Button>
       </div>
+    </>
+  );
+};
+
+const TableView = (props: ConfigureElementProps) => {
+  const items = Object.keys(props.default).map((key) => {
+    return { key: key, value: props.default[key] };
+  });
+
+  const [tableItems, setTableItems] = useState(items || []);
+
+  const handleDelete = (key: string) => {
+    const newTableItems = tableItems.filter((data) => data.key !== key);
+    setTableItems(newTableItems);
+    const value: { [key: string]: string } = {};
+    newTableItems.forEach((item) => (value[item.key] = item.value));
+    props.postMessage({ key: props.name, value: value });
+  };
+
+  const columns = [
+    {
+      title: "Key",
+      dataIndex: "key",
+    },
+    {
+      title: "Value",
+      dataIndex: "value",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      render: (_: any, record: { key: string }) =>
+        tableItems.length >= 1 ? (
+          <DeleteOutlined onClick={() => handleDelete(record.key)} />
+        ) : null,
+    },
+  ];
+
+  return (
+    <>
+      {tableItems.length > 0 && (
+        <Table
+          size="small"
+          pagination={false}
+          dataSource={tableItems}
+          columns={columns}
+        />
+      )}
     </>
   );
 };

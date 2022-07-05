@@ -27,14 +27,12 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
     (key) => (dendronConfig[key].default = _.get(config, key))
   );
   const { Header, Content, Sider } = Layout;
-  const items = Object.keys(dendronConfig)
-    .sort()
-    .map((conf) => {
-      return {
-        key: conf,
-        label: _.startCase(dendronConfig[conf].group),
-      };
-    });
+  const items = Object.keys(dendronConfig).map((conf) => {
+    return {
+      key: conf,
+      label: _.startCase(dendronConfig[conf].group),
+    };
+  });
   const menuItems = items.filter(
     (value, index, self) =>
       index === self.findIndex((t) => t.label === value.label)
@@ -63,7 +61,6 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   };
 
   const handleSearch = debounce((e: any) => {
-    console.log(e.target.value);
     setSearchString(e.target.value);
   }, 500);
 
@@ -101,7 +98,6 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
               style={{ display: "flex" }}
             >
               {Object.keys(dendronConfig)
-                .sort()
                 .filter((conf) =>
                   _.lowerCase(conf).includes(_.lowerCase(searchString))
                 )

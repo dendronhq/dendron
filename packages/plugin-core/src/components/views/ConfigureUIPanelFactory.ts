@@ -5,6 +5,7 @@ import {
   getWebEditorViewEntry,
 } from "@dendronhq/common-all";
 import * as vscode from "vscode";
+import { ConfigureCommand } from "../../commands/ConfigureCommand";
 import { WebViewUtils } from "../../views/utils";
 import { DendronExtension } from "../../workspace";
 
@@ -31,20 +32,27 @@ export class ConfigureUIPanelFactory {
           localResourceRoots: WebViewUtils.getLocalResourceRoots(ext.context),
         }
       );
-      this.panel.webview.onDidReceiveMessage((msg: ConfigureUIMessage) => {
-        const engine = ext.getEngine();
-        // eslint-disable-next-line default-case
-        switch (msg.type) {
-          case ConfigureUIMessageEnum.onUpdateConfig:
-            {
-              const { config } = msg.data;
-              engine.writeConfig({ config });
+      this.panel.webview.onDidReceiveMessage(
+        async (msg: ConfigureUIMessage) => {
+          const engine = ext.getEngine();
+          // eslint-disable-next-line default-case
+          switch (msg.type) {
+            case ConfigureUIMessageEnum.onUpdateConfig:
+              {
+                const { config } = msg.data;
+                engine.writeConfig({ config });
+              }
+              break;
+            case ConfigureUIMessageEnum.openDendronConfigYaml: {
+              const openConfig = new ConfigureCommand(ext);
+              openConfig.run();
+              break;
             }
-            break;
-          default:
-            return;
+            default:
+              return;
+          }
         }
-      });
+      );
 
       this.panel.onDidDispose(() => {
         this.panel = undefined;

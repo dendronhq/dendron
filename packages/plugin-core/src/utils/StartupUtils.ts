@@ -59,7 +59,7 @@ export class StartupUtils {
   static showManualUpgradeMessage() {
     const SHOW_ME_HOW = "Show Me How";
     const MESSAGE =
-      "You are upgrading from a legacy version of Dendron. Please follow the instructions below to manually migrate your configuration.";
+      "You are upgrading from a legacy version of Dendron. Please follow the instructions to manually migrate your configuration.";
     vscode.window
       .showInformationMessage(MESSAGE, SHOW_ME_HOW)
       .then(async (resp) => {
@@ -67,58 +67,9 @@ export class StartupUtils {
           AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
             status: ConfirmStatus.accepted,
           });
-
-          const content = [
-            "# Instructions for Upgrade",
-            "",
-            "You are upgrading from a version that is below 0.63.0, which we do not support direct automatic migration.",
-            "",
-            "you can either manually update the configuration or revert to a compatible older version before upgrading to the current version",
-            "",
-            "If you have not set custom values for the deprecated configurations listed in [this link](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/), you may safely ignore this warning.",
-            "",
-            "Please follow the steps below:",
-            "",
-            "## Method 1: Reverting to a compatible version",
-            "",
-            "- This instruction reverts you to the last version of Dendron that supported automatic migration.",
-            "",
-            `1. Go to the Extensions panel and find Dendron ([Click Here](${vscode.Uri.parse(
-              `command:workbench.extensions.search?${JSON.stringify(
-                "@id:dendron.dendron"
-              )}`
-            )}))`,
-            `2. Click on the cog wheel icon and select \`Install Another Version...\``,
-            `3. Select \`0.100.0\`, and wait for the installation to complete`,
-            `4. Reload VSCode ([Click Here](${vscode.Uri.parse(
-              `command:workbench.action.reloadWindow`
-            )})), and wait for Dendron to activate`,
-            `5. Update Dendron back to the latest version`,
-            `6. Confirm that configurations are migrated correctly`,
-            "",
-            "## Method 2: Manual Migration",
-            "",
-            `1. Open [\`dendron.code-workspace\`](${vscode.Uri.parse(
-              `command:workbench.action.openWorkspaceSettingsFile`
-            )}) and [\`dendron.yml\`](${vscode.Uri.parse(
-              `command:dendron.configureRaw`
-            )})`,
-            "2. consult [Deprecated Configs](https://wiki.dendron.so/notes/paWj2hk2FV5UDDbIp7uhr/) and move them to the correct location.",
-            `3. Reload VSCode ([Click Here](${vscode.Uri.parse(
-              `command:workbench.action.reloadWindow`
-            )}))`,
-          ].join("\n");
-
-          const panel = vscode.window.createWebviewPanel(
-            "showManualUpgradeMessagePreview",
-            "Instructions for Upgrade",
-            vscode.ViewColumn.One,
-            {
-              enableCommandUris: true,
-            }
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/4119x15gl9w90qx8qh1truj"
           );
-          const md = _md();
-          panel.webview.html = md.render(content);
         } else {
           AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
             status: ConfirmStatus.rejected,

@@ -827,7 +827,13 @@ export class NoteUtils {
     }
   }
 
-  static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
+  static getURI({
+    note,
+    wsRoot,
+  }: {
+    note: NotePropsMeta;
+    wsRoot: string;
+  }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
 

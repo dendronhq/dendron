@@ -6,6 +6,7 @@ import {
   GetAllFilesOpts,
   IFileStore,
   RespV3,
+  URI,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { getAllFiles } from "@dendronhq/common-server";
@@ -14,15 +15,15 @@ export class NodeJSFileStore implements IFileStore {
   /**
    * See {@link IFileStore.read}
    */
-  async read(fpath: string): Promise<RespV3<string>> {
+  async read(uri: URI): Promise<RespV3<string>> {
     try {
-      const data = await fs.readFile(fpath, { encoding: "utf8" });
+      const data = await fs.readFile(uri.fsPath, { encoding: "utf8" });
       return { data };
     } catch (err) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.CONTENT_NOT_FOUND,
-          message: `Failed to read from ${fpath}.`,
+          message: `Failed to read from ${uri.fsPath}.`,
           innerError: err as Error,
           severity: ERROR_SEVERITY.MINOR,
         }),
@@ -61,15 +62,15 @@ export class NodeJSFileStore implements IFileStore {
   /**
    * See {@link IFileStore.write}
    */
-  async write(fpath: string, content: string): Promise<RespV3<string>> {
+  async write(uri: URI, content: string): Promise<RespV3<URI>> {
     try {
-      await fs.writeFile(fpath, content);
-      return { data: fpath };
+      await fs.writeFile(uri.fsPath, content);
+      return { data: uri };
     } catch (err) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.WRITE_FAILED,
-          message: `Failed to write to ${fpath}.`,
+          message: `Failed to write to ${uri.fsPath}.`,
           innerError: err as Error,
           severity: ERROR_SEVERITY.MINOR,
         }),
@@ -80,15 +81,15 @@ export class NodeJSFileStore implements IFileStore {
   /**
    * See {@link IFileStore.delete}
    */
-  async delete(fpath: string): Promise<RespV3<string>> {
+  async delete(uri: URI): Promise<RespV3<URI>> {
     try {
-      await fs.unlink(fpath);
-      return { data: fpath };
+      await fs.unlink(uri.fsPath);
+      return { data: uri };
     } catch (err) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.DELETE_FAILED,
-          message: `Failed to delete from ${fpath}.`,
+          message: `Failed to delete from ${uri.fsPath}.`,
           innerError: err as Error,
           severity: ERROR_SEVERITY.MINOR,
         }),
@@ -99,15 +100,15 @@ export class NodeJSFileStore implements IFileStore {
   /**
    * See {@link IFileStore.rename}
    */
-  async rename(oldFpath: string, newFpath: string): Promise<RespV3<string>> {
+  async rename(oldUri: URI, newUri: URI): Promise<RespV3<URI>> {
     try {
-      await fs.rename(oldFpath, newFpath);
-      return { data: newFpath };
+      await fs.rename(oldUri.fsPath, newUri.fsPath);
+      return { data: newUri };
     } catch (err) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.RENAME_FAILED,
-          message: `Failed to rename from ${oldFpath} to ${newFpath}.`,
+          message: `Failed to rename from ${oldUri.fsPath} to ${newUri.fsPath}.`,
           innerError: err as Error,
           severity: ERROR_SEVERITY.MINOR,
         }),

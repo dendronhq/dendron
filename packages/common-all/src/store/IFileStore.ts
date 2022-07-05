@@ -1,3 +1,4 @@
+import { URI } from "vscode-uri";
 import { RespV3 } from "../types";
 
 export type GetAllFilesOpts = {
@@ -11,13 +12,13 @@ export type GetAllFilesOpts = {
  */
 export interface IFileStore {
   /**
-   * Reads contents of file at given path.
+   * Reads contents of file at given URI.
    * If file for given path is not found, return error.
    *
-   * @param fpath: full path to target file
+   * @param uri: URI of target file
    * @return string representation of contents
    */
-  read(fpath: string): Promise<RespV3<string>>;
+  read(uri: URI): Promise<RespV3<string>>;
 
   /**
    * Reads entries of file directory stored at given path.
@@ -29,27 +30,27 @@ export interface IFileStore {
   readDir(opts: GetAllFilesOpts): Promise<RespV3<string[]>>;
 
   /**
-   * Write contents to filesystem, overwriting contents at given path.
+   * Write contents to filesystem, overwriting contents at given URI.
    *
-   * @param fpath: full path to target file to write to
+   * @param uri: URI to target file to write to
    * @param content: content to write to filesystem
-   * @return original fpath
+   * @return original URI
    */
-  write(fpath: string, content: string): Promise<RespV3<string>>;
+  write(uri: URI, content: string): Promise<RespV3<URI>>;
 
   /**
-   * Deletes entries from given path
-   * If path does not exist, do nothing.
+   * Deletes entries from given URI
+   * If URI does not exist, do nothing.
    *
-   * @return original fpath
+   * @return original URI
    */
-  delete(fpath: string): Promise<RespV3<string>>;
+  delete(uri: URI): Promise<RespV3<URI>>;
 
   /**
    * Renames file or folder
-   * If path does not exist, do nothing.
+   * If URI does not exist, do nothing.
    *
-   * @return new fpath
+   * @return new URI
    */
-  rename(oldFpath: string, newFpath: string): Promise<RespV3<string>>;
+  rename(oldUri: URI, newUri: URI): Promise<RespV3<URI>>;
 }

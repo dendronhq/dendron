@@ -2,6 +2,7 @@ import {
   BulkResp,
   DendronCompositeError,
   DendronError,
+  Disposable,
   DNoteLoc,
   ERROR_SEVERITY,
   ERROR_STATUS,
@@ -19,28 +20,34 @@ import {
   WriteNoteMetaOpts,
   WriteNoteOpts,
 } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 
 /**
  * Responsible for storing NoteProps non-metadata and NoteProps metadata
  */
-export class NoteStore implements INoteStore<string> {
+export class NoteStore implements Disposable, INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
   private _wsRoot: string;
   private _logger: DLogger;
+  private _loggerDispose: () => any;
 
-  constructor(
-    fileStore: IFileStore,
-    dataStore: IDataStore<string, NotePropsMeta>,
-    wsRoot: string,
-    logger: DLogger
-  ) {
-    this._fileStore = fileStore;
-    this._metadataStore = dataStore;
-    this._wsRoot = wsRoot;
+  constructor(opts: {
+    fileStore: IFileStore;
+    dataStore: IDataStore<string, NotePropsMeta>;
+    wsRoot: string;
+  }) {
+    this._fileStore = opts.fileStore;
+    this._metadataStore = opts.dataStore;
+    this._wsRoot = opts.wsRoot;
+    const { logger, dispose } = createDisposableLogger();
     this._logger = logger;
+    this._loggerDispose = dispose;
+  }
+
+  dispose() {
+    this._loggerDispose();
   }
 
   /**
@@ -53,11 +60,8 @@ export class NoteStore implements INoteStore<string> {
     if (metadata.error) {
       return { error: metadata.error };
     }
-    const fpath = NoteUtils.getFullPath({
-      note: metadata.data,
-      wsRoot: this._wsRoot,
-    });
-    const nonMetadata = await this._fileStore.read(fpath);
+    const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
+    const nonMetadata = await this._fileStore.read(uri);
     if (nonMetadata.error) {
       return { error: nonMetadata.error };
     }
@@ -78,7 +82,7 @@ export class NoteStore implements INoteStore<string> {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
-          message: `Frontmatter missing for file ${fpath} associated with note ${key}.`,
+          message: `Frontmatter missing for file ${uri.fsPath} associated with note ${key}.`,
           severity: ERROR_SEVERITY.MINOR,
         }),
       };
@@ -145,12 +149,9 @@ export class NoteStore implements INoteStore<string> {
       return { error: metaResp.error };
     }
 
-    const fpath = NoteUtils.getFullPath({
-      note,
-      wsRoot: this._wsRoot,
-    });
+    const uri = NoteUtils.getURI({ note, wsRoot: this._wsRoot });
     const content = NoteUtils.serialize(note, { excludeStub: true });
-    const writeResp = await this._fileStore.write(fpath, content);
+    const writeResp = await this._fileStore.write(uri, content);
     if (writeResp.error) {
       return { error: writeResp.error };
     }
@@ -205,11 +206,8 @@ export class NoteStore implements INoteStore<string> {
     if (metadata.error) {
       return { error: metadata.error };
     }
-    const fpath = NoteUtils.getFullPath({
-      note: metadata.data,
-      wsRoot: this._wsRoot,
-    });
-    const deleteResp = await this._fileStore.delete(fpath);
+    const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
+    const deleteResp = await this._fileStore.delete(uri);
     if (deleteResp.error) {
       return { error: deleteResp.error };
     }

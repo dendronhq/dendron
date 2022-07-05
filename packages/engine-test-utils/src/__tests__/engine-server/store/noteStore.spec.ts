@@ -1,7 +1,6 @@
 import { ERROR_STATUS, NotePropsMeta } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
-  DendronEngineClient,
   NodeJSFileStore,
   NoteMetadataStore,
   NoteStore,
@@ -10,16 +9,15 @@ import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 
-describe("NoteStore", () => {
-  test("Test finding note", async () => {
+describe("GIVEN NoteStore", () => {
+  test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot, engine }) => {
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
 
         _.values(engine.notes).forEach(async (note) => {
           const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
@@ -67,16 +65,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test creating and retrieving note", async () => {
+  test("WHEN writing a note, THEN get and getMetadata should retrieve same note", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -105,16 +102,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test creating and deleting note", async () => {
+  test("WHEN writing and deleting a note, THEN get should return CONTENT_NOT_FOUND", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -141,16 +137,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test multiple writes", async () => {
+  test("WHEN writing a note, THEN subsequent writes should update note", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -192,16 +187,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test writing multiple notes with same fname", async () => {
+  test("WHEN writing a note with the same fname, THEN content hash should change", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -240,16 +234,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test writing note with mismatched key", async () => {
+  test("WHEN writing a note with a mismatched key, THEN error should be returned", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -267,16 +260,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test multiple write metadata", async () => {
+  test("WHEN writing and getting metadata, THEN only metadata should be retrieved", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -329,16 +321,15 @@ describe("NoteStore", () => {
     );
   });
 
-  test("Test bulk write metadata", async () => {
+  test("WHEN bulk writing metadata, THEN all metadata should be retrievable", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot, engine }) => {
+      async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          new NoteMetadataStore(),
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
           wsRoot,
-          (engine as DendronEngineClient).logger
-        );
+        });
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar123",
           body: "note body",

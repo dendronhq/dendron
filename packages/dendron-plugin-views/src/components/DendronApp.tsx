@@ -134,7 +134,14 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       }
 
-      // case EditorMessageEnum.initialDocumentState: {
+      case EditorMessageEnum.initialDocumentState: {
+        const cmsg = msg;
+        const editorText = cmsg.data;
+        console.log(`Initial Document State: ${editorText}`);
+        // logger.info({ ctx, graphDepth, msg: "onGraphDepthChange" });
+        ideDispatch(ideSlice.actions.setEditorText(editorText));
+        break;
+      }
 
       // }
       default:

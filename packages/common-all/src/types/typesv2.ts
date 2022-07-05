@@ -5,6 +5,7 @@ import {
   DNodeProps,
   DNodeType,
   NoteProps,
+  Point,
   Position,
   SchemaData,
   SchemaProps,
@@ -902,10 +903,22 @@ export type NoteViewMessage = DMessage<
 >;
 
 export type EditorChange = {
-  text: string;
-  lineNumber: number;
-  editType: "insertion" | "deletion";
-  nodeType: "text" | "lineBreak";
+  editType: "insert" | "replace" | "delete";
+  payload: EditorDelete | EditorReplace | EditorInsert;
+};
+
+export type EditorDelete = {
+  range: Position;
+};
+
+export type EditorReplace = {
+  range: Position;
+  newText: string;
+};
+
+export type EditorInsert = {
+  position: Point;
+  newText: string;
 };
 
 export type EditorChangeMessage = DMessage<EditorMessageType, EditorChange[]>;

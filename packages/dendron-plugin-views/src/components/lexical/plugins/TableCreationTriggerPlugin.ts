@@ -1,6 +1,7 @@
 import {
   $isElementNode,
   $isParagraphNode,
+  ElementNode,
   ParagraphNode,
   TextNode,
 } from "lexical";
@@ -23,6 +24,7 @@ import { $isTextNode } from "lexical";
 import { useEffect } from "react";
 
 import { $createParagraphNode, $createTextNode } from "lexical";
+import { getLeafLevelText } from "./UpdateVSCodePlugin";
 
 const TABLE_ROW_REG_EXP = /^(?:\|\s*)+(?:\|\s*)$/;
 
@@ -87,7 +89,7 @@ export default function TableCreationTriggerPlugin() {
         const matches = prevNodeByEditorAppearance
           .getTextContent()
           .match(TABLE_ROW_REG_EXP);
-        debugger;
+        // debugger;
         if (matches && matches.length > 0) {
           console.log(`Found Table match!`);
 
@@ -97,7 +99,7 @@ export default function TableCreationTriggerPlugin() {
 
           // const matchCells = mapToTableCells(matches[0]);
 
-          debugger;
+          // debugger;
           if (matchCells == null) {
             return;
           }
@@ -138,6 +140,30 @@ export default function TableCreationTriggerPlugin() {
 
           const table = $createTableNode();
 
+          // Implementing MarkdownSerializable interface
+          table.serialize = function (): string {
+            const output = [];
+
+            for (const row of this.getChildren()) {
+              const rowOutput = [];
+
+              if ($isTableRowNode(row)) {
+                for (const cell of row.getChildren()) {
+                  // It's TableCellNode (hence ElementNode) so it's just to make flow happy
+                  if ($isElementNode(cell)) {
+                    // TODO: Remove circular dependency
+                    rowOutput.push(getLeafLevelText(cell));
+                  }
+                }
+              }
+
+              output.push(`| ${rowOutput.join(" | ")} |`);
+            }
+
+            debugger;
+            return output.join("\n");
+          };
+
           for (const cells of rows) {
             const tableRow = $createTableRowNode();
             table.append(tableRow);
@@ -149,7 +175,7 @@ export default function TableCreationTriggerPlugin() {
             }
           }
 
-          debugger;
+          // debugger;
           prevNodeByEditorAppearance.replace(table);
 
           // const previousSibling = parentNode.getPreviousSibling();

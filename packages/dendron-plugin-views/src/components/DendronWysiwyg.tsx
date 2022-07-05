@@ -11,7 +11,7 @@ import {
 } from "@dendronhq/common-frontend";
 import _, { remove } from "lodash";
 import mermaid from "mermaid";
-import React from "react";
+import React, { useState } from "react";
 import {
   useCurrentTheme,
   useMermaid,
@@ -82,6 +82,7 @@ import { TABLE } from "./lexical/nodes/TableTransformer";
 import TableCreationTriggerPlugin from "./lexical/plugins/TableCreationTriggerPlugin";
 import TableActionMenuPlugin from "./lexical/plugins/TableActionMenuPlugin";
 import TableCellResizerPlugin from "./lexical/plugins/TableCellResizer";
+import VSCodeMsgReceiverPlugin from "./lexical/plugins/VSCodeMsgReceiverPlugin";
 
 // --- Start Lexical Code Block
 
@@ -126,6 +127,7 @@ const DendronWysiwyg: DendronComponent = (props) => {
   const config = props.engine.config;
   const [workspace] = useWorkspaceProps();
   const { useConfig } = engineHooks;
+  const ide = props.ide;
   useConfig({ opts: workspace });
 
   const { useEngine } = engineHooks;
@@ -198,7 +200,10 @@ const DendronWysiwyg: DendronComponent = (props) => {
         <TablePlugin />
         <TableCreationTriggerPlugin />
         <TableCellResizerPlugin />
-        <TableActionMenuPlugin />
+        <VSCodeMsgReceiverPlugin
+          initialText={ide.initialEditorText ?? "undefined"}
+        />
+        {/* <TableActionMenuPlugin /> */}
       </LexicalComposer>
     </div>
   );

@@ -4,10 +4,14 @@ import {
   DMessageEnum,
   DMessageSource,
   EditorChangeMessage,
+  EditorDelete,
   EditorInitMessage,
+  EditorInsert,
   EditorMessageEnum,
   EditorMessageType,
+  EditorReplace,
   getWebEditorViewEntry,
+  NoteProps,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -76,24 +80,18 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
     webview: vscode.Webview,
     document: vscode.TextDocument
   ) {
-    const note = await this._textDocumentService.processTextDocument(document);
+    // const note = await this._textDocumentService.processTextDocument(document);
     // note = this.rewriteImageUrls(note, panel);
 
-    webview.postMessage({
-      type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-      data: {
-        note,
-        syncChangedNote: false,
-      },
-      source: "vscode",
-    } as OnDidChangeActiveTextEditorMsg);
+    //TODO: Fix.
+    const note: NoteProps = {} as NoteProps;
+    note.body = document.getText();
 
-    // const msg: EditorInitMessage = {
-    //   type: EditorMessageEnum.initialDocumentState,
-    //   data: document.getText(),
-    //   source: DMessageSource.vscode,
-    // };
-    // return webview.postMessage(msg);
+    webview.postMessage({
+      type: EditorMessageEnum.initialDocumentState,
+      data: document.getText(),
+      source: "vscode",
+    });
   }
 
   private setupCallbacks(
@@ -104,34 +102,39 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
     webview.onDidReceiveMessage(async (msg: EditorChangeMessage) => {
       const ctx = "ShowPreview:onDidReceiveMessage";
       switch (msg.type) {
+        case DMessageEnum.MESSAGE_DISPATCHER_READY: {
+          console.log(`Msg Dispatcher Ready`);
+          await this.sendInitialState(webview, document);
+          break;
+        }
         case EditorMessageEnum.documentChanged: {
           // const zeroIndexedLineNumber = msg.data.lineNumber - 1;
-          // console.log(
-          //   `Msg Received: Line: ${zeroIndexedLineNumber} | Text: ${msg.data.text} | EditType: ${msg.data.editType} | NodeType: ${msg.data.nodeType}`
-          // );
+          console.log(`Msg Received: ${JSON.stringify(msg.data)}`);
 
-          msg.data.sort((a, b) => {
-            if (a.editType === "deletion" && b.editType === "deletion") {
-              if (a.nodeType === "text") {
-                return -1;
-              }
-            }
-            return 0;
-          });
-
+          // TODO: Probably need to sort to do all replaces first, followed by insert/delete?
           for (const editorChange of msg.data) {
-            const zeroIndexedLineNumber = editorChange.lineNumber - 1;
-
             const edit = new vscode.WorkspaceEdit();
 
-            if (editorChange.editType === "insertion") {
-              if (editorChange.nodeType === "text") {
-                // console.log(
-                //   `Doing Replace. Existing Line: ${
-                //     document.lineAt(zeroIndexedLineNumber).text
-                //   }`
-                // );
-                const lineDiff = zeroIndexedLineNumber - document.lineCount + 1;
+            switch (editorChange.editType) {
+              case "delete": {
+                const payload: EditorDelete =
+                  editorChange.payload as EditorDelete;
+                edit.delete(
+                  document.uri,
+                  new vscode.Range(
+                    payload.range.start.line,
+                    payload.range.start.column,
+                    payload.range.end.line,
+                    payload.range.end.column
+                  )
+                );
+                break;
+              }
+              case "insert": {
+                const payload: EditorInsert =
+                  editorChange.payload as EditorInsert;
+
+                const lineDiff = payload.position.line - document.lineCount + 1;
 
                 if (lineDiff > 0) {
                   edit.insert(
@@ -140,53 +143,38 @@ export class WysiwygEditor implements vscode.CustomTextEditorProvider {
                       document.lineCount - 1,
                       document.lineAt(document.lineCount - 1).text.length
                     ),
-                    _.repeat("\n", lineDiff)
+                    _.repeat("\n", lineDiff) + payload.newText
+                  );
+                } else {
+                  edit.insert(
+                    document.uri,
+                    new vscode.Position(
+                      payload.position.line,
+                      payload.position.column
+                    ),
+                    payload.newText
                   );
                 }
+                break;
+              }
+              case "replace": {
+                const payload: EditorReplace =
+                  editorChange.payload as EditorReplace;
+
                 edit.replace(
                   document.uri,
                   new vscode.Range(
-                    zeroIndexedLineNumber,
-                    0,
-                    zeroIndexedLineNumber,
-                    lineDiff > 0
-                      ? 0
-                      : document.lineAt(zeroIndexedLineNumber).text.length
+                    payload.range.start.line,
+                    payload.range.start.column,
+                    payload.range.end.line,
+                    payload.range.end.column
                   ),
-                  editorChange.text
+                  payload.newText
                 );
-              } else if (editorChange.nodeType === "lineBreak") {
-                edit.insert(
-                  document.uri,
-                  new vscode.Position(
-                    zeroIndexedLineNumber,
-                    document.lineAt(zeroIndexedLineNumber).text.length
-                  ),
-                  "\n"
-                );
+                break;
               }
-            } else if (editorChange.editType === "deletion") {
-              if (editorChange.nodeType === "lineBreak") {
-                edit.delete(
-                  document.uri,
-                  new vscode.Range(
-                    zeroIndexedLineNumber,
-                    document.lineAt(zeroIndexedLineNumber).text.length,
-                    zeroIndexedLineNumber + 1,
-                    0
-                  )
-                );
-              } else if (editorChange.nodeType === "text") {
-                edit.delete(
-                  document.uri,
-                  new vscode.Range(
-                    zeroIndexedLineNumber,
-                    0,
-                    zeroIndexedLineNumber,
-                    document.lineAt(zeroIndexedLineNumber).text.length
-                  )
-                );
-              }
+              default:
+                break;
             }
 
             //TODO: Fix later

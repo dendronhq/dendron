@@ -28,6 +28,7 @@ type InitialState = {
   tree?: TreeMenu;
   graphTheme?: GraphThemeEnum;
   graphDepth?: number;
+  initialEditorText?: string;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -41,6 +42,7 @@ const INITIAL_STATE: InitialState = {
   tree: undefined,
   graphTheme: GraphThemeEnum.Classic,
   graphDepth: 1,
+  initialEditorText: "",
 };
 
 export { InitialState as IDEState };
@@ -83,6 +85,9 @@ export const ideSlice = createSlice({
     },
     setGraphDepth: (state, action: PayloadAction<number>) => {
       state.graphDepth = action.payload;
+    },
+    setEditorText: (state, action: PayloadAction<string>) => {
+      state.initialEditorText = action.payload;
     },
   },
 });

@@ -6,7 +6,6 @@ import {
 } from "@dendronhq/common-all";
 import sinon from "sinon";
 import { RunMigrationCommand } from "../../commands/RunMigrationCommand";
-import { CONFIG } from "../../constants";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, runTestButSkipForWindows } from "../testUtilsV3";
 import { DConfig } from "@dendronhq/engine-server";
@@ -20,31 +19,29 @@ suite("RunMigrationCommand", function () {
         _.unset(config.commands, "lookup");
         return config;
       },
-      wsSettingsOverride: {
-        settings: {
-          [CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key]: "selection2link",
-        },
-      },
       workspaceType: WorkspaceType.CODE,
     },
     () => {
       test("THEN migration runs as expected", async () => {
         const ext = ExtensionProvider.getExtension();
         const cmd = new RunMigrationCommand(ext);
+        expect(ext.type).toEqual(WorkspaceType.CODE);
 
         // testing for explicitly delete key.
         const { wsRoot } = ext.getDWorkspace();
         const rawConfig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
         expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
 
-        sinon.stub(cmd, "gatherInputs").resolves({ version: "0.55.2" });
+        sinon.stub(cmd, "gatherInputs").resolves({ version: "0.83.0" });
         const out = await cmd.run();
         expect(out!.length).toEqual(1);
-        expect(out![0].data.version === "0.55.2");
+        expect(out![0].data.version === "0.83.0");
+
+        expect(out![0].data.wsConfig).toNotEqual(undefined);
 
         const config = ext.getDWorkspace().config;
         const lookupConfig = ConfigUtils.getLookup(config);
-        expect(lookupConfig.note.selectionMode).toEqual("link");
+        expect(lookupConfig.note.selectionMode).toEqual("extract");
       });
     }
   );

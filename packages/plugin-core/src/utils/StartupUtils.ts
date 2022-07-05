@@ -35,8 +35,66 @@ import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import semver from "semver";
 
 export class StartupUtils {
+  static shouldShowManualUpgradeMessage({
+    previousWorkspaceVersion,
+    currentVersion,
+  }: {
+    previousWorkspaceVersion: string;
+    currentVersion: string;
+  }) {
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion,
+      currentVersion,
+    });
+
+    return (
+      workspaceInstallStatus === InstallStatus.UPGRADED &&
+      semver.lte(previousWorkspaceVersion, "0.63.0")
+    );
+  }
+
+  static showManualUpgradeMessage() {
+    const SHOW_ME_HOW = "Show Me How";
+    const MESSAGE =
+      "You are upgrading from a legacy version of Dendron. Please follow the instructions to manually migrate your configuration.";
+    vscode.window
+      .showInformationMessage(MESSAGE, SHOW_ME_HOW)
+      .then(async (resp) => {
+        if (resp === SHOW_ME_HOW) {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.accepted,
+          });
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/4119x15gl9w90qx8qh1truj"
+          );
+        } else {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.rejected,
+          });
+        }
+      });
+  }
+
+  static async showManualUpgradeMessageIfNecessary({
+    previousWorkspaceVersion,
+    currentVersion,
+  }: {
+    previousWorkspaceVersion: string;
+    currentVersion: string;
+  }) {
+    if (
+      StartupUtils.shouldShowManualUpgradeMessage({
+        previousWorkspaceVersion,
+        currentVersion,
+      })
+    ) {
+      StartupUtils.showManualUpgradeMessage();
+    }
+  }
+
   static async runMigrationsIfNecessary({
     wsService,
     currentVersion,

@@ -151,6 +151,8 @@ export enum ConfigEvents {
 export enum MigrationEvents {
   MigrationSucceeded = "Migration_Succeeded",
   MigrationFailed = "Migration_Failed",
+  ManualUpgradeMessageShow = "ManualUpgradeMessageShow",
+  ManualUpgradeMessageConfirm = "ManualUpgradeMessageConfirm",
 }
 
 export enum ContextualUIEvents {

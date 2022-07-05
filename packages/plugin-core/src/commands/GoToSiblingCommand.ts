@@ -1,16 +1,16 @@
 import {
+  DEngineClient,
   DNodeUtils,
   DWorkspaceV2,
   isNumeric,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { TextEditor, Uri, window } from "vscode";
+import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { UNKNOWN_ERROR_MSG } from "../logger";
@@ -49,7 +49,7 @@ export class GoToSiblingCommand extends BasicCommand<
     // Get workspace
     const workspace = ExtensionProvider.getDWorkspace();
     // Get the active note
-    const note = await this.getActiveNote(workspace, textEditor, fname);
+    const note = await this.getActiveNote(workspace.engine, fname);
     if (!note) throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
     // Get the sibling note
     let siblingNote: NoteProps;
@@ -86,18 +86,10 @@ export class GoToSiblingCommand extends BasicCommand<
   }
 
   async getActiveNote(
-    { engine, vaults, wsRoot }: DWorkspaceV2,
-    textEditor: TextEditor,
+    engine: DEngineClient,
     fname: string
   ): Promise<NoteProps | null> {
-    const vault =
-      fname === "root"
-        ? VaultUtils.getVaultByFilePath({
-            vaults,
-            wsRoot,
-            fsPath: textEditor.document.uri.fsPath,
-          })
-        : PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const vault = PickerUtilsV2.getVaultForOpenEditor();
     const hitNotes = await engine.findNotes({ fname, vault });
     return hitNotes.length !== 0 ? hitNotes[0] : null;
   }

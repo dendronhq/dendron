@@ -32,6 +32,7 @@ import {
   EditorChange,
   EditorChangeMessage,
   EditorDelete,
+  EditorInsert,
   EditorMessageEnum,
   Position,
 } from "@dendronhq/common-all";
@@ -314,9 +315,7 @@ export default function UpdateVSCodePlugin() {
           editorState.read(() => {
             const node = $getNodeByKey(key);
 
-            // debugger;
-
-            // Only do top level elements (for now).
+            // Only do top level elements (for now) + node deletions.
             if (
               node !== null &&
               ($isRootNode(node) || !$isRootNode(node?.getParent()))
@@ -337,13 +336,39 @@ export default function UpdateVSCodePlugin() {
         }
 
         if (msgToSend.length > 0) {
+          // Need to send the messages in order of highest to lowest. Higher
+          // numbered lines need to be processed first? (at least for multi-line
+          // delete).
+          // TODO: Check if multi-line insert works.
+          const msgSortFn = function (a: EditorChange, b: EditorChange) {
+            let APosition =
+              a.editType === "insert"
+                ? (a.payload as EditorInsert).position
+                : (a.payload as EditorDelete).range.start;
+
+            let BPosition =
+              b.editType === "insert"
+                ? (b.payload as EditorInsert).position
+                : (b.payload as EditorDelete).range.start;
+
+            if (APosition.line < BPosition.line) {
+              return 1;
+            } else if (APosition.line > BPosition.line) {
+              return -1;
+            } else {
+              return BPosition.column - APosition.column;
+            }
+          };
+
+          const sortedMessages = msgToSend.sort(msgSortFn);
+
           const msg: EditorChangeMessage = {
             type: EditorMessageEnum.documentChanged,
-            data: msgToSend,
+            data: sortedMessages,
             source: DMessageSource.webClient,
           };
 
-          msgToSend.forEach((editorChange) => {
+          sortedMessages.forEach((editorChange) => {
             console.log(
               `postVSCodeMessage.  editType: ${
                 editorChange.editType

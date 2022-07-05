@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.102.0 (2022-07-05)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
+
+
+
+
 # 0.101.0 (2022-06-28)
 
 

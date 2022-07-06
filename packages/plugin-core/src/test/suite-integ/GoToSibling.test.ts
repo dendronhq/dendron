@@ -249,7 +249,7 @@ suite("GoToSibling", () => {
   );
 
   describeMultiWS(
-    "temp",
+    "multi-root",
     {
       postSetupHook: createNotesForMultiWorkspace,
     },
@@ -260,7 +260,7 @@ suite("GoToSibling", () => {
         ext = ExtensionProvider.getExtension();
       });
 
-      test("temp", async () => {
+      test("nav in multi-root", async () => {
         const { vaults } = ext.getDWorkspace();
 
         for (const vault of vaults) {

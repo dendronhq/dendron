@@ -1936,6 +1936,15 @@
         "doc",
         "tutorial"
       ]
+    },
+    {
+      "login": "jlongo",
+      "name": "José Longo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1572402?v=4",
+      "profile": "http://in construction",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

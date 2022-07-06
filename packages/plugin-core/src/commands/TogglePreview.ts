@@ -1,11 +1,12 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { ExtensionEvents, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { AnalyticsUtils } from "../utils/analytics";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { InputArgCommand } from "./base";
 import {
   TogglePreviewCommandOpts,
@@ -91,6 +92,17 @@ export class TogglePreviewCommand extends InputArgCommand<
         await this.openFileInPreview(fsPath);
         return { fsPath };
       }
+    }
+
+    if (this.key === DENDRON_COMMANDS.SHOW_PREVIEW.key) {
+      AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
+        source: DENDRON_COMMANDS.SHOW_PREVIEW.key,
+      });
+      VSCodeUtils.showMessage(
+        MessageSeverity.WARN,
+        "Show Preview is being deprecated and will be replaced with Toggle Preview",
+        {}
+      );
     }
     return undefined;
   }

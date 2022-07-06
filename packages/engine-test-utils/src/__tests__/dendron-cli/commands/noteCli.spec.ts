@@ -1,9 +1,4 @@
-import {
-  DendronError,
-  IDendronError,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NoteCLICommand,

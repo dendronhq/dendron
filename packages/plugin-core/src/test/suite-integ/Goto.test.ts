@@ -4,6 +4,7 @@ import { describe } from "mocha";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import { GotoCommand } from "../../commands/Goto";
+import { TargetKind } from "../../commands/GoToNoteInterface";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
@@ -92,7 +93,11 @@ suite("GotoNote", function () {
           /* Prevent the test to actually open the link */
           const avoidPopUp = sinon.stub(vscode.env, "openExternal");
           const { data } = await executeGotoCmd(ext);
-          expect(data).toEqual({ fsPath: "https://www.dendron.so/" });
+          expect(data).toContain({
+            kind: TargetKind.LINK,
+            fullPath: "https://www.dendron.so/",
+            fromProxy: false,
+          });
           avoidPopUp.restore();
         });
       }

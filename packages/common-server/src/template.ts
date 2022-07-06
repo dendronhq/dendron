@@ -167,11 +167,7 @@ export class TemplateUtils {
       TemplateHelpers.init();
       _INIT_HELPERS = true;
     }
-    if (ConfigUtils.getWorkspace(opts.engine.config).enableHandlebarTemplates) {
-      return this.applyHBTemplate(opts);
-    } else {
-      return this.applyLodashTemplate(opts);
-    }
+    return this.applyHBTemplate(opts);
   }
 
   /**

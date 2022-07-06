@@ -360,7 +360,6 @@ export class ExtensionUtils {
         : workspaceFolders.length,
       hasLocalConfig: false,
       numLocalConfigVaults: 0,
-      enableHandlebarTemplates: workspaceConfig.enableHandlebarTemplates,
     };
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);

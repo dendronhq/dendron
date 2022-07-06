@@ -59,9 +59,8 @@ export class TogglePreviewCommand extends InputArgCommand<
   async execute(opts?: TogglePreviewCommandOpts) {
     let note: NoteProps | undefined;
 
-    // If this class is used as TogglePreview (not as ShowCommand),
-    // hide (dispose) the previwe panel when it's already visible
-    if (!this._isShowCommand && this._panel.isVisible()) {
+    // Hide (dispose) the previwe panel when it's already visible
+    if (this._panel.isVisible()) {
       this._panel.hide();
       return undefined;
     }

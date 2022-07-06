@@ -143,6 +143,7 @@ export const PATH_MAP = new Map<string, mappedConfigPath>([
     "workspace.enableXVaultWikiLink",
     { target: "noXVaultWikiLink", iteratee: FLIP },
   ],
+  ["workspace.enableHandleBar", { target: "enableHandleBar" }],
   ["workspace.enableRemoteVaultInit", { target: "initializeRemoteVaults" }],
   ["workspace.workspaceVaultSyncMode", { target: "workspaceVaultSync" }],
   ["workspace.enableAutoFoldFrontmatter", { target: "autoFoldFrontmatter" }],

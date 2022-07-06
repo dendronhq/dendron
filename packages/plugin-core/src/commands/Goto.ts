@@ -27,7 +27,7 @@ import { OpenLinkCommand } from "./OpenLink";
 
 type CommandOpts = {};
 
-type CommandOutput = RespV3<GoToNoteCommandOutput | { fsPath: string }>;
+type CommandOutput = RespV3<GoToNoteCommandOutput>;
 
 const GOTO_KEY = "uri";
 
@@ -170,7 +170,9 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
         return { error };
       });
     }
-    return { data: { fsPath: assetPath } };
+    return {
+      data: { kind: TargetKind.LINK, fullPath: assetPath, fromProxy: false },
+    };
   }
 
   private openLink(uri: string) {

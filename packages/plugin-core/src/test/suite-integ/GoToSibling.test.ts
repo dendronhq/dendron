@@ -1,126 +1,16 @@
-import {
-  DVault,
-  LegacyJournalConfig,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { DVault, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { before, describe } from "mocha";
+import { describe } from "mocha";
 import { GoToSiblingCommand } from "../../commands/GoToSiblingCommand";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
-import { describeSingleWS } from "../testUtilsV3";
-
-const getActiveDocumentFname = () =>
-  VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-
-const createNoteForVault = async (wsRoot: string, vault: DVault) => {
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.08",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.09",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.08.29",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.08.30",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.08.31",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "foo.journal.2020.09.01",
-    wsRoot,
-    vault,
-  });
-
-  const base = "foo.journal.2021.04";
-  const fnames = ["3", "zlob", "29", "baz", "300", "bar"].map((leaf) =>
-    [base, leaf].join(".")
-  );
-
-  for (const fname of fnames) {
-    await NoteTestUtilsV4.createNote({
-      fname,
-      wsRoot,
-      vault,
-    });
-  }
-
-  await NoteTestUtilsV4.createNote({
-    fname: "random.note.without.siblings",
-    wsRoot,
-    vault,
-  });
-
-  await NoteTestUtilsV4.createNote({
-    fname: "gamma",
-    wsRoot,
-    vault,
-  });
-};
-
-// const createNotesForMultiWorkspace = async ({
-//   wsRoot,
-//   vaults,
-// }: WorkspaceOpts) => {
-//   for (const vault of vaults) {
-//     await NoteTestUtilsV4.createNote({
-//       fname: "foo.journal.2020.08.29",
-//       wsRoot,
-//       vault,
-//     });
-
-//     await NoteTestUtilsV4.createNote({
-//       fname: "foo.journal.2020.08.30",
-//       wsRoot,
-//       vault,
-//     });
-//   }
-// };
-
-/* journal note
-  2022.07.06 <-> 2022.07.07 (basic)
-  2022.06.30 <-> 2022.07.01 (month)
-  2021.12.31 <-> 2022.01.01 (year)
-  2021.07.04 <-> (2023.07.05) <-> 2022.07.06 (non consecutive days)
-
-  config is not default
-  06.01 06.30 -> (07.01) default wrap behavior
-*/
-
-const openNote = async (
-  ext: IDendronExtension,
-  fname: string,
-  vault?: DVault
-) => {
-  const { engine } = ext.getDWorkspace();
-  const hitNotes = await engine.findNotes({ fname, vault });
-  if (hitNotes.length === 0) throw Error("Cannot find the active note");
-  await new WSUtilsV2(ext).openNote(hitNotes[0]);
-};
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 
 const createNotes = async ({
   opts,
@@ -133,6 +23,15 @@ const createNotes = async ({
     await NoteTestUtilsV4.createNote({ ...opts, fname });
 };
 
+const getPostSetupHookForNonJournalNotes =
+  (fnames: string[]) =>
+  async ({ wsRoot, vaults }: WorkspaceOpts) => {
+    await createNotes({
+      opts: { wsRoot, vault: vaults[0] },
+      fnames: fnames,
+    });
+  };
+
 const getPostHostSetupHookForJournalNotes =
   (fnames: string[]) =>
   async ({ wsRoot, vaults }: WorkspaceOpts) => {
@@ -142,88 +41,85 @@ const getPostHostSetupHookForJournalNotes =
     });
   };
 
-const basic = getPostHostSetupHookForJournalNotes(["2022.07.06", "2022.07.07"]);
-const month = getPostHostSetupHookForJournalNotes(["2022.06.30", "2022.07.01"]);
-const year = getPostHostSetupHookForJournalNotes(["2021.12.31", "2022.01.01"]);
-const nonSequence = getPostHostSetupHookForJournalNotes([
-  "2021.07.04",
-  "2023.07.05",
-  "2022.07.06",
-]);
-const notDefaultConfig = getPostHostSetupHookForJournalNotes([
-  "06.01",
-  "06.30",
-  "07.01",
-]);
-
 suite("GoToSibling", () => {
   describe("WHEN non-journal note is open", async () => {
     describeSingleWS(
-      "When GoToSibling is invoked",
+      "basic",
+      { postSetupHook: getPostSetupHookForNonJournalNotes(["foo.a", "foo.b"]) },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo.a");
+
+          const resp = await new GoToSiblingCommand().execute({
+            direction: "next",
+          });
+          expect(resp).toEqual({ msg: "ok" });
+          expect(getActiveDocumentFname()?.endsWith("foo.b.md")).toBeTruthy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "go over index",
+      { postSetupHook: getPostSetupHookForNonJournalNotes(["foo.a", "foo.b"]) },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo.b");
+
+          const resp = await new GoToSiblingCommand().execute({
+            direction: "next",
+          });
+          expect(resp).toEqual({ msg: "ok" });
+          expect(getActiveDocumentFname()?.endsWith("foo.a.md")).toBeTruthy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "numeric siblings sort correctly",
       {
-        postSetupHook: async ({ wsRoot, vaults }) =>
-          await createNoteForVault(wsRoot, vaults[0]),
+        postSetupHook: getPostSetupHookForNonJournalNotes([
+          "foo.1",
+          "foo.2",
+          "foo.3",
+        ]),
       },
       () => {
-        let ext: IDendronExtension;
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo.1");
 
-        before(() => {
-          ext = ExtensionProvider.getExtension();
-        });
-
-        test("basic", async () => {
-          await openNote(ext, "foo.journal.2020.08.29");
-          const resp = await new GoToSiblingCommand().execute({
-            direction: "next",
-          });
-          expect(resp).toEqual({ msg: "ok" });
-          expect(
-            getActiveDocumentFname()?.endsWith("foo.journal.2020.08.30.md")
-          ).toBeTruthy();
-        });
-
-        test("traversal from parent", async () => {
-          await openNote(ext, "foo.journal.2020.08");
-          const resp = await new GoToSiblingCommand().execute({
-            direction: "next",
-          });
-          expect(resp).toEqual({ msg: "ok" });
-          expect(
-            getActiveDocumentFname()?.endsWith("foo.journal.2020.09.md")
-          ).toBeTruthy();
-        });
-
-        test("go over index", async () => {
-          await openNote(ext, "foo.journal.2020.08.31");
-          const resp = await new GoToSiblingCommand().execute({
-            direction: "next",
-          });
-          expect(resp).toEqual({ msg: "ok" });
-          expect(
-            getActiveDocumentFname()?.endsWith("foo.journal.2020.08.29.md")
-          ).toBeTruthy();
-        });
-
-        test("numeric siblings sort correctly", async () => {
-          await openNote(ext, "foo.journal.2020.08.29");
           const resp1 = await new GoToSiblingCommand().execute({
             direction: "next",
           });
           expect(resp1).toEqual({ msg: "ok" });
-          expect(
-            getActiveDocumentFname()?.endsWith("foo.journal.2020.08.30.md")
-          ).toBeTruthy();
+          expect(getActiveDocumentFname()?.endsWith("foo.2.md")).toBeTruthy();
+
           const resp2 = await new GoToSiblingCommand().execute({
             direction: "next",
           });
           expect(resp2).toEqual({ msg: "ok" });
-          expect(
-            getActiveDocumentFname()?.endsWith("foo.journal.2020.08.31.md")
-          ).toBeTruthy();
+          expect(getActiveDocumentFname()?.endsWith("foo.3.md")).toBeTruthy();
         });
+      }
+    );
 
-        test("numeric and alphabetic siblings", async () => {
-          await openNote(ext, "foo.journal.2021.04.300");
+    describeSingleWS(
+      "numeric and alphabetic siblings",
+      {
+        postSetupHook: getPostSetupHookForNonJournalNotes([
+          "foo.a",
+          "foo.b",
+          "foo.3",
+          "foo.300",
+        ]),
+      },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo.300");
 
           const resp1 = await new GoToSiblingCommand().execute({
             direction: "next",
@@ -231,7 +127,7 @@ suite("GoToSibling", () => {
           expect(resp1).toEqual({ msg: "ok" });
           expect(
             VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-              "foo.journal.2021.04.bar.md"
+              "foo.a.md"
             )
           ).toBeTruthy();
 
@@ -241,17 +137,7 @@ suite("GoToSibling", () => {
           expect(resp2).toEqual({ msg: "ok" });
           expect(
             VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-              "foo.journal.2021.04.baz.md"
-            )
-          ).toBeTruthy();
-
-          const resp3 = await new GoToSiblingCommand().execute({
-            direction: "next",
-          });
-          expect(resp3).toEqual({ msg: "ok" });
-          expect(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-              "foo.journal.2021.04.zlob.md"
+              "foo.b.md"
             )
           ).toBeTruthy();
 
@@ -261,79 +147,91 @@ suite("GoToSibling", () => {
           expect(resp4).toEqual({ msg: "ok" });
           expect(
             VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-              "foo.journal.2021.04.3.md"
+              "foo.3.md"
             )
           ).toBeTruthy();
         });
+      }
+    );
 
-        test("no siblings", async () => {
-          await openNote(ext, "random.note.without.siblings");
+    describeSingleWS(
+      "no siblings",
+      { postSetupHook: getPostSetupHookForNonJournalNotes(["foo"]) },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo");
 
           const resp = await new GoToSiblingCommand().execute({
             direction: "next",
           });
           expect(resp).toEqual({ msg: "no_siblings" });
-          expect(
-            getActiveDocumentFname()?.endsWith(
-              "random.note.without.siblings.md"
-            )
-          ).toBeTruthy();
+          expect(getActiveDocumentFname()?.endsWith("foo.md")).toBeTruthy();
         });
+      }
+    );
 
-        test("no editor", async () => {
-          await VSCodeUtils.closeAllEditors();
-          const resp = await new GoToSiblingCommand().execute({
-            direction: "next",
-          });
-          expect(resp).toEqual({ msg: "no_editor" });
+    describeSingleWS("no editor", {}, () => {
+      test("", async () => {
+        await VSCodeUtils.closeAllEditors();
+        const resp = await new GoToSiblingCommand().execute({
+          direction: "next",
         });
+        expect(resp).toEqual({ msg: "no_editor" });
+      });
+    });
 
-        test("nav in root", async () => {
+    describeSingleWS(
+      "nav in root",
+      { postSetupHook: getPostSetupHookForNonJournalNotes(["foo"]) },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
           await openNote(ext, "root");
 
           const resp = await new GoToSiblingCommand().execute({
             direction: "next",
           });
           expect(resp).toEqual({ msg: "ok" });
-          expect(getActiveDocumentFname()?.endsWith("gamma.md")).toBeTruthy();
+          expect(getActiveDocumentFname()?.endsWith("foo.md")).toBeTruthy();
         });
       }
     );
 
-    // describeMultiWS(
-    //   "multi-root",
-    //   {
-    //     postSetupHook: createNotesForMultiWorkspace,
-    //   },
-    //   () => {
-    //     let ext: IDendronExtension;
+    describeMultiWS(
+      "nav in multi-root",
+      {
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          for (const vault of vaults) {
+            await NoteTestUtilsV4.createNote({ wsRoot, vault, fname: "foo.a" });
+            await NoteTestUtilsV4.createNote({ wsRoot, vault, fname: "foo.b" });
+          }
+        },
+      },
+      () => {
+        test("", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "foo.a");
 
-    //     before(() => {
-    //       ext = ExtensionProvider.getExtension();
-    //     });
-
-    //     test("nav in multi-root", async () => {
-    //       const { vaults } = ext.getDWorkspace();
-
-    //       for (const vault of vaults) {
-    //         await beforeTestResuts(ext, "foo.journal.2020.08.29", vault);
-    //         const resp = await new GoToSiblingCommand().execute({
-    //           direction: "next",
-    //         });
-    //         expect(resp).toEqual({ msg: "ok" });
-    //         expect(
-    //           getActiveDocumentFname()?.endsWith("foo.journal.2020.08.30.md")
-    //         ).toBeTruthy();
-    //       }
-    //     });
-    //   }
-    // );
+          const resp = await new GoToSiblingCommand().execute({
+            direction: "next",
+          });
+          expect(resp).toEqual({ msg: "ok" });
+          expect(getActiveDocumentFname()?.endsWith("foo.b.md")).toBeTruthy();
+        });
+      }
+    );
   });
 
   describe("WHEN journal note is open", async () => {
     describeSingleWS(
       "WHEN next sibling is next day",
-      { postSetupHook: basic },
+      {
+        postSetupHook: getPostHostSetupHookForJournalNotes([
+          "2022.07.06",
+          "2022.07.07",
+        ]),
+      },
       () => {
         test("THEN the note for the next day should open", async () => {
           const ext = ExtensionProvider.getExtension();
@@ -351,7 +249,12 @@ suite("GoToSibling", () => {
 
     describeSingleWS(
       "WHEN next sibling is the first day of the next month",
-      { postSetupHook: month },
+      {
+        postSetupHook: getPostHostSetupHookForJournalNotes([
+          "2022.06.30",
+          "2022.07.01",
+        ]),
+      },
       () => {
         test("THEN the note for the first day of the next month should open", async () => {
           const ext = ExtensionProvider.getExtension();
@@ -369,7 +272,12 @@ suite("GoToSibling", () => {
 
     describeSingleWS(
       "WHEN next sibling is the first day of the next year",
-      { postSetupHook: year },
+      {
+        postSetupHook: getPostHostSetupHookForJournalNotes([
+          "2021.12.31",
+          "2022.01.01",
+        ]),
+      },
       () => {
         test("THEN the note for the first day of the next year should open", async () => {
           const ext = ExtensionProvider.getExtension();
@@ -387,7 +295,13 @@ suite("GoToSibling", () => {
 
     describeSingleWS(
       "WHEN next sibling is not the next day in sequence",
-      { postSetupHook: nonSequence },
+      {
+        postSetupHook: getPostHostSetupHookForJournalNotes([
+          "2021.07.04",
+          "2023.07.05",
+          "2022.07.06",
+        ]),
+      },
       () => {
         test("THEN the note for the closest day should open", async () => {
           const ext = ExtensionProvider.getExtension();
@@ -406,7 +320,11 @@ suite("GoToSibling", () => {
     describeSingleWS(
       "WHEN date config for journal notes is note default",
       {
-        postSetupHook: notDefaultConfig,
+        postSetupHook: getPostHostSetupHookForJournalNotes([
+          "06.01",
+          "06.30",
+          "07.01",
+        ]),
         modConfigCb: (config) => {
           // Change journal date config on dendron.yml for the current workspace
           config.workspace.journal.dateFormat = "MM.dd";
@@ -429,3 +347,17 @@ suite("GoToSibling", () => {
     );
   });
 });
+
+const getActiveDocumentFname = () =>
+  VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+
+const openNote = async (
+  ext: IDendronExtension,
+  fname: string,
+  vault?: DVault
+) => {
+  const { engine } = ext.getDWorkspace();
+  const hitNotes = await engine.findNotes({ fname, vault });
+  if (hitNotes.length === 0) throw Error("Cannot find the active note");
+  await new WSUtilsV2(ext).openNote(hitNotes[0]);
+};

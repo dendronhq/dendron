@@ -532,16 +532,18 @@ export class PickerUtilsV2 {
 
     const vaultsWithMatchingHierarchy: VaultPickerItem[] | undefined =
       queryResponse.data
-        .filter((value) => value.fname === newQs)
-        .map((value) => value.vault)
-        .sort(sortByPathNameFn)
-        .map((value) => {
-          return {
-            vault: value,
-            detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(value),
-          };
-        });
+        ? queryResponse.data
+            .filter((value) => value.fname === newQs)
+            .map((value) => value.vault)
+            .sort(sortByPathNameFn)
+            .map((value) => {
+              return {
+                vault: value,
+                detail: HIERARCHY_MATCH_DETAIL,
+                label: VaultUtils.getName(value),
+              };
+            })
+        : undefined;
 
     if (!vaultsWithMatchingHierarchy) {
       // Suggest current vault context as top suggestion

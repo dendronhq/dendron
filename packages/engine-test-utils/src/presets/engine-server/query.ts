@@ -129,7 +129,7 @@ const NOTES = {
       });
       return [
         {
-          actual: data.length,
+          actual: data?.length,
           expected: 4,
         },
       ];
@@ -155,11 +155,11 @@ const NOTES = {
       )[0];
       return [
         {
-          actual: data[0],
+          actual: data ? data[0] : undefined,
           expected: expectedNote,
         },
         {
-          actual: data[0].schema,
+          actual: data ? data[0].schema : undefined,
           expected: {
             moduleId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,
             schemaId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,

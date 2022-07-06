@@ -435,8 +435,8 @@ export type NoteBlock = {
 /**
  * Returns list of notes that were changed
  */
-export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
-export type BulkWriteNoteResp = Required<BulkResp<NoteChangeEntry[]>>;
+export type WriteNoteResp = RespV2<NoteChangeEntry[]>;
+export type BulkWriteNoteResp = BulkResp<NoteChangeEntry[]>;
 
 // --- Common
 export type ConfigGetPayload = IntermediateDendronConfig;
@@ -444,7 +444,7 @@ export type ConfigGetPayload = IntermediateDendronConfig;
 export type DCommonMethods = {
   bulkWriteNotes: (
     opts: BulkWriteNotesOpts
-  ) => Promise<Required<BulkResp<NoteChangeEntry[]>>>;
+  ) => Promise<BulkResp<NoteChangeEntry[]>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   /**
@@ -520,7 +520,7 @@ export type WorkspaceExtensionSetting = {
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
-export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
+export type NoteQueryResp = RespV2<NoteProps[]>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 /**

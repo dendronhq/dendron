@@ -309,7 +309,10 @@ export class FileStorage implements DStore {
         });
         const changed = await this.writeNote(replacingStub, { newNode: true });
         out.push({ note: noteToDelete, status: "delete" });
-        out = out.concat(changed.data);
+
+        if (changed.data) {
+          out = out.concat(changed.data);
+        }
       }
     } else {
       // no children, delete reference from parent
@@ -967,7 +970,7 @@ export class FileStorage implements DStore {
     });
     let deleteOldFile = false;
     let changedFromDelete: EngineDeleteNotePayload = [];
-    let changeFromWrite: NoteChangeEntry[];
+    let changeFromWrite: NoteChangeEntry[] | undefined;
     if (
       oldNote.fname.toLowerCase() === newNote.fname.toLowerCase() &&
       VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
@@ -1018,9 +1021,13 @@ export class FileStorage implements DStore {
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
-    notesChangedEntries = changedFromDelete
-      .concat(changeFromWrite)
-      .concat(notesChangedEntries);
+
+    notesChangedEntries = changedFromDelete.concat(notesChangedEntries);
+
+    if (changeFromWrite) {
+      notesChangedEntries = notesChangedEntries.concat(changeFromWrite);
+    }
+
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
   }
@@ -1097,6 +1104,8 @@ export class FileStorage implements DStore {
     if (existingNote) {
       // make sure existing note actually has a parent.
       if (!existingNote.parent) {
+        // TODO: We should be able to handle rewriting of root. This happens
+        // with certain operations such as Doctor FixFrontmatter
         throw new DendronError({
           message: `no parent found for ${note.fname}`,
         });

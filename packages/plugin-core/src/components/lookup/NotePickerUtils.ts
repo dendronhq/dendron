@@ -170,7 +170,11 @@ export class NotePickerUtils {
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
-    let nodes: NoteProps[] = resp.data;
+    let nodes = resp.data;
+
+    if (!nodes) {
+      return [];
+    }
 
     // We need to filter our results to abide by different variations of our
     // transformed query. We should do filtering prior to doing pagination cut off.

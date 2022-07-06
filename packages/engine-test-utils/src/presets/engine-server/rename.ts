@@ -909,13 +909,13 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
-            { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![4].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -971,14 +971,14 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             // this is a diff vault
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
-            { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![4].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
         },
         {
@@ -1038,9 +1038,9 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
-            { status: "update", fname: "beta" },
           ],
         },
         {

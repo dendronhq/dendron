@@ -73,7 +73,7 @@ export interface IEngineAPIService {
 
   bulkWriteNotes(
     opts: BulkWriteNotesOpts
-  ): Promise<Required<BulkResp<NoteChangeEntry[]>>>;
+  ): Promise<BulkResp<NoteChangeEntry[]>>;
 
   updateNote(
     note: NoteProps,
@@ -85,7 +85,7 @@ export interface IEngineAPIService {
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  ): Promise<RespV2<NoteChangeEntry[]>>;
 
   writeSchema(schema: SchemaModuleProps): Promise<void>;
 
@@ -109,7 +109,7 @@ export interface IEngineAPIService {
 
   querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>>;
 
-  queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>>;
+  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>>;
 
   queryNotesSync({
     qs,
@@ -119,7 +119,7 @@ export interface IEngineAPIService {
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): Required<RespV2<NoteProps[]>>;
+  }): RespV2<NoteProps[]>;
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
 

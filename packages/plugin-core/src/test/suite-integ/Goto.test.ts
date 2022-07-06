@@ -125,7 +125,7 @@ suite("GotoNote", function () {
     GOTO_NOTE_PRESETS.NO_LINK.label,
     { preSetupHook: GOTO_NOTE_PRESETS.NO_LINK.preSetupHook },
     () => {
-      test("TEST TEST", async () => {
+      test("THEN error message should show up", async () => {
         const ext = ExtensionProvider.getExtension();
         await GOTO_NOTE_PRESETS.NO_LINK.beforeTestResults({ ext });
         const { error } = (await executeGotoCmd(ext)) as {

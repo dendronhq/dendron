@@ -241,7 +241,7 @@ const PARTIAL_URL = new TestPresetEntry<{
 const NO_LINK = new TestPresetEntry<{
   ext: IDendronExtension;
 }>({
-  label: "THEN error message should show up",
+  label: "WHEN there is no valid link under the cursor",
   preSetupHook: async (opts) => await ENGINE_HOOKS.setupBasic(opts),
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();

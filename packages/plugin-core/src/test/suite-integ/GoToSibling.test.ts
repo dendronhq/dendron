@@ -408,10 +408,8 @@ suite("GoToSibling", () => {
       {
         postSetupHook: notDefaultConfig,
         modConfigCb: (config) => {
-          if (!config.journal)
-            config.journal = { dateFormat: "MM.dd" } as LegacyJournalConfig;
-          else config.journal.dateFormat = "MM.dd";
-          console.log("journalconfig", config.journal);
+          // Change journal date config on dendron.yml for the current workspace
+          config.workspace.journal.dateFormat = "MM.dd";
           return config;
         },
       },

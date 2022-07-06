@@ -114,3 +114,11 @@ export const ENGINE_PRESETS_MULTI = [
   { name: "update", presets: ENGINE_SERVER.ENGINE_UPDATE_PRESETS },
   { name: "write", presets: ENGINE_WRITE_PRESETS_MULTI },
 ];
+
+export const ENGINE_V3_PRESETS = [
+  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
+];
+
+export const ENGINE_V3_PRESETS_MULTI = [
+  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
+];

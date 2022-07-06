@@ -26,6 +26,7 @@ import {
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
+  NotePropsMeta,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -68,6 +69,10 @@ export interface IEngineAPIService {
    * Find NoteProps by note properties. If no notes match, return empty list
    */
   findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
+  /**
+   * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
+   */
+  findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
 
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 

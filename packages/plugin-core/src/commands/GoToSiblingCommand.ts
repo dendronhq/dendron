@@ -207,11 +207,15 @@ export class GoToSiblingCommand extends BasicCommand<
     currNote: NoteProps
   ): NoteProps[] {
     if (currNote.fname === "root") {
-      return currNote.children.map((id) => notes[id]).concat(currNote);
+      return currNote.children
+        .map((id) => notes[id])
+        .filter((note) => !note.stub)
+        .concat(currNote);
+    } else {
+      return notes[currNote.parent!].children
+        .map((id) => notes[id])
+        .filter((note) => !note.stub);
     }
-    return notes[currNote.parent!].children
-      .map((id) => notes[id])
-      .filter((note) => !note.stub);
   }
 
   private sortNotes(notes: NoteProps[]) {

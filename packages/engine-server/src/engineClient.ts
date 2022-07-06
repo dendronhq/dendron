@@ -52,6 +52,7 @@ import {
   VaultUtils,
   WriteNoteResp,
   FindNoteOpts,
+  NotePropsMeta,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -234,6 +235,14 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     } else {
       return [];
     }
+  }
+
+  /**
+   * See {@link DStore.findNotesMeta}
+   * TODO: fix logic after engine refactor
+   */
+  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+    return this.findNotes(opts);
   }
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {

@@ -27,6 +27,7 @@ import {
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
+  createEngineV3,
   DConfig,
   WorkspaceConfig,
   WorkspaceService,
@@ -74,6 +75,17 @@ export type AsyncCreateEngineFunction = (
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
   return {
     engine: engineServerCreateEngine(opts) as DEngineClient,
+    port: undefined,
+    server: undefined,
+  };
+}
+
+/**
+ * Create an {@link DendronEngine}
+ */
+export async function createEngineV3FromEngine(opts: WorkspaceOpts) {
+  return {
+    engine: createEngineV3(opts) as DEngineClient,
     port: undefined,
     server: undefined,
   };

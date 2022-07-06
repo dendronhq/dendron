@@ -43,6 +43,7 @@ import {
   NoteDictsUtils,
   NoteProps,
   NotePropsByIdDict,
+  NotePropsMeta,
   NoteUtils,
   NullCache,
   Optional,
@@ -351,6 +352,13 @@ export class DendronEngineV2 implements DEngine {
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
     return this.store.findNotes(opts);
+  }
+
+  /**
+   * See {@link DEngine.findNotesMeta}
+   */
+  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+    return this.findNotes(opts);
   }
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {

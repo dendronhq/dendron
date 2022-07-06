@@ -25,6 +25,7 @@ type CommandCLIOpts = {
   output?: NoteCLIOutput;
   destFname?: string;
   destVaultName?: string;
+  newEngine?: boolean;
 };
 
 export enum NoteCLIOutput {
@@ -51,6 +52,10 @@ export enum NoteCommands {
    * Returns a list of notes
    */
   LOOKUP = "lookup",
+  /**
+   * Get note by id. Uses new engine/store
+   */
+  GET = "get",
   LOOKUP_LEGACY = "lookup_legacy",
   DELETE = "delete",
   MOVE = "move",
@@ -178,6 +183,11 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ cmd: args.cmd, output: args.output });
+
+    // TODO remove after migration to new engine
+    if (args.cmd === NoteCommands.GET) {
+      args.newEngine = true;
+    }
     const engineArgs = await setupEngine(args);
     return { data: { ...args, ...engineArgs } };
   }
@@ -203,6 +213,30 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             stringOutput: resp,
           };
           return { data };
+        }
+        case NoteCommands.GET: {
+          const { query } = checkQuery(opts);
+          const note = await engine.getNote(query);
+          if (note) {
+            const resp = await formatNotes({
+              output,
+              notes: [note],
+              engine,
+            });
+            this.print(resp);
+            const data: NoteCommandData = {
+              notesOutput: [note],
+              stringOutput: resp,
+            };
+            return { data };
+          } else {
+            return {
+              error: ErrorFactory.create404Error({
+                url: query,
+              }),
+              data: undefined,
+            };
+          }
         }
         case NoteCommands.LOOKUP_LEGACY: {
           const { query, vault } = checkQueryAndVault(opts);

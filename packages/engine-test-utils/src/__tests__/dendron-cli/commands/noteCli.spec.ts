@@ -1,4 +1,9 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  IDendronError,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NoteCLICommand,
@@ -8,7 +13,11 @@ import {
   NoteCommands,
 } from "@dendronhq/dendron-cli";
 import _ from "lodash";
-import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
+import {
+  createEngineFromServer,
+  createEngineV3FromEngine,
+  runEngineTestV5,
+} from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../presets";
 import { checkString } from "../../../utils";
 
@@ -48,6 +57,20 @@ const runLookupCmd = (
     server: {} as any,
     output: NoteCLIOutput.JSON,
   }) as Promise<{ data: NoteCommandData }>;
+};
+
+const runGetCmd = (
+  opts: Omit<NoteCLICommandOpts, "port" | "server" | "cmd">
+) => {
+  const cmd = new NoteCLICommand();
+  cmd.opts.quiet = true;
+  return cmd.execute({
+    ...opts,
+    cmd: NoteCommands.GET,
+    port: 0,
+    server: {} as any,
+    output: NoteCLIOutput.JSON,
+  });
 };
 
 describe("WHEN run 'dendron note lookup'", () => {
@@ -168,6 +191,55 @@ describe("WHEN run 'dendron note lookup'", () => {
         {
           expect,
           createEngine: createEngineFromServer,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
+});
+
+describe("WHEN run 'dendron note get'", () => {
+  describe("AND WHEN get note that doesn't exist", () => {
+    test("THEN return empty result", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const resp = await runGetCmd({
+            wsRoot,
+            engine,
+            query: "gamma",
+            output: NoteCLIOutput.JSON,
+          });
+          expect(resp.data).toBeUndefined();
+          expect(resp.error?.message).toContain("gamma does not exist");
+          const note = await engine.getNote("gamma");
+          // note not created
+          expect(note).toBeUndefined();
+        },
+        {
+          createEngine: createEngineV3FromEngine,
+          expect,
+        }
+      );
+    });
+  });
+
+  describe("AND WHEN find note with single matches", () => {
+    test("THEN return one matches", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const resp = await runGetCmd({
+            wsRoot,
+            engine,
+            query: "foo.ch1",
+          });
+          const noteData = resp.data as NoteCommandData;
+          expect(_.map(noteData.notesOutput, (n) => n.fname)).toEqual([
+            "foo.ch1",
+          ]);
+        },
+        {
+          expect,
+          createEngine: createEngineV3FromEngine,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
       );

@@ -31,6 +31,7 @@ import {
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
+  NotePropsMeta,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -209,6 +210,13 @@ export class EngineAPIService
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
     return this._internalEngine.findNotes(opts);
+  }
+
+  /**
+   * See {@link IEngineAPIService.findNotesMeta}
+   */
+  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+    return this._internalEngine.findNotesMeta(opts);
   }
 
   async refreshNotes(opts: RefreshNotesOpts) {

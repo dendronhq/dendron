@@ -179,10 +179,6 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable cross-vault wikilink",
     desc: "Enable cross-vault wikilinks",
   },
-  enableHandlebarTemplates: {
-    label: "Enable handlebar style templates",
-    desc: "",
-  },
   enableRemoteVaultInit: {
     label: "Enable Remote Vault Init",
     desc: "Enable initializing remote vaults on startup.",

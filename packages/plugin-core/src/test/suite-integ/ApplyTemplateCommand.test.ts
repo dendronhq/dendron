@@ -69,11 +69,6 @@ async function runTemplateTest({
 
 const basicPreset = ENGINE_HOOKS.setupBasic;
 
-const enableHB = (cfg: IntermediateDendronConfig) => {
-  cfg.workspace.enableHandlebarTemplates = true;
-  return cfg;
-};
-
 suite("ApplyTemplate", function () {
   describeMultiWS(
     "WHEN ApplyTemplate run with regular template",
@@ -128,7 +123,6 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with template with frontmatter",
     {
       preSetupHook: basicPreset,
-      modConfigCb: enableHB,
       timeout,
     },
     () => {

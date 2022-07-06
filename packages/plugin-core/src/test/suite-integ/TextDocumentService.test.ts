@@ -1,11 +1,11 @@
 import {
   assert,
+  genHash,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
   extractNoteChangeEntriesByType,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { genHash } from "@dendronhq/common-server";
 import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,

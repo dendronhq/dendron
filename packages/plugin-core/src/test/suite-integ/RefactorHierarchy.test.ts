@@ -119,7 +119,7 @@ suite("RefactorHierarchy", function () {
               await engine.findNotes({ fname: "prefix", vault })
             )[0];
             expect(noteAfterRefactor?.body).toEqual(
-              "- [[prefix.one]]\n- [[prefix.two]]\n"
+              "- [[prefix.one]]\n- [[prefix.two]]"
             );
             done();
           },
@@ -169,13 +169,13 @@ suite("RefactorHierarchy", function () {
               await engine.findNotes({ fname: "refactor", vault })
             )[0];
             expect(noteAfterRefactor?.body).toEqual(
-              "- [[refactor.one]]\n- [[prefix.two]]\n"
+              "- [[refactor.one]]\n- [[prefix.two]]"
             );
 
             const noteOneAfterRefactor = (
               await engine.findNotes({ fname: "refactor.one", vault })
             )[0];
-            expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]\n");
+            expect(noteOneAfterRefactor?.body).toEqual("- [[prefix.two]]");
             done();
           },
         });

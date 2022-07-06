@@ -79,8 +79,7 @@ exports[`H1_TO_TITLE basic pass candidates opts 2`] = `
 Object {
   "anchors": Object {},
   "body": "# Bar Header
-## Bar Content
-",
+## Bar Content",
   "children": Array [],
   "contentHash": undefined,
   "created": 1,
@@ -185,8 +184,7 @@ exports[`h1 to h2 basic pass candidates opt 2`] = `
 Object {
   "anchors": Object {},
   "body": "# Bar Header
-## Bar Content
-",
+## Bar Content",
   "children": Array [],
   "contentHash": undefined,
   "created": 1,
@@ -210,8 +208,7 @@ exports[`h1 to h2 dry run 1`] = `
 Object {
   "anchors": Object {},
   "body": "# Foo Header
-## Foo Content
-",
+## Foo Content",
   "children": Array [],
   "contentHash": undefined,
   "created": 1,
@@ -235,8 +232,7 @@ exports[`h1 to h2 dry run 2`] = `
 Object {
   "anchors": Object {},
   "body": "# Bar Header
-## Bar Content
-",
+## Bar Content",
   "children": Array [],
   "contentHash": undefined,
   "created": 1,

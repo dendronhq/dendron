@@ -34,6 +34,7 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
+  NotePropsMeta,
 } from "./types";
 import {
   ConfigUtils,
@@ -763,10 +764,12 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return NoteDictsUtils.findByFname(
-      fname,
-      { notesById: engine.notes, notesByFname: engine.noteFnames },
-      vault
+    return _.cloneDeep(
+      NoteDictsUtils.findByFname(
+        fname,
+        { notesById: engine.notes, notesByFname: engine.noteFnames },
+        vault
+      )
     );
   }
 
@@ -806,7 +809,7 @@ export class NoteUtils {
     note,
     wsRoot,
   }: {
-    note: NoteProps;
+    note: NotePropsMeta;
     wsRoot: string;
   }): string {
     try {
@@ -824,7 +827,13 @@ export class NoteUtils {
     }
   }
 
-  static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
+  static getURI({
+    note,
+    wsRoot,
+  }: {
+    note: NotePropsMeta;
+    wsRoot: string;
+  }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
 
@@ -1061,7 +1070,9 @@ export class NoteUtils {
     meta.title = _.toString(meta.title);
     meta.id = _.toString(meta.id);
 
-    return matter.stringify(body || "", meta);
+    const stringified = matter.stringify(body || "", meta);
+    // Stringify appends \n if it doesn't exist. Remove it if body originally doesn't contain new line
+    return body.slice(-1) !== "\n" ? stringified.slice(0, -1) : stringified;
   }
 
   static toLogObj(note: NoteProps) {

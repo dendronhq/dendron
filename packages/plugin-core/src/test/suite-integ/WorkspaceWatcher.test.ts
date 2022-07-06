@@ -157,7 +157,7 @@ suite("WorkspaceWatcher", function () {
                   vault: vaults[0],
                 })
               )[0];
-              expect(reference.body).toEqual(`[[newfile]]\n`);
+              expect(reference.body).toEqual(`[[newfile]]`);
             });
           },
         };

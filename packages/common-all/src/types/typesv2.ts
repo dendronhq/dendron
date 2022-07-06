@@ -14,7 +14,7 @@ import { DVault } from "./workspace";
 import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
 import { Decoration, Diagnostic } from ".";
-import { FindNoteOpts } from "./rest";
+import { FindNoteOpts } from "./store";
 import type { Optional } from "../utils";
 import { DendronASTDest, ProcFlavor } from "./unified";
 import { GetAnchorsRequest, GetLinksRequest } from "..";

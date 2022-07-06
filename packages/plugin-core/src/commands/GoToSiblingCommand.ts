@@ -54,7 +54,7 @@ export class GoToSiblingCommand extends BasicCommand<
     // Get the sibling note
     let siblingNote: NoteProps;
     // If the active note is a journal note, get the sibling note based on the chronological order
-    if (this.isJournalNote(note)) {
+    if (await this.canBeHandledAsJournalNote(note, workspace.engine)) {
       const { sibling, msg } = await this.getSiblingForJournalNote(
         workspace.engine.notes,
         note,
@@ -94,8 +94,19 @@ export class GoToSiblingCommand extends BasicCommand<
     return hitNotes.length !== 0 ? hitNotes[0] : null;
   }
 
-  private isJournalNote(note: NoteProps): boolean {
-    return NoteUtils.getNoteTraits(note).includes("journalNote");
+  private async canBeHandledAsJournalNote(
+    note: NoteProps,
+    engine: DEngineClient
+  ): Promise<boolean> {
+    const markedAsJournalNote =
+      NoteUtils.getNoteTraits(note).includes("journalNote");
+    if (!markedAsJournalNote) return false;
+
+    // Check the date format for journal note. Only when date format of journal notes is default,
+    // navigate chronologically
+    const config = await engine.getConfig();
+    const dateFormat = config.data?.workspace.journal.dateFormat;
+    return dateFormat === "y.MM.dd";
   }
 
   private async getSiblingForJournalNote(

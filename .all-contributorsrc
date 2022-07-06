@@ -1926,6 +1926,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "woodwm",
+      "name": "Weiming",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13971199?v=4",
+      "profile": "https://github.com/woodwm",
+      "contributions": [
+        "doc",
+        "tutorial"
+      ]
     }
   ],
   "contributorsPerLine": 7,

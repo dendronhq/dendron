@@ -1,4 +1,8 @@
-import { DVault, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DVault,
+  LegacyJournalConfig,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,
@@ -78,24 +82,24 @@ const createNoteForVault = async (wsRoot: string, vault: DVault) => {
   });
 };
 
-const createNotesForMultiWorkspace = async ({
-  wsRoot,
-  vaults,
-}: WorkspaceOpts) => {
-  for (const vault of vaults) {
-    await NoteTestUtilsV4.createNote({
-      fname: "foo.journal.2020.08.29",
-      wsRoot,
-      vault,
-    });
+// const createNotesForMultiWorkspace = async ({
+//   wsRoot,
+//   vaults,
+// }: WorkspaceOpts) => {
+//   for (const vault of vaults) {
+//     await NoteTestUtilsV4.createNote({
+//       fname: "foo.journal.2020.08.29",
+//       wsRoot,
+//       vault,
+//     });
 
-    await NoteTestUtilsV4.createNote({
-      fname: "foo.journal.2020.08.30",
-      wsRoot,
-      vault,
-    });
-  }
-};
+//     await NoteTestUtilsV4.createNote({
+//       fname: "foo.journal.2020.08.30",
+//       wsRoot,
+//       vault,
+//     });
+//   }
+// };
 
 /* journal note
   2022.07.06 <-> 2022.07.07 (basic)
@@ -146,10 +150,10 @@ const nonSequence = getPostHostSetupHookForJournalNotes([
   "2023.07.05",
   "2022.07.06",
 ]);
-const noConfig = getPostHostSetupHookForJournalNotes([
-  "2021.06.01",
-  "2023.06.30",
-  "2022.07.01",
+const notDefaultConfig = getPostHostSetupHookForJournalNotes([
+  "06.01",
+  "06.30",
+  "07.01",
 ]);
 
 suite("GoToSibling", () => {
@@ -394,6 +398,33 @@ suite("GoToSibling", () => {
           expect(resp).toEqual({ msg: "ok" });
           expect(
             getActiveDocumentFname()?.endsWith("journal.2022.07.06.md")
+          ).toBeTruthy();
+        });
+      }
+    );
+
+    describeSingleWS(
+      "WHEN date config for journal notes is note default",
+      {
+        postSetupHook: notDefaultConfig,
+        modConfigCb: (config) => {
+          if (!config.journal)
+            config.journal = { dateFormat: "MM.dd" } as LegacyJournalConfig;
+          else config.journal.dateFormat = "MM.dd";
+          console.log("journalconfig", config.journal);
+          return config;
+        },
+      },
+      () => {
+        test("THEN the default non-chronological one-parent-level navigation should be used", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await openNote(ext, "journal.06.30");
+          const resp = await new GoToSiblingCommand().execute({
+            direction: "next",
+          });
+          expect(resp).toEqual({ msg: "ok" });
+          expect(
+            getActiveDocumentFname()?.endsWith("journal.06.01.md")
           ).toBeTruthy();
         });
       }

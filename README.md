@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-204-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-205-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -465,6 +465,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/cquick01"><img src="https://avatars.githubusercontent.com/u/72400253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>cquick01</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Acquick01" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/woodwm"><img src="https://avatars.githubusercontent.com/u/13971199?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Weiming</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=woodwm" title="Documentation">📖</a> <a href="#tutorial-woodwm" title="Tutorials">✅</a></td>
   </tr>
 </table>
 

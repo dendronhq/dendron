@@ -9,6 +9,7 @@ import {
   TutorialNoteViewedPayload,
   isABTest,
   ErrorUtils,
+  QuickstartTutorialTestGroups,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -21,7 +22,6 @@ import path from "path";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
-import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
@@ -46,13 +46,14 @@ export class TutorialInitializer
   implements WorkspaceInitializer
 {
   static getTutorialType() {
-    if (isABTest(CURRENT_TUTORIAL_TEST)) {
-      return CURRENT_TUTORIAL_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
-    } else {
-      return MAIN_TUTORIAL_TYPE_NAME;
-    }
+    return QuickstartTutorialTestGroups["quickstart-short-instant"];
+    // if (isABTest(CURRENT_TUTORIAL_TEST)) {
+    //   return CURRENT_TUTORIAL_TEST.getUserGroup(
+    //     SegmentClient.instance().anonymousId
+    //   );
+    // } else {
+    //   return MAIN_TUTORIAL_TYPE_NAME;
+    // }
   }
 
   async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {
@@ -168,22 +169,6 @@ export class TutorialInitializer
     MetadataService.instance().setActivationContext(
       WorkspaceActivationContext.normal
     );
-
-    // backfill global state to metadata
-    // this should be removed once we have sufficiently waited it out
-    const initialSurveyGlobalState =
-      await StateService.instance().getGlobalState(
-        GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
-      );
-
-    if (
-      initialSurveyGlobalState === "submitted" &&
-      MetadataService.instance().getMeta().initialSurveyStatus === undefined
-    ) {
-      MetadataService.instance().setInitialSurveyStatus(
-        InitialSurveyStatusEnum.submitted
-      );
-    }
 
     const metaData = MetadataService.instance().getMeta();
     const initialSurveySubmitted =

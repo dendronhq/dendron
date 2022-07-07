@@ -1,5 +1,4 @@
 import {
-  ConfigUtils,
   DendronError,
   DEngineClient,
   DVault,

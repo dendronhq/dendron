@@ -16,7 +16,6 @@ import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 
 const trackScrolled = _.debounce(() => {
-  Logger.error({ msg: "BOND - scrolling" });
   AnalyticsUtils.track(EngagementEvents.NoteScrolled, {
     noteScrolledSource: NoteScrolledSource.EDITOR,
   });

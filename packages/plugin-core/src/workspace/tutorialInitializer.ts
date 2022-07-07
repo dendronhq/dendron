@@ -1,15 +1,14 @@
 import {
+  CURRENT_TUTORIAL_TEST,
   DendronError,
   DWorkspaceV2,
-  getStage,
-  TutorialEvents,
-  VaultUtils,
-  CURRENT_TUTORIAL_TEST,
-  MAIN_TUTORIAL_TYPE_NAME,
-  TutorialNoteViewedPayload,
-  isABTest,
   ErrorUtils,
-  QuickstartTutorialTestGroups,
+  getStage,
+  isABTest,
+  MAIN_TUTORIAL_TYPE_NAME,
+  TutorialEvents,
+  TutorialNoteViewedPayload,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -24,7 +23,6 @@ import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { StateService } from "../services/stateService";
 import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
 import { ObsidianImportTip } from "../showcase/ObsidianImportTip";
 import { SurveyUtils } from "../survey";
@@ -46,14 +44,13 @@ export class TutorialInitializer
   implements WorkspaceInitializer
 {
   static getTutorialType() {
-    return QuickstartTutorialTestGroups["quickstart-short-instant"];
-    // if (isABTest(CURRENT_TUTORIAL_TEST)) {
-    //   return CURRENT_TUTORIAL_TEST.getUserGroup(
-    //     SegmentClient.instance().anonymousId
-    //   );
-    // } else {
-    //   return MAIN_TUTORIAL_TYPE_NAME;
-    // }
+    if (isABTest(CURRENT_TUTORIAL_TEST)) {
+      return CURRENT_TUTORIAL_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+    } else {
+      return MAIN_TUTORIAL_TYPE_NAME;
+    }
   }
 
   async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {

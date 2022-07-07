@@ -2,13 +2,15 @@
 id: c1bs7wsjfbhb0zipaywqv1
 title: Quickstart
 desc: ""
-updated: 1657204918953
+updated: 1657213807671
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
 ---
 
 Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you manage information using flexible hierarchies!
+
+You are currently in the tutorial vault (a vault is the folder where your notes are stored). Feel free to edit this note and create new files as you go through the quickstart!
 
 ## Create a Note
 
@@ -74,12 +76,19 @@ Congrats, you finished the Dendron tutorial!
 
 Depending on your needs, here are some common next steps:
 
-- I want to just start writing: The easiest way to just start writing is by [creating a daily journal note](command:dendron.createDailyJournalNote) ([docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd))
-- I want to use templates: Use the [Appy Template](https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6) command to apply [templates](https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2) to existing notes
-- I want to do a longer tutorial: Check out our [5min tutorial to explore more of Dendron's functionality](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
-- I want to implement a particular workflow(eg. zettelkasten): Check out community [workflow guides](https://wiki.dendron.so/notes/9313b845-d9bf-42c9-aad1-0da34794ce26)
-- I want to use Dendron for managing my tasks and todos: See the [Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows](https://wiki.dendron.so/notes/ordz7r99w1v099v14hrwgnp) for how the founder of Dendron uses it to manage his work.
-- I want to dive deeper into Dendron: See [next steps](https://wiki.dendron.so/notes/TflY5kn29HOLpp1pWT9tP) for longer walkthroughs and advanced functionality!
+- I want to **start writing**: [Create a daily journal note](command:dendron.createDailyJournalNote) ([docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd))
+
+- I want to **use templates**: Use the [Appy Template](https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6) command to apply [templates](https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2) to existing notes
+
+- I want to do a **longer tutorial**: Check out our [5min tutorial to explore more of Dendron's functionality](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
+
+- I want to **implement a particular workflow** (bullet journal, zettelkasten, etc): Check out community [workflow guides](https://wiki.dendron.so/notes/9313b845-d9bf-42c9-aad1-0da34794ce26)
+
+- I want to use Dendron for **tasks and todos**: See the [Getting Things Done (GTD), Bullet Journaling, and Other Task Management Workflows](https://wiki.dendron.so/notes/ordz7r99w1v099v14hrwgnp) for how the founder of Dendron uses it to manage his work.
+
+- I want to explore **advanced features**: See [next steps](https://wiki.dendron.so/notes/TflY5kn29HOLpp1pWT9tP) for longer walkthroughs and advanced functionality!
+
+- I want to start clean with a **new vault at a custom location**: Run [Dendron: Initialize Workspace](command:dendron.initWS) from the command prompt (or click this link) to start from a clean slate
 
 > Coming from Obsidian? Click [here](command:dendron.importObsidianPod) to import your Obsidian notes (or any markdown notes) into Dendron to see how they look.
 

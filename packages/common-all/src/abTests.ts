@@ -74,7 +74,7 @@ const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
       weight: 1,
     },
     {
-      name: QuickstartTutorialTestGroups["quickstart-v1"],
+      name: QuickstartTutorialTestGroups["quickstart-short-instant"],
       weight: 1,
     },
   ]

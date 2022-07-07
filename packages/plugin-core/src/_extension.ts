@@ -25,7 +25,6 @@ import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
@@ -219,19 +218,7 @@ export async function _activate(
     const previousWorkspaceVersionFromState =
       stateService.getWorkspaceVersion();
 
-    const previousGlobalVersionFromState = stateService.getGlobalVersion();
-    let previousGlobalVersionFromMetadata =
-      MetadataService.instance().getGlobalVersion();
-    // state is more recent than global, backfill
-    if (
-      semver.gt(
-        previousGlobalVersionFromState,
-        previousGlobalVersionFromMetadata
-      )
-    ) {
-      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
-    }
-    const previousGlobalVersion = previousGlobalVersionFromMetadata;
+    const previousGlobalVersion = MetadataService.instance().getGlobalVersion();
 
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({

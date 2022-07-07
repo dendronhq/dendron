@@ -362,16 +362,22 @@ export async function _activate(
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       // if keybinding conflict is detected, let the users know and guide them how to resolve  ^rikhd9cc0rwb
       await KeybindingUtils.maybePromptKeybindingConflict();
+      // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
+      if (!SegmentClient.instance().hasOptedOut) {
+        AnalyticsUtils.showTelemetryNotice();
+      }
     }
 
-    await showWelcomeOrWhatsNew({
-      extensionInstallStatus,
-      isSecondaryInstall,
-      version: DendronExtension.version(),
-      previousExtensionVersion: previousWorkspaceVersionFromState,
-      start: startActivate,
-      assetUri,
-    });
+    if (!opts?.skipInteractiveElements) {
+      await showWelcomeOrWhatsNew({
+        extensionInstallStatus,
+        isSecondaryInstall,
+        version: DendronExtension.version(),
+        previousExtensionVersion: previousWorkspaceVersionFromState,
+        start: startActivate,
+        assetUri,
+      });
+    }
 
     if (DendronExtension.isActive(context)) {
       HistoryService.instance().add({
@@ -455,10 +461,6 @@ async function showWelcomeOrWhatsNew({
 
       metadataService.setGlobalVersion(version);
 
-      // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
-      if (!SegmentClient.instance().hasOptedOut) {
-        AnalyticsUtils.showTelemetryNotice();
-      }
       // show the welcome page ^ygtm7ofzezwd
       return showWelcome(assetUri);
     }

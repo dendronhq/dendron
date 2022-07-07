@@ -125,32 +125,6 @@ suite("SurveyUtils", function () {
           surveySpy.restore();
         });
 
-        describe("AND initialSurveyStatus is not set", () => {
-          test("THEN metadata is backfilled AND showInitialSurvey is not called", async () => {
-            const tutorialInitializer = new TutorialInitializer();
-            const ws = ExtensionProvider.getDWorkspace();
-            // metadata is not set yet, we expect this to be backfilled
-            expect(
-              MetadataService.instance().getMeta().initialSurveyStatus
-            ).toEqual(undefined);
-            // global state is already set.
-            expect(
-              await StateService.instance().getGlobalState(
-                GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
-              )
-            ).toEqual("submitted");
-
-            await tutorialInitializer.onWorkspaceOpen({ ws });
-
-            expect(surveySpy.calledOnce).toBeFalsy();
-
-            // metadata is backfilled.
-            expect(
-              MetadataService.instance().getMeta().initialSurveyStatus
-            ).toEqual(InitialSurveyStatusEnum.submitted);
-          });
-        });
-
         describe("AND initialSurveyStatus is set to submitted", () => {
           test("THEN showInitialSurvey is not called", async () => {
             const tutorialInitializer = new TutorialInitializer();

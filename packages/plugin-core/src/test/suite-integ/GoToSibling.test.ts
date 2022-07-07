@@ -19,8 +19,11 @@ const createNotes = async ({
   opts: Omit<CreateNoteOptsV4, "fname">;
   fnames: string[];
 }) => {
-  for (const fname of fnames)
-    await NoteTestUtilsV4.createNote({ ...opts, fname });
+  Promise.all(
+    fnames.map(
+      async (fname) => await NoteTestUtilsV4.createNote({ ...opts, fname })
+    )
+  );
 };
 
 const getPostSetupHookForNonJournalNotes =
@@ -28,7 +31,7 @@ const getPostSetupHookForNonJournalNotes =
   async ({ wsRoot, vaults }: WorkspaceOpts) => {
     await createNotes({
       opts: { wsRoot, vault: vaults[0] },
-      fnames: fnames,
+      fnames,
     });
   };
 
@@ -47,7 +50,7 @@ suite("GoToSibling", () => {
       "basic",
       { postSetupHook: getPostSetupHookForNonJournalNotes(["foo.a", "foo.b"]) },
       () => {
-        test("", async () => {
+        test("Next sibling should open", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo.a");
 
@@ -64,7 +67,7 @@ suite("GoToSibling", () => {
       "go over index",
       { postSetupHook: getPostSetupHookForNonJournalNotes(["foo.a", "foo.b"]) },
       () => {
-        test("", async () => {
+        test("Sibling navigation should wrap", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo.b");
 
@@ -87,7 +90,7 @@ suite("GoToSibling", () => {
         ]),
       },
       () => {
-        test("", async () => {
+        test("Sibling navigation should be in numeric order", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo.1");
 
@@ -117,7 +120,7 @@ suite("GoToSibling", () => {
         ]),
       },
       () => {
-        test("", async () => {
+        test("Both alphabetical and numerical orders should be respected", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo.300");
 
@@ -158,7 +161,7 @@ suite("GoToSibling", () => {
       "no siblings",
       { postSetupHook: getPostSetupHookForNonJournalNotes(["foo"]) },
       () => {
-        test("", async () => {
+        test("Warning message should appear", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo");
 
@@ -172,7 +175,7 @@ suite("GoToSibling", () => {
     );
 
     describeSingleWS("no editor", {}, () => {
-      test("", async () => {
+      test("Warning message should appear", async () => {
         await VSCodeUtils.closeAllEditors();
         const resp = await new GoToSiblingCommand().execute({
           direction: "next",
@@ -185,7 +188,7 @@ suite("GoToSibling", () => {
       "nav in root",
       { postSetupHook: getPostSetupHookForNonJournalNotes(["foo"]) },
       () => {
-        test("", async () => {
+        test("Sibling navigation should be performed on the children of the root note", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "root");
 
@@ -202,14 +205,24 @@ suite("GoToSibling", () => {
       "nav in multi-root",
       {
         postSetupHook: async ({ wsRoot, vaults }) => {
-          for (const vault of vaults) {
-            await NoteTestUtilsV4.createNote({ wsRoot, vault, fname: "foo.a" });
-            await NoteTestUtilsV4.createNote({ wsRoot, vault, fname: "foo.b" });
-          }
+          Promise.all(
+            vaults.map(async (vault) => {
+              await NoteTestUtilsV4.createNote({
+                wsRoot,
+                vault,
+                fname: "foo.a",
+              });
+              await NoteTestUtilsV4.createNote({
+                wsRoot,
+                vault,
+                fname: "foo.b",
+              });
+            })
+          );
         },
       },
       () => {
-        test("", async () => {
+        test("Sibling navigation should treat notes in different vaults separately", async () => {
           const ext = ExtensionProvider.getExtension();
           await openNote(ext, "foo.a");
 

@@ -861,10 +861,6 @@
           "when": "dendron:devMode"
         },
         {
-          "command": "dendron.dev.resetConfig",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.dev.runMigration",
           "when": "dendron:pluginActive"
         },

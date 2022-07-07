@@ -1,14 +1,12 @@
 ---
-id: c1bs7wsjfbhb0zipaywqins
+id: c1bs7wsjfbhb0zipaywqv1
 title: Quickstart
 desc: ""
-updated: 1654578425031
+updated: 1657204918953
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
 ---
-
-# Quickstart
 
 Welcome to Dendron! Dendron is a developer-focused knowledge base that helps you manage information using flexible hierarchies!
 

@@ -326,7 +326,6 @@ export class ExtensionUtils {
     const publishingTheme = dendronConfig?.publishing?.theme;
     const previewTheme = dendronConfig?.preview?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
-    const workspaceConfig = ConfigUtils.getWorkspace(dendronConfig);
     const { workspaceFile, workspaceFolders } = vscode.workspace;
     const trackProps = {
       duration: durationReloadWorkspace,

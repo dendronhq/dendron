@@ -1,4 +1,4 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
 import { AssertUtils, TestNoteFactory } from "@dendronhq/common-test-utils";
 import sinon from "sinon";

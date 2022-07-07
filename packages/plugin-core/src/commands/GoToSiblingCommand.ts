@@ -35,9 +35,8 @@ export class GoToSiblingCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts) {
-    // Context for error messages
     const ctx = "GoToSiblingCommand";
-    // Get text editor
+    // validate editor and note exists
     const textEditor = VSCodeUtils.getActiveTextEditor();
     if (!textEditor) {
       window.showErrorMessage("You need to be in a note to use this command");
@@ -45,44 +44,36 @@ export class GoToSiblingCommand extends BasicCommand<
         msg: "no_editor" as const,
       };
     }
-    // Get fname of the active note
+
     const fname = path.basename(textEditor.document.uri.fsPath, ".md");
-    // Get extension and workspace
     const ext = ExtensionProvider.getExtension();
     const workspace = ext.getDWorkspace();
-    // Get the active note
     const note = await this.getActiveNote(workspace.engine, fname);
     if (!note) throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
-    // Get the sibling note
+
     let siblingNote: NoteProps;
     // If the active note is a journal note, get the sibling note based on the chronological order
     if (await this.canBeHandledAsJournalNote(note, workspace.engine)) {
-      const { data, error } = await this.getSiblingForJournalNote(
+      const resp = await this.getSiblingForJournalNote(
         workspace.engine.notes,
         note,
         opts.direction
       );
-      if (error) {
-        VSCodeUtils.showMessage(MessageSeverity.WARN, error.message, {});
-        return { msg: error.name } as CommandOutput;
+      if (resp.error) {
+        VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
+        return { msg: resp.error.name } as CommandOutput;
       }
-      siblingNote = data.sibling;
+      siblingNote = resp.data.sibling;
     } else {
-      const { data, error } = this.getSibling(
-        workspace,
-        note,
-        opts.direction,
-        ctx
-      );
-      if (error) {
-        VSCodeUtils.showMessage(MessageSeverity.INFO, error.message, {});
-        return { msg: error.name } as CommandOutput;
+      const resp = this.getSibling(workspace, note, opts.direction, ctx);
+      if (resp.error) {
+        VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
+        return { msg: resp.error.name } as CommandOutput;
       }
-      siblingNote = data.sibling;
+      siblingNote = resp.data.sibling;
     }
-    // Open the sibling note
+
     await new WSUtilsV2(ext).openNote(siblingNote);
-    // Return the success message for testing
     return { msg: "ok" as const };
   }
 
@@ -109,8 +100,6 @@ export class GoToSiblingCommand extends BasicCommand<
     const dateFormat = config.data?.workspace.journal.dateFormat;
     return dateFormat === "y.MM.dd";
   }
-
-  //{ sibling: NoteProps | null; msg: CommandOutput["msg"] | null }
 
   private async getSiblingForJournalNote(
     allNotes: NotePropsByIdDict,
@@ -155,40 +144,24 @@ export class GoToSiblingCommand extends BasicCommand<
     notes: NotePropsByIdDict,
     currNote: NoteProps
   ): NoteProps[] => {
-    const month = notes[currNote.parent!];
-    const year = notes[month.parent!];
-    const parent = notes[year.parent!];
+    const monthNote = notes[currNote.parent!];
+    const yearNote = notes[monthNote.parent!];
+    const parentNote = notes[yearNote.parent!];
 
-    const siblings = [];
-    for (const yearNoteId of parent.children) {
+    const siblings: NoteProps[] = [];
+    parentNote.children.forEach((yearNoteId) => {
       const yearNote = notes[yearNoteId];
-      for (const monthNoteId of yearNote.children) {
+      yearNote.children.forEach((monthNoteId) => {
         const monthNote = notes[monthNoteId];
-        for (const dateNoteId of monthNote.children) {
+        monthNote.children.forEach((dateNoteId) => {
           const dateNote = notes[dateNoteId];
           siblings.push(dateNote);
-        }
-      }
-    }
+        });
+      });
+    });
     // Filter out stub notes
     return siblings.filter((note) => !note.stub);
   };
-
-  // private getDescendantsRecursively = (
-  //   notes: NotePropsByIdDict,
-  //   parent: NoteProps
-  // ): NoteProps[] => {
-  //   // Get child notes
-  //   const children = parent.children.map((id) => notes[id]);
-  //   // Get all descendant notes of the given note, including stub notes
-  //   const descendants = [...children];
-  //   // Recursively get descendants
-  //   for (const child of children) {
-  //     const grandChild = this.getDescendantsRecursively(notes, child);
-  //     descendants.push(...grandChild);
-  //   }
-  //   return descendants;
-  // };
 
   private getSibling(
     workspace: DWorkspaceV2,

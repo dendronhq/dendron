@@ -184,11 +184,11 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
   // check for vaults with same name
   const uniqueVaults = new Set<string>();
   const duplicates = new Set<string>();
-  for (const vault of vaults) {
+  vaults.forEach(vault => {
     const vaultName = VaultUtils.getName(vault);
     if (uniqueVaults.has(vaultName)) duplicates.add(vaultName);
     uniqueVaults.add(vaultName);
-  }
+  });
 
   if (duplicates.size > 0) {
     const txt = "Fix it";

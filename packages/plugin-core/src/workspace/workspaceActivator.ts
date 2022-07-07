@@ -195,7 +195,7 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
     const duplicateVaultNames = Array.from(duplicates).join(", ");
     await vscode.window
       .showErrorMessage(
-        `Following vault names has duplicates: ${duplicateVaultNames} See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix`,
+        `Following vault names have duplicates: ${duplicateVaultNames} See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix`,
         txt
       )
       .then((resp) => {

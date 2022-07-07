@@ -20,9 +20,7 @@ const createNotes = async ({
   fnames: string[];
 }) => {
   Promise.all(
-    fnames.map(
-      async (fname) => await NoteTestUtilsV4.createNote({ ...opts, fname })
-    )
+    fnames.map(async (fname) => NoteTestUtilsV4.createNote({ ...opts, fname }))
   );
 };
 
@@ -40,7 +38,7 @@ const getPostHostSetupHookForJournalNotes =
   async ({ wsRoot, vaults }: WorkspaceOpts) => {
     await createNotes({
       opts: { wsRoot, vault: vaults[0], props: { traits: ["journalNote"] } },
-      fnames: fnames.map((name) => "journal" + "." + name),
+      fnames: fnames.map((name) => "journal." + name),
     });
   };
 

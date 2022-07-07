@@ -1,5 +1,4 @@
 import {
-  DendronError,
   DEngineClient,
   DNodeUtils,
   DWorkspaceV2,

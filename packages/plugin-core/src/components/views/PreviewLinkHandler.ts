@@ -53,7 +53,10 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
    * TODO: this logic is specific to the tutorial workspace
    *       add a way to register callbacks to the link handler in the future
    */
-  private _trackAllowedIds = new Set<string>(["c1bs7wsjfbhb0zipaywqfbg"]);
+  private _trackAllowedIds = new Set<string>([
+    "c1bs7wsjfbhb0zipaywqv1",
+    "c1bs7wsjfbhb0zipaywqins",
+  ]);
 
   constructor(ext: IDendronExtension) {
     this._ext = ext;

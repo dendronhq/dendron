@@ -268,7 +268,7 @@ export default function Graph({
   useEffect(() => {
     renderGraph();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.graphTheme.value]);
+  }, [config.graphTheme.value, config["connections.showBacklinks"]?.value]);
 
   useEffect(() => {
     // If initial vault data received

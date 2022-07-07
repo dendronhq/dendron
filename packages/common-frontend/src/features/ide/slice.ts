@@ -28,6 +28,7 @@ type InitialState = {
   tree?: TreeMenu;
   graphTheme?: GraphThemeEnum;
   graphDepth?: number;
+  showBacklinks?: boolean;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -41,6 +42,7 @@ const INITIAL_STATE: InitialState = {
   tree: undefined,
   graphTheme: GraphThemeEnum.Classic,
   graphDepth: 1,
+  showBacklinks: true,
 };
 
 export { InitialState as IDEState };
@@ -83,6 +85,9 @@ export const ideSlice = createSlice({
     },
     setGraphDepth: (state, action: PayloadAction<number>) => {
       state.graphDepth = action.payload;
+    },
+    setShowBacklinks: (state, action: PayloadAction<boolean>) => {
+      state.showBacklinks = action.payload;
     },
   },
 });

@@ -810,6 +810,7 @@ export enum GraphViewMessageEnum {
   "configureCustomStyling" = "configureCustomStyling",
   "toggleGraphView" = "toggleGraphView",
   "onGraphDepthChange" = "onGraphDepthChange",
+  "showBacklinks" = "showBacklinks",
 }
 
 export enum CalendarViewMessageType {

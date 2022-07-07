@@ -170,6 +170,22 @@
         "icon": "$(arrow-down)"
       },
       {
+        "command": "dendron.graph-panel.showBacklinks",
+        "title": "Show Backlinks"
+      },
+      {
+        "command": "dendron.graph-panel.showOutwardLinks",
+        "title": "Show Outward Links"
+      },
+      {
+        "command": "dendron.graph-panel.showBacklinksChecked",
+        "title": "✓ Show Backlinks"
+      },
+      {
+        "command": "dendron.graph-panel.showOutwardLinksChecked",
+        "title": "✓ Show Outward Links"
+      },
+      {
         "command": "dendron.browseNote",
         "title": "Dendron: Browse Note"
       },
@@ -950,6 +966,22 @@
           "command": "dendron.graph-panel.decreaseDepth",
           "when": "view == dendron.graph-panel",
           "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.showBacklinksChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showBacklinks"
+        },
+        {
+          "command": "dendron.graph-panel.showOutwardLinksChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showOutwardLinks"
+        },
+        {
+          "command": "dendron.graph-panel.showBacklinks",
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showBacklinks"
+        },
+        {
+          "command": "dendron.graph-panel.showOutwardLinks",
+          "when": "view == dendron.graph-panel && false"
         }
       ],
       "explorer/context": [

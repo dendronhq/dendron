@@ -100,7 +100,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       case GraphViewMessageEnum.onGraphLoad: {
         const cmsg = msg;
-        const { styles, graphTheme, graphDepth } = cmsg.data;
+        const { styles, graphTheme, graphDepth, showBacklinks } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
           ideDispatch(ideSlice.actions.setGraphStyles(styles));
@@ -116,6 +116,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           logger.info({ ctx, graphDepth, msg: "default graph depth" });
           ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         }
+        ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
         break;
       }
       case SeedBrowserMessageType.onSeedStateChange: {
@@ -132,6 +133,14 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         break;
       }
+      case GraphViewMessageEnum.showBacklinks: {
+        const cmsg = msg;
+        const { showBacklinks } = cmsg.data;
+        logger.info({ ctx, showBacklinks, msg: "showBacklinks" });
+        ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
+        break;
+      }
+
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

@@ -22,6 +22,8 @@ export enum DendronContext {
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
   TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewItemLabelType",
+  GRAPH_PANEL_SHOW_BACKLINKS = "dendron.graph-panel.showBacklinks",
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS = "dendron.graph-panel.showOutwardLinks",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -256,6 +258,22 @@ export const DENDRON_MENUS = {
       when: "view == dendron.graph-panel",
       group: "navigation@2",
     },
+    {
+      command: "dendron.graph-panel.showBacklinksChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_BACKLINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showOutwardLinksChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showBacklinks",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_BACKLINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showOutwardLinks",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
+    },
   ],
   "explorer/context": [
     {
@@ -366,6 +384,22 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.graph-panel.decreaseDepth",
     title: "Decrease Depth",
     icon: "$(arrow-down)",
+  },
+  GRAPH_PANEL_SHOW_BACKLINKS: {
+    key: "dendron.graph-panel.showBacklinks",
+    title: "Show Backlinks",
+  },
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS: {
+    key: "dendron.graph-panel.showOutwardLinks",
+    title: "Show Outward Links",
+  },
+  GRAPH_PANEL_SHOW_BACKLINKS_CHECKED: {
+    key: "dendron.graph-panel.showBacklinksChecked",
+    title: "✓ Show Backlinks",
+  },
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS_CHECKED: {
+    key: "dendron.graph-panel.showOutwardLinksChecked",
+    title: "✓ Show Outward Links",
   },
   // --- Notes
   BROWSE_NOTE: {

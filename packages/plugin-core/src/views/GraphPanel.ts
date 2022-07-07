@@ -15,6 +15,7 @@ import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { DendronContext } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { GraphStyleService } from "../styles";
@@ -27,12 +28,16 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
   private _graphDepth: number | undefined;
+  private _showBacklinks: boolean | undefined;
 
   constructor(extension: IDendronExtension) {
     this._ext = extension;
     this._ext.context.subscriptions.push(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
+    // Set default
+    this.showBacklinks =
+      MetadataService.instance().graphPanelShowBacklinks ?? true;
   }
 
   private get graphDepth(): number | undefined {
@@ -49,6 +54,29 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         },
         source: DMessageSource.vscode,
       });
+    }
+  }
+
+  public get showBacklinks(): boolean | undefined {
+    return this._showBacklinks;
+  }
+
+  public set showBacklinks(displayBacklinks: boolean | undefined) {
+    this._showBacklinks = displayBacklinks;
+    if (!_.isUndefined(displayBacklinks)) {
+      VSCodeUtils.setContext(
+        DendronContext.GRAPH_PANEL_SHOW_BACKLINKS,
+        displayBacklinks
+      );
+      this.postMessage({
+        type: GraphViewMessageEnum.showBacklinks,
+        data: {
+          showBacklinks: this._showBacklinks,
+        },
+        source: DMessageSource.vscode,
+      });
+      // Save the setting update into persistance storage:
+      MetadataService.instance().graphPanelShowBacklinks = displayBacklinks;
     }
   }
 
@@ -156,6 +184,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
               styles,
               graphTheme,
               graphDepth: this.graphDepth,
+              showBacklinks: this.showBacklinks,
             },
             source: "vscode",
           });

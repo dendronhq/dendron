@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   DVault,
   NoteDictsUtils,
@@ -175,12 +176,14 @@ function computeLinkedElements({
   maxDistance,
   vaults,
   fNameDict,
+  showBacklinks,
 }: {
   notes: NotePropsByIdDict;
   noteActive: NoteProps;
   maxDistance: number;
   vaults: DVault[] | undefined;
   fNameDict: NotePropsByFnameDict;
+  showBacklinks?: boolean;
 }): GraphElements {
   // Initialize edges
   const edges: GraphEdges = {
@@ -227,42 +230,43 @@ function computeLinkedElements({
 
     if (data.distance < maxDistance) {
       const noteVaultClass = getVaultClass(note.vault);
-
-      // setup inward links for note
-      const connectedNotes = NoteUtils.getNotesWithLinkTo({
-        note,
-        notes,
-      });
-      connectedNotes.forEach((connectedNote) => {
-        // return if it is a self-referential link or there's already an outward link for this set of nodes
-        if (
-          note.id === connectedNote.id ||
-          linkedEdgesMap.has(`${connectedNote.id}_${note.id}`)
-        )
-          return;
-
-        // add link to the map
-        linkedEdgesMap.set(`${note.id}_${connectedNote.id}`, "");
-        nodesQueue.enqueue({
-          note: connectedNote,
-          distance: data.distance + 1,
-          classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
+      if (showBacklinks) {
+        // setup inward links for note
+        const connectedNotes = NoteUtils.getNotesWithLinkTo({
+          note,
+          notes,
         });
-        edges.links.push({
-          data: {
-            group: "edges",
-            id: `${note.id}_${connectedNote.id}`,
-            source: note.id,
-            target: connectedNote.id,
-            fname: note.fname,
-            stub:
-              _.isUndefined(note.stub) && _.isUndefined(connectedNote.stub)
-                ? false
-                : !!(note.stub || connectedNote.stub),
-          },
-          classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
+        connectedNotes.forEach((connectedNote) => {
+          // return if it is a self-referential link or there's already an outward link for this set of nodes
+          if (
+            note.id === connectedNote.id ||
+            linkedEdgesMap.has(`${connectedNote.id}_${note.id}`)
+          )
+            return;
+
+          // add link to the map
+          linkedEdgesMap.set(`${note.id}_${connectedNote.id}`, "");
+          nodesQueue.enqueue({
+            note: connectedNote,
+            distance: data.distance + 1,
+            classes: `${DEFAULT_NODE_CLASSES} ${getVaultClass(note.vault)}`,
+          });
+          edges.links.push({
+            data: {
+              group: "edges",
+              id: `${note.id}_${connectedNote.id}`,
+              source: note.id,
+              target: connectedNote.id,
+              fname: note.fname,
+              stub:
+                _.isUndefined(note.stub) && _.isUndefined(connectedNote.stub)
+                  ? false
+                  : !!(note.stub || connectedNote.stub),
+            },
+            classes: `${DEFAULT_EDGE_CLASSES} links ${noteVaultClass}`,
+          });
         });
-      });
+      }
 
       // setup outward links for note
 
@@ -291,6 +295,7 @@ const getLocalNoteGraphElements = ({
   vaults,
   fNameDict,
   maxDistance,
+  showBacklinks,
 }: {
   notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
@@ -298,6 +303,7 @@ const getLocalNoteGraphElements = ({
   vaults: DVault[] | undefined;
   noteActive: NoteProps | undefined;
   maxDistance: number;
+  showBacklinks?: boolean;
 }): GraphElements => {
   if (_.isUndefined(noteActive)) {
     return {
@@ -326,6 +332,7 @@ const getLocalNoteGraphElements = ({
     maxDistance,
     vaults,
     fNameDict,
+    showBacklinks,
   });
 
   const graphElements = {
@@ -730,12 +737,14 @@ const useGraphElements = ({
   config,
   noteActive,
   wsRoot,
+  showBacklinks,
 }: {
   type: "note" | "schema";
   engine: engineSlice.EngineState;
   config: GraphConfig;
   noteActive?: NoteProps | undefined;
   wsRoot: string;
+  showBacklinks?: boolean | undefined;
 }) => {
   const [elements, setElements] = useState<GraphElements>({
     nodes: [],
@@ -790,11 +799,17 @@ const useGraphElements = ({
           vaults: engine.vaults,
           noteActive,
           maxDistance: config["filter.depth"].value || 1,
+          showBacklinks: showBacklinks,
         })
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noteActive, engine.notes, isLocalGraph, config["filter.depth"].value]);
+  }, [
+    noteActive,
+    engine.notes,
+    isLocalGraph,
+    showBacklinks,
+    config["filter.depth"].value,
+  ]);
 
   useEffect(() => {
     if (

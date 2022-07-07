@@ -174,10 +174,16 @@ export enum NativeWorkspaceEvents {
 
 export enum EngagementEvents {
   NoteViewed = "NoteViewed",
+  NoteScrolled = "NoteViewed",
   EngineStateChanged = "EngineStateChanged",
   AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
   TemplateApplied = "TemplateApplied",
   RefactoringCommandUsed = "RefactoringCommandUsed",
+}
+
+export enum NoteScrolledSource {
+  EDITOR = "EDITOR",
+  PREVIEW = "PREVIEW",
 }
 
 export enum AppNames {

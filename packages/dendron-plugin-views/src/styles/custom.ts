@@ -79,6 +79,9 @@ export const getStyles = (
         ? `curve-style: ${themeObj[theme].graph.links.curveStyle};`
         : ""
     }
+    mid-target-arrow-shape: vee; 
+    mid-target-arrow-color: ${themeObj[theme].graph.edge.color};
+    arrow-scale: 0;
   }
 
   .hierarchy {

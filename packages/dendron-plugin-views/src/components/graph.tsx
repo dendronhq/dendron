@@ -267,7 +267,7 @@ export default function Graph({
   // re-render graph if graph style is changed.
   useEffect(() => {
     renderGraph();
-    /* eslint-disable react-hooks/exhaustive-deps */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.graphTheme.value, ide.showBacklinks, ide.showOutwardLinks]);
 
   useEffect(() => {

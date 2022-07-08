@@ -256,9 +256,9 @@ function computeLinkedElements({
           edges.links.push({
             data: {
               group: "edges",
-              id: `${note.id}_${connectedNote.id}`,
-              source: note.id,
-              target: connectedNote.id,
+              id: `${connectedNote.id}_${note.id}`,
+              source: connectedNote.id,
+              target: note.id,
               fname: note.fname,
               stub:
                 _.isUndefined(note.stub) && _.isUndefined(connectedNote.stub)

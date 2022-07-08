@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { createLogger } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
@@ -268,11 +267,8 @@ export default function Graph({
   // re-render graph if graph style is changed.
   useEffect(() => {
     renderGraph();
-  }, [
-    config.graphTheme.value,
-    config["connections.show-backlinks"]?.value,
-    config["connections.show-outwardLinks"]?.value,
-  ]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [config.graphTheme.value, ide.showBacklinks, ide.showOutwardLinks]);
 
   useEffect(() => {
     // If initial vault data received

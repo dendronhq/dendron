@@ -77,6 +77,11 @@ export function createRunnableGoogleDocsV2PodConfigSchema(): JSONSchemaType<Runn
         type: "string",
         nullable: true,
       },
+      wikiLinkToURL: {
+        type: "boolean",
+        default: false,
+        nullable: true,
+      },
     },
   };
 }

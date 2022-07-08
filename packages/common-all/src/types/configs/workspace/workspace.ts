@@ -36,6 +36,7 @@ export type DendronWorkspaceConfig = {
   maxPreviewsCached: number;
   maxNoteLength: number;
   enableEditorDecorations: boolean;
+  enableSmartRefs?: boolean;
   //
   feedback?: boolean;
   apiEndpoint?: string;
@@ -77,5 +78,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
     enableFullHierarchyNoteTitle: false,
+    enableSmartRefs: false,
   };
 }

@@ -224,4 +224,8 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable FullHierarchyNoteTitle mode",
     desc: "When enabled, the full hierarchy position of a note is used to generate the note title",
   },
+  enableSmartRefs: {
+    label: "Enable smart references",
+    desc: "When enabled, note references that include a header will transclude said header and all sub headers",
+  },
 };

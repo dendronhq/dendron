@@ -23,6 +23,7 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
+import { Heading } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
@@ -578,11 +579,13 @@ function prepareNoteRefIndices<T>({
   anchorEnd,
   bodyAST,
   makeErrorData,
+  enableSmartRef,
 }: {
   anchorStart?: string;
   anchorEnd?: string;
   bodyAST: DendronASTNode;
   makeErrorData: (anchorName: string, anchorType: "Start" | "End") => T;
+  enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;
@@ -641,6 +644,16 @@ function prepareNoteRefIndices<T>({
     end = { ...start };
   }
 
+  if (!anchorEnd && start.type === "header" && start.node && enableSmartRef) {
+    // anchor end is next header that is smaller or equal
+    const nodes = RemarkUtils.extractHeaderBlock(
+      bodyAST,
+      start.node as Heading
+    );
+    // TODO: diff behavior if we fail at extracting header block
+    end = { index: start.index + nodes.length - 1, type: "header" };
+  }
+
   // Handle anchors inside lists. Lists need to slice out sibling list items, and extract out nested lists.
   // We need to remove elements before the start or after the end.
   // We do end first and start second in case they refer to the same list, so that the indices don't shift.
@@ -681,7 +694,7 @@ function convertNoteRefHelperAST(
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
   // Workaround until all usages of MDUtilsV4 are removed
-  const engine = MDUtilsV5.getProcData(proc).engine;
+  const { engine, config } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -712,6 +725,7 @@ function convertNoteRefHelperAST(
 
   const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
+    enableSmartRef: ConfigUtils.getWorkspace(config).enableSmartRefs,
     anchorEnd,
     bodyAST,
     makeErrorData: (anchorName, anchorType) => {
@@ -755,6 +769,7 @@ type FindAnchorResult =
       type: "header" | "block";
       index: number;
       anchorType?: "block" | "header";
+      node?: Node;
     }
   | {
       type: "list";
@@ -794,14 +809,24 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
+  let foundNode: Node | undefined;
   const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
     if (idx === 0 && match === "*") {
       return false;
     }
-    return MdastUtils.matchHeading(node, match, { slugger });
+    const out = MdastUtils.matchHeading(node, match, { slugger });
+    if (out) {
+      foundNode = node;
+    }
+    return out;
   });
   if (foundIndex < 0) return null;
-  return { type: "header", index: foundIndex, anchorType: "header" };
+  return {
+    type: "header",
+    index: foundIndex,
+    anchorType: "header",
+    node: foundNode,
+  };
 }
 
 /** Searches for block anchors, then returns the index for the top-level ancestor.

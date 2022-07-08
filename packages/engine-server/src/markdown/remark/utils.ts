@@ -1331,7 +1331,7 @@ export class RemarkUtils {
           }
         }
       } else if (node.type === DendronASTTypes.HEADING) {
-        if (foundHeaderIndex) {
+        if (!_.isUndefined(foundHeaderIndex)) {
           if (depth <= targetHeader!.depth) nextHeaderIndex = index;
         }
       }
@@ -1341,11 +1341,8 @@ export class RemarkUtils {
       return [];
     }
     const nodesToExtract = nextHeaderIndex
-      ? tree.children.splice(
-          foundHeaderIndex!,
-          nextHeaderIndex! - foundHeaderIndex!
-        )
-      : tree.children.splice(foundHeaderIndex!);
+      ? tree.children.slice(foundHeaderIndex!, nextHeaderIndex)
+      : tree.children.slice(foundHeaderIndex!);
     return nodesToExtract;
   }
 

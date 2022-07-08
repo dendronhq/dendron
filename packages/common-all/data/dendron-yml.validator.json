@@ -753,6 +753,9 @@
         "enableEditorDecorations": {
           "type": "boolean"
         },
+        "enableSmartRefs": {
+          "type": "boolean"
+        },
         "feedback": {
           "type": "boolean"
         },

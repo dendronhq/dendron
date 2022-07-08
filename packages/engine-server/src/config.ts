@@ -32,6 +32,20 @@ export enum LocalConfigScope {
 }
 
 export class DConfig {
+  static createSync({
+    wsRoot,
+    defaults,
+  }: {
+    wsRoot: string;
+    defaults?: DeepPartial<StrictConfigV5>;
+  }) {
+    const configPath = DConfig.configPath(wsRoot);
+    const config: IntermediateDendronConfig =
+      ConfigUtils.genLatestConfig(defaults);
+    writeYAML(configPath, config);
+    return config;
+  }
+
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }

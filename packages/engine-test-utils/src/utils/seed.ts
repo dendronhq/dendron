@@ -70,7 +70,10 @@ export class TestSeedUtils {
       mode: SeedInitMode.CREATE_WORKSPACE,
       ...opts,
     });
-    await GitTestUtils.addRepoToWorkspace(opts.wsRoot);
+    try {
+      await GitTestUtils.addRepoToWorkspace(opts.wsRoot);
+      // eslint-disable-next-line no-empty
+    } catch (err) {}
     return seed;
   }
 }

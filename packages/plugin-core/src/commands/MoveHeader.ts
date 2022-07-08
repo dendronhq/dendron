@@ -115,6 +115,7 @@ export class MoveHeaderCommand extends BasicCommand<
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
+    targetIndex: number;
   } {
     const { editor, selection } = VSCodeUtils.getSelection();
 
@@ -134,16 +135,18 @@ export class MoveHeaderCommand extends BasicCommand<
     const proc = this.getProc(engine, maybeNote);
     const parsedLine = proc.parse(line);
     let targetHeader: Heading | undefined;
+    let targetIndex: number;
     // Find the first occurring heading node in selected line.
     // This should be our target.
-    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading) => {
+    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading, index) => {
       targetHeader = heading;
+      targetIndex = index;
       return false;
     });
     if (!targetHeader) {
       throw this.headerNotSelectedError;
     }
-    return { proc, origin: maybeNote, targetHeader };
+    return { proc, origin: maybeNote, targetHeader, targetIndex };
   }
 
   /**
@@ -219,13 +222,15 @@ export class MoveHeaderCommand extends BasicCommand<
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = ExtensionProvider.getEngine();
-    const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
+    const { proc, origin, targetHeader, targetIndex } =
+      this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);
     const nodesToMove = RemarkUtils.extractHeaderBlock(
       originTree,
-      targetHeader
+      targetHeader.depth,
+      targetIndex
     );
 
     if (nodesToMove.length === 0) {

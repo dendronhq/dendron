@@ -656,13 +656,16 @@ function prepareNoteRefIndices<T>({
       start.type === "block-begin") &&
     start.node
   ) {
+    // if block-begin, accept header of any depth
     const startHeaderDepth: number =
-      start.type === "header" ? start.node.depth : 0;
+      start.type === "header" ? start.node.depth : 99;
     // anchor end is next header that is smaller or equal
     const nodes = RemarkUtils.extractHeaderBlock(
       bodyAST,
       startHeaderDepth,
-      start.index
+      start.index,
+      // stop at first header
+      start.type === "block-begin"
     );
     // TODO: diff behavior if we fail at extracting header block
     end = { index: start.index + nodes.length - 1, type: "header" };
@@ -841,14 +844,14 @@ function findHeader({
   match: string;
   slugger: ReturnType<typeof getSlugger>;
 }): FindAnchorResult {
-  let foundNode: Node | undefined;
+  let foundNode: Heading | undefined;
   const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
     if (idx === 0 && match === "*") {
       return false;
     }
     const out = MdastUtils.matchHeading(node, match, { slugger });
     if (out) {
-      foundNode = node;
+      foundNode = node as Heading;
     }
     return out;
   });
@@ -861,9 +864,6 @@ function findHeader({
   };
 }
 
-/**
- * Search for start of document and traverse until first header
- */
 function findBeginBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
   // TODO: error if no first node found
   const firstNode = nodes[0];

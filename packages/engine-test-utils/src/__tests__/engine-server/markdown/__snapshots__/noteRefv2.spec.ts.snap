@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`noteRefV2 WHEN parse begin block AND note has beginning section "MD_REGULAR: THEN parse beginning section: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+Some text at the beginning
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse begin block AND note has beginning section "MD_REGULAR: THEN parse beginning section: REGULAR" 2`] = `
+VFile {
+  "contents": "# Foo
+
+Some text at the beginning
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse begin block AND note has beginning section but no headers "MD_REGULAR: THEN parse beginning section: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+Some text at the beginning
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse begin block AND note starts with a header "MD_REGULAR: THEN parse beginning section: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`noteRefV2 WHEN parse header AND parse from end header "MD_REGULAR: THEN parse end header and sub headers: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo

@@ -1312,7 +1312,8 @@ export class RemarkUtils {
   static extractHeaderBlock(
     tree: Node,
     startHeaderDepth: number,
-    startHeaderIndex: number
+    startHeaderIndex: number,
+    stopAtFirstHeader?: boolean
   ) {
     let nextHeaderIndex: number | undefined;
     if (!RemarkUtils.isParent(tree)) {
@@ -1320,7 +1321,7 @@ export class RemarkUtils {
     }
     visit(tree, (node, _index) => {
       // we are still before the start index
-      if (_index <= startHeaderIndex) {
+      if (_index <= startHeaderIndex && !stopAtFirstHeader) {
         return;
       }
       if (nextHeaderIndex) {
@@ -1328,15 +1329,20 @@ export class RemarkUtils {
       }
       if (node.type === DendronASTTypes.HEADING) {
         const depth = (node as Heading).depth;
-        if (!_.isUndefined(startHeaderIndex)) {
-          if (depth <= startHeaderDepth) nextHeaderIndex = _index;
-        }
+        if (depth <= startHeaderDepth) nextHeaderIndex = _index;
       }
     });
 
+    // edge case when we extract from beginning of note
+    if (startHeaderIndex === 0 && nextHeaderIndex === 0) {
+      return [];
+    }
+
+    // if we find a next header index, extract up to nextHedaer index
+    // otherwise, extract from start
     const nodesToExtract = nextHeaderIndex
-      ? tree.children.slice(startHeaderIndex!, nextHeaderIndex)
-      : tree.children.slice(startHeaderIndex!);
+      ? tree.children.slice(startHeaderIndex, nextHeaderIndex)
+      : tree.children.slice(startHeaderIndex);
     return nodesToExtract;
   }
 

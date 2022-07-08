@@ -14,6 +14,7 @@ import { ExtensionProvider } from "./ExtensionProvider";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
+import { ExtensionUtils } from "./utils/ExtensionUtils";
 
 const trackScrolled = _.debounce(() => {
   AnalyticsUtils.track(EngagementEvents.NoteScrolled, {
@@ -167,7 +168,8 @@ export class WindowWatcher {
       this.triggerUpdateDecorations(editor);
       if (
         editor.document.uri.fsPath ===
-        window.activeTextEditor?.document.uri.fsPath
+          window.activeTextEditor?.document.uri.fsPath &&
+        ExtensionUtils.getTutorialIds().has(note.id)
       ) {
         trackScrolled();
       }

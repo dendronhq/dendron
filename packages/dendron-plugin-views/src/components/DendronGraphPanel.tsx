@@ -37,6 +37,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
     noteActive,
     wsRoot: workspace.ws,
     showBacklinks: ide.showBacklinks,
+    showOutwardLinks: ide.showOutwardLinks,
   });
   useEffect(() => {
     if (!_.isUndefined(elements)) {
@@ -93,7 +94,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
       logger.log("updating showBacklinks in config ", ide.showBacklinks);
       setConfig((c) => ({
         ...c,
-        "connections.showBacklinks": {
+        "connections.show-backlinks": {
           value: ide.showBacklinks!,
           mutable: true,
         },
@@ -101,6 +102,20 @@ const DendronGraphPanel: DendronComponent = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ide.showBacklinks]);
+
+  useEffect(() => {
+    if (!_.isUndefined(ide.showOutwardLinks)) {
+      logger.log("updating showOutwardLinks in config ", ide.showOutwardLinks);
+      setConfig((c) => ({
+        ...c,
+        "connections.show-outwardLinks": {
+          value: ide.showOutwardLinks!,
+          mutable: true,
+        },
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ide.showOutwardLinks]);
 
   useEffect(() => {
     if (isSidePanel) {

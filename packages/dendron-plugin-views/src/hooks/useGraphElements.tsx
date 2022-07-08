@@ -177,6 +177,7 @@ function computeLinkedElements({
   vaults,
   fNameDict,
   showBacklinks,
+  showOutwardLinks,
 }: {
   notes: NotePropsByIdDict;
   noteActive: NoteProps;
@@ -184,6 +185,7 @@ function computeLinkedElements({
   vaults: DVault[] | undefined;
   fNameDict: NotePropsByFnameDict;
   showBacklinks?: boolean;
+  showOutwardLinks?: boolean;
 }): GraphElements {
   // Initialize edges
   const edges: GraphEdges = {
@@ -269,18 +271,19 @@ function computeLinkedElements({
       }
 
       // setup outward links for note
-
-      const outwardLinkedConnections = getOutwardLinkedConnections({
-        note,
-        vaults,
-        notes,
-        fNameDict,
-        nodesQueue,
-        data,
-        noteVaultClass,
-        linkedEdgesMap,
-      });
-      edges.links.push(...outwardLinkedConnections);
+      if (showOutwardLinks) {
+        const outwardLinkedConnections = getOutwardLinkedConnections({
+          note,
+          vaults,
+          notes,
+          fNameDict,
+          nodesQueue,
+          data,
+          noteVaultClass,
+          linkedEdgesMap,
+        });
+        edges.links.push(...outwardLinkedConnections);
+      }
     }
   }
   return {
@@ -296,6 +299,7 @@ const getLocalNoteGraphElements = ({
   fNameDict,
   maxDistance,
   showBacklinks,
+  showOutwardLinks,
 }: {
   notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
@@ -304,6 +308,7 @@ const getLocalNoteGraphElements = ({
   noteActive: NoteProps | undefined;
   maxDistance: number;
   showBacklinks?: boolean;
+  showOutwardLinks?: boolean;
 }): GraphElements => {
   if (_.isUndefined(noteActive)) {
     return {
@@ -333,6 +338,7 @@ const getLocalNoteGraphElements = ({
     vaults,
     fNameDict,
     showBacklinks,
+    showOutwardLinks,
   });
 
   const graphElements = {
@@ -738,6 +744,7 @@ const useGraphElements = ({
   noteActive,
   wsRoot,
   showBacklinks,
+  showOutwardLinks,
 }: {
   type: "note" | "schema";
   engine: engineSlice.EngineState;
@@ -745,6 +752,7 @@ const useGraphElements = ({
   noteActive?: NoteProps | undefined;
   wsRoot: string;
   showBacklinks?: boolean | undefined;
+  showOutwardLinks?: boolean | undefined;
 }) => {
   const [elements, setElements] = useState<GraphElements>({
     nodes: [],
@@ -799,7 +807,8 @@ const useGraphElements = ({
           vaults: engine.vaults,
           noteActive,
           maxDistance: config["filter.depth"].value || 1,
-          showBacklinks: showBacklinks,
+          showBacklinks,
+          showOutwardLinks,
         })
       );
     }
@@ -808,6 +817,7 @@ const useGraphElements = ({
     engine.notes,
     isLocalGraph,
     showBacklinks,
+    showOutwardLinks,
     config["filter.depth"].value,
   ]);
 

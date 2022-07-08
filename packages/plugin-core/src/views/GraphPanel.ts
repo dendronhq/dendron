@@ -29,6 +29,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   private _ext: IDendronExtension;
   private _graphDepth: number | undefined;
   private _showBacklinks: boolean | undefined;
+  private _showOutwardLinks: boolean | undefined;
 
   constructor(extension: IDendronExtension) {
     this._ext = extension;
@@ -38,6 +39,9 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     // Set default
     this.showBacklinks =
       MetadataService.instance().graphPanelShowBacklinks ?? true;
+
+    this.showOutwardLinks =
+      MetadataService.instance().graphPanelShowOutwardLinks ?? true;
   }
 
   private get graphDepth(): number | undefined {
@@ -69,7 +73,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         displayBacklinks
       );
       this.postMessage({
-        type: GraphViewMessageEnum.showBacklinks,
+        type: GraphViewMessageEnum.toggleLinkedEdges,
         data: {
           showBacklinks: this._showBacklinks,
         },
@@ -77,6 +81,30 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       });
       // Save the setting update into persistance storage:
       MetadataService.instance().graphPanelShowBacklinks = displayBacklinks;
+    }
+  }
+
+  public get showOutwardLinks(): boolean | undefined {
+    return this._showOutwardLinks;
+  }
+
+  public set showOutwardLinks(displayOutwardLinks: boolean | undefined) {
+    this._showOutwardLinks = displayOutwardLinks;
+    if (!_.isUndefined(displayOutwardLinks)) {
+      VSCodeUtils.setContext(
+        DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS,
+        displayOutwardLinks
+      );
+      this.postMessage({
+        type: GraphViewMessageEnum.toggleLinkedEdges,
+        data: {
+          showOutwardLinks: this._showOutwardLinks,
+        },
+        source: DMessageSource.vscode,
+      });
+      // Save the setting update into persistance storage:
+      MetadataService.instance().graphPanelShowOutwardLinks =
+        displayOutwardLinks;
     }
   }
 
@@ -185,6 +213,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
               graphTheme,
               graphDepth: this.graphDepth,
               showBacklinks: this.showBacklinks,
+              showOutwardLinks: this.showOutwardLinks,
             },
             source: "vscode",
           });

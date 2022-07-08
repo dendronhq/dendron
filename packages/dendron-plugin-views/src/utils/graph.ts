@@ -38,7 +38,9 @@ export type CoreGraphConfig = {
 export type NoteGraphConfig = {
   "connections.links"?: GraphConfigItem<boolean>;
 
-  "connections.showBacklinks"?: GraphConfigItem<boolean>;
+  "connections.show-backlinks"?: GraphConfigItem<boolean>;
+
+  "connections.show-outwardLinks"?: GraphConfigItem<boolean>;
 
   "information.edges-links"?: GraphConfigItem<number>;
 
@@ -116,7 +118,12 @@ const noteGraphConfig: NoteGraphConfig = {
     value: false,
     mutable: true,
   },
-  "connections.showBacklinks": {
+  "connections.show-backlinks": {
+    value: true,
+    mutable: true,
+  },
+
+  "connections.show-outwardLinks": {
     value: true,
     mutable: true,
   },

@@ -150,6 +150,10 @@ type Metadata = Partial<{
    * graph panel show backlinks
    */
   graphPanelShowBacklinks: boolean;
+  /**
+   * graph panel show outward links
+   */
+  graphPanelShowOutwardLinks: boolean;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -262,6 +266,10 @@ export class MetadataService {
 
   get graphPanelShowBacklinks(): boolean | undefined {
     return this.getMeta().graphPanelShowBacklinks;
+  }
+
+  get graphPanelShowOutwardLinks(): boolean | undefined {
+    return this.getMeta().graphPanelShowOutwardLinks;
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -379,6 +387,10 @@ export class MetadataService {
 
   set graphPanelShowBacklinks(showBacklinks: boolean | undefined) {
     this.setMeta("graphPanelShowBacklinks", showBacklinks);
+  }
+
+  set graphPanelShowOutwardLinks(showOutwardLinks: boolean | undefined) {
+    this.setMeta("graphPanelShowOutwardLinks", showOutwardLinks);
   }
   // Add a single path to recent workspaces. Recent workspaces acts like a FIFO
   // queue

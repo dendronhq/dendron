@@ -29,6 +29,7 @@ type InitialState = {
   graphTheme?: GraphThemeEnum;
   graphDepth?: number;
   showBacklinks?: boolean;
+  showOutwardLinks?: boolean;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -43,6 +44,7 @@ const INITIAL_STATE: InitialState = {
   graphTheme: GraphThemeEnum.Classic,
   graphDepth: 1,
   showBacklinks: true,
+  showOutwardLinks: true,
 };
 
 export { InitialState as IDEState };
@@ -88,6 +90,9 @@ export const ideSlice = createSlice({
     },
     setShowBacklinks: (state, action: PayloadAction<boolean>) => {
       state.showBacklinks = action.payload;
+    },
+    setShowOutwardLinks: (state, action: PayloadAction<boolean>) => {
+      state.showOutwardLinks = action.payload;
     },
   },
 });

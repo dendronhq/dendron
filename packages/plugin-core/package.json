@@ -981,7 +981,7 @@
         },
         {
           "command": "dendron.graph-panel.showOutwardLinks",
-          "when": "view == dendron.graph-panel && false"
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showOutwardLinks"
         }
       ],
       "explorer/context": [

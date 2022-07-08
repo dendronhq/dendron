@@ -656,13 +656,16 @@ function prepareNoteRefIndices<T>({
       start.type === "block-begin") &&
     start.node
   ) {
+    // if block-begin, accept header of any depth
     const startHeaderDepth: number =
-      start.type === "header" ? start.node.depth : 0;
+      start.type === "header" ? start.node.depth : 99;
     // anchor end is next header that is smaller or equal
     const nodes = RemarkUtils.extractHeaderBlock(
       bodyAST,
       startHeaderDepth,
-      start.index
+      start.index,
+      // stop at first header
+      start.type === "block-begin"
     );
     // TODO: diff behavior if we fail at extracting header block
     end = { index: start.index + nodes.length - 1, type: "header" };

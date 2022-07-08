@@ -143,10 +143,12 @@ export class MoveHeaderCommand extends BasicCommand<
 
     const parsedLine = proc.parse(line);
     let targetHeader: Heading | undefined;
+    let targetIndex: number;
     // Find the first occurring heading node in selected line.
     // This should be our target.
-    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading) => {
+    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading, index) => {
       targetHeader = heading;
+      targetIndex = index;
       return false;
     });
     if (!targetHeader) {

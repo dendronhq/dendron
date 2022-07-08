@@ -168,6 +168,124 @@ describe("noteRefV2", () => {
     });
   });
 
+  describe("WHEN parse begin block", () => {
+    const BEGIN_BLOCK_ANCHOR_SETUP = async (opts: WorkspaceOpts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "---",
+          "Some text at the beginning",
+          "## Header 1",
+        ];
+        note.body = txt.join("\n");
+        return note;
+      });
+    };
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await BEGIN_BLOCK_ANCHOR_SETUP(opts);
+    };
+
+    describe("AND note has beginning section", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "Some text at the beginning");
+                await checkNotInVFile(resp, "Header 1");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note starts with a header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkNotInVFile(resp, "Some text at the beginning");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "# Foo",
+                "Some text at the beginning",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+
+    describe("AND note has beginning section but no headers", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "Some text at the beginning");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "Some text at the beginning",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+  });
+
   describe("common cases", () => {
     const linkWithNoExtension = "![[foo]]";
 

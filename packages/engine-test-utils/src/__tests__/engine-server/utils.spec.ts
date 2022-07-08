@@ -7,8 +7,9 @@ import {
   stripLocalOnlyTags,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+
 function createFileLink(data?: Partial<DNoteRefData>): DNoteRefLink {
-  let cleanData: DNoteRefData = _.defaults(data, { type: "file" });
+  const cleanData: DNoteRefData = _.defaults(data, { type: "file" });
   return {
     from: {
       fname: "foo",

@@ -173,8 +173,8 @@ const NOTES = {
       )[0];
       return [
         {
-          actual: newNote,
-          expected: note,
+          actual: _.omit(newNote, "contentHash"),
+          expected: _.omit(note, "contentHash"),
         },
       ];
     },

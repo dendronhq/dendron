@@ -167,7 +167,7 @@ export class GoogleDocsExportPodV2
           fname: input.fname,
           vaultName: input.vault,
           dest: "stdout",
-          convertLinks: false,
+          convertLinks: this._config.wikiLinkToURL,
         };
         // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
         let data = await pod.plant({
@@ -326,6 +326,12 @@ export class GoogleDocsExportPodV2
         connectionId: {
           description: "ID of the Airtable Connected Service",
           type: "string",
+        },
+        wikiLinkToURL: {
+          description: "How to convert the wikilinks",
+          type: "boolean",
+          default: false,
+          nullable: true,
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;

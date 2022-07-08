@@ -122,6 +122,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       exportScope,
       accessToken,
       refreshToken,
+      wikiLinkToURL: opts?.wikiLinkToURL || false,
       ...opts,
       podType: PodV2Types.GoogleDocsExportV2,
       expirationTime,

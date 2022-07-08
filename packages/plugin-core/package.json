@@ -1227,7 +1227,7 @@
         "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
-        "command": "dendron.showPreview",
+        "command": "dendron.togglePreview",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"

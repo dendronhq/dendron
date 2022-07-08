@@ -166,7 +166,7 @@ suite("GoToSibling", () => {
           const resp = await new GoToSiblingCommand().execute({
             direction: "next",
           });
-          expect(resp).toEqual({ msg: "no_siblings" });
+          expect(resp).toEqual({ msg: "other_error" });
           expect(getActiveDocumentFname()?.endsWith("foo.md")).toBeTruthy();
         });
       }

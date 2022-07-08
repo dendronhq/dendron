@@ -22,7 +22,9 @@ type Direction = "next" | "prev";
 type CommandOpts = { direction: Direction };
 export { CommandOpts as GoToSiblingCommandOpts };
 
-type CommandOutput = { msg: "ok" | "no_editor" | "no_siblings" };
+type CommandOutput = {
+  msg: "ok" | "no_editor" | "no_siblings" | "other_error";
+};
 
 export class GoToSiblingCommand extends BasicCommand<
   CommandOpts,
@@ -61,14 +63,14 @@ export class GoToSiblingCommand extends BasicCommand<
       );
       if (resp.error) {
         VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
-        return { msg: resp.error.name } as CommandOutput;
+        return { msg: "other_error" } as CommandOutput;
       }
       siblingNote = resp.data.sibling;
     } else {
       const resp = this.getSibling(workspace, note, opts.direction, ctx);
       if (resp.error) {
         VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
-        return { msg: resp.error.name } as CommandOutput;
+        return { msg: "other_error" } as CommandOutput;
       }
       siblingNote = resp.data.sibling;
     }

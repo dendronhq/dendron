@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "antd/dist/antd.css";
-import { Layout, Menu, Input, Card, Typography, Space, Divider } from "antd";
+import { Layout, Input, Card, Typography, Space, Divider, Anchor } from "antd";
 import { DendronComponent, DendronProps } from "../types";
 import { useWorkspaceProps } from "../hooks";
 import { engineHooks } from "@dendronhq/common-frontend";
@@ -54,12 +54,6 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
     } as ConfigureUIMessage);
   };
 
-  const handleMenuClick = ({ key }: { key: string }) => {
-    const id = dendronConfig[key].group;
-    const element = document.getElementById(id);
-    element?.scrollIntoView(true);
-  };
-
   const handleSearch = debounce((e: any) => {
     setSearchString(e.target.value);
   }, 500);
@@ -70,20 +64,36 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
         <Input placeholder="search config" onChange={handleSearch} />
       </Header>
       <Layout>
-        <Sider width={200}>
-          <Menu
-            mode="inline"
-            style={{
-              height: "100%",
-              borderRight: "1px solid #383838",
-              margin: 0,
-            }}
-            items={menuItems}
-            onClick={handleMenuClick}
-          ></Menu>
+        <Sider
+          width={160}
+          style={{
+            height: "100%",
+            borderRight: "1px solid #383838",
+            margin: 0,
+            padding: "20px 16px 0 21px",
+          }}
+        >
+          <Anchor
+            getContainer={() => document.getElementById("configure-content")!}
+          >
+            <Space
+              direction="vertical"
+              size="middle"
+              style={{ display: "flex" }}
+            >
+              {menuItems.map((item) => (
+                <Anchor.Link
+                  key={item.key}
+                  href={`#${item.label.toLowerCase()}`}
+                  title={item.label}
+                />
+              ))}
+            </Space>
+          </Anchor>
         </Sider>
         <Layout>
           <Content
+            id="configure-content"
             style={{
               padding: 24,
               margin: 0,

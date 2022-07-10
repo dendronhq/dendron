@@ -81,7 +81,9 @@ const ConfigureElement = (props: ConfigureElementProps) => {
           onChange={(e) => handleSelectChange(e, props.name)}
         >
           {props.enum?.map((val: any) => (
-            <Option value={val}>{val}</Option>
+            <Option key={val} value={val}>
+              {val}
+            </Option>
           ))}
         </Select>
       );

@@ -209,7 +209,7 @@ const NOTES = {
     return [
       {
         actual: note,
-        expected: _.omit(await engine.getNote(note.id), "contentHash"),
+        expected: await engine.getNote(note.id),
         msg: "bar should be written in engine",
       },
       {
@@ -502,7 +502,7 @@ const NOTES_MULTI = {
     return [
       {
         actual: note,
-        expected: _.omit(await engine.getNote(note.id), "contentHash"),
+        expected: await engine.getNote(note.id),
         msg: "bar should be written in engine",
       },
       {
@@ -536,7 +536,7 @@ const NOTES_MULTI = {
       return [
         {
           actual: note,
-          expected: _.omit(await engine.getNote(note.id), "contentHash"),
+          expected: await engine.getNote(note.id),
           msg: "bar should be written in engine",
         },
         {

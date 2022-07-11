@@ -42,6 +42,7 @@ import variables from "remark-variables";
 // eslint-disable-next-line import/no-named-default
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { normalizev2 } from "../utils";
 import { hierarchies, RemarkUtils } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { BlockAnchorOpts, blockAnchors } from "./remark/blockAnchors";
@@ -501,7 +502,9 @@ export class MdastUtils {
     slugger?: ReturnType<typeof getSlugger>;
   }): FindHeaderAnchor | null {
     const cSlugger = slugger ?? getSlugger();
-    const cMatchText = _.isString(match) ? match : toString(match);
+    const cMatchText = _.isString(match)
+      ? match
+      : normalizev2(toString(match), getSlugger());
     let foundNode: Node | undefined;
 
     const foundIndex = MdastUtils.findIndex(

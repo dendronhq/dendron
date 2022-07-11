@@ -21,36 +21,38 @@ import {
   Anchor,
   AnchorUtils,
   DendronASTDest,
+  DendronASTNode,
   DendronASTTypes,
   Heading,
   HistoryEvent,
   LinkUtils,
+  MdastUtils,
   MDUtilsV5,
   Node,
   Processor,
   RemarkUtils,
   visit,
 } from "@dendronhq/engine-server";
+import { error } from "console";
 import _ from "lodash";
 import path from "path";
 import { Location } from "vscode";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
-import { PickerUtilsV2 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
-import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { findReferences, FoundRefT } from "../utils/md";
-import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 import {
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { findReferences, FoundRefT } from "../utils/md";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
-import { error } from "console";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { BasicCommand } from "./base";
 
 type CommandInput =
   | {
@@ -115,6 +117,7 @@ export class MoveHeaderCommand extends BasicCommand<
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
+    targetHeaderIndex: number;
   } {
     const { editor, selection } = VSCodeUtils.getSelection();
 
@@ -132,6 +135,12 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // parse selection and get the target header node
     const proc = this.getProc(engine, maybeNote);
+
+    // TODO: shoudl account for line number
+    const bodyAST: DendronASTNode = proc.parse(
+      maybeNote.body
+    ) as DendronASTNode;
+
     const parsedLine = proc.parse(line);
     let targetHeader: Heading | undefined;
     // Find the first occurring heading node in selected line.
@@ -143,7 +152,21 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!targetHeader) {
       throw this.headerNotSelectedError;
     }
-    return { proc, origin: maybeNote, targetHeader };
+
+    // eslint-disable-next-line no-unused-expressions
+    const resp = MdastUtils.findHeader({
+      nodes: bodyAST.children,
+      match: targetHeader,
+    });
+    if (!resp) {
+      throw Error("did not find header");
+    }
+    return {
+      proc,
+      origin: maybeNote,
+      targetHeader,
+      targetHeaderIndex: resp.index,
+    };
   }
 
   /**
@@ -219,13 +242,15 @@ export class MoveHeaderCommand extends BasicCommand<
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = ExtensionProvider.getEngine();
-    const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
+    const { proc, origin, targetHeader, targetHeaderIndex } =
+      this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);
     const nodesToMove = RemarkUtils.extractHeaderBlock(
       originTree,
-      targetHeader
+      targetHeader.depth,
+      targetHeaderIndex
     );
 
     if (nodesToMove.length === 0) {

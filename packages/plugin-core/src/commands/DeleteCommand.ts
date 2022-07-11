@@ -41,7 +41,7 @@ function formatDeletedMsg({
 }
 
 export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  key = DENDRON_COMMANDS.DELETE_NODE.key;
+  key = DENDRON_COMMANDS.DELETE.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

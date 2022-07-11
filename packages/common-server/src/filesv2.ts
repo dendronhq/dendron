@@ -665,7 +665,7 @@ export async function moveIfExists(from: string, to: string): Promise<boolean> {
 }
 
 /** Utility functions for dealing with file extensions. */
-export class ExtensionUtils {
+export class FileExtensionUtils {
   private static textExtensions: ReadonlySet<string>;
   private static ensureTextExtensions() {
     if (this.textExtensions === undefined) {

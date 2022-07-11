@@ -1,14 +1,14 @@
 import {
+  CURRENT_TUTORIAL_TEST,
   DendronError,
   DWorkspaceV2,
-  getStage,
-  TutorialEvents,
-  VaultUtils,
-  CURRENT_TUTORIAL_TEST,
-  MAIN_TUTORIAL_TYPE_NAME,
-  TutorialNoteViewedPayload,
-  isABTest,
   ErrorUtils,
+  getStage,
+  isABTest,
+  MAIN_TUTORIAL_TYPE_NAME,
+  TutorialEvents,
+  TutorialNoteViewedPayload,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note, SegmentClient, vault2Path } from "@dendronhq/common-server";
 import {
@@ -21,10 +21,8 @@ import path from "path";
 import * as vscode from "vscode";
 import { ShowPreviewCommand } from "../commands/ShowPreview";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
-import { GLOBAL_STATE } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { StateService } from "../services/stateService";
 import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
 import { ObsidianImportTip } from "../showcase/ObsidianImportTip";
 import { SurveyUtils } from "../survey";
@@ -168,22 +166,6 @@ export class TutorialInitializer
     MetadataService.instance().setActivationContext(
       WorkspaceActivationContext.normal
     );
-
-    // backfill global state to metadata
-    // this should be removed once we have sufficiently waited it out
-    const initialSurveyGlobalState =
-      await StateService.instance().getGlobalState(
-        GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
-      );
-
-    if (
-      initialSurveyGlobalState === "submitted" &&
-      MetadataService.instance().getMeta().initialSurveyStatus === undefined
-    ) {
-      MetadataService.instance().setInitialSurveyStatus(
-        InitialSurveyStatusEnum.submitted
-      );
-    }
 
     const metaData = MetadataService.instance().getMeta();
     const initialSurveySubmitted =

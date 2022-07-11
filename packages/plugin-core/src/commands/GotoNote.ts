@@ -8,7 +8,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  ExtensionUtils,
+  FileExtensionUtils,
   findNonNoteFile,
   TemplateUtils,
 } from "@dendronhq/common-server";
@@ -243,7 +243,7 @@ export class GotoNoteCommand extends BasicCommand<
     // Non-note files use `qs` for full path, and set vault to null
     if (opts.kind === TargetKind.NON_NOTE && qs) {
       let type: GotoFileType;
-      if (ExtensionUtils.isTextFileExtension(path.extname(qs))) {
+      if (FileExtensionUtils.isTextFileExtension(path.extname(qs))) {
         // Text file, open inside of VSCode
         type = GotoFileType.TEXT;
         const editor = await VSCodeUtils.openFileInEditor(

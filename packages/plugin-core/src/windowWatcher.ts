@@ -1,4 +1,8 @@
-import { EngagementEvents, Time } from "@dendronhq/common-all";
+import {
+  EngagementEvents,
+  NoteScrolledSource,
+  Time,
+} from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
@@ -10,6 +14,13 @@ import { ExtensionProvider } from "./ExtensionProvider";
 import { debouncedUpdateDecorations } from "./features/windowDecorations";
 import { Logger } from "./logger";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
+import { ExtensionUtils } from "./utils/ExtensionUtils";
+
+const trackScrolled = _.debounce(() => {
+  AnalyticsUtils.track(EngagementEvents.NoteScrolled, {
+    noteScrolledSource: NoteScrolledSource.EDITOR,
+  });
+}, 2500);
 
 /**
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs
@@ -143,9 +154,25 @@ export class WindowWatcher {
         return;
       }
       Logger.debug({ ctx, editor: uri.fsPath });
+
+      // check if its a note and we should update decorators
+      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+        editor.document
+      );
+      if (_.isUndefined(note)) {
+        return;
+      }
+
       // Decorations only render the visible portions of the screen, so they
       // need to be re-rendered when the user scrolls around
       this.triggerUpdateDecorations(editor);
+      if (
+        editor.document.uri.fsPath ===
+          window.activeTextEditor?.document.uri.fsPath &&
+        ExtensionUtils.getTutorialIds().has(note.id)
+      ) {
+        trackScrolled();
+      }
     }
   );
 

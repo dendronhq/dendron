@@ -120,6 +120,37 @@ export class ExtensionUtils {
     return ext as vscode.Extension<any>;
   }
 
+  static _TUTORIAL_IDS: Set<string> | undefined;
+  static getTutorialIds(): Set<string> {
+    if (_.isUndefined(ExtensionUtils._TUTORIAL_IDS)) {
+      // Note IDs that are part of our tutorial(s). We want to exclude these from
+      // our 'numNotes' telemetry.
+      ExtensionUtils._TUTORIAL_IDS = new Set<string>([
+        "ks3b4u7gnd6yiw68qu6ba4m",
+        "mycf53kz1r7swcttcobwbdl",
+        "kzry3qcy2y4ey1jcf1llajg",
+        "y60h6laqi7w462zjp3jyqtt",
+        "4do06cts1tme9yz7vfp46bu",
+        "5pz82kyfhp2whlzfldxmkzu",
+        "kl6ndok3a1f14be6zv771c9",
+        "iq3ggn67k1u3v6up8ny3kf5",
+        "ie5x2bq5yj7uvenylblnhyr",
+        "rjnqumna1ye82u9u76ni42k",
+        "wmbd5xz40ohjb8rd5b737cq",
+        "epmpyk2kjdxqyvflotan2vt",
+        "yyfpeq3th3h17cgvj8cnjw5",
+        "lxrp006mal1tfsd7nxmsobe",
+        "4u6pv56mnt25d8l2wzfygu7",
+        "khv6u4514vnvvy4njhctfru",
+        "kyjfnf2rnc6vn71iyn9liz7",
+        "c1bs7wsjfbhb0zipaywqfbg", // quickstart-v1
+        "c1bs7wsjfbhb0zipaywqv1",
+        "c1bs7wsjfbhb0zipaywqins", //quickstart-no-welcome
+      ]);
+    }
+    return ExtensionUtils._TUTORIAL_IDS;
+  }
+
   static setWorkspaceContextOnActivate(
     dendronConfig: IntermediateDendronConfig
   ) {

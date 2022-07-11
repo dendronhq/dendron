@@ -100,7 +100,7 @@ suite("GIVEN SetupWorkspace Command", function () {
 
     describe("AND workspace has not been set up yet", () => {
       test("THEN Dendon does not activate", async () => {
-        const resp = await _activate(ctx);
+        const resp = await _activate(ctx, { skipInteractiveElements: true });
         expect(resp).toBeFalsy();
         const dendronState = MetadataService.instance().getMeta();
         expect(isNotUndefined(dendronState.firstInstall)).toBeTruthy();

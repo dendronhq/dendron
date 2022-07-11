@@ -1,4 +1,3 @@
-import { ServerUtils } from "@dendronhq/api-server";
 import {
   DVault,
   NoteProps,
@@ -8,7 +7,6 @@ import {
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
-import { ExecaChildProcess } from "execa";
 import path from "path";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "./constants";
@@ -24,35 +22,6 @@ import { WSUtilsV2 } from "./WSUtilsV2";
  * See [[Migration of static  methods to a non-static|dendron://dendron.docs/dev.ref.impactful-change-notice#migration-of-static--methods-to-a-non-static]]
  * */
 export class WSUtils {
-  static handleServerProcess({
-    subprocess,
-    context,
-    onExit,
-  }: {
-    subprocess: ExecaChildProcess;
-    context: vscode.ExtensionContext;
-    onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
-  }) {
-    const ctx = "WSUtils.handleServerProcess";
-    Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
-    // if extension closes, reap server process
-    context.subscriptions.push(
-      new vscode.Disposable(() => {
-        Logger.info({ ctx, msg: "kill server start" });
-        if (subprocess.pid) {
-          process.kill(subprocess.pid);
-        }
-        Logger.info({ ctx, msg: "kill server end" });
-      })
-    );
-    // if server process has issues, prompt user to restart
-    ServerUtils.onProcessExit({
-      // @ts-ignore
-      subprocess,
-      cb: onExit,
-    });
-  }
-
   static showActivateProgress() {
     const ctx = "showActivateProgress";
     vscode.window.withProgress(

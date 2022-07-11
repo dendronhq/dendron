@@ -907,7 +907,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   RUN_MIGRATION: {
     key: "dendron.dev.runMigration",

@@ -25,7 +25,6 @@ import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
@@ -219,19 +218,7 @@ export async function _activate(
     const previousWorkspaceVersionFromState =
       stateService.getWorkspaceVersion();
 
-    const previousGlobalVersionFromState = stateService.getGlobalVersion();
-    let previousGlobalVersionFromMetadata =
-      MetadataService.instance().getGlobalVersion();
-    // state is more recent than global, backfill
-    if (
-      semver.gt(
-        previousGlobalVersionFromState,
-        previousGlobalVersionFromMetadata
-      )
-    ) {
-      previousGlobalVersionFromMetadata = previousGlobalVersionFromState;
-    }
-    const previousGlobalVersion = previousGlobalVersionFromMetadata;
+    const previousGlobalVersion = MetadataService.instance().getGlobalVersion();
 
     const { extensionInstallStatus, isSecondaryInstall } =
       ExtensionUtils.getAndTrackInstallStatus({
@@ -375,16 +362,22 @@ export async function _activate(
     if (extensionInstallStatus === InstallStatus.INITIAL_INSTALL) {
       // if keybinding conflict is detected, let the users know and guide them how to resolve  ^rikhd9cc0rwb
       await KeybindingUtils.maybePromptKeybindingConflict();
+      // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
+      if (!SegmentClient.instance().hasOptedOut) {
+        AnalyticsUtils.showTelemetryNotice();
+      }
     }
 
-    await showWelcomeOrWhatsNew({
-      extensionInstallStatus,
-      isSecondaryInstall,
-      version: DendronExtension.version(),
-      previousExtensionVersion: previousWorkspaceVersionFromState,
-      start: startActivate,
-      assetUri,
-    });
+    if (!opts?.skipInteractiveElements) {
+      await showWelcomeOrWhatsNew({
+        extensionInstallStatus,
+        isSecondaryInstall,
+        version: DendronExtension.version(),
+        previousExtensionVersion: previousWorkspaceVersionFromState,
+        start: startActivate,
+        assetUri,
+      });
+    }
 
     if (DendronExtension.isActive(context)) {
       HistoryService.instance().add({
@@ -468,10 +461,6 @@ async function showWelcomeOrWhatsNew({
 
       metadataService.setGlobalVersion(version);
 
-      // if user hasn't opted out of telemetry, notify them about it ^njhii5plxmxr
-      if (!SegmentClient.instance().hasOptedOut) {
-        AnalyticsUtils.showTelemetryNotice();
-      }
       // show the welcome page ^ygtm7ofzezwd
       return showWelcome(assetUri);
     }

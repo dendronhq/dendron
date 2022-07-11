@@ -9,7 +9,7 @@ import {
   NoteViewMessage,
   TutorialEvents,
 } from "@dendronhq/common-all";
-import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
+import { FileExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -21,6 +21,7 @@ import _ from "lodash";
 import { PluginFileUtils } from "../../utils/files";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { AnalyticsUtils } from "../../utils/analytics";
+import { ExtensionUtils } from "../../utils/ExtensionUtils";
 
 export enum LinkType {
   WIKI = "WIKI",
@@ -53,7 +54,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
    * TODO: this logic is specific to the tutorial workspace
    *       add a way to register callbacks to the link handler in the future
    */
-  private _trackAllowedIds = new Set<string>(["c1bs7wsjfbhb0zipaywqfbg"]);
+  private _trackAllowedIds = ExtensionUtils.getTutorialIds();
 
   constructor(ext: IDendronExtension) {
     this._ext = ext;
@@ -139,7 +140,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       })) || {};
     if (fullPath) {
       // Found a matching non-note file.
-      if (ExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
+      if (FileExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
         // If it's a text file, open it inside VSCode.
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(fullPath),

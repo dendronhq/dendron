@@ -1,4 +1,7 @@
-import { TutorialEvents } from "@dendronhq/common-all";
+import {
+  QuickstartTutorialTestGroups,
+  TutorialEvents,
+} from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -6,6 +9,17 @@ import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspa
 import { LaunchTutorialCommandInvocationPoint } from "./constants";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
+import { TutorialInitializer } from "./workspace/tutorialInitializer";
+
+async function initWorkspace() {
+  // ^z5hpzc3fdkxs
+  await AnalyticsUtils.trackForNextRun(TutorialEvents.ClickStart);
+
+  await new LaunchTutorialWorkspaceCommand().run({
+    invocationPoint: LaunchTutorialCommandInvocationPoint.WelcomeWebview,
+  });
+  return;
+}
 
 export function showWelcome(assetUri: vscode.Uri) {
   try {
@@ -16,6 +30,11 @@ export function showWelcome(assetUri: vscode.Uri) {
       "vault",
       "welcome.html"
     );
+    const group = TutorialInitializer.getTutorialType();
+
+    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcome"]) {
+      return initWorkspace();
+    }
 
     const { content } = readMD(uri.fsPath);
     const title = "Welcome to Dendron";
@@ -39,12 +58,7 @@ export function showWelcome(assetUri: vscode.Uri) {
 
           case "initializeWorkspace": {
             // ^z5hpzc3fdkxs
-            await AnalyticsUtils.trackForNextRun(TutorialEvents.ClickStart);
-
-            await new LaunchTutorialWorkspaceCommand().run({
-              invocationPoint:
-                LaunchTutorialCommandInvocationPoint.WelcomeWebview,
-            });
+            await initWorkspace();
             return;
           }
           default:
@@ -54,7 +68,9 @@ export function showWelcome(assetUri: vscode.Uri) {
       undefined,
       undefined
     );
+    return;
   } catch (err) {
     vscode.window.showErrorMessage(JSON.stringify(err));
+    return;
   }
 }

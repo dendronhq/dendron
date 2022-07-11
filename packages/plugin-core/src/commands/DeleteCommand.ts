@@ -167,6 +167,11 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           return;
         }
 
+        // If Delete note preview is open, close it first
+        if (backlinks.length !== 0) {
+          await VSCodeUtils.closeCurrentFileEditor();
+        }
+
         const out = (await engine.deleteNote(note.id)) as EngineDeletePayload;
         if (out.error) {
           Logger.error({ ctx, msg: "error deleting node", error: out.error });
@@ -175,6 +180,7 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         window.showInformationMessage(
           formatDeletedMsg({ fsPath, vault: note.vault })
         );
+        await VSCodeUtils.closeCurrentFileEditor();
         return out;
       } else {
         const smod = await DendronClientUtilsV2.getSchemaModByFname({
@@ -185,6 +191,7 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         window.showInformationMessage(
           formatDeletedMsg({ fsPath, vault: smod.vault })
         );
+        await VSCodeUtils.closeCurrentFileEditor();
         return;
       }
     } else {

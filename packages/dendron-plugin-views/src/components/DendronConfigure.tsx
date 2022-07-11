@@ -1,6 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "antd/dist/antd.css";
-import { Layout, Input, Card, Typography, Space, Divider, Anchor } from "antd";
+import {
+  Layout,
+  Input,
+  Card,
+  Typography,
+  Space,
+  Divider,
+  Anchor,
+  Spin,
+} from "antd";
 import { DendronComponent, DendronProps } from "../types";
 import { useWorkspaceProps } from "../hooks";
 import { engineHooks } from "@dendronhq/common-frontend";
@@ -16,17 +25,20 @@ import _, { debounce } from "lodash";
 import { dendronConfig } from "../utils/dendronConfig";
 
 const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
-  const config = _.cloneDeep(engine.config);
+  const [config, setConfig] = useState(engine.config);
   const [searchString, setSearchString] = useState("");
   const [workspace] = useWorkspaceProps();
   const { useConfig } = engineHooks;
   const configGroupMap = new Map<string, string>();
 
+  useEffect(() => {
+    setConfig(engine.config);
+    Object.keys(dendronConfig).forEach(
+      (key) => (dendronConfig[key].default = _.get(engine.config, key))
+    );
+  }, [engine.config]);
+
   useConfig({ opts: workspace });
-  if (!config) return <></>;
-  Object.keys(dendronConfig).forEach(
-    (key) => (dendronConfig[key].default = _.get(config, key))
-  );
   const { Header, Content, Sider } = Layout;
   const items = Object.keys(dendronConfig).map((conf) => {
     return {
@@ -47,10 +59,13 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   };
 
   const postMessage = ({ key, value }: { key: string; value: any }) => {
-    _.set(config, key, value);
+    let newConf = _.cloneDeep(config);
+    newConf = newConf && _.set(newConf, key, value);
+    dendronConfig[key].default = value;
+    setConfig(newConf);
     postVSCodeMessage({
       type: ConfigureUIMessageEnum.onUpdateConfig,
-      data: { config: config },
+      data: { config: newConf },
       source: DMessageSource.webClient,
     } as ConfigureUIMessage);
   };
@@ -61,90 +76,98 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
 
   return (
     <Layout style={{ height: "100vh", overflow: "hidden" }}>
-      <Header className="header">
-        <Input placeholder="search config" onChange={handleSearch} />
-      </Header>
-      <Layout>
-        <Sider
-          width={160}
-          style={{
-            height: "100%",
-            borderRight: "1px solid #383838",
-            margin: 0,
-            padding: "20px 16px 0 21px",
-          }}
-        >
-          <Anchor
-            getContainer={() => document.getElementById("configure-content")!}
-          >
-            <Space
-              direction="vertical"
-              size="middle"
-              style={{ display: "flex" }}
+      {!config ? (
+        <Spin />
+      ) : (
+        <>
+          <Header className="header">
+            <Input placeholder="search config" onChange={handleSearch} />
+          </Header>
+          <Layout>
+            <Sider
+              width={160}
+              style={{
+                height: "100%",
+                borderRight: "1px solid #383838",
+                margin: 0,
+                padding: "20px 16px 0 21px",
+              }}
             >
-              {menuItems.map((item) => (
-                <Anchor.Link
-                  key={item.key}
-                  href={`#${item.label.toLowerCase()}`}
-                  title={item.label}
-                />
-              ))}
-            </Space>
-          </Anchor>
-        </Sider>
-        <Layout>
-          <Content
-            id="configure-content"
-            style={{
-              padding: 24,
-              margin: 0,
-              minHeight: 280,
-              height: "100%",
-              overflowY: "scroll",
-            }}
-          >
-            <Space
-              direction="vertical"
-              size="middle"
-              style={{ display: "flex" }}
-            >
-              {Object.keys(dendronConfig)
-                .filter((conf) =>
-                  _.lowerCase(conf).includes(_.lowerCase(searchString))
-                )
-                .map((conf) => {
-                  return (
-                    <>
-                      {!configGroupMap.has(dendronConfig[conf]?.group) &&
-                      configGroupMap.set(dendronConfig[conf]?.group, "") ? (
-                        <Divider orientation="left">
-                          <Typography.Title
-                            level={2}
-                            id={dendronConfig[conf]?.group}
-                          >
-                            {_.startCase(dendronConfig[conf]?.group)}
-                          </Typography.Title>
-                        </Divider>
-                      ) : null}
-                      <Card title={cleanTitle(conf)} id={conf}>
-                        <Typography.Paragraph>
-                          {dendronConfig[conf]?.type !== "boolean"
-                            ? ConfigUtils.getConfigDescription(conf)
-                            : null}
-                        </Typography.Paragraph>
-                        <ConfigureElement
-                          {...dendronConfig[conf]}
-                          name={conf}
-                          postMessage={postMessage}
-                        />
-                      </Card>
-                    </>
-                  );
-                })}
-            </Space>
-          </Content>
-        </Layout>
-      </Layout>
+              <Anchor
+                getContainer={() =>
+                  document.getElementById("configure-content")!
+                }
+              >
+                <Space
+                  direction="vertical"
+                  size="middle"
+                  style={{ display: "flex" }}
+                >
+                  {menuItems.map((item) => (
+                    <Anchor.Link
+                      key={item.key}
+                      href={`#${item.label.toLowerCase()}`}
+                      title={item.label}
+                    />
+                  ))}
+                </Space>
+              </Anchor>
+            </Sider>
+            <Layout>
+              <Content
+                id="configure-content"
+                style={{
+                  padding: 24,
+                  margin: 0,
+                  minHeight: 280,
+                  height: "100%",
+                  overflowY: "scroll",
+                }}
+              >
+                <Space
+                  direction="vertical"
+                  size="middle"
+                  style={{ display: "flex" }}
+                >
+                  {Object.keys(dendronConfig)
+                    .filter((conf) =>
+                      _.lowerCase(conf).includes(_.lowerCase(searchString))
+                    )
+                    .map((conf) => {
+                      return (
+                        <>
+                          {!configGroupMap.has(dendronConfig[conf]?.group) &&
+                          configGroupMap.set(dendronConfig[conf]?.group, "") ? (
+                            <Divider orientation="left">
+                              <Typography.Title
+                                level={2}
+                                id={dendronConfig[conf]?.group}
+                              >
+                                {_.startCase(dendronConfig[conf]?.group)}
+                              </Typography.Title>
+                            </Divider>
+                          ) : null}
+                          <Card title={cleanTitle(conf)} id={conf}>
+                            <Typography.Paragraph>
+                              {dendronConfig[conf]?.type !== "boolean"
+                                ? ConfigUtils.getConfigDescription(conf)
+                                : null}
+                            </Typography.Paragraph>
+                            <ConfigureElement
+                              {...dendronConfig[conf]}
+                              name={conf}
+                              postMessage={postMessage}
+                            />
+                          </Card>
+                        </>
+                      );
+                    })}
+                </Space>
+              </Content>
+            </Layout>
+          </Layout>
+        </>
+      )}
     </Layout>
   );
 };

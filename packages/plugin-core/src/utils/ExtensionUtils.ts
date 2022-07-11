@@ -70,16 +70,27 @@ async function startServerProcess(): Promise<{
 
   // start server is separate process ^pyiildtq4tdx
   const logPath = getDWorkspace().logUri.fsPath;
-  const out = await ServerUtils.execServerNode({
-    scriptPath: path.join(__dirname, "server.js"),
-    logPath,
-    nextServerUrl,
-    nextStaticRoot,
-    port,
-    googleOauthClientId: GOOGLE_OAUTH_ID,
-    googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
-  });
-  return out;
+  try {
+    const out = await ServerUtils.execServerNode({
+      scriptPath: path.join(__dirname, "server.js"),
+      logPath,
+      nextServerUrl,
+      nextStaticRoot,
+      port,
+      googleOauthClientId: GOOGLE_OAUTH_ID,
+      googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
+    });
+    return out;
+  } catch (err) {
+    // TODO: change to error, wait for https://github.com/dendronhq/dendron/issues/3227 to be resolved first
+    Logger.info({ msg: "failed to spawn a subshell" });
+    const out = await launchv2({
+      logPath: path.join(__dirname, "..", "..", "dendron.server.log"),
+      googleOauthClientId: GOOGLE_OAUTH_ID,
+      googleOauthClientSecret: GOOGLE_OAUTH_SECRET,
+    });
+    return { port: out.port };
+  }
 }
 
 export class ExtensionUtils {

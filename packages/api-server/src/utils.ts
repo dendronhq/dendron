@@ -196,6 +196,7 @@ export class ServerUtils {
           NEXT_STATIC_ROOT: nextStaticRoot,
           GOOGLE_OAUTH_ID: googleOauthClientId,
           GOOGLE_OAUTH_SECRET: googleOauthClientSecret,
+          ELECTRON_RUN_AS_NODE: 1,
         } as SERVER_ENV,
       });
       logger.info({ state: "post:exec.node" });

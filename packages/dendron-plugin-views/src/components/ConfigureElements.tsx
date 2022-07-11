@@ -73,7 +73,7 @@ const ConfigureElement = (props: ConfigureElementProps) => {
           onChange={handleInputChange}
         />
       );
-    case "enum":
+    case "select":
       return (
         <Select
           style={{ width: "100%" }}

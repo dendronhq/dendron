@@ -7,6 +7,7 @@ import {
   Button,
   Typography,
   Table,
+  Form,
 } from "antd";
 import { debounce } from "lodash";
 import React, { useState } from "react";
@@ -17,6 +18,7 @@ import { postVSCodeMessage } from "../utils/vscode";
 import {
   ConfigureUIMessage,
   ConfigureUIMessageEnum,
+  ConfigUtils,
   DMessageSource,
 } from "@dendronhq/common-all";
 
@@ -62,7 +64,9 @@ const ConfigureElement = (props: ConfigureElementProps) => {
           defaultChecked={props.default}
           onChange={handleCheckboxChange}
         >
-          {props.description}
+          {props.group === "global"
+            ? ConfigUtils.getConfigDescription(`global.${name}`)
+            : ConfigUtils.getConfigDescription(name)}
         </Checkbox>
       );
     case "string":
@@ -167,18 +171,34 @@ const ListView = (props: ConfigureElementProps) => {
 };
 
 const TableView = (props: ConfigureElementProps) => {
-  const items = Object.keys(props.default).map((key) => {
+  type TableItems = {
+    key: string;
+    value: any;
+  };
+  const [form] = Form.useForm();
+  const items: TableItems[] = Object.keys(props.default).map((key) => {
     return { key: key, value: props.default[key] };
   });
 
-  const [tableItems, setTableItems] = useState(items || []);
-
-  const handleDelete = (key: string) => {
-    const newTableItems = tableItems.filter((data) => data.key !== key);
-    setTableItems(newTableItems);
+  const sendMessage = (newTableItems: TableItems[]) => {
     const value: { [key: string]: string } = {};
     newTableItems.forEach((item) => (value[item.key] = item.value));
     props.postMessage({ key: props.name, value: value });
+  };
+
+  const [tableItems, setTableItems] = useState(items || []);
+  const handleRowAdd = (row: { key: string; value: any }) => {
+    const newRow = { key: row.key, value: row.value };
+    const newTableItems = [...tableItems, newRow];
+    setTableItems(newTableItems);
+    form.resetFields();
+
+    sendMessage(newTableItems);
+  };
+  const handleDelete = (key: string) => {
+    const newTableItems = tableItems.filter((data) => data.key !== key);
+    setTableItems(newTableItems);
+    sendMessage(newTableItems);
   };
 
   const columns = [
@@ -203,12 +223,51 @@ const TableView = (props: ConfigureElementProps) => {
   return (
     <>
       {tableItems.length > 0 && (
-        <Table
-          size="small"
-          pagination={false}
-          dataSource={tableItems}
-          columns={columns}
-        />
+        <>
+          <Table
+            size="small"
+            pagination={false}
+            dataSource={tableItems}
+            columns={columns}
+          />
+          <Form
+            form={form}
+            name="basic"
+            autoComplete="off"
+            onFinish={handleRowAdd}
+            style={{ display: "flex", paddingTop: "10px" }}
+          >
+            <Form.Item
+              name="key"
+              style={{ padding: "5px" }}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="value"
+              style={{ padding: "5px" }}
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item style={{ padding: "5px" }}>
+              <Button htmlType="submit" type="primary">
+                Add
+              </Button>
+            </Form.Item>
+          </Form>
+        </>
       )}
     </>
   );

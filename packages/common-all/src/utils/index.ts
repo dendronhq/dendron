@@ -14,6 +14,7 @@ import {
   CONFIG_TO_MINIMUM_COMPAT_MAPPING,
   ERROR_SEVERITY,
 } from "../constants";
+import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
 import { DendronError, ErrorMessages } from "../error";
 import {
   DendronSiteConfig,
@@ -1253,6 +1254,10 @@ export class ConfigUtils {
     }
     return foundDeprecatedPaths;
   }
+
+  static getConfigDescription = (conf: string) => {
+    return _.get(DENDRON_CONFIG, conf)?.desc;
+  };
 }
 
 /**

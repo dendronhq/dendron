@@ -7,6 +7,7 @@ import { engineHooks } from "@dendronhq/common-frontend";
 import {
   ConfigureUIMessage,
   ConfigureUIMessageEnum,
+  ConfigUtils,
   DMessageSource,
 } from "@dendronhq/common-all";
 import { postVSCodeMessage } from "../utils/vscode";
@@ -128,7 +129,7 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
                       <Card title={cleanTitle(conf)} id={conf}>
                         <Typography.Paragraph>
                           {dendronConfig[conf]?.type !== "boolean"
-                            ? dendronConfig[conf]?.description
+                            ? ConfigUtils.getConfigDescription(conf)
                             : null}
                         </Typography.Paragraph>
                         <ConfigureElement

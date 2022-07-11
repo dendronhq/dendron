@@ -2,6 +2,7 @@ import {
   DLink,
   DVault,
   EngineDeletePayload,
+  ExtensionEvents,
   NoteProps,
   NoteUtils,
   Position,
@@ -19,7 +20,8 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { AnalyticsUtils } from "../utils/analytics";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -134,6 +136,17 @@ export class DeleteNodeCommand extends BasicCommand<
   async execute(opts?: CommandOpts): Promise<CommandOutput> {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const ctx = "DeleteNoteCommand";
+
+    AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
+      source: DENDRON_COMMANDS.DELETE_NODE.key,
+    });
+
+    VSCodeUtils.showMessage(
+      MessageSeverity.WARN,
+      "Heads up that DeleteNode is being deprecated and will be replaced with the 'Delete' command",
+      {}
+    );
+
     if ((opts && opts._fsPath) || editor) {
       const fsPath =
         opts && opts._fsPath

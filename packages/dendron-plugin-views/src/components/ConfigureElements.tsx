@@ -29,15 +29,15 @@ const ConfigureElement = (props: ConfigureElementProps) => {
   const { Option } = Select;
   const { name, postMessage } = props;
 
-  const handleSelectChange = debounce((e: any, name: string) => {
+  const handleSelectChange = (e: any, name: string) => {
     postMessage({ key: name, value: e });
-  }, 500);
+  };
   const handleInputChange = debounce((e: any) => {
     postMessage({ key: e.target.name, value: e.target.value });
   }, 500);
-  const handleCheckboxChange = debounce((e: any) => {
+  const handleCheckboxChange = (e: any) => {
     postMessage({ key: e.target.name, value: e.target.checked });
-  }, 500);
+  };
 
   const handleLink = () => {
     postVSCodeMessage({

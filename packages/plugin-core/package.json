@@ -210,6 +210,10 @@
         "title": "Dendron: Delete Node"
       },
       {
+        "command": "dendron.delete",
+        "title": "Dendron: Delete"
+      },
+      {
         "command": "dendron.insertNoteLink",
         "title": "Dendron: Insert Note Link"
       },
@@ -602,6 +606,10 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.delete",
+          "when": "dendron:pluginActive"
+        },
+        {
           "command": "dendron.insertNoteLink",
           "when": "dendron:pluginActive"
         },
@@ -961,6 +969,11 @@
           "group": "2_workspace"
         },
         {
+          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
+          "command": "dendron.delete",
+          "group": "2_workspace"
+        },
+        {
           "when": "resourceExtname == .md && dendron:pluginActive",
           "command": "dendron.moveNote",
           "group": "2_workspace"
@@ -1167,7 +1180,7 @@
         "when": "editorFocus && dendron:pluginActive"
       },
       {
-        "command": "dendron.deleteNode",
+        "command": "dendron.delete",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
         "when": "dendron:pluginActive"

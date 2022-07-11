@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import {
   ConfigUtils,
   DendronError,
@@ -55,6 +56,7 @@ import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import {
   DendronASTData,
   DendronASTDest,
+  DendronASTNode,
   DendronASTTypes,
   VaultMissingBehavior,
 } from "./types";
@@ -122,6 +124,12 @@ type VisitorParentsIndices = ({
   index: number;
   ancestors: ParentWithIndex[];
 }) => boolean | undefined | "skip";
+
+export type FindHeaderAnchor = {
+  type: "header";
+  index: number;
+  node?: Heading;
+};
 
 /** @deprecated Please use {@link MDUtilsV5} instead. */
 export class MDUtilsV4 {
@@ -482,12 +490,48 @@ export class MdastUtils {
     return root(blockquote(text(msg)));
   }
 
+  static findHeader({
+    nodes,
+    match,
+    slugger,
+  }: {
+    nodes: DendronASTNode["children"];
+    match: string | Heading;
+    slugger?: ReturnType<typeof getSlugger>;
+  }): FindHeaderAnchor | null {
+    const cSlugger = slugger ?? getSlugger();
+    const cMatchText = _.isString(match) ? match : toString(match);
+    let foundNode: Node | undefined;
+
+    const foundIndex = MdastUtils.findIndex(
+      nodes,
+      (node: Node, idx: number) => {
+        if (idx === 0 && match === "*") {
+          return false;
+        }
+        const out = MdastUtils.matchHeading(node, cMatchText, {
+          slugger: cSlugger,
+        });
+        if (out) {
+          foundNode = node;
+        }
+        return out;
+      }
+    );
+    if (foundIndex < 0) return null;
+    return {
+      type: "header",
+      index: foundIndex,
+      node: foundNode as Heading,
+    };
+  }
+
   /** Find the index of the list element for which the predicate `fn` returns true.
    *
    * @returns The index where the element was found, -1 otherwise.
    */
   static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
       if (fn(array[i], i)) {
         return i;
       }
@@ -576,7 +620,7 @@ export class MdastUtils {
 
   static matchHeading(
     node: Node,
-    text: string,
+    matchText: string,
     opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
   ) {
     const { depth, slugger } = opts;
@@ -585,13 +629,15 @@ export class MdastUtils {
     }
 
     // wildcard is always true
-    if (text === "*") {
+    if (matchText === "*") {
       return true;
     }
 
-    if (text) {
+    if (matchText) {
       const headingText = toString(node);
-      return text.trim().toLowerCase() === slugger.slug(headingText.trim());
+      return (
+        matchText.trim().toLowerCase() === slugger.slug(headingText.trim())
+      );
     }
 
     if (depth) {

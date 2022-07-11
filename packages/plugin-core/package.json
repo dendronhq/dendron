@@ -474,6 +474,11 @@
         "icon": "$(open-preview)"
       },
       {
+        "command": "dendron.togglePreview",
+        "title": "Dendron: Toggle Preview",
+        "icon": "$(open-preview)"
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File"
       },
@@ -814,6 +819,10 @@
         },
         {
           "command": "dendron.showPreview",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.togglePreview",
           "when": "dendron:pluginActive"
         },
         {
@@ -1230,7 +1239,7 @@
         "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
-        "command": "dendron.showPreview",
+        "command": "dendron.togglePreview",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"

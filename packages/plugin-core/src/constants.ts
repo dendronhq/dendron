@@ -838,6 +838,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,
     icon: `$(open-preview)`,
+    when: "dendron:pluginActive",
+  },
+  TOGGLE_PREVIEW: {
+    key: "dendron.togglePreview",
+    title: `${CMD_PREFIX} Toggle Preview`,
+    icon: `$(open-preview)`,
     keybindings: {
       windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",

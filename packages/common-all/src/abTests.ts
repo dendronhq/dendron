@@ -57,7 +57,7 @@ export enum DailyJournalTestGroups {
 
 export enum QuickstartTutorialTestGroups {
   "quickstart-v1" = "quickstart-v1",
-  "quickstart-skip-welcomet" = "quickstart-skip-welcomet",
+  "quickstart-skip-welcome" = "quickstart-skip-welcome",
 }
 
 /**
@@ -74,7 +74,7 @@ const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
       weight: 1,
     },
     {
-      name: QuickstartTutorialTestGroups["quickstart-skip-welcomet"],
+      name: QuickstartTutorialTestGroups["quickstart-skip-welcome"],
       weight: 1,
     },
   ]

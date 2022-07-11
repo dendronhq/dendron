@@ -32,7 +32,7 @@ export function showWelcome(assetUri: vscode.Uri) {
     );
     const group = TutorialInitializer.getTutorialType();
 
-    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcomet"]) {
+    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcome"]) {
       return initWorkspace();
     }
 

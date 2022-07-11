@@ -20,7 +20,7 @@ const trackScrolled = _.debounce(() => {
   AnalyticsUtils.track(EngagementEvents.NoteScrolled, {
     noteScrolledSource: NoteScrolledSource.EDITOR,
   });
-}, 250);
+}, 2500);
 
 /**
  * See [[Window Watcher|dendron://dendron.docs/pkg.plugin-core.ref.window-watcher]] for docs

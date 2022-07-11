@@ -129,6 +129,7 @@ export type FindHeaderAnchor = {
   type: "header";
   index: number;
   node?: Heading;
+  anchorType?: "header";
 };
 
 /** @deprecated Please use {@link MDUtilsV5} instead. */
@@ -523,6 +524,7 @@ export class MdastUtils {
       type: "header",
       index: foundIndex,
       node: foundNode as Heading,
+      anchorType: "header",
     };
   }
 

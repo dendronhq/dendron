@@ -828,37 +828,8 @@ function findAnchor({
     }
     return findBlockAnchor({ nodes, match: anchorId });
   } else {
-    return findHeader({ nodes, match, slugger: getSlugger() });
+    return MdastUtils.findHeader({ nodes, match, slugger: getSlugger() });
   }
-}
-
-function findHeader({
-  nodes,
-  match,
-  slugger,
-}: {
-  nodes: DendronASTNode["children"];
-  match: string;
-  slugger: ReturnType<typeof getSlugger>;
-}): FindAnchorResult {
-  let foundNode: Node | undefined;
-  const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
-    if (idx === 0 && match === "*") {
-      return false;
-    }
-    const out = MdastUtils.matchHeading(node, match, { slugger });
-    if (out) {
-      foundNode = node;
-    }
-    return out;
-  });
-  if (foundIndex < 0) return null;
-  return {
-    type: "header",
-    index: foundIndex,
-    anchorType: "header",
-    node: foundNode,
-  };
 }
 
 /**

@@ -1174,6 +1174,13 @@
         },
         "siteBanner": {
           "type": "string"
+        },
+        "privateNoteBehavior": {
+          "type": "string",
+          "enum": [
+            "privateLink",
+            "titleFallback"
+          ]
         }
       },
       "required": [
@@ -1186,7 +1193,8 @@
         "writeStubs",
         "seo",
         "github",
-        "enablePrettyLinks"
+        "enablePrettyLinks",
+        "privateNoteBehavior"
       ],
       "additionalProperties": false,
       "description": "Namespace for all publishing related configurations"

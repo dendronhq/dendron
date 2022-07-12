@@ -26,6 +26,16 @@ export class TestUnifiedUtils {
     return checkString(contents, 'class="private"', value + " (Private)");
   };
 
+  static verifyAlias = ({
+    contents,
+    value,
+  }: {
+    contents: string;
+    value: string;
+  }) => {
+    return checkString(contents, value);
+  };
+
   /** Gets the descendent (child, or child of child...) node of a given node.
    *
    * @param node The root node to start descending from.

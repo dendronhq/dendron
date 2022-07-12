@@ -1,5 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`GIVEN basic workspace WHEN creating a TreeNode from engine notes, then expect TreeNode to match snapshots 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [],
+      "fname": "bar",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "fname": "ch1",
+        },
+      ],
+      "fname": "foo",
+    },
+  ],
+  "fname": "root",
+}
+`;
+
+exports[`GIVEN basic workspace WHEN creating a TreeNode from engine notes, then expect TreeNode to match snapshots 2`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [],
+      "fname": "bar",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "fname": "ch1",
+        },
+      ],
+      "fname": "foo",
+    },
+  ],
+  "fname": "root",
+}
+`;
+
 exports[`WHEN has_collection enabled AND nav_children_exclude set to false THEN return only root 1`] = `
 Array [
   Object {

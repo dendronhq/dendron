@@ -6,71 +6,6 @@ export type Config = {
 };
 
 export const dendronConfig: { [key: string]: Config } = {
-  version: {
-    type: "number",
-    group: "global",
-  },
-  enableFMTitle: {
-    type: "boolean",
-    group: "global",
-  },
-  enableNoteTitleForLink: {
-    type: "boolean",
-    group: "global",
-  },
-  enableMermaid: {
-    type: "boolean",
-    group: "global",
-  },
-  enablePrettyRefs: {
-    type: "boolean",
-    group: "global",
-  },
-  enableKatex: {
-    type: "boolean",
-    group: "global",
-  },
-  enableBackLinks: {
-    type: "boolean",
-    group: "global",
-  },
-  enableChildLinks: {
-    type: "boolean",
-    group: "global",
-  },
-  "dev.enablePreviewV2": {
-    type: "boolean",
-    group: "dev",
-  },
-  "dev.nextServerUrl": {
-    type: "string",
-    group: "dev",
-  },
-  "dev.nextStaticRoot": {
-    type: "string",
-    group: "dev",
-  },
-  "dev.engineServerPort": {
-    type: "number",
-    group: "dev",
-  },
-  "dev.enableLinkCandidates": {
-    type: "boolean",
-    group: "dev",
-  },
-  "dev.forceWatcherType": {
-    type: "select",
-    group: "dev",
-    enum: ["plugin", "engine"],
-  },
-  "dev.enableExportPodV2": {
-    type: "boolean",
-    group: "dev",
-  },
-  "dev.enableSelfContainedVaults": {
-    type: "boolean",
-    group: "dev",
-  },
   "commands.lookup.note.selectionMode": {
     type: "select",
     group: "commands",
@@ -513,5 +448,70 @@ export const dendronConfig: { [key: string]: Config } = {
   "publishing.hierarchy": {
     type: "object",
     group: "publishing",
+  },
+  version: {
+    type: "number",
+    group: "global",
+  },
+  enableFMTitle: {
+    type: "boolean",
+    group: "global",
+  },
+  enableNoteTitleForLink: {
+    type: "boolean",
+    group: "global",
+  },
+  enableMermaid: {
+    type: "boolean",
+    group: "global",
+  },
+  enablePrettyRefs: {
+    type: "boolean",
+    group: "global",
+  },
+  enableKatex: {
+    type: "boolean",
+    group: "global",
+  },
+  enableBackLinks: {
+    type: "boolean",
+    group: "global",
+  },
+  enableChildLinks: {
+    type: "boolean",
+    group: "global",
+  },
+  "dev.enablePreviewV2": {
+    type: "boolean",
+    group: "dev",
+  },
+  "dev.nextServerUrl": {
+    type: "string",
+    group: "dev",
+  },
+  "dev.nextStaticRoot": {
+    type: "string",
+    group: "dev",
+  },
+  "dev.engineServerPort": {
+    type: "number",
+    group: "dev",
+  },
+  "dev.enableLinkCandidates": {
+    type: "boolean",
+    group: "dev",
+  },
+  "dev.forceWatcherType": {
+    type: "select",
+    group: "dev",
+    enum: ["plugin", "engine"],
+  },
+  "dev.enableExportPodV2": {
+    type: "boolean",
+    group: "dev",
+  },
+  "dev.enableSelfContainedVaults": {
+    type: "boolean",
+    group: "dev",
   },
 };

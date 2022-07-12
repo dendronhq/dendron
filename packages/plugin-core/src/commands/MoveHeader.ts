@@ -151,7 +151,7 @@ export class MoveHeaderCommand extends BasicCommand<
       targetIndex = index;
       return false;
     });
-    if (!targetHeader || !targetIndex) {
+    if (!targetHeader || _.isUndefined(targetIndex)) {
       throw this.headerNotSelectedError;
     }
 

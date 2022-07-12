@@ -2,6 +2,7 @@ import { Server } from "@dendronhq/api-server";
 import { createLogger, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineV2,
+  DendronEngineV3,
   DEngineClient,
   EngineConnector,
   EngineConnectorTarget,
@@ -19,6 +20,7 @@ export type SetupEngineCLIOpts = {
   useLocalEngine?: boolean;
   attach?: boolean;
   target?: EngineConnectorTarget;
+  newEngine?: boolean;
 } & LaunchEngineServerCLIOpts;
 
 export type SetupEngineResp = {
@@ -62,7 +64,7 @@ export async function setupEngine(
   opts: SetupEngineCLIOpts
 ): Promise<SetupEngineResp> {
   const logger = createLogger();
-  const { enginePort, init, useLocalEngine } = _.defaults(opts, {
+  const { enginePort, init, useLocalEngine, newEngine } = _.defaults(opts, {
     init: true,
     useLocalEngine: false,
   });
@@ -76,7 +78,9 @@ export async function setupEngine(
   // instead of spwaning an engine in a separate process, create one
   // in memory
   if (useLocalEngine) {
-    const engine = DendronEngineV2.create({ wsRoot, logger });
+    const engine = newEngine
+      ? DendronEngineV3.create({ wsRoot, logger })
+      : DendronEngineV2.create({ wsRoot, logger });
     const out = await engine.init();
     if (out.error) {
       // eslint-disable-next-line no-console

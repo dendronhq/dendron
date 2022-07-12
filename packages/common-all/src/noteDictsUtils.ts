@@ -160,4 +160,26 @@ export class NoteFnameDictUtils {
     }
     return true;
   }
+
+  /**
+   * Merge two NotePropsByFnameDict into a single NotePropsByFnameDict
+   * If key exists in both, merge values into a single array
+   *
+   * @return new merged NotePropsByFnameDict without modifying existing NotePropsByFnameDicts
+   */
+  static merge(
+    fnameDictOne: NotePropsByFnameDict,
+    fnameDictTwo: NotePropsByFnameDict
+  ) {
+    const notesByFname = _.cloneDeep(fnameDictOne);
+    _.entries(fnameDictTwo).forEach(([key, value]) => {
+      // If same key exists, concat values
+      if (notesByFname[key]) {
+        notesByFname[key] = notesByFname[key].concat(value);
+      } else {
+        notesByFname[key] = value;
+      }
+    });
+    return notesByFname;
+  }
 }

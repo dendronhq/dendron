@@ -5,6 +5,7 @@ import {
   DNodeProps,
   DNodeType,
   NoteProps,
+  NotePropsMeta,
   Position,
   SchemaData,
   SchemaProps,
@@ -581,6 +582,10 @@ export type DEngine = DCommonProps &
      * Find NoteProps by note properties. If no notes match, return empty list
      */
     findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
+    /**
+     * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
+     */
+    findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2

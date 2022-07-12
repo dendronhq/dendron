@@ -10,6 +10,7 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
   private _cachePath: string;
   private _noCaching: boolean | undefined;
   private _logger: DLogger;
+  private _numCacheMisses: number;
 
   constructor({
     cachePath,
@@ -23,11 +24,16 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
     this._cachePath = cachePath;
     this._noCaching = noCaching;
     this._logger = logger;
+    this._numCacheMisses = 0;
     if (this._noCaching) {
       this._cacheContents = this.createEmptyCacheContents();
     } else {
       this._cacheContents = this.readFromFileSystem();
     }
+  }
+
+  get numCacheMisses() {
+    return this._numCacheMisses;
   }
 
   /**
@@ -73,5 +79,9 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
       return fs.removeSync(this._cachePath);
     }
     return;
+  }
+
+  incrementCacheMiss(): void {
+    this._numCacheMisses += 1;
   }
 }

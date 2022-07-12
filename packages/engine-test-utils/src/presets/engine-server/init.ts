@@ -155,7 +155,7 @@ const NOTES = {
     async ({ engine }) => {
       return [
         {
-          actual: _.omit(engine.notes["one"], ["body", "parent"]),
+          actual: _.omit((await engine.getNote("one"))!, ["body", "parent"]),
           expected: {
             children: [],
             created: 1,
@@ -177,7 +177,7 @@ const NOTES = {
           },
         },
         {
-          actual: _.omit(engine.notes["three"], ["body", "parent"]),
+          actual: _.omit((await engine.getNote("three"))!, ["body", "parent"]),
           expected: {
             children: [],
             created: 1,
@@ -217,10 +217,51 @@ const NOTES = {
       },
     }
   ),
+  FIND: new TestPresetEntryV4(
+    async ({ engine, vaults }) => {
+      const fooNote = (
+        await engine.findNotes({
+          fname: "foo",
+        })
+      )[0];
+      const rootNotes = await engine.findNotes({ fname: "root" });
+      const rootNote = (
+        await engine.findNotes({
+          fname: "root",
+          vault: vaults[0],
+        })
+      )[0];
+      return [
+        {
+          actual: fooNote.fname,
+          expected: "foo",
+        },
+        {
+          actual: fooNote.body,
+          expected: "foo body",
+        },
+        {
+          actual: rootNotes.length,
+          expected: 3,
+        },
+        {
+          actual: rootNote.fname,
+          expected: "root",
+        },
+        {
+          actual: rootNote.vault.fsPath,
+          expected: vaults[0].fsPath,
+        },
+      ];
+    },
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    }
+  ),
   NOTE_TOO_LONG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = engine.notes["one"];
-      const two = engine.notes["two"];
+      const one = (await engine.getNote("one"))!;
+      const two = (await engine.getNote("two"))!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },
@@ -253,8 +294,8 @@ const NOTES = {
   ),
   NOTE_TOO_LONG_CONFIG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = engine.notes["one"];
-      const two = engine.notes["two"];
+      const one = (await engine.getNote("one"))!;
+      const two = (await engine.getNote("two"))!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },
@@ -293,13 +334,26 @@ const NOTES = {
     }
   ),
   MIXED_CASE_PARENT: new TestPresetEntryV4(
-    async ({ engine }) => {
-      const notes = engine.notes;
+    async ({ engine, vaults }) => {
+      const notesV1 = await engine.findNotesMeta({ vault: vaults[0] });
+      const notesV2 = await engine.findNotesMeta({ vault: vaults[1] });
+      const notesV3 = await engine.findNotesMeta({ vault: vaults[2] });
+
       return [
         {
-          actual: _.size(notes),
-          // 3 root, 1 foo, 1 foo.one, 1 foo.two
-          expected: 6,
+          actual: notesV1.length,
+          // 1 root, 1 foo, 1 foo.one, 1 foo.two
+          expected: 4,
+        },
+        {
+          actual: notesV2.length,
+          // 1 root
+          expected: 1,
+        },
+        {
+          actual: notesV3.length,
+          // 1 root
+          expected: 1,
         },
       ];
     },
@@ -403,7 +457,7 @@ const NOTES = {
       )[0];
 
       const noteChild = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "foo",
           vault: vaults[0],
         })

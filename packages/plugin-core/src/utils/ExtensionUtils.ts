@@ -28,14 +28,13 @@ import path from "path";
 import * as vscode from "vscode";
 import { CONFIG, DendronContext } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { IBaseCommand } from "../types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../workspace";
-import { WSUtils } from "../WSUtils";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -47,12 +46,12 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    getDWorkspace().config.dev || {};
+    ExtensionProvider.getDWorkspace().config.dev || {};
   // const ctx = "startServer";
   const maybePort =
-    DendronExtension.configuration().get<number | undefined>(
-      CONFIG.SERVER_PORT.key
-    ) || engineServerPort;
+    ExtensionProvider.getExtension()
+      .getWorkspaceConfig()
+      .get<number | undefined>(CONFIG.SERVER_PORT.key) || engineServerPort;
   const port = maybePort;
   if (port) {
     return { port };
@@ -91,6 +90,35 @@ async function startServerProcess(): Promise<{
     });
     return { port: out.port };
   }
+}
+
+function handleServerProcess({
+  subprocess,
+  context,
+  onExit,
+}: {
+  subprocess: ExecaChildProcess;
+  context: vscode.ExtensionContext;
+  onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
+}) {
+  const ctx = "WSUtils.handleServerProcess";
+  Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
+  // if extension closes, reap server process
+  context.subscriptions.push(
+    new vscode.Disposable(() => {
+      Logger.info({ ctx, msg: "kill server start" });
+      if (subprocess.pid) {
+        process.kill(subprocess.pid);
+      }
+      Logger.info({ ctx, msg: "kill server end" });
+    })
+  );
+  // if server process has issues, prompt user to restart
+  ServerUtils.onProcessExit({
+    // @ts-ignore
+    subprocess,
+    cb: onExit,
+  });
 }
 
 export class ExtensionUtils {
@@ -209,7 +237,7 @@ export class ExtensionUtils {
     const ctx = "startServerProcess";
     const { port, subprocess } = await startServerProcess();
     if (subprocess) {
-      WSUtils.handleServerProcess({
+      handleServerProcess({
         subprocess,
         context,
         onExit,

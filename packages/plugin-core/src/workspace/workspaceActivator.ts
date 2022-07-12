@@ -182,12 +182,20 @@ async function getAndCleanPreviousWSVersion({
 
 async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
   // check for vaults with same name
-  const uniqVaults = _.uniqBy(vaults, (vault) => VaultUtils.getName(vault));
-  if (_.size(uniqVaults) < _.size(vaults)) {
+  const uniqueVaults = new Set<string>();
+  const duplicates = new Set<string>();
+  vaults.forEach(vault => {
+    const vaultName = VaultUtils.getName(vault);
+    if (uniqueVaults.has(vaultName)) duplicates.add(vaultName);
+    uniqueVaults.add(vaultName);
+  });
+
+  if (duplicates.size > 0) {
     const txt = "Fix it";
+    const duplicateVaultNames = Array.from(duplicates).join(", ");
     await vscode.window
       .showErrorMessage(
-        "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",
+        `Following vault names have duplicates: ${duplicateVaultNames} See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix`,
         txt
       )
       .then((resp) => {

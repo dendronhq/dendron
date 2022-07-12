@@ -1,26 +1,30 @@
 import {
-  DendronError,
+  DEngineClient,
   DNodeUtils,
+  DWorkspaceV2,
   isNumeric,
   NoteProps,
+  NotePropsByIdDict,
   NoteUtils,
-  VaultUtils,
+  RespV3,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { Uri, window } from "vscode";
+import { window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";
 
-type CommandOpts = { direction: "next" | "prev" };
+type Direction = "next" | "prev";
+type CommandOpts = { direction: Direction };
 export { CommandOpts as GoToSiblingCommandOpts };
 
-type CommandOutput = { msg: "ok" | "no_editor" | "no_siblings" };
+type CommandOutput = {
+  msg: "ok" | "no_editor" | "no_siblings" | "other_error";
+};
 
 export class GoToSiblingCommand extends BasicCommand<
   CommandOpts,
@@ -34,64 +38,194 @@ export class GoToSiblingCommand extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = "GoToSiblingCommand";
-    const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
-    if (!maybeTextEditor) {
+    // validate editor and note exists
+    const textEditor = VSCodeUtils.getActiveTextEditor();
+    if (!textEditor) {
       window.showErrorMessage("You need to be in a note to use this command");
       return {
         msg: "no_editor" as const,
       };
     }
-    let value = "";
-    value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    let respNodes: NoteProps[] = [];
 
-    const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
-    if (value === "root") {
-      const vault = VaultUtils.getVaultByFilePath({
-        vaults,
-        wsRoot,
-        fsPath: maybeTextEditor.document.uri.fsPath,
-      });
-      const rootNode = NoteUtils.getNoteByFnameFromEngine({
-        fname: value,
-        vault,
-        engine,
-      });
-      if (_.isUndefined(rootNode)) {
-        throw new DendronError({ message: "no root node found" });
+    const fname = path.basename(textEditor.document.uri.fsPath, ".md");
+    const ext = ExtensionProvider.getExtension();
+    const workspace = ext.getDWorkspace();
+    const note = await this.getActiveNote(workspace.engine, fname);
+    if (!note) throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
+
+    let siblingNote: NoteProps;
+    // If the active note is a journal note, get the sibling note based on the chronological order
+    if (await this.canBeHandledAsJournalNote(note, workspace.engine)) {
+      const resp = await this.getSiblingForJournalNote(
+        workspace.engine.notes,
+        note,
+        opts.direction
+      );
+      if (resp.error) {
+        VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
+        return { msg: "other_error" } as CommandOutput;
       }
-      respNodes = rootNode.children
-        .map((ent) => engine.notes[ent])
-        .concat([rootNode]);
+      siblingNote = resp.data.sibling;
     } else {
-      const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: value,
-        vault,
-        engine,
-      });
-      if (!_.isUndefined(note)) {
-        respNodes = engine.notes[note.parent as string].children
-          .map((id) => engine.notes[id])
-          .filter((ent) => _.isUndefined(ent.stub));
+      const resp = this.getSibling(workspace, note, opts.direction, ctx);
+      if (resp.error) {
+        VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
+        return { msg: "other_error" } as CommandOutput;
       }
+      siblingNote = resp.data.sibling;
     }
 
-    if (respNodes.length <= 1) {
-      window.showInformationMessage(
-        "One is the loneliest number. This node has no siblings :( "
-      );
+    await new WSUtilsV2(ext).openNote(siblingNote);
+    return { msg: "ok" as const };
+  }
+
+  async getActiveNote(
+    engine: DEngineClient,
+    fname: string
+  ): Promise<NoteProps | null> {
+    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const hitNotes = await engine.findNotes({ fname, vault });
+    return hitNotes.length !== 0 ? hitNotes[0] : null;
+  }
+
+  private async canBeHandledAsJournalNote(
+    note: NoteProps,
+    engine: DEngineClient
+  ): Promise<boolean> {
+    const markedAsJournalNote =
+      NoteUtils.getNoteTraits(note).includes("journalNote");
+    if (!markedAsJournalNote) return false;
+
+    // Check the date format for journal note. Only when date format of journal notes is default,
+    // navigate chronologically
+    const config = await engine.getConfig();
+    const dateFormat = config.data?.workspace.journal.dateFormat;
+    return dateFormat === "y.MM.dd";
+  }
+
+  private async getSiblingForJournalNote(
+    allNotes: NotePropsByIdDict,
+    currNote: NoteProps,
+    direction: Direction
+  ): Promise<RespV3<{ sibling: NoteProps }>> {
+    const journalNotes = this.getSiblingsForJournalNote(allNotes, currNote);
+    // If the active note is the only journal note in the workspace, there is no sibling
+    if (journalNotes.length === 1) {
       return {
-        msg: "no_siblings" as const,
+        error: {
+          name: "no_siblings",
+          message:
+            "There is no sibling journal note. Currently open note is the only journal note in the current workspace",
+        },
       };
     }
+    // Sort all journal notes in the workspace
+    const sortedJournalNotes = _.sortBy(journalNotes, [
+      (note) => this.getDateFromJournalNote(note).valueOf(),
+    ]);
+    const currNoteIdx = _.findIndex(sortedJournalNotes, { id: currNote.id });
+    // Get the sibling based on the direction.
+    let sibling: NoteProps;
+    if (direction === "next") {
+      sibling =
+        currNoteIdx !== sortedJournalNotes.length - 1
+          ? sortedJournalNotes[currNoteIdx + 1]
+          : // If current note is the latest journal note, get the earliest note as the sibling
+            sortedJournalNotes[0];
+    } else {
+      sibling =
+        currNoteIdx !== 0
+          ? sortedJournalNotes[currNoteIdx - 1]
+          : // If current note is the earliest journal note, get the last note as the sibling
+            _.last(sortedJournalNotes)!;
+    }
+    return { data: { sibling } };
+  }
 
+  private getSiblingsForJournalNote = (
+    notes: NotePropsByIdDict,
+    currNote: NoteProps
+  ): NoteProps[] => {
+    const monthNote = notes[currNote.parent!];
+    const yearNote = notes[monthNote.parent!];
+    const parentNote = notes[yearNote.parent!];
+
+    const siblings: NoteProps[] = [];
+    parentNote.children.forEach((yearNoteId) => {
+      const yearNote = notes[yearNoteId];
+      yearNote.children.forEach((monthNoteId) => {
+        const monthNote = notes[monthNoteId];
+        monthNote.children.forEach((dateNoteId) => {
+          const dateNote = notes[dateNoteId];
+          siblings.push(dateNote);
+        });
+      });
+    });
+    // Filter out stub notes
+    return siblings.filter((note) => !note.stub);
+  };
+
+  private getSibling(
+    workspace: DWorkspaceV2,
+    note: NoteProps,
+    direction: Direction,
+    ctx: string
+  ): RespV3<{ sibling: NoteProps }> {
+    // Get sibling notes
+    const siblingNotes = this.getSiblings(workspace.engine.notes, note);
+    // Check if there is any sibling notes
+    if (siblingNotes.length <= 1) {
+      return {
+        error: {
+          name: "no_siblings",
+          message: "One is the loneliest number. This node has no siblings :(",
+        },
+      };
+    }
+    // Sort the sibling notes
+    const sortedSiblingNotes = this.sortNotes(siblingNotes);
+    // Get the index of the active note in the sorted notes
+    const idx = _.findIndex(sortedSiblingNotes, { id: note.id });
+    // Deal with the unexpected error
+    if (idx < 0) {
+      throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
+    }
+    // Get sibling based on the direction
+    let sibling: NoteProps;
+    if (direction === "next") {
+      sibling =
+        idx !== siblingNotes.length - 1
+          ? sortedSiblingNotes[idx + 1]
+          : sortedSiblingNotes[0];
+    } else {
+      sibling =
+        idx !== 0 ? sortedSiblingNotes[idx - 1] : _.last(sortedSiblingNotes)!;
+    }
+    return { data: { sibling } };
+  }
+
+  private getSiblings(
+    notes: NotePropsByIdDict,
+    currNote: NoteProps
+  ): NoteProps[] {
+    if (currNote.parent === null) {
+      return currNote.children
+        .map((id) => notes[id])
+        .filter((note) => !note.stub)
+        .concat(currNote);
+    } else {
+      return notes[currNote.parent].children
+        .map((id) => notes[id])
+        .filter((note) => !note.stub);
+    }
+  }
+
+  private sortNotes(notes: NoteProps[]) {
     // check if there are numeric-only nodes
-    const numericNodes = _.filter(respNodes, (o) => {
+    const numericNodes = _.filter(notes, (o) => {
       const leafName = DNodeUtils.getLeafName(o);
       return isNumeric(leafName);
-    }) as NoteProps[];
-
+    });
     // determine how much we want to zero-pad the numeric-only node names
     let padLength = 0;
     if (numericNodes.length > 0) {
@@ -104,38 +238,21 @@ export class GoToSiblingCommand extends BasicCommand<
       );
       padLength = sortedNumericNodes[0].fname.length;
     }
-
     // zero-pad numeric-only nodes before sorting
-    const sorted = _.sortBy(respNodes, (o) => {
+    return _.sortBy(notes, (o) => {
       const leafName = DNodeUtils.getLeafName(o);
       if (isNumeric(leafName)) {
         return _.padStart(leafName, padLength, "0");
       }
       return leafName;
     });
-    const indexOfCurrentNote = _.findIndex(sorted, { fname: value });
-    if (indexOfCurrentNote < 0) {
-      throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
-    }
-    let siblingNote;
-    if (opts.direction === "next") {
-      siblingNote =
-        indexOfCurrentNote === respNodes.length - 1
-          ? sorted[0]
-          : sorted[indexOfCurrentNote + 1];
-    } else {
-      siblingNote =
-        indexOfCurrentNote === 0
-          ? sorted.slice(-1)[0]
-          : sorted[indexOfCurrentNote - 1];
-    }
-    const vpath = vault2Path({
-      vault: siblingNote.vault,
-      wsRoot: getDWorkspace().wsRoot,
-    });
-    await VSCodeUtils.openFileInEditor(
-      VSCodeUtils.joinPath(Uri.file(vpath), siblingNote.fname + ".md")
-    );
-    return { msg: "ok" as const };
+  }
+
+  private getDateFromJournalNote(note: NoteProps): Date {
+    const [year, month, date] = note.fname
+      .split("")
+      .slice(-3)
+      .map((str) => parseInt(str, 10));
+    return new Date(year, month - 1, date);
   }
 }

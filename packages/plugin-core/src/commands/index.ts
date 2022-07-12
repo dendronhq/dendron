@@ -26,6 +26,7 @@ import { CreateSchemaFromHierarchyCommand } from "./CreateSchemaFromHierarchyCom
 import { CreateScratchNoteCommand } from "./CreateScratchNoteCommand";
 import { CreateTaskCommand } from "./CreateTask";
 import { DeleteHookCommand } from "./DeleteHookCommand";
+import { DeleteCommand } from "./DeleteCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DevTriggerCommand } from "./DevTriggerCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
@@ -109,6 +110,7 @@ const ALL_COMMANDS = [
   MigrateSelfContainedVaultCommand,
   CreateSchemaFromHierarchyCommand,
   DeleteHookCommand,
+  DeleteCommand,
   DeleteNodeCommand,
   DiagnosticsReportCommand,
   DisableTelemetryCommand,

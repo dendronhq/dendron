@@ -1,15 +1,16 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
-import fs from "fs-extra";
-import _ from "lodash";
-import path from "path";
+import { ExtensionEvents, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import * as fs from "fs-extra";
+import * as _ from "lodash";
+import * as path from "path";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { AnalyticsUtils } from "../utils/analytics";
+import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
 import { InputArgCommand } from "./base";
 import {
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput,
+  TogglePreviewCommandOpts,
+  TogglePreviewCommandOutput,
 } from "./ShowPreviewInterface";
 
 /**
@@ -17,26 +18,35 @@ import {
  * preview webview, then prefer to get an instance of {@link PreviewProxy}
  * instead of creating an instance of this command.
  */
-export class ShowPreviewCommand extends InputArgCommand<
-  ShowPreviewCommandOpts,
-  ShowPreviewCommandOutput
+export class TogglePreviewCommand extends InputArgCommand<
+  TogglePreviewCommandOpts,
+  TogglePreviewCommandOutput
 > {
-  key = DENDRON_COMMANDS.SHOW_PREVIEW.key;
-
+  key = DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
+  _isShowCommand: boolean;
   _panel: PreviewProxy;
-  constructor(previewPanel: PreviewProxy) {
+
+  // This class is used for both ShowPreview and TogglePreview commands.
+  // Pass true for isShowCommand param to use this class for Show Preview command
+  // By default, this class is used for TogglePreview
+  constructor(previewPanel: PreviewProxy, isShowCommand?: boolean) {
     super();
     this._panel = previewPanel;
+    this._isShowCommand = !!isShowCommand;
+
+    this.key = this._isShowCommand
+      ? DENDRON_COMMANDS.SHOW_PREVIEW.key
+      : DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
   }
 
-  async sanityCheck(opts?: ShowPreviewCommandOpts) {
+  async sanityCheck(opts?: TogglePreviewCommandOpts) {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor()) && _.isEmpty(opts)) {
       return "No note currently open, and no note selected to open.";
     }
     return;
   }
 
-  addAnalyticsPayload(opts?: ShowPreviewCommandOpts) {
+  addAnalyticsPayload(opts?: TogglePreviewCommandOpts) {
     return { providedFile: !_.isEmpty(opts) };
   }
 
@@ -46,8 +56,14 @@ export class ShowPreviewCommand extends InputArgCommand<
    * be shown in preview. If unspecified, then preview will follow default
    * behavior of showing the contents of the currently in-focus Dendron note.
    */
-  async execute(opts?: ShowPreviewCommandOpts) {
+  async execute(opts?: TogglePreviewCommandOpts) {
     let note: NoteProps | undefined;
+
+    // Hide (dispose) the previwe panel when it's already visible
+    if (this._panel.isVisible()) {
+      this._panel.hide();
+      return undefined;
+    }
 
     if (opts !== undefined && !_.isEmpty(opts)) {
       // Used a context menu to open preview for a specific note
@@ -75,6 +91,17 @@ export class ShowPreviewCommand extends InputArgCommand<
         await this.openFileInPreview(fsPath);
         return { fsPath };
       }
+    }
+
+    if (this.key === DENDRON_COMMANDS.SHOW_PREVIEW.key) {
+      AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
+        source: DENDRON_COMMANDS.SHOW_PREVIEW.key,
+      });
+      VSCodeUtils.showMessage(
+        MessageSeverity.WARN,
+        "Show Preview is being deprecated and will be replaced with Toggle Preview",
+        {}
+      );
     }
     return undefined;
   }

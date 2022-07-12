@@ -340,15 +340,24 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       }
       note = this.rewriteImageUrls(note, panel);
 
-      return panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
+      try {
+        return panel.webview.postMessage({
+          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+          data: {
+            note,
+            syncChangedNote,
+          },
+          source: "vscode",
+        } as OnDidChangeActiveTextEditorMsg);
+      } catch (err) {
+        Logger.info({
+          ctx: "sendRefreshMessage",
+          state: "webview is disposed",
+        });
+        return;
+      }
     }
+
     return;
   }
 

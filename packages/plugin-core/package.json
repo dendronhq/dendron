@@ -210,6 +210,10 @@
         "title": "Dendron: Delete Node"
       },
       {
+        "command": "dendron.delete",
+        "title": "Dendron: Delete"
+      },
+      {
         "command": "dendron.insertNoteLink",
         "title": "Dendron: Insert Note Link"
       },
@@ -474,6 +478,11 @@
         "icon": "$(open-preview)"
       },
       {
+        "command": "dendron.togglePreview",
+        "title": "Dendron: Toggle Preview",
+        "icon": "$(open-preview)"
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File"
       },
@@ -594,6 +603,10 @@
         },
         {
           "command": "dendron.deleteNode",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.delete",
           "when": "dendron:pluginActive"
         },
         {
@@ -817,6 +830,10 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.togglePreview",
+          "when": "dendron:pluginActive"
+        },
+        {
           "command": "dendron.pasteFile",
           "when": "dendron:pluginActive"
         },
@@ -949,6 +966,11 @@
         {
           "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
           "command": "dendron.deleteNode",
+          "group": "2_workspace"
+        },
+        {
+          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
+          "command": "dendron.delete",
           "group": "2_workspace"
         },
         {
@@ -1158,7 +1180,7 @@
         "when": "editorFocus && dendron:pluginActive"
       },
       {
-        "command": "dendron.deleteNode",
+        "command": "dendron.delete",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
         "when": "dendron:pluginActive"
@@ -1230,7 +1252,7 @@
         "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
-        "command": "dendron.showPreview",
+        "command": "dendron.togglePreview",
         "windows": "windows+ctrl+p",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"

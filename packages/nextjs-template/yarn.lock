@@ -1637,10 +1637,10 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.101.0":
-  version "0.101.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-all/-/common-all-0.101.0.tgz#d355357e41dd56b2aa99ed6c3453a57023790f1e"
-  integrity sha512-zNbEFfGtE3+yiE/HXK/cevn/c+pclb/59bCnTkDIjhbM6JiY/GCldwXQBjt3ykLSi6HZJ5ZUC+/CuX2bENR3/g==
+"@dendronhq/common-all@^0.102.1":
+  version "0.102.1"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.102.1.tgz#2206ebc2a8be0d2fd8f5fd24d66019bdc5c0feb6"
+  integrity sha512-j5eYgC7LWzu1gCoooqz6a9caCji+3ihANvhYYLmmCQFKHoo5t+zwtm2covUNgu1MeaZBHO5v8IUiEOtPQv4CPw==
   dependencies:
     axios "^0.21.4"
     dropbox "^4.0.30"
@@ -1659,13 +1659,13 @@
     title "^3.4.4"
     vscode-uri "^2.1.2"
 
-"@dendronhq/common-frontend@^0.101.0":
-  version "0.101.0"
-  resolved "https://registry.npmjs.org/@dendronhq/common-frontend/-/common-frontend-0.101.0.tgz#adb89c6e124892a6ef0e47122dfea8a80e5f1b94"
-  integrity sha512-9JQiJ3QGAR/4KwpNlBAOLQkz/mPwIHi4j5V1jGXcZJ0YH22Uojh8VcZwWElA1bgxJ3bHPjIDw0F+i+53SzdjfA==
+"@dendronhq/common-frontend@^0.102.1":
+  version "0.102.1"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.102.1.tgz#5a140de209cd2ca24c7abfdb53a0e11088e58a2f"
+  integrity sha512-raPuZCIJsXe69D0MWBE+rW1M5d5n+1N3hU8++dPZLHSn7QXgwzXF17uCJAuBcrRuY9dWe9FIYkwB3hrIxiKgXA==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.101.0"
+    "@dendronhq/common-all" "^0.102.1"
     "@reduxjs/toolkit" "^1.5.1"
     antd "^4.15.4"
     lodash "^4.17.20"
@@ -3910,9 +3910,9 @@ minimist@^1.2.0, minimist@^1.2.5:
   integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
 moment@^2.19.3, moment@^2.24.0, moment@^2.25.3:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
-  integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 mrmime@^1.0.0:
   version "1.0.0"

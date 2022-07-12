@@ -12,11 +12,11 @@ import path from "path";
 import * as queryString from "query-string";
 import { ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { StateService } from "../services/stateService";
 import { GOOGLE_OAUTH_ID } from "../types/global";
 import { clipboard } from "../utils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 
 export type PodQuickPickItemV4 = QuickPickItem & PodItemV4;
 
@@ -37,7 +37,7 @@ export const showPodQuickPickItemsV4 = (podItem: PodItemV4[]) => {
 
 export const launchGoogleOAuthFlow = async (id?: string) => {
   const port = fs.readFileSync(
-    path.join(getDWorkspace().wsRoot, ".dendron.port"),
+    path.join(ExtensionProvider.getDWorkspace().wsRoot, ".dendron.port"),
     {
       encoding: "utf8",
     }
@@ -113,7 +113,7 @@ export const getGlobalState = async (key: GLOBAL_STATE) => {
 export const openFileInEditor = async (note: NoteProps): Promise<void> => {
   const npath = NoteUtils.getFullPath({
     note,
-    wsRoot: getDWorkspace().wsRoot,
+    wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
   });
   const uri = Uri.file(npath);
   await VSCodeUtils.openFileInEditor(uri);

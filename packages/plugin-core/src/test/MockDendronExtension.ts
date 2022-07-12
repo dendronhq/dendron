@@ -53,6 +53,10 @@ export class MockDendronExtension implements IDendronExtension {
     this._wsRoot = wsRoot;
     this._vaults = vaults;
   }
+  fileWatcher?: FileWatcher | undefined;
+  get podsDir(): string {
+    throw new Error("Method not implemented.");
+  }
   get traitRegistrar(): NoteTraitService {
     throw new Error("Method not implemented.");
   }

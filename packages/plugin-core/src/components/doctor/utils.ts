@@ -105,7 +105,7 @@ export class DoctorUtils {
               ],
             };
 
-            vscode.commands.executeCommand(cmd.command, ...cmd.arguments);
+            vscode.commands.executeCommand(cmd.command, ...cmd.arguments!);
           }
         });
         AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound, {

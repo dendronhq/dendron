@@ -577,6 +577,10 @@
       {
         "command": "dendron.instrumentedWrapperCommand",
         "title": "Dendron: Instrumented Wrapper Command"
+      },
+      {
+        "command": "dendron.dev.validateEngine",
+        "title": "Dendron:Dev: Validate Engine"
       }
     ],
     "menus": {

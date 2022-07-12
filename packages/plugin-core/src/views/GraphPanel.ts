@@ -66,8 +66,11 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   }
 
   public set showBacklinks(displayBacklinks: boolean | undefined) {
-    this._showBacklinks = displayBacklinks;
-    if (!_.isUndefined(displayBacklinks)) {
+    if (
+      !_.isUndefined(displayBacklinks) &&
+      this._showBacklinks !== displayBacklinks
+    ) {
+      this._showBacklinks = displayBacklinks;
       VSCodeUtils.setContext(
         DendronContext.GRAPH_PANEL_SHOW_BACKLINKS,
         displayBacklinks
@@ -89,8 +92,11 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   }
 
   public set showOutwardLinks(displayOutwardLinks: boolean | undefined) {
-    this._showOutwardLinks = displayOutwardLinks;
-    if (!_.isUndefined(displayOutwardLinks)) {
+    if (
+      !_.isUndefined(displayOutwardLinks) &&
+      this._showOutwardLinks !== displayOutwardLinks
+    ) {
+      this._showOutwardLinks = displayOutwardLinks;
       VSCodeUtils.setContext(
         DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS,
         displayOutwardLinks
@@ -205,7 +211,14 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         const styles = GraphStyleService.getParsedStyles();
         const graphTheme = MetadataService.instance().getGraphTheme();
         this.graphDepth = MetadataService.instance().graphDepth;
-        if (this._view && (styles || graphTheme || this.graphDepth)) {
+        if (
+          this._view &&
+          (styles ||
+            graphTheme ||
+            this.graphDepth ||
+            this.showBacklinks ||
+            this.showOutwardLinks)
+        ) {
           this._view.webview.postMessage({
             type: GraphViewMessageEnum.onGraphLoad,
             data: {

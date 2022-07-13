@@ -101,7 +101,7 @@ function handleServerProcess({
   context: vscode.ExtensionContext;
   onExit: Parameters<typeof ServerUtils["onProcessExit"]>[0]["cb"];
 }) {
-  const ctx = "WSUtils.handleServerProcess";
+  const ctx = "handleServerProcess";
   Logger.info({ ctx, msg: "subprocess running", pid: subprocess.pid });
   // if extension closes, reap server process
   context.subscriptions.push(

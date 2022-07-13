@@ -36,8 +36,14 @@ export class ApplyTemplateCommand extends BasicCommand<
   key = DENDRON_COMMANDS.APPLY_TEMPLATE.key;
 
   async sanityCheck() {
-    if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
+    const activeDoc = VSCodeUtils.getActiveTextEditor();
+    if (_.isUndefined(activeDoc)) {
       return "No document open";
+    }
+    // because apply tempalte writes to the note out of band (using fs.write), this will cause
+    // conflicts if the document is dirty
+    if (activeDoc.document.isDirty) {
+      return "Please save the current document before applying a template";
     }
     return;
   }

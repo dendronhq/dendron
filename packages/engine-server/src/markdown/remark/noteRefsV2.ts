@@ -100,6 +100,10 @@ function gatherNoteRefs({
   return noteRefs;
 }
 
+function isBeginBlockAnchorId(anchorId: string) {
+  return anchorId === "begin";
+}
+
 function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
   const procData = MDUtilsV5.getProcData(proc);
   const { config, fname, engine, vault, dest } = procData;
@@ -594,7 +598,7 @@ function prepareNoteRefIndices<T>({
 } {
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
-    type: "header",
+    type: "none",
     index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
@@ -644,11 +648,24 @@ function prepareNoteRefIndices<T>({
     end = { ...start };
   }
 
-  if (!anchorEnd && start.type === "header" && start.node && enableSmartRef) {
+  if (
+    !anchorEnd &&
+    // smart header ref
+    ((start.type === "header" && enableSmartRef) ||
+      // smart block
+      start.type === "block-begin") &&
+    start.node
+  ) {
+    // if block-begin, accept header of any depth
+    const startHeaderDepth: number =
+      start.type === "header" ? start.node.depth : 99;
     // anchor end is next header that is smaller or equal
     const nodes = RemarkUtils.extractHeaderBlock(
       bodyAST,
-      start.node as Heading
+      startHeaderDepth,
+      start.index,
+      // stop at first header
+      start.type === "block-begin"
     );
     // TODO: diff behavior if we fail at extracting header block
     end = { index: start.index + nodes.length - 1, type: "header" };
@@ -766,16 +783,31 @@ function convertNoteRefHelperAST(
 
 type FindAnchorResult =
   | {
-      type: "header" | "block";
+      type: "block";
       index: number;
-      anchorType?: "block" | "header";
+      anchorType?: "block";
       node?: Node;
+    }
+  | {
+      type: "header";
+      index: number;
+      anchorType?: "header";
+      node?: Heading;
+    }
+  | {
+      type: "block-begin";
+      index: number;
+      node: Node;
     }
   | {
       type: "list";
       index: number;
       ancestors: ParentWithIndex[];
       anchorType?: "block";
+    }
+  | {
+      type: "none";
+      index: number;
     }
   | null;
 
@@ -794,38 +826,25 @@ function findAnchor({
 }): FindAnchorResult {
   if (isBlockAnchor(match)) {
     const anchorId = match.slice(1);
+    if (isBeginBlockAnchorId(anchorId)) {
+      return findBeginBlockAnchor({ nodes });
+    }
     return findBlockAnchor({ nodes, match: anchorId });
   } else {
-    return findHeader({ nodes, match, slugger: getSlugger() });
+    return MdastUtils.findHeader({ nodes, match, slugger: getSlugger() });
   }
 }
 
-function findHeader({
-  nodes,
-  match,
-  slugger,
-}: {
-  nodes: DendronASTNode["children"];
-  match: string;
-  slugger: ReturnType<typeof getSlugger>;
-}): FindAnchorResult {
-  let foundNode: Node | undefined;
-  const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
-    if (idx === 0 && match === "*") {
-      return false;
-    }
-    const out = MdastUtils.matchHeading(node, match, { slugger });
-    if (out) {
-      foundNode = node;
-    }
-    return out;
-  });
-  if (foundIndex < 0) return null;
+/**
+ * Search for start of document and traverse until first header
+ */
+function findBeginBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
+  // TODO: error if no first node found
+  const firstNode = nodes[0];
   return {
-    type: "header",
-    index: foundIndex,
-    anchorType: "header",
-    node: foundNode,
+    type: "block-begin",
+    index: 0,
+    node: firstNode,
   };
 }
 

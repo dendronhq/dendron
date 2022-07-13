@@ -15,10 +15,10 @@ import { WSMeta } from "../types";
 
 export * from "./engineUtils";
 
-function normalize(text: string) {
-  return _.toLower(_.trim(text, " #"));
-}
-
+/**
+ * Details:
+ * - trim white space, remove `#`, handle `*` and slug
+ */
 export function normalizev2(
   text: string,
   slugger: ReturnType<typeof getSlugger>
@@ -31,39 +31,10 @@ export function normalizev2(
 }
 
 /**
- * take a ref link and parse it as regular markdown
+ * stringify a note ref link
+ * @param opts
+ * @returns
  */
-export function refLink2String(
-  link: DNoteRefLink,
-  opts?: { includeParen: boolean; includeRefTag?: boolean }
-): string {
-  const cleanOpts = _.defaults(opts, {
-    includeParen: false,
-    includeRefTag: false,
-  });
-  const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
-  const { fname: name } = link.from;
-  // [[foo]]#head1:#*"
-  const linkParts = [`[[${name}]]`];
-  if (anchorStart) {
-    linkParts.push(`#${normalize(anchorStart)}`);
-  }
-  if (anchorStartOffset) {
-    linkParts.push(`,${anchorStartOffset}`);
-  }
-  if (anchorEnd) {
-    linkParts.push(`:#${normalize(anchorEnd)}`);
-  }
-  if (cleanOpts.includeRefTag) {
-    linkParts.splice(0, 0, "ref: ");
-  }
-  if (cleanOpts.includeParen) {
-    linkParts.splice(0, 0, "((");
-    linkParts.push("))");
-  }
-  return linkParts.join("");
-}
-
 export function refLink2Stringv2(opts: {
   link: DNoteRefLink;
   useVaultPrefix?: boolean;

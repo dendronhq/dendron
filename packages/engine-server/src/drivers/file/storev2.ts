@@ -1286,11 +1286,12 @@ export class FileStorage implements DStore {
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
-    await note2File({
+    const hash = await note2File({
       note,
       vault: note.vault,
       wsRoot: this.wsRoot,
     });
+    note.contentHash = hash;
 
     // schema metadata is only applicable at runtime
     // we therefore write it after we persist note to store

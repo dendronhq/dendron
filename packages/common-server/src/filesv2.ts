@@ -352,7 +352,10 @@ export function uniqueOutermostFolders(folders: string[]) {
   );
 }
 
-export function note2File({
+/**
+ * Return hash of written file
+ */
+export async function note2File({
   note,
   vault,
   wsRoot,
@@ -365,7 +368,8 @@ export function note2File({
   const ext = ".md";
   const payload = NoteUtils.serialize(note, { excludeStub: true });
   const vpath = vault2Path({ vault, wsRoot });
-  return fs.writeFile(path.join(vpath, fname + ext), payload);
+  await fs.writeFile(path.join(vpath, fname + ext), payload);
+  return genHash(payload);
 }
 
 function serializeModuleProps(moduleProps: SchemaModuleProps) {

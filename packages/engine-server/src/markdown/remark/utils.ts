@@ -1306,43 +1306,43 @@ export class RemarkUtils {
    * This will extract all nodes until it hits the next heading
    * with the same depth of the target heading.
    * @param tree Abstract syntax tree
-   * @param targetHeader Heading to target
+   * @param startHeaderDepth Heading to target
    * @returns nodes to extract
    */
-  static extractHeaderBlock(tree: Node, targetHeader: Heading) {
-    let headerFound = false;
-    let foundHeaderIndex: number | undefined;
+  static extractHeaderBlock(
+    tree: Node,
+    startHeaderDepth: number,
+    startHeaderIndex: number,
+    stopAtFirstHeader?: boolean
+  ) {
     let nextHeaderIndex: number | undefined;
-    visit(tree, (node, index) => {
+    if (!RemarkUtils.isParent(tree)) {
+      return [];
+    }
+    visit(tree, (node, _index) => {
+      // we are still before the start index
+      if (_index <= startHeaderIndex && !stopAtFirstHeader) {
+        return;
+      }
       if (nextHeaderIndex) {
         return;
       }
-      // @ts-ignore
-      const depth = node.depth as Heading["depth"];
-      if (!headerFound) {
-        if (node.type === DendronASTTypes.HEADING) {
-          if (
-            depth === targetHeader!.depth &&
-            RemarkUtils.hasIdenticalChildren(node, targetHeader!)
-          ) {
-            headerFound = true;
-            foundHeaderIndex = index;
-            return;
-          }
-        }
-      } else if (node.type === DendronASTTypes.HEADING) {
-        if (!_.isUndefined(foundHeaderIndex)) {
-          if (depth <= targetHeader!.depth) nextHeaderIndex = index;
-        }
+      if (node.type === DendronASTTypes.HEADING) {
+        const depth = (node as Heading).depth;
+        if (depth <= startHeaderDepth) nextHeaderIndex = _index;
       }
     });
 
-    if (!headerFound || !RemarkUtils.isParent(tree)) {
+    // edge case when we extract from beginning of note
+    if (startHeaderIndex === 0 && nextHeaderIndex === 0) {
       return [];
     }
+
+    // if we find a next header index, extract up to nextHedaer index
+    // otherwise, extract from start
     const nodesToExtract = nextHeaderIndex
-      ? tree.children.slice(foundHeaderIndex!, nextHeaderIndex)
-      : tree.children.slice(foundHeaderIndex!);
+      ? tree.children.slice(startHeaderIndex, nextHeaderIndex)
+      : tree.children.slice(startHeaderIndex);
     return nodesToExtract;
   }
 

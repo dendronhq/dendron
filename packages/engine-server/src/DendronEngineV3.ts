@@ -47,6 +47,7 @@ import {
   SchemaModuleProps,
   SchemaQueryResp,
   stringifyError,
+  UpdateNoteResp,
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
@@ -361,7 +362,7 @@ export class DendronEngineV3 implements DEngine {
     throw Error("renameNote not implemented");
   }
 
-  async updateNote(): Promise<NoteProps> {
+  async updateNote(): Promise<UpdateNoteResp> {
     throw new Error("updateNote not implemented");
   }
 

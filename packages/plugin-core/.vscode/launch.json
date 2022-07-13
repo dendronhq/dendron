@@ -14,7 +14,9 @@
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
-      "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder:plugin-core}/out/**/*.js"
+      ],
       "skipFiles": [
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
@@ -35,7 +37,9 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
       ],
-      "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder:plugin-core}/out/**/*.js"
+      ],
       "skipFiles": [
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
@@ -54,7 +58,9 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
-      "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder:plugin-core}/out/**/*.js"
+      ],
       "env": {
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
         "LOG_LEVEL": "debug"
@@ -69,20 +75,13 @@
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--disable-extensions"
       ],
-      "outFiles": ["${workspaceFolder:plugin-core}/dist/*.js"],
+      "outFiles": [
+        "${workspaceFolder:plugin-core}/dist/*.js"
+      ],
       "env": {
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
         "LOG_LEVEL": "debug"
       }
-    },
-    {
-      "type": "node",
-      "request": "attach",
-      "name": "Attach to Server",
-      "restart": true,
-      "port": 6009,
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder:lsp-server}/out/**/*.js"]
     },
     {
       "name": "Extension Integ Tests",
@@ -102,7 +101,9 @@
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
       ],
-      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/out/src/test/**/*.js"
+      ]
     },
     {
       "name": "Extension Integ Tests Remote",
@@ -121,7 +122,9 @@
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
       ],
-      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/out/src/test/**/*.js"
+      ]
     },
     {
       "name": "Extension Integ Tests - File",
@@ -143,7 +146,9 @@
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
         "**/extensionHostProcess.js"
       ],
-      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/out/src/test/**/*.js"
+      ]
     },
     {
       "name": "Extension Integ Tests - File (with extensions)",
@@ -162,13 +167,18 @@
         "<node_internals>/**/*.js",
         "${workspaceFolder}/**/node_modules/mocha/**/*.js",
       ],
-      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/out/src/test/**/*.js"
+      ]
     }
   ],
   "compounds": [
     {
       "name": "Client + Server",
-      "configurations": ["Run Extension", "Attach to Server"]
+      "configurations": [
+        "Run Extension",
+        "Attach to Server"
+      ]
     }
   ]
 }

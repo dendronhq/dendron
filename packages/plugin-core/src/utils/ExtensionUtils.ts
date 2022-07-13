@@ -68,7 +68,7 @@ async function startServerProcess(): Promise<{
   }
 
   // start server is separate process ^pyiildtq4tdx
-  const logPath = getDWorkspace().logUri.fsPath;
+  const logPath = ExtensionProvider.getDWorkspace().logUri.fsPath;
   try {
     const out = await ServerUtils.execServerNode({
       scriptPath: path.join(__dirname, "server.js"),

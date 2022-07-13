@@ -1972,6 +1972,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Sjiep",
+      "name": "Robert van Kints",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5003111?v=4",
+      "profile": "https://github.com/Sjiep",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

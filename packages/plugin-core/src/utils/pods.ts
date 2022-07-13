@@ -13,7 +13,6 @@ import * as queryString from "query-string";
 import { ProgressLocation, QuickPickItem, Uri, window } from "vscode";
 import { gdocRequiredScopes, GLOBAL_STATE } from "../constants";
 import { StateService } from "../services/stateService";
-import { GOOGLE_OAUTH_ID } from "../types/global";
 import { clipboard } from "../utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace } from "../workspace";
@@ -44,7 +43,8 @@ export const launchGoogleOAuthFlow = async (id?: string) => {
   );
 
   const stringifiedParams = queryString.stringify({
-    client_id: GOOGLE_OAUTH_ID,
+    client_id:
+      "158580191802-mg09ec0cnahjrct3a6dtk1a6rpiq5rpj.apps.googleusercontent.com",
     redirect_uri: `http://localhost:${port}/api/oauth/getToken?service=google&connectionId=${id}`,
     scope: gdocRequiredScopes.join(" "), // space seperated string
     response_type: "code",

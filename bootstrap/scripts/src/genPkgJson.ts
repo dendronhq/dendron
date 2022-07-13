@@ -21,20 +21,6 @@ type PkgJson = {
   };
 };
 
-const getPackages = (opts?: { blacklist: string[] }) => {
-  let blacklist = [
-    ".DS_Store",
-    "lsp-client",
-    "lsp-server",
-    "generator-dendron",
-  ];
-  const packages = fs.readdirSync("packages");
-  if (opts?.blacklist) {
-    blacklist = blacklist.concat(opts.blacklist);
-  }
-  return packages.filter((ent) => !blacklist.includes(ent));
-};
-
 const getPackagesBackend = (opts?: { blacklist: string[] }) => {
   let blacklist = [".DS_Store"];
   const packages = fs.readdirSync(

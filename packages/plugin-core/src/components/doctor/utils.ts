@@ -101,10 +101,16 @@ export class DoctorUtils {
               command: new DoctorCommand(ExtensionProvider.getExtension()).key,
               title: "Fix the frontmatter",
               arguments: [
-                { scope: "file", action: DoctorActionsEnum.REGENERATE_NOTE_ID },
+                {
+                  scope: "file",
+                  action: DoctorActionsEnum.REGENERATE_NOTE_ID,
+                  data: { note: duplicate },
+                },
               ],
             };
-
+            AnalyticsUtils.track(WorkspaceEvents.DuplicateNoteFound, {
+              state: "resolved",
+            });
             vscode.commands.executeCommand(cmd.command, ...cmd.arguments!);
           }
         });

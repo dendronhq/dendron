@@ -271,26 +271,24 @@ describe("GIVEN dendronPub", () => {
       let resp: VFile;
 
       test("THEN public link is rendered", async () => {
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname: fnameBeta,
-                linkText: `[[beta]] [[alpha]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
+        resp = await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname: fnameBeta,
+              linkText: `[[beta]] [[alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
         await verifyPublicLink(resp, fnameBeta);
       });
 
-      describe("AND WHNEN wikilink has an alias", () => {
+      describe("AND WHEN wikilink has an alias", () => {
         beforeAll(async () => {
           await runEngineTestV5(
             async (opts) => {

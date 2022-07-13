@@ -155,7 +155,6 @@ export class MoveHeaderCommand extends BasicCommand<
       throw this.headerNotSelectedError;
     }
 
-    // eslint-disable-next-line no-unused-expressions
     const resp = MdastUtils.findHeader({
       nodes: bodyAST.children,
       match: targetHeader,

@@ -42,6 +42,7 @@ import {
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import {
   DendronEngineClient,
@@ -230,7 +231,7 @@ export class EngineAPIService
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
-  ): Promise<NoteProps> {
+  ): Promise<UpdateNoteResp> {
     return this._internalEngine.updateNote(note, opts);
   }
 

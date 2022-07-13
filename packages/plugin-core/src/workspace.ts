@@ -689,6 +689,30 @@ export class DendronExtension implements IDendronExtension {
         graphPanel.decreaseGraphDepth();
       })
     );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_BACKLINKS_CHECKED.key,
+      sentryReportingCallback(() => {
+        graphPanel.showBacklinks = false;
+      })
+    );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_BACKLINKS.key,
+      sentryReportingCallback(() => {
+        graphPanel.showBacklinks = true;
+      })
+    );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_OUTWARD_LINKS_CHECKED.key,
+      sentryReportingCallback(() => {
+        graphPanel.showOutwardLinks = false;
+      })
+    );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_OUTWARD_LINKS.key,
+      sentryReportingCallback(() => {
+        graphPanel.showOutwardLinks = true;
+      })
+    );
     return vscode.window.registerWebviewViewProvider(
       GraphPanel.viewType,
       graphPanel

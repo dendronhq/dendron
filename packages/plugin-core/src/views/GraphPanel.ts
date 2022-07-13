@@ -15,6 +15,7 @@ import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { DendronContext } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { GraphStyleService } from "../styles";
@@ -27,12 +28,20 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   private _ext: IDendronExtension;
   private _graphDepth: number | undefined;
+  private _showBacklinks: boolean | undefined;
+  private _showOutwardLinks: boolean | undefined;
 
   constructor(extension: IDendronExtension) {
     this._ext = extension;
     this._ext.context.subscriptions.push(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );
+    // Set default
+    this.showBacklinks =
+      MetadataService.instance().graphPanelShowBacklinks ?? true;
+
+    this.showOutwardLinks =
+      MetadataService.instance().graphPanelShowOutwardLinks ?? true;
   }
 
   private get graphDepth(): number | undefined {
@@ -49,6 +58,59 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         },
         source: DMessageSource.vscode,
       });
+    }
+  }
+
+  public get showBacklinks(): boolean | undefined {
+    return this._showBacklinks;
+  }
+
+  public set showBacklinks(displayBacklinks: boolean | undefined) {
+    if (
+      !_.isUndefined(displayBacklinks) &&
+      this._showBacklinks !== displayBacklinks
+    ) {
+      this._showBacklinks = displayBacklinks;
+      VSCodeUtils.setContext(
+        DendronContext.GRAPH_PANEL_SHOW_BACKLINKS,
+        displayBacklinks
+      );
+      this.postMessage({
+        type: GraphViewMessageEnum.toggleLinkedEdges,
+        data: {
+          showBacklinks: this._showBacklinks,
+        },
+        source: DMessageSource.vscode,
+      });
+      // Save the setting update into persistance storage:
+      MetadataService.instance().graphPanelShowBacklinks = displayBacklinks;
+    }
+  }
+
+  public get showOutwardLinks(): boolean | undefined {
+    return this._showOutwardLinks;
+  }
+
+  public set showOutwardLinks(displayOutwardLinks: boolean | undefined) {
+    if (
+      !_.isUndefined(displayOutwardLinks) &&
+      this._showOutwardLinks !== displayOutwardLinks
+    ) {
+      this._showOutwardLinks = displayOutwardLinks;
+      VSCodeUtils.setContext(
+        DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS,
+        displayOutwardLinks
+      );
+      this.postMessage({
+        type: GraphViewMessageEnum.toggleLinkedEdges,
+        data: {
+          showOutwardLinks: this._showOutwardLinks,
+        },
+        source: DMessageSource.vscode,
+      });
+      // Save the setting update into persistance storage:
+      MetadataService.instance().graphPanelShowOutwardLinks =
+        displayOutwardLinks;
     }
   }
 
@@ -149,13 +211,22 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         const styles = GraphStyleService.getParsedStyles();
         const graphTheme = MetadataService.instance().getGraphTheme();
         this.graphDepth = MetadataService.instance().graphDepth;
-        if (this._view && (styles || graphTheme || this.graphDepth)) {
+        if (
+          this._view &&
+          (styles ||
+            graphTheme ||
+            this.graphDepth ||
+            this.showBacklinks ||
+            this.showOutwardLinks)
+        ) {
           this._view.webview.postMessage({
             type: GraphViewMessageEnum.onGraphLoad,
             data: {
               styles,
               graphTheme,
               graphDepth: this.graphDepth,
+              showBacklinks: this.showBacklinks,
+              showOutwardLinks: this.showOutwardLinks,
             },
             source: "vscode",
           });

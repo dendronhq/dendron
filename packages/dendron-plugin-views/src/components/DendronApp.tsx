@@ -20,6 +20,7 @@ import {
   setLogLevel,
 } from "@dendronhq/common-frontend";
 import { Layout } from "antd";
+import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import "../styles/scss/main.scss";
@@ -100,7 +101,13 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         break;
       case GraphViewMessageEnum.onGraphLoad: {
         const cmsg = msg;
-        const { styles, graphTheme, graphDepth } = cmsg.data;
+        const {
+          styles,
+          graphTheme,
+          graphDepth,
+          showBacklinks,
+          showOutwardLinks,
+        } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
           ideDispatch(ideSlice.actions.setGraphStyles(styles));
@@ -116,6 +123,8 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           logger.info({ ctx, graphDepth, msg: "default graph depth" });
           ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         }
+        ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
+        ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
         break;
       }
       case SeedBrowserMessageType.onSeedStateChange: {
@@ -132,6 +141,20 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         break;
       }
+      case GraphViewMessageEnum.toggleLinkedEdges: {
+        const cmsg = msg;
+        const { showBacklinks, showOutwardLinks } = cmsg.data;
+        if (!_.isUndefined(showBacklinks)) {
+          logger.info({ ctx, showBacklinks, msg: "showBacklinks" });
+          ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
+        }
+        if (!_.isUndefined(showOutwardLinks)) {
+          logger.info({ ctx, showOutwardLinks, msg: "showOutwardLinks" });
+          ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
+        }
+        break;
+      }
+
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

@@ -146,6 +146,14 @@ type Metadata = Partial<{
    * level set by user for local graph view and graph panel
    */
   graphDepth: number;
+  /**
+   * graph panel show backlinks
+   */
+  graphPanelShowBacklinks: boolean;
+  /**
+   * graph panel show outward links
+   */
+  graphPanelShowOutwardLinks: boolean;
 }>;
 
 export enum InactvieUserMsgStatusEnum {
@@ -254,6 +262,14 @@ export class MetadataService {
 
   get graphDepth(): number | undefined {
     return this.getMeta().graphDepth;
+  }
+
+  get graphPanelShowBacklinks(): boolean | undefined {
+    return this.getMeta().graphPanelShowBacklinks;
+  }
+
+  get graphPanelShowOutwardLinks(): boolean | undefined {
+    return this.getMeta().graphPanelShowOutwardLinks;
   }
 
   setMeta(key: keyof Metadata, value: any) {
@@ -369,6 +385,13 @@ export class MetadataService {
     this.setMeta("v100ReleaseMessageShown", hasShown);
   }
 
+  set graphPanelShowBacklinks(showBacklinks: boolean | undefined) {
+    this.setMeta("graphPanelShowBacklinks", showBacklinks);
+  }
+
+  set graphPanelShowOutwardLinks(showOutwardLinks: boolean | undefined) {
+    this.setMeta("graphPanelShowOutwardLinks", showOutwardLinks);
+  }
   // Add a single path to recent workspaces. Recent workspaces acts like a FIFO
   // queue
   addToRecentWorkspaces(path: string) {

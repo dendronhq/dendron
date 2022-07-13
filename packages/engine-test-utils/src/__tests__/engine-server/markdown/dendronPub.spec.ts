@@ -310,7 +310,7 @@ describe("GIVEN dendronPub", () => {
             ConfigUtils.setPublishProp(
               config,
               "privateNoteBehavior",
-              "titleFallback"
+              "aliasFallback"
             );
           });
           test("THEN a wikilink should be converted to a paragraph with the note alias as its text", async () => {

@@ -400,7 +400,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         ).privateNoteBehavior;
 
         if (value === "403") {
-          if (privateBehavior === "titleFallback" && data.alias) {
+          if (privateBehavior === "aliasFallback" && data.alias) {
             _node.data = {
               alias,
               type: "paragraph",

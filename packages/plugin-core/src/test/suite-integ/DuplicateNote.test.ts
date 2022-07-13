@@ -9,6 +9,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { expect } from "../testUtilsv2";
 import { DoctorUtils } from "../../components/doctor/utils";
 import { VaultUtils } from "@dendronhq/common-all";
+import sinon from "sinon";
 
 suite("Duplicate note detection", function () {
   describeSingleWS(
@@ -40,6 +41,37 @@ suite("Duplicate note detection", function () {
           throw Error;
         }
         expect(note.id).toEqual(duplicate.id);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "GIVEN a duplicate note AND WHEN Fix It button is clicked from the toaster",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("THEN duplicate note should not be detected", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
+        const barPath = path.join(wsRoot, vaultPath, "bar.md");
+        const dupeNotePath = path.join(wsRoot, vaultPath, "bar-dupe.md");
+        const dupeNoteUri = vscode.Uri.file(dupeNotePath);
+        const barContent = fs.readFileSync(barPath, { encoding: "utf-8" });
+        fs.writeFileSync(dupeNotePath, barContent, { encoding: "utf-8" });
+
+        await VSCodeUtils.openFileInEditor(dupeNoteUri);
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const document = editor?.document;
+        const showMessageStub = sinon
+          .stub(VSCodeUtils, "showMessage")
+          .resolves({ title: "Fix It" });
+
+        await DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+          document!,
+          "dendron"
+        );
+        expect(showMessageStub.calledOnce).toBeTruthy();
       });
     }
   );

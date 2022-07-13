@@ -31,10 +31,8 @@
     "build": "yarn compile",
     "buildCI": "yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
-    "test": "echo nop",
     "coverage": "echo nop",
-    "watch": "yarn compile --watch",
-    "test:watch": "echo nop"
+    "watch": "yarn compile --watch"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.103.0",

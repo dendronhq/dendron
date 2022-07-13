@@ -31,11 +31,7 @@
     "build": "yarn compile",
     "buildCI": "yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
-    "test": "echo 0",
-    "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
-    "watch": "yarn compile --watch",
-    "test:watch": "echo nop",
-    "test:unit:debug": "echo nop"
+    "watch": "yarn compile --watch"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.103.0",

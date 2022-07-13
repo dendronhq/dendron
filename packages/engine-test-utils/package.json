@@ -29,13 +29,8 @@
     "build": "yarn compile",
     "buildCI": "yarn clean && yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
-    "test": "cross-env LOG_LEVEL=error npx jest --bail",
     "coverage": "jest --coverage",
-    "watch": "yarn compile --watch",
-    "test:unit": "jest ",
-    "test:updateSnapshots": "jest -u",
-    "test:unit:debug": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:watch": "jest --watch"
+    "watch": "yarn compile --watch"
   },
   "devDependencies": {
     "@testing-library/react": "12.1.0",

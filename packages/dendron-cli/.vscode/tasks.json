@@ -2,27 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "test:watch",
-      "command": "yarn test:watch ${relativeFile} -u",
-      "type": "shell",
-      "problemMatcher": [],
-      "options": {
-        "env": {
-          "LOG_DST": "../../logs/dendron-cli.log"
-        }
-      }
-    },
-    {
-      "type": "npm",
-      "label": "test:all",
-      "script": "test",
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "chmod +x",
       "command": "chmod +x lib/bin/dendron-cli.js",
       "type": "shell",

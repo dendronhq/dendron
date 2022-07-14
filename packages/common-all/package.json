@@ -30,11 +30,7 @@
     "build": "yarn compile",
     "buildCI": "yarn compile",
     "compile": "tsc -p tsconfig.build.json ",
-    "test": "echo 0",
-    "watch": "yarn compile --watch",
-    "test:unit": "echo 0",
-    "test:unit:debug": "echo 0",
-    "test:watch": "echo 0"
+    "watch": "yarn compile --watch"
   },
   "dependencies": {
     "axios": "^0.21.4",

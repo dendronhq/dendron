@@ -5,13 +5,13 @@ import {
   EngineInfoResp,
   EngineRenameNotePayload,
   EngineRenameNoteRequest,
-  EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
   NoteQueryRequest,
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
   RespV2,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import { NodeJSUtils } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
@@ -126,11 +126,10 @@ export class NoteController {
     ws,
     note,
     opts,
-  }: EngineUpdateNoteRequest): Promise<EngineUpdateNotePayload> {
+  }: EngineUpdateNoteRequest): Promise<UpdateNoteResp> {
     const engine = await getWSEngine({ ws });
     try {
-      const data = await engine.updateNote(note, opts);
-      return { error: null, data };
+      return engine.updateNote(note, opts);
     } catch (err) {
       return {
         error: new DendronError({ message: JSON.stringify(err) }),

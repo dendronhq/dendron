@@ -33,6 +33,7 @@ import {
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
+  UpdateNoteResp,
   VSRange,
 } from "./types";
 
@@ -200,7 +201,6 @@ export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;
 
 export type EngineQueryPayload = APIPayload<DNodeProps[]>;
 export type EngineRenameNotePayload = APIPayload<RenameNotePayload>;
-export type EngineUpdateNotePayload = APIPayload<NoteProps>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
 export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayload>;
@@ -439,9 +439,7 @@ export class DendronAPI extends API {
     });
   }
 
-  engineUpdateNote(
-    req: EngineUpdateNoteRequest
-  ): Promise<EngineUpdateNotePayload> {
+  engineUpdateNote(req: EngineUpdateNoteRequest): Promise<UpdateNoteResp> {
     return this._makeRequest({
       path: "note/update",
       method: "post",

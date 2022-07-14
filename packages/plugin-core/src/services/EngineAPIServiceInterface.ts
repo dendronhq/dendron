@@ -37,6 +37,7 @@ import {
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 
@@ -83,7 +84,7 @@ export interface IEngineAPIService {
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
-  ): Promise<NoteProps>;
+  ): Promise<UpdateNoteResp>;
 
   updateSchema(schema: SchemaModuleProps): Promise<void>;
 

@@ -438,6 +438,7 @@ export type NoteBlock = {
  */
 export type WriteNoteResp = RespV2<NoteChangeEntry[]>;
 export type BulkWriteNoteResp = BulkResp<NoteChangeEntry[]>;
+export type UpdateNoteResp = RespV2<NoteChangeEntry[]>;
 
 // --- Common
 export type ConfigGetPayload = IntermediateDendronConfig;
@@ -457,7 +458,7 @@ export type DCommonMethods = {
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
-  ): Promise<NoteProps>;
+  ): Promise<UpdateNoteResp>;
   updateSchema: (schema: SchemaModuleProps) => Promise<void>;
 
   writeNote: (

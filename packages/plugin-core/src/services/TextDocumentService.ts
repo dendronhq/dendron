@@ -126,7 +126,9 @@ export class TextDocumentService implements ITextDocumentService {
    * @param document
    * @returns
    */
-  private async onDidSave(document: TextDocument) {
+  private async onDidSave(
+    document: TextDocument
+  ): Promise<NoteProps | undefined> {
     const ctx = "TextDocumentService:onDidSave";
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
@@ -172,7 +174,15 @@ export class TextDocumentService implements ITextDocumentService {
       fname,
       vault,
     });
-    return engine.updateNote(props);
+
+    const resp = await engine.updateNote(props);
+
+    // This altering of response type is only for maintaining test compatibility
+    if (resp.data && resp.data.length > 0) {
+      return resp.data[0].note;
+    }
+
+    return;
   }
 
   /**

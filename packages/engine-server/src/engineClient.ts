@@ -53,6 +53,7 @@ import {
   WriteNoteResp,
   FindNoteOpts,
   NotePropsMeta,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -461,39 +462,20 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     };
   }
 
-  async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
-    const existing = await this.getNote(note.id);
-
+  async updateNote(
+    note: NoteProps,
+    opts?: EngineUpdateNodesOptsV2
+  ): Promise<UpdateNoteResp> {
     const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
-    const noteClean = resp.data;
-    if (_.isUndefined(noteClean)) {
-      throw new DendronError({
-        message: `error updating note: ${JSON.stringify(
-          NoteUtils.toNoteLoc(note)
-        )}`,
-        payload: resp,
-      });
+    if (resp.error || !resp.data) {
+      return resp;
     }
 
-    // If no note existed, treat this as a create.
-    const changeEntry: NoteChangeEntry = existing
-      ? {
-          note: noteClean,
-          prevNote: existing,
-          status: "update",
-        }
-      : {
-          status: "create",
-          note: noteClean,
-        };
+    await this.refreshNotesV2(resp.data);
 
-    await this.refreshNotesV2([changeEntry]);
+    this._onNoteChangedEmitter.fire(resp.data);
 
-    if (resp.data) {
-      this._onNoteChangedEmitter.fire([changeEntry]);
-    }
-
-    return noteClean;
+    return resp;
   }
 
   async writeNote(

@@ -494,7 +494,7 @@ export class StartupUtils {
     if (VSCodeUtils.isExtensionInstalled("dendron.dendron-markdown-links")) {
       vscode.window
         .showInformationMessage(
-          "Please uninstall the Dendron Markdown Links extension. This extension is no longer maintained and Dendron has the note graph feature built-in natively now.",
+          "Please uninstall the Dendron Markdown Links extension. Dendron has the note graph feature built-in now and having this legacy extension installed will interfere with its functionality.",
           { modal: true },
           { title: "Uninstall" }
         )

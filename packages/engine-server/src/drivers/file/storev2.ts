@@ -1062,29 +1062,41 @@ export class FileStorage implements DStore {
 
     const changes: NoteChangeEntry[] = [];
 
-    const noteDicts = {
-      notesById: this.notes,
-      notesByFname: this.noteFnames,
-    };
-    if (opts?.newNode) {
-      const changesToParents = NoteUtils.addOrUpdateParents({
-        note,
-        noteDicts,
-        createStubs: true,
-        wsRoot: this.wsRoot,
-      });
-      changesToParents.forEach((changedEntry) => {
-        NoteDictsUtils.add(changedEntry.note, noteDicts);
-        changes.push(changedEntry);
-      });
+    try {
+      const noteDicts = {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      };
+      if (opts?.newNode) {
+        const changesToParents = NoteUtils.addOrUpdateParents({
+          note,
+          noteDicts,
+          createStubs: true,
+          wsRoot: this.wsRoot,
+        });
+        changesToParents.forEach((changedEntry) => {
+          NoteDictsUtils.add(changedEntry.note, noteDicts);
+          changes.push(changedEntry);
+        });
 
-      changes.push({
-        note,
-        status: "create",
-      });
+        changes.push({
+          note,
+          status: "create",
+        });
+      } else {
+        const prevNote = noteDicts.notesById[note.id];
+        changes.push({
+          prevNote,
+          note,
+          status: "update",
+        });
+      }
+      this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
+      NoteDictsUtils.add(note, noteDicts);
+    } catch (error: any) {
+      return { error };
     }
-    this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
-    NoteDictsUtils.add(note, noteDicts);
+
     return { data: changes, error: null };
   }
 

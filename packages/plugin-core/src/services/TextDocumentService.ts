@@ -179,9 +179,8 @@ export class TextDocumentService implements ITextDocumentService {
     const resp = await engine.updateNote(props);
 
     // This altering of response type is only for maintaining test compatibility
-    if (resp.data) {
-      const entries = extractNoteChangeEntriesByType(resp.data, "create");
-      return entries.length > 0 ? entries[0].note : undefined;
+    if (resp.data && resp.data.length > 0) {
+      return resp.data[0].note;
     }
 
     return;

@@ -599,6 +599,9 @@ export type DEngine = DCommonProps &
 
     getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
+    /**
+     * Query for NoteProps from fuse engine
+     */
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({
       qs,

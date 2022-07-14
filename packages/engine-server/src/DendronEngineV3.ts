@@ -30,6 +30,7 @@ import {
   IFileStore,
   INoteStore,
   IntermediateDendronConfig,
+  isNotUndefined,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -40,6 +41,7 @@ import {
   NotePropsMeta,
   NoteUtils,
   Optional,
+  QueryNotesOpts,
   RenameNotePayload,
   RenderNotePayload,
   RespV2,
@@ -341,8 +343,46 @@ export class DendronEngineV3 implements DEngine {
     throw Error("querySchema not implemented");
   }
 
-  async queryNotes(): ReturnType<DEngineClient["queryNotes"]> {
-    throw Error("queryNotes not implemented");
+  /**
+   * See {@link DEngine.queryNotes}
+   */
+  async queryNotes(
+    opts: QueryNotesOpts
+  ): ReturnType<DEngineClient["queryNotes"]> {
+    const ctx = "Engine:queryNotes";
+    const { qs, vault, onlyDirectChildren, originalQS } = opts;
+
+    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
+    // @ts-ignore
+    if (vault?.selfContained === "true" || vault?.selfContained === "false")
+      vault.selfContained = vault.selfContained === "true";
+
+    const noteIds = this.fuseEngine
+      .queryNote({
+        qs,
+        onlyDirectChildren,
+        originalQS,
+      })
+      .map((ent) => ent.id);
+
+    if (noteIds.length === 0) {
+      return { error: null, data: [] };
+    }
+
+    // TODO: Support createifNew? Doesn't seem to be actively used
+
+    this.logger.info({ ctx, msg: "exit" });
+    const responses = await this._noteStore.bulkGet(noteIds);
+    let notes = responses.map((resp) => resp.data).filter(isNotUndefined);
+    if (!_.isUndefined(vault)) {
+      notes = notes.filter((ent) => {
+        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
+      });
+    }
+    return {
+      error: null,
+      data: notes,
+    };
   }
 
   async renderNote(): Promise<RespV2<RenderNotePayload>> {

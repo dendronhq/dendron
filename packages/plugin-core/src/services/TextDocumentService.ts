@@ -1,6 +1,5 @@
 import {
   DVault,
-  extractNoteChangeEntriesByType,
   NoteProps,
   NoteUtils,
   VaultUtils,

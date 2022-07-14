@@ -490,6 +490,9 @@
         "randomNote": {
           "$ref": "#/definitions/RandomNoteConfig"
         },
+        "insertNote": {
+          "$ref": "#/definitions/InsertNoteConfig"
+        },
         "insertNoteLink": {
           "$ref": "#/definitions/InsertNoteLinkConfig"
         },
@@ -498,15 +501,12 @@
         },
         "copyNoteLink": {
           "$ref": "#/definitions/CopyNoteLinkConfig"
-        },
-        "templateHierarchy": {
-          "type": "string",
-          "description": "Default template hiearchy used when running commands like `Apply template`"
         }
       },
       "required": [
         "lookup",
         "randomNote",
+        "insertNote",
         "insertNoteLink",
         "insertNoteIndex",
         "copyNoteLink"
@@ -594,6 +594,19 @@
       },
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  RandomNoteCommand }"
+    },
+    "InsertNoteConfig": {
+      "type": "object",
+      "properties": {
+        "initialValue": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "initialValue"
+      ],
+      "additionalProperties": false,
+      "description": ""
     },
     "InsertNoteLinkConfig": {
       "type": "object",
@@ -743,6 +756,10 @@
         },
         "enableFullHierarchyNoteTitle": {
           "type": "boolean"
+        },
+        "templateHierarchy": {
+          "type": "string",
+          "description": "Default template hierarchy used when running commands like `Apply template`"
         },
         "maxPreviewsCached": {
           "type": "number"

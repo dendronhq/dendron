@@ -53,10 +53,12 @@ function computeHierarchicalGraphElements({
   notes,
   noteActive,
   maxDistance,
+  showHierarchy,
 }: {
   notes: NotePropsByIdDict;
   noteActive: NoteProps;
   maxDistance: number;
+  showHierarchy?: boolean;
 }): GraphElements {
   // Initialize edges
   const edges: GraphEdges = {
@@ -64,6 +66,13 @@ function computeHierarchicalGraphElements({
     links: [],
   };
   const nodes: GraphNodes = [];
+
+  if (!showHierarchy) {
+    return {
+      nodes,
+      edges,
+    };
+  }
   const activeNote = notes[noteActive.id];
 
   // Add descendents (children, grandchildren, etc) depending on the specified
@@ -300,6 +309,7 @@ const getLocalNoteGraphElements = ({
   maxDistance,
   showBacklinks,
   showOutwardLinks,
+  showHierarchy,
 }: {
   notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;
@@ -309,6 +319,7 @@ const getLocalNoteGraphElements = ({
   maxDistance: number;
   showBacklinks?: boolean;
   showOutwardLinks?: boolean;
+  showHierarchy?: boolean;
 }): GraphElements => {
   if (_.isUndefined(noteActive)) {
     return {
@@ -329,6 +340,7 @@ const getLocalNoteGraphElements = ({
     notes,
     noteActive,
     maxDistance,
+    showHierarchy,
   });
 
   const linkedElements = computeLinkedElements({
@@ -745,6 +757,7 @@ const useGraphElements = ({
   wsRoot,
   showBacklinks,
   showOutwardLinks,
+  showHierarchy,
 }: {
   type: "note" | "schema";
   engine: engineSlice.EngineState;
@@ -753,6 +766,7 @@ const useGraphElements = ({
   wsRoot: string;
   showBacklinks?: boolean | undefined;
   showOutwardLinks?: boolean | undefined;
+  showHierarchy?: boolean | undefined;
 }) => {
   const [elements, setElements] = useState<GraphElements>({
     nodes: [],
@@ -809,6 +823,7 @@ const useGraphElements = ({
           maxDistance: config["filter.depth"].value || 1,
           showBacklinks,
           showOutwardLinks,
+          showHierarchy,
         })
       );
     }
@@ -818,6 +833,7 @@ const useGraphElements = ({
     isLocalGraph,
     showBacklinks,
     showOutwardLinks,
+    showHierarchy,
     config["filter.depth"].value,
   ]);
 

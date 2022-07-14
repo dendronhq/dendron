@@ -178,12 +178,20 @@
         "title": "Show Outward Links"
       },
       {
+        "command": "dendron.graph-panel.showHierarchy",
+        "title": "Show Hierarchy"
+      },
+      {
         "command": "dendron.graph-panel.showBacklinksChecked",
         "title": "✓ Show Backlinks"
       },
       {
         "command": "dendron.graph-panel.showOutwardLinksChecked",
         "title": "✓ Show Outward Links"
+      },
+      {
+        "command": "dendron.graph-panel.showHierarchyChecked",
+        "title": "✓ Show Hierarchy"
       },
       {
         "command": "dendron.browseNote",
@@ -976,12 +984,20 @@
           "when": "view == dendron.graph-panel && dendron.graph-panel.showOutwardLinks"
         },
         {
+          "command": "dendron.graph-panel.showHierarchyChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showHierarchy"
+        },
+        {
           "command": "dendron.graph-panel.showBacklinks",
           "when": "view == dendron.graph-panel && !dendron.graph-panel.showBacklinks"
         },
         {
           "command": "dendron.graph-panel.showOutwardLinks",
           "when": "view == dendron.graph-panel && !dendron.graph-panel.showOutwardLinks"
+        },
+        {
+          "command": "dendron.graph-panel.showHierarchy",
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showHierarchy"
         }
       ],
       "explorer/context": [

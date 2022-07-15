@@ -48,11 +48,11 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       MetadataService.instance().graphPanelShowHierarchy ?? true;
   }
 
-  private get graphDepth(): number | undefined {
+  public get graphDepth(): number | undefined {
     return this._graphDepth;
   }
 
-  private set graphDepth(depth: number | undefined) {
+  public set graphDepth(depth: number | undefined) {
     if (depth) {
       this._graphDepth = depth;
       this.postMessage({

@@ -44,6 +44,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NotePropsMeta,
+  NoteQueryResp,
   NoteUtils,
   NullCache,
   Optional,
@@ -496,11 +497,9 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async queryNotes(
-    opts: QueryNotesOpts
-  ): ReturnType<DEngineClient["queryNotes"]> {
+  async queryNotes(opts: QueryNotesOpts): Promise<NoteQueryResp> {
     const ctx = "Engine:queryNotes";
-    const { qs, vault, createIfNew, onlyDirectChildren, originalQS } = opts;
+    const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
@@ -517,24 +516,6 @@ export class DendronEngineV2 implements DEngine {
       return { error: null, data: [] };
     }
 
-    const item = this.notes[items[0].id];
-    if (createIfNew) {
-      let noteNew: NoteProps;
-      if (item?.fname === qs && item?.stub) {
-        noteNew = item;
-        noteNew.stub = false;
-      } else {
-        if (_.isUndefined(vault)) {
-          return {
-            error: new DendronError({ message: "no vault specified" }),
-            data: null as any,
-          };
-        }
-        noteNew = NoteUtils.create({ fname: qs, vault });
-      }
-      await this.writeNote(noteNew, { newNode: true });
-      this.fuseEngine.updateNotesIndex(this.notes);
-    }
     this.logger.info({ ctx, msg: "exit" });
     let notes = items.map((ent) => this.notes[ent.id]);
     if (!_.isUndefined(vault)) {

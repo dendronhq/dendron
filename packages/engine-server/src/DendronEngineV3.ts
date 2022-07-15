@@ -39,6 +39,7 @@ import {
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
+  NoteQueryResp,
   NoteUtils,
   Optional,
   QueryNotesOpts,
@@ -346,9 +347,7 @@ export class DendronEngineV3 implements DEngine {
   /**
    * See {@link DEngine.queryNotes}
    */
-  async queryNotes(
-    opts: QueryNotesOpts
-  ): ReturnType<DEngineClient["queryNotes"]> {
+  async queryNotes(opts: QueryNotesOpts): Promise<NoteQueryResp> {
     const ctx = "Engine:queryNotes";
     const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
@@ -368,8 +367,6 @@ export class DendronEngineV3 implements DEngine {
     if (noteIds.length === 0) {
       return { error: null, data: [] };
     }
-
-    // TODO: Support createifNew? Doesn't seem to be actively used
 
     this.logger.info({ ctx, msg: "exit" });
     const responses = await this._noteStore.bulkGet(noteIds);

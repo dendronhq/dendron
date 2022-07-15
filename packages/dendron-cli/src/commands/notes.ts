@@ -23,6 +23,7 @@ type CommandCLIOpts = {
   query?: string;
   cmd: NoteCommands;
   output?: NoteCLIOutput;
+  fName?: string;
   destFname?: string;
   destVaultName?: string;
   newEngine?: boolean;
@@ -48,7 +49,7 @@ export type NoteCommandData = {
 
 export enum NoteCommands {
   /**
-   * Like lookup, but only look for notes
+   * Like lookup, but only look for notes. Uses new engine/store
    * Returns a list of notes
    */
   LOOKUP = "lookup",
@@ -56,6 +57,10 @@ export enum NoteCommands {
    * Get note by id. Uses new engine/store
    */
   GET = "get",
+  /**
+   * Find note by note properties. Uses new engine/store
+   */
+  FIND = "find",
   LOOKUP_LEGACY = "lookup_legacy",
   DELETE = "delete",
   MOVE = "move",
@@ -185,7 +190,11 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.addArgsToPayload({ cmd: args.cmd, output: args.output });
 
     // TODO remove after migration to new engine
-    if (args.cmd === NoteCommands.GET) {
+    if (
+      args.cmd === NoteCommands.GET ||
+      args.cmd === NoteCommands.LOOKUP ||
+      args.cmd === NoteCommands.FIND
+    ) {
       args.newEngine = true;
     }
     const engineArgs = await setupEngine(args);
@@ -237,6 +246,29 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               data: undefined,
             };
           }
+        }
+        case NoteCommands.FIND: {
+          const maybeVault = opts.vault
+            ? VaultUtils.getVaultByNameOrThrow({
+                vaults: engine.vaults,
+                vname: opts.vault,
+              })
+            : undefined;
+          const notes = await engine.findNotes({
+            fname: opts.fName,
+            vault: maybeVault,
+          });
+          const resp = await formatNotes({
+            output,
+            notes,
+            engine,
+          });
+          this.print(resp);
+          const data: NoteCommandData = {
+            notesOutput: notes,
+            stringOutput: resp,
+          };
+          return { data };
         }
         case NoteCommands.LOOKUP_LEGACY: {
           const { query, vault } = checkQueryAndVault(opts);

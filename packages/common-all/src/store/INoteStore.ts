@@ -23,6 +23,15 @@ export interface INoteStore<K> {
   get(key: K): Promise<RespV3<NoteProps>>;
 
   /**
+   * Bulk get NoteProps by list of key
+   * If no notes are found, return empty list.
+   *
+   * @param key: keys of NoteProps
+   * @return list of NoteProps
+   */
+  bulkGet(keys: K[]): Promise<RespV3<NoteProps>[]>;
+
+  /**
    * Get NoteProps metadata by key
    * If key is not found, return error.
    *

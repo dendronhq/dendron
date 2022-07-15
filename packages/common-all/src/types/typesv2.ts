@@ -324,14 +324,10 @@ export type EngineWriteOptsV2 = {
    */
   noAddParent?: boolean;
   /**
-   * Should update existing note instead of overwriting
-   */
-  updateExisting?: boolean;
-  /**
    * Should any configured hooks be run during the write
    */
   runHooks?: boolean;
-} & Partial<EngineUpdateNodesOptsV2>;
+};
 
 export type DEngineInitPayload = {
   notes: NotePropsByIdDict;

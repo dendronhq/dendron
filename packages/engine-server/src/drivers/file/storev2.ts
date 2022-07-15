@@ -319,7 +319,7 @@ export class FileStorage implements DStore {
           notesById: this.notes,
           notesByFname: this.noteFnames,
         });
-        const changed = await this.writeNote(replacingStub, { newNode: true });
+        const changed = await this.writeNote(replacingStub);
         out.push({ note: noteToDelete, status: "delete" });
 
         if (changed.data) {
@@ -959,7 +959,6 @@ export class FileStorage implements DStore {
       return (
         await this.bulkWriteNotes({
           notes: notesChangedEntries.map((ent) => ent.note),
-          opts: { updateExisting: true },
         })
       ).data;
     }
@@ -997,7 +996,7 @@ export class FileStorage implements DStore {
       // but we don't want that in this case. we need to add the old note's children back in
       newNote.children = oldNote.children;
 
-      const out = await this.writeNote(newNote, { updateExisting: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     } else {
       // The file is being renamed to a new file.
@@ -1024,14 +1023,13 @@ export class FileStorage implements DStore {
         msg: "writeNewNote:pre",
         note: NoteUtils.toLogObj(newNote),
       });
-      const out = await this.writeNote(newNote, { newNode: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await this.bulkWriteNotes({
       notes: notesChangedEntries.map((ent) => ent.note),
-      opts: { updateExisting: true },
     });
     if (deleteOldFile) fs.removeSync(oldLocPath);
 

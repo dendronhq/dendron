@@ -164,7 +164,7 @@ const NOTES = {
         })
       )[0];
       note.custom = { bond: 43 };
-      await engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note);
       const newNote = (
         await engine.findNotes({
           fname: "foo",

@@ -50,7 +50,7 @@ const writeNote = async ({
   engine: DEngineClient;
 }) => {
   const note = NoteUtils.create(noteOpts);
-  await engine.writeNote(note, { newNode: true });
+  await engine.writeNote(note);
   const out = engine.notes[note.id];
   return { note: out };
 };
@@ -86,7 +86,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -129,7 +129,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -178,7 +178,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -224,7 +224,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -326,7 +326,7 @@ describe("engine", () => {
           body: "hooked body",
           vault,
         });
-        await engine.writeNote(note, { newNode: true, runHooks: false });
+        await engine.writeNote(note, { runHooks: false });
         const ent = engine.notes["hooked"];
         expect(
           await AssertUtils.assertInString({
@@ -407,7 +407,7 @@ describe("remote engine", () => {
           body: "hooked body",
           vault,
         });
-        const resp = await engine.writeNote(note, { newNode: true });
+        const resp = await engine.writeNote(note);
         expect(
           resp.error!.message.startsWith("NoteProps is undefined")
         ).toBeTruthy();

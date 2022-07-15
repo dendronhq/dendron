@@ -34,7 +34,6 @@ export default function DendronTreeMenu(
   const tree = ide.tree;
   const logger = createLogger("DendronTreeMenu");
   const dendronRouter = useDendronRouter();
-  const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const noteActiveId = _.isUndefined(dendronRouter.query.id)
     ? props.noteIndex?.id
@@ -73,13 +72,14 @@ export default function DendronTreeMenu(
   });
 
   // --- Methods
-  const onSelect = (noteId: string) => {
-    if (!props.noteIndex) {
-      return;
-    }
+  const onSubMenuSelect = (noteId: string) => {
+    logger.info({ ctx: "onSubMenuSelect", id: noteId });
     setCollapsed(true);
-    logger.info({ ctx: "onSelect", id: noteId });
-    changeActiveNote(noteId, { noteIndex: props.noteIndex });
+  };
+
+  const onMenuItemClick = (noteId: string) => {
+    logger.info({ ctx: "onMenuItemClick", id: noteId });
+    setCollapsed(true);
   };
 
   const onExpand = (noteId: string) => {
@@ -103,7 +103,8 @@ export default function DendronTreeMenu(
       {...props}
       roots={roots}
       expandKeys={expandKeys}
-      onSelect={onSelect}
+      onSubMenuSelect={onSubMenuSelect}
+      onMenuItemClick={onMenuItemClick}
       onExpand={onExpand}
       collapsed={collapsed}
       activeNote={noteActiveId}
@@ -114,7 +115,8 @@ export default function DendronTreeMenu(
 function MenuView({
   roots,
   expandKeys,
-  onSelect,
+  onSubMenuSelect,
+  onMenuItemClick,
   onExpand,
   collapsed,
   activeNote,
@@ -122,7 +124,8 @@ function MenuView({
 }: {
   roots: DataNode[];
   expandKeys: string[];
-  onSelect: (noteId: string) => void;
+  onSubMenuSelect: (noteId: string) => void;
+  onMenuItemClick: (noteId: string) => void;
   onExpand: (noteId: string) => void;
   collapsed: boolean;
   activeNote: string | undefined;
@@ -159,7 +162,7 @@ function MenuView({
             const target = event.domEvent.target as HTMLElement;
             const isArrow = target.dataset.expandedicon;
             if (!isArrow) {
-              onSelect(event.key);
+              onSubMenuSelect(event.key);
             } else {
               onExpand(event.key);
             }
@@ -196,6 +199,9 @@ function MenuView({
       inlineCollapsed={collapsed}
       // results in gray box otherwise when nav bar is too short for display
       style={{ height: "100%" }}
+      onClick={({ key }) => {
+        onMenuItemClick(key);
+      }}
     >
       {roots.map((menu) => {
         return createMenu(menu);

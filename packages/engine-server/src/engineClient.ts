@@ -487,13 +487,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       opts,
       ws: this.ws,
     });
-    let changed = resp.data;
+    const changed = resp.data;
     if (resp.error) {
       return resp;
-    }
-    // we are updating in place, remove deletes
-    if (opts?.updateExisting) {
-      changed = _.reject(changed, (ent) => ent.status === "delete");
     }
 
     if (changed) {

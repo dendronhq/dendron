@@ -14,7 +14,7 @@ import {
   DLink,
   DVault,
   EngineDeleteNoteResp,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -260,7 +260,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   async deleteNote(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<EngineDeleteNoteResp> {
     const ws = this.ws;
     const resp = await this.api.engineDelete({ id, opts, ws });
@@ -284,7 +284,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   async deleteSchema(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<DEngineDeleteSchemaResp> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });

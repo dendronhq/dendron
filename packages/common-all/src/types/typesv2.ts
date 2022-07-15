@@ -312,7 +312,6 @@ export type EngineUpdateNodesOptsV2 = {
    */
   newNode: boolean;
 };
-export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
   /**
    * Write all children?
@@ -589,11 +588,11 @@ export type DEngine = DCommonProps &
     findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
     deleteNote: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<EngineDeleteNoteResp>;
     deleteSchema: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<DEngineDeleteSchemaResp>;
     info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
@@ -656,11 +655,11 @@ export type DStore = DCommonProps &
     findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
     deleteNote: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<StoreDeleteNoteResp>;
     deleteSchema: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<DEngineDeleteSchemaResp>;
     renameNote: (opts: RenameNoteOpts) => Promise<RenameNotePayload>;
   };
@@ -679,11 +678,11 @@ export type DEngineV4Methods = {
   init: () => Promise<DEngineInitResp>;
   deleteNote: (
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ) => Promise<EngineDeleteNoteResp>;
   deleteSchema: (
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ) => Promise<DEngineDeleteSchemaResp>;
   sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 

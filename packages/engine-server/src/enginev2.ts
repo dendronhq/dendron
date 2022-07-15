@@ -17,7 +17,7 @@ import {
   DNodeType,
   DStore,
   DVault,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -370,7 +370,7 @@ export class DendronEngineV2 implements DEngine {
 
   async deleteNote(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): ReturnType<DEngineClient["deleteNote"]> {
     try {
       const note = this.notes[id];
@@ -396,7 +396,7 @@ export class DendronEngineV2 implements DEngine {
 
   async deleteSchema(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<DEngineDeleteSchemaResp> {
     try {
       const data = (await this.store.deleteSchema(

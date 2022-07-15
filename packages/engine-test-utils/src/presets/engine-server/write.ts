@@ -627,6 +627,60 @@ const NOTES_MULTI = {
       preSetupHook: setupBasic,
     }
   ),
+  BODY_UPDATED: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
+      fooUpdated.body = "updatedBody";
+      debugger;
+      const changes = await engine.writeNote(fooUpdated);
+      const createEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "create"
+      );
+
+      const deleteEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "delete"
+      );
+
+      const updateEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "update"
+      ) as NoteChangeUpdateEntry[];
+
+      return [
+        {
+          actual: updateEntries.length,
+          expected: 0,
+          msg: "0 updates should happen.",
+        },
+        {
+          actual: deleteEntries.length,
+          expected: 0,
+          msg: "0 delete should happen.",
+        },
+        {
+          actual: createEntries.length,
+          expected: 1,
+          msg: "1 create should happen.",
+        },
+        {
+          actual: createEntries[0].note.fname,
+          expected: "foo",
+          msg: "foo note is created.",
+        },
+        {
+          actual: createEntries[0].note.body,
+          expected: "updatedBody",
+          msg: "created foo note's body is updatedBody",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
 };
 
 export const ENGINE_WRITE_PRESETS = {

@@ -62,7 +62,7 @@ export const findUriByRef = (
 };
 
 export const lineBreakOffsetsByLineIndex = (value: string): number[] => {
-  const result = [];
+  const result: number[] = [];
   let index = value.indexOf("\n");
 
   while (index !== -1) {

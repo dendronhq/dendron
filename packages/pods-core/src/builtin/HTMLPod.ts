@@ -63,6 +63,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       fname,
       config: overrideConfig,
       wikiLinksOpts: { convertLinks },
+      // wikiLinkToURL: true
     });
     const { contents } = await proc.processSync(note.body);
     return contents as string;

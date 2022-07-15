@@ -113,6 +113,10 @@ export type ProcDataFullOptsV5 = {
   wikiLinksOpts?: WikiLinksOpts;
   publishOpts?: DendronPubOpts;
   backlinkHoverOpts?: BacklinkOpts;
+  /**
+   * new option
+   */
+  wikiLinkToURL: boolean;
 } & {
   config?: IntermediateDendronConfig;
   wsRoot?: string;
@@ -249,6 +253,11 @@ export class MDUtilsV5 {
       .use(backlinksHover, data.backlinkHoverOpts)
       .data("errors", errors);
 
+    if (opts.wikilinktoUrl === true) {
+      proc.use(
+        RemarkUtils.convertWikiLinkToNoteUrl(note, [], engine, dendronConfig)
+      );
+    }
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
 

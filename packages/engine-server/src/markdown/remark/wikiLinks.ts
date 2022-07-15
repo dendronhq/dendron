@@ -253,5 +253,52 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "wikiLink");
 }
 
+return function (this: Processor) {
+  if (convertLinks) {
+    return async (tree: Node, _vfile: VFile) => {
+      debugger;
+      const root = tree as DendronASTRoot;
+      const wikiLinks: WikiLinkNoteV4[] = selectAll(
+        DendronASTTypes.WIKI_LINK,
+        root
+      ) as WikiLinkNoteV4[];
+      let dirty = false;
+      await asyncLoop(wikiLinks, async (linkNode) => {
+        let vault: DVault | undefined;
+        if (!_.isUndefined(linkNode.data.vaultName)) {
+          vault = VaultUtils.getVaultByName({
+            vaults: engine.vaults,
+            vname: linkNode.data.vaultName,
+          });
+        }
+        const existingNote = (
+          await engine.findNotes({ fname: linkNode.value, vault })
+        )[0];
+        if (existingNote) {
+          const publishingConfig =
+            ConfigUtils.getPublishingConfig(dendronConfig);
+          const urlRoot = publishingConfig.siteUrl || "";
+          const { vault } = existingNote;
+          linkNode.value = WorkspaceUtils.getNoteUrl({
+            config: dendronConfig,
+            note: existingNote,
+            vault,
+            urlRoot,
+            anchor: linkNode.data.anchorHeader,
+          });
+          dirty = true;
+        }
+      });
+  
+      if (dirty) {
+        changes.push({
+          note,
+          prevNote,
+          status: "update",
+        });
+      }
+  }
+
+
 export { plugin as wikiLinks };
 export { PluginOpts as WikiLinksOpts };

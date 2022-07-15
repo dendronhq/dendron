@@ -19,6 +19,13 @@
       "detail": "tsc -watch -p ./"
     },
     {
+      "type": "npm",
+      "script": "watch-web",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$ts-webpack-watch"]
+    },
+    {
       "label": "gen:config",
       "type": "shell",
       "command": "node out/scripts/genConfig.js",

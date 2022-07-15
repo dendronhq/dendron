@@ -392,7 +392,7 @@ export async function _activate(
       ) {
         await PreviewPanelFactory.create(getExtension()).show(note);
       }
-
+      StartupUtils.showUninstallMarkdownLinksExtensionMessage();
       return true;
     }
     return false;

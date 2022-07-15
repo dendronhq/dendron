@@ -632,7 +632,6 @@ const NOTES_MULTI = {
       const fooNote = await engine.getNote("foo");
       const fooUpdated = { ...fooNote! };
       fooUpdated.body = "updatedBody";
-      debugger;
       const changes = await engine.writeNote(fooUpdated);
       const createEntries = extractNoteChangeEntriesByType(
         changes.data!,

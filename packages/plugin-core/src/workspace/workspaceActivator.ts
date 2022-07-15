@@ -581,7 +581,8 @@ export class WorkspaceActivator {
       return new EngineNoteProvider(engine);
     };
     if (!opts?.skipTreeView) {
-      await initTreeView({ context, providerConstructor, ext });
+      await initTreeView({ context, providerConstructor });
+      vscode.commands.executeCommand("dendron.treeView.focus");
     }
 
     // Add the current workspace to the recent workspace list. The current

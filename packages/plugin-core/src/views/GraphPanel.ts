@@ -43,7 +43,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     this.showOutwardLinks =
       MetadataService.instance().graphPanelShowOutwardLinks ?? true;
 
-    this._graphDepth = 1;
+    this.graphDepth = MetadataService.instance().graphDepth || 1;
   }
 
   private get graphDepth(): number | undefined {

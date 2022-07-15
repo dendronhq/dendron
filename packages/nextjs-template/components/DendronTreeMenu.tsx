@@ -97,18 +97,18 @@ export default function DendronTreeMenu(
     }
   };
 
-  return (
-    noteActiveId && (
-      <MenuView
-        {...props}
-        roots={roots}
-        expandKeys={expandKeys}
-        onSelect={onSelect}
-        onExpand={onExpand}
-        collapsed={collapsed}
-        activeNote={noteActiveId}
-      />
-    )
+  return noteActiveId ? (
+    <MenuView
+      {...props}
+      roots={roots}
+      expandKeys={expandKeys}
+      onSelect={onSelect}
+      onExpand={onExpand}
+      collapsed={collapsed}
+      activeNote={noteActiveId}
+    />
+  ) : (
+    <></>
   );
 }
 

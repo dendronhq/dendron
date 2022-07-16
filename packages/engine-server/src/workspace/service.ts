@@ -28,11 +28,11 @@ import {
   Time,
   VaultUtils,
   WorkspaceSettings,
+  DLogger,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   createDisposableLogger,
-  DLogger,
   getAllFiles,
   GitUtils,
   moveIfExists,

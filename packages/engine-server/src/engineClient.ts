@@ -319,12 +319,16 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   async queryNote(
     opts: Parameters<DEngineClient["queryNotes"]>[0]
   ): Promise<NoteProps[]> {
+    const ctx = "queryNote";
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
-    let noteIndexProps = await this.fuseEngine.queryNote({
+    this.logger.info({ ctx, state: "pre:fuseQueryNote" });
+    let noteIndexProps = this.fuseEngine.queryNote({
       qs,
       onlyDirectChildren,
       originalQS,
+      logger: this.logger,
     });
+    this.logger.info({ ctx, state: "post:fuseQueryNote" });
     // TODO: hack
     if (!_.isUndefined(vault)) {
       noteIndexProps = noteIndexProps.filter((ent) =>

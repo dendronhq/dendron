@@ -186,10 +186,12 @@ export class FuseEngine {
     qs,
     onlyDirectChildren,
     originalQS,
+    logger,
   }: {
     qs: string;
     onlyDirectChildren?: boolean;
     originalQS: string;
+    logger?: logger;
   }): NoteIndexProps[] {
     let items: NoteIndexProps[];
 

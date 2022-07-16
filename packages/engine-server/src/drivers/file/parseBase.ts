@@ -1,5 +1,4 @@
-import { DStore } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { DStore, DLogger } from "@dendronhq/common-all";
 
 export class ParserBase {
   constructor(public opts: { store: DStore; logger: DLogger }) {}

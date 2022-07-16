@@ -14,11 +14,12 @@ import {
   SchemaPropsDict,
   SchemaRaw,
   SchemaUtils,
+  DLogger,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { file2Schema, vault2Path } from "./filesv2";
-import { createLogger, DLogger } from "./logger";
+import { createLogger } from "./logger";
 import Ajv from "ajv";
 import AjvErrors from "ajv-errors";
 

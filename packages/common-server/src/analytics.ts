@@ -2,6 +2,7 @@ import {
   AppNames,
   CONSTANTS,
   DendronError,
+  DLogger,
   env,
   genUUID,
   RespV2,
@@ -13,7 +14,7 @@ import _ from "lodash";
 import os from "os";
 import path from "path";
 import { getOS } from "./system";
-import { createLogger, DLogger } from "./logger";
+import { createLogger } from "./logger";
 
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",

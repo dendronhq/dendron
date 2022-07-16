@@ -52,9 +52,9 @@ import {
   FindNoteOpts,
   isNotNull,
   ErrorUtils,
+  DLogger,
 } from "@dendronhq/common-all";
 import {
-  DLogger,
   file2Note,
   getAllFiles,
   getDurationMilliseconds,

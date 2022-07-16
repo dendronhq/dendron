@@ -54,10 +54,10 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
+  DLogger,
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  DLogger,
   getDurationMilliseconds,
   NodeJSUtils,
   readYAML,

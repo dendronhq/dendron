@@ -268,6 +268,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         transformedQuery,
         originalQS: queryOrig,
       });
+      profile = getDurationMilliseconds(start);
+      Logger.debug({ ctx, state: "fetchPickerResults:post", profile });
 
       if (token?.isCancellationRequested) {
         return;
@@ -294,6 +296,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           notePath: queryUpToLastDot,
           schemaModDict: engine.schemas,
         });
+        profile = getDurationMilliseconds(start);
+        Logger.debug({ ctx, state: "schemaMatchPath:post", profile });
         // since namespace matches everything, we don't do queries on that
         if (results && !results.namespace) {
           const { schema, schemaModule } = results;
@@ -342,12 +346,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
               });
             })
           );
+          profile = getDurationMilliseconds(start);
+          Logger.debug({ ctx, state: "addSchemaCandidates:post", profile });
         }
       }
 
       // filter the results through optional middleware
       if (picker.filterMiddleware) {
         updatedItems = picker.filterMiddleware(updatedItems);
+        profile = getDurationMilliseconds(start);
+        Logger.debug({ ctx, state: "filterMiddleware:post", profile });
       }
 
       // if new notes are allowed and we didn't get a perfect match, append `Create New` option
@@ -361,6 +369,8 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const numberOfExactMatches = updatedItems.filter(
         (item) => item.fname.toLowerCase() === queryOrigLowerCase
       ).length;
+      profile = getDurationMilliseconds(start);
+      Logger.debug({ ctx, state: "numberOfEactMatchersFilter:post", profile });
       const vaultsHaveSpaceForExactMatch =
         this.extension.getDWorkspace().engine.vaults.length >
         numberOfExactMatches;
@@ -392,8 +402,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           })
         ) {
           updatedItems = [entryCreateNew, ...updatedItems];
+          profile = getDurationMilliseconds(start);
+          Logger.debug({
+            ctx,
+            state: "updatedItems:shouldAddCreateNew:post",
+            profile,
+          });
         } else {
           updatedItems = [...updatedItems, entryCreateNew];
+          profile = getDurationMilliseconds(start);
+          Logger.debug({ ctx, state: "updatedItems:post", profile });
         }
       }
 
@@ -401,12 +419,16 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // TODO: in the future this should be done in the engine
       if (fuzzThreshold === 1) {
         updatedItems = updatedItems.filter((ent) => ent.fname === picker.value);
+        profile = getDurationMilliseconds(start);
+        Logger.debug({ ctx, state: "fuzzThreshold:post", profile });
       }
 
       // We do NOT want quick pick to filter out items since it does not match with FuseJS.
       updatedItems.forEach((item) => {
         item.alwaysShow = true;
       });
+      profile = getDurationMilliseconds(start);
+      Logger.debug({ ctx, state: "updatedItems:alwaysShow:post", profile });
 
       picker.items = updatedItems;
     } catch (err: any) {

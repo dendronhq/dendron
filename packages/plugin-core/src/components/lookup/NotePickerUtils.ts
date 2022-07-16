@@ -165,11 +165,13 @@ export class NotePickerUtils {
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 
+    Logger.info({ ctx, msg: "pre:queryNotes", transformedQuery, originalQS });
     const resp = await engine.queryNotes({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
+    Logger.info({ ctx, msg: "post:queryNotes", transformedQuery, originalQS });
     let nodes = resp.data;
 
     if (!nodes) {
@@ -180,14 +182,16 @@ export class NotePickerUtils {
     // transformed query. We should do filtering prior to doing pagination cut off.
     nodes = filterPickerResults({ itemsToFilter: nodes, transformedQuery });
 
-    Logger.info({ ctx, msg: "post:queryNotes" });
+    Logger.info({ ctx, msg: "post:filterPickerResults" });
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;
       picker.offset = PAGINATE_LIMIT;
       picker.moreResults = true;
       nodes = nodes.slice(0, PAGINATE_LIMIT);
+      Logger.info({ ctx, msg: "truncate results" });
     } else {
       PickerUtilsV2.resetPaginationOpts(picker);
+      Logger.info({ ctx, msg: "notruncate results" });
     }
     const updatedItems = await Promise.all(
       nodes.map(async (ent) =>
@@ -202,7 +206,7 @@ export class NotePickerUtils {
     );
 
     const profile = getDurationMilliseconds(start);
-    Logger.info({ ctx, msg: "engine.query", profile });
+    Logger.info({ ctx, msg: "post:enhancePropForQuickInput", profile });
     return updatedItems;
   }
 

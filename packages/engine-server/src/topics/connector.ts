@@ -5,12 +5,9 @@ import {
   DVault,
   Time,
   ConfigUtils,
-} from "@dendronhq/common-all";
-import {
-  createFileWatcher,
-  createLogger,
   DLogger,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
+import { createFileWatcher, createLogger } from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "../config";

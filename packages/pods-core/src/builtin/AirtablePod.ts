@@ -14,8 +14,9 @@ import {
   RespV3,
   StatusCodes,
   VaultUtils,
+  DLogger,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
 import {
   NoteMetadataUtils,
   NoteMetadataValidationProps,

@@ -6,8 +6,9 @@ import {
   stringifyError,
   VaultUtils,
   WorkspaceOpts,
+  DLogger,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
+import { createLogger, resolvePath } from "@dendronhq/common-server";
 import { JSONSchemaType } from "ajv";
 import { Item } from "klaw";
 import _ from "lodash";

@@ -3,9 +3,9 @@ import {
   DVault,
   ERROR_STATUS,
   SchemaModuleProps,
+  DLogger,
 } from "@dendronhq/common-all";
 import {
-  DLogger,
   SchemaParserV2 as cSchemaParserV2,
   vault2Path,
 } from "@dendronhq/common-server";

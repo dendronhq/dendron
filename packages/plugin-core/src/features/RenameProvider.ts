@@ -8,8 +8,9 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  DLogger,
 } from "@dendronhq/common-all";
-import { DLogger, vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import { Logger } from "../logger";
 import _ from "lodash";
 import vscode from "vscode";

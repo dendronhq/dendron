@@ -54,8 +54,9 @@ import {
   FindNoteOpts,
   NotePropsMeta,
   UpdateNoteResp,
+  DLogger,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
+import { createLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
@@ -143,6 +144,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.config = readYAML(cpath, true) as IntermediateDendronConfig;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(this.config).note.fuzzThreshold,
+      logger: this.logger,
     });
     this.store = new FileStorage({
       engine: this,
@@ -326,7 +328,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       qs,
       onlyDirectChildren,
       originalQS,
-      logger: this.logger,
     });
     this.logger.info({ ctx, state: "post:fuseQueryNote" });
     // TODO: hack

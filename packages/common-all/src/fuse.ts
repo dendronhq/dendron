@@ -2,8 +2,11 @@ import Fuse from "fuse.js";
 import _, { ListIterator, NotVoid } from "lodash";
 import {
   ConfigUtils,
+  DateTime,
   DEngineMode,
+  DLogger,
   DNodeUtils,
+  NopLogger,
   NoteProps,
   NotePropsByIdDict,
   SchemaModuleDict,
@@ -94,6 +97,7 @@ export type SerializedFuseIndex = ReturnType<
 >;
 
 type FuseEngineOpts = {
+  logger?: DLogger;
   mode?: DEngineMode;
   /** If specified must be within 0-1 range. */
   fuzzThreshold: number;
@@ -140,6 +144,7 @@ export class FuseEngine {
   public schemaIndex: Fuse<SchemaProps>;
 
   private readonly threshold: number;
+  private readonly logger: DLogger;
 
   constructor(opts: FuseEngineOpts) {
     this.threshold =
@@ -153,6 +158,8 @@ export class FuseEngine {
       preset: "schema",
       threshold: this.threshold,
     });
+    this.logger =
+      opts.logger || new NopLogger({ name: "FuseEngine", level: "info" });
   }
 
   async querySchema({ qs }: { qs: string }): Promise<SchemaProps[]> {
@@ -186,14 +193,14 @@ export class FuseEngine {
     qs,
     onlyDirectChildren,
     originalQS,
-    logger,
   }: {
     qs: string;
     onlyDirectChildren?: boolean;
     originalQS: string;
-    logger?: logger;
   }): NoteIndexProps[] {
     let items: NoteIndexProps[];
+    const start = DateTime.now().toSeconds();
+    let profile: number;
 
     if (qs === "") {
       const results = this.notesIndex.search("root");
@@ -209,11 +216,19 @@ export class FuseEngine {
       const formattedQS = FuseEngine.formatQueryForFuse({ qs });
 
       let results = this.notesIndex.search(formattedQS);
+      profile = DateTime.now().toSeconds() - start;
+      this.logger.debug({ ctx: "queryNote", state: "post:search", profile });
 
       results = this.postQueryFilter({
         results,
         queryString: formattedQS,
         onlyDirectChildren,
+      });
+      profile = DateTime.now().toSeconds() - start;
+      this.logger.debug({
+        ctx: "queryNote",
+        state: "post:queryFilter",
+        profile,
       });
 
       if (originalQS === undefined) {
@@ -221,9 +236,17 @@ export class FuseEngine {
         originalQS = qs;
       }
       results = FuseEngine.sortResults({ results, originalQS });
+      profile = DateTime.now().toSeconds() - start;
+      this.logger.debug({
+        ctx: "queryNote",
+        state: "post:sortResults",
+        profile,
+      });
 
       items = _.map(results, (resp) => resp.item);
     }
+    profile = DateTime.now().toSeconds() - start;
+    this.logger.debug({ ctx: "queryNote", state: "exit", profile });
     return items;
   }
 

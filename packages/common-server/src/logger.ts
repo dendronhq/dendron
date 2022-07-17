@@ -6,33 +6,6 @@ import pino from "pino";
 
 export type LogLvl = "debug" | "info" | "error";
 
-export class Logger {
-  public name: string;
-  public level: string;
-  constructor(opts: { name: string; level: string }) {
-    this.name = opts.name;
-    this.level = opts.level;
-  }
-
-  private _log(msg: any) {
-    let ctx = "";
-    if (msg.ctx) {
-      ctx = msg.ctx;
-    }
-    // eslint-disable-next-line no-console
-    console.log(this.name, ctx, msg);
-  }
-  debug = (msg: any) => {
-    this._log(msg);
-  };
-  info = (msg: any) => {
-    this._log(msg);
-  };
-  error = (msg: any) => {
-    this._log(msg);
-  };
-}
-
 /** @deprecated Avoid using this function as it may leak file descriptors. Please see createDisposableLogger instead. */
 function createLogger(
   name?: string,

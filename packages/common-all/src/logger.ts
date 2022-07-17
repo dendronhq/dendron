@@ -14,14 +14,7 @@ export class NopLogger {
     this.level = opts.level;
   }
 
-  private _log(msg: any) {
-    let ctx = "";
-    if (msg.ctx) {
-      ctx = msg.ctx;
-    }
-    // eslint-disable-next-line no-console
-    // console.log(this.name, ctx, msg);
-  }
+  private _log(_msg: any) {}
   debug = (msg: any) => {
     this._log(msg);
   };

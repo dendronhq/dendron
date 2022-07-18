@@ -230,6 +230,10 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "select",
     enum: ["skip", "noPush", "noCommit", "sync"],
   },
+  "workspace.enableSmartRefs": {
+    type: "boolean",
+    group: "workspace",
+  },
   "preview.enableFMTitle": {
     type: "boolean",
     group: "preview",
@@ -448,38 +452,6 @@ export const dendronConfig: { [key: string]: Config } = {
   "publishing.hierarchy": {
     type: "object",
     group: "publishing",
-  },
-  version: {
-    type: "number",
-    group: "global",
-  },
-  enableFMTitle: {
-    type: "boolean",
-    group: "global",
-  },
-  enableNoteTitleForLink: {
-    type: "boolean",
-    group: "global",
-  },
-  enableMermaid: {
-    type: "boolean",
-    group: "global",
-  },
-  enablePrettyRefs: {
-    type: "boolean",
-    group: "global",
-  },
-  enableKatex: {
-    type: "boolean",
-    group: "global",
-  },
-  enableBackLinks: {
-    type: "boolean",
-    group: "global",
-  },
-  enableChildLinks: {
-    type: "boolean",
-    group: "global",
   },
   "dev.enablePreviewV2": {
     type: "boolean",

@@ -64,9 +64,7 @@ const ConfigureElement = (props: ConfigureElementProps) => {
           defaultChecked={props.default}
           onChange={handleCheckboxChange}
         >
-          {props.group === "global"
-            ? ConfigUtils.getConfigDescription(`global.${name}`)
-            : ConfigUtils.getConfigDescription(name)}
+          {ConfigUtils.getConfigDescription(name)}
         </Checkbox>
       );
     case "string":

@@ -395,6 +395,12 @@ export class WorkspaceWatcher {
       const files = args.files[0];
       const { vaults, wsRoot } = this._extension.getDWorkspace();
       const { oldUri, newUri } = files;
+
+      // No-op if we are not dealing with a Dendron note.
+      if (!NoteUtils.isNote(oldUri)) {
+        return;
+      }
+
       const oldVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
@@ -444,6 +450,12 @@ export class WorkspaceWatcher {
       const fname = DNodeUtils.fname(newUri.fsPath);
       const engine = this._extension.getEngine();
       const { vaults, wsRoot } = this._extension.getDWorkspace();
+
+      // No-op if we are not dealing with a Dendron note.
+      if (!NoteUtils.isNote(newUri)) {
+        return;
+      }
+
       const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,

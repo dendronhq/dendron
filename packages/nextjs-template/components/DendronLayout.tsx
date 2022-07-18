@@ -38,6 +38,7 @@ export default function DendronLayout(
         position: "fixed",
         overflow: "auto",
         height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+        backgroundColor: `transparent`,
       }}
       trigger={null}
     >

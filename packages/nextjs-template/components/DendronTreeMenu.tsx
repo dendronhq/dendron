@@ -44,19 +44,18 @@ export default function DendronTreeMenu(
     if (!noteActiveId || !tree) {
       return undefined;
     }
-
     logger.info({
       state: "useEffect:preCalculateTree",
     });
 
     // all parents should be in expanded position
-    const activeNoteIds = TreeUtils.getAllParents({
+    const newActiveNoteIds = TreeUtils.getAllParents({
       child2parent: tree.child2parent,
       noteId: noteActiveId,
     });
 
-    setActiveNoteIds(activeNoteIds);
-  }, [props.noteIndex, dendronRouter.query.id, noteActiveId]);
+    setActiveNoteIds(newActiveNoteIds);
+  }, [props.noteIndex, dendronRouter.query.id, noteActiveId, tree]);
 
   const { notes, collapsed, setCollapsed } = props;
 
@@ -98,7 +97,7 @@ export default function DendronTreeMenu(
     }
   };
 
-  return (
+  return noteActiveId ? (
     <MenuView
       {...props}
       roots={roots}
@@ -109,6 +108,8 @@ export default function DendronTreeMenu(
       collapsed={collapsed}
       activeNote={noteActiveId}
     />
+  ) : (
+    <></>
   );
 }
 
@@ -128,7 +129,7 @@ function MenuView({
   onMenuItemClick: (noteId: string) => void;
   onExpand: (noteId: string) => void;
   collapsed: boolean;
-  activeNote: string | undefined;
+  activeNote: string;
 } & Partial<NoteData>) {
   const ExpandIcon = useCallback(
     ({ isOpen, ...rest }: { isOpen: boolean }) => {
@@ -181,10 +182,6 @@ function MenuView({
     );
   };
 
-  if (activeNote) {
-    expandKeys.push(activeNote);
-  }
-
   return (
     <Menu
       key={String(collapsed)}
@@ -192,7 +189,7 @@ function MenuView({
       mode="inline"
       {...(!collapsed && {
         openKeys: expandKeys,
-        selectedKeys: expandKeys,
+        selectedKeys: [...expandKeys, activeNote],
       })}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}

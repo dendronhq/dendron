@@ -22,7 +22,7 @@ import {
 import { postVSCodeMessage } from "../utils/vscode";
 import ConfigureElement from "./ConfigureElements";
 import _, { debounce } from "lodash";
-import { dendronConfig } from "../utils/dendronConfig";
+import { dendronConfig, getSortedConfig } from "../utils/dendronConfig";
 
 const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   const [config, setConfig] = useState(engine.config);
@@ -40,7 +40,7 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
 
   useConfig({ opts: workspace });
   const { Header, Content, Sider } = Layout;
-  const items = Object.keys(dendronConfig).map((conf) => {
+  const items = getSortedConfig().map((conf) => {
     return {
       key: conf,
       label: _.startCase(dendronConfig[conf].group),
@@ -129,7 +129,7 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
                   size="middle"
                   style={{ display: "flex" }}
                 >
-                  {Object.keys(dendronConfig)
+                  {getSortedConfig()
                     .filter((conf) =>
                       _.lowerCase(conf).includes(_.lowerCase(searchString))
                     )

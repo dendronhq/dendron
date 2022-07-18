@@ -487,3 +487,19 @@ export const dendronConfig: { [key: string]: Config } = {
     group: "dev",
   },
 };
+
+const configSortOrder = [
+  "commands",
+  "workspace",
+  "preview",
+  "publishing",
+  "dev",
+];
+
+export const getSortedConfig = () => {
+  return Object.keys(dendronConfig).sort(
+    (a, b) =>
+      configSortOrder.indexOf(a.split(".")[0]) -
+      configSortOrder.indexOf(b.split(".")[0])
+  );
+};

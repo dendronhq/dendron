@@ -880,7 +880,7 @@ function findEndBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
   const lastNode = _.last(nodes);
   if (!lastNode) {
     // TODO: should not happen
-    throw Error("no nodes found");
+    throw Error("no nodes found for end-anchor");
   }
   return {
     type: "block-end",

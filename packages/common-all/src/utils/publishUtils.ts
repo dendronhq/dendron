@@ -22,31 +22,25 @@ export class PublishUtils {
     config: IntermediateDendronConfig
   ): Partial<SEOProps> {
     if (configIsV4(config)) {
-      const {
-        title,
-        twitter,
-        description: excerpt,
-        image,
-      } = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return { title, twitter, excerpt, image };
+      const { title, twitter, description, image } = ConfigUtils.getSite(
+        config
+      ) as DendronSiteConfig;
+      return { title, twitter, description, image };
     } else {
-      const {
-        title,
-        twitter,
-        description: excerpt,
-        image,
-      } = ConfigUtils.getPublishing(config).seo;
-      return { title, twitter, excerpt, image };
+      const { title, twitter, description, image } =
+        ConfigUtils.getPublishing(config).seo;
+      return { title, twitter, description, image };
     }
   }
 
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
-    const { title, created, updated, image } = note;
+    const { title, created, updated, image, desc } = note;
     const { excerpt, canonicalUrl, noindex, canonicalBaseUrl, twitter } =
       note.custom ? note.custom : ({} as any);
     return {
       title,
       excerpt,
+      description: desc || undefined,
       updated,
       created,
       canonicalBaseUrl,

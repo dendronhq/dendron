@@ -158,7 +158,7 @@ describe("GIVEN two TreeNodes", () => {
     const treeFive = { fname: "root", children: [childOne, childThree] };
     resp = TreeUtils.validateTreeNodes(treeOne, treeFive);
     expect(resp.error).toBeTruthy();
-    expect(resp.error?.message).toContain("Children differs");
+    expect(resp.error?.message).toContain("Mismatch at root's children");
 
     // Expect tree nodes to not be equal at root's grandchildren
     const grandChildTwo = { fname: "grandChildTwo", children: [] };

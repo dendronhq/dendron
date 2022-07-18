@@ -574,6 +574,50 @@ suite("REGENERATE_NOTE_ID", function () {
       });
     }
   );
+
+  describeMultiWS(
+    "GIVEN a note as an argument",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("THEN fix the provided note", async () => {
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        const oldNote = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
+        const oldId = oldNote.id;
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
+            scope: "file",
+            data: { note: oldNote },
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
+          expect(note?.id).toNotEqual(oldId);
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+        }
+      });
+    }
+  );
 });
 
 suite("FIND_INCOMPATIBLE_EXTENSIONS", function () {

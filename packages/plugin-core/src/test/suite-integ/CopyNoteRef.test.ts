@@ -95,6 +95,7 @@ suite("CopyNoteRef", function () {
               });
             },
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {
@@ -172,6 +173,7 @@ suite("CopyNoteRef", function () {
               });
             },
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {

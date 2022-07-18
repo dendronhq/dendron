@@ -12,6 +12,7 @@ import _ from "lodash";
 import path from "path";
 import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 import { TreeNote } from "./TreeNote";
 
@@ -76,6 +77,8 @@ export class NativeTreeView implements Disposable {
         this.onOpenTextDocument,
         this
       );
+
+      this.forceReveal({ treeView: this.treeView });
     });
   }
 
@@ -96,6 +99,18 @@ export class NativeTreeView implements Disposable {
             select: false,
           });
         });
+      }
+    }
+  }
+
+  private forceReveal({ treeView }: { treeView: TreeView<NoteProps> }) {
+    const maybeActiveEditor = VSCodeUtils.getActiveTextEditor();
+    if (maybeActiveEditor !== undefined) {
+      const activeNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+        maybeActiveEditor.document
+      );
+      if (activeNote !== undefined) {
+        treeView.reveal(activeNote);
       }
     }
   }

@@ -30,6 +30,7 @@ type InitialState = {
   graphDepth?: number;
   showBacklinks?: boolean;
   showOutwardLinks?: boolean;
+  showHierarchy?: boolean;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -45,6 +46,7 @@ const INITIAL_STATE: InitialState = {
   graphDepth: 1,
   showBacklinks: true,
   showOutwardLinks: true,
+  showHierarchy: true,
 };
 
 export { InitialState as IDEState };
@@ -93,6 +95,9 @@ export const ideSlice = createSlice({
     },
     setShowOutwardLinks: (state, action: PayloadAction<boolean>) => {
       state.showOutwardLinks = action.payload;
+    },
+    setShowHierarchy: (state, action: PayloadAction<boolean>) => {
+      state.showHierarchy = action.payload;
     },
   },
 });

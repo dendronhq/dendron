@@ -107,6 +107,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           graphDepth,
           showBacklinks,
           showOutwardLinks,
+          showHierarchy,
         } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
@@ -125,6 +126,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         }
         ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
         ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
+        ideDispatch(ideSlice.actions.setShowHierarchy(showHierarchy));
         break;
       }
       case SeedBrowserMessageType.onSeedStateChange: {
@@ -141,9 +143,9 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
         break;
       }
-      case GraphViewMessageEnum.toggleLinkedEdges: {
+      case GraphViewMessageEnum.toggleGraphEdges: {
         const cmsg = msg;
-        const { showBacklinks, showOutwardLinks } = cmsg.data;
+        const { showBacklinks, showOutwardLinks, showHierarchy } = cmsg.data;
         if (!_.isUndefined(showBacklinks)) {
           logger.info({ ctx, showBacklinks, msg: "showBacklinks" });
           ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
@@ -151,6 +153,11 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         if (!_.isUndefined(showOutwardLinks)) {
           logger.info({ ctx, showOutwardLinks, msg: "showOutwardLinks" });
           ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
+        }
+
+        if (!_.isUndefined(showHierarchy)) {
+          logger.info({ ctx, showHierarchy, msg: "showHierarchy" });
+          ideDispatch(ideSlice.actions.setShowHierarchy(showHierarchy));
         }
         break;
       }

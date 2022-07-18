@@ -30,6 +30,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
   private _graphDepth: number | undefined;
   private _showBacklinks: boolean | undefined;
   private _showOutwardLinks: boolean | undefined;
+  private _showHierarchy: boolean | undefined;
 
   constructor(extension: IDendronExtension) {
     this._ext = extension;
@@ -42,13 +43,16 @@ export class GraphPanel implements vscode.WebviewViewProvider {
 
     this.showOutwardLinks =
       MetadataService.instance().graphPanelShowOutwardLinks ?? true;
+
+    this.showHierarchy =
+      MetadataService.instance().graphPanelShowHierarchy ?? true;
   }
 
-  private get graphDepth(): number | undefined {
+  public get graphDepth(): number | undefined {
     return this._graphDepth;
   }
 
-  private set graphDepth(depth: number | undefined) {
+  public set graphDepth(depth: number | undefined) {
     if (depth) {
       this._graphDepth = depth;
       this.postMessage({
@@ -76,7 +80,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         displayBacklinks
       );
       this.postMessage({
-        type: GraphViewMessageEnum.toggleLinkedEdges,
+        type: GraphViewMessageEnum.toggleGraphEdges,
         data: {
           showBacklinks: this._showBacklinks,
         },
@@ -102,7 +106,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
         displayOutwardLinks
       );
       this.postMessage({
-        type: GraphViewMessageEnum.toggleLinkedEdges,
+        type: GraphViewMessageEnum.toggleGraphEdges,
         data: {
           showOutwardLinks: this._showOutwardLinks,
         },
@@ -111,6 +115,32 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       // Save the setting update into persistance storage:
       MetadataService.instance().graphPanelShowOutwardLinks =
         displayOutwardLinks;
+    }
+  }
+
+  public get showHierarchy(): boolean | undefined {
+    return this._showHierarchy;
+  }
+
+  public set showHierarchy(displayHierarchy: boolean | undefined) {
+    if (
+      !_.isUndefined(displayHierarchy) &&
+      this._showHierarchy !== displayHierarchy
+    ) {
+      this._showHierarchy = displayHierarchy;
+      VSCodeUtils.setContext(
+        DendronContext.GRAPH_PANEL_SHOW_HIERARCHY,
+        displayHierarchy
+      );
+      this.postMessage({
+        type: GraphViewMessageEnum.toggleGraphEdges,
+        data: {
+          showHierarchy: this._showHierarchy,
+        },
+        source: DMessageSource.vscode,
+      });
+      // Save the setting update into persistance storage:
+      MetadataService.instance().graphPanelShowHierarchy = displayHierarchy;
     }
   }
 
@@ -217,7 +247,8 @@ export class GraphPanel implements vscode.WebviewViewProvider {
             graphTheme ||
             this.graphDepth ||
             this.showBacklinks ||
-            this.showOutwardLinks)
+            this.showOutwardLinks ||
+            this.showHierarchy)
         ) {
           this._view.webview.postMessage({
             type: GraphViewMessageEnum.onGraphLoad,
@@ -227,6 +258,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
               graphDepth: this.graphDepth,
               showBacklinks: this.showBacklinks,
               showOutwardLinks: this.showOutwardLinks,
+              showHierarchy: this.showHierarchy,
             },
             source: "vscode",
           });

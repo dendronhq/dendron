@@ -52,7 +52,7 @@ import { NoteDictsUtils } from "./noteDictsUtils";
  * Utilities for dealing with nodes
  */
 export class DNodeUtils {
-  static addChild(parent: DNodeProps, child: DNodeProps) {
+  static addChild(parent: NotePropsMeta, child: NotePropsMeta) {
     parent.children = Array.from(new Set(parent.children).add(child.id));
     child.parent = parent.id;
   }
@@ -300,18 +300,10 @@ export class NoteUtils {
 
   static deleteChildFromParent(opts: {
     childToDelete: NoteProps;
-    notes: NotePropsByIdDict;
+    parent: NoteProps;
   }): NoteChangeEntry[] {
     const changed: NoteChangeEntry[] = [];
-    const { childToDelete, notes } = opts;
-    let parent;
-    if (childToDelete.parent) {
-      parent = notes[childToDelete.parent];
-    } else {
-      throw new DendronError({
-        message: `No parent found for ${childToDelete.fname}`,
-      });
-    }
+    const { childToDelete, parent } = opts;
 
     const prevParentState = { ...parent };
     parent.children = _.reject<string[]>(

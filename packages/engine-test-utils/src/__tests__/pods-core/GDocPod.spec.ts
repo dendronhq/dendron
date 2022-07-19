@@ -205,7 +205,7 @@ describe("GDoc import pod", () => {
         const mockedAxios = axios as jest.Mocked<typeof axios>;
         result = response;
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
-        await engine.writeNote(existingNote, { newNode: true });
+        await engine.writeNote(existingNote);
         mockedAxios.get.mockResolvedValue(result);
         await pod.execute({
           engine,
@@ -243,7 +243,7 @@ describe("GDoc import pod", () => {
         result = response;
         existingNote.custom.revisionId = "jslkdhsal";
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
-        await engine.writeNote(existingNote, { newNode: true });
+        await engine.writeNote(existingNote);
         mockedAxios.get.mockResolvedValue(result);
         stubWindow(undefined);
         const { importedNotes } = await pod.execute({
@@ -278,7 +278,7 @@ describe("GDoc import pod", () => {
         result = response;
         existingNote.custom.revisionId = "jslkdhsa";
         pod.getAllDocuments = jest.fn().mockReturnValue({ docIdsHashMap });
-        await engine.writeNote(existingNote, { newNode: true });
+        await engine.writeNote(existingNote);
         mockedAxios.get.mockResolvedValue(result);
         const resp = {
           title: "Yes",

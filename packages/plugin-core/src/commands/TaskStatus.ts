@@ -155,7 +155,7 @@ export class TaskStatusCommand extends BasicCommand<
       status: opts.setStatus,
     };
 
-    await this._ext.getEngine().writeNote(opts.note, { updateExisting: true });
+    await this._ext.getEngine().writeNote(opts.note);
 
     delayedUpdateDecorations();
 

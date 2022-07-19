@@ -473,7 +473,7 @@ export class WorkspaceWatcher {
         noteHydrated: engine.notes[noteRaw.id],
       });
       newNote.title = NoteUtils.genTitle(fname);
-      await engine.writeNote(newNote, { updateExisting: true });
+      await engine.writeNote(newNote);
     } catch (error: any) {
       Sentry.captureException(error);
       throw error;

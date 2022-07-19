@@ -253,7 +253,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       }
     });
     if (shouldUpdate) {
-      await engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note);
     }
   };
 
@@ -281,9 +281,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     switch (resp) {
       case MergeConflictOptions.OVERWRITE_LOCAL: {
         conflict.conflictEntry.fname = conflict.conflictNote.fname;
-        await engine.writeNote(conflict.conflictEntry, {
-          updateExisting: true,
-        });
+        await engine.writeNote(conflict.conflictEntry);
         break;
       }
       case MergeConflictOptions.SKIP:

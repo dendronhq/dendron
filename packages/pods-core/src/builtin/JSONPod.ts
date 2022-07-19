@@ -43,9 +43,7 @@ export class JSONImportPod extends ImportPod {
       destName,
       concatenate,
     });
-    await Promise.all(
-      _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
-    );
+    await Promise.all(_.map(notes, (n) => engine.writeNote(n)));
     return { importedNotes: notes };
   }
 

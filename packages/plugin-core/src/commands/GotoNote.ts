@@ -316,7 +316,7 @@ export class GotoNoteCommand extends BasicCommand<
           if (note.stub) {
             delete note.stub;
             note = _.merge(note, overrides || {});
-            await client.writeNote(note, { updateExisting: true });
+            await client.writeNote(note);
           }
         }
 

@@ -164,7 +164,7 @@ const NOTES = {
         })
       )[0];
       note.custom = { bond: 43 };
-      await engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note);
       const newNote = (
         await engine.findNotes({
           fname: "foo",
@@ -620,6 +620,59 @@ const NOTES_MULTI = {
           actual: updatedChild?.note.parent,
           expected: "updatedID",
           msg: "updated child's parent should be updatedID.",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  BODY_UPDATED: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
+      fooUpdated.body = "updatedBody";
+      const changes = await engine.writeNote(fooUpdated);
+      const createEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "create"
+      );
+
+      const deleteEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "delete"
+      );
+
+      const updateEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "update"
+      ) as NoteChangeUpdateEntry[];
+
+      return [
+        {
+          actual: updateEntries.length,
+          expected: 0,
+          msg: "0 updates should happen.",
+        },
+        {
+          actual: deleteEntries.length,
+          expected: 0,
+          msg: "0 delete should happen.",
+        },
+        {
+          actual: createEntries.length,
+          expected: 1,
+          msg: "1 create should happen.",
+        },
+        {
+          actual: createEntries[0].note.fname,
+          expected: "foo",
+          msg: "foo note is created.",
+        },
+        {
+          actual: createEntries[0].note.body,
+          expected: "updatedBody",
+          msg: "created foo note's body is updatedBody",
         },
       ];
     },

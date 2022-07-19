@@ -315,9 +315,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             // If note exists and its a stub note, delete stub and create new note
             if (note.stub) {
               delete note.stub;
-              const resp = await engine.writeNote(note, {
-                updateExisting: true,
-              });
+              const resp = await engine.writeNote(note);
               if (resp.error) {
                 return {
                   error: ErrorFactory.createInvalidStateError({

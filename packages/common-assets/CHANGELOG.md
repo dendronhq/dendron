@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.104.0 (2022-07-19)
+
+**Note:** Version bump only for package @dendronhq/common-assets
+
+
+
+
+
 # 0.103.0 (2022-07-12)
 
 **Note:** Version bump only for package @dendronhq/common-assets

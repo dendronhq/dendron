@@ -1,7 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
-
-// const vscodefs = require("vscode").workspace.fs;
+const CopyPlugin = require("copy-webpack-plugin");
 
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 /** @type WebpackConfig */
@@ -38,15 +37,22 @@ const webExtensionConfig = {
       http: require.resolve("stream-http"),
       https: require.resolve("https-browserify"),
       constants: require.resolve("constants-browserify"),
-      // fs: vscodefs, // TODO: This will likely cause a lot of breaks. See def of vscode's FS at `export interface FileSystem`
+      fs: path.resolve(__dirname, "src/web/fs-fallback.js"), // TODO: Currently an empty export
+      child_process: false, // TODO: Currently an empty export
+      net: false,
+      tls: false,
+      dns: false,
+      zlib: false,
+      http2: false,
+      "node-loader": false,
     },
   },
   module: {
     rules: [
       {
-        // test: /\.ts$/,
+        test: /\.ts$/,
         exclude: /node_modules/,
-        include: path.resolve(__dirname, "src/web/"),
+        // include: path.resolve(__dirname, "src/web/"),
         use: [
           {
             loader: "ts-loader",
@@ -69,16 +75,28 @@ const webExtensionConfig = {
           },
         ],
       },
+      {
+        test: /.node$/,
+        loader: "node-loader",
+      },
     ],
   },
   plugins: [
     new webpack.ProvidePlugin({
-      process: "process/browser", // provide a shim for the global `process` variable
+      process: "process/browser.js", // provide a shim for the global `process` variable
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
+      ],
     }),
   ],
-  externals: {
-    vscode: "commonjs vscode", // ignored because it doesn't exist
-  },
+  externals: [
+    {
+      vscode: "commonjs vscode", // ignored because it doesn't exist
+    },
+    /\.\/webpack-require-hack/,
+  ],
   performance: {
     hints: false,
   },

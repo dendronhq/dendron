@@ -33,7 +33,7 @@ import {
   RemarkUtils,
   visit,
 } from "@dendronhq/engine-server";
-import { error } from "console";
+// import { error } from "console";
 import _ from "lodash";
 import path from "path";
 import { Location } from "vscode";
@@ -530,7 +530,7 @@ export class MoveHeaderCommand extends BasicCommand<
           note!.vault
         );
         if (ErrorUtils.isErrorResp(resp)) {
-          throw error;
+          throw new Error();
         }
         const _note = resp.data;
         const linksToUpdate = this.findLinksToUpdate(

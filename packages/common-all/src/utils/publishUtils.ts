@@ -40,7 +40,7 @@ export class PublishUtils {
     return {
       title,
       excerpt,
-      description: desc || excerpt || undefined,
+      description: excerpt || desc || undefined,
       updated,
       created,
       canonicalBaseUrl,

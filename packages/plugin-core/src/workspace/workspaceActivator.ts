@@ -184,7 +184,7 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
   // check for vaults with same name
   const uniqueVaults = new Set<string>();
   const duplicates = new Set<string>();
-  vaults.forEach(vault => {
+  vaults.forEach((vault) => {
     const vaultName = VaultUtils.getName(vault);
     if (uniqueVaults.has(vaultName)) duplicates.add(vaultName);
     uniqueVaults.add(vaultName);
@@ -539,14 +539,6 @@ export class WorkspaceActivator {
     // setup services
     context.subscriptions.push(TextDocumentServiceFactory.create(ext));
 
-    // Setup tree viiew
-    const providerConstructor = function () {
-      return new EngineNoteProvider(engine);
-    };
-    if (!opts?.skipTreeView) {
-      await initTreeView({ context, providerConstructor });
-    }
-
     // Reload
     WSUtils.showActivateProgress();
     const start = process.hrtime();
@@ -581,6 +573,16 @@ export class WorkspaceActivator {
     if (stage !== "test") {
       ext.activateWatchers();
       togglePluginActiveContext(true);
+    }
+
+    // Setup tree view
+    // This needs to happen after activation because we need the engine.
+    const providerConstructor = function () {
+      return new EngineNoteProvider(engine);
+    };
+    if (!opts?.skipTreeView) {
+      await initTreeView({ context, providerConstructor });
+      vscode.commands.executeCommand("dendron.treeView.focus");
     }
 
     // Add the current workspace to the recent workspace list. The current

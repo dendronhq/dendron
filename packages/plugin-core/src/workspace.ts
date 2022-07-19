@@ -713,6 +713,18 @@ export class DendronExtension implements IDendronExtension {
         graphPanel.showOutwardLinks = true;
       })
     );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_HIERARCHY_CHECKED.key,
+      sentryReportingCallback(() => {
+        graphPanel.showHierarchy = false;
+      })
+    );
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.GRAPH_PANEL_SHOW_HIERARCHY.key,
+      sentryReportingCallback(() => {
+        graphPanel.showHierarchy = true;
+      })
+    );
     return vscode.window.registerWebviewViewProvider(
       GraphPanel.viewType,
       graphPanel

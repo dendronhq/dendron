@@ -82,7 +82,7 @@ suite("AirtableExportCommand", function () {
               },
             },
           };
-          await engine.writeNote(note, { updateExisting: true });
+          await engine.writeNote(note);
           const payload = await cmd.enrichInputs(config);
           const airtableId = "airtable-proj.beta";
           const DendronId = note.id;

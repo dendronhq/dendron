@@ -15,7 +15,7 @@ import {
   DStore,
   DVault,
   EngineDeleteNotePayload,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
@@ -228,7 +228,7 @@ export class FileStorage implements DStore {
   /**
    *
    * @param id id of note to be deleted
-   * @param opts EngineDeleteOptsV2 the flag `replaceWithNewStub` is used
+   * @param opts EngineDeleteOpts the flag `replaceWithNewStub` is used
    *             for a specific case where this method is called from
    *             `renameNote`. TODO: remove this flag so that this is handled
    *             automatically.
@@ -236,7 +236,7 @@ export class FileStorage implements DStore {
    */
   async deleteNote(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<StoreDeleteNoteResp> {
     const ctx = "deleteNote";
     if (id === "root") {
@@ -319,7 +319,7 @@ export class FileStorage implements DStore {
           notesById: this.notes,
           notesByFname: this.noteFnames,
         });
-        const changed = await this.writeNote(replacingStub, { newNode: true });
+        const changed = await this.writeNote(replacingStub);
         out.push({ note: noteToDelete, status: "delete" });
 
         if (changed.data) {
@@ -389,7 +389,7 @@ export class FileStorage implements DStore {
 
   async deleteSchema(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<DEngineDeleteSchemaResp> {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
@@ -959,7 +959,6 @@ export class FileStorage implements DStore {
       return (
         await this.bulkWriteNotes({
           notes: notesChangedEntries.map((ent) => ent.note),
-          opts: { updateExisting: true },
         })
       ).data;
     }
@@ -997,7 +996,7 @@ export class FileStorage implements DStore {
       // but we don't want that in this case. we need to add the old note's children back in
       newNote.children = oldNote.children;
 
-      const out = await this.writeNote(newNote, { updateExisting: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     } else {
       // The file is being renamed to a new file.
@@ -1024,14 +1023,13 @@ export class FileStorage implements DStore {
         msg: "writeNewNote:pre",
         note: NoteUtils.toLogObj(newNote),
       });
-      const out = await this.writeNote(newNote, { newNode: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await this.bulkWriteNotes({
       notes: notesChangedEntries.map((ent) => ent.note),
-      opts: { updateExisting: true },
     });
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
@@ -1108,7 +1106,9 @@ export class FileStorage implements DStore {
   }
 
   /**
-   * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note
+   * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note that has a different id.
+   * If the existing and new note have the same id, then do nothing.
+   *
    * @param param0
    * @returns - Changed Entries
    */
@@ -1133,10 +1133,12 @@ export class FileStorage implements DStore {
       notesById: this.notes,
       notesByFname: this.noteFnames,
     };
+    const isSameNote = existingNote ? existingNote.id === note.id : false;
+
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
-    if (existingNote) {
+    if (existingNote && !isSameNote) {
       // make sure existing note actually has a parent.
       if (!existingNote.parent) {
         // TODO: We should be able to handle rewriting of root. This happens
@@ -1184,6 +1186,8 @@ export class FileStorage implements DStore {
           status: "update",
         });
       });
+
+      changed.push({ note: existingNote, status: "delete" });
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
@@ -1232,22 +1236,12 @@ export class FileStorage implements DStore {
       maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"]),
     });
 
-    // don't count as delete if we're updating existing note
-    // we need to preserve the ids, otherwise can result in data conflict
-    let noDelete = false;
-    if (maybeNote?.stub || opts?.updateExisting) {
-      note = { ...maybeNote, ...note };
-      note = _.omit(note, "stub");
-      if (opts?.updateExisting) noDelete = true;
-    }
-
-    if (!opts?.updateExisting) {
-      changedEntries = await this._writeNewNote({
-        note,
-        existingNote: maybeNote,
-        opts,
-      });
-    }
+    // Override existing note if ids are different
+    changedEntries = await this._writeNewNote({
+      note,
+      existingNote: maybeNote,
+      opts,
+    });
 
     // add schema if applicable
     const schemaMatch = SchemaUtils.matchPath({
@@ -1336,9 +1330,6 @@ export class FileStorage implements DStore {
         .map((ent) => this.updateNote(ent))
     );
 
-    if (maybeNote && !noDelete) {
-      changedEntries.push({ note: maybeNote, status: "delete" });
-    }
     changedEntries.push({ note, status: "create" });
     this.logger.info({
       ctx,

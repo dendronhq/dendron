@@ -339,6 +339,12 @@ export class NoteUtils {
     wsRoot: string;
   }): NoteChangeEntry[] {
     const { note, noteDicts, createStubs, wsRoot } = opts;
+    const changed: NoteChangeEntry[] = [];
+
+    // Ignore if root note
+    if (DNodeUtils.isRoot(note)) {
+      return changed;
+    }
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
     const parent = NoteDictsUtils.findByFname(
       parentPath,
@@ -346,7 +352,6 @@ export class NoteUtils {
       note.vault
     )[0];
 
-    const changed: NoteChangeEntry[] = [];
     if (parent) {
       const prevParentState = { ...parent };
       DNodeUtils.addChild(parent, note);

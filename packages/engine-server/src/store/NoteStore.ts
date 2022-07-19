@@ -90,6 +90,16 @@ export class NoteStore implements Disposable, INoteStore<string> {
   }
 
   /**
+   * See {@link INoteStore.bulkGet}
+   */
+  async bulkGet(keys: string[]): Promise<RespV3<NoteProps>[]> {
+    const ctx = "NoteStore:bulkGet";
+    this._logger.info({ ctx, msg: `Bulk getting NoteProps for ${keys}` });
+
+    return Promise.all(keys.map((key) => this.get(key)));
+  }
+
+  /**
    * See {@link INoteStore.getMetadata}
    */
   async getMetadata(key: string): Promise<RespV3<NotePropsMeta>> {

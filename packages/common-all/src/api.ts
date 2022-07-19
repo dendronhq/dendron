@@ -10,7 +10,7 @@ import {
   DNodeProps,
   DVault,
   EngineDeleteNotePayload,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -138,7 +138,7 @@ export type EngineWriteRequest = {
 } & { ws: string };
 export type EngineDeleteRequest = {
   id: string;
-  opts?: EngineDeleteOptsV2;
+  opts?: EngineDeleteOpts;
 } & { ws: string };
 export type EngineBulkAddRequest = {
   opts: BulkWriteNotesOpts;
@@ -172,7 +172,7 @@ export type GetLinksRequest = {
 
 export type SchemaDeleteRequest = {
   id: string;
-  opts?: EngineDeleteOptsV2;
+  opts?: EngineDeleteOpts;
 } & Partial<WorkspaceRequest>;
 export type SchemaReadRequest = {
   id: string;

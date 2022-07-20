@@ -336,6 +336,7 @@ export async function _activate(
         wsRoot: maybeWsRoot,
         engine: resp.data.engine,
         wsService,
+        opts,
       });
       if (respActivate.error) {
         return false;

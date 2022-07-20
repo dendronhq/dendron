@@ -588,6 +588,11 @@ type UserProfileProps = {
    * Email of user. Retrieved from initial survey.
    */
   email?: string;
+
+  /**
+   * Did the user express interest in using Dendron for a team?
+   */
+  teamIntent?: boolean;
 };
 
 // platform props

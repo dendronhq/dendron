@@ -82,6 +82,10 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
           LinkType: LinkType.WEBSITE,
           href: data.href,
         });
+        // some questions signal intent
+        if (data.href.endsWith("98f6d928-3f61-49fb-9c9e-70c27d25f838")) {
+          AnalyticsUtils.identify({ teamIntent: true });
+        }
       }
       return LinkType.WEBSITE;
     }

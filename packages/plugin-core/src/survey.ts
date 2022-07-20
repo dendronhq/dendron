@@ -220,7 +220,6 @@ export class UseCaseSurvey extends DendronQuickPickSurvey {
       { label: "Team knowledge base" },
       { label: "Todos and Agenda" },
       { label: "Meeting notes" },
-      { label: "Publishing" },
       { label: "Research" },
       { label: "Other" },
     ];
@@ -269,6 +268,7 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
       { label: PriorTools.OneNote },
       { label: PriorTools.Obsidian },
       { label: PriorTools.Evernote },
+      { label: PriorTools.Confluence },
       { label: PriorTools.GoogleKeep },
       { label: PriorTools.Other },
     ];
@@ -300,7 +300,7 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
 
   static create() {
     const title =
-      "Dendron lets you easily publish your notes. Do you have any plans to publish your notes?";
+      "Dendron lets you publish your notes as a static website. Is this something you'd be interested in?";
     const choices = Object.keys(PublishingUseCaseSurvey.CHOICES).map((key) => {
       return { label: key };
     });

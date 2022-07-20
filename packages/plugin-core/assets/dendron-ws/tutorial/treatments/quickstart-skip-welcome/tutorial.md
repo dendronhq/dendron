@@ -2,7 +2,7 @@
 id: c1bs7wsjfbhb0zipaywqins
 title: Quickstart
 desc: ""
-updated: 1657554645347
+updated: 1658180875356
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
@@ -74,6 +74,10 @@ You are currently in the tutorial vault (a vault is the folder where your notes 
 
 Congrats, you finished the Dendron tutorial!
 
+Was there anything **unclear or buggy** about this tutorial? Please [**report it**](https://github.com/dendronhq/dendron/discussions/3266) so we can **make it better**!
+
+## Next Steps
+
 Depending on your needs, here are some common next steps:
 
 - I want to **start writing**: [Create a daily journal note](command:dendron.createDailyJournalNote) ([docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd))
@@ -89,6 +93,8 @@ Depending on your needs, here are some common next steps:
 - I want to explore **advanced features**: See [next steps](https://wiki.dendron.so/notes/TflY5kn29HOLpp1pWT9tP) for longer walkthroughs and advanced functionality!
 
 - I want to start clean with a **new vault at a custom location**: Run [Dendron: Initialize Workspace](command:dendron.initWS) from the command prompt (or click this link) to start from a clean slate
+
+- I want to use Dendron as a **knowledge base for my team**: Read the [Dendron team setup](https://wiki.dendron.so/notes/98f6d928-3f61-49fb-9c9e-70c27d25f838) to get started
 
 > Coming from Obsidian? Click [here](command:dendron.importObsidianPod) to import your Obsidian notes (or any markdown notes) into Dendron to see how they look.
 

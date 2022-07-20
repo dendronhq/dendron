@@ -148,6 +148,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     "AND when cancelled",
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 5e3,
     },
     () => {
       test("THEN create no notes", async () => {
@@ -195,6 +196,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     "GIVEN broken link with alias",
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 5e3,
     },
     () => {
       test("THEN fix link", async () => {

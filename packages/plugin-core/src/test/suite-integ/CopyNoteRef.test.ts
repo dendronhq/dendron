@@ -95,6 +95,7 @@ suite("CopyNoteRef", function () {
               });
             },
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {
@@ -172,6 +173,7 @@ suite("CopyNoteRef", function () {
               });
             },
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {
@@ -255,6 +257,7 @@ suite("CopyNoteRef", function () {
       "AND WHEN reference entire note",
       {
         preSetupHook: ENGINE_HOOKS.setupBasic,
+        timeout: 5e3,
       },
       () => {
         test("THEN generate note to note", async () => {

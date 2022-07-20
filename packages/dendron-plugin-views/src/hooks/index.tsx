@@ -78,7 +78,10 @@ export const useRenderedNoteBody = ({
 };
 
 /**
- * Initialize mermaid if it is enabled
+ * Initialize mermaid if it is enabled in the config file.
+ * Converts all divs with the class "mermaid" into svgs.
+ *
+ * https://mermaid-js.github.io/mermaid/#/
  */
 export const useMermaid = ({
   config,

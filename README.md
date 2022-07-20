@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-210-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-211-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -471,6 +471,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/Phoebian"><img src="https://avatars.githubusercontent.com/u/11403336?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Phoebian</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=Phoebian" title="Documentation">📖</a></td>
     <td align="center"><a href="https://soltorgsgymnasiet.se"><img src="https://avatars.githubusercontent.com/u/625655?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrik Grip-Jansson</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=kap42" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Akap42" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/Sjiep"><img src="https://avatars.githubusercontent.com/u/5003111?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Robert van Kints</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ASjiep" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/patchworquill"><img src="https://avatars.githubusercontent.com/u/6552507?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Patrick Wilkie</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Apatchworquill" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

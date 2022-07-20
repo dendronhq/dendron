@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Extension Tests in VS Code",
+      "type": "extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentKind=web",
+        "--extensionTestsPath=${workspaceFolder}/dist/src/test/suite/index"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/src/**/*.js"
+      ],
+      "preLaunchTask": "npm: watch-web"
+    }
+  ]
+}

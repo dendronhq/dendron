@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "out",
+    "rootDir": "src",
+    "declaration": false,
+    "skipLibCheck": true,
+    "strictNullChecks": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*-spec.ts",
+    "**/*.d.ts"
+  ],
+  // "types": [
+  //   // "mocha",
+  //   "vscode"
+  // ]
+}

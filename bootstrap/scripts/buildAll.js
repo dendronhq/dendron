@@ -26,5 +26,6 @@ $(
 $(`npx lerna run build --scope "@dendronhq/engine-test-utils"`);
 $(`npx lerna run build --scope "@dendronhq/dendron-plugin-views"`);
 $(`npx lerna run build --scope "@dendronhq/plugin-core"`);
+$(`npx lerna run build --scope "@dendronhq/plugin-web"`);
 $(`npx yarn dendron dev sync_assets --fast`);
 console.log("done");

@@ -1,0 +1,55 @@
+{
+  "name": "@dendronhq/plugin-web",
+  "version": "0.103.0",
+  "description": "Web Extension Host for Dendron",
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/$PKG_NAME"
+  },
+  "author": {
+    "name": "Dendron INC",
+    "email": "eng@dendron.so",
+    "url": "https://www.dendron.so"
+  },
+  "keywords": [
+    "common"
+  ],
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib && rimraf coverage",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean",
+    "build": "yarn compile",
+    "buildCI": "yarn compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "test": "vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=out/test/suite/index.js"
+  },
+  "dependencies": {
+    "@dendronhq/common-all": "^0.103.0",
+    "@types/webpack-env": "^1.17.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "@types/vscode": "^1.69.0",
+    "@types/webpack-env": "^1.17.0",
+    "@vscode/test-web": "^0.0.27",
+    "mocha": "^10.0.0",
+    "process": "^0.11.10",
+    "rimraf": "^2.6.2",
+    "ts-loader": "^9.3.1",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "engines": {
+    "vscode": "^1.62.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

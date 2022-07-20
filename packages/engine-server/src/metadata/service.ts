@@ -38,6 +38,7 @@ export enum PriorTools {
   Obsidian = "Obsidian",
   Evernote = "Evernote",
   GoogleKeep = "Google Keep",
+  Confluence = "Confluence",
   Other = "Other",
 }
 

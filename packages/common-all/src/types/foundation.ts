@@ -244,6 +244,7 @@ export type SEOProps = {
   updated: number;
   created: number;
   excerpt?: string;
+  description?: string;
   image?: DNodeImage;
   /**
    * Use as root canonical url for all published notes

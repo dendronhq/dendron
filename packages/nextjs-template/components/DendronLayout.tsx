@@ -155,7 +155,7 @@ export default function DendronLayout(
           marginTop: 64,
         }}
       >
-        <Layout className="site-layout" style={{ flexDirection: "row" }}>
+        <Layout className="site-layout">
           <Layout
             className="site-layout-sidebar"
             style={{

@@ -1991,6 +1991,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "VoltCruelerz",
+      "name": "Michael Greene",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4068550?v=4",
+      "profile": "https://www.linkedin.com/in/michael-greene-8260004a/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

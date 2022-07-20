@@ -156,7 +156,7 @@ export default function DendronLayout(
         }}
       >
         <Layout className="site-layout">
-          <Layout
+          <div
             className="site-layout-sidebar"
             style={{
               flex: "0 0 auto",
@@ -174,7 +174,7 @@ export default function DendronLayout(
             }}
           >
             {sidebar}
-          </Layout>
+          </div>
           <Layout
             className="side-layout-main"
             style={{

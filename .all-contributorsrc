@@ -2000,6 +2000,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "liby",
+      "name": "Bryan Lee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38807139?v=4",
+      "profile": "https://liby.github.io/notes",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

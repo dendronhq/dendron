@@ -34,6 +34,8 @@ $(
 
 $(`npx lerna run buildCI --scope "@dendronhq/engine-test-utils"`);
 
+$(`npx lerna run buildCI --scope "@dendronhq/plugin-common"`);
+
 $(`npx lerna run buildCI --scope "@dendronhq/plugin-core"`);
 
 if (TEST_NEXT_TEMPLATE) {

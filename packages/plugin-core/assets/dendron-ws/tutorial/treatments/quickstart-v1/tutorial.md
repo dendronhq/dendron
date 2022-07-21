@@ -2,7 +2,7 @@
 id: c1bs7wsjfbhb0zipaywqv1
 title: Tutorial
 desc: ""
-updated: 1658342257809
+updated: 1658447800901
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
@@ -17,7 +17,7 @@ You are currently in the tutorial vault (a vault is the folder where your notes 
 1. Use `Ctrl+L` / `Cmd+L` to bring up the lookup prompt
 1. Type `dendron` and select `Create New`
 
-- > NOTE: After you press enter, Dendron will create and open the `dendron` note. Use `<ALT>-<TAB>/<WINDOW>-<TAB>` to come back to this note
+- > NOTE: After you press enter, Dendron will create and open the `dendron` note. Use `<CTRL>-<TAB>` to come back to this note
 
 You just created your first note!
 

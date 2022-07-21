@@ -82,6 +82,22 @@
       "preLaunchTask": "npm: watch-web"
     },
     {
+      "name": "Plugin Web Extension Tests in VS Code",
+      "type": "extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentKind=web",
+        "--extensionTestsPath=${workspaceFolder}/dist/web/test/suite/index"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/web/**/*.js"
+      ],
+      "preLaunchTask": "npm: watch-web"
+    },
+    {
       "name": "Run Extension - webpack",
       "type": "extensionHost",
       "request": "launch",
@@ -184,15 +200,6 @@
       ],
       "outFiles": [
         "${workspaceFolder}/out/src/test/**/*.js"
-      ]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": [
-        "Run Extension",
-        "Attach to Server"
       ]
     }
   ]

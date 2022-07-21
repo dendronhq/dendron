@@ -1159,7 +1159,7 @@ export class FileStorage implements DStore {
       // so that it doesn't hold the deleted existing note's id as children
       NoteUtils.deleteChildFromParent({
         childToDelete: existingNote,
-        notes: this.notes,
+        parent,
       });
 
       // then update parent note of existing note
@@ -1326,11 +1326,19 @@ export class FileStorage implements DStore {
     });
     await Promise.all(
       [note]
-        .concat(changedEntries.map((entry) => entry.note))
+        .concat(
+          changedEntries
+            .filter((entry) => entry.status !== "delete")
+            .map((entry) => entry.note)
+        )
         .map((ent) => this.updateNote(ent))
     );
 
-    changedEntries.push({ note, status: "create" });
+    if (maybeNote && maybeNote.id === note.id) {
+      changedEntries.push({ prevNote: maybeNote, note, status: "update" });
+    } else {
+      changedEntries.push({ note, status: "create" });
+    }
     this.logger.info({
       ctx,
       msg: "exit",

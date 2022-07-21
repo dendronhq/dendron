@@ -193,7 +193,8 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     if (
       args.cmd === NoteCommands.GET ||
       args.cmd === NoteCommands.LOOKUP ||
-      args.cmd === NoteCommands.FIND
+      args.cmd === NoteCommands.FIND ||
+      args.cmd === NoteCommands.DELETE
     ) {
       args.newEngine = true;
     }

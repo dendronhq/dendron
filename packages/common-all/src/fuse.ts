@@ -11,7 +11,7 @@ import {
   SchemaProps,
   SchemaUtils,
 } from ".";
-import { DVault } from "./types";
+import { DVault, NoteChangeEntry } from "./types";
 import { levenshteinDistance } from "./util/stringUtil";
 
 export type NoteIndexProps = {
@@ -250,7 +250,7 @@ export class FuseEngine {
     );
   }
 
-  async updateNotesIndex(notes: NotePropsByIdDict) {
+  async replaceNotesIndex(notes: NotePropsByIdDict) {
     this.notesIndex.setCollection(
       _.map(notes, ({ fname, title, id, vault, updated, stub }, _key) => ({
         fname,
@@ -263,6 +263,29 @@ export class FuseEngine {
     );
   }
 
+  async updateNotesIndex(noteChanges: NoteChangeEntry[]) {
+    noteChanges.forEach((change) => {
+      switch (change.status) {
+        case "create": {
+          this.addNoteToIndex(change.note);
+          break;
+        }
+        case "delete": {
+          this.removeNoteFromIndex(change.note);
+          break;
+        }
+        case "update": {
+          // Fuse has no update. Must remove old and add new
+          this.removeNoteFromIndex(change.prevNote);
+          this.addNoteToIndex(change.note);
+          break;
+        }
+        default:
+          break;
+      }
+    });
+  }
+
   async removeNoteFromIndex(note: NoteProps) {
     this.notesIndex.remove((doc) => {
       // FIXME: can be undefined, dunno why
@@ -271,6 +294,19 @@ export class FuseEngine {
       }
       return doc.id === note.id;
     });
+  }
+
+  async addNoteToIndex(note: NoteProps) {
+    const indexProps: NoteIndexProps = _.pick(note, [
+      "fname",
+      "id",
+      "title",
+      "vault",
+      "updated",
+      "stub",
+    ]);
+
+    this.notesIndex.add(indexProps);
   }
 
   async removeSchemaFromIndex(smod: SchemaModuleProps) {

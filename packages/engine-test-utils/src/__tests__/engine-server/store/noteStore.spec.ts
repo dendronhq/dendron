@@ -1,4 +1,5 @@
 import { ERROR_STATUS, NotePropsMeta } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NodeJSFileStore,
@@ -8,6 +9,7 @@ import {
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
+import fs from "fs-extra";
 
 describe("GIVEN NoteStore", () => {
   test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
@@ -31,7 +33,7 @@ describe("GIVEN NoteStore", () => {
         expect(note.fname).toEqual("foo");
         expect(note.body).toEqual("foo body");
 
-        // Test NoteStore.findMetaData
+        // Test NoteStore.findMetaData fname property
         let metadataResp = await noteStore.findMetaData({ fname: "foo" });
         expect(metadataResp.data!.length).toEqual(1);
         let noteMetadata = metadataResp.data![0];
@@ -46,17 +48,77 @@ describe("GIVEN NoteStore", () => {
         expect(note.fname).toEqual("root");
         expect(note.vault.fsPath).toEqual(vaults[0].fsPath);
 
-        // Test NoteStore.findMetaData multiple matches
+        // Test NoteStore.findMetaData fname + vault
         metadataResp = await noteStore.findMetaData({ fname: "root" });
         expect(metadataResp.data!.length).toEqual(3);
         metadataResp = await noteStore.findMetaData({
           fname: "root",
           vault: vaults[1],
         });
-        expect(findResp.data!.length).toEqual(1);
+        expect(metadataResp.data!.length).toEqual(1);
         noteMetadata = metadataResp.data![0];
         expect(noteMetadata.fname).toEqual("root");
         expect(noteMetadata.vault.fsPath).toEqual(vaults[1].fsPath);
+
+        // Test NoteStore.findMetaData vault property
+        metadataResp = await noteStore.findMetaData({
+          vault: vaults[0],
+        });
+        expect(metadataResp.data!.length).toEqual(4);
+
+        // Test NoteStore.findMetaData child property
+        // Closest ancestor of foo.ch1 = foo
+        const fooCh1 = await noteStore.get("foo.ch1");
+        metadataResp = await noteStore.findMetaData({
+          child: fooCh1.data,
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+        noteMetadata = metadataResp.data![0];
+        expect(noteMetadata.fname).toEqual("foo");
+
+        // Closest ancestor of bar.abc.123 = bar
+        const bar123 = await NoteTestUtilsV4.createNote({
+          fname: "bar.abc.123",
+          body: "bar.abc.123",
+          vault: vaults[0],
+          wsRoot,
+        });
+        metadataResp = await noteStore.findMetaData({
+          child: bar123,
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+        noteMetadata = metadataResp.data![0];
+        expect(noteMetadata.fname).toEqual("bar");
+
+        // Test NoteStore.findMetaData child + fname property
+        metadataResp = await noteStore.findMetaData({
+          child: fooCh1.data,
+          fname: "foo",
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+        noteMetadata = metadataResp.data![0];
+        expect(noteMetadata.fname).toEqual("foo");
+
+        metadataResp = await noteStore.findMetaData({
+          child: fooCh1.data,
+          fname: "foos",
+        });
+        expect(metadataResp.data!.length).toEqual(0);
+
+        // Test NoteStore.findMetaData child + vault property
+        metadataResp = await noteStore.findMetaData({
+          child: fooCh1.data,
+          vault: vaults[0],
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+        noteMetadata = metadataResp.data![0];
+        expect(noteMetadata.fname).toEqual("foo");
+
+        metadataResp = await noteStore.findMetaData({
+          child: fooCh1.data,
+          vault: vaults[1],
+        });
+        expect(metadataResp.data!.length).toEqual(0);
       },
       {
         expect,
@@ -85,11 +147,57 @@ describe("GIVEN NoteStore", () => {
         expect(note.data).toBeFalsy();
         await noteStore.write({ key: newNote.id, note: newNote });
 
+        // Make sure note is written to filesystem
+        const vpath = vault2Path({ vault, wsRoot });
+        expect(_.includes(fs.readdirSync(vpath), "foobar.md")).toBeTruthy();
+
         // Test NoteStore.get
         note = await noteStore.get(newNote.id);
         expect(note.data!.fname).toEqual(newNote.fname);
         expect(note.data!.body.trim()).toEqual(newNote.body.trim());
         expect(note.data!.contentHash).toBeTruthy();
+        expect(newNote.data!.contentHash).toBeFalsy();
+
+        // Test NoteStore.getMetadata
+        const noteMetadata = await noteStore.getMetadata(newNote.id);
+        expect(noteMetadata.data!.fname).toEqual(newNote.fname);
+      },
+      {
+        expect,
+      }
+    );
+  });
+
+  test("WHEN writing a stub note, THEN get and getMetadata should retrieve same note", async () => {
+    await runEngineTestV5(
+      async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
+          wsRoot,
+        });
+        const newNote = await NoteTestUtilsV4.createNote({
+          fname: "foobar",
+          body: "",
+          vault,
+          wsRoot,
+          stub: true,
+        });
+
+        let note = await noteStore.get(newNote.id);
+        expect(note.data).toBeFalsy();
+        await noteStore.write({ key: newNote.id, note: newNote });
+
+        // Make sure note is not written to filesystem
+        const vpath = vault2Path({ vault, wsRoot });
+        expect(_.includes(fs.readdirSync(vpath), "foobar.md")).toBeFalsy();
+
+        // Test NoteStore.get
+        note = await noteStore.get(newNote.id);
+        expect(note.data!.fname).toEqual(newNote.fname);
+        expect(note.data!.body.trim()).toEqual(newNote.body.trim());
+        expect(note.data!.contentHash).toBeFalsy();
         expect(newNote.data!.contentHash).toBeFalsy();
 
         // Test NoteStore.getMetadata
@@ -375,6 +483,34 @@ describe("GIVEN NoteStore", () => {
 
         const anotherMetadata = await noteStore.getMetadata(anotherNote.id);
         expect(anotherMetadata.data!.fname).toEqual(anotherNote.fname);
+      },
+      {
+        expect,
+      }
+    );
+  });
+
+  test("WHEN deleting a root note, THEN error should return and be CANT_DELETE_ROOT", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, engine }) => {
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
+          wsRoot,
+        });
+
+        _.values(engine.notes).forEach(async (note) => {
+          const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
+          await noteStore.writeMetadata({ key: note.id, noteMeta });
+        });
+
+        // Test NoteStore.get
+        const resp = await noteStore.find({ fname: "root" });
+
+        // Test NoteStore.delete
+        const deleteResp = await noteStore.delete(resp.data![0].id);
+        expect(deleteResp.data).toBeUndefined();
+        expect(deleteResp.error?.status).toEqual(ERROR_STATUS.CANT_DELETE_ROOT);
       },
       {
         expect,

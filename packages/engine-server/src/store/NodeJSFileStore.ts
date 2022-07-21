@@ -83,7 +83,9 @@ export class NodeJSFileStore implements IFileStore {
    */
   async delete(uri: URI): Promise<RespV3<URI>> {
     try {
-      await fs.unlink(uri.fsPath);
+      if (await fs.pathExists(uri.fsPath)) {
+        await fs.unlink(uri.fsPath);
+      }
       return { data: uri };
     } catch (err) {
       return {

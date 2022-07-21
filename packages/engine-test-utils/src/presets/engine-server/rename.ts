@@ -1593,6 +1593,13 @@ const NOTES = {
       const isReplacingStubCreated = changedEntries?.find((entry) => {
         return entry.status === "create" && entry.note.fname === "foo";
       })?.note.stub;
+      const root = (
+        await engine.findNotes({
+          fname: "root",
+          vault: vaults[0],
+        })
+      )[0];
+
       return [
         {
           actual: isReplacingStubCreated,
@@ -1603,7 +1610,12 @@ const NOTES = {
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 6,
+          actual: changedEntries && changedEntries.length === 5,
+          expected: true,
+        },
+        {
+          // root's children is now the replacing stub and renamed note
+          actual: root.children.length === 2,
           expected: true,
         },
       ];

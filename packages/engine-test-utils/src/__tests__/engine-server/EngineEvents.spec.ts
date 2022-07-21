@@ -356,31 +356,38 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
           engineClient.onEngineNoteStateChanged(
             (noteChangeEntries: NoteChangeEntry[]) => {
+              // foo stub is created
               const createEntries = extractNoteChangeEntriesByType(
                 noteChangeEntries,
                 "create"
               );
 
+              // original foo is created
               const deleteEntries = extractNoteChangeEntriesByType(
                 noteChangeEntries,
                 "delete"
               );
 
+              // foo's parent is updated
               const updateEntries = extractNoteChangeEntriesByType(
                 noteChangeEntries,
                 "update"
               ) as NoteChangeUpdateEntry[];
 
               testAssertsInsideCallback(() => {
-                expect(createEntries.length).toEqual(0);
+                expect(createEntries.length).toEqual(1);
                 expect(updateEntries.length).toEqual(1);
-                expect(deleteEntries.length).toEqual(0);
+                expect(deleteEntries.length).toEqual(1);
 
                 const updatedEntry = updateEntries[0];
 
                 expect(updatedEntry.status).toEqual("update");
-                expect(updatedEntry.note.fname).toEqual("foo");
-                expect(updatedEntry.note.stub).toBeTruthy();
+                expect(updatedEntry.note.fname).toEqual("root");
+                expect(updatedEntry.note.children.length).toEqual(2);
+
+                expect(deleteEntries[0].note.fname).toEqual("foo");
+                expect(createEntries[0].note.fname).toEqual("foo");
+                expect(createEntries[0].note.stub).toBeTruthy();
               }, done);
             }
           );

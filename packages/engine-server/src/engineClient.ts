@@ -187,7 +187,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
-    await this.fuseEngine.updateNotesIndex(notes);
+    await this.fuseEngine.replaceNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
     this.store.notes = notes;
     this.store.schemas = schemas;
@@ -296,7 +296,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
-    this.fuseEngine.updateNotesIndex(notes);
+    this.fuseEngine.replaceNotesIndex(notes);
     this.fuseEngine.updateSchemaIndex(schemas);
     return {
       error: null,
@@ -410,7 +410,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         NoteDictsUtils.add(ent.note, noteDicts);
       }
     });
-    this.fuseEngine.updateNotesIndex(this.notes);
+    this.fuseEngine.replaceNotesIndex(this.notes);
   }
 
   async refreshSchemas(smods: SchemaModuleProps[]) {
@@ -448,7 +448,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
-    await this.fuseEngine.updateNotesIndex(notes);
+    await this.fuseEngine.replaceNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
     return {
       error: resp.error,

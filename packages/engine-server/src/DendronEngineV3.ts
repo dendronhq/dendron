@@ -11,10 +11,15 @@ import {
   DEngineInitResp,
   DEngineMode,
   DHookDict,
+  DHookEntry,
   DLink,
+  DNodeUtils,
   DStore,
   DVault,
+  EngineDeleteNoteResp,
+  EngineDeleteOpts,
   EngineInfoResp,
+  EngineWriteOptsV2,
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
@@ -46,6 +51,7 @@ import {
   RenameNotePayload,
   RenderNotePayload,
   RespV2,
+  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaQueryResp,
@@ -68,7 +74,7 @@ import { NodeJSFileStore, NoteStore } from "./store";
 import { DConfig } from "./config";
 import { AnchorUtils, LinkUtils } from "./markdown";
 import { NoteMetadataStore } from "./store/NoteMetadataStore";
-import { HookUtils } from "./topics/hooks";
+import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
@@ -203,7 +209,7 @@ export class DendronEngineV3 implements DEngine {
           }),
         };
       }
-      this.fuseEngine.updateNotesIndex(notes);
+      this.fuseEngine.replaceNotesIndex(notes);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
 
@@ -290,12 +296,349 @@ export class DendronEngineV3 implements DEngine {
     return resp.data ? resp.data : [];
   }
 
+  /**
+   * See {@link DEngine.writeNote}
+   */
+  async writeNote(
+    note: NoteProps,
+    opts?: EngineWriteOptsV2
+  ): Promise<WriteNoteResp> {
+    const changes: NoteChangeEntry[] = [];
+    let error: DendronError | null = null;
+    const ctx = "writeNewNote";
+    this.logger.info({
+      ctx,
+      msg: `enter with ${opts}`,
+      note: NoteUtils.toLogObj(note),
+    });
+
+    // Apply hooks
+    if (opts?.runHooks === false) {
+      this.logger.info({
+        ctx,
+        msg: "hooks disabled for write",
+      });
+    } else {
+      const hooks = _.filter(this.hooks.onCreate, (hook) =>
+        NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+      );
+      const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
+        hooks,
+        async (notePromise, hook) => {
+          const { note } = await notePromise;
+          const script = HookUtils.getHookScriptPath({
+            wsRoot: this.wsRoot,
+            basename: hook.id + ".js",
+          });
+          return HookUtils.requireHook({
+            note,
+            fpath: script,
+            wsRoot: this.wsRoot,
+          });
+        },
+        Promise.resolve({ note })
+      ).catch(
+        (err) =>
+          new DendronError({
+            severity: ERROR_SEVERITY.MINOR,
+            message: "error with hook",
+            payload: stringifyError(err),
+          })
+      );
+      if (resp instanceof DendronError) {
+        error = resp;
+        this.logger.error({ ctx, error: stringifyError(error) });
+      } else {
+        const valResp = NoteUtils.validate(resp.note);
+        if (valResp instanceof DendronError) {
+          error = valResp;
+          this.logger.error({ ctx, error: stringifyError(error) });
+        } else {
+          note = resp.note;
+          this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+        }
+      }
+    }
+
+    // Check if another note with same fname and vault exists
+    const resp = await this._noteStore.find({
+      fname: note.fname,
+      vault: note.vault,
+    });
+    const existingNote = resp.data ? resp.data[0] : undefined;
+    // If a note exists with a different id but same fname/vault, then we throw an error unless its a stub or override is set
+    if (existingNote && existingNote.id !== note.id) {
+      // If note is a stub or client wants to override existing note, we need to update parent/children relationships since ids are different
+      // The parent of this note needs to have the old note removed (because the id is now different)
+      // The new note needs to have the old note's children
+      if (existingNote.stub || opts?.overrideExisting) {
+        // make sure existing note actually has a parent.
+        const parentResp = await this._noteStore.find({
+          child: existingNote,
+        });
+        if (!parentResp.data || parentResp.data.length === 0) {
+          return {
+            error: new DendronError({
+              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+              message: `No parent found for ${existingNote.fname}`,
+            }),
+          };
+        }
+
+        // Save the state of the parent to later record changed entry.
+        const parent = parentResp.data[0];
+        const prevParentState = { ...parent };
+
+        // Update existing note's parent so that it doesn't hold the existing note's id as children
+        DNodeUtils.removeChild(parent, existingNote);
+
+        // Update parent note of existing note so that the newly created note is a child
+        DNodeUtils.addChild(parent, note);
+
+        // Add an entry for the updated parent
+        changes.push({
+          prevNote: prevParentState,
+          note: parent,
+          status: "update",
+        });
+
+        // Move existing note's children to new note
+        const childrenResp = await this._noteStore.bulkGet(
+          existingNote.children
+        );
+        childrenResp.forEach((child) => {
+          if (child.data) {
+            const childNote = child.data;
+            const prevChildNoteState = { ...childNote };
+            DNodeUtils.addChild(note, childNote);
+
+            // Add one entry for each child updated
+            changes.push({
+              prevNote: prevChildNoteState,
+              note: childNote,
+              status: "update",
+            });
+          }
+        });
+
+        // Delete the existing note
+        const deleteResp = opts?.metaOnly
+          ? await this._noteStore.deleteMetadata(existingNote.id)
+          : await this._noteStore.delete(existingNote.id);
+        if (deleteResp.error) {
+          return {
+            error: new DendronError({
+              message: `Unable to delete note ${existingNote.id}`,
+              severity: ERROR_SEVERITY.MINOR,
+              payload: deleteResp.error,
+            }),
+          };
+        }
+
+        changes.push({ note: existingNote, status: "delete" });
+        changes.push({ note, status: "create" });
+      } else {
+        return {
+          error: new DendronError({
+            message: `Cannot write note with id ${note.id}. Note ${existingNote.id} with same fname and vault exists`,
+          }),
+        };
+      }
+    } else if (existingNote && existingNote.id === note.id) {
+      // If a note exist with the same id, then we treat this as an update
+      changes.push({ prevNote: existingNote, note, status: "update" });
+    } else {
+      // If no note exists, then we treat this as a create
+      changes.push({ note, status: "create" });
+
+      // If existing note does not exist, check if we need to add parents
+      // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
+      // this is the default behavior
+      if (!opts?.noAddParent) {
+        const ancestorResp = await this._noteStore.find({ child: note });
+        if (ancestorResp.data && ancestorResp.data.length === 1) {
+          const ancestor = ancestorResp.data[0];
+
+          const prevAncestorState = { ...ancestor };
+
+          // Create stubs for any uncreated notes between ancestor and note
+          const stubNodes = NoteUtils.createStubs(ancestor, note);
+          stubNodes.forEach((stub) => {
+            changes.push({
+              status: "create",
+              note: stub,
+            });
+          });
+
+          changes.push({
+            status: "update",
+            prevNote: prevAncestorState,
+            note: ancestor,
+          });
+        } else {
+          this.logger.error({
+            ctx,
+            msg: `Unable to find ancestor for note ${note.fname}`,
+          });
+        }
+      }
+    }
+
+    // Write to metadata store and/or filesystem
+    const writeResp = opts?.metaOnly
+      ? await this._noteStore.writeMetadata({ key: note.id, noteMeta: note })
+      : await this._noteStore.write({ key: note.id, note });
+    if (writeResp.error) {
+      return {
+        error: new DendronError({
+          message: `Unable to write note ${note.id}`,
+          severity: ERROR_SEVERITY.MINOR,
+          payload: writeResp.error,
+        }),
+      };
+    }
+
+    // TODO: Add schema
+
+    // Propragate metadata for all other changes
+    await this.fuseEngine.updateNotesIndex(changes);
+    await this.updateNoteMetadataStore(changes);
+
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
+    });
+    return {
+      error,
+      data: changes,
+    };
+  }
+
   async bulkWriteNotes(): Promise<Required<BulkResp<NoteChangeEntry[]>>> {
     throw new Error("bulkWriteNotes not implemented");
   }
 
-  async deleteNote(): ReturnType<DEngineClient["deleteNote"]> {
-    throw Error("deleteNote not implemented");
+  /**
+   * See {@link DEngine.deleteNote}
+   */
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOpts
+  ): Promise<EngineDeleteNoteResp> {
+    const ctx = "deleteNote";
+    if (id === "root") {
+      throw new DendronError({
+        message: "",
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
+      });
+    }
+    const changes: NoteChangeEntry[] = [];
+
+    const resp = await this._noteStore.getMetadata(id);
+    if (resp.error) {
+      return {
+        error: new DendronError({
+          status: ERROR_STATUS.DOES_NOT_EXIST,
+          message: `Unable to delete ${id}: Note does not exist`,
+        }),
+      };
+    }
+    // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
+    const noteToDelete = _.merge(resp.data, {
+      body: "",
+    });
+    this.logger.info({ ctx, noteToDelete, opts, id });
+    const noteAsLog = NoteUtils.toLogObj(noteToDelete);
+
+    const parentResp = await this._noteStore.find({
+      child: noteToDelete,
+    });
+    if (!parentResp.data || parentResp.data.length === 0) {
+      return {
+        error: new DendronError({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+          message: `Unable to delete ${noteToDelete.fname}: Note's parent does not exist in engine: ${noteToDelete.parent}`,
+        }),
+      };
+    }
+    let parentNote = parentResp.data[0];
+
+    let prevNote = { ...noteToDelete };
+    // If deleted note has children, create stub note with a new id in metadata store
+    if (!_.isEmpty(noteToDelete.children)) {
+      this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
+      const replacingStub = NoteUtils.create({
+        // the replacing stub should not keep the old note's body, id, and links.
+        // otherwise, it will be captured while processing links and will
+        // fail because this note is not actually in the file system.
+        ..._.omit(noteToDelete, ["id", "links", "body"]),
+        stub: true,
+      });
+
+      DNodeUtils.addChild(parentNote, replacingStub);
+      changes.push({ note: replacingStub, status: "create" });
+    } else {
+      // If parent is a stub, go upwards up the tree and delete rest of stubs
+      while (parentNote.stub) {
+        changes.push({ note: parentNote, status: "delete" });
+        // eslint-disable-next-line no-await-in-loop
+        const parentResp = await this._noteStore.find({
+          child: parentNote,
+        });
+        if (parentResp.data && parentResp.data.length > 0) {
+          prevNote = { ...parentNote };
+          parentNote = parentResp.data[0];
+        } else {
+          return {
+            error: new DendronError({
+              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+              message: `Unable to delete ${noteToDelete.fname}: Note ${parentNote?.fname}'s parent does not exist in engine: ${parentNote.parent}`,
+            }),
+          };
+        }
+      }
+    }
+
+    // Delete note reference from parent's child
+    const parentNotePrev = { ...parentNote };
+    this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
+    DNodeUtils.removeChild(parentNote, prevNote);
+
+    // Add an entry for the updated parent
+    changes.push({
+      prevNote: parentNotePrev,
+      note: parentNote,
+      status: "update",
+    });
+
+    const deleteResp = opts?.metaOnly
+      ? await this._noteStore.deleteMetadata(id)
+      : await this._noteStore.delete(id);
+    if (deleteResp.error) {
+      return {
+        error: new DendronError({
+          message: `Unable to delete note ${id}`,
+          severity: ERROR_SEVERITY.MINOR,
+          payload: deleteResp.error,
+        }),
+      };
+    }
+
+    changes.push({ note: noteToDelete, status: "delete" });
+    // Update metadata for all other changes
+    await this.fuseEngine.updateNotesIndex(changes);
+    await this.updateNoteMetadataStore(changes);
+
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
+    });
+    return {
+      error: null,
+      data: changes,
+    };
   }
 
   async deleteSchema(): Promise<DEngineDeleteSchemaResp> {
@@ -413,10 +756,6 @@ export class DendronEngineV3 implements DEngine {
 
   async addAccessTokensToPodConfig() {
     throw Error("addAccessTokensToPodConfig not implemented");
-  }
-
-  async writeNote(): Promise<WriteNoteResp> {
-    throw Error("writeNote not implemented");
   }
 
   async writeSchema() {
@@ -579,6 +918,36 @@ export class DendronEngineV3 implements DEngine {
         this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
     });
+  }
+
+  /**
+   * Update note metadata store based on note change entries
+   * @param changes entries to update
+   * @returns
+   */
+  private async updateNoteMetadataStore(
+    changes: NoteChangeEntry[]
+  ): Promise<RespV3<string>[]> {
+    return Promise.all(
+      changes
+        .filter((change) => change.status !== "delete")
+        .map((change) => {
+          switch (change.status) {
+            case "delete": {
+              return this._noteStore.deleteMetadata(change.note.id);
+            }
+            case "create":
+            case "update": {
+              return this._noteStore.writeMetadata({
+                key: change.note.id,
+                noteMeta: change.note,
+              });
+            }
+            default:
+              return { data: "" };
+          }
+        })
+    );
   }
 }
 

@@ -35,10 +35,6 @@ export type EngineDeleteOpts = {
    * If node is deleted and parents are stubs, default behavior is to alsod delete parents
    */
   noDeleteParentStub?: boolean;
-  /**
-   * If the deleted note has children, replace the deleted note with a newly created stub note in place.
-   */
-  replaceWithNewStub?: boolean;
 };
 
 export type NoteLink = {
@@ -327,6 +323,14 @@ export type EngineWriteOptsV2 = {
    * Should any configured hooks be run during the write
    */
   runHooks?: boolean;
+  /**
+   * If true, overwrite existing note with same fname and vault, even if note has a different id
+   */
+  overrideExisting?: boolean;
+  /**
+   * If true, write only to metadata store
+   */
+  metaOnly?: boolean;
 };
 
 export type DEngineInitPayload = {
@@ -456,6 +460,10 @@ export type DCommonMethods = {
   ): Promise<UpdateNoteResp>;
   updateSchema: (schema: SchemaModuleProps) => Promise<void>;
 
+  /**
+   * Write note to metadata store and/or filesystem. This will update existing note or create new if one doesn't exist.
+   * If another note with same fname + vault but different id exists, then return error (otherwise overrideExisting flag is passed)
+   */
   writeNote: (
     note: NoteProps,
     opts?: EngineWriteOptsV2
@@ -516,7 +524,7 @@ export type WorkspaceExtensionSetting = {
 
 // --- KLUDGE END
 
-export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
+export type EngineDeleteNoteResp = RespV2<EngineDeleteNotePayload>;
 export type NoteQueryResp = RespV2<NoteProps[]>;
 export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
@@ -582,6 +590,9 @@ export type DEngine = DCommonProps &
      * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
      */
     findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
+    /**
+     * Delete note from metadata store and/or filesystem. If note doesn't exist, return error
+     */
     deleteNote: (
       id: string,
       opts?: EngineDeleteOpts

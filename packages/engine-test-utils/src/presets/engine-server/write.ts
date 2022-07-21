@@ -553,7 +553,9 @@ const NOTES_MULTI = {
       const fooNote = await engine.getNote("foo");
       const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
-      const changes = await engine.writeNote(fooUpdated);
+      const changes = await engine.writeNote(fooUpdated, {
+        overrideExisting: true,
+      });
 
       const deletedFooNote = await engine.getNote("foo");
       const newFooNote = await engine.getNote("updatedID");

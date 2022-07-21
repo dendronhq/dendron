@@ -72,7 +72,7 @@ export function useDendronLookup(notes?: NotePropsByIdDict) {
   React.useEffect(() => {
     if (notes) {
       const noteIndex = new FuseEngine({ mode: "fuzzy", fuzzThreshold });
-      noteIndex.updateNotesIndex(notes);
+      noteIndex.replaceNotesIndex(notes);
       setNoteIndex(noteIndex);
     }
   }, [notes]);

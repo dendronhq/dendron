@@ -71,6 +71,26 @@ export const getPreset = ({
   return out;
 };
 
+export const getPresetMulti = ({
+  presets,
+  presetName,
+  nodeType,
+  key,
+}: {
+  presets: typeof ENGINE_PRESETS_MULTI;
+  presetName: string;
+  nodeType: "NOTES";
+  key: string;
+}) => {
+  const ent = _.find(presets, { name: presetName })!;
+  // @ts-ignore
+  const out = _.get(ent.presets[nodeType], key);
+  if (!out) {
+    throw Error(`no key ${key} found in ${presetName}`);
+  }
+  return out;
+};
+
 export const getPresetGroup = ({
   presets,
   presetName,
@@ -118,8 +138,12 @@ export const ENGINE_PRESETS_MULTI = [
 
 export const ENGINE_V3_PRESETS = [
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
+  { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
+  { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
 ];
 
 export const ENGINE_V3_PRESETS_MULTI = [
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
+  { name: "write", presets: ENGINE_WRITE_PRESETS_MULTI },
+  { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
 ];

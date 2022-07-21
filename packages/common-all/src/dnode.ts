@@ -57,6 +57,10 @@ export class DNodeUtils {
     child.parent = parent.id;
   }
 
+  static removeChild(parent: NotePropsMeta, child: NotePropsMeta) {
+    parent.children = _.reject(parent.children, (ent) => ent === child.id);
+  }
+
   static create(opts: DNodeOpts): DNodeProps {
     const cleanProps: DNodeProps = _.defaults(opts, {
       updated: Time.now().toMillis(),
@@ -296,26 +300,6 @@ export class NoteUtils {
       value: link.value,
       alias: link.alias,
     });
-  }
-
-  static deleteChildFromParent(opts: {
-    childToDelete: NoteProps;
-    parent: NoteProps;
-  }): NoteChangeEntry[] {
-    const changed: NoteChangeEntry[] = [];
-    const { childToDelete, parent } = opts;
-
-    const prevParentState = { ...parent };
-    parent.children = _.reject<string[]>(
-      parent.children,
-      (ent: string) => ent === childToDelete.id
-    ) as string[];
-    changed.push({
-      status: "update",
-      prevNote: prevParentState,
-      note: parent,
-    });
-    return changed;
   }
 
   /**
@@ -1081,7 +1065,7 @@ export class NoteUtils {
     return body.slice(-1) !== "\n" ? stringified.slice(0, -1) : stringified;
   }
 
-  static toLogObj(note: NoteProps) {
+  static toLogObj(note: NotePropsMeta) {
     const { fname, id, children, vault, parent } = note;
     return {
       fname,

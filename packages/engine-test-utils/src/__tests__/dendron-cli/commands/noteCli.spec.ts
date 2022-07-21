@@ -489,6 +489,11 @@ describe("WHEN run 'dendron note delete", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[0];
+          const before = (
+            await engine.findNotesMeta({ fname: "foo.ch1", vault })
+          )[0];
+          expect(before.fname).toEqual("foo.ch1");
+
           await runCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
@@ -496,10 +501,12 @@ describe("WHEN run 'dendron note delete", () => {
             cmd,
             query: "foo.ch1",
           });
-          expect(engine.notes["foo.ch1"]).toBeUndefined();
+
+          const after = await engine.findNotesMeta({ fname: "foo.ch1", vault });
+          expect(after.length).toEqual(0);
         },
         {
-          createEngine: createEngineFromServer,
+          createEngine: createEngineV3FromEngine,
           expect,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
@@ -512,6 +519,10 @@ describe("WHEN run 'dendron note delete", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const vault = vaults[1];
+          const before = (
+            await engine.findNotesMeta({ fname: "bar", vault })
+          )[0];
+          expect(before.fname).toEqual("bar");
           await runCmd({
             wsRoot,
             vault: VaultUtils.getName(vault),
@@ -519,10 +530,11 @@ describe("WHEN run 'dendron note delete", () => {
             cmd,
             query: "bar",
           });
-          expect(engine.notes["bar"]).toBeUndefined();
+          const after = await engine.findNotesMeta({ fname: "bar", vault });
+          expect(after.length).toEqual(0);
         },
         {
-          createEngine: createEngineFromServer,
+          createEngine: createEngineV3FromEngine,
           expect,
           preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         }

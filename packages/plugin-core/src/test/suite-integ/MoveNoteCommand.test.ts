@@ -168,7 +168,7 @@ suite("MoveNoteCommand", function () {
               },
             ],
           });
-          expect(resp?.changed?.length).toEqual(6);
+          expect(resp?.changed?.length).toEqual(5);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
           expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(
             "foobar"

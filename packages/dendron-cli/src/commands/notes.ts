@@ -341,11 +341,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: query,
-            vault,
-            engine,
-          });
+          const note = (
+            await engine.findNotes({
+              fname: query,
+              vault,
+            })
+          )[0];
           if (note) {
             const resp = await engine.deleteNote(note.id);
             this.print(`deleted ${note.fname}`);

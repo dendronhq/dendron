@@ -93,6 +93,16 @@ export interface INoteStore<K> {
   delete(key: K): Promise<RespV3<string>>;
 
   /**
+   * Delete NoteProps metadata from storage layer for given key.
+   * If key does not exist, do nothing.
+   * Unlike {@link INoteStore.delete}, this will not touch the filesystem
+   *
+   * @param key: key of NoteProps to delete
+   * @return original key
+   */
+  deleteMetadata(key: K): Promise<RespV3<string>>;
+
+  /**
    * Rename location of NoteProps
    * If old location does not exist, return error.
    *

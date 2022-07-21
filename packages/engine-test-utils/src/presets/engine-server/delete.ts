@@ -139,7 +139,7 @@ const NOTES = {
       const vpath = vault2Path({ vault, wsRoot });
       await engine.init();
       return [
-        { actual: changed[0].note.id, expected: "foo" },
+        { actual: changed![0].note.id, expected: "foo" },
         { actual: _.size(notesInVaultBefore), expected: 3 },
         { actual: _.size(notesInVaultAfter), expected: 2 },
         { actual: fooNote.children, expected: [] },

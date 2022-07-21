@@ -72,7 +72,7 @@
       "debugWebWorkerHost": true,
       "request": "launch",
       "args": [
-        "--disable-extensions",
+        // "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionDevelopmentKind=web"
       ],

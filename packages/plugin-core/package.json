@@ -1333,7 +1333,8 @@
     "vscode:prepublish": "npm run package-web",
     "compile-web": "webpack --config webpack.webext.js",
     "watch-web": "webpack --watch --config webpack.webext.js",
-    "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js"
+    "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js",
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.105.2",

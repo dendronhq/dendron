@@ -55,6 +55,7 @@ export function genDefaultSettings() {
       unwantedRecommendations: [
         "dendron.dendron-markdown-links",
         "dendron.dendron-markdown-notes",
+        "dendron.dendron-markdown-preview-enhanced",
         "shd101wyy.markdown-preview-enhanced",
         "kortina.vscode-markdown-notes",
         "mushan.vscode-paste-image",

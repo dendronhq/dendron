@@ -1352,6 +1352,8 @@
     "@types/open-graph-scraper": "^4.7.0",
     "@types/semver": "^7.3.1",
     "@types/string-similarity": "^4.0.0",
+    "@types/webpack-env": "^1.17.0",
+    "@vscode/test-web": "^0.0.27",
     "circular-dependency-plugin": "^5.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",

@@ -128,7 +128,7 @@ suite("GIVEN Dendron plugin activation", function () {
     );
   });
 
-  describe("AND WHEN secondary install on a fresh vscode instance", () => {
+  describe.skip("AND WHEN secondary install on a fresh vscode instance", () => {
     describeMultiWS(
       "AND WHEN activate",
       {
@@ -136,6 +136,7 @@ suite("GIVEN Dendron plugin activation", function () {
           mockHomeDirStub = TestEngineUtils.mockHomeDir();
           // new instance, so fresh user-data. global storage is clean slate.
           stubDendronWhenFirstInstall(ctx);
+
           // but we have first install already recorded in metadata.
           stubDendronWhenNotFirstInstall();
           setupSpies();

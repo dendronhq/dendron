@@ -368,7 +368,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 "delete"
               );
 
-              // foo's parent is updated
+              // foo's parent is updated, foo's child is updated
               const updateEntries = extractNoteChangeEntriesByType(
                 noteChangeEntries,
                 "update"
@@ -376,7 +376,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
 
               testAssertsInsideCallback(() => {
                 expect(createEntries.length).toEqual(1);
-                expect(updateEntries.length).toEqual(1);
+                expect(updateEntries.length).toEqual(2);
                 expect(deleteEntries.length).toEqual(1);
 
                 const updatedEntry = updateEntries[0];
@@ -384,6 +384,12 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
                 expect(updatedEntry.status).toEqual("update");
                 expect(updatedEntry.note.fname).toEqual("root");
                 expect(updatedEntry.note.children.length).toEqual(2);
+
+                expect(updateEntries[1].status).toEqual("update");
+                expect(updateEntries[1].note.fname).toEqual("foo.ch1");
+                expect(updateEntries[1].note.parent).toEqual(
+                  createEntries[0].note.id
+                );
 
                 expect(deleteEntries[0].note.fname).toEqual("foo");
                 expect(createEntries[0].note.fname).toEqual("foo");

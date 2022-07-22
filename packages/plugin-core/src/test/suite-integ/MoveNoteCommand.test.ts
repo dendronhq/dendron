@@ -168,7 +168,7 @@ suite("MoveNoteCommand", function () {
               },
             ],
           });
-          expect(resp?.changed?.length).toEqual(5);
+          expect(resp?.changed?.length).toEqual(6);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
           expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(
             "foobar"
@@ -675,8 +675,11 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
 
+        // Since there are no more children, stubs should not exist
         expect(
-          (await engine.findNotes({ fname: "foo", vault: vault1 }))[0].stub
+          _.isUndefined(
+            (await engine.findNotes({ fname: "foo", vault: vault1 }))[0]
+          )
         ).toBeTruthy();
         expect(
           _.isUndefined(

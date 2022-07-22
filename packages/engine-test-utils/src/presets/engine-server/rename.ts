@@ -1590,19 +1590,25 @@ const NOTES = {
       });
 
       const changedEntries: RenameNotePayload | undefined = out.data;
-      const isReplacingStubCreated = changedEntries?.find((entry) => {
+      const fooStub = changedEntries?.find((entry) => {
         return entry.status === "create" && entry.note.fname === "foo";
-      })?.note.stub;
+      })?.note;
       const root = (
         await engine.findNotes({
           fname: "root",
           vault: vaults[0],
         })
       )[0];
+      const fooChild = (
+        await engine.findNotes({
+          fname: "foo.bar",
+          vault: vaults[0],
+        })
+      )[0];
 
       return [
         {
-          actual: isReplacingStubCreated,
+          actual: fooStub?.stub,
           expected: true,
         },
         {
@@ -1610,13 +1616,18 @@ const NOTES = {
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 5,
+          actual: changedEntries && changedEntries.length === 6,
           expected: true,
         },
         {
           // root's children is now the replacing stub and renamed note
           actual: root.children.length === 2,
           expected: true,
+        },
+        {
+          // children's parent points to replaced stub
+          actual: fooChild.parent,
+          expected: fooStub?.id,
         },
       ];
     },

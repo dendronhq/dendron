@@ -303,7 +303,7 @@ export class DendronEngineV3 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const changes: NoteChangeEntry[] = [];
+    let changes: NoteChangeEntry[] = [];
     let error: DendronError | null = null;
     const ctx = "writeNewNote";
     this.logger.info({
@@ -402,39 +402,12 @@ export class DendronEngineV3 implements DEngine {
           status: "update",
         });
 
-        // Move existing note's children to new note
-        const childrenResp = await this._noteStore.bulkGet(
-          existingNote.children
+        // Move children to new note
+        changes = changes.concat(
+          await this.updateChildrenWithNewParent(existingNote, note)
         );
-        childrenResp.forEach((child) => {
-          if (child.data) {
-            const childNote = child.data;
-            const prevChildNoteState = { ...childNote };
-            DNodeUtils.addChild(note, childNote);
 
-            // Add one entry for each child updated
-            changes.push({
-              prevNote: prevChildNoteState,
-              note: childNote,
-              status: "update",
-            });
-          }
-        });
-
-        // Delete the existing note
-        const deleteResp = opts?.metaOnly
-          ? await this._noteStore.deleteMetadata(existingNote.id)
-          : await this._noteStore.delete(existingNote.id);
-        if (deleteResp.error) {
-          return {
-            error: new DendronError({
-              message: `Unable to delete note ${existingNote.id}`,
-              severity: ERROR_SEVERITY.MINOR,
-              payload: deleteResp.error,
-            }),
-          };
-        }
-
+        // Delete the existing note from metadata store. Since fname/vault are the same, no need to touch filesystem
         changes.push({ note: existingNote, status: "delete" });
         changes.push({ note, status: "create" });
       } else {
@@ -533,7 +506,7 @@ export class DendronEngineV3 implements DEngine {
         status: ERROR_STATUS.CANT_DELETE_ROOT,
       });
     }
-    const changes: NoteChangeEntry[] = [];
+    let changes: NoteChangeEntry[] = [];
 
     const resp = await this._noteStore.getMetadata(id);
     if (resp.error) {
@@ -577,6 +550,12 @@ export class DendronEngineV3 implements DEngine {
       });
 
       DNodeUtils.addChild(parentNote, replacingStub);
+
+      // Move children to new note
+      changes = changes.concat(
+        await this.updateChildrenWithNewParent(noteToDelete, replacingStub)
+      );
+
       changes.push({ note: replacingStub, status: "create" });
     } else {
       // If parent is a stub, go upwards up the tree and delete rest of stubs
@@ -921,6 +900,34 @@ export class DendronEngineV3 implements DEngine {
   }
 
   /**
+   * Move children of old parent note to new parent
+   * @return note change entries of modified children
+   */
+  private async updateChildrenWithNewParent(
+    oldParent: NotePropsMeta,
+    newParent: NotePropsMeta
+  ) {
+    const changes: NoteChangeEntry[] = [];
+    // Move existing note's children to new note
+    const childrenResp = await this._noteStore.bulkGet(oldParent.children);
+    childrenResp.forEach((child) => {
+      if (child.data) {
+        const childNote = child.data;
+        const prevChildNoteState = { ...childNote };
+        DNodeUtils.addChild(newParent, childNote);
+
+        // Add one entry for each child updated
+        changes.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      }
+    });
+    return changes;
+  }
+
+  /**
    * Update note metadata store based on note change entries
    * @param changes entries to update
    * @returns
@@ -929,24 +936,22 @@ export class DendronEngineV3 implements DEngine {
     changes: NoteChangeEntry[]
   ): Promise<RespV3<string>[]> {
     return Promise.all(
-      changes
-        .filter((change) => change.status !== "delete")
-        .map((change) => {
-          switch (change.status) {
-            case "delete": {
-              return this._noteStore.deleteMetadata(change.note.id);
-            }
-            case "create":
-            case "update": {
-              return this._noteStore.writeMetadata({
-                key: change.note.id,
-                noteMeta: change.note,
-              });
-            }
-            default:
-              return { data: "" };
+      changes.map((change) => {
+        switch (change.status) {
+          case "delete": {
+            return this._noteStore.deleteMetadata(change.note.id);
           }
-        })
+          case "create":
+          case "update": {
+            return this._noteStore.writeMetadata({
+              key: change.note.id,
+              noteMeta: change.note,
+            });
+          }
+          default:
+            return { data: "" };
+        }
+      })
     );
   }
 }

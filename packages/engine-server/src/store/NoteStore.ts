@@ -64,9 +64,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
     // If note is a stub, return stub note
     if (metadata.data.stub) {
       return {
-        data: _.merge(metadata.data, {
-          body: "",
-        }),
+        data: { ...metadata.data, body: "" },
       };
     }
     const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });

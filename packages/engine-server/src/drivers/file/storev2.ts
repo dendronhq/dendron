@@ -281,10 +281,7 @@ export class FileStorage implements DStore {
       const parentNote: NoteProps | undefined = this.notes[noteToDelete.parent];
       if (parentNote) {
         const parentNotePrev = { ...parentNote };
-        parentNote.children = _.reject(
-          parentNote.children,
-          (ent) => ent === noteToDelete.id
-        );
+        DNodeUtils.removeChild(parentNote, noteToDelete);
         DNodeUtils.addChild(parentNote, replacingStub);
         out.push({
           note: parentNote,
@@ -298,6 +295,20 @@ export class FileStorage implements DStore {
           message: "Parent note missing from state",
         });
       }
+
+      // Update children's parent id to new note
+      noteToDelete.children.forEach((child) => {
+        const childNote = this.notes[child];
+        const prevChildNoteState = { ...childNote };
+        childNote.parent = replacingStub.id;
+
+        // add one entry for each child updated
+        out.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      });
 
       NoteDictsUtils.delete(noteToDelete, {
         notesById: this.notes,

@@ -202,13 +202,16 @@ const NOTES = {
 
       const notesInVaultAfter = await engine.findNotesMeta({ vault });
       const fooNote = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
+      const fooChild = (
+        await engine.findNotesMeta({ fname: "foo.ch1", vault })
+      )[0];
       const vpath = vault2Path({ vault, wsRoot });
 
       return [
         {
           actual: updateEntries.length,
-          expected: 1,
-          msg: "1 update should happen.",
+          expected: 2,
+          msg: "2 updates should happen.",
         },
         {
           actual: deleteEntries.length,
@@ -234,6 +237,11 @@ const NOTES = {
           actual: fooNote.stub,
           expected: true,
           msg: "foo should be a stub",
+        },
+        {
+          actual: fooChild.parent,
+          expected: fooNote.id,
+          msg: "foo's child should have updated parent id",
         },
         {
           actual: _.includes(fs.readdirSync(vpath), "foo.md"),

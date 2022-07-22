@@ -1,4 +1,7 @@
 import * as vscode from "vscode";
+// import { DENDRON_COMMANDS } from "../constants";
+import { LookupQuickpickFactory } from "@dendronhq/plugin-common";
+// import { DendronEngineV3Web } from "@dendronhq/engine-server";
 // import { ShowHelpCommand } from "../commands/ShowHelp";
 // import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 // import { Logger } from "../logger";
@@ -22,6 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  _setupCommands({ context });
+
   // if (activeEditor) {
   //   console.log("foo");
   // }
@@ -34,28 +39,27 @@ export function deactivate() {
   // require("./_extension").deactivate(); // eslint-disable-line global-require
 }
 
-// async function _setupCommands({
-//   context,
-// }: {
-//   context: vscode.ExtensionContext;
-// }) {
-//   const existingCommands = await vscode.commands.getCommands();
-
-//   const COMMANDS: any[] = [];
-//   // const COMMANDS = [ShowHelpCommand];
-
-//   // add all commands
-//   COMMANDS.map((Cmd) => {
-//     const cmd = new Cmd();
-
-//     if (!existingCommands.includes(cmd.key))
-//       context.subscriptions.push(
-//         vscode.commands.registerCommand(cmd.key, async (args: any) => {
-//           await cmd.run(args);
-//         })
-//         // sentryReportingCallback(async (args: any) => {
-//         //   await cmd.run(args);
-//         // })
-//       );
-//   });
+// function importTest() {
+//   DendronEngineV3Web.foo();
 // }
+
+async function _setupCommands({
+  context,
+}: {
+  context: vscode.ExtensionContext;
+}) {
+  const existingCommands = await vscode.commands.getCommands();
+
+  const key = "dendron.lookupNote";
+
+  if (!existingCommands.includes(key))
+    context.subscriptions.push(
+      vscode.commands.registerCommand(key, async (args: any) => {
+        const qp = LookupQuickpickFactory.CreateDefault();
+        qp.show();
+      })
+      // sentryReportingCallback(async (args: any) => {
+      //   await cmd.run(args);
+      // })
+    );
+}

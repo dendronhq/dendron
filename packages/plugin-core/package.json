@@ -666,8 +666,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.lookupNote",
-          "when": "dendron:pluginActive"
+          "command": "dendron.lookupNote"
         },
         {
           "command": "dendron.lookupNoteAutoComplete",

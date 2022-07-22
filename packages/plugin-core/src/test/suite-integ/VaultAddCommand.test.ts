@@ -285,10 +285,12 @@ suite("VaultAddCommand", function () {
         test("THEN do right thing", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
           const vpath = path.join(wsRoot, "vault2");
-          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          const cmd = new VaultAddCommand();
+          stubVaultInput({ cmd, sourceType: "local", sourcePath: vpath });
 
-          await new VaultAddCommand().run();
+          await cmd.run();
           expect(await fs.readdir(vpath)).toEqual([
+            ".gitignore",
             "root.md",
             "root.schema.yml",
           ]);
@@ -325,8 +327,9 @@ suite("VaultAddCommand", function () {
       test("THEN do right thing", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const vpath = path.join(wsRoot, "vault2");
-        stubVaultInput({ sourceType: "local", sourcePath: vpath });
-        await new VaultAddCommand().run();
+        const cmd = new VaultAddCommand();
+        stubVaultInput({ cmd, sourceType: "local", sourcePath: vpath });
+        await cmd.run();
 
         const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
 
@@ -381,8 +384,9 @@ suite("VaultAddCommand", function () {
       test("THEN do right thing", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         const vpath = tmpDir().name;
-        stubVaultInput({ sourceType: "local", sourcePath: vpath });
-        await new VaultAddCommand().run();
+        const cmd = new VaultAddCommand();
+        stubVaultInput({ cmd, sourceType: "local", sourcePath: vpath });
+        await cmd.run();
         const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
         expect(
           await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
@@ -636,7 +640,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
         expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
+          [FOLDERS.DEPENDENCIES, vaultName].join("/")
         );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });

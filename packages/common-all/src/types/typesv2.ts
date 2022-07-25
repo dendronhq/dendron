@@ -312,7 +312,6 @@ export type EngineUpdateNodesOptsV2 = {
    */
   newNode: boolean;
 };
-export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
   /**
    * Write all children?
@@ -325,14 +324,10 @@ export type EngineWriteOptsV2 = {
    */
   noAddParent?: boolean;
   /**
-   * Should update existing note instead of overwriting
-   */
-  updateExisting?: boolean;
-  /**
    * Should any configured hooks be run during the write
    */
   runHooks?: boolean;
-} & Partial<EngineUpdateNodesOptsV2>;
+};
 
 export type DEngineInitPayload = {
   notes: NotePropsByIdDict;
@@ -589,17 +584,20 @@ export type DEngine = DCommonProps &
     findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
     deleteNote: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<EngineDeleteNoteResp>;
     deleteSchema: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<DEngineDeleteSchemaResp>;
     info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
     getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
+    /**
+     * Query for NoteProps from fuse engine
+     */
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({
       qs,
@@ -653,11 +651,11 @@ export type DStore = DCommonProps &
     findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
     deleteNote: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<StoreDeleteNoteResp>;
     deleteSchema: (
       id: string,
-      opts?: EngineDeleteOptsV2
+      opts?: EngineDeleteOpts
     ) => Promise<DEngineDeleteSchemaResp>;
     renameNote: (opts: RenameNoteOpts) => Promise<RenameNotePayload>;
   };
@@ -676,11 +674,11 @@ export type DEngineV4Methods = {
   init: () => Promise<DEngineInitResp>;
   deleteNote: (
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ) => Promise<EngineDeleteNoteResp>;
   deleteSchema: (
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ) => Promise<DEngineDeleteSchemaResp>;
   sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
@@ -811,7 +809,7 @@ export enum GraphViewMessageEnum {
   "configureCustomStyling" = "configureCustomStyling",
   "toggleGraphView" = "toggleGraphView",
   "onGraphDepthChange" = "onGraphDepthChange",
-  "toggleLinkedEdges" = "toggleLinkedEdges",
+  "toggleGraphEdges" = "toggleGraphEdges",
 }
 
 export enum CalendarViewMessageType {

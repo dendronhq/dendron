@@ -38,6 +38,7 @@ const DendronGraphPanel: DendronComponent = (props) => {
     wsRoot: workspace.ws,
     showBacklinks: ide.showBacklinks || !isSidePanel,
     showOutwardLinks: ide.showOutwardLinks || !isSidePanel,
+    showHierarchy: ide.showHierarchy || !isSidePanel,
   });
   useEffect(() => {
     if (!_.isUndefined(elements)) {

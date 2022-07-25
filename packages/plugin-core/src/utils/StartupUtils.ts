@@ -490,6 +490,25 @@ export class StartupUtils {
     }
   }
 
+  static showUninstallMarkdownLinksExtensionMessage() {
+    if (VSCodeUtils.isExtensionInstalled("dendron.dendron-markdown-links")) {
+      vscode.window
+        .showInformationMessage(
+          "Please uninstall the Dendron Markdown Links extension. Dendron has the note graph feature built-in now and having this legacy extension installed will interfere with its functionality.",
+          { modal: true },
+          { title: "Uninstall" }
+        )
+        .then(async (resp) => {
+          if (resp?.title === "Uninstall") {
+            await vscode.commands.executeCommand(
+              "workbench.extensions.uninstallExtension",
+              "dendron.dendron-markdown-links"
+            );
+          }
+        });
+    }
+  }
+
   /**
    * A one-off logic to show a special webview message for the v0.100.0 launch.
    * @returns

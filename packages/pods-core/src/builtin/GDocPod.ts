@@ -361,18 +361,18 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
           const resp = await onPrompt(PROMPT.USERPROMPT);
 
           if (resp?.title.toLowerCase() === "yes") {
-            await engine.writeNote(existingNote, { newNode: true });
+            await engine.writeNote(existingNote);
             return existingNote;
           }
         } else {
-          await engine.writeNote(existingNote, { newNode: true });
+          await engine.writeNote(existingNote);
           return existingNote;
         }
       } else if (onPrompt) {
         onPrompt();
       }
     } else {
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       return note;
     }
     return undefined;

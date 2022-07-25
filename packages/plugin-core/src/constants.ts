@@ -24,6 +24,7 @@ export enum DendronContext {
   TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewItemLabelType",
   GRAPH_PANEL_SHOW_BACKLINKS = "dendron.graph-panel.showBacklinks",
   GRAPH_PANEL_SHOW_OUTWARD_LINKS = "dendron.graph-panel.showOutwardLinks",
+  GRAPH_PANEL_SHOW_HIERARCHY = "dendron.graph-panel.showHierarchy",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -267,12 +268,20 @@ export const DENDRON_MENUS = {
       when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
     },
     {
+      command: "dendron.graph-panel.showHierarchyChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_HIERARCHY}`,
+    },
+    {
       command: "dendron.graph-panel.showBacklinks",
       when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_BACKLINKS}`,
     },
     {
       command: "dendron.graph-panel.showOutwardLinks",
       when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showHierarchy",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_HIERARCHY}`,
     },
   ],
   "explorer/context": [
@@ -393,6 +402,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.graph-panel.showOutwardLinks",
     title: "Show Outward Links",
   },
+  GRAPH_PANEL_SHOW_HIERARCHY: {
+    key: "dendron.graph-panel.showHierarchy",
+    title: "Show Hierarchy",
+  },
   GRAPH_PANEL_SHOW_BACKLINKS_CHECKED: {
     key: "dendron.graph-panel.showBacklinksChecked",
     title: "✓ Show Backlinks",
@@ -400,6 +413,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GRAPH_PANEL_SHOW_OUTWARD_LINKS_CHECKED: {
     key: "dendron.graph-panel.showOutwardLinksChecked",
     title: "✓ Show Outward Links",
+  },
+  GRAPH_PANEL_SHOW_HIERARCHY_CHECKED: {
+    key: "dendron.graph-panel.showHierarchyChecked",
+    title: "✓ Show Hierarchy",
   },
   // --- Notes
   BROWSE_NOTE: {

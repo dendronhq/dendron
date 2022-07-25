@@ -286,6 +286,121 @@ describe("noteRefV2", () => {
     });
   });
 
+  describe("WHEN parse end block", () => {
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "---",
+          "begin section",
+          "## Header 1",
+          "body 1.1",
+          "## Header 2",
+          "body 2.2",
+          "end section",
+        ];
+        note.body = txt.join("\n");
+        return note;
+      });
+    };
+
+    describe("AND WHEN try parse #^end anchor as start anchor", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN show error",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(
+                  resp,
+                  "the '^end' anchor cannot be used as the starting anchor"
+                );
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note has beginning section", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#header-1:^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "end section");
+                await checkNotInVFile(resp, "begin section");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note ends on a header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#header-1:^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "end section", "## Header 3");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "begin section",
+                "## Header 1",
+                "body 1.1",
+                "## Header 2",
+                "body 2.2",
+                "end section",
+                "## Header 3",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+  });
+
   describe("common cases", () => {
     const linkWithNoExtension = "![[foo]]";
 
@@ -1433,7 +1548,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1447,7 +1562,7 @@ describe("noteRefV2", () => {
             "* Sapiente sed accusamus eum.",
             "* Ullam optio est quia. ^start",
             "* Reprehenderit doloribus.",
-            "* Sint minus fuga omnis non. ^end",
+            "* Sint minus fuga omnis non. ^fin",
             "* Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1478,7 +1593,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1493,7 +1608,7 @@ describe("noteRefV2", () => {
             "* Sapiente sed accusamus eum.",
             "  * Ullam optio est quia. ^start",
             "* Reprehenderit doloribus.",
-            "  * Sint minus fuga omnis non. ^end",
+            "  * Sint minus fuga omnis non. ^fin",
             "  * Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1524,7 +1639,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1541,7 +1656,7 @@ describe("noteRefV2", () => {
             "",
             "Sapiente sed accusamus eum.",
             "",
-            "* Sint minus fuga omnis non. ^end",
+            "* Sint minus fuga omnis non. ^fin",
             "* Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1619,7 +1734,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^invalid-start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^invalid-start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1634,7 +1749,7 @@ describe("noteRefV2", () => {
             "",
             "Ullam optio est quia. ^start",
             "",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1677,7 +1792,7 @@ describe("noteRefV2", () => {
             "",
             "Ullam optio est quia. ^start",
             "",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1705,7 +1820,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start2:#^end2]]",
+          text: "# Foo Bar\n![[foo.ch1#^start2:#^fin2]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1720,13 +1835,13 @@ describe("noteRefV2", () => {
             "",
             "Aut id architecto quia. ^start1",
             "",
-            "Sapiente sed accusamus eum. ^end1",
+            "Sapiente sed accusamus eum. ^fin1",
             "",
             "Ullam optio est quia. ^start2",
             "",
-            "![[foo.ch1#^start1:#^end1]]",
+            "![[foo.ch1#^start1:#^fin1]]",
             "",
-            "Reprehenderit doloribus. ^end2",
+            "Reprehenderit doloribus. ^fin2",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1758,7 +1873,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start2:#^end2]]",
+          text: "# Foo Bar\n![[foo.ch1#^start2:#^fin2]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1773,13 +1888,13 @@ describe("noteRefV2", () => {
             "",
             "Aut id architecto quia. ^start1",
             "",
-            "Sapiente sed accusamus eum. ^end1",
+            "Sapiente sed accusamus eum. ^fin1",
             "",
             "Ullam optio est quia. ^start2",
             "",
-            "![[#^start1:#^end1]]",
+            "![[#^start1:#^fin1]]",
             "",
-            "Reprehenderit doloribus. ^end2",
+            "Reprehenderit doloribus. ^fin2",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1811,7 +1926,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1827,7 +1942,7 @@ describe("noteRefV2", () => {
             "* Reprehenderit doloribus.",
             "",
             "Sapiente sed accusamus eum.",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1859,7 +1974,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1876,7 +1991,7 @@ describe("noteRefV2", () => {
             "Sapiente sed accusamus eum. ^start",
             "",
             "* Reprehenderit doloribus.",
-            "* Ullam optio est quia. ^end",
+            "* Ullam optio est quia. ^fin",
             "* Aut id architecto quia.",
             "",
             "Iure neque alias dolorem.",
@@ -1910,7 +2025,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1924,7 +2039,7 @@ describe("noteRefV2", () => {
             "# start",
             "",
             "Sint minus fuga omnis non.",
-            "Sapiente sed accusamus eum. ^end",
+            "Sapiente sed accusamus eum. ^fin",
             "",
             "Aut id architecto quia.",
             "Iure neque alias dolorem.",

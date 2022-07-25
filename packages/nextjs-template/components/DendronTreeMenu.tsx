@@ -34,7 +34,6 @@ export default function DendronTreeMenu(
   const tree = ide.tree;
   const logger = createLogger("DendronTreeMenu");
   const dendronRouter = useDendronRouter();
-  const { changeActiveNote } = dendronRouter;
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   const noteActiveId = _.isUndefined(dendronRouter.query.id)
     ? props.noteIndex?.id
@@ -45,19 +44,18 @@ export default function DendronTreeMenu(
     if (!noteActiveId || !tree) {
       return undefined;
     }
-
     logger.info({
       state: "useEffect:preCalculateTree",
     });
 
     // all parents should be in expanded position
-    const activeNoteIds = TreeUtils.getAllParents({
+    const newActiveNoteIds = TreeUtils.getAllParents({
       child2parent: tree.child2parent,
       noteId: noteActiveId,
     });
 
-    setActiveNoteIds(activeNoteIds);
-  }, [props.noteIndex, dendronRouter.query.id, noteActiveId]);
+    setActiveNoteIds(newActiveNoteIds);
+  }, [props.noteIndex, dendronRouter.query.id, noteActiveId, tree]);
 
   const { notes, collapsed, setCollapsed } = props;
 
@@ -73,13 +71,14 @@ export default function DendronTreeMenu(
   });
 
   // --- Methods
-  const onSelect = (noteId: string) => {
-    if (!props.noteIndex) {
-      return;
-    }
+  const onSubMenuSelect = (noteId: string) => {
+    logger.info({ ctx: "onSubMenuSelect", id: noteId });
     setCollapsed(true);
-    logger.info({ ctx: "onSelect", id: noteId });
-    changeActiveNote(noteId, { noteIndex: props.noteIndex });
+  };
+
+  const onMenuItemClick = (noteId: string) => {
+    logger.info({ ctx: "onMenuItemClick", id: noteId });
+    setCollapsed(true);
   };
 
   const onExpand = (noteId: string) => {
@@ -98,23 +97,27 @@ export default function DendronTreeMenu(
     }
   };
 
-  return (
+  return noteActiveId ? (
     <MenuView
       {...props}
       roots={roots}
       expandKeys={expandKeys}
-      onSelect={onSelect}
+      onSubMenuSelect={onSubMenuSelect}
+      onMenuItemClick={onMenuItemClick}
       onExpand={onExpand}
       collapsed={collapsed}
       activeNote={noteActiveId}
     />
+  ) : (
+    <></>
   );
 }
 
 function MenuView({
   roots,
   expandKeys,
-  onSelect,
+  onSubMenuSelect,
+  onMenuItemClick,
   onExpand,
   collapsed,
   activeNote,
@@ -122,10 +125,11 @@ function MenuView({
 }: {
   roots: DataNode[];
   expandKeys: string[];
-  onSelect: (noteId: string) => void;
+  onSubMenuSelect: (noteId: string) => void;
+  onMenuItemClick: (noteId: string) => void;
   onExpand: (noteId: string) => void;
   collapsed: boolean;
-  activeNote: string | undefined;
+  activeNote: string;
 } & Partial<NoteData>) {
   const ExpandIcon = useCallback(
     ({ isOpen, ...rest }: { isOpen: boolean }) => {
@@ -159,7 +163,7 @@ function MenuView({
             const target = event.domEvent.target as HTMLElement;
             const isArrow = target.dataset.expandedicon;
             if (!isArrow) {
-              onSelect(event.key);
+              onSubMenuSelect(event.key);
             } else {
               onExpand(event.key);
             }
@@ -178,10 +182,6 @@ function MenuView({
     );
   };
 
-  if (activeNote) {
-    expandKeys.push(activeNote);
-  }
-
   return (
     <Menu
       key={String(collapsed)}
@@ -189,13 +189,16 @@ function MenuView({
       mode="inline"
       {...(!collapsed && {
         openKeys: expandKeys,
-        selectedKeys: expandKeys,
+        selectedKeys: [...expandKeys, activeNote],
       })}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
       // results in gray box otherwise when nav bar is too short for display
       style={{ height: "100%" }}
+      onClick={({ key }) => {
+        onMenuItemClick(key);
+      }}
     >
       {roots.map((menu) => {
         return createMenu(menu);

@@ -69,7 +69,7 @@ export default function DendronSEO({
   const cleanSeoProps: SEOProps = _.defaults(noteSeoProps, siteSeoProps);
 
   const title = cleanSeoProps.title;
-  const description = cleanSeoProps.excerpt;
+  const description = cleanSeoProps.description;
   const images = cleanSeoProps?.image ? [cleanSeoProps.image] : [];
   const publishingConfig = ConfigUtils.getPublishingConfig(config);
   const canonical = getCanonicalUrl({

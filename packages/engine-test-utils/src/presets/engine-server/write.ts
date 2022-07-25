@@ -2,7 +2,6 @@ import {
   CONSTANTS,
   DNodeUtils,
   NoteChangeUpdateEntry,
-  NoteProps,
   NoteUtils,
   SchemaUtils,
   extractNoteChangeEntriesByType,
@@ -127,11 +126,12 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtils.getNoteByFnameFromEngine({
-      fname: note.fname,
-      engine,
-      vault,
-    }) as NoteProps;
+    const noteRoot = (
+      await engine.findNotes({
+        fname: note.fname,
+        vault,
+      })
+    )[0];
     await engine.init();
     return [
       {
@@ -164,7 +164,7 @@ const NOTES = {
         })
       )[0];
       note.custom = { bond: 43 };
-      await engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note);
       const newNote = (
         await engine.findNotes({
           fname: "foo",
@@ -280,7 +280,7 @@ const NOTES = {
       })
     )[0];
     const bar = (
-      await engine.findNotes({
+      await engine.findNotesMeta({
         fname: "bar",
         vault,
       })
@@ -554,6 +554,9 @@ const NOTES_MULTI = {
       const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
       const changes = await engine.writeNote(fooUpdated);
+
+      const deletedFooNote = await engine.getNote("foo");
+      const newFooNote = await engine.getNote("updatedID");
       const createEntries = extractNoteChangeEntriesByType(
         changes.data!,
         "create"
@@ -620,6 +623,69 @@ const NOTES_MULTI = {
           actual: updatedChild?.note.parent,
           expected: "updatedID",
           msg: "updated child's parent should be updatedID.",
+        },
+        {
+          actual: deletedFooNote,
+          expected: undefined,
+          msg: "Foo should be deleted",
+        },
+        {
+          actual: newFooNote?.id,
+          expected: "updatedID",
+          msg: "New Foo should be created",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  BODY_UPDATED: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
+      fooUpdated.body = "updatedBody";
+      const changes = await engine.writeNote(fooUpdated);
+      const createEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "create"
+      );
+
+      const deleteEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "delete"
+      );
+
+      const updateEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "update"
+      ) as NoteChangeUpdateEntry[];
+
+      return [
+        {
+          actual: updateEntries.length,
+          expected: 1,
+          msg: "1 update should happen.",
+        },
+        {
+          actual: deleteEntries.length,
+          expected: 0,
+          msg: "0 delete should happen.",
+        },
+        {
+          actual: createEntries.length,
+          expected: 0,
+          msg: "0 creates should happen.",
+        },
+        {
+          actual: updateEntries[0].note.fname,
+          expected: "foo",
+          msg: "foo note is updated.",
+        },
+        {
+          actual: updateEntries[0].note.body,
+          expected: "updatedBody",
+          msg: "updated foo note's body is updatedBody",
         },
       ];
     },

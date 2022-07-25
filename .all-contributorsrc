@@ -1982,6 +1982,33 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "patchworquill",
+      "name": "Patrick Wilkie",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6552507?v=4",
+      "profile": "https://github.com/patchworquill",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "VoltCruelerz",
+      "name": "Michael Greene",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4068550?v=4",
+      "profile": "https://www.linkedin.com/in/michael-greene-8260004a/",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "liby",
+      "name": "Bryan Lee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38807139?v=4",
+      "profile": "https://liby.github.io/notes",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

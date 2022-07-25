@@ -161,7 +161,7 @@ export class NotionUtils {
           ...note.custom,
           notionId,
         };
-        await engine.writeNote(note, { updateExisting: true });
+        await engine.writeNote(note);
       })
     );
   };

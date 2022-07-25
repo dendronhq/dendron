@@ -91,7 +91,9 @@ suite("RenameNote", function () {
         const updateResps = out!.data?.filter((resp) => {
           return resp.status === "update";
         });
-        expect(updateResps?.length).toEqual(0);
+        // Only target note should be updated
+        expect(updateResps?.length).toEqual(1);
+        expect(updateResps![0].note.fname).toEqual("target");
       });
     }
   );

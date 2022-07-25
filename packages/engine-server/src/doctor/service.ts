@@ -325,7 +325,7 @@ export class DoctorService implements Disposable {
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note, { updateExisting: true });
+            await engineWrite(note);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -355,7 +355,7 @@ export class DoctorService implements Disposable {
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note, { updateExisting: true });
+            await engineWrite(note);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -402,8 +402,6 @@ export class DoctorService implements Disposable {
           note.id = genUUID();
           await engine.writeNote(note, {
             runHooks: false,
-            // Old note needs to be removed
-            updateExisting: false,
           });
           numChanges += 1;
         };
@@ -584,7 +582,7 @@ export class DoctorService implements Disposable {
             custom: { ...note.custom, pods },
           };
           // update note
-          await engine.writeNote(updatedNote, { updateExisting: true });
+          await engine.writeNote(updatedNote);
         };
         break;
       }

@@ -60,6 +60,89 @@ VFile {
 }
 `;
 
+exports[`noteRefV2 WHEN parse end block AND WHEN try parse #^end anchor as start anchor "MD_REGULAR: THEN show error: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+the '^end' anchor cannot be used as the starting anchor
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse end block AND note ends on a header "MD_REGULAR: THEN parse beginning section: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+## Header 1
+
+body 1.1
+
+## Header 2
+
+body 2.2
+end section
+
+## Header 3
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse end block AND note has beginning section "MD_REGULAR: THEN parse beginning section: REGULAR" 1`] = `
+VFile {
+  "contents": "# Foo
+
+## Header 1
+
+body 1.1
+
+## Header 2
+
+body 2.2
+end section
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 WHEN parse end block AND note has beginning section "MD_REGULAR: THEN parse beginning section: REGULAR" 2`] = `
+VFile {
+  "contents": "# Foo
+
+## Header 1
+
+body 1.1
+
+## Header 2
+
+body 2.2
+end section
+
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`noteRefV2 WHEN parse header AND parse from end header "MD_REGULAR: THEN parse end header and sub headers: REGULAR" 1`] = `
 VFile {
   "contents": "# Foo
@@ -961,9 +1044,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start1\\" href=\\"#^start1\\"></a>Aut id architecto quia. </p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end1\\" href=\\"#^end1\\"></a>Sapiente sed accusamus eum. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin1\\" href=\\"#^fin1\\"></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end2\\" href=\\"#^end2\\"></a>Reprehenderit doloribus. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin2\\" href=\\"#^fin2\\"></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -1001,9 +1084,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start1\\" href=\\"#^start1\\"></a>Aut id architecto quia. </p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end1\\" href=\\"#^end1\\"></a>Sapiente sed accusamus eum. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin1\\" href=\\"#^fin1\\"></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end2\\" href=\\"#^end2\\"></a>Reprehenderit doloribus. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin2\\" href=\\"#^fin2\\"></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -1041,9 +1124,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start1\\" href=\\"#^start1\\"></a>Aut id architecto quia. </p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end1\\" href=\\"#^end1\\"></a>Sapiente sed accusamus eum. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin1\\" href=\\"#^fin1\\"></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end2\\" href=\\"#^end2\\"></a>Reprehenderit doloribus. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin2\\" href=\\"#^fin2\\"></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -1081,9 +1164,9 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start1\\" href=\\"#^start1\\"></a>Aut id architecto quia. </p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end1\\" href=\\"#^end1\\"></a>Sapiente sed accusamus eum. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin1\\" href=\\"#^fin1\\"></a>Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end2\\" href=\\"#^end2\\"></a>Reprehenderit doloribus. </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin2\\" href=\\"#^fin2\\"></a>Reprehenderit doloribus. </p>
 </div></div><p></p><p></p>
 <hr>
 <strong>Children</strong>
@@ -1902,7 +1985,7 @@ VFile {
 </ul>
 <p>Sapiente sed accusamus eum.</p>
 <ul>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -1936,7 +2019,7 @@ VFile {
 </ul>
 <p>Sapiente sed accusamus eum.</p>
 <ul>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2021,7 +2104,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non.
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non.
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
@@ -2050,7 +2133,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><h1 id=\\"start\\">start</h1>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non.
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non.
 Sapiente sed accusamus eum. </p>
 </div></div><p></p><p></p>
 <hr>
@@ -2082,7 +2165,7 @@ VFile {
 <li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start\\" href=\\"#^start\\"></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sapiente sed accusamus eum.
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sapiente sed accusamus eum.
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
@@ -2114,7 +2197,7 @@ VFile {
 <li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start\\" href=\\"#^start\\"></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
 </ul>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sapiente sed accusamus eum.
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sapiente sed accusamus eum.
 Sint minus fuga omnis non. </p>
 </div></div><p></p><p></p>
 <hr>
@@ -2146,7 +2229,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 <ul>
 <li>Reprehenderit doloribus.</li>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Ullam optio est quia. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Ullam optio est quia. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2178,7 +2261,7 @@ VFile {
 Sapiente sed accusamus eum. </p>
 <ul>
 <li>Reprehenderit doloribus.</li>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Ullam optio est quia. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Ullam optio est quia. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2317,7 +2400,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
 <li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start\\" href=\\"#^start\\"></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2348,7 +2431,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><ul>
 <li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^start\\" href=\\"#^start\\"></a>Ullam optio est quia. </li>
 <li>Reprehenderit doloribus.</li>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </div></div><p></p><p></p>
 <hr>
@@ -2384,7 +2467,7 @@ VFile {
 </li>
 <li>Reprehenderit doloribus.
 <ul>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </li>
 </ul>
@@ -2422,7 +2505,7 @@ VFile {
 </li>
 <li>Reprehenderit doloribus.
 <ul>
-<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^end\\" href=\\"#^end\\"></a>Sint minus fuga omnis non. </li>
+<li><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^fin\\" href=\\"#^fin\\"></a>Sint minus fuga omnis non. </li>
 </ul>
 </li>
 </ul>

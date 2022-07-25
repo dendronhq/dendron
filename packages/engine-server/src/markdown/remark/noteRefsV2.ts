@@ -104,6 +104,10 @@ function isBeginBlockAnchorId(anchorId: string) {
   return anchorId === "begin";
 }
 
+function isEndBlockAnchorId(anchorId: string) {
+  return anchorId === "end";
+}
+
 function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
   const procData = MDUtilsV5.getProcData(proc);
   const { config, fname, engine, vault, dest } = procData;
@@ -588,7 +592,7 @@ function prepareNoteRefIndices<T>({
   anchorStart?: string;
   anchorEnd?: string;
   bodyAST: DendronASTNode;
-  makeErrorData: (anchorName: string, anchorType: "Start" | "End") => T;
+  makeErrorData: (msg: string) => T;
   enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
@@ -596,6 +600,10 @@ function prepareNoteRefIndices<T>({
   data: T | null;
   error: any;
 } {
+  const genErrorMsg = (anchorName: string, anchorType: "Start" | "End") => {
+    return `${anchorType} anchor ${anchorName} not found`;
+  };
+
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
     type: "none",
@@ -608,9 +616,19 @@ function prepareNoteRefIndices<T>({
       nodes: bodyAST.children,
       match: anchorStart,
     });
+    if (start?.type === "block-end") {
+      return {
+        data: makeErrorData(
+          "the '^end' anchor cannot be used as the starting anchor"
+        ),
+        start: null,
+        end: null,
+        error: null,
+      };
+    }
     if (_.isNull(start)) {
       return {
-        data: makeErrorData(anchorStart, "Start"),
+        data: makeErrorData(genErrorMsg(anchorStart, "Start")),
         start: null,
         end: null,
         error: null,
@@ -633,7 +651,7 @@ function prepareNoteRefIndices<T>({
     }
     if (_.isNull(end)) {
       return {
-        data: makeErrorData(anchorEnd, "End"),
+        data: makeErrorData(genErrorMsg(anchorEnd, "End")),
         start: null,
         end: null,
         error: null,
@@ -745,10 +763,8 @@ function convertNoteRefHelperAST(
     enableSmartRef: ConfigUtils.getWorkspace(config).enableSmartRefs,
     anchorEnd,
     bodyAST,
-    makeErrorData: (anchorName, anchorType) => {
-      return MdastUtils.genMDMsg(
-        `${anchorType} anchor ${anchorName} not found`
-      );
+    makeErrorData: (msg) => {
+      return MdastUtils.genMDMsg(msg);
     },
   });
   if (data) return { data, error };
@@ -800,6 +816,11 @@ type FindAnchorResult =
       node: Node;
     }
   | {
+      type: "block-end";
+      index: number;
+      node: Node;
+    }
+  | {
       type: "list";
       index: number;
       ancestors: ParentWithIndex[];
@@ -829,6 +850,9 @@ function findAnchor({
     if (isBeginBlockAnchorId(anchorId)) {
       return findBeginBlockAnchor({ nodes });
     }
+    if (isEndBlockAnchorId(anchorId)) {
+      return findEndBlockAnchor({ nodes });
+    }
     return findBlockAnchor({ nodes, match: anchorId });
   } else {
     return MdastUtils.findHeader({ nodes, match, slugger: getSlugger() });
@@ -845,6 +869,23 @@ function findBeginBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
     type: "block-begin",
     index: 0,
     node: firstNode,
+  };
+}
+
+/**
+ * Search for end of document;
+ */
+function findEndBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
+  // TODO: error if no first node found
+  const lastNode = _.last(nodes);
+  if (!lastNode) {
+    // TODO: should not happen
+    throw Error("no nodes found for end-anchor");
+  }
+  return {
+    type: "block-end",
+    index: nodes.length,
+    node: lastNode,
   };
 }
 

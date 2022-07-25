@@ -336,6 +336,7 @@ export async function _activate(
         wsRoot: maybeWsRoot,
         engine: resp.data.engine,
         wsService,
+        opts,
       });
       if (respActivate.error) {
         return false;
@@ -392,7 +393,7 @@ export async function _activate(
       ) {
         await PreviewPanelFactory.create(getExtension()).show(note);
       }
-
+      StartupUtils.showUninstallMarkdownLinksExtensionMessage();
       return true;
     }
     return false;

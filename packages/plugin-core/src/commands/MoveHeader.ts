@@ -313,9 +313,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // add the stringified blocks to destination note body
     dest.body = `${dest.body}\n\n${destContentToAppend}`;
-    await engine.writeNote(dest, {
-      updateExisting: true,
-    });
+    await engine.writeNote(dest);
   }
 
   /**
@@ -548,9 +546,7 @@ export class MoveHeaderCommand extends BasicCommand<
           dest,
         });
         note!.body = modifiedNote.body;
-        const writeResp = await engine.writeNote(note!, {
-          updateExisting: true,
-        });
+        const writeResp = await engine.writeNote(note!);
         if (writeResp.data) {
           noteChangeEntries = noteChangeEntries.concat(writeResp.data);
         }
@@ -590,9 +586,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
     origin.body = modifiedOriginContent;
 
-    await engine.writeNote(origin, {
-      updateExisting: true,
-    });
+    await engine.writeNote(origin);
 
     return modifiedOriginContent;
   }

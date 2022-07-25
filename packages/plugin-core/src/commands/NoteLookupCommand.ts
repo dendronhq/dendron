@@ -552,9 +552,7 @@ export class NoteLookupCommand
       const nodeModified = await picker.onCreate(nodeNew);
       if (nodeModified) nodeNew = nodeModified;
     }
-    const resp = await engine.writeNote(nodeNew, {
-      newNode: true,
-    });
+    const resp = await engine.writeNote(nodeNew);
     if (resp.error) {
       Logger.error({ ctx, error: resp.error });
       return;

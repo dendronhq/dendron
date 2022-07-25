@@ -2,6 +2,10 @@ import _ from "lodash";
 import semver from "semver";
 import { Event, version as vscodeVersion, ViewColumn, window } from "vscode";
 
+/**
+ * NOTE: type definitions copied over from vscode@1.68 to support vscode version 1.62-1.67
+ * will be removed once we bump min version to 1.68
+ */
 export interface Tab {
   /**
    * The text displayed on the tab.
@@ -41,6 +45,10 @@ export interface Tab {
   readonly isPreview: boolean;
 }
 
+/**
+ * NOTE: type definitions copied over from vscode@1.68 to support vscode version 1.62-1.67
+ * will be removed once we bump min version to 1.68
+ */
 export interface TabGroup {
   /**
    * Whether or not the group is currently active.
@@ -72,6 +80,10 @@ export interface TabGroup {
   readonly tabs: readonly Tab[];
 }
 
+/**
+ * NOTE: type definitions copied over from vscode@1.68 to support vscode version 1.62-1.67
+ * will be removed once we bump min version to 1.68
+ */
 export interface TabGroups {
   /**
    * All the groups within the group container.

@@ -1,19 +1,19 @@
-import { expect } from "../testUtilsv2";
-import { describe, beforeEach, before, after } from "mocha";
-import { EngineNoteProvider } from "../../views/EngineNoteProvider";
-import { describeMultiWS } from "../testUtilsV3";
-import { MockEngineEvents } from "./MockEngineEvents";
 import { DendronError, NoteProps, TreeUtils } from "@dendronhq/common-all";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
 import { vault2Path } from "@dendronhq/common-server";
-import { Uri } from "vscode";
-import path from "path";
-import sinon from "sinon";
-import { VSCodeUtils } from "../../vsCodeUtils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
+import { after, before, beforeEach, describe } from "mocha";
+import path from "path";
+import sinon from "sinon";
+import { Uri } from "vscode";
+import { DeleteCommand } from "../../commands/DeleteCommand";
+import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { EngineNoteProvider } from "../../views/EngineNoteProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS } from "../testUtilsV3";
+import { MockEngineEvents } from "./MockEngineEvents";
 
 function getNoteUri(opts: { note: NoteProps; wsRoot: string }) {
   const { note, wsRoot } = opts;
@@ -59,7 +59,7 @@ async function runDeleteNote(opts: { noteId: string }) {
   const { noteId } = opts;
   const noteToDelete = engine.notes[noteId];
   const _fsPath = getNoteUri({ note: noteToDelete, wsRoot }).fsPath;
-  const deleteCmd = new DeleteNodeCommand();
+  const deleteCmd = new DeleteCommand();
   const deleteOpts = {
     _fsPath,
     noConfirm: true,

@@ -49,6 +49,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     undefined;
   private _onTextChanged: vscode.Disposable | undefined = undefined;
   private _linkHandler: IPreviewLinkHandler;
+  private _lockedEditorFileName: string | undefined;
 
   /**
    *
@@ -150,11 +151,29 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
+  lock(): void {
+    this._lockedEditorFileName =
+      vscode.window.activeTextEditor?.document.fileName;
+  }
+  unlock(): void {
+    this._lockedEditorFileName = undefined;
+  }
   isOpen(): boolean {
     return this._panel !== undefined;
   }
   isVisible(): boolean {
     return this._panel !== undefined && this._panel.visible;
+  }
+
+  /**
+   * The Preview is locked if the activeEditor does not match the locked note.
+   */
+  isLocked(): boolean {
+    return (
+      this._panel !== undefined &&
+      vscode.window.activeTextEditor?.document.fileName !==
+        this._lockedEditorFileName
+    );
   }
   dispose() {
     if (this._panel) {
@@ -234,7 +253,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             if (
               !editor ||
               editor.document.uri.fsPath !==
-                vscode.window.activeTextEditor?.document.uri.fsPath
+                vscode.window.activeTextEditor?.document.uri.fsPath ||
+              this.isLocked()
             ) {
               return;
             }
@@ -370,7 +390,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     if (textDocument.document.isDirty === false) {
       return;
     }
-    if (this.isVisible()) {
+    if (this.isVisible() && !this.isLocked()) {
       const note =
         await this._textDocumentService.processTextDocumentChangeEvent(
           textDocument

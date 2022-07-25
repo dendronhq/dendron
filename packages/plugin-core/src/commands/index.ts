@@ -27,7 +27,6 @@ import { CreateScratchNoteCommand } from "./CreateScratchNoteCommand";
 import { CreateTaskCommand } from "./CreateTask";
 import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteCommand } from "./DeleteCommand";
-import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DevTriggerCommand } from "./DevTriggerCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
@@ -111,7 +110,6 @@ const ALL_COMMANDS = [
   CreateSchemaFromHierarchyCommand,
   DeleteHookCommand,
   DeleteCommand,
-  DeleteNodeCommand,
   DiagnosticsReportCommand,
   DisableTelemetryCommand,
   DevTriggerCommand,

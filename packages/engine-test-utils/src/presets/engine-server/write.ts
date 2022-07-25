@@ -2,7 +2,6 @@ import {
   CONSTANTS,
   DNodeUtils,
   NoteChangeUpdateEntry,
-  NoteProps,
   NoteUtils,
   SchemaUtils,
   extractNoteChangeEntriesByType,
@@ -127,11 +126,12 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtils.getNoteByFnameFromEngine({
-      fname: note.fname,
-      engine,
-      vault,
-    }) as NoteProps;
+    const noteRoot = (
+      await engine.findNotes({
+        fname: note.fname,
+        vault,
+      })
+    )[0];
     await engine.init();
     return [
       {
@@ -280,7 +280,7 @@ const NOTES = {
       })
     )[0];
     const bar = (
-      await engine.findNotes({
+      await engine.findNotesMeta({
         fname: "bar",
         vault,
       })
@@ -554,6 +554,9 @@ const NOTES_MULTI = {
       const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
       const changes = await engine.writeNote(fooUpdated);
+
+      const deletedFooNote = await engine.getNote("foo");
+      const newFooNote = await engine.getNote("updatedID");
       const createEntries = extractNoteChangeEntriesByType(
         changes.data!,
         "create"
@@ -621,6 +624,16 @@ const NOTES_MULTI = {
           expected: "updatedID",
           msg: "updated child's parent should be updatedID.",
         },
+        {
+          actual: deletedFooNote,
+          expected: undefined,
+          msg: "Foo should be deleted",
+        },
+        {
+          actual: newFooNote?.id,
+          expected: "updatedID",
+          msg: "New Foo should be created",
+        },
       ];
     },
     {
@@ -651,8 +664,8 @@ const NOTES_MULTI = {
       return [
         {
           actual: updateEntries.length,
-          expected: 0,
-          msg: "0 updates should happen.",
+          expected: 1,
+          msg: "1 update should happen.",
         },
         {
           actual: deleteEntries.length,
@@ -661,18 +674,18 @@ const NOTES_MULTI = {
         },
         {
           actual: createEntries.length,
-          expected: 1,
-          msg: "1 create should happen.",
+          expected: 0,
+          msg: "0 creates should happen.",
         },
         {
-          actual: createEntries[0].note.fname,
+          actual: updateEntries[0].note.fname,
           expected: "foo",
-          msg: "foo note is created.",
+          msg: "foo note is updated.",
         },
         {
-          actual: createEntries[0].note.body,
+          actual: updateEntries[0].note.body,
           expected: "updatedBody",
-          msg: "created foo note's body is updatedBody",
+          msg: "updated foo note's body is updatedBody",
         },
       ];
     },

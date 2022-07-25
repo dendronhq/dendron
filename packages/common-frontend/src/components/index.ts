@@ -1,2 +1,1 @@
-export {DendronNote} from "./DendronNote"
-export {BasicLayout} from "./layouts/BasicLayout"
+export { DendronNote } from "./DendronNote";

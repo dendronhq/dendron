@@ -488,11 +488,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy To Clipboard`,
     when: "false",
   },
-  DELETE_NODE: {
-    key: "dendron.deleteNode",
-    title: `${CMD_PREFIX} Delete Node`,
-    when: DendronContext.PLUGIN_ACTIVE,
-  },
   DELETE: {
     key: "dendron.delete",
     title: `${CMD_PREFIX} Delete`,

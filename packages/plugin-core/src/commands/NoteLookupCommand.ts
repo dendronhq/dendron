@@ -381,6 +381,9 @@ export class NoteLookupCommand
     return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
 
+  /**
+   * Executed after user accepts a quickpick item
+   */
   async execute(opts: CommandOpts) {
     const ctx = "NoteLookupCommand:execute";
     Logger.info({ ctx, msg: "enter" });
@@ -427,14 +430,14 @@ export class NoteLookupCommand
           return this.acceptItem(item);
         })
       );
-      const outClean = out.filter(
+      const notesToShow = out.filter(
         (ent) => !_.isUndefined(ent)
       ) as OnDidAcceptReturn[];
       if (!_.isUndefined(quickpick.copyNoteLinkFunc)) {
-        await quickpick.copyNoteLinkFunc!(outClean.map((item) => item.node));
+        await quickpick.copyNoteLinkFunc!(notesToShow.map((item) => item.node));
       }
       await _.reduce(
-        outClean,
+        notesToShow,
         async (acc, item) => {
           await acc;
           return quickpick.showNote!(item.uri);

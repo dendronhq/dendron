@@ -34,6 +34,7 @@ import {
 } from "./constants";
 import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
 import { OnAcceptHook } from "./LookupProviderV3Interface";
+import { TabUtils } from "./TabUtils";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -232,7 +233,28 @@ export class PickerUtilsV2 {
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
     quickPick.sortByLabel = false;
-    quickPick.showNote = async (uri) => window.showTextDocument(uri);
+    quickPick.showNote = async (uri) => {
+      let viewColumn;
+
+      // if current tab is a preview, open note in a different view
+      if (TabUtils.tabAPIAvailable()) {
+        const allTabGroups = TabUtils.getAllTabGroups();
+        const activeTabGroup = allTabGroups.activeTabGroup;
+        if (
+          activeTabGroup.activeTab &&
+          TabUtils.isPreviewTab(activeTabGroup.activeTab)
+        ) {
+          const nonPreviewTabGroup = _.find(
+            allTabGroups.all,
+            (tb) => tb.viewColumn !== activeTabGroup.viewColumn
+          );
+          if (nonPreviewTabGroup) {
+            viewColumn = nonPreviewTabGroup.viewColumn;
+          }
+        }
+      }
+      return window.showTextDocument(uri, { viewColumn });
+    };
     if (initialValue !== undefined) {
       quickPick.rawValue = initialValue;
       quickPick.prefix = initialValue;

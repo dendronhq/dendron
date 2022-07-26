@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
 // import { DENDRON_COMMANDS } from "../constants";
-import { LookupQuickpickFactory } from "@dendronhq/plugin-common";
+import {
+  DendronEngineV3Web,
+  LookupQuickpickFactory,
+} from "@dendronhq/plugin-common";
+import { MockEngineAPIService } from "./test/helpers/MockEngineAPIService";
+// import { DendronEngineV3Web } from "@dendronhq/plugin-common";
 // import { DendronEngineV3Web } from "@dendronhq/engine-server";
 // import { ShowHelpCommand } from "../commands/ShowHelp";
 // import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
@@ -27,6 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   _setupCommands({ context });
 
+  importTest();
+
   // if (activeEditor) {
   //   console.log("foo");
   // }
@@ -39,9 +46,9 @@ export function deactivate() {
   // require("./_extension").deactivate(); // eslint-disable-line global-require
 }
 
-// function importTest() {
-//   DendronEngineV3Web.foo();
-// }
+function importTest() {
+  DendronEngineV3Web.foo();
+}
 
 async function _setupCommands({
   context,
@@ -54,9 +61,10 @@ async function _setupCommands({
 
   if (!existingCommands.includes(key))
     context.subscriptions.push(
-      vscode.commands.registerCommand(key, async (args: any) => {
-        const qp = LookupQuickpickFactory.CreateDefault();
-        qp.show();
+      vscode.commands.registerCommand(key, async (_args: any) => {
+        const factory = new LookupQuickpickFactory(new MockEngineAPIService());
+        factory.ShowLookup();
+        // qp.show();
       })
       // sentryReportingCallback(async (args: any) => {
       //   await cmd.run(args);

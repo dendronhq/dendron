@@ -31,6 +31,9 @@ EXT_TYPE=dendron
 if [ $SCRIPT_EXT_TYPE = "nightly" ]; then
   EXT_TYPE=nightly
 fi
+if [ $SCRIPT_EXT_TARGET = "enterprise" ]; then
+  EXT_TARGET=enterprise
+fi
 
 if [ -z $FAST ]; then
 	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --extensionType $EXT_TYPE

@@ -39,6 +39,7 @@ export enum PublishEndpoint {
 export enum ExtensionType {
   DENDRON = "dendron",
   NIGHTLY = "nightly",
+  ENTERPRISE = "enterprise",
 }
 
 const LOCAL_NPM_ENDPOINT = "http://localhost:4873";
@@ -207,6 +208,10 @@ export class BuildUtils {
       description =
         "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
       icon = "media/logo-bw.png";
+    }
+    if (target === ExtensionTarget.ENTERPRISE) {
+      version = await this.getIncrementedVerForNightly();
+      description = "Dendron - Enterprise Version";
     }
 
     this.updatePkgMeta({

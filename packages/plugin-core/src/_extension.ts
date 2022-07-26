@@ -74,6 +74,8 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
+import { SurveyUtils } from "./survey";
+import _ from "lodash";
 import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 import semver from "semver";
 import _ from "lodash";
@@ -415,6 +417,24 @@ export async function _activate(
             showcase.showToast();
           }
         }, ONE_MINUTE_IN_MS);
+      }
+      if (ExtensionUtils.isEnterprise(context)) {
+        let resp: boolean | undefined | string = true;
+        while (!ExtensionUtils.hasValidLicense() && resp !== undefined) {
+          // eslint-disable-next-line no-await-in-loop
+          resp = await SurveyUtils.showEnterpriseLicenseSurvey();
+        }
+        if (resp === undefined) {
+          vscode.window.showInformationMessage(
+            "Please reload to enter your license key",
+            {
+              modal: true,
+              detail:
+                "Dendron will be inactive until you enter a license key. You can reload your vscode instance to be prompted again",
+            }
+          );
+          return false;
+        }
       }
     } else {
       // ws not active

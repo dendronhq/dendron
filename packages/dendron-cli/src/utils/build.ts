@@ -1,5 +1,9 @@
 /* eslint-disable no-console */
-import { DendronError, error2PlainObject } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DendronError,
+  error2PlainObject,
+} from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
@@ -194,22 +198,38 @@ export class BuildUtils {
     let version;
     let description;
     let icon;
-
-    if (target === ExtensionTarget.NIGHTLY) {
-      version = await this.getIncrementedVerForNightly();
-      description =
-        "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
-      icon = "media/logo-bw.png";
-    }
-    if (target === ExtensionTarget.ENTERPRISE) {
-      version = await this.getIncrementedVerForNightly();
-      description = "Dendron - Enterprise Version";
+    let license: string = "GPLv3";
+    let name: string;
+    switch (target) {
+      case ExtensionTarget.DENDRON: {
+        name = target.toString();
+        break;
+      }
+      case ExtensionTarget.NIGHTLY: {
+        name = target.toString();
+        version = await this.getIncrementedVerForNightly();
+        description =
+          "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
+        icon = "media/logo-bw.png";
+        break;
+      }
+      case ExtensionTarget.ENTERPRISE: {
+        name = `dendron-enterprise`;
+        version = await this.getIncrementedVerForNightly();
+        description = "Dendron - Enterprise Version";
+        license =
+          "see license in https://github.com/dendronhq/dendron/wiki/Enterprise-EULA";
+        break;
+      }
+      default: {
+        assertUnreachable(target);
+      }
     }
 
     this.updatePkgMeta({
       pkgPath,
-      name: target.toString(),
-      displayName: target.toString(),
+      name,
+      displayName: name,
       description,
       main: "./dist/extension.js",
       repository: {

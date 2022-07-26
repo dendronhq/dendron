@@ -170,7 +170,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    */
   isLocked(): boolean {
     return (
-      this._panel !== undefined &&
+      this._lockedEditorFileName !== undefined &&
       vscode.window.activeTextEditor?.document.fileName !==
         this._lockedEditorFileName
     );

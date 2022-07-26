@@ -472,6 +472,10 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       this.print("modifying plugin manifest for nightly target...");
       await BuildUtils.prepPluginPkg(ExtensionTarget.NIGHTLY);
     }
+    if (opts.extensionTarget === ExtensionTarget.ENTERPRISE) {
+      this.print("modifying plugin manifest for enterprisetarget...");
+      await BuildUtils.prepPluginPkg(ExtensionTarget.ENTERPRISE);
+    }
 
     this.print("package deps...");
     await BuildUtils.packagePluginDependencies(opts);

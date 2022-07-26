@@ -502,6 +502,11 @@
         "icon": "$(open-preview)"
       },
       {
+        "command": "dendron.togglePreviewLock",
+        "title": "Dendron: Toggle PreviewLock",
+        "icon": "$(open-preview)"
+      },
+      {
         "command": "dendron.pasteFile",
         "title": "Dendron: Paste File"
       },
@@ -846,6 +851,10 @@
         },
         {
           "command": "dendron.togglePreview",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.togglePreviewLock",
           "when": "dendron:pluginActive"
         },
         {

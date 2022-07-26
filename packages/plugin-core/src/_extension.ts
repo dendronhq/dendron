@@ -36,8 +36,9 @@ import {
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
-import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
+import { TogglePreviewLockCommand } from "./commands/TogglePreviewLock";
+import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
@@ -591,6 +592,22 @@ async function _setupCommands({
             await new TogglePreviewCommand(PreviewPanelFactory.create(ext)).run(
               args
             );
+          })
+        )
+      );
+    }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await new TogglePreviewLockCommand(
+              PreviewPanelFactory.create(ext)
+            ).run(args);
           })
         )
       );

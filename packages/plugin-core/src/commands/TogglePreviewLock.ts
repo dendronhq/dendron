@@ -1,3 +1,4 @@
+import { ExtensionProvider } from "../ExtensionProvider";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
@@ -23,6 +24,10 @@ export class TogglePreviewLockCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     if (this._panel.isLocked()) {
       this._panel.unlock();
+      const note = ExtensionProvider.getWSUtils().getActiveNote();
+      if (note) {
+        this._panel.show(note);
+      }
     } else {
       this._panel.lock();
     }

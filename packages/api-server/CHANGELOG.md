@@ -3,4870 +3,2704 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## 0.104.1 (2022-07-21)
+# 0.105.0 (2022-07-26)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
+## 0.104.1 (2022-07-21)
 
-
-
+**Note:** Version bump only for package @dendronhq/api-server
 
 # 0.104.0 (2022-07-19)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.103.0 (2022-07-12)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.102.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.102.1) (2022-07-05)
-
-
 
 # 0.102.0 (2022-07-05)
 
-
-
 # 0.101.0 (2022-06-28)
-
-
 
 ## 0.100.1 (2022-06-23)
 
-
-
 # 0.100.0 (2022-06-21)
-
-
 
 # 0.99.0 (2022-06-14)
 
-
-
 # 0.98.0 (2022-06-07)
-
-
 
 # 0.96.0 (2022-05-24)
 
-
-
 ## 0.95.1 (2022-05-18)
-
-
 
 # 0.95.0 (2022-05-17)
 
-
-
 # 0.94.0 (2022-05-10)
-
-
 
 # 0.93.0 (2022-05-03)
 
-
-
 ## 0.92.1 (2022-04-28)
-
-
 
 # 0.91.0 (2022-04-19)
 
-
-
 # 0.88.0 (2022-03-29)
-
-
 
 # 0.85.0 (2022-03-08)
 
-
-
 # 0.84.0 (2022-03-01)
-
-
 
 # 0.82.0 (2022-02-15)
 
-
-
 # 0.79.0 (2022-01-25)
-
 
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.102.0 (2022-07-05)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.101.0 (2022-06-28)
-
 
 ### Bug Fixes
 
-* **structure:** hot reload in note traits + no template by default ([3904655](https://github.com/dendronhq/dendron/commit/390465552a6744495387aea6f49fa5392fb69b03))
-
-
-
-
+- **structure:** hot reload in note traits + no template by default ([3904655](https://github.com/dendronhq/dendron/commit/390465552a6744495387aea6f49fa5392fb69b03))
 
 ## 0.100.1 (2022-06-23)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.100.0 (2022-06-21)
-
 
 ### Bug Fixes
 
-* **edit:** autocomplete issues with tags and mentions ([#3107](https://github.com/dendronhq/dendron/issues/3107)) ([01be85f](https://github.com/dendronhq/dendron/commit/01be85f84ae6cdf182f2d43b9561decac44369e6))
-
-
-
-
+- **edit:** autocomplete issues with tags and mentions ([#3107](https://github.com/dendronhq/dendron/issues/3107)) ([01be85f](https://github.com/dendronhq/dendron/commit/01be85f84ae6cdf182f2d43b9561decac44369e6))
 
 # 0.99.0 (2022-06-14)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.98.0 (2022-06-07)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # 0.97.0 (2022-05-31)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.96.0 (2022-05-24)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## 0.95.1 (2022-05-18)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.95.0 (2022-05-17)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # 0.94.0 (2022-05-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.93.0 (2022-05-03)
-
 
 ### Features Dendron
 
-* **views:** Dendron Side Panel ([#2832](https://github.com/dendronhq/dendron/issues/2832)) ([158ed1d](https://github.com/dendronhq/dendron/commit/158ed1d748448c611146900915c6299a0730bbf9))
-
-
-
-
+- **views:** Dendron Side Panel ([#2832](https://github.com/dendronhq/dendron/issues/2832)) ([158ed1d](https://github.com/dendronhq/dendron/commit/158ed1d748448c611146900915c6299a0730bbf9))
 
 ## 0.92.1 (2022-04-28)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.92.0 (2022-04-26)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.91.0 (2022-04-19)
-
 
 ### Features Dendron
 
-* **workspace:** Meeting Notes ([#2727](https://github.com/dendronhq/dendron/issues/2727)) ([8ea1d1b](https://github.com/dendronhq/dendron/commit/8ea1d1b8e6247fec3e636c26da3f98e047026a6b))
-
-
-
-
+- **workspace:** Meeting Notes ([#2727](https://github.com/dendronhq/dendron/issues/2727)) ([8ea1d1b](https://github.com/dendronhq/dendron/commit/8ea1d1b8e6247fec3e636c26da3f98e047026a6b))
 
 # 0.90.0 (2022-04-12)
 
-
 ### Bug Fixes
 
-* malformed _trackCommon arguments ([7e4bfa0](https://github.com/dendronhq/dendron/commit/7e4bfa0ea805ee74380052f560af21eee2c28169))
-
-
-
-
+- malformed \_trackCommon arguments ([7e4bfa0](https://github.com/dendronhq/dendron/commit/7e4bfa0ea805ee74380052f560af21eee2c28169))
 
 # 0.89.0 (2022-04-05)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.88.0 (2022-03-29)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.87.0 (2022-03-22)
-
 
 ### Bug Fixes
 
-* Prevent fatal errors in Open Backup Command and Run Migration Command in native workspaces ([#2607](https://github.com/dendronhq/dendron/issues/2607)) ([dce17fe](https://github.com/dendronhq/dendron/commit/dce17fe293cf73016797257fd18e5f85c625a6a2))
-
-
-
-
+- Prevent fatal errors in Open Backup Command and Run Migration Command in native workspaces ([#2607](https://github.com/dendronhq/dendron/issues/2607)) ([dce17fe](https://github.com/dendronhq/dendron/commit/dce17fe293cf73016797257fd18e5f85c625a6a2))
 
 ## [0.86.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.86.1) (2022-03-15)
 
-
-
 # 0.86.0 (2022-03-15)
-
-
 
 # 0.85.0 (2022-03-08)
 
-
-
 # 0.84.0 (2022-03-01)
-
-
 
 # 0.82.0 (2022-02-15)
 
-
-
 # 0.79.0 (2022-01-25)
-
 
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.86.0 (2022-03-15)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.85.0 (2022-03-08)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.84.0 (2022-03-01)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.83.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.83.0) (2022-02-22)
 
-
-
 # 0.82.0 (2022-02-15)
-
-
 
 # 0.79.0 (2022-01-25)
 
-
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.82.0 (2022-02-15)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.81.0 (2022-02-08)
-
 
 ### Bug Fixes
 
-* **pod:** markdown import to update asset references ([#2350](https://github.com/dendronhq/dendron/issues/2350)) ([c22a322](https://github.com/dendronhq/dendron/commit/c22a322ce904da4157260e06cc14ffd07728042d))
-
-
-
-
+- **pod:** markdown import to update asset references ([#2350](https://github.com/dendronhq/dendron/issues/2350)) ([c22a322](https://github.com/dendronhq/dendron/commit/c22a322ce904da4157260e06cc14ffd07728042d))
 
 # 0.80.0 (2022-02-01)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # 0.79.0 (2022-01-25)
-
 
 ### Reverts
 
-* Revert "fix(views): hover preview containing local images on Windows  (#2047)" ([7890c01](https://github.com/dendronhq/dendron/commit/7890c0108253eee34cef84af0437a11856da7fc8)), closes [#2047](https://github.com/dendronhq/dendron/issues/2047)
-
-
-
-
+- Revert "fix(views): hover preview containing local images on Windows (#2047)" ([7890c01](https://github.com/dendronhq/dendron/commit/7890c0108253eee34cef84af0437a11856da7fc8)), closes [#2047](https://github.com/dendronhq/dendron/issues/2047)
 
 ## [0.78.4](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.78.4) (2022-01-20)
 
-
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.78.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.78.3) (2022-01-20)
 
-
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.78.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.78.2) (2022-01-20)
 
-
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.78.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.78.1) (2022-01-19)
 
-
 ### Bug Fixes
 
-* highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- highlighting breaks when there's too much text ([#2163](https://github.com/dendronhq/dendron/issues/2163)) ([9d9579c](https://github.com/dendronhq/dendron/commit/9d9579cdab773131a5c8e0b1d6e130262d6a8164))
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.78.0 (2022-01-18)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.77.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.77.1) (2022-01-12)
-
 
 ### Bug Fixes
 
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.77.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.77.0) (2022-01-11)
 
-
 ### Bug Fixes
 
-* **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
-
-
+- **server:** specify localhost when starting server ([c57972a](https://github.com/dendronhq/dendron/commit/c57972a4afe3ea5ce98c464ba6a46fc173a7d514))
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.76.0 (2022-01-04)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.75.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.75.0) (2021-12-28)
-
-
 
 # 0.72.0 (2021-12-07)
 
-
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.74.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.74.0) (2021-12-21)
 
-
-
 # 0.72.0 (2021-12-07)
-
 
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.73.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.73.1) (2021-12-15)
 
-
-
 # 0.72.0 (2021-12-07)
-
 
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.73.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.73.0) (2021-12-14)
 
-
-
 # 0.72.0 (2021-12-07)
-
 
 ### Bug Fixes
 
-* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
-
-
-
-
 # 0.72.0 (2021-12-07)
-
 
 ### Bug Fixes
 
-* **views:** update webview title name ([16d1f0c](https://github.com/dendronhq/dendron/commit/16d1f0c2454e4056d56d988aa909c2ea70cf18b1))
-
-
-
-
+- **views:** update webview title name ([16d1f0c](https://github.com/dendronhq/dendron/commit/16d1f0c2454e4056d56d988aa909c2ea70cf18b1))
 
 ## [0.71.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.71.3) (2021-11-30)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.71.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.71.2) (2021-11-30)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.71.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.71.1) (2021-11-30)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # 0.71.0 (2021-11-30)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.70.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.70.1) (2021-11-26)
-
 
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.70.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.70.0) (2021-11-23)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.69.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.3-alpha.0) (2021-11-22)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.69.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.2) (2021-11-19)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.69.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.2-alpha.0) (2021-11-19)
 
-
 ### Bug Fixes
 
-* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.69.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.1) (2021-11-16)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.69.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.69.0) (2021-11-16)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.68.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.68.2) (2021-11-12)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.68.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.68.1) (2021-11-10)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.68.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.68.0) (2021-11-09)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ### Features Dendron
 
-* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
-
-
+- **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.3-alpha.3) (2021-11-09)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.3-alpha.2) (2021-11-08)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.3-alpha.1) (2021-11-07)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.3-alpha.0) (2021-11-07)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.2) (2021-11-05)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.67.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.1) (2021-11-05)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.67.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.67.0) (2021-11-05)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.66.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.66.2) (2021-11-05)
 
-
 ### Bug Fixes
 
-* **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
-
-
+- **server:** improving error response on api server ([#1645](https://github.com/dendronhq/dendron/issues/1645)) ([8936fb6](https://github.com/dendronhq/dendron/commit/8936fb690045022487fb46aafd661581b60deab1))
 
 ## 0.62.3 (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.66.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.66.1) (2021-11-03)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.66.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.66.0) (2021-11-03)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.65.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.65.1) (2021-10-29)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.65.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.65.0) (2021-10-26)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.64.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.64.2) (2021-10-23)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.64.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.64.1) (2021-10-22)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.64.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.64.0) (2021-10-19)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.63.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.63.4-alpha.0) (2021-10-17)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.63.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.63.3) (2021-10-17)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.63.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.63.2) (2021-10-17)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.63.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.63.1) (2021-10-15)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.63.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.63.0) (2021-10-12)
 
-
-
 ## 0.62.3 (2021-10-09)
-
-
 
 # 0.61.0 (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.62.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.62.3) (2021-10-09)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.62.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.62.2) (2021-10-08)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.62.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.62.1) (2021-10-08)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.62.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.62.0) (2021-10-05)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.61.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.2) (2021-10-02)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.61.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.1) (2021-10-01)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.61.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.1-alpha.0) (2021-09-29)
 
-
-
 # 0.61.0 (2021-09-28)
-
 
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.61.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.61.0) (2021-09-28)
 
-
 ### Bug Fixes
 
-* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
-
-
+- **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
 
 ## 0.60.2 (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.3-alpha.0) (2021-09-28)
 
-
-
 ## 0.60.2 (2021-09-25)
-
-
 
 ## 0.60.2-alpha.0 (2021-09-24)
 
-
-
 ## 0.60.1 (2021-09-24)
-
-
 
 # 0.60.0 (2021-09-21)
 
-
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.2) (2021-09-25)
 
-
-
 ## 0.60.2-alpha.0 (2021-09-24)
-
-
 
 ## 0.60.1 (2021-09-24)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.2-alpha.0) (2021-09-24)
 
-
-
 ## 0.60.1 (2021-09-24)
-
-
 
 # 0.60.0 (2021-09-21)
 
-
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.1) (2021-09-24)
 
-
 ### Bug Fixes
 
-* **workspace:** corrupted keybindings ([f63bf5a](https://github.com/dendronhq/dendron/commit/f63bf5afb622f332811047fe48db8e2fd53fc167)), closes [#1290](https://github.com/dendronhq/dendron/issues/1290) [#1392](https://github.com/dendronhq/dendron/issues/1392) [#1371](https://github.com/dendronhq/dendron/issues/1371) [#1389](https://github.com/dendronhq/dendron/issues/1389) [#1388](https://github.com/dendronhq/dendron/issues/1388) [#1369](https://github.com/dendronhq/dendron/issues/1369) [#1387](https://github.com/dendronhq/dendron/issues/1387) [#1386](https://github.com/dendronhq/dendron/issues/1386) [#1384](https://github.com/dendronhq/dendron/issues/1384) [#1383](https://github.com/dendronhq/dendron/issues/1383) [#1370](https://github.com/dendronhq/dendron/issues/1370) [#1352](https://github.com/dendronhq/dendron/issues/1352) [#1382](https://github.com/dendronhq/dendron/issues/1382) [#1332](https://github.com/dendronhq/dendron/issues/1332)
-
-
+- **workspace:** corrupted keybindings ([f63bf5a](https://github.com/dendronhq/dendron/commit/f63bf5afb622f332811047fe48db8e2fd53fc167)), closes [#1290](https://github.com/dendronhq/dendron/issues/1290) [#1392](https://github.com/dendronhq/dendron/issues/1392) [#1371](https://github.com/dendronhq/dendron/issues/1371) [#1389](https://github.com/dendronhq/dendron/issues/1389) [#1388](https://github.com/dendronhq/dendron/issues/1388) [#1369](https://github.com/dendronhq/dendron/issues/1369) [#1387](https://github.com/dendronhq/dendron/issues/1387) [#1386](https://github.com/dendronhq/dendron/issues/1386) [#1384](https://github.com/dendronhq/dendron/issues/1384) [#1383](https://github.com/dendronhq/dendron/issues/1383) [#1370](https://github.com/dendronhq/dendron/issues/1370) [#1352](https://github.com/dendronhq/dendron/issues/1352) [#1382](https://github.com/dendronhq/dendron/issues/1382) [#1332](https://github.com/dendronhq/dendron/issues/1332)
 
 # 0.60.0 (2021-09-21)
 
-
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.1-alpha.3) (2021-09-23)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.1-alpha.2) (2021-09-22)
 
-
-
 # 0.60.0 (2021-09-21)
-
 
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.1-alpha.1) (2021-09-21)
 
-
 ### Bug Fixes
 
-* minor sentry cleanup ([#1374](https://github.com/dendronhq/dendron/issues/1374)) ([e9cdd8e](https://github.com/dendronhq/dendron/commit/e9cdd8e538740ca80012f52a96ceb063482d7c66))
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- minor sentry cleanup ([#1374](https://github.com/dendronhq/dendron/issues/1374)) ([e9cdd8e](https://github.com/dendronhq/dendron/commit/e9cdd8e538740ca80012f52a96ceb063482d7c66))
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.60.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.1-alpha.0) (2021-09-20)
 
-
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 # [0.60.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.60.0) (2021-09-20)
 
-
 ### Bug Fixes
 
-* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
-
-
+- **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
-
-
-
-
 
 ## [0.59.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.3-alpha.1) (2021-09-20)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.3-alpha.0) (2021-09-19)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2) (2021-09-17)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.1) (2021-09-16)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.5) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.4) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.3) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.2) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.1) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.2-alpha.0) (2021-09-15)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.59.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.1) (2021-09-14)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.59.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.59.0) (2021-09-14)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.4](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.4) (2021-09-12)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.4-alpha.3](https://github.com/dendronhq/dendron/compare/v0.58.4-alpha.1...v0.58.4-alpha.3) (2021-09-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.58.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.4-alpha.1) (2021-09-10)
-
-
 
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.4-alpha.0) (2021-09-09)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.3-alpha.0) (2021-09-09)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.2-alpha.0) (2021-09-09)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.58.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.1) (2021-09-08)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.58.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.58.0) (2021-09-07)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.57.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.57.3) (2021-09-06)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.57.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.57.2) (2021-09-04)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.57.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.57.1) (2021-09-04)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.57.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.57.0) (2021-08-31)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.56.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.56.0) (2021-08-23)
 
-
-
 ## 0.55.2 (2021-08-21)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.55.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.55.2) (2021-08-19)
 
-
-
 ## 0.55.1 (2021-08-17)
-
-
 
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.55.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.55.1) (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.55.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.55.0) (2021-08-17)
 
-
-
 ## 0.54.1 (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.54.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.1) (2021-08-13)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.54.0](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.54.0) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.53.10](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.10) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.53.9](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.9) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.53.8](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.8) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.53.7](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.7) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.53.6](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.6) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.53.5](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.5) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.53.4](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.4) (2021-08-10)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.53.3](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.3) (2021-08-08)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.53.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.2) (2021-08-06)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.53.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.53.1) (2021-08-06)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.53.0](https://github.com/dendronhq/dendron/compare/v0.52.0...v0.53.0) (2021-08-03)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.52.0](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.52.0) (2021-07-26)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.51.4](https://github.com/dendronhq/dendron/compare/v0.51.3...v0.51.4) (2021-07-25)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.51.2](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.2) (2021-07-22)
-
 
 ### Features Dendron
 
-* async launch engine ([0c1a607](https://github.com/dendronhq/dendron/commit/0c1a607d7ec3d19cc369c5f6ca16412c0cd0615e))
-
-
-
-
+- async launch engine ([0c1a607](https://github.com/dendronhq/dendron/commit/0c1a607d7ec3d19cc369c5f6ca16412c0cd0615e))
 
 ## [0.51.1](https://github.com/dendronhq/dendron/compare/v0.51.0...v0.51.1) (2021-07-20)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.51.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.51.0) (2021-07-19)
-
 
 ### Bug Fixes
 
-* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
-* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
-* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
-
+- normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+- path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+- store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
 
 ### Features Dendron
 
-* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
-* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
-
-
-
-
+- auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+- support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
 
 ## [0.50.3](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.3) (2021-07-19)
 
-
 ### Bug Fixes
 
-* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
-* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
-* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
-
+- normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+- path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+- store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
 
 ### Features Dendron
 
-* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
-* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
-
-
-
-
+- auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+- support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
 
 ## [0.50.2](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.2) (2021-07-19)
 
-
 ### Bug Fixes
 
-* normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
-* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
-* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
-
+- normalize casing when fetchiing assets ([3b42ec4](https://github.com/dendronhq/dendron/commit/3b42ec4dca32f98574092373ecdf61b61f06de55))
+- path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+- store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
 
 ### Features Dendron
 
-* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
-* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
-
-
-
-
+- auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+- support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
 
 ## [0.50.1](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.1) (2021-07-16)
 
-
 ### Bug Fixes
 
-* path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
-* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
-
+- path for express static assets ([dade093](https://github.com/dendronhq/dendron/commit/dade0935b9e62e0b4ecd2012d988ca520b46dc57))
+- store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
 
 ### Features Dendron
 
-* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
-* support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
-
-
-
-
+- auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
+- support dynamic theming ([1da7714](https://github.com/dendronhq/dendron/commit/1da7714f50acbba312a7e2e7a497f9e53920c96f))
 
 # [0.50.0](https://github.com/dendronhq/dendron/compare/v0.49.0...v0.50.0) (2021-07-12)
 
-
 ### Bug Fixes
 
-* store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
-
+- store workspace using case insensitive keys ([#934](https://github.com/dendronhq/dendron/issues/934)) ([4de138b](https://github.com/dendronhq/dendron/commit/4de138be7853f35103ca46533546b6275df4193e))
 
 ### Features Dendron
 
-* auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
-
-
-
-
+- auto completion for anchors and headers ([#894](https://github.com/dendronhq/dendron/issues/894)) ([13e81d4](https://github.com/dendronhq/dendron/commit/13e81d49c1f14ee18457543f8e0818d0e36c17db))
 
 # [0.49.0](https://github.com/dendronhq/dendron/compare/v0.48.3...v0.49.0) (2021-07-05)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.48.3](https://github.com/dendronhq/dendron/compare/v0.48.2...v0.48.3) (2021-07-02)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.48.2](https://github.com/dendronhq/dendron/compare/v0.48.1...v0.48.2) (2021-07-01)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.48.1](https://github.com/dendronhq/dendron/compare/v0.48.0...v0.48.1) (2021-06-30)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 # [0.48.0](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.48.0) (2021-06-28)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.47.2](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.2) (2021-06-24)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.47.1](https://github.com/dendronhq/dendron/compare/v0.47.0...v0.47.1) (2021-06-23)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.47.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.47.0) (2021-06-21)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.46.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.3-alpha.0) (2021-06-19)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.46.2](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2) (2021-06-19)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.46.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.1) (2021-06-16)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.46.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.46.1...v0.46.2-alpha.0) (2021-06-16)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.46.1](https://github.com/dendronhq/dendron/compare/v0.46.0...v0.46.1) (2021-06-14)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 # [0.46.0](https://github.com/dendronhq/dendron/compare/v0.45.2...v0.46.0) (2021-06-14)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.45.2](https://github.com/dendronhq/dendron/compare/v0.45.1...v0.45.2) (2021-06-12)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.45.1](https://github.com/dendronhq/dendron/compare/v0.45.0...v0.45.1) (2021-06-09)
-
 
 ### Bug Fixes
 
-* format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
-
-
-
-
+- format issue ([232926d](https://github.com/dendronhq/dendron/commit/232926d88c633aaa052711e9380a9da4a1ecc5d7))
 
 # [0.45.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.45.0) (2021-06-07)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.44.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.1) (2021-06-06)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.44.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.44.1...v0.44.2-alpha.0) (2021-06-06)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.44.1](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1) (2021-06-04)
 
 **Note:** Version bump only for package @dendronhq/api-server
-
-
-
-
 
 ## [0.44.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.7) (2021-06-04)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.44.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.44.1-alpha.5...v0.44.1-alpha.6) (2021-06-04)
 
 **Note:** Version bump only for package @dendronhq/api-server
 
-
-
-
-
 ## [0.44.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.5) (2021-06-04)
-
 
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 ## [0.44.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.4) (2021-06-04)
 
-
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 ## [0.44.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.3) (2021-06-03)
 
-
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 ## [0.44.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.2) (2021-06-03)
 
-
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 ## [0.44.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.1) (2021-06-02)
 
-
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 ## [0.44.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.1-alpha.0) (2021-06-02)
 
-
 ### Bug Fixes
 
-* caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
-
-
-
-
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
 
 # [0.44.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.44.0) (2021-05-31)
 

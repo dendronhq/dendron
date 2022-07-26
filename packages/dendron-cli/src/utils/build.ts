@@ -20,6 +20,7 @@ type PkgJson = {
   repository: PkgRepository;
   devDependencies: { [key: string]: string };
   icon: string;
+  license: string;
 };
 
 type PkgRepository = {
@@ -237,6 +238,7 @@ export class BuildUtils {
     this.updatePkgMeta({
       pkgPath,
       name,
+      license,
       displayName: name,
       description,
       main: "./dist/extension.js",
@@ -496,11 +498,13 @@ export class BuildUtils {
     main,
     repository,
     version,
+    license,
     icon,
   }: {
     pkgPath: string;
     name: string;
     displayName: string;
+    license: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
     pkg.name = name;
@@ -523,6 +527,7 @@ export class BuildUtils {
       pkg.icon = icon;
     }
     pkg.main = "dist/extension.js";
+    pkg.license = license;
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });
   }
 

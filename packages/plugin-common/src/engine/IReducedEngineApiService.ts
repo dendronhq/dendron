@@ -9,13 +9,9 @@ import {
   NoteProps,
   NotePropsMeta,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
-  RenderNoteOpts,
-  RenderNotePayload,
   RespV2,
-  SchemaModuleProps,
 } from "@dendronhq/common-all";
 
 // Subset of IEngineAPIService

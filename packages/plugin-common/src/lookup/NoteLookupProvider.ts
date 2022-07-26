@@ -17,15 +17,14 @@ import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 
 type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
 
-// TODO: What is T
-export type provideItemsProps<T> = {
+export type provideItemsProps = {
   _justActivated: boolean;
   nonInteractive: boolean;
   forceAsIsPickerValueUsage: boolean;
   token?: CancellationToken;
   fuzzThreshold?: number;
-  pickerValue: T;
-  prevQuickpickValue: T;
+  pickerValue: string;
+  prevQuickpickValue: string;
   /**
    * force update even if picker value didn't change
    */
@@ -41,9 +40,9 @@ export type workspaceState = {
   schemas: SchemaModuleDict;
 };
 
-export interface LookupProvider<T> {
+export interface LookupProvider {
   provideItems(
-    opts: provideItemsProps<T> // TODO: Check the type parameter
+    opts: provideItemsProps // TODO: Check the type parameter
   ): Promise<NoteQuickInput[] | undefined>;
 }
 
@@ -54,7 +53,7 @@ export class NoteLookupProvider {
   }
 
   async provideItems(
-    opts: provideItemsProps<string> // TODO: Check the type parameter
+    opts: provideItemsProps // TODO: Check the type parameter
   ): Promise<NoteQuickInput[] | undefined> {
     const {
       token,
@@ -83,6 +82,7 @@ export class NoteLookupProvider {
       onlyDirectChildren: showDirectChildrenOnly,
     });
 
+    debugger;
     const queryOrig = NoteLookupUtils.slashToDot(pickerValue);
 
     const queryUpToLastDot =
@@ -217,10 +217,10 @@ export class NoteLookupProvider {
 
       // If each of the vaults in the workspace already have exact match of the file name
       // then we should not allow create new option.
-      const queryOrigLowerCase = queryOrig.toLowerCase();
-      const numberOfExactMatches = updatedItems.filter(
-        (item) => item.fname.toLowerCase() === queryOrigLowerCase
-      ).length;
+      // const queryOrigLowerCase = queryOrig.toLowerCase();
+      // const numberOfExactMatches = updatedItems.filter(
+      //   (item) => item.fname.toLowerCase() === queryOrigLowerCase
+      // ).length;
       // Move this logic to controller:
       // const vaultsHaveSpaceForExactMatch =
       //   workspaceState.vaults.length > numberOfExactMatches;
@@ -306,6 +306,8 @@ export class NoteLookupProvider {
     vaults: DVault[];
   }) => {
     const nodes = await this.fetchRootResults(engine);
+
+    debugger;
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot,
@@ -333,8 +335,8 @@ export class NoteLookupProvider {
     workspaceState: workspaceState;
   }) {
     // const PAGINATE_LIMIT = 50;
-    const ctx = "createPickerItemsFromEngine";
-    const start = process.hrtime();
+    // const ctx = "createPickerItemsFromEngine";
+    // const start = process.hrtime();
     const { transformedQuery, originalQS } = opts;
     // const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     // if we are doing a query, reset pagination options

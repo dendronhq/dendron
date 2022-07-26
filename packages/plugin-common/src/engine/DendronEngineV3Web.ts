@@ -9,7 +9,7 @@ import {
   DLink,
   DVault,
   EngineInfoResp,
-  error2PlainObject,
+  // error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
@@ -36,11 +36,11 @@ import {
   SchemaQueryResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  DLogger,
-  getDurationMilliseconds,
-} from "@dendronhq/common-server";
+// import {
+//   createLogger,
+//   DLogger,
+//   getDurationMilliseconds,
+// } from "@dendronhq/common-server";
 import _ from "lodash";
 import { NoteStore, VSCodeFileStore } from "./store";
 // import { DConfig } from "./config";
@@ -59,7 +59,7 @@ type DendronEngineOptsV3 = {
   noteStore: INoteStore<string>;
   forceNew?: boolean;
   mode?: DEngineMode;
-  logger?: DLogger;
+  // logger?: DLogger;
   config: IntermediateDendronConfig;
 };
 type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
@@ -68,14 +68,13 @@ export class DendronEngineV3Web /*implements DEngine*/ {
   public wsRoot: string;
   // public store: DStore;
   // protected props: DendronEnginePropsV3;
-  public logger: DLogger;
+  // public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
   public configRoot: string;
   // public config: IntermediateDendronConfig;
   // public hooks: DHookDict;
   private _vaults: DVault[];
-  private _fileStore: IFileStore;
   private _noteStore: INoteStore<string>;
 
   static _instance: DendronEngineV3Web | undefined;
@@ -83,7 +82,7 @@ export class DendronEngineV3Web /*implements DEngine*/ {
   constructor(props: Omit<DendronEnginePropsV3, "config">) {
     this.wsRoot = props.wsRoot;
     this.configRoot = props.wsRoot;
-    this.logger = props.logger;
+    // this.logger = props.logger;
     // this.props = props;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 1,
@@ -92,11 +91,6 @@ export class DendronEngineV3Web /*implements DEngine*/ {
     this.links = [];
     // this.config = props.config;
     this._vaults = props.vaults;
-    // const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
-    //   onCreate: [],
-    // };
-    // this.hooks = hooks;
-    this._fileStore = props.fileStore;
     this._noteStore = props.noteStore;
 
     // // TODO: remove after migration
@@ -110,8 +104,8 @@ export class DendronEngineV3Web /*implements DEngine*/ {
     console.log("Hello");
   }
 
-  static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
-    const LOGGER = logger || createLogger();
+  static create({ wsRoot }: { wsRoot: string }) {
+    // const LOGGER = logger || createLogger();
     // const { error, data: config } =
     //   DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
     // if (error) {
@@ -131,7 +125,7 @@ export class DendronEngineV3Web /*implements DEngine*/ {
       }),
       fileStore,
       mode: "fuzzy",
-      logger: LOGGER,
+      // logger: LOGGER,
       // config,
     });
   }
@@ -226,7 +220,7 @@ export class DendronEngineV3Web /*implements DEngine*/ {
         default:
           error = new DendronCompositeError(allErrors);
       }
-      this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
+      // this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
         data: {
@@ -429,14 +423,14 @@ export class DendronEngineV3Web /*implements DEngine*/ {
    * @returns NotePropsByIdDict
    */
   private async initNotes(): Promise<BulkResp<NotePropsByIdDict>> {
-    const ctx = "DendronEngineV3:initNotes";
-    this.logger.info({ ctx, msg: "enter" });
+    // const ctx = "DendronEngineV3:initNotes";
+    // this.logger.info({ ctx, msg: "enter" });
     const errors: IDendronError[] = [];
     let notesFname: NotePropsByFnameDict = {};
-    const start = process.hrtime();
+    // const start = process.hrtime();
 
     const allNotesList = await Promise.all(
-      this.vaults.map(async (vault) => {
+      this.vaults.map(async (_vault) => {
         // const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // // Get list of files from filesystem
         // const maybeFiles = await this._fileStore.readDir({
@@ -503,8 +497,8 @@ export class DendronEngineV3Web /*implements DEngine*/ {
       },
       notesWithLinks
     );
-    const duration = getDurationMilliseconds(start);
-    this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
+    // const duration = getDurationMilliseconds(start);
+    // this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 
     return {
       data: allNotes,
@@ -534,8 +528,8 @@ export class DendronEngineV3Web /*implements DEngine*/ {
           }
         });
       } catch (err: any) {
-        const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        // const error = error2PlainObject(err);
+        // this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
     });
   }

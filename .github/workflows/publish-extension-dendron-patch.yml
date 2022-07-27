@@ -89,11 +89,13 @@ jobs:
         run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
 
       - name: Tag Release on Github
+        if: success() || failure()
         run: |
           git tag $DENDRON_RELEASE_VERSION
           git push origin $DENDRON_RELEASE_VERSION
 
       - name: Raise Pull Request back to master
+        if: success() || failure()
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: "master"

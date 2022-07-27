@@ -230,10 +230,6 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
-        "command": "dendron.deleteNode",
-        "title": "Dendron: Delete Node"
-      },
-      {
         "command": "dendron.delete",
         "title": "Dendron: Delete"
       },
@@ -485,11 +481,11 @@
         "title": "Dendron: Show Help"
       },
       {
-        "command": "dendron.showNoteGraph",
+        "command": "dendron.showNoteGraphView",
         "title": "Dendron: Show Note Graph"
       },
       {
-        "command": "dendron.showSchemaGraph",
+        "command": "dendron.showSchemaGraphView",
         "title": "Dendron: Show Schema Graph"
       },
       {
@@ -623,10 +619,6 @@
         {
           "command": "dendron.copyToClipboard",
           "when": "false"
-        },
-        {
-          "command": "dendron.deleteNode",
-          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.delete",
@@ -837,11 +829,11 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.showNoteGraph",
+          "command": "dendron.showNoteGraphView",
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.showSchemaGraph",
+          "command": "dendron.showSchemaGraphView",
           "when": "dendron:pluginActive"
         },
         {
@@ -1008,7 +1000,7 @@
         },
         {
           "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
-          "command": "dendron.deleteNode",
+          "command": "dendron.delete",
           "group": "2_workspace"
         },
         {

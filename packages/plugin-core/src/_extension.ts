@@ -606,7 +606,7 @@ async function _setupCommands({
               args = {};
             }
             await new TogglePreviewLockCommand(
-              PreviewPanelFactory.create(ext)
+              PreviewPanelFactory.preview
             ).run(args);
           })
         )

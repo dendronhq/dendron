@@ -30,4 +30,8 @@ export class PreviewPanelFactory {
 
     return PreviewPanelFactory._preview;
   }
+
+  static get preview() {
+    return PreviewPanelFactory._preview
+  }
 }

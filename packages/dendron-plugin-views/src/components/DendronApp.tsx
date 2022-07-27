@@ -4,6 +4,7 @@ import {
   GraphThemeEnum,
   GraphViewMessageEnum,
   LookupViewMessageEnum,
+  NoteViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   SeedBrowserMessageType,
@@ -63,7 +64,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   // register a listener for vscode messages
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
-    logger.info({ ctx, msgType: msg.type });
+    logger.info({ ctx, msgType: msg.type, msg });
     switch (msg.type) {
       // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
@@ -161,7 +162,16 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         }
         break;
       }
-
+      case NoteViewMessageEnum.onLock: {
+        logger.info({ ctx, msg: "onLock" });
+        ideDispatch(ideSlice.actions.setLock(true));
+        break;
+      }
+      case NoteViewMessageEnum.onUnlock: {
+        logger.info({ ctx, msg: "onUnlock" });
+        ideDispatch(ideSlice.actions.setLock(false));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

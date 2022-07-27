@@ -93,6 +93,8 @@ const DendronNotePreview: DendronComponent = (props) => {
   const { useConfig } = engineHooks;
   useConfig({ opts: workspace });
 
+  const isLocked = props.ide.isLocked;
+
   logger.info({
     ctx,
     msg: "enter",
@@ -110,6 +112,14 @@ const DendronNotePreview: DendronComponent = (props) => {
   const { currentTheme: themeType } = useCurrentTheme();
   useMermaid({ config, themeType, mermaid, noteRenderedBody });
 
+  const handleLock = React.useCallback(() => {
+    postVSCodeMessage({
+      type: NoteViewMessageEnum.onUnlock,
+      data: {},
+      source: DMessageSource.webClient,
+    });
+  }, []);
+
   if (props.engine.error) {
     return (
       <div>
@@ -121,7 +131,13 @@ const DendronNotePreview: DendronComponent = (props) => {
   if (!noteRenderedBody || !config) {
     return <div>Loading...</div>;
   }
-  return <DendronNote noteContent={noteRenderedBody} config={config} />;
+
+  return (
+    <div>
+      {isLocked && <button onClick={handleLock}>Unlock</button>}
+      <DendronNote noteContent={noteRenderedBody} config={config} />;
+    </div>
+  );
 };
 
 export default DendronNotePreview;

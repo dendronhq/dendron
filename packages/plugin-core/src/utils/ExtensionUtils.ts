@@ -422,6 +422,7 @@ export class ExtensionUtils {
     const dendronConfigChanged = configDiff.length > 0;
 
     const trackProps = {
+      extensionId: ext.context.extension.id,
       duration: durationReloadWorkspace,
       numNotes,
       numNoteRefs,

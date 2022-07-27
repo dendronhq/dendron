@@ -55,6 +55,7 @@ type IncompatibleExtensionInstallStatus = {
 
 type CommandOptsData = {
   installStatus?: IncompatibleExtensionInstallStatus[];
+  note?: NoteProps;
 };
 
 type CommandOpts = {
@@ -357,26 +358,30 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     // Make sure to save any changes in the file because Doctor reads them from
     // disk, and won't see changes that haven't been saved.
-    const document = VSCodeUtils.getActiveTextEditor()?.document;
-    if (
-      isNotUndefined(document) &&
-      isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
-    ) {
-      await document.save();
-    }
-    this.L.info({ ctx, msg: "pre:Reload" });
-
-    if (shouldDoctorReloadWorkspaceBeforeDoctorAction(opts.action)) {
-      await this.reload();
-    }
-
     let note;
-    if (opts.scope === "file") {
+    if (opts.data?.note) {
+      note = opts.data.note;
+    } else {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
-      if (_.isUndefined(document)) {
-        throw new DendronError({ message: "No note open." });
+      if (
+        isNotUndefined(document) &&
+        isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
+      ) {
+        await document.save();
       }
-      note = this.extension.wsUtils.getNoteFromDocument(document);
+      this.L.info({ ctx, msg: "pre:Reload" });
+
+      if (shouldDoctorReloadWorkspaceBeforeDoctorAction(opts.action)) {
+        await this.reload();
+      }
+
+      if (opts.scope === "file") {
+        const document = VSCodeUtils.getActiveTextEditor()?.document;
+        if (_.isUndefined(document)) {
+          throw new DendronError({ message: "No note open." });
+        }
+        note = this.extension.wsUtils.getNoteFromDocument(document);
+      }
     }
 
     const engine = this.extension.getEngine();

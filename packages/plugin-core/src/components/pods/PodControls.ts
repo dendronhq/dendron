@@ -18,7 +18,6 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getExtension } from "../../workspace";
 import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
 import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../lookup/LookupProviderV3Interface";
@@ -291,7 +290,9 @@ export class PodUIControls {
   public static async promptToCreateNewServiceConfig(
     serviceType: ExternalService
   ) {
-    const mngr = new ExternalConnectionManager(getExtension().podsDir);
+    const mngr = new ExternalConnectionManager(
+      ExtensionProvider.getExtension().podsDir
+    );
 
     const id = await this.promptForGenericId();
 
@@ -396,7 +397,7 @@ export class PodUIControls {
     const items: QuickPickItem[] = [];
 
     const configs = PodV2ConfigManager.getAllPodConfigs(
-      path.join(getExtension().podsDir, "custom")
+      path.join(ExtensionProvider.getExtension().podsDir, "custom")
     );
 
     configs.forEach((config) => {

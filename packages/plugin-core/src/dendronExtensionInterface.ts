@@ -132,4 +132,9 @@ export interface IDendronExtension {
    * about registered Note Traits
    */
   get traitRegistrar(): NoteTraitService;
+
+  /**
+   * Directory in which pod configs are located
+   */
+  get podsDir(): string;
 }

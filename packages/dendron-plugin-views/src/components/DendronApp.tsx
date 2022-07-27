@@ -65,7 +65,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
   // register a listener for vscode messages
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
-    logger.info({ ctx, msgType: msg.type, msg });
+    logger.info({ ctx, msgType: msg.type });
     switch (msg.type) {
       // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:

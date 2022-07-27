@@ -46,6 +46,8 @@ const webExtensionConfig = {
       zlib: false,
       http2: false,
       "node-loader": false,
+      stream: require.resolve("stream-browserify"),
+      buffer: require.resolve("buffer"),
     },
   },
   module: {
@@ -85,6 +87,9 @@ const webExtensionConfig = {
   plugins: [
     new webpack.ProvidePlugin({
       process: "process/browser.js", // provide a shim for the global `process` variable
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
     }),
     new CopyPlugin({
       patterns: [

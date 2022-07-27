@@ -35,6 +35,7 @@ import {
   SchemaPropsDict,
   SchemaRaw,
   NotePropsMeta,
+  DVaultUriVariant,
 } from "./types";
 import {
   DefaultMap,
@@ -54,6 +55,13 @@ export class DNodeUtils {
   static addChild(parent: NotePropsMeta, child: NotePropsMeta) {
     parent.children = Array.from(new Set(parent.children).add(child.id));
     child.parent = parent.id;
+  }
+
+  static convertDVaultVersions(vault: DVaultUriVariant): DVault {
+    const ret: DVault = { ...vault, fsPath: vault.path.fsPath };
+    // ret.fsPath = vault.path.fsPath;
+
+    return ret;
   }
 
   static removeChild(parent: NotePropsMeta, child: NotePropsMeta) {

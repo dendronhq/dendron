@@ -5,6 +5,7 @@ import {
   RespV3,
   URI,
 } from "@dendronhq/common-all";
+import * as vscode from "vscode";
 // import { getAllFiles } from "@dendronhq/common-server";
 
 export class VSCodeFileStore implements IFileStore {
@@ -32,7 +33,11 @@ export class VSCodeFileStore implements IFileStore {
    * See {@link IFileStore.readDir}
    */
   async readDir(_opts: GetAllFilesOpts): Promise<RespV3<string[]>> {
-    throw new Error("Not implemented");
+    const res = await vscode.workspace.fs.readDirectory(_opts.root);
+
+    return {
+      data: res.map((item) => item[0]).filter((str) => str.endsWith(".md")),
+    };
     // const { root } = _.defaults(opts, {
     //   exclude: [".git", "Icon\r", ".*"],
     // });

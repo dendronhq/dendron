@@ -1,41 +1,38 @@
 import {
-  DendronError,
-  DEngineClient,
-  DNodeUtils,
-  DuplicateNoteError,
-  DVault,
-  ErrorFactory,
-  ErrorUtils,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  IDendronError,
-  NoteDictsUtils,
-  NoteProps,
+  minimatch,
+  DVaultUriVariant,
+  BulkResp,
+  NoteDicts,
   NotePropsByFnameDict,
   NotePropsByIdDict,
-  NoteDicts,
-  NoteUtils,
-  stringifyError,
-  NoteChangeEntry,
-  genHash,
-  RespV2,
-  cleanName,
-  BulkResp,
+  IDendronError,
+  DendronError,
+  ERROR_STATUS,
   DendronCompositeError,
-} from "@dendronhq/common-all";
-import {
-  DLogger,
-  globMatch,
+  NoteDictsUtils,
+  DNodeUtils,
+  DuplicateNoteError,
+  ErrorFactory,
+  ERROR_SEVERITY,
+  RespV2,
+  NoteChangeEntry,
+  NoteUtils,
+  ErrorUtils,
+  stringifyError,
+  NoteProps,
+  genHash,
+  cleanName,
+  URI,
+  DVault,
   string2Note,
-  vault2Path,
-} from "@dendronhq/common-server";
-import fs from "fs-extra";
+} from "@dendronhq/common-all";
+// import { string2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { createCacheEntry, EngineUtils } from "../../utils";
-import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
+import * as vscode from "vscode"; // NOTE: This version contains vscode.workspace.fs API references. Need to refactor that out somehow.
+import { Utils } from "vscode-uri";
 
-// NOTE: THIS FILE IS DUPLICATED IN COMMON-ALL
+// NOTE: THIS FILE IS DUPLICATED IN ENGINE-SERVER
 export type FileMeta = {
   // fpath: full path, eg: foo.md, fpath: foo.md
   fpath: string;
@@ -60,24 +57,37 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
   return metaDict;
 }
 
+function globMatch(patterns: string[] | string, fname: string): boolean {
+  if (_.isString(patterns)) {
+    return minimatch(fname, patterns);
+  }
+  return _.some(patterns, (pattern) => minimatch(fname, pattern));
+}
+
 export class NoteParserV2 {
-  public cache: NotesFileSystemCache;
-  private engine: DEngineClient;
+  // public cache: NotesFileSystemCache;
+  // private engine: DEngineClient;
+  private wsRoot: string;
+  // private maxNoteLength: number;
 
   constructor(
     public opts: {
-      cache: NotesFileSystemCache;
-      engine: DEngineClient;
-      logger: DLogger;
+      wsRoot: string;
+      // cache: NotesFileSystemCache;
+      // engine: DEngineClient;
+      // logger: DLogger;
+      // maxNoteLength: number;
     }
   ) {
-    this.cache = opts.cache;
-    this.engine = opts.engine;
+    this.wsRoot = opts.wsRoot;
+    // this.cache = opts.cache;
+    // this.engine = opts.engine;
+    // this.maxNoteLength = opts.maxNoteLength;
   }
 
-  get logger() {
-    return this.opts.logger;
-  }
+  // get logger() {
+  //   return this.opts.logger;
+  // }
 
   /**
    * Construct in-memory
@@ -88,7 +98,7 @@ export class NoteParserV2 {
    */
   async parseFiles(
     allPaths: string[],
-    vault: DVault
+    vault: DVaultUriVariant
   ): Promise<BulkResp<NoteDicts>> {
     const ctx = "parseFiles";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
@@ -100,9 +110,9 @@ export class NoteParserV2 {
       notesById,
       notesByFname,
     };
-    this.logger.info({ ctx, msg: "enter", vault });
+    // this.logger.info({ ctx, msg: "enter", vault });
     // Keep track of which notes in cache no longer exist
-    const unseenKeys = this.cache.getCacheEntryKeys();
+    // const unseenKeys = this.cache.getCacheEntryKeys();
     const errors: IDendronError<any>[] = [];
 
     // get root note
@@ -123,7 +133,7 @@ export class NoteParserV2 {
       );
       return { error: new DendronCompositeError(errors) };
     }
-    const rootProps = this.parseNoteProps({
+    const rootProps = await this.parseNoteProps({
       fpath: rootFile.fpath,
       addParent: false,
       vault,
@@ -141,8 +151,8 @@ export class NoteParserV2 {
     }
     const rootNote = rootProps.data[0].note;
     NoteDictsUtils.add(rootNote, noteDicts);
-    unseenKeys.delete(rootNote.fname);
-    this.logger.info({ ctx, msg: "post:parseRootNote" });
+    // unseenKeys.delete(rootNote.fname);
+    // this.logger.info({ ctx, msg: "post:parseRootNote" });
 
     // Parse root hierarchies
     fileMetaDict[1]
@@ -150,7 +160,7 @@ export class NoteParserV2 {
       .filter((n) => n.fpath !== "root.md")
       .map(async (ent) => {
         try {
-          const resp = this.parseNoteProps({
+          const resp = await this.parseNoteProps({
             fpath: ent.fpath,
             addParent: false,
             vault,
@@ -161,7 +171,7 @@ export class NoteParserV2 {
           }
           if (resp.data && resp.data.length > 0) {
             const parsedNote = resp.data[0].note;
-            unseenKeys.delete(parsedNote.fname);
+            // unseenKeys.delete(parsedNote.fname);
             DNodeUtils.addChild(rootNote, parsedNote);
 
             // Check for duplicate IDs when adding notes to the map
@@ -182,12 +192,12 @@ export class NoteParserV2 {
           // A fatal error would kill the initialization
           error.severity = ERROR_SEVERITY.MINOR;
           error.message =
-            `Failed to read ${ent.fpath} in ${vault.fsPath}: ` + error.message;
+            `Failed to read ${ent.fpath} in ${vault.name}: ` + error.message;
           errors.push(error);
         }
       });
 
-    this.logger.info({ ctx, msg: "post:parseDomainNotes" });
+    // this.logger.info({ ctx, msg: "post:parseDomainNotes" });
 
     // Parse level by level
     let lvl = 2;
@@ -196,9 +206,9 @@ export class NoteParserV2 {
         .filter((ent) => {
           return !globMatch(["root.*"], ent.fpath);
         })
-        .flatMap((ent) => {
+        .flatMap(async (ent) => {
           try {
-            const resp = this.parseNoteProps({
+            const resp = await this.parseNoteProps({
               fpath: ent.fpath,
               noteDicts: { notesById, notesByFname },
               addParent: true,
@@ -210,8 +220,8 @@ export class NoteParserV2 {
             }
 
             if (resp.data && resp.data.length > 0) {
-              const parsedNote = resp.data[0].note;
-              unseenKeys.delete(parsedNote.fname);
+              // const parsedNote = resp.data[0].note;
+              // unseenKeys.delete(parsedNote.fname);
 
               resp.data.forEach((ent) => {
                 const note = ent.note;
@@ -237,30 +247,30 @@ export class NoteParserV2 {
             // A fatal error would kill the initialization
             dendronError.severity = ERROR_SEVERITY.MINOR;
             dendronError.message =
-              `Failed to read ${ent.fpath} in ${vault.fsPath}: ` +
+              `Failed to read ${ent.fpath} in ${vault.name}: ` +
               dendronError.message;
             errors.push(dendronError);
           }
         });
       lvl += 1;
     }
-    this.logger.info({ ctx, msg: "post:parseAllNotes" });
+    // this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
     // Remove stale entries from cache
-    unseenKeys.forEach((unseenKey) => {
-      this.cache.drop(unseenKey);
-    });
+    // unseenKeys.forEach((unseenKey) => {
+    //   this.cache.drop(unseenKey);
+    // });
 
     // OPT:make async and don't wait for return
     // Skip this if we found no notes, which means vault did not initialize, or if there are no cache changes needed
-    if (
-      (_.size(notesById) > 0 && this.cache.numCacheMisses > 0) ||
-      unseenKeys.size > 0
-    ) {
-      this.cache.writeToFileSystem();
-    }
+    // if (
+    //   (_.size(notesById) > 0 && this.cache.numCacheMisses > 0) ||
+    //   unseenKeys.size > 0
+    // ) {
+    //   this.cache.writeToFileSystem();
+    // }
 
-    this.logger.info({ ctx, msg: "post:matchSchemas" });
+    // this.logger.info({ ctx, msg: "post:matchSchemas" });
     return { data: noteDicts, error: new DendronCompositeError(errors) };
   }
 
@@ -270,12 +280,12 @@ export class NoteParserV2 {
    *
    * @returns List of all notes changed. If a note has no direct parents, stub notes are added instead
    */
-  private parseNoteProps(opts: {
+  private async parseNoteProps(opts: {
     fpath: string;
     noteDicts?: NoteDicts;
     addParent: boolean;
-    vault: DVault;
-  }): RespV2<NoteChangeEntry[]> {
+    vault: DVaultUriVariant;
+  }): Promise<RespV2<NoteChangeEntry[]>> {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       noteDicts: {
@@ -285,15 +295,16 @@ export class NoteParserV2 {
     });
     const { fpath, noteDicts, vault } = cleanOpts;
     const ctx = "parseNoteProps";
-    this.logger.debug({ ctx, msg: "enter", fpath });
-    const wsRoot = this.engine.wsRoot;
-    const vpath = vault2Path({ vault, wsRoot });
+    // this.logger.debug({ ctx, msg: "enter", fpath });
+    const wsRoot = this.wsRoot;
+    const vpath = vault.path;
+    // const vpath = vault2Path({ vault, wsRoot });
     let changeEntries: NoteChangeEntry[] = [];
 
     try {
       // Get note props from file and propagate any errors
-      const { data: note, error } = this.file2NoteWithCache({
-        fpath: path.join(vpath, fpath),
+      const { data: note, error } = await this.file2NoteWithCache({
+        uri: Utils.joinPath(vault.path, "notes", fpath), // TODO: Only works on self-contained vaults
         vault,
       });
 
@@ -320,7 +331,7 @@ export class NoteParserV2 {
           payload: { fname: fpath, error: stringifyError(_err) },
           message: `${fpath} could not be parsed`,
         });
-        this.logger.error({ ctx, error });
+        // this.logger.error({ ctx, error });
         return { error };
       }
       return { error: _err };
@@ -335,66 +346,133 @@ export class NoteParserV2 {
    *
    * @returns NoteProp associated with fpath
    */
-  private file2NoteWithCache({
-    fpath,
+  private async file2NoteWithCache({
+    uri,
     vault,
   }: {
-    fpath: string;
-    vault: DVault;
-  }): RespV2<NoteProps> {
-    const content = fs.readFileSync(fpath, { encoding: "utf8" });
-    const { name } = path.parse(fpath);
+    uri: URI;
+    vault: DVaultUriVariant;
+  }): Promise<RespV2<NoteProps>> {
+    const raw = await vscode.workspace.fs.readFile(uri);
+
+    // @ts-ignore - this needs to use browser's TextDecoder, not an import from node utils
+    const textDecoder = new TextDecoder();
+
+    const content = textDecoder.decode(raw);
+    const name = Utils.basename(uri);
     const sig = genHash(content);
-    const cacheEntry = this.cache.get(name);
-    const matchHash = cacheEntry?.hash === sig;
-    let note: NoteProps;
+    // const cacheEntry = this.cache.get(name);
+    // const matchHash = cacheEntry?.hash === sig;
+    // let note: NoteProps;
 
     // if hash matches, note hasn't changed
-    if (matchHash) {
-      // since we don't store the note body in the cache file, we need to re-parse the body
-      const capture = content.match(/^---[\s\S]+?---/);
-      if (capture) {
-        const offset = capture[0].length;
-        const body = content.slice(offset + 1);
-        // vault can change without note changing so we need to add this
-        // add `contentHash` to this signature because its not saved with note
-        note = {
-          ...cacheEntry.data,
-          body,
-          vault,
-          contentHash: sig,
-        };
-        return { data: note, error: null };
-      } else {
-        // No frontmatter exists for this file, return error
-        return {
-          error: new DendronError({
-            message: `File "${fpath}" is missing frontmatter. Please delete file and recreate note`,
-            severity: ERROR_SEVERITY.MINOR,
-          }),
-        };
-      }
-    }
+    // if (matchHash) {
+    //   // since we don't store the note body in the cache file, we need to re-parse the body
+    //   const capture = content.match(/^---[\s\S]+?---/);
+    //   if (capture) {
+    //     const offset = capture[0].length;
+    //     const body = content.slice(offset + 1);
+    //     // vault can change without note changing so we need to add this
+    //     // add `contentHash` to this signature because its not saved with note
+    //     note = {
+    //       ...cacheEntry.data,
+    //       body,
+    //       vault,
+    //       contentHash: sig,
+    //     };
+    //     return { data: note, error: null };
+    //   } else {
+    //     // No frontmatter exists for this file, return error
+    //     return {
+    //       error: new DendronError({
+    //         message: `File "${fpath}" is missing frontmatter. Please delete file and recreate note`,
+    //         severity: ERROR_SEVERITY.MINOR,
+    //       }),
+    //     };
+    //   }
+    // }
     // If hash is different, then we update all links and anchors ^link-anchor
-    note = string2Note({ content, fname: cleanName(name), vault });
+    const note = string2Note({
+      content,
+      fname: cleanName(name),
+      vault: DNodeUtils.convertDVaultVersions(vault),
+    });
     note.contentHash = sig;
     // Link/anchor errors should be logged but not interfere with rest of parsing
     let error: IDendronError | null = null;
     try {
-      EngineUtils.refreshNoteLinksAndAnchors({ note, engine: this.engine });
+      // this.updateLinksAndAnchors(note);
     } catch (_err: any) {
       error = ErrorFactory.wrapIfNeeded(_err);
     }
 
     // Update cache entry as well
-    this.cache.set(
-      name,
-      createCacheEntry({
-        noteProps: note,
-        hash: note.contentHash,
-      })
-    );
-    this.cache.incrementCacheMiss();
+    // this.cache.set(
+    //   name,
+    //   createCacheEntry({
+    //     noteProps: note,
+    //     hash: note.contentHash,
+    //   })
+    // );
+    // this.cache.incrementCacheMiss();
     return { data: note, error };
   }
+
+  // private updateLinksAndAnchors(note: NoteProps): void {
+  //   const ctx = "noteParser:updateLinksAndAnchors";
+  //   // Skip finding links/anchors if note is too long
+  //   if (
+  //     note.body.length >=
+  //     (this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+  //   ) {
+  //     this.logger.info({
+  //       ctx,
+  //       msg: "Note too large, skipping",
+  //       note: NoteUtils.toLogObj(note),
+  //       length: note.body.length,
+  //     });
+  //     throw new DendronError({
+  //       message:
+  //         `Note "${note.fname}" in vault "${VaultUtils.getName(
+  //           note.vault
+  //         )}" is longer than ${
+  //           this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
+  //         } characters, some features like backlinks may not work correctly for it. ` +
+  //         `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
+  //       severity: ERROR_SEVERITY.MINOR,
+  //     });
+  //   }
+
+  //   try {
+  //     // TODO: modify logic so it doesn't need engine
+  //     const links = LinkUtils.findLinks({
+  //       note,
+  //       engine: this.engine,
+  //     });
+  //     note.links = links;
+  //   } catch (err: any) {
+  //     const dendronError = ErrorFactory.wrapIfNeeded(err);
+  //     dendronError.message =
+  //       `Failed to read links in note ${note.fname}: ` + dendronError.message;
+  //     this.logger.error({
+  //       ctx,
+  //       error: dendronError,
+  //       note: NoteUtils.toLogObj(note),
+  //     });
+  //     throw dendronError;
+  //   }
+  //   try {
+  //     const anchors = AnchorUtils.findAnchors({
+  //       note,
+  //     });
+  //     note.anchors = anchors;
+  //     return;
+  //   } catch (err: any) {
+  //     const dendronError = ErrorFactory.wrapIfNeeded(err);
+  //     dendronError.message =
+  //       `Failed to read headers or block anchors in note ${note.fname}` +
+  //       dendronError.message;
+  //     throw dendronError;
+  //   }
+  // }
 }

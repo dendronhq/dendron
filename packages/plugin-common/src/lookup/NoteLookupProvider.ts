@@ -82,7 +82,7 @@ export class NoteLookupProvider {
       onlyDirectChildren: showDirectChildrenOnly,
     });
 
-    debugger;
+    // debugger;
     const queryOrig = NoteLookupUtils.slashToDot(pickerValue);
 
     const queryUpToLastDot =
@@ -307,7 +307,7 @@ export class NoteLookupProvider {
   }) => {
     const nodes = await this.fetchRootResults(engine);
 
-    debugger;
+    // debugger;
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot,

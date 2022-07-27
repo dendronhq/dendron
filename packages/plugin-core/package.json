@@ -497,11 +497,6 @@
         "title": "Dendron: Show Preview (legacy)"
       },
       {
-        "command": "dendron.showPreview",
-        "title": "Dendron: Show Preview",
-        "icon": "$(open-preview)"
-      },
-      {
         "command": "dendron.togglePreview",
         "title": "Dendron: Toggle Preview",
         "icon": "$(open-preview)"
@@ -848,10 +843,6 @@
         {
           "command": "dendron.showLegacyPreview",
           "when": "dendron:pluginActive && dendron:hasLegacyPreview"
-        },
-        {
-          "command": "dendron.showPreview",
-          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.togglePreview",
@@ -1301,7 +1292,7 @@
       },
       {
         "command": "dendron.togglePreview",
-        "windows": "windows+ctrl+p",
+        "windows": "ctrl+k v",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"
       }

@@ -1,12 +1,11 @@
-import { ExtensionEvents, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import * as fs from "fs-extra";
 import * as _ from "lodash";
 import * as path from "path";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { AnalyticsUtils } from "../utils/analytics";
-import { MessageSeverity, VSCodeUtils } from "../vsCodeUtils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { InputArgCommand } from "./base";
 import {
   TogglePreviewCommandOpts,
@@ -23,20 +22,14 @@ export class TogglePreviewCommand extends InputArgCommand<
   TogglePreviewCommandOutput
 > {
   key = DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
-  _isShowCommand: boolean;
   _panel: PreviewProxy;
 
   // This class is used for both ShowPreview and TogglePreview commands.
   // Pass true for isShowCommand param to use this class for Show Preview command
   // By default, this class is used for TogglePreview
-  constructor(previewPanel: PreviewProxy, isShowCommand?: boolean) {
+  constructor(previewPanel: PreviewProxy) {
     super();
     this._panel = previewPanel;
-    this._isShowCommand = !!isShowCommand;
-
-    this.key = this._isShowCommand
-      ? DENDRON_COMMANDS.SHOW_PREVIEW.key
-      : DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
   }
 
   async sanityCheck(opts?: TogglePreviewCommandOpts) {
@@ -91,17 +84,6 @@ export class TogglePreviewCommand extends InputArgCommand<
         await this.openFileInPreview(fsPath);
         return { fsPath };
       }
-    }
-
-    if (this.key === DENDRON_COMMANDS.SHOW_PREVIEW.key) {
-      AnalyticsUtils.track(ExtensionEvents.DeprecationNoticeShow, {
-        source: DENDRON_COMMANDS.SHOW_PREVIEW.key,
-      });
-      VSCodeUtils.showMessage(
-        MessageSeverity.WARN,
-        "Show Preview is being deprecated and will be replaced with Toggle Preview",
-        {}
-      );
     }
     return undefined;
   }

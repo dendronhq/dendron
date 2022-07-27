@@ -75,7 +75,7 @@ const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
     },
     {
       name: QuickstartTutorialTestGroups["quickstart-skip-welcome"],
-      weight: 1,
+      weight: 0,
     },
   ]
 );

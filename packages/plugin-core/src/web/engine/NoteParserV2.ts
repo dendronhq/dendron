@@ -134,7 +134,7 @@ export class NoteParserV2 {
       return { error: new DendronCompositeError(errors) };
     }
     const rootProps = await this.parseNoteProps({
-      fpath: rootFile.fpath,
+      fpath: cleanName(rootFile.fpath), // TODO: Don't think cleanName is necessary here
       addParent: false,
       vault,
     });
@@ -155,7 +155,7 @@ export class NoteParserV2 {
     // this.logger.info({ ctx, msg: "post:parseRootNote" });
 
     // Parse root hierarchies
-    fileMetaDict[1]
+    const op = fileMetaDict[1]
       // Don't count root node
       .filter((n) => n.fpath !== "root.md")
       .map(async (ent) => {
@@ -198,11 +198,12 @@ export class NoteParserV2 {
       });
 
     // this.logger.info({ ctx, msg: "post:parseDomainNotes" });
+    await Promise.all(op);
 
     // Parse level by level
     let lvl = 2;
     while (lvl <= maxLvl) {
-      (fileMetaDict[lvl] || [])
+      const anotherOp = (fileMetaDict[lvl] || [])
         .filter((ent) => {
           return !globMatch(["root.*"], ent.fpath);
         })
@@ -253,6 +254,9 @@ export class NoteParserV2 {
           }
         });
       lvl += 1;
+
+      // TODO: Fix
+      await Promise.all(anotherOp);
     }
     // this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
@@ -359,7 +363,7 @@ export class NoteParserV2 {
     const textDecoder = new TextDecoder();
 
     const content = textDecoder.decode(raw);
-    const name = Utils.basename(uri);
+    const name = path.parse(Utils.basename(uri)).name;
     const sig = genHash(content);
     // const cacheEntry = this.cache.get(name);
     // const matchHash = cacheEntry?.hash === sig;

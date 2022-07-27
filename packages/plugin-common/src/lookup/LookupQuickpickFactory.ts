@@ -2,23 +2,29 @@ import { QuickPickItem, QuickPick, QuickPickOptions } from "vscode";
 import * as vscode from "vscode";
 // import { NoteQuickInput } from "@dendronhq/common-all";
 import { LookupProvider, NoteLookupProvider } from "./NoteLookupProvider";
-import { NoteQuickInput } from "@dendronhq/common-all";
+import { DVault, NoteQuickInput } from "@dendronhq/common-all";
 import { IReducedEngineAPIService } from "../engine";
 
 export type LookupQuickpickFactoryCreateOpts = QuickPickOptions & {
   buttons: vscode.QuickInputButton[];
   provider: LookupProvider;
+  wsRoot: string;
+  vaults: DVault[];
 };
 
 export type LookupAcceptPayload = {
-  items: string[];
+  items: readonly NoteQuickInput[];
 };
 
 export class LookupQuickpickFactory {
   private _engine: IReducedEngineAPIService;
 
   // TODO: Add injection annotations
-  constructor(engine: IReducedEngineAPIService) {
+  constructor(
+    engine: IReducedEngineAPIService,
+    private wsRoot: string,
+    private vaults: DVault[]
+  ) {
     this._engine = engine;
   }
 
@@ -26,6 +32,8 @@ export class LookupQuickpickFactory {
     const qp = this.Create({
       buttons: [],
       provider: new NoteLookupProvider(this._engine),
+      wsRoot: this.wsRoot,
+      vaults: this.vaults,
     });
 
     const outerPromise = new Promise<LookupAcceptPayload | undefined>(
@@ -33,7 +41,7 @@ export class LookupQuickpickFactory {
         const foo = new Promise<LookupAcceptPayload | undefined>((resolve) => {
           qp.onDidAccept(() => {
             resolve({
-              items: qp.selectedItems.map((value) => value.fname),
+              items: qp.selectedItems,
             });
           });
 
@@ -73,23 +81,32 @@ export class LookupQuickpickFactory {
     qp.title = opts.title;
     qp.buttons = opts.buttons;
 
-    let _justActivated = true;
+    // TODO: Add back stripping logic here based on just activated
+
+    // let _justActivated = true;
+
+    // Just activated picker's have special behavior:
+    //
+    // We slice the postfix off until the first dot to show all results at the same
+    // level so that when a user types `foo.one`, they will see all results in `foo.*`
+    // if (_justActivated) {
+    //   pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
+    // }
     qp.onDidChangeValue(async (_newInput) => {
       const items = await opts.provider.provideItems({
-        _justActivated,
-        nonInteractive: false,
-        forceAsIsPickerValueUsage: false,
+        // _justActivated,
         pickerValue: _newInput,
-        prevQuickpickValue: _newInput, // TODO: Can't be newInput
         showDirectChildrenOnly: false,
         workspaceState: {
-          wsRoot: "",
-          vaults: [],
+          wsRoot: opts.wsRoot,
+          vaults: opts.vaults,
           schemas: {},
         },
       });
 
-      _justActivated = false;
+      console.log(`Items Provided: ${items?.length}`);
+
+      // _justActivated = false;
 
       if (items) {
         qp.items = items;

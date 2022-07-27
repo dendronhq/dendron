@@ -416,6 +416,7 @@ export class ExtensionUtils {
     const workspaceConfig = ConfigUtils.getWorkspace(dendronConfig);
     const { workspaceFile, workspaceFolders } = vscode.workspace;
     const trackProps = {
+      extensionId: ext.context.extension.id,
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
       numNotes,

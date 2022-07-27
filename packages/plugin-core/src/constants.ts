@@ -298,7 +298,7 @@ export const DENDRON_MENUS = {
     {
       // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
       when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
-      command: "dendron.deleteNode",
+      command: "dendron.delete",
       group: "2_workspace",
     },
     {
@@ -872,12 +872,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Show Help`,
   },
   SHOW_NOTE_GRAPH: {
-    key: "dendron.showNoteGraph",
+    key: "dendron.showNoteGraphView",
     title: `${CMD_PREFIX} Show Note Graph`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_SCHEMA_GRAPH: {
-    key: "dendron.showSchemaGraph",
+    key: "dendron.showSchemaGraphView",
     title: `${CMD_PREFIX} Show Schema Graph`,
     when: DendronContext.PLUGIN_ACTIVE,
   },

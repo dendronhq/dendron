@@ -32,7 +32,7 @@ export class GraphThemeTip implements IFeatureShowcaseMessage {
       href: "https://www.loom.com/share/f2c53d2a5aeb48209b5587a3dfbb1015",
       alt: "Click on menu icon in the Graph View to change themes",
     });
-    vscode.commands.executeCommand("dendron.showNoteGraph");
+    vscode.commands.executeCommand("dendron.showNoteGraphView");
   }
 
   get confirmText(): string {

@@ -502,8 +502,8 @@
         "icon": "$(open-preview)"
       },
       {
-        "command": "dendron.togglePreviewLock",
-        "title": "Dendron: Toggle PreviewLock",
+        "command": "dendron.lockPreview",
+        "title": "Dendron: Lock Preview",
         "icon": "$(open-preview)"
       },
       {
@@ -854,7 +854,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.togglePreviewLock",
+          "command": "dendron.lockPreview",
           "when": "dendron:pluginActive"
         },
         {

@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   DendronCompositeError,
   DendronError,
   Disposable,
@@ -9,7 +8,6 @@ import {
   FindNoteOpts,
   genHash,
   IDataStore,
-  IDendronError,
   IFileStore,
   INoteStore,
   isNotUndefined,
@@ -120,7 +118,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
   /**
    * See {@link INoteStore.find}
    */
-  async find(opts: FindNoteOpts): Promise<BulkResp<NoteProps[]>> {
+  async find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>> {
     const noteMetadata = await this.findMetaData(opts);
     if (noteMetadata.error) {
       return { error: new DendronCompositeError([noteMetadata.error]) };
@@ -129,18 +127,8 @@ export class NoteStore implements Disposable, INoteStore<string> {
     const responses = await Promise.all(
       noteMetadata.data.map((noteMetadata) => this.get(noteMetadata.id))
     );
-    const errors: IDendronError[] = [];
-    const data: NoteProps[] = [];
-    responses.forEach((resp) => {
-      if (resp.error) {
-        errors.push(resp.error);
-      } else {
-        data.push(resp.data);
-      }
-    });
     return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
-      data: data.filter(isNotUndefined),
+      data: responses.map((resp) => resp.data).filter(isNotUndefined),
     };
   }
 

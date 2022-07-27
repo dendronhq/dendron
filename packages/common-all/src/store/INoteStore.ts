@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   DNoteLoc,
   FindNoteOpts,
   NoteProps,
@@ -47,7 +46,7 @@ export interface INoteStore<K> {
    * @param opts: NoteProps find criteria
    * @return List of NoteProps that matches criteria
    */
-  find(opts: FindNoteOpts): Promise<BulkResp<NoteProps[]>>;
+  find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>>;
 
   /**
    * Find NoteProps metadata by criteria. If no criteria is set, return empty array.

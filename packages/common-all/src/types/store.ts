@@ -14,9 +14,6 @@ export type FindNoteOpts = {
   fname?: string;
   // If vault is provided, filter results so that only notes with matching vault is returned
   vault?: DVault;
-  // Find note by child. This usually refers to parent but could also be closest ancestor if parent doesn't exist. Max one note should be returned
-  // E.g. if childFname = `baz.one.two` and `baz.one` does not exist, then `baz` will be returned
-  child?: NotePropsMeta; // Noteprops metadata of child
 };
 
 export type WriteNoteOpts<K> = {

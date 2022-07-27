@@ -33,6 +33,10 @@ describe("GIVEN NoteStore", () => {
         expect(note.fname).toEqual("foo");
         expect(note.body).toEqual("foo body");
 
+        // Test NoteStore.find empty
+        findResp = await noteStore.find({});
+        expect(findResp.data!.length).toEqual(0);
+
         // Test NoteStore.findMetaData fname property
         let metadataResp = await noteStore.findMetaData({ fname: "foo" });
         expect(metadataResp.data!.length).toEqual(1);
@@ -65,60 +69,6 @@ describe("GIVEN NoteStore", () => {
           vault: vaults[0],
         });
         expect(metadataResp.data!.length).toEqual(4);
-
-        // Test NoteStore.findMetaData child property
-        // Closest ancestor of foo.ch1 = foo
-        const fooCh1 = await noteStore.get("foo.ch1");
-        metadataResp = await noteStore.findMetaData({
-          child: fooCh1.data,
-        });
-        expect(metadataResp.data!.length).toEqual(1);
-        noteMetadata = metadataResp.data![0];
-        expect(noteMetadata.fname).toEqual("foo");
-
-        // Closest ancestor of bar.abc.123 = bar
-        const bar123 = await NoteTestUtilsV4.createNote({
-          fname: "bar.abc.123",
-          body: "bar.abc.123",
-          vault: vaults[0],
-          wsRoot,
-        });
-        metadataResp = await noteStore.findMetaData({
-          child: bar123,
-        });
-        expect(metadataResp.data!.length).toEqual(1);
-        noteMetadata = metadataResp.data![0];
-        expect(noteMetadata.fname).toEqual("bar");
-
-        // Test NoteStore.findMetaData child + fname property
-        metadataResp = await noteStore.findMetaData({
-          child: fooCh1.data,
-          fname: "foo",
-        });
-        expect(metadataResp.data!.length).toEqual(1);
-        noteMetadata = metadataResp.data![0];
-        expect(noteMetadata.fname).toEqual("foo");
-
-        metadataResp = await noteStore.findMetaData({
-          child: fooCh1.data,
-          fname: "foos",
-        });
-        expect(metadataResp.data!.length).toEqual(0);
-
-        // Test NoteStore.findMetaData child + vault property
-        metadataResp = await noteStore.findMetaData({
-          child: fooCh1.data,
-          vault: vaults[0],
-        });
-        expect(metadataResp.data!.length).toEqual(1);
-        noteMetadata = metadataResp.data![0];
-        expect(noteMetadata.fname).toEqual("foo");
-
-        metadataResp = await noteStore.findMetaData({
-          child: fooCh1.data,
-          vault: vaults[1],
-        });
-        expect(metadataResp.data!.length).toEqual(0);
       },
       {
         expect,

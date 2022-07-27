@@ -373,10 +373,9 @@ export class DendronEngineV3 implements DEngine {
       // The new note needs to have the old note's children
       if (existingNote.stub || opts?.overrideExisting) {
         // make sure existing note actually has a parent.
-        const parentResp = await this._noteStore.find({
-          child: existingNote,
-        });
-        if (!parentResp.data || parentResp.data.length === 0) {
+        if (!existingNote.parent) {
+          // TODO: We should be able to handle rewriting of root. This happens
+          // with certain operations such as Doctor FixFrontmatter
           return {
             error: new DendronError({
               status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
@@ -384,9 +383,19 @@ export class DendronEngineV3 implements DEngine {
             }),
           };
         }
+        const parentResp = await this._noteStore.get(existingNote.parent);
+        if (parentResp.error) {
+          return {
+            error: new DendronError({
+              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+              message: `No parent found for ${existingNote.fname}`,
+              innerError: parentResp.error,
+            }),
+          };
+        }
 
         // Save the state of the parent to later record changed entry.
-        const parent = parentResp.data[0];
+        const parent = parentResp.data;
         const prevParentState = { ...parent };
 
         // Update existing note's parent so that it doesn't hold the existing note's id as children
@@ -428,9 +437,12 @@ export class DendronEngineV3 implements DEngine {
       // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
       // this is the default behavior
       if (!opts?.noAddParent) {
-        const ancestorResp = await this._noteStore.find({ child: note });
-        if (ancestorResp.data && ancestorResp.data.length === 1) {
-          const ancestor = ancestorResp.data[0];
+        const ancestorResp = await this.findClosestAncestor(
+          note.fname,
+          note.vault
+        );
+        if (ancestorResp.data) {
+          const ancestor = ancestorResp.data;
 
           const prevAncestorState = { ...ancestor };
 
@@ -453,6 +465,7 @@ export class DendronEngineV3 implements DEngine {
             ctx,
             msg: `Unable to find ancestor for note ${note.fname}`,
           });
+          return { error: ancestorResp.error };
         }
       }
     }
@@ -524,18 +537,26 @@ export class DendronEngineV3 implements DEngine {
     this.logger.info({ ctx, noteToDelete, opts, id });
     const noteAsLog = NoteUtils.toLogObj(noteToDelete);
 
-    const parentResp = await this._noteStore.find({
-      child: noteToDelete,
-    });
-    if (!parentResp.data || parentResp.data.length === 0) {
+    if (!noteToDelete.parent) {
+      return {
+        error: new DendronError({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+          message: `No parent found for ${noteToDelete.fname}`,
+        }),
+      };
+    }
+    const parentResp = await this._noteStore.get(noteToDelete.parent);
+    if (parentResp.error) {
       return {
         error: new DendronError({
           status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
           message: `Unable to delete ${noteToDelete.fname}: Note's parent does not exist in engine: ${noteToDelete.parent}`,
+          innerError: parentResp.error,
         }),
       };
     }
-    let parentNote = parentResp.data[0];
+
+    let parentNote = parentResp.data;
 
     let prevNote = { ...noteToDelete };
     // If deleted note has children, create stub note with a new id in metadata store
@@ -561,13 +582,19 @@ export class DendronEngineV3 implements DEngine {
       // If parent is a stub, go upwards up the tree and delete rest of stubs
       while (parentNote.stub) {
         changes.push({ note: parentNote, status: "delete" });
+        if (!parentNote.parent) {
+          return {
+            error: new DendronError({
+              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
+              message: `No parent found for ${parentNote.fname}`,
+            }),
+          };
+        }
         // eslint-disable-next-line no-await-in-loop
-        const parentResp = await this._noteStore.find({
-          child: parentNote,
-        });
-        if (parentResp.data && parentResp.data.length > 0) {
+        const parentResp = await this._noteStore.get(parentNote.parent);
+        if (parentResp.data) {
           prevNote = { ...parentNote };
-          parentNote = parentResp.data[0];
+          parentNote = parentResp.data;
         } else {
           return {
             error: new DendronError({
@@ -953,6 +980,42 @@ export class DendronEngineV3 implements DEngine {
         }
       })
     );
+  }
+
+  /**
+   * Recursively search through fname to find next available ancestor note.
+   *
+   * E.g, if fpath = "baz.foo.bar", search for "baz.foo", then "baz", then "root" until first valid note is found
+   * @param fpath of note to find ancestor of
+   * @param vault of ancestor note
+   * @returns closest ancestor note
+   */
+  private async findClosestAncestor(
+    fpath: string,
+    vault: DVault
+  ): Promise<RespV3<NoteProps>> {
+    const dirname = DNodeUtils.dirName(fpath);
+    // Reached the end, must be root note
+    if (dirname === "") {
+      const rootResp = await this._noteStore.find({ fname: "root", vault });
+      if (rootResp.error || rootResp.data.length === 0) {
+        return {
+          error: DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
+            message: `No root found for ${fpath}.`,
+            innerError: rootResp.error,
+            severity: ERROR_SEVERITY.MINOR,
+          }),
+        };
+      }
+      return { data: rootResp.data[0] };
+    }
+    const parentResp = await this._noteStore.find({ fname: dirname, vault });
+    if (parentResp.data && parentResp.data.length > 0) {
+      return { data: parentResp.data[0] };
+    } else {
+      return this.findClosestAncestor(dirname, vault);
+    }
   }
 }
 

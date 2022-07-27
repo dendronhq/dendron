@@ -43,7 +43,9 @@ import {
 //   getDurationMilliseconds,
 // } from "@dendronhq/common-server";
 import _ from "lodash";
-import { IReducedEngineAPIService } from "./IReducedEngineApiService";
+import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
+import { NoteParserV2 } from "./NoteParserV2";
+import { Utils } from "vscode-uri";
 // import { NoteStore, VSCodeFileStore } from "./store";
 // import { DConfig } from "./config";
 // import { AnchorUtils, LinkUtils } from "./markdown";
@@ -56,13 +58,13 @@ import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 
 type DendronEngineOptsV3 = {
   wsRoot: string;
-  vaults: DVault[];
+  vaults: DVaultUriVariant[];
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
   // forceNew?: boolean;
   // mode?: DEngineMode;
   // logger?: DLogger;
-  config: IntermediateDendronConfig;
+  // config: IntermediateDendronConfig;
 };
 type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
 
@@ -76,11 +78,11 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   // public configRoot: string;
   // public config: IntermediateDendronConfig;
   // public hooks: DHookDict;
-  private _vaults: DVault[];
+  private _vaults: DVaultUriVariant[];
   private _noteStore: INoteStore<string>;
   private _fileStore: IFileStore; // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
 
-  constructor(props: Omit<DendronEnginePropsV3, "config">) {
+  constructor(props: DendronEnginePropsV3) {
     this.wsRoot = props.wsRoot;
     // this.configRoot = props.wsRoot;
     // this.logger = props.logger;
@@ -117,38 +119,14 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   // }
 
   /**
-   * @deprecated
-   * For accessing a specific note by id, see {@link DendronEngineV3Web.getNote}.
-   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
-   */
-  // get notes(): NotePropsByIdDict {
-  //   return this.store.notes;
-  // }
-  /**
-   * @deprecated see {@link DendronEngineV3Web.findNotes}
-   */
-  // get noteFnames() {
-  //   return this.store.noteFnames;
-  // }
-  // get schemas(): SchemaModuleDict {
-  //   return this.store.schemas;
-  // }
-
-  get vaults(): DVault[] {
-    return this._vaults;
-  }
-
-  set vaults(vaults: DVault[]) {
-    this._vaults = vaults;
-  }
-
-  /**
    * Does not throw error but returns it
    */
   async init(): Promise<any> {
     // async init(): Promise<DEngineInitResp> {
     try {
-      const { data: notes, error: storeError } = await this.initNotes();
+      const { data: notes, error: storeError } = await this.initNotesNew(
+        this._vaults
+      );
 
       // TODO: add schemas to notes
       const schemas = {};
@@ -206,7 +184,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
           notes,
           schemas,
           wsRoot: this.wsRoot,
-          vaults: this.vaults,
+          // vaults: this.vaults,
           // config: this.config,
         },
       };
@@ -409,7 +387,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
         // const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: vault.path,
+          root: Utils.joinPath(vault.path, "notes"), // TODO: Only works on self-contained vaults
           include: ["*.md"],
         });
         if (maybeFiles.error) {
@@ -439,103 +417,11 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
         // };
 
         const { data: notesDict, error } = await new NoteParserV2({
-          cache: notesCache,
-          engine: this,
-          logger: this.logger,
-          maxNoteLength: ConfigUtils.getWorkspace(this.config).maxNoteLength,
+          wsRoot: this.wsRoot,
         }).parseFiles(maybeFiles.data, vault);
         if (error) {
           errors = errors.concat(error?.errors);
         }
-        if (notesDict) {
-          const { notesById, notesByFname } = notesDict;
-          notesFname = NoteFnameDictUtils.merge(notesFname, notesByFname);
-
-          // this.logger.info({
-          //   ctx,
-          //   vault,
-          //   numEntries: _.size(notesById),
-          //   numCacheUpdates: notesCache.numCacheMisses,
-          // });
-          return notesById;
-        }
-        return {};
-      })
-    );
-    const allNotes: NotePropsByIdDict = Object.assign({}, ...allNotesList);
-    const notesWithLinks = _.filter(allNotes, (note) => !_.isEmpty(note.links));
-    this.addBacklinks(
-      {
-        notesById: allNotes,
-        notesByFname: notesFname,
-      },
-      notesWithLinks
-    );
-    // const duration = getDurationMilliseconds(start);
-    // this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
-
-    return {
-      data: allNotes,
-      error: new DendronCompositeError(errors),
-    };
-  }
-  /**
-   * Construct dictionary of NoteProps from workspace on filesystem
-   *
-   * For every vault on the filesystem, get list of files and convert each file to NoteProp
-   * @returns NotePropsByIdDict
-   */
-  private async initNotes(): Promise<BulkResp<NotePropsByIdDict>> {
-    // const ctx = "DendronEngineV3:initNotes";
-    // this.logger.info({ ctx, msg: "enter" });
-    const errors: IDendronError[] = [];
-    let notesFname: NotePropsByFnameDict = {};
-    // const start = process.hrtime();
-
-    const allNotesList = await Promise.all(
-      this.vaults.map(async (_vault) => {
-        // const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-        // // Get list of files from filesystem
-        // const maybeFiles = await this._fileStore.readDir({
-        //   root: vpath,
-        //   include: ["*.md"],
-        // });
-        // if (maybeFiles.error) {
-        //   // Keep initializing other vaults
-        //   errors = errors.concat([
-        //     new DendronError({
-        //       message: `Unable to read notes for vault ${VaultUtils.getName(
-        //         vault
-        //       )}`,
-        //       severity: ERROR_SEVERITY.MINOR,
-        //       payload: maybeFiles.error,
-        //     }),
-        //   ]);
-        //   return {};
-        // }
-
-        // // Load cache from vault
-        // const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
-        // const notesCache = new NotesFileSystemCache({
-        //   cachePath,
-        //   noCaching: this.config.noCaching,
-        //   logger: this.logger,
-        // });
-
-        // TODO: Currently mocked as empty
-        const notesDict: NoteDicts = {
-          notesById: {},
-          notesByFname: {},
-        };
-        // const { data: notesDict, error } = await new NoteParserV2({
-        //   cache: notesCache,
-        //   engine: this,
-        //   logger: this.logger,
-        //   maxNoteLength: ConfigUtils.getWorkspace(this.config).maxNoteLength,
-        // }).parseFiles(maybeFiles.data, vault);
-        // if (error) {
-        //   errors = errors.concat(error?.errors);
-        // }
         if (notesDict) {
           const { notesById, notesByFname } = notesDict;
           notesFname = NoteFnameDictUtils.merge(notesFname, notesByFname);

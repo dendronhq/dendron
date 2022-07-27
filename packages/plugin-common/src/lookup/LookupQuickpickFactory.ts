@@ -38,7 +38,9 @@ export class LookupQuickpickFactory {
           });
 
           // qp.hi;
-          resolve(undefined);
+          qp.onDidHide(() => {
+            resolve(undefined);
+          });
         });
 
         foo.then((value) => {
@@ -47,6 +49,8 @@ export class LookupQuickpickFactory {
         });
       }
     );
+
+    qp.show();
 
     return outerPromise;
   }

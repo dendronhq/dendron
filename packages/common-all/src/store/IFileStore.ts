@@ -2,7 +2,7 @@ import { URI } from "vscode-uri";
 import { RespV3 } from "../types";
 
 export type GetAllFilesOpts = {
-  root: string;
+  root: URI;
   include?: string[];
   exclude?: string[];
 };

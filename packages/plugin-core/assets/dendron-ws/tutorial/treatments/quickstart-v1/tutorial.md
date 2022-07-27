@@ -2,7 +2,7 @@
 id: c1bs7wsjfbhb0zipaywqv1
 title: Tutorial
 desc: ""
-updated: 1658447800901
+updated: 1658931733078
 created: 1654223767390
 currentStep: 0
 totalSteps: 0
@@ -67,7 +67,7 @@ You just navigated the link!
 
 ## Refactor a Note
 
-1. Open [[tutorial.one]], bring up the command prompt and type `Dendron: Rename Note`
+1. Open [[tutorial.one]], bring up the command prompt (`CTRL+SHIFT+P`/`CMD+SHIFT+P`) and type `Dendron: Rename Note`
 1. Replace `tutorial` with `my-note` and then press `<ENTER>`
 1. You just refactored the note!
 

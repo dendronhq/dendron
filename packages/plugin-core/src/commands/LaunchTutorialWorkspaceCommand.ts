@@ -44,8 +44,8 @@ export class LaunchTutorialWorkspaceCommand extends BasicCommand<
     await new SetupWorkspaceCommand().execute({
       rootDirRaw: filePath,
       workspaceInitializer: new TutorialInitializer(),
-      workspaceType: WorkspaceType.NATIVE,
-      EXPERIMENTAL_openNativeWorkspaceNoReload: true,
+      workspaceType: WorkspaceType.CODE,
+      EXPERIMENTAL_openNativeWorkspaceNoReload: false,
     });
   }
 }

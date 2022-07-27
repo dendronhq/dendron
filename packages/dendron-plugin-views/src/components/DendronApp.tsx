@@ -181,13 +181,13 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
 
   const isLocked = props.ide.isLocked;
 
-  const handleLock = React.useCallback(() => {
+  const handleLock = () => {
     postVSCodeMessage({
       type: NoteViewMessageEnum.onUnlock,
       data: {},
       source: DMessageSource.webClient,
     });
-  }, []);
+  };
 
   return (
     <>

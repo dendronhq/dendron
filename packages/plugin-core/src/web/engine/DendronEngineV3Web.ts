@@ -5,22 +5,15 @@ import {
   DEngine,
   DEngineClient,
   DEngineDeleteSchemaResp,
-  DEngineMode,
-  DLink,
-  DVault,
   DVaultUriVariant,
-  EngineInfoResp,
   // error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
   FuseEngine,
-  GetDecorationsPayload,
-  GetNoteBlocksPayload,
   IDendronError,
   IFileStore,
   INoteStore,
-  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -30,93 +23,44 @@ import {
   NotePropsByIdDict,
   NotePropsMeta,
   NoteUtils,
+  QueryNotesOpts,
   RenameNotePayload,
-  RenderNotePayload,
   RespV2,
   SchemaModuleProps,
   SchemaQueryResp,
+  VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-// import {
-//   createLogger,
-//   DLogger,
-//   getDurationMilliseconds,
-// } from "@dendronhq/common-server";
-import _ from "lodash";
 import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
-import { NoteParserV2 } from "./NoteParserV2";
+import _ from "lodash";
 import { Utils } from "vscode-uri";
-// import { NoteStore, VSCodeFileStore } from "./store";
-// import { DConfig } from "./config";
-// import { AnchorUtils, LinkUtils } from "./markdown";
-// import { NoteMetadataStore } from "./store/NoteMetadataStore";
-// import { HookUtils } from "./topics/hooks";
-// import { NoteParserV2 } from "./drivers/file/NoteParserV2";
-// import path from "path";
-// import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-// import { FileStorage } from "./drivers/file/storev2";
+import { NoteParserV2 } from "./NoteParserV2";
 
 type DendronEngineOptsV3 = {
   wsRoot: string;
   vaults: DVaultUriVariant[];
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
-  // forceNew?: boolean;
-  // mode?: DEngineMode;
-  // logger?: DLogger;
-  // config: IntermediateDendronConfig;
 };
 type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
 
 export class DendronEngineV3Web implements IReducedEngineAPIService {
-  public wsRoot: string;
-  // public store: DStore;
-  // protected props: DendronEnginePropsV3;
-  // public logger: DLogger;
-  public fuseEngine: FuseEngine;
-  public links: DLink[];
-  // public configRoot: string;
-  // public config: IntermediateDendronConfig;
-  // public hooks: DHookDict;
+  private wsRoot: string;
+  private fuseEngine: FuseEngine;
   private _vaults: DVaultUriVariant[];
   private _noteStore: INoteStore<string>;
   private _fileStore: IFileStore; // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
 
   constructor(props: DendronEnginePropsV3) {
     this.wsRoot = props.wsRoot;
-    // this.configRoot = props.wsRoot;
-    // this.logger = props.logger;
-    // this.props = props;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 1,
       // fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
-    this.links = [];
-    // this.config = props.config;
     this._vaults = props.vaults;
     this._noteStore = props.noteStore;
     this._fileStore = props.fileStore;
   }
-
-  // static create({ wsRoot }: { wsRoot: string }) {
-  //   const fileStore = new VSCodeFileStore();
-
-  //   return new DendronEngineV3Web({
-  //     wsRoot,
-  //     vaults: [],
-  //     // vaults: ConfigUtils.getVaults(config),
-  //     forceNew: true,
-  //     noteStore: new NoteStore({
-  //       fileStore,
-  //       dataStore: new NoteMetadataStore(),
-  //       wsRoot,
-  //     }),
-  //     fileStore,
-  //     mode: "fuzzy",
-  //     // logger: LOGGER,
-  //     // config,
-  //   });
-  // }
 
   /**
    * Does not throw error but returns it
@@ -238,86 +182,63 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     throw Error("deleteSchema not implemented");
   }
 
-  async getConfig() {
-    return {
-      error: new Error("not implemented"),
-    };
-    // const cpath = DConfig.configPath(this.configRoot);
-    // const config = _.defaultsDeep(
-    //   readYAML(cpath) as IntermediateDendronConfig,
-    //   ConfigUtils.genDefaultConfig()
-    // );
-
-    // return {
-    //   error: null,
-    //   data: config,
-    // };
-  }
-
   async getSchema(): Promise<RespV2<SchemaModuleProps>> {
     throw Error("getSchema not implemented");
-  }
-
-  async info(): Promise<RespV2<EngineInfoResp>> {
-    // const version = NodeJSUtils.getVersionFromPkg();
-    // if (!version) {
-    return {
-      data: undefined,
-      error: DendronError.createPlainError({
-        message: "Unable to read Dendron version",
-      }),
-    };
-    // }
-    // return {
-    //   data: {
-    //     version,
-    //   },
-    //   error: null,
-    // };
-  }
-
-  queryNotesSync(): ReturnType<DEngineClient["queryNotesSync"]> {
-    throw Error("queryNotesSync not implemented");
   }
 
   async querySchema(): Promise<SchemaQueryResp> {
     throw Error("querySchema not implemented");
   }
 
-  async queryNotes(): ReturnType<DEngineClient["queryNotes"]> {
-    throw Error("queryNotes not implemented");
-  }
+  async queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
+    // const ctx = "Engine:queryNotes";
+    const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
-  async renderNote(): Promise<RespV2<RenderNotePayload>> {
-    throw Error("renderNote not implemented");
-  }
+    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
+    // @ts-ignore
+    if (vault?.selfContained === "true" || vault?.selfContained === "false")
+      vault.selfContained = vault.selfContained === "true";
 
-  async sync(): Promise<never> {
-    throw Error("sync not implemented");
-  }
+    const items = await this.fuseEngine.queryNote({
+      qs,
+      onlyDirectChildren,
+      originalQS,
+    });
 
-  async refreshNotes(): Promise<RespV2<void>> {
-    throw new Error("sync not implemented");
+    if (items.length === 0) {
+      return { error: null, data: [] };
+    }
+
+    const notes = await Promise.all(
+      items.map((ent) => this._noteStore.get(ent.id)) // TODO: Should be using metadata instead
+    );
+
+    let modifiedNotes;
+    // let notes = items.map((ent) => this.notes[ent.id]);
+    // if (!_.isUndefined(vault)) {
+    modifiedNotes = notes
+      .filter((ent) => _.isUndefined(ent.error))
+      .map((resp) => resp.data!);
+
+    if (!_.isUndefined(vault)) {
+      modifiedNotes = modifiedNotes.filter((ent) =>
+        VaultUtils.isEqual(vault, ent.data!.vault, this.wsRoot)
+      );
+    }
+
+    return {
+      error: null,
+      // data: items,
+      data: modifiedNotes,
+    };
   }
 
   async renameNote(): Promise<RespV2<RenameNotePayload>> {
     throw Error("renameNote not implemented");
   }
 
-  async updateNote(): Promise<NoteProps> {
-    throw new Error("updateNote not implemented");
-  }
-
   async updateSchema() {
     throw Error("updateSchema not implemented");
-  }
-
-  async writeConfig(): ReturnType<DEngine["writeConfig"]> {
-    throw Error("writeConfig not implemented");
-  }
-
-  async addAccessTokensToPodConfig() {
-    throw Error("addAccessTokensToPodConfig not implemented");
   }
 
   async writeNote(): Promise<WriteNoteResp> {
@@ -327,51 +248,6 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   async writeSchema() {
     throw Error("writeSchema not implemented");
   }
-
-  async getNoteBlocks(): Promise<GetNoteBlocksPayload> {
-    throw Error("getNoteBlocks not implemented");
-  }
-
-  async getDecorations(): Promise<GetDecorationsPayload> {
-    throw Error("getDecorations not implemented");
-  }
-
-  /**
-   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
-   */
-  // async getLinks(
-  //   opts: Optional<GetLinksRequest, "ws">
-  // ): Promise<GetNoteLinksPayload> {
-  //   const { type, note } = opts;
-  //   let links;
-  //   switch (type) {
-  //     case "regular":
-  //       links = LinkUtils.findLinks({
-  //         note,
-  //         engine: this,
-  //       });
-  //       break;
-  //     case "candidate":
-  //       links = LinkUtils.findLinkCandidates({
-  //         note,
-  //         engine: this,
-  //       });
-  //       break;
-  //     default:
-  //       assertUnreachable(type);
-  //   }
-  //   const backlinks = note.links.filter((link) => link.type === "backlink");
-  //   return { data: links.concat(backlinks), error: null };
-  // }
-
-  // async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
-  //   return {
-  //     data: AnchorUtils.findAnchors({
-  //       note: opts.note,
-  //     }),
-  //     error: null,
-  //   };
-  // }
 
   private async initNotesNew(
     vaults: DVaultUriVariant[]
@@ -390,6 +266,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
           root: Utils.joinPath(vault.path, "notes"), // TODO: Only works on self-contained vaults
           include: ["*.md"],
         });
+
         if (maybeFiles.error) {
           // Keep initializing other vaults
           errors = errors.concat([
@@ -401,6 +278,11 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
           ]);
           return {};
         }
+
+        // TODO: Remove once this works inside file store.
+        const filteredFiles = maybeFiles.data.filter((file) =>
+          file.endsWith(".md")
+        );
 
         // // Load cache from vault
         // const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
@@ -418,7 +300,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
 
         const { data: notesDict, error } = await new NoteParserV2({
           wsRoot: this.wsRoot,
-        }).parseFiles(maybeFiles.data, vault);
+        }).parseFiles(filteredFiles, vault);
         if (error) {
           errors = errors.concat(error?.errors);
         }

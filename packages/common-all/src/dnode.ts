@@ -135,7 +135,6 @@ export class DNodeUtils {
     vaults: DVault[];
     wsRoot: string;
   }): DNodePropsQuickInputV2 {
-    debugger;
     const vault = VaultUtils.matchVault({ vaults, wsRoot, vault: props.vault });
 
     if (!vault) {

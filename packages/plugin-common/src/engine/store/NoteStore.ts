@@ -110,7 +110,9 @@ export class NoteStore implements Disposable, INoteStore<string> {
     }
 
     const responses = await Promise.all(
-      noteMetadata.data.map((noteMetadata) => this.get(noteMetadata.id))
+      noteMetadata.data.map((noteMetadata) => {
+        return this.get(noteMetadata.id);
+      })
     );
     const errors: IDendronError[] = [];
     const data: NoteProps[] = [];

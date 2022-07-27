@@ -10,6 +10,7 @@ import {
 import { MockEngineAPIService } from "./test/helpers/MockEngineAPIService";
 import {
   CONSTANTS,
+  DNodeUtils,
   DVaultUriVariant,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -91,14 +92,15 @@ async function _setupCommands({
         const engine = await getWebEngine(wsRoot, vaults);
 
         // debugger;
-        const factory = new LookupQuickpickFactory(engine);
+        const factory = new LookupQuickpickFactory(
+          engine,
+          wsRoot,
+          vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault))
+        );
         // const factory = new LookupQuickpickFactory(new MockEngineAPIService());
         factory.ShowLookup();
         // qp.show();
       })
-      // sentryReportingCallback(async (args: any) => {
-      //   await cmd.run(args);
-      // })
     );
 }
 

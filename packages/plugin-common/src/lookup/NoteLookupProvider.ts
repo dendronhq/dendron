@@ -1,4 +1,5 @@
 import {
+  DNodeProps,
   DNodeUtils,
   DVault,
   NoteLookupUtils,
@@ -14,23 +15,19 @@ import stringSimilarity from "string-similarity";
 import { CancellationToken } from "typescript";
 import { window } from "vscode";
 import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
+import { ILookupProvider } from "./ILookupProvider";
 
-type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
+// type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
 
 export type provideItemsProps = {
-  _justActivated: boolean;
-  nonInteractive: boolean;
-  forceAsIsPickerValueUsage: boolean;
+  // _justActivated: boolean;
+  // nonInteractive: boolean;
+  // forceAsIsPickerValueUsage: boolean;
   token?: CancellationToken;
   fuzzThreshold?: number;
   pickerValue: string;
-  prevQuickpickValue: string;
-  /**
-   * force update even if picker value didn't change
-   */
-  forceUpdate?: boolean;
   showDirectChildrenOnly: boolean;
-  filterMiddleware?: FilterQuickPickFunction;
+  // filterMiddleware?: FilterQuickPickFunction;
   workspaceState: workspaceState;
 };
 
@@ -46,7 +43,7 @@ export interface LookupProvider {
   ): Promise<NoteQuickInput[] | undefined>;
 }
 
-export class NoteLookupProvider {
+export class NoteLookupProvider implements ILookupProvider {
   // TODO: Use DI
   constructor(private engine: IReducedEngineAPIService) {
     console.log("inside constructor");
@@ -55,27 +52,19 @@ export class NoteLookupProvider {
   async provideItems(
     opts: provideItemsProps // TODO: Check the type parameter
   ): Promise<NoteQuickInput[] | undefined> {
-    const {
-      token,
-      fuzzThreshold,
-      _justActivated,
-      nonInteractive,
-      forceAsIsPickerValueUsage,
-      showDirectChildrenOnly,
-      prevQuickpickValue,
-      filterMiddleware,
-      workspaceState,
-    } = opts;
+    const { token, fuzzThreshold, showDirectChildrenOnly, workspaceState } =
+      opts;
 
-    let { pickerValue } = opts;
+    // debugger;
+    const { pickerValue } = opts;
 
     // Just activated picker's have special behavior:
     //
     // We slice the postfix off until the first dot to show all results at the same
     // level so that when a user types `foo.one`, they will see all results in `foo.*`
-    if (_justActivated && !nonInteractive && forceAsIsPickerValueUsage) {
-      pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
-    }
+    // if (_justActivated) {
+    //   pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
+    // }
 
     const transformedQuery = NoteLookupUtils.transformQueryString({
       query: pickerValue,
@@ -91,18 +80,11 @@ export class NoteLookupProvider {
         : undefined;
 
     try {
-      if (pickerValue === prevQuickpickValue) {
-        if (!opts.forceUpdate) {
-          return;
-        }
-      }
-
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         // Logger.debug({ ctx, msg: "empty qs" });
 
         const items = this.fetchRootQuickPickResults({
-          engine: this.engine,
           wsRoot: workspaceState.wsRoot,
           vaults: workspaceState.vaults,
           schemas: workspaceState.schemas,
@@ -206,9 +188,9 @@ export class NoteLookupProvider {
       }
 
       // filter the results through optional middleware
-      if (filterMiddleware) {
-        updatedItems = filterMiddleware(updatedItems);
-      }
+      // if (filterMiddleware) {
+      //   updatedItems = filterMiddleware(updatedItems);
+      // }
 
       // if new notes are allowed and we didn't get a perfect match, append `Create New` option
       // to picker results
@@ -295,17 +277,16 @@ export class NoteLookupProvider {
   }
 
   private fetchRootQuickPickResults = async ({
-    engine,
     wsRoot,
     schemas,
     vaults,
   }: {
-    engine: IReducedEngineAPIService;
     wsRoot: string;
     schemas: SchemaModuleDict;
     vaults: DVault[];
   }) => {
-    const nodes = await this.fetchRootResults(engine);
+    // debugger;
+    const nodes = await this.fetchRootResults();
 
     // debugger;
     return nodes.map((ent) => {
@@ -318,13 +299,13 @@ export class NoteLookupProvider {
     });
   };
 
-  private fetchRootResults = async (engine: IReducedEngineAPIService) => {
+  private fetchRootResults = async () => {
     //TODO: Change to findNotesMeta
-    const roots = await engine.findNotes({ fname: "root" });
+    const roots = await this.engine.findNotes({ fname: "root" });
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
     const childrenOfRootNotes = await Promise.all(
-      _.map(childrenOfRoot, (ent) => engine.getNote(ent))
+      _.map(childrenOfRoot, (ent) => this.engine.getNote(ent))
     );
     return roots.concat(_.compact(childrenOfRootNotes));
   };
@@ -347,6 +328,7 @@ export class NoteLookupProvider {
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
+    // debugger;
     const nodes = resp.data;
 
     if (!nodes) {
@@ -371,7 +353,7 @@ export class NoteLookupProvider {
       nodes.map(async (ent) =>
         DNodeUtils.enhancePropForQuickInputV3({
           wsRoot: opts.workspaceState.wsRoot,
-          props: ent,
+          props: ent as DNodeProps<any, any>, // TODO: Error casting
           schemas: opts.workspaceState.schemas,
           vaults: opts.workspaceState.vaults,
         })

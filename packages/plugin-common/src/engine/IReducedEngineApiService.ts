@@ -6,6 +6,7 @@ import {
   EngineWriteOptsV2,
   FindNoteOpts,
   NoteChangeEntry,
+  NoteIndexProps,
   NoteProps,
   NotePropsMeta,
   QueryNotesOpts,

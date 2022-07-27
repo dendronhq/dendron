@@ -2009,6 +2009,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Lodrus",
+      "name": "Lodrus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28769785?v=4",
+      "profile": "https://github.com/Lodrus",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

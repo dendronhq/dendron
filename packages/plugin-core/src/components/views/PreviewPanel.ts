@@ -151,18 +151,18 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
-  lock(sync: boolean = true) {
-    this._lockedEditorFileName =
-      vscode.window.activeTextEditor?.document.fileName;
-    if (sync) {
+  lock() {
+    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+    if (activeTextEditor) {
+      this._lockedEditorFileName = activeTextEditor?.document.fileName;
       this.sendLockMessage(this._panel!, this.isLocked());
+    } else {
+      vscode.window.showInformationMessage("No active texteditor found");
     }
   }
-  unlock(sync: boolean = true) {
+  unlock() {
     this._lockedEditorFileName = undefined;
-    if (sync) {
-      this.sendLockMessage(this._panel!, this.isLocked());
-    }
+    this.sendLockMessage(this._panel!, this.isLocked());
   }
   isOpen(): boolean {
     return this._panel !== undefined;
@@ -179,10 +179,10 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    * If the Preview is locked and the active note does not match the locked note.
    */
   isLockedAndDirty(): boolean {
+    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
     return (
       this.isLocked() &&
-      vscode.window.activeTextEditor?.document.fileName !==
-        this._lockedEditorFileName
+      activeTextEditor?.document.fileName !== this._lockedEditorFileName
     );
   }
   dispose() {
@@ -251,10 +251,12 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         }
         case NoteViewMessageEnum.onLock: {
           Logger.debug({ ctx, "msg.type": "onLock" });
+          this.lock();
           break;
         }
         case NoteViewMessageEnum.onUnlock: {
           Logger.debug({ ctx, "msg.type": "onUnlock" });
+          this.unlock();
           break;
         }
         default:

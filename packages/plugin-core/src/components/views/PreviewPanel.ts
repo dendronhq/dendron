@@ -380,6 +380,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       }
       note = this.rewriteImageUrls(note, panel);
 
+      this.sendLockMessage(this._panel!, this.isLocked());
+
       try {
         return panel.webview.postMessage({
           type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,

@@ -23,7 +23,10 @@ export function getDataDir(): string {
   return dataDir;
 }
 
-export function getNoteBody(id: string) {
+/**
+ *  Returns the HTML representation of a note
+ */
+export function getNoteBody(id: string): Promise<string> {
   const dataDir = getDataDir();
   const body = fs.readFile(path.join(dataDir, NOTE_BODY_DIR, `${id}.html`), {
     encoding: "utf8",
@@ -33,7 +36,7 @@ export function getNoteBody(id: string) {
 
 let _NOTES_CACHE: NoteData | undefined;
 
-export function getNotes() {
+export function getNotes(): NoteData {
   if (_.isUndefined(_NOTES_CACHE)) {
     const dataDir = getDataDir();
     _NOTES_CACHE = fs.readJSONSync(
@@ -68,23 +71,30 @@ export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
   };
 }
 
-export function getNoteMeta(id: string) {
+/**
+ * Reads the JSON contents of data/meta/<note>.json
+ */
+export function getNoteMeta(id: string): Promise<NoteProps> {
   const dataDir = getDataDir();
   return fs.readJSON(
     path.join(dataDir, NOTE_META_DIR, `${id}.json`),
-  ) as Promise<NoteProps>;
+  );
 }
 
+let _CONFIG_CACHE: IntermediateDendronConfig | undefined;
 export function getConfig(): Promise<IntermediateDendronConfig> {
-  const dataDir = getDataDir();
-  return fs.readJSON(path.join(dataDir, "dendron.json"));
+  if (_.isUndefined(_CONFIG_CACHE)) {
+    const dataDir = getDataDir();
+    return fs.readJSON(path.join(dataDir, "dendron.json"));
+  }
+  return new Promise(() => _CONFIG_CACHE);
 }
 
-export function getPublicDir() {
+export function getPublicDir(): string {
   return path.join(process.cwd(), "public");
 }
 
-export async function getCustomHead() {
+export async function getCustomHead(): Promise<string | null> {
   const config = await getConfig();
   const publishingConfig = ConfigUtils.getPublishingConfig(config);
   const customHeadPathConfig = publishingConfig.customHeaderPath;

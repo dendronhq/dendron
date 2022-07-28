@@ -42,7 +42,7 @@ export const getStaticProps: GetStaticProps<
     const customHeadContent: string | null = await getCustomHead();
     const { notes, noteIndex } = noteData;
     const collectionChildren = note.custom?.has_collection
-      ? prepChildrenForCollection(note, notes, noteIndex)
+      ? prepChildrenForCollection(note, notes)
       : null;
     const props: DendronNotePageProps = {
       note,

@@ -179,12 +179,12 @@ describe("RemarkUtils and LinkUtils", () => {
     );
   });
 
-  describe("findLinks", () => {
+  describe("findLinksFromBody", () => {
     testWithEngine(
       "one link",
       async ({ engine }) => {
         const note = engine.notes["foo"];
-        const links = LinkUtils.findLinks({ note, engine });
+        const links = LinkUtils.findLinksFromBody({ note, engine });
         expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("bar");
       },
@@ -204,7 +204,7 @@ describe("RemarkUtils and LinkUtils", () => {
       "empty link",
       async ({ engine }) => {
         const note = engine.notes["foo"];
-        const links = LinkUtils.findLinks({ note, engine });
+        const links = LinkUtils.findLinksFromBody({ note, engine });
         expect(links).toMatchSnapshot();
         expect(_.isEmpty(links)).toBeTruthy();
       },
@@ -224,7 +224,7 @@ describe("RemarkUtils and LinkUtils", () => {
       "xvault link",
       async ({ engine }) => {
         const note = engine.notes["foo"];
-        const links = LinkUtils.findLinks({ note, engine });
+        const links = LinkUtils.findLinksFromBody({ note, engine });
         expect(links).toMatchSnapshot();
         expect(links[0].from).toEqual({
           fname: "foo",
@@ -252,7 +252,7 @@ describe("RemarkUtils and LinkUtils", () => {
       "hashtag link",
       async ({ engine }) => {
         const note = engine.notes["foo"];
-        const links = LinkUtils.findLinks({ note, engine });
+        const links = LinkUtils.findLinksFromBody({ note, engine });
         expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("tags.bar");
       },
@@ -272,7 +272,7 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["foo.one-id"];
-          const links = LinkUtils.findLinks({ note, engine });
+          const links = LinkUtils.findLinksFromBody({ note, engine });
           expect(links).toMatchSnapshot();
           checkLink({
             src: {
@@ -318,7 +318,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
       const getLinks = (engine: DEngineClient, filter: LinkFilter) => {
         const note = engine.notes["foo"];
-        const links = LinkUtils.findLinks({
+        const links = LinkUtils.findLinksFromBody({
           note,
           engine,
           filter,
@@ -373,7 +373,7 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const note = engine.notes["foo.one-id"];
-          const links = LinkUtils.findLinks({ note, engine });
+          const links = LinkUtils.findLinksFromBody({ note, engine });
           const link = LinkUtils.dlink2DNoteLink(links[0]);
           const newBody = LinkUtils.updateLink({
             note,
@@ -412,7 +412,7 @@ describe("RemarkUtils and LinkUtils", () => {
         await runEngineTestV5(
           async ({ engine }) => {
             const note = engine.notes["foo"];
-            const links = LinkUtils.findLinks({ note, engine });
+            const links = LinkUtils.findLinksFromBody({ note, engine });
             const link = LinkUtils.dlink2DNoteLink(links[0]);
             const newLink = {
               ...link,
@@ -441,7 +441,7 @@ describe("RemarkUtils and LinkUtils", () => {
             const idx = 1;
             const newLine = "nospace[[bar]]";
             const note = engine.notes["foo"];
-            const links = LinkUtils.findLinks({ note, engine });
+            const links = LinkUtils.findLinksFromBody({ note, engine });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
             const newLink = {
               ...link,
@@ -470,7 +470,7 @@ describe("RemarkUtils and LinkUtils", () => {
             const idx = 2;
             const newLine = "onespace [[bar]]";
             const note = engine.notes["foo"];
-            const links = LinkUtils.findLinks({ note, engine });
+            const links = LinkUtils.findLinksFromBody({ note, engine });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
             const newLink = {
               ...link,

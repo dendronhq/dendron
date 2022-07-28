@@ -1,5 +1,4 @@
 import {
-  CONSTANTS,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -17,7 +16,6 @@ import {
   NoteDicts,
   NoteUtils,
   stringifyError,
-  VaultUtils,
   NoteChangeEntry,
   genHash,
   RespV2,
@@ -34,9 +32,8 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { createCacheEntry } from "../../utils";
+import { createCacheEntry, EngineUtils } from "../../utils";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
-import { AnchorUtils, LinkUtils } from "../../markdown/remark/utils";
 
 export type FileMeta = {
   // fpath: full path, eg: foo.md, fpath: foo.md
@@ -65,19 +62,16 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
 export class NoteParserV2 {
   public cache: NotesFileSystemCache;
   private engine: DEngineClient;
-  private maxNoteLength: number;
 
   constructor(
     public opts: {
       cache: NotesFileSystemCache;
       engine: DEngineClient;
       logger: DLogger;
-      maxNoteLength: number;
     }
   ) {
     this.cache = opts.cache;
     this.engine = opts.engine;
-    this.maxNoteLength = opts.maxNoteLength;
   }
 
   get logger() {
@@ -386,7 +380,7 @@ export class NoteParserV2 {
     // Link/anchor errors should be logged but not interfere with rest of parsing
     let error: IDendronError | null = null;
     try {
-      this.updateLinksAndAnchors(note);
+      EngineUtils.refreshNoteLinksAndAnchors({ note, engine: this.engine });
     } catch (_err: any) {
       error = ErrorFactory.wrapIfNeeded(_err);
     }
@@ -401,63 +395,5 @@ export class NoteParserV2 {
     );
     this.cache.incrementCacheMiss();
     return { data: note, error };
-  }
-
-  private updateLinksAndAnchors(note: NoteProps): void {
-    const ctx = "noteParser:updateLinksAndAnchors";
-    // Skip finding links/anchors if note is too long
-    if (
-      note.body.length >=
-      (this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-    ) {
-      this.logger.info({
-        ctx,
-        msg: "Note too large, skipping",
-        note: NoteUtils.toLogObj(note),
-        length: note.body.length,
-      });
-      throw new DendronError({
-        message:
-          `Note "${note.fname}" in vault "${VaultUtils.getName(
-            note.vault
-          )}" is longer than ${
-            this.maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
-          } characters, some features like backlinks may not work correctly for it. ` +
-          `You may increase "maxNoteLength" in "dendron.yml" to override this warning.`,
-        severity: ERROR_SEVERITY.MINOR,
-      });
-    }
-
-    try {
-      // TODO: modify logic so it doesn't need engine
-      const links = LinkUtils.findLinks({
-        note,
-        engine: this.engine,
-      });
-      note.links = links;
-    } catch (err: any) {
-      const dendronError = ErrorFactory.wrapIfNeeded(err);
-      dendronError.message =
-        `Failed to read links in note ${note.fname}: ` + dendronError.message;
-      this.logger.error({
-        ctx,
-        error: dendronError,
-        note: NoteUtils.toLogObj(note),
-      });
-      throw dendronError;
-    }
-    try {
-      const anchors = AnchorUtils.findAnchors({
-        note,
-      });
-      note.anchors = anchors;
-      return;
-    } catch (err: any) {
-      const dendronError = ErrorFactory.wrapIfNeeded(err);
-      dendronError.message =
-        `Failed to read headers or block anchors in note ${note.fname}` +
-        dendronError.message;
-      throw dendronError;
-    }
   }
 }

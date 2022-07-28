@@ -37,7 +37,6 @@ import {
   NotePropsMeta,
 } from "./types";
 import {
-  ConfigUtils,
   DefaultMap,
   getSlugger,
   isNotUndefined,
@@ -895,78 +894,6 @@ export class NoteUtils {
     }
 
     return { ...noteRaw, ...hydrateProps };
-  }
-
-  /**
-   * Update note metadata (eg. links and anchors)
-   * Calculate note metadata based on contents of the notes
-   */
-  static async updateNoteMetadata({
-    note,
-    fmChangeOnly,
-    engine,
-    enableLinkCandidates,
-  }: {
-    note: NoteProps;
-    fmChangeOnly: boolean;
-    engine: DEngineClient;
-    enableLinkCandidates?: boolean;
-  }) {
-    // Avoid calculating links/anchors if the note is too long
-    if (
-      note.body.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength
-    ) {
-      return note;
-    }
-    // Links have to be updated even with frontmatter only changes
-    // because `tags` in frontmatter adds new links
-    const links = await engine.getLinks({ note, type: "regular" });
-    if (!links.data) {
-      throw new DendronError({
-        message: "Unable to calculate the links in note",
-        payload: {
-          note: NoteUtils.toLogObj(note),
-          error: links.error,
-        },
-      });
-    }
-    note.links = links.data;
-
-    // if only frontmatter changed, don't bother with heavy updates
-    if (!fmChangeOnly) {
-      const anchors = await engine.getAnchors({
-        note,
-      });
-      if (!anchors.data) {
-        throw new DendronError({
-          message: "Unable to calculate anchors in note",
-          payload: {
-            note: NoteUtils.toLogObj(note),
-            error: anchors.error,
-          },
-        });
-      }
-      note.anchors = anchors.data;
-
-      if (enableLinkCandidates) {
-        const linkCandidates = await engine.getLinks({
-          note,
-          type: "candidate",
-        });
-        if (!linkCandidates.data) {
-          throw new DendronError({
-            message: "Unable to calculate the backlink candidates in note",
-            payload: {
-              note: NoteUtils.toLogObj(note),
-              error: linkCandidates.error,
-            },
-          });
-        }
-        note.links = note.links.concat(linkCandidates.data);
-      }
-    }
-
-    return note;
   }
 
   static match({ notePath, pattern }: { notePath: string; pattern: string }) {

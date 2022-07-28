@@ -70,9 +70,9 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks empty link 1`] = `Array []`;
+exports[`RemarkUtils and LinkUtils findLinksFromBody empty link 1`] = `Array []`;
 
-exports[`RemarkUtils and LinkUtils findLinks filter loc match 1`] = `
+exports[`RemarkUtils and LinkUtils findLinksFromBody filter loc match 1`] = `
 Array [
   Object {
     "alias": "foo",
@@ -107,9 +107,9 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks filter loc no match 1`] = `Array []`;
+exports[`RemarkUtils and LinkUtils findLinksFromBody filter loc no match 1`] = `Array []`;
 
-exports[`RemarkUtils and LinkUtils findLinks hashtag link 1`] = `
+exports[`RemarkUtils and LinkUtils findLinksFromBody hashtag link 1`] = `
 Array [
   Object {
     "alias": "#bar",
@@ -144,7 +144,7 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks note ref 1`] = `
+exports[`RemarkUtils and LinkUtils findLinksFromBody note ref 1`] = `
 Array [
   Object {
     "alias": "foo.two",
@@ -207,7 +207,7 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks one link 1`] = `
+exports[`RemarkUtils and LinkUtils findLinksFromBody one link 1`] = `
 Array [
   Object {
     "alias": "bar",
@@ -242,7 +242,7 @@ Array [
 ]
 `;
 
-exports[`RemarkUtils and LinkUtils findLinks xvault link 1`] = `
+exports[`RemarkUtils and LinkUtils findLinksFromBody xvault link 1`] = `
 Array [
   Object {
     "alias": "bar",

@@ -187,31 +187,40 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
+        const oldPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "oldfile.md"
+        );
         const oldUri = vscode.Uri.file(oldPath);
-        const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
+        const newPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "newfile.md"
+        );
         const newUri = vscode.Uri.file(newPath);
-        const args: vscode.FileRenameEvent = {
+        const args: vscode.FileWillRenameEvent = {
           files: [
             {
               oldUri,
               newUri,
             },
           ],
+          // eslint-disable-next-line no-undef
+          waitUntil: (_args: Thenable<any>) => {
+            _args.then(async () => {
+              const newFile = (
+                await engine.findNotes({
+                  fname: "newfile",
+                  vault: vaults[0],
+                })
+              )[0];
+              expect(newFile.title).toEqual(`Newfile`);
+            });
+          },
         };
-        const edit = new vscode.WorkspaceEdit();
-        edit.renameFile(oldUri, newUri);
-        const success = await vscode.workspace.applyEdit(edit);
-        if (success) {
-          await watcher.onDidRenameFiles(args);
-          const newFile = (
-            await engine.findNotes({
-              fname: "newfile",
-              vault: vaults[0],
-            })
-          )[0];
-          expect(newFile.title).toEqual(`Newfile`);
-        }
+
+        watcher.onWillRenameFiles(args);
       });
     }
   );

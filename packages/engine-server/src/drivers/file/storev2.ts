@@ -640,7 +640,6 @@ export class FileStorage implements DStore {
       };
     }
     const noteFiles = out.data;
-    const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
 
     const {
       notesById,
@@ -651,7 +650,6 @@ export class FileStorage implements DStore {
       cache: notesCache,
       engine: this.engine,
       logger: this.logger,
-      maxNoteLength,
     }).parseFiles(noteFiles, vault);
 
     errors = errors.concat(parseErrors);
@@ -736,7 +734,7 @@ export class FileStorage implements DStore {
       return;
     }
     const _n = resp.data;
-    const foundLinks = LinkUtils.findLinks({
+    const foundLinks = LinkUtils.findLinksFromBody({
       note: _n,
       engine: this.engine,
       filter: { loc: oldLoc },
@@ -946,13 +944,6 @@ export class FileStorage implements DStore {
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
-    if (!_.isUndefined(opts.isEventSourceEngine)) {
-      return (
-        await this.bulkWriteNotes({
-          notes: notesChangedEntries.map((ent) => ent.note),
-        })
-      ).data;
-    }
     const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,
@@ -973,7 +964,6 @@ export class FileStorage implements DStore {
       msg: "deleteNote:meta:pre",
       note: NoteUtils.toLogObj(oldNote),
     });
-    let deleteOldFile = false;
     let changedFromDelete: EngineDeleteNotePayload = [];
     let changeFromWrite: NoteChangeEntry[] | undefined;
     if (
@@ -987,14 +977,14 @@ export class FileStorage implements DStore {
       // but we don't want that in this case. we need to add the old note's children back in
       newNote.children = oldNote.children;
 
-      const out = await this.writeNote(newNote);
+      const out = await this.writeNote(newNote, { metaOnly: opts.metaOnly });
       changeFromWrite = out.data;
     } else {
       // The file is being renamed to a new file.
       this.logger.info({ ctx, msg: "Renaming the file to a new name" });
       try {
         changedFromDelete = await this.deleteNote(oldNote.id, {
-          metaOnly: true,
+          metaOnly: opts.metaOnly,
         });
       } catch (err) {
         throw new DendronError({
@@ -1007,13 +997,14 @@ export class FileStorage implements DStore {
           payload: err,
         });
       }
-      deleteOldFile = true;
       this.logger.info({
         ctx,
         msg: "writeNewNote:pre",
         note: NoteUtils.toLogObj(newNote),
       });
-      const out = await this.writeNote(newNote);
+      const out = await this.writeNote(newNote, {
+        metaOnly: opts.metaOnly,
+      });
       changeFromWrite = out.data;
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
@@ -1021,7 +1012,6 @@ export class FileStorage implements DStore {
     await this.bulkWriteNotes({
       notes: notesChangedEntries.map((ent) => ent.note),
     });
-    if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
 
@@ -1287,12 +1277,14 @@ export class FileStorage implements DStore {
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
-    const hash = await note2File({
-      note,
-      vault: note.vault,
-      wsRoot: this.wsRoot,
-    });
-    note.contentHash = hash;
+    if (!opts?.metaOnly) {
+      const hash = await note2File({
+        note,
+        vault: note.vault,
+        wsRoot: this.wsRoot,
+      });
+      note.contentHash = hash;
+    }
 
     // schema metadata is only applicable at runtime
     // we therefore write it after we persist note to store

@@ -1,5 +1,4 @@
 import {
-  DendronCompositeError,
   DendronError,
   Disposable,
   DNoteLoc,
@@ -108,11 +107,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
    * See {@link INoteStore.getMetadata}
    */
   async getMetadata(key: string): Promise<RespV3<NotePropsMeta>> {
-    const resp = await this._metadataStore.get(key);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    return { data: resp.data };
+    return this._metadataStore.get(key);
   }
 
   /**
@@ -121,7 +116,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
   async find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>> {
     const noteMetadata = await this.findMetaData(opts);
     if (noteMetadata.error) {
-      return { error: new DendronCompositeError([noteMetadata.error]) };
+      return { error: noteMetadata.error };
     }
 
     const responses = await Promise.all(
@@ -136,11 +131,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
    * See {@link INoteStore.findMetaData}
    */
   async findMetaData(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
-    const resp = await this._metadataStore.find(opts);
-    if (resp.error) {
-      return { error: resp.error };
-    }
-    return { data: resp.data };
+    return this._metadataStore.find(opts);
   }
 
   /**
@@ -185,12 +176,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
         }),
       };
     }
-    const metaResp = await this._metadataStore.write(key, noteMeta);
-    if (metaResp.error) {
-      return { error: metaResp.error };
-    }
-
-    return { data: key };
+    return this._metadataStore.write(key, noteMeta);
   }
 
   /**s
@@ -251,12 +237,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
       };
     }
 
-    const metaResp = await this._metadataStore.delete(key);
-    if (metaResp.error) {
-      return { error: metaResp.error };
-    }
-
-    return { data: key };
+    return this._metadataStore.delete(key);
   }
 
   async rename(oldLoc: DNoteLoc, newLoc: DNoteLoc): Promise<RespV3<string>> {

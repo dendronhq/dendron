@@ -2,21 +2,18 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
-  ErrorUtils,
   NoteUtils,
   SchemaUtils,
   Time,
   VaultUtils,
   Wrap,
 } from "@dendronhq/common-all";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { RemarkUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import path from "path";
 import {
   ExtensionContext,
-  FileRenameEvent,
   FileWillRenameEvent,
   Range,
   Selection,
@@ -151,14 +148,6 @@ export class WorkspaceWatcher {
     this._extension.addDisposable(
       workspace.onWillRenameFiles(
         this.onWillRenameFiles,
-        this,
-        context.subscriptions
-      )
-    );
-
-    this._extension.addDisposable(
-      workspace.onDidRenameFiles(
-        this.onDidRenameFiles,
         this,
         context.subscriptions
       )
@@ -423,57 +412,12 @@ export class WorkspaceWatcher {
           fname: newFname,
           vaultName: VaultUtils.getName(newVault),
         },
-        isEventSourceEngine: false,
+        metaOnly: true,
       };
       AnalyticsUtils.track(ContextualUIEvents.ContextualUIRename);
       const engine = this._extension.getEngine();
       const updateNoteReferences = engine.renameNote(opts);
       args.waitUntil(updateNoteReferences);
-    } catch (error: any) {
-      Sentry.captureException(error);
-      throw error;
-    }
-  }
-
-  /**
-   * method to make modifications to the workspace after the file is renamed.
-   * It updates the title of the note wrt the new fname and refreshes tree view
-   */
-  async onDidRenameFiles(args: FileRenameEvent) {
-    // No-op if we're not in a Dendron Workspace
-    if (!this._extension.isActive()) {
-      return;
-    }
-    try {
-      const files = args.files[0];
-      const { newUri } = files;
-      const fname = DNodeUtils.fname(newUri.fsPath);
-      const engine = this._extension.getEngine();
-      const { vaults, wsRoot } = this._extension.getDWorkspace();
-
-      // No-op if we are not dealing with a Dendron note.
-      if (!NoteUtils.isNote(newUri)) {
-        return;
-      }
-
-      const newVault = VaultUtils.getVaultByFilePath({
-        vaults,
-        wsRoot,
-        fsPath: newUri.fsPath,
-      });
-      const vpath = vault2Path({ wsRoot, vault: newVault });
-      const newLocPath = path.join(vpath, fname + ".md");
-      const resp = file2Note(newLocPath, newVault);
-      if (ErrorUtils.isErrorResp(resp)) {
-        throw resp.error;
-      }
-      const noteRaw = resp.data;
-      const newNote = NoteUtils.hydrate({
-        noteRaw,
-        noteHydrated: engine.notes[noteRaw.id],
-      });
-      newNote.title = NoteUtils.genTitle(fname);
-      await engine.writeNote(newNote);
     } catch (error: any) {
       Sentry.captureException(error);
       throw error;

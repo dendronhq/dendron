@@ -344,9 +344,11 @@ export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
   newLoc: DNoteLoc;
   /**
-   * added for dendron to recognise vscode `rename` menu option
+   * Flag to determine whether we should touch metadata only
+   * For example, if the code comes from vscode `rename` menu option,
+   * we do not want to touch the filesystem
    */
-  isEventSourceEngine?: boolean;
+  metaOnly?: boolean;
 };
 
 export type RenderNoteOpts = {
@@ -618,6 +620,9 @@ export type DEngine = DCommonProps &
       originalQS: string;
       vault?: DVault;
     }): NoteQueryResp;
+    /**
+     * Rename note from old DNoteLoc to new DNoteLoc. New note keeps original id
+     */
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
     renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
     /**
@@ -637,9 +642,15 @@ export type DEngine = DCommonProps &
     getDecorations: (
       opts: GetDecorationsOpts
     ) => Promise<GetDecorationsPayload>;
+    /**
+     * @deprecated: Use {@link LinkUtils.findLinks}
+     */
     getLinks: (
       opts: Optional<GetLinksRequest, "ws">
     ) => Promise<GetNoteLinksPayload>;
+    /**
+     * @deprecated: Use {@link AnchorUtils.findAnchors}
+     */
     getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
   };
 

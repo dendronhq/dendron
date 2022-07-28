@@ -78,7 +78,7 @@ export function getNoteMeta(id: string): Promise<NoteProps> {
   const dataDir = getDataDir();
   return fs.readJSON(
     path.join(dataDir, NOTE_META_DIR, `${id}.json`),
-  ) as Promise<NoteProps>;
+  );
 }
 
 let _CONFIG_CACHE: IntermediateDendronConfig | undefined;

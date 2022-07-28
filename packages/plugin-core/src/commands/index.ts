@@ -79,6 +79,7 @@ import { SyncCommand } from "./Sync";
 import { TaskCompleteCommand } from "./TaskComplete";
 import { TaskStatusCommand } from "./TaskStatus";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
+import { ValidateEngineCommand } from "./ValidateEngineCommand";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
@@ -173,6 +174,7 @@ const ALL_COMMANDS = [
   CreateNoteWithUserDefinedTrait,
   OpenBackupCommand,
   InstrumentedWrapperCommand,
+  ValidateEngineCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

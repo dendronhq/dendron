@@ -1010,6 +1010,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Instrumented Wrapper Command`,
     when: "false",
   },
+  VALIDATE_ENGINE: {
+    key: "dendron.dev.validateEngine",
+    title: `${CMD_PREFIX}Dev: Validate Engine`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

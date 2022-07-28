@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { NotePropsByIdDict, NoteProps } from "../types";
+import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
 import { isNotUndefined, PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 
@@ -30,6 +30,11 @@ export enum TreeViewItemLabelTypeEnum {
   title = "title",
   filename = "filename",
 }
+
+export type TreeNode = {
+  fname: string;
+  children: TreeNode[];
+};
 
 export class TreeUtils {
   static generateTreeData(
@@ -192,4 +197,100 @@ export class TreeUtils {
 
     return { data: out, error };
   };
+
+  /**
+   * Create tree starting from given root note. Use note's children properties to define TreeNode children relationship
+   *
+   * @param allNotes
+   * @param rootNoteId
+   * @returns
+   */
+  static createTreeFromEngine(
+    allNotes: NotePropsByIdDict,
+    rootNoteId: string
+  ): TreeNode {
+    const note = allNotes[rootNoteId];
+
+    if (note) {
+      const children = note.children
+        .filter((child) => child !== note.id)
+        .sort((a, b) => a.localeCompare(b))
+        .map((note) => this.createTreeFromEngine(allNotes, note));
+
+      const fnames = note.fname.split(".");
+      return { fname: fnames[fnames.length - 1], children };
+    } else {
+      throw new DendronError({
+        message: `No note found in engine for "${rootNoteId}"`,
+      });
+    }
+  }
+
+  /**
+   * Create tree from list of file names. Use the delimiter "." to define TreeNode children relationship
+   */
+  static createTreeFromFileNames(fNames: string[], rootNote: string) {
+    const result: TreeNode[] = [];
+    fNames.forEach((name) => {
+      if (name !== rootNote) {
+        name.split(".").reduce(
+          (object, fname) => {
+            let item = (object.children = object.children || []).find(
+              (q: { fname: string }) => q.fname === fname
+            );
+            if (!item) {
+              object.children.push((item = { fname, children: [] }));
+            }
+            return item;
+          },
+          { children: result }
+        );
+      }
+    });
+    return { fname: rootNote, children: result };
+  }
+
+  /**
+   * Check if two trees are equal.
+   * Two trees are equal if and only if fnames are equal and children tree nodes are equal
+   */
+  static validateTreeNodes(
+    expectedTree: TreeNode,
+    actualTree: TreeNode
+  ): RespV3<void> {
+    if (expectedTree.fname !== actualTree.fname) {
+      return {
+        error: new DendronError({
+          message: `Fname differs. Expected: "${expectedTree.fname}". Actual "${actualTree.fname}"`,
+        }),
+      };
+    }
+
+    expectedTree.children.sort((a, b) => a.fname.localeCompare(b.fname));
+    actualTree.children.sort((a, b) => a.fname.localeCompare(b.fname));
+
+    if (expectedTree.children.length !== actualTree.children.length) {
+      const expectedChildren = expectedTree.children.map(
+        (child) => child.fname
+      );
+      const actualChildren = actualTree.children.map((child) => child.fname);
+      return {
+        error: new DendronError({
+          message: `Mismatch at ${expectedTree.fname}'s children. Expected: "${expectedChildren}". Actual "${actualChildren}"`,
+        }),
+      };
+    }
+
+    for (const [idx, value] of expectedTree.children.entries()) {
+      const resp = this.validateTreeNodes(value, actualTree.children[idx]);
+      if (resp.error) {
+        return {
+          error: new DendronError({
+            message: `Mismatch at ${expectedTree.fname}'s children. ${resp.error.message}.`,
+          }),
+        };
+      }
+    }
+    return { data: undefined };
+  }
 }

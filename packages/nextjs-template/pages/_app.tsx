@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
+import DendronProvider from "../context/DendronProvider";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/assets-dendron/css/light.css";
@@ -88,20 +89,22 @@ function DendronApp({ Component, pageProps }: AppProps) {
   logger.info({ ctx: "render" });
 
   return (
-    <DendronLayout
-      {...noteData}
-      noteIndex={pageProps.noteIndex}
-      dendronRouter={dendronRouter}
-    >
-      <Head>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Component
-        {...pageProps}
-        notes={noteData}
+    <DendronProvider>
+      <DendronLayout
+        {...noteData}
+        noteIndex={pageProps.noteIndex}
         dendronRouter={dendronRouter}
-      />
-    </DendronLayout>
+      >
+        <Head>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Component
+          {...pageProps}
+          notes={noteData}
+          dendronRouter={dendronRouter}
+        />
+      </DendronLayout>
+    </DendronProvider>
   );
 }
 

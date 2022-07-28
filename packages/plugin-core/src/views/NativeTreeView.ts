@@ -117,9 +117,7 @@ export class NativeTreeView implements Disposable {
         maybeActiveEditor.document
       );
       if (activeNote !== undefined) {
-        treeView.reveal(activeNote, {
-          focus: false,
-        });
+        treeView.reveal(activeNote);
 
         // we want to force reveal the tree view but not steal focus
         // this yields focus back to the active editor

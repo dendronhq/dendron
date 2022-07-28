@@ -6,6 +6,7 @@ import DendronNotePage, {
   DendronNotePageProps,
 } from "../../components/DendronNotePage";
 import {
+  DendronNotePageParams,
   getConfig,
   getCustomHead,
   getNoteBody,
@@ -16,16 +17,21 @@ import {
 
 export default DendronNotePage;
 
-export const getStaticPaths: GetStaticPaths = getNotePaths;
+export const getStaticPaths: GetStaticPaths<DendronNotePageParams> =
+  getNotePaths;
 
-export const getStaticProps: GetStaticProps = async (
-  context: GetStaticPropsContext
+export const getStaticProps: GetStaticProps<
+  DendronNotePageProps,
+  DendronNotePageParams
+> = async (
+  { params },
 ) => {
-  const { params } = context;
   if (!params) {
     throw Error("params required");
   }
-  const id = params["id"];
+
+  const { id } = params;
+
   if (!_.isString(id)) {
     throw Error("id required");
   }
@@ -36,7 +42,7 @@ export const getStaticProps: GetStaticProps = async (
     const customHeadContent: string | null = await getCustomHead();
     const { notes, noteIndex } = noteData;
     const collectionChildren = note.custom?.has_collection
-      ? prepChildrenForCollection(note, notes, noteIndex)
+      ? prepChildrenForCollection(note, notes)
       : null;
     const props: DendronNotePageProps = {
       note,

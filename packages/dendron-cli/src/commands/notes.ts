@@ -193,7 +193,8 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     if (
       args.cmd === NoteCommands.GET ||
       args.cmd === NoteCommands.LOOKUP ||
-      args.cmd === NoteCommands.FIND
+      args.cmd === NoteCommands.FIND ||
+      args.cmd === NoteCommands.DELETE
     ) {
       args.newEngine = true;
     }
@@ -341,11 +342,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: query,
-            vault,
-            engine,
-          });
+          const note = (
+            await engine.findNotes({
+              fname: query,
+              vault,
+            })
+          )[0];
           if (note) {
             const resp = await engine.deleteNote(note.id);
             this.print(`deleted ${note.fname}`);

@@ -675,8 +675,11 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
 
+        // Since there are no more children, stubs should not exist
         expect(
-          (await engine.findNotes({ fname: "foo", vault: vault1 }))[0].stub
+          _.isUndefined(
+            (await engine.findNotes({ fname: "foo", vault: vault1 }))[0]
+          )
         ).toBeTruthy();
         expect(
           _.isUndefined(

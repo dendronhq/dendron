@@ -265,7 +265,7 @@ export class EngineAPIService
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
+  ): Promise<RespV2<EngineDeleteNotePayload>> {
     return this._internalEngine.deleteNote(id, opts);
   }
 

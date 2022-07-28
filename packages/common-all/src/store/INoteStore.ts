@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   DNoteLoc,
   FindNoteOpts,
   NoteProps,
@@ -47,7 +46,7 @@ export interface INoteStore<K> {
    * @param opts: NoteProps find criteria
    * @return List of NoteProps that matches criteria
    */
-  find(opts: FindNoteOpts): Promise<BulkResp<NoteProps[]>>;
+  find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>>;
 
   /**
    * Find NoteProps metadata by criteria. If no criteria is set, return empty array.
@@ -91,6 +90,16 @@ export interface INoteStore<K> {
    * @return original key
    */
   delete(key: K): Promise<RespV3<string>>;
+
+  /**
+   * Delete NoteProps metadata from storage layer for given key.
+   * If key does not exist, do nothing.
+   * Unlike {@link INoteStore.delete}, this will not touch the filesystem
+   *
+   * @param key: key of NoteProps to delete
+   * @return original key
+   */
+  deleteMetadata(key: K): Promise<RespV3<string>>;
 
   /**
    * Rename location of NoteProps

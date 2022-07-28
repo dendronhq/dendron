@@ -364,7 +364,7 @@ export class DendronEngineV2 implements DEngine {
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {
     const changed = await this.store.bulkWriteNotes(opts);
-    this.fuseEngine.updateNotesIndex(this.notes);
+    this.fuseEngine.replaceNotesIndex(this.notes);
     return changed;
   }
 
@@ -697,7 +697,7 @@ export class DendronEngineV2 implements DEngine {
         }
       })
     );
-    this.fuseEngine.updateNotesIndex(this.notes);
+    this.fuseEngine.replaceNotesIndex(this.notes);
   }
 
   async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
@@ -748,7 +748,7 @@ export class DendronEngineV2 implements DEngine {
     if (mode === "schema") {
       this.fuseEngine.updateSchemaIndex(this.schemas);
     } else {
-      this.fuseEngine.updateNotesIndex(this.notes);
+      this.fuseEngine.replaceNotesIndex(this.notes);
     }
   }
 
@@ -803,7 +803,7 @@ export class DendronEngineV2 implements DEngine {
       engine: this,
     });
     const out = await this.store.writeNote(noteWithLinks, opts);
-    this.fuseEngine.updateNotesIndex(this.notes);
+    this.fuseEngine.replaceNotesIndex(this.notes);
     return out;
   }
 

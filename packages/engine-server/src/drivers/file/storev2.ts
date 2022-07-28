@@ -228,10 +228,6 @@ export class FileStorage implements DStore {
   /**
    *
    * @param id id of note to be deleted
-   * @param opts EngineDeleteOpts the flag `replaceWithNewStub` is used
-   *             for a specific case where this method is called from
-   *             `renameNote`. TODO: remove this flag so that this is handled
-   *             automatically.
    * @returns
    */
   async deleteNote(
@@ -267,65 +263,60 @@ export class FileStorage implements DStore {
       await fs.unlink(fpath);
     }
 
-    // if have children, keep this node around as a stub
+    // if have children, create stub note with a new id
     if (!_.isEmpty(noteToDelete.children)) {
-      if (!opts?.replaceWithNewStub) {
-        this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
-        const prevNote = { ...noteToDelete };
-        noteToDelete.stub = true;
-        this.updateNote(noteToDelete);
-        out.push({ note: noteToDelete, status: "update", prevNote });
-      } else {
-        // the delete operation originated from rename.
-        // since _noteToDelete_ in this case is renamed and
-        // moved to another location, simply adding stub: true
-        // will not work.
-        // we need a fresh stub note that will fill in the old note's place.
-        const replacingStub = NoteUtils.create({
-          // the replacing stub should not keep the old note's body and link.
-          // otherwise, it will be captured while processing links and will
-          // fail because this note is not actually in the file system.
-          ..._.omit(noteToDelete, ["id", "links", "body"]),
-          stub: true,
+      const replacingStub = NoteUtils.create({
+        // the replacing stub should not keep the old note's body and link.
+        // otherwise, it will be captured while processing links and will
+        // fail because this note is not actually in the file system.
+        ..._.omit(noteToDelete, ["id", "links", "body"]),
+        stub: true,
+      });
+      this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
+      if (!noteToDelete.parent) {
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
-        this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
-        if (!noteToDelete.parent) {
-          throw DendronError.createFromStatus({
-            status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-          });
-        }
-        const parentNote: NoteProps | undefined =
-          this.notes[noteToDelete.parent];
-        if (parentNote) {
-          const parentNotePrev = { ...parentNote };
-          parentNote.children = _.reject(
-            parentNote.children,
-            (ent) => ent === noteToDelete.id
-          );
-          out.push({
-            note: parentNote,
-            status: "update",
-            prevNote: parentNotePrev,
-          });
-        } else {
-          this.logger.error({
-            ctx,
-            noteToDelete,
-            message: "Parent note missing from state",
-          });
-        }
-
-        NoteDictsUtils.delete(noteToDelete, {
-          notesById: this.notes,
-          notesByFname: this.noteFnames,
-        });
-        const changed = await this.writeNote(replacingStub);
-        out.push({ note: noteToDelete, status: "delete" });
-
-        if (changed.data) {
-          out = out.concat(changed.data);
-        }
       }
+      const parentNote: NoteProps | undefined = this.notes[noteToDelete.parent];
+      if (parentNote) {
+        const parentNotePrev = { ...parentNote };
+        DNodeUtils.removeChild(parentNote, noteToDelete);
+        DNodeUtils.addChild(parentNote, replacingStub);
+        out.push({
+          note: parentNote,
+          status: "update",
+          prevNote: parentNotePrev,
+        });
+      } else {
+        this.logger.error({
+          ctx,
+          noteToDelete,
+          message: "Parent note missing from state",
+        });
+      }
+
+      // Update children's parent id to new note
+      noteToDelete.children.forEach((child) => {
+        const childNote = this.notes[child];
+        const prevChildNoteState = { ...childNote };
+        childNote.parent = replacingStub.id;
+
+        // add one entry for each child updated
+        out.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      });
+
+      NoteDictsUtils.delete(noteToDelete, {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      });
+      await this.updateNote(replacingStub);
+      out.push({ note: replacingStub, status: "create" });
+      out.push({ note: noteToDelete, status: "delete" });
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -1004,7 +995,6 @@ export class FileStorage implements DStore {
       try {
         changedFromDelete = await this.deleteNote(oldNote.id, {
           metaOnly: true,
-          replaceWithNewStub: true,
         });
       } catch (err) {
         throw new DendronError({
@@ -1157,10 +1147,7 @@ export class FileStorage implements DStore {
 
       // first, update existing note's parent
       // so that it doesn't hold the deleted existing note's id as children
-      NoteUtils.deleteChildFromParent({
-        childToDelete: existingNote,
-        parent,
-      });
+      DNodeUtils.removeChild(parent, existingNote);
 
       // then update parent note of existing note
       // so that the newly created note is a child

@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   DendronCompositeError,
   DendronError,
   Disposable,
@@ -9,7 +8,6 @@ import {
   FindNoteOpts,
   genHash,
   IDataStore,
-  IDendronError,
   IFileStore,
   INoteStore,
   isNotUndefined,
@@ -59,6 +57,13 @@ export class NoteStore implements Disposable, INoteStore<string> {
     const metadata = await this.getMetadata(key);
     if (metadata.error) {
       return { error: metadata.error };
+    }
+
+    // If note is a stub, return stub note
+    if (metadata.data.stub) {
+      return {
+        data: { ...metadata.data, body: "" },
+      };
     }
     const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
     const nonMetadata = await this._fileStore.read(uri);
@@ -113,7 +118,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
   /**
    * See {@link INoteStore.find}
    */
-  async find(opts: FindNoteOpts): Promise<BulkResp<NoteProps[]>> {
+  async find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>> {
     const noteMetadata = await this.findMetaData(opts);
     if (noteMetadata.error) {
       return { error: new DendronCompositeError([noteMetadata.error]) };
@@ -122,18 +127,8 @@ export class NoteStore implements Disposable, INoteStore<string> {
     const responses = await Promise.all(
       noteMetadata.data.map((noteMetadata) => this.get(noteMetadata.id))
     );
-    const errors: IDendronError[] = [];
-    const data: NoteProps[] = [];
-    responses.forEach((resp) => {
-      if (resp.error) {
-        errors.push(resp.error);
-      } else {
-        data.push(resp.data);
-      }
-    });
     return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
-      data: data.filter(isNotUndefined),
+      data: responses.map((resp) => resp.data).filter(isNotUndefined),
     };
   }
 
@@ -159,11 +154,14 @@ export class NoteStore implements Disposable, INoteStore<string> {
       return { error: metaResp.error };
     }
 
-    const uri = NoteUtils.getURI({ note, wsRoot: this._wsRoot });
-    const content = NoteUtils.serialize(note, { excludeStub: true });
-    const writeResp = await this._fileStore.write(uri, content);
-    if (writeResp.error) {
-      return { error: writeResp.error };
+    // If note is a stub, do not write to file
+    if (!noteMeta.stub) {
+      const uri = NoteUtils.getURI({ note, wsRoot: this._wsRoot });
+      const content = NoteUtils.serialize(note, { excludeStub: true });
+      const writeResp = await this._fileStore.write(uri, content);
+      if (writeResp.error) {
+        return { error: writeResp.error };
+      }
     }
 
     return { data: key };
@@ -216,11 +214,43 @@ export class NoteStore implements Disposable, INoteStore<string> {
     if (metadata.error) {
       return { error: metadata.error };
     }
-    const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
-    const deleteResp = await this._fileStore.delete(uri);
-    if (deleteResp.error) {
-      return { error: deleteResp.error };
+    const resp = await this.deleteMetadata(key);
+    if (resp.error) {
+      return { error: resp.error };
     }
+
+    // If note is a stub, do not delete from file store since it won't exist
+    if (!metadata.data.stub) {
+      const uri = NoteUtils.getURI({
+        note: metadata.data,
+        wsRoot: this._wsRoot,
+      });
+      const deleteResp = await this._fileStore.delete(uri);
+      if (deleteResp.error) {
+        return { error: deleteResp.error };
+      }
+    }
+
+    return { data: key };
+  }
+
+  /**
+   * See {@link INoteStore.deleteMetadata}
+   */
+  async deleteMetadata(key: string): Promise<RespV3<string>> {
+    const metadata = await this.getMetadata(key);
+    if (metadata.error) {
+      return { error: metadata.error };
+    } else if (metadata.data.fname === "root") {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CANT_DELETE_ROOT,
+          message: `Cannot delete ${key}. Root notes cannot be deleted.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
+    }
+
     const metaResp = await this._metadataStore.delete(key);
     if (metaResp.error) {
       return { error: metaResp.error };

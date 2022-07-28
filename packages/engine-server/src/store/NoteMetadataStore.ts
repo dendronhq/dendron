@@ -54,27 +54,29 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
     const { fname, vault } = opts;
     let noteMetadata: NotePropsMeta[] = [];
+
     if (fname) {
       const cleanedFname = cleanName(fname);
-      const ids: string[] | undefined = this._noteIdsByFname[cleanedFname];
+      const ids = this._noteIdsByFname[cleanedFname];
       if (!ids) {
         return { data: [] };
       }
       noteMetadata = ids
         .map((id) => this._noteMetadataById[id])
         .filter(isNotUndefined);
-      if (vault) {
-        noteMetadata = noteMetadata.filter((note) =>
-          VaultUtils.isEqualV2(note.vault, vault)
-        );
+    }
+
+    if (vault) {
+      // If other properties are not set, then filter entire note set instead
+      if (!fname) {
+        noteMetadata = _.values(this._noteMetadataById);
       }
-      return { data: _.cloneDeep(noteMetadata) };
-    } else if (vault) {
-      noteMetadata = _.values(this._noteMetadataById).filter((note) =>
+      noteMetadata = noteMetadata.filter((note) =>
         VaultUtils.isEqualV2(note.vault, vault)
       );
     }
-    return { data: noteMetadata };
+
+    return { data: _.cloneDeep(noteMetadata) };
   }
 
   /**

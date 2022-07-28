@@ -52,7 +52,7 @@ async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
   const fuseEngine = new FuseEngine({ fuzzThreshold: 0.2 });
   const notePropsByIdDict: NotePropsByIdDict =
     await testDataToNotePropsByIdDict(testData);
-  await fuseEngine.updateNotesIndex(notePropsByIdDict);
+  await fuseEngine.replaceNotesIndex(notePropsByIdDict);
   return fuseEngine;
 }
 

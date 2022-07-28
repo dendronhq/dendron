@@ -230,10 +230,6 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
-        "command": "dendron.deleteNode",
-        "title": "Dendron: Delete Node"
-      },
-      {
         "command": "dendron.delete",
         "title": "Dendron: Delete"
       },
@@ -625,10 +621,6 @@
           "when": "false"
         },
         {
-          "command": "dendron.deleteNode",
-          "when": "dendron:pluginActive"
-        },
-        {
           "command": "dendron.delete",
           "when": "dendron:pluginActive"
         },
@@ -919,6 +911,10 @@
         {
           "command": "dendron.instrumentedWrapperCommand",
           "when": "false"
+        },
+        {
+          "command": "dendron.dev.validateEngine",
+          "when": "dendron:pluginActive"
         }
       ],
       "view/title": [
@@ -1022,7 +1018,7 @@
           "group": "2_workspace"
         },
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "navigation"
         }
@@ -1036,14 +1032,14 @@
       ],
       "editor/title": [
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "1_open"
         }

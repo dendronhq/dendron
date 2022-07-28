@@ -78,7 +78,10 @@ export default function DendronLayout(
 
   const engine = useEngineAppSelector((state) => state.engine);
   const config = engine.config;
-  const enableMermaid = config && ConfigUtils.getEnableMermaid(config, true);
+  const enableMermaid =
+    config &&
+    ConfigUtils.getEnableMermaid(config, true) &&
+    document.getElementsByClassName(".mermaid")?.length;
 
   return (
     <Layout

@@ -30,7 +30,7 @@ export class LockPreviewCommand extends BasicCommand<
     return;
   }
 
-  async execute(_opts: CommandOpts) {
+  async execute(_opts?: CommandOpts) {
     if (this._panel) {
       this._panel.lock();
     }

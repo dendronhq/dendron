@@ -786,7 +786,7 @@ export class DendronEngineV3 implements DEngine {
     let links;
     switch (type) {
       case "regular":
-        links = LinkUtils.findLinks({
+        links = LinkUtils.findLinksFromBody({
           note,
           engine: this,
         });
@@ -860,7 +860,6 @@ export class DendronEngineV3 implements DEngine {
           cache: notesCache,
           engine: this,
           logger: this.logger,
-          maxNoteLength: ConfigUtils.getWorkspace(this.config).maxNoteLength,
         }).parseFiles(maybeFiles.data, vault);
         if (error) {
           errors = errors.concat(error?.errors);

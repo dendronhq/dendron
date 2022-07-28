@@ -20,6 +20,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { TogglePreviewCommand } from "../commands/TogglePreview";
+import { TogglePreviewLock } from "../commands/TogglePreviewLock";
 import { PreviewPanelFactory } from "../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -149,11 +150,13 @@ export class TutorialInitializer
       await vscode.window.showTextDocument(rootUri);
 
       if (getStage() !== "test") {
+        const preview = PreviewPanelFactory.create(
+          ExtensionProvider.getExtension()
+        );
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(() => {
-          new TogglePreviewCommand(
-            PreviewPanelFactory.create(ExtensionProvider.getExtension())
-          ).execute();
+          new TogglePreviewCommand(preview).execute();
+          new TogglePreviewLock(preview).execute();
         }, 1000);
       }
     } else {

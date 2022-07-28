@@ -870,6 +870,10 @@ export type OnDidChangeActiveTextEditorData = {
    * If activeNote is defined, view will set that note as active note. Otherwise default to {@param note}
    */
   activeNote?: NoteProps;
+  /**
+   * if preview is locked
+   */
+  isLocked?: boolean;
 };
 
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;

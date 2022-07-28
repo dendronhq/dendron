@@ -10,7 +10,14 @@ import {
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { Disposable, TextEditor, TreeView, window } from "vscode";
+import {
+  Disposable,
+  TextEditor,
+  TreeView,
+  window,
+  commands,
+  Uri,
+} from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
@@ -110,7 +117,18 @@ export class NativeTreeView implements Disposable {
         maybeActiveEditor.document
       );
       if (activeNote !== undefined) {
-        treeView.reveal(activeNote);
+        treeView.reveal(activeNote, {
+          focus: false,
+        });
+
+        // we want to force reveal the tree view but not steal focus
+        // this yields focus back to the active editor
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const activeNotePath = NoteUtils.getFullPath({
+          note: activeNote,
+          wsRoot,
+        });
+        commands.executeCommand("vscode.open", Uri.parse(activeNotePath));
       }
     }
   }

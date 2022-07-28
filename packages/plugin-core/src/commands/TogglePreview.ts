@@ -33,7 +33,11 @@ export class TogglePreviewCommand extends InputArgCommand<
   }
 
   async sanityCheck(opts?: TogglePreviewCommandOpts) {
-    if (_.isUndefined(VSCodeUtils.getActiveTextEditor()) && _.isEmpty(opts)) {
+    if (
+      _.isUndefined(VSCodeUtils.getActiveTextEditor()) &&
+      _.isEmpty(opts) &&
+      !this._panel.isVisible()
+    ) {
       return "No note currently open, and no note selected to open.";
     }
     return;

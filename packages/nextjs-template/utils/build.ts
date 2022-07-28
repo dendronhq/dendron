@@ -4,10 +4,11 @@ import {
   ConfigUtils,
   IntermediateDendronConfig,
   NoteProps,
-  TreeMenu,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
+import { GetStaticPathsResult } from "next";
+import { ParsedUrlQuery } from "querystring";
 
 export * from "./fetchers";
 
@@ -36,23 +37,33 @@ export function getNotes() {
   if (_.isUndefined(_NOTES_CACHE)) {
     const dataDir = getDataDir();
     _NOTES_CACHE = fs.readJSONSync(
-      path.join(dataDir, "notes.json")
+      path.join(dataDir, "notes.json"),
     ) as NoteData;
   }
   return _NOTES_CACHE;
 }
 
+export interface DendronNotePageParams extends ParsedUrlQuery {
+  id: string;
+}
 /**
  * Generate URLs for all exported pages
+ * For use with getStaticProps
+ * https://nextjs.org/docs/basic-features/data-fetching/get-static-props
  * @returns
  */
-export function getNotePaths() {
+export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
   const { notes, noteIndex } = getNotes();
-  const ids = _.reject(_.keys(notes), (id) => id === noteIndex.id);
+  // filter out the index node
+  const paths = Object.keys(notes)
+    .filter((id) => id !== noteIndex.id)
+    .map(
+      (id) => {
+        return { params: { id } };
+      },
+    );
   return {
-    paths: _.map(ids, (id) => {
-      return { params: { id } };
-    }),
+    paths,
     fallback: false,
   };
 }
@@ -60,7 +71,7 @@ export function getNotePaths() {
 export function getNoteMeta(id: string) {
   const dataDir = getDataDir();
   return fs.readJSON(
-    path.join(dataDir, NOTE_META_DIR, `${id}.json`)
+    path.join(dataDir, NOTE_META_DIR, `${id}.json`),
   ) as Promise<NoteProps>;
 }
 

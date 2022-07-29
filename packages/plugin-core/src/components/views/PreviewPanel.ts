@@ -138,7 +138,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           this._onTextChanged = undefined;
         }
 
-        this._panel = undefined;
+        this.dispose();
       });
 
       this._panel.reveal(viewColumn, preserveFocus);
@@ -186,6 +186,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     );
   }
   dispose() {
+    this.unlock();
     if (this._panel) {
       this._panel.dispose();
       this._panel = undefined;

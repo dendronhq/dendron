@@ -1,5 +1,4 @@
 import {
-  asyncLoop,
   asyncLoopOneAtATime,
   DVault,
   NoteProps,
@@ -20,13 +19,6 @@ import {
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
-
-const stubVaultPick = (vaults: DVault[]) => {
-  const vault = _.find(vaults, { fsPath: "vault1" });
-  return sinon
-    .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
-    .returns(Promise.resolve(vault));
-};
 
 suite("LookupProviderV3 utility methods:", () => {
   describe(`shouldBubbleUpCreateNew`, () => {

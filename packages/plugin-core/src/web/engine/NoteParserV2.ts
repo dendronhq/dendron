@@ -399,7 +399,8 @@ export class NoteParserV2 {
     const note = string2Note({
       content,
       fname: cleanName(name),
-      vault: DNodeUtils.convertDVaultVersions(vault),
+      vault,
+      // vault: DNodeUtils.convertDVaultVersions(vault),
     });
     note.contentHash = sig;
     // Link/anchor errors should be logged but not interfere with rest of parsing

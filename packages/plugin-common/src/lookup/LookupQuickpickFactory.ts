@@ -30,6 +30,7 @@ export class LookupQuickpickFactory {
 
   public ShowLookup(): Promise<LookupAcceptPayload | undefined> {
     const qp = this.Create({
+      title: "Lookup Note",
       buttons: [],
       provider: new NoteLookupProvider(this._engine),
       wsRoot: this.wsRoot,
@@ -43,6 +44,8 @@ export class LookupQuickpickFactory {
             resolve({
               items: qp.selectedItems,
             });
+
+            qp.dispose();
           });
 
           // qp.hi;

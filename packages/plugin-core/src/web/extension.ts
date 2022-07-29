@@ -1,49 +1,28 @@
 import * as vscode from "vscode";
 // import { DENDRON_COMMANDS } from "../constants";
 import {
-  IReducedEngineAPIService,
-  LookupQuickpickFactory,
-  NoteMetadataStore,
-  NoteStore,
-  VSCodeFileStore,
-} from "@dendronhq/plugin-common";
-import { MockEngineAPIService } from "./test/helpers/MockEngineAPIService";
-import {
   CONSTANTS,
   DNodeUtils,
   DVaultUriVariant,
   IntermediateDendronConfig,
-  isNotUndefined,
-  StrictConfigV5,
 } from "@dendronhq/common-all";
+import {
+  IReducedEngineAPIService,
+  NoteMetadataStore,
+  NoteStore,
+  VSCodeFileStore,
+} from "@dendronhq/plugin-common";
 import YAML from "js-yaml";
-import _ from "lodash";
-import { Uri, WorkspaceFolder } from "vscode";
 import path from "path";
-import { URI, Utils } from "vscode-uri";
+import { Uri } from "vscode";
+import { Utils } from "vscode-uri";
+import { WebNoteLookupCmd } from "./commands/WebNoteLookupCmd";
 import { DendronEngineV3Web } from "./engine/DendronEngineV3Web";
-// import { TextDecoder } from "util";
-// import { TextDecoder } from "util";
-// import path from "path";
-// import { DendronEngineV3Web } from "@dendronhq/plugin-common";
-// import { DendronEngineV3Web } from "@dendronhq/engine-server";
-// import { ShowHelpCommand } from "../commands/ShowHelp";
-// import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-// import { Logger } from "../logger";
-// import { DWorkspace } from "../workspacev2";
+import { LookupQuickpickFactory } from "./commands/lookup/LookupQuickpickFactory";
+import { WSUtilsWeb } from "./utils/WSUtils";
 
 export async function activate(context: vscode.ExtensionContext) {
   vscode.window.showInformationMessage("Hello World");
-
-  context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor((activeEditor) => {
-      console.log("Inside callback");
-      vscode.window.showInformationMessage(
-        "Inside OnDidChangeActiveTextEditor"
-      );
-      console.log(`Scheme is ${activeEditor?.document.uri.scheme}`);
-    })
-  );
 
   const { workspaceFile, workspaceFolders } = vscode.workspace;
 
@@ -65,7 +44,9 @@ export async function activate(context: vscode.ExtensionContext) {
     const note = await engine.getNote("foo");
     console.log(`vaults are ${vaults.length} in length`);
 
-    _setupCommands({ context, wsRoot: wsRoot.fsPath, vaults });
+    _setupCommands({ context, wsRoot, vaults });
+
+    vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
   }
 }
 
@@ -78,7 +59,7 @@ async function _setupCommands({
   wsRoot,
   vaults,
 }: {
-  wsRoot: string;
+  wsRoot: Uri;
   context: vscode.ExtensionContext;
   vaults: DVaultUriVariant[];
 }) {
@@ -86,20 +67,29 @@ async function _setupCommands({
 
   const key = "dendron.lookupNote";
 
+  const engine = await getWebEngine(wsRoot.fsPath, vaults);
+
+  const wsUtils = new WSUtilsWeb(
+    engine,
+    wsRoot,
+    vaults
+    // vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault))
+  );
+
+  const factory = new LookupQuickpickFactory(
+    engine,
+    wsRoot.fsPath,
+    vaults,
+    // vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault)),
+    wsUtils
+  );
+
+  const cmd = new WebNoteLookupCmd(factory, wsRoot, engine);
+
   if (!existingCommands.includes(key))
     context.subscriptions.push(
       vscode.commands.registerCommand(key, async (_args: any) => {
-        const engine = await getWebEngine(wsRoot, vaults);
-
-        // debugger;
-        const factory = new LookupQuickpickFactory(
-          engine,
-          wsRoot,
-          vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault))
-        );
-        // const factory = new LookupQuickpickFactory(new MockEngineAPIService());
-        factory.ShowLookup();
-        // qp.show();
+        await cmd.run();
       })
     );
 }
@@ -245,7 +235,7 @@ export async function getWSRoot(): Promise<vscode.Uri | undefined> {
 // }
 
 async function readYAML(path: Uri, overwriteDuplicate?: boolean): Promise<any> {
-  // @ts-ignore - this needs to use browser's TextDecoder, not an import from node utils
+  // @ts-ignore
   const textDecoder = new TextDecoder();
   const file = await vscode.workspace.fs.readFile(path);
   // file.

@@ -8,6 +8,7 @@ import { PreviewProxy } from "../components/views/PreviewProxy";
 export class MockPreviewProxy implements PreviewProxy {
   _isVisible: boolean = false;
   _isOpen: boolean = false;
+  _isLocked: boolean = false;
   async show(_note?: NoteProps): Promise<void> {
     this._isVisible = true;
     this._isOpen = true;
@@ -21,5 +22,14 @@ export class MockPreviewProxy implements PreviewProxy {
   }
   isOpen(): boolean {
     return this._isOpen;
+  }
+  lock(): void {
+    this._isLocked = true;
+  }
+  unlock(): void {
+    this._isLocked = false;
+  }
+  isLocked(): boolean {
+    return this._isLocked;
   }
 }

@@ -22,12 +22,15 @@ import {
 } from "@dendronhq/common-frontend";
 import { Layout, Button } from "antd";
 import LockFilled from "@ant-design/icons/lib/icons/LockFilled";
+import UnlockOutlined from "@ant-design/icons/lib/icons/UnlockOutlined";
 import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import "../styles/scss/main.scss";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
+import type { SyntheticEvent } from "react";
+
 const { Content } = Layout;
 
 const { useEngineAppSelector } = engineHooks;
@@ -179,27 +182,39 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     }
   });
 
-  const isLocked = props.ide.isLocked;
+  const handleLock = (event: SyntheticEvent<HTMLElement>) => {
+    if (!(event.target instanceof HTMLElement)) {
+      return;
+    }
 
-  const handleLock = () => {
+    const _islocked = event.target.dataset.islocked === "true";
+
     postVSCodeMessage({
-      type: NoteViewMessageEnum.onUnlock,
+      type: _islocked
+        ? NoteViewMessageEnum.onUnlock
+        : NoteViewMessageEnum.onLock,
       data: {},
       source: DMessageSource.webClient,
     });
   };
 
+  const isLocked = props.ide.isLocked;
+
   return (
     <>
       <Component {...props} />
-      {isLocked && (
-        <Button
-          shape="circle"
-          icon={<LockFilled />}
-          onClick={handleLock}
-          style={{ position: "absolute", top: 33, right: 33 }}
-        />
-      )}
+      <Button
+        data-islocked={isLocked}
+        shape="circle"
+        icon={isLocked ? <LockFilled /> : <UnlockOutlined />}
+        onClick={handleLock}
+        style={{
+          position: "absolute",
+          top: 33,
+          right: 33,
+          opacity: isLocked ? 1 : 0.5,
+        }}
+      />
     </>
   );
 }

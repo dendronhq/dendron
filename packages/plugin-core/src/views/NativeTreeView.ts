@@ -10,14 +10,7 @@ import {
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import {
-  Disposable,
-  TextEditor,
-  TreeView,
-  window,
-  commands,
-  Uri,
-} from "vscode";
+import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
@@ -75,17 +68,31 @@ export class NativeTreeView implements Disposable {
     >;
 
     result.then(() => {
-      this.treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
+      const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
         treeDataProvider,
         showCollapseAll: true,
       });
+
+      treeView.onDidChangeVisibility(async (e) => {
+        // when the tree view is first shown ever during the session,
+        // VSCode fires a tree view `.reveal` internally to initially load in the nodes.
+        // when this is happening, if we trigger a `reveal` again, there will be an error.
+        // onDidChangeVisibility doesn't seem to wait for the reveal to finish, so
+        // we have to waitfor the initial load to finish before triggering `reveal`.
+        // It seems like setting a very short timeout is enough to this cooperate with VSCode.
+        setTimeout(() => {
+          if (e.visible) {
+            this.forceReveal({ treeView });
+          }
+        }, 0);
+      });
+
+      this.treeView = treeView;
 
       this._handler = window.onDidChangeActiveTextEditor(
         this.onOpenTextDocument,
         this
       );
-
-      this.forceReveal({ treeView: this.treeView });
     });
   }
 
@@ -118,15 +125,6 @@ export class NativeTreeView implements Disposable {
       );
       if (activeNote !== undefined) {
         treeView.reveal(activeNote);
-
-        // we want to force reveal the tree view but not steal focus
-        // this yields focus back to the active editor
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const activeNotePath = NoteUtils.getFullPath({
-          note: activeNote,
-          wsRoot,
-        });
-        commands.executeCommand("vscode.open", Uri.parse(activeNotePath));
       }
     }
   }

@@ -13,6 +13,11 @@ export type OnWorkspaceCreationOpts = {
  */
 export type WorkspaceInitializer = {
   /**
+   * name of the workspace initializer
+   */
+  name: string;
+
+  /**
    * Create the vaults to be added to the workspace being initialized.
    */
   createVaults?(wsVault?: DVault): { wsVault?: DVault; additionalVaults?: [] };

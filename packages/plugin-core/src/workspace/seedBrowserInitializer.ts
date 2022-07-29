@@ -15,6 +15,8 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
  * Seed Browser Workspace Initializer - Open the Seed Browser
  */
 export class SeedBrowserInitializer implements WorkspaceInitializer {
+  name = "seedBrowser";
+
   /**
    * Launch Seed Browser Webview
    * @param _opts

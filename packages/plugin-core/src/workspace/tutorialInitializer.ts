@@ -43,6 +43,8 @@ export class TutorialInitializer
   extends BlankInitializer
   implements WorkspaceInitializer
 {
+  name = "tutorial";
+
   static getTutorialType() {
     if (isABTest(CURRENT_TUTORIAL_TEST)) {
       return CURRENT_TUTORIAL_TEST.getUserGroup(

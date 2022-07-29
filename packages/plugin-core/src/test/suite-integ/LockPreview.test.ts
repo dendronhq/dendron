@@ -57,9 +57,9 @@ suite("GIVEN LockPreview", function () {
         beforeEach(async () => {
           await cmd.run();
         });
-        test("THEN preview should stay locked and pristine", async () => {
+        test("THEN preview should toggle to unlocked", async () => {
           await cmd.run();
-          expect(previewPanel.isLockedAndDirty()).toBeFalsy();
+          expect(previewPanel.isLocked()).toBeFalsy();
         });
 
         describe("AND changing note", () => {

@@ -1,3 +1,4 @@
+import { ExtensionProvider } from "../ExtensionProvider";
 import { PreviewProxy } from "../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
@@ -24,15 +25,20 @@ export class LockPreviewCommand extends BasicCommand<
     if (!this._panel || !this._panel.isVisible()) {
       return "No preview currently open";
     }
-    if (this._panel && this._panel.isLocked()) {
-      return "Preview is already locked";
-    }
     return;
   }
 
   async execute(_opts?: CommandOpts) {
     if (this._panel) {
-      this._panel.lock();
+      if (this._panel.isLocked()) {
+        this._panel.unlock();
+        const note = ExtensionProvider.getWSUtils().getActiveNote();
+        if (note) {
+          this._panel.show(note);
+        }
+      } else {
+        this._panel.lock();
+      }
     }
 
     return {};

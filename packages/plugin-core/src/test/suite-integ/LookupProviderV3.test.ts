@@ -1,18 +1,16 @@
 import {
   asyncLoopOneAtATime,
-  DVault,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
-import _, { last } from "lodash";
+import _ from "lodash";
 import { beforeEach, describe, it, suite } from "mocha";
 import sinon from "sinon";
 import { ExtensionContext, Selection } from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
-  PickerUtilsV2,
   shouldBubbleUpCreateNew,
   sortBySimilarity,
 } from "../../components/lookup/utils";

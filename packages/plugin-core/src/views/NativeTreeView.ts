@@ -80,6 +80,7 @@ export class NativeTreeView implements Disposable {
         // onDidChangeVisibility doesn't seem to wait for the reveal to finish, so
         // we have to waitfor the initial load to finish before triggering `reveal`.
         // It seems like setting a very short timeout is enough to this cooperate with VSCode.
+        // TODO: Remove timeout once this bug is resolved.
         setTimeout(() => {
           if (e.visible) {
             this.forceReveal({ treeView });

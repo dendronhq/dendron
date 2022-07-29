@@ -11,9 +11,9 @@ import {
   TransformedQueryString,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import stringSimilarity from "string-similarity";
 import { window } from "vscode";
-import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 import { ILookupProvider, provideItemsProps } from "./ILookupProvider";
 
 // type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];

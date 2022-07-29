@@ -26,7 +26,7 @@ export enum DVaultSync {
   SYNC = "sync",
 }
 
-export type DVaultUriVariant = Omit<DVault, "fsPath"> & {
+export type DVaultUriVariant = DVault & {
   path: URI;
 };
 

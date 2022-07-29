@@ -896,7 +896,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Toggle Preview`,
     icon: `$(open-preview)`,
     keybindings: {
-      windows: "ctrl+k v",
+      key: "ctrl+k v",
       mac: "cmd+ctrl+p",
       when: "dendron:pluginActive",
     },

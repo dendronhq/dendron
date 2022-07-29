@@ -230,10 +230,6 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
-        "command": "dendron.deleteNode",
-        "title": "Dendron: Delete Node"
-      },
-      {
         "command": "dendron.delete",
         "title": "Dendron: Delete"
       },
@@ -619,10 +615,6 @@
         {
           "command": "dendron.copyToClipboard",
           "when": "false"
-        },
-        {
-          "command": "dendron.deleteNode",
-          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.delete",
@@ -1292,7 +1284,7 @@
       },
       {
         "command": "dendron.togglePreview",
-        "windows": "ctrl+k v",
+        "key": "ctrl+k v",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"
       }

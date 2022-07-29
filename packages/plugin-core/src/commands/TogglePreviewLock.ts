@@ -8,12 +8,12 @@ type CommandInput = {};
 type CommandOpts = {};
 type CommandOutput = CommandOpts;
 
-export class LockPreviewCommand extends BasicCommand<
+export class TogglePreviewLock extends BasicCommand<
   CommandOpts,
   CommandOutput,
   CommandInput
 > {
-  key = DENDRON_COMMANDS.LOCK_PREVIEW.key;
+  key = DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key;
   _panel: PreviewProxy | undefined;
 
   constructor(previewPanel: PreviewProxy | undefined) {

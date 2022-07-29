@@ -902,9 +902,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: "dendron:pluginActive",
   },
-  LOCK_PREVIEW: {
-    key: "dendron.lockPreview",
-    title: `${CMD_PREFIX} Lock Preview`,
+  TOGGLE_PREVIEW_LOCK: {
+    key: "dendron.togglePreviewLock",
+    title: `${CMD_PREFIX} Toggle Preview Lock`,
     icon: `$(lock)`,
     when: "dendron:pluginActive",
   },

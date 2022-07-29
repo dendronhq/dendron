@@ -504,7 +504,7 @@
       {
         "command": "dendron.lockPreview",
         "title": "Dendron: Lock Preview",
-        "icon": "$(open-preview)"
+        "icon": "$(lock)"
       },
       {
         "command": "dendron.pasteFile",

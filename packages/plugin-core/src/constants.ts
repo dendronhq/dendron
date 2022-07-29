@@ -905,7 +905,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   LOCK_PREVIEW: {
     key: "dendron.lockPreview",
     title: `${CMD_PREFIX} Lock Preview`,
-    icon: `$(open-preview)`,
+    icon: `$(lock)`,
     when: "dendron:pluginActive",
   },
   PASTE_FILE: {

@@ -78,6 +78,7 @@ export class WebViewCommonUtils {
 
       .main-content ul {
         list-style: unset;
+        list-style-type: disc;
       }
 
       body, .ant-layout {

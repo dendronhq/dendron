@@ -492,16 +492,21 @@
         "title": "Dendron: Show Help"
       },
       {
-        "command": "dendron.showNoteGraphView",
+        "command": "dendron.showNoteGraph",
         "title": "Dendron: Show Note Graph"
       },
       {
-        "command": "dendron.showSchemaGraphView",
+        "command": "dendron.showSchemaGraph",
         "title": "Dendron: Show Schema Graph"
       },
       {
         "command": "dendron.showLegacyPreview",
         "title": "Dendron: Show Preview (legacy)"
+      },
+      {
+        "command": "dendron.showPreview",
+        "title": "Dendron: Show Preview",
+        "icon": "$(open-preview)"
       },
       {
         "command": "dendron.togglePreview",
@@ -592,10 +597,6 @@
       {
         "command": "dendron.instrumentedWrapperCommand",
         "title": "Dendron: Instrumented Wrapper Command"
-      },
-      {
-        "command": "dendron.dev.validateEngine",
-        "title": "Dendron:Dev: Validate Engine"
       }
     ],
     "menus": {
@@ -895,6 +896,10 @@
         {
           "command": "dendron.showLegacyPreview",
           "when": "dendron:pluginActive && dendron:hasLegacyPreview"
+        },
+        {
+          "command": "dendron.showPreview",
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.togglePreview",

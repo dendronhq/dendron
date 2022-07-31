@@ -73,6 +73,7 @@ import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
 import { URI } from "vscode-uri";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -642,6 +643,12 @@ export class FileStorage implements DStore {
       };
     }
     const noteFiles = out.data;
+
+    // instantiate so we can use singleton later
+    if (this.config.workspace.metadataStore === "sqlite") {
+      // eslint-disable-next-line no-new
+      new SQLiteMetadataStore({ wsRoot: this.wsRoot });
+    }
 
     const {
       notesById,

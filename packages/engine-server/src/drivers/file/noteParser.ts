@@ -9,20 +9,20 @@ import {
   ErrorUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  genHash,
   IDendronError,
   isNotUndefined,
+  NoteChangeEntry,
+  NoteDicts,
   NoteDictsUtils,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
-  NoteDicts,
   NotesCacheEntry,
   NotesCacheEntryMap,
   NoteUtils,
   SchemaUtils,
   stringifyError,
-  NoteChangeEntry,
-  genHash,
   string2Note,
   globMatch,
 } from "@dendronhq/common-all";
@@ -33,6 +33,7 @@ import path from "path";
 import { createCacheEntry, EngineUtils } from "../../utils";
 import { ParserBase } from "./parseBase";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -79,7 +80,10 @@ export class NoteParser extends ParserBase {
 
   async parseFiles(
     allPaths: string[],
-    vault: DVault
+    vault: DVault,
+    opts?: {
+      useSQLiteMetadataStore?: boolean;
+    }
   ): Promise<{
     notesById: NotePropsByIdDict;
     cacheUpdates: NotesCacheEntryMap;
@@ -271,6 +275,9 @@ export class NoteParser extends ParserBase {
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
+    if (opts?.useSQLiteMetadataStore && !SQLiteMetadataStore.isInitialized()) {
+      await SQLiteMetadataStore.initializeMetadata(notesById);
+    }
     return { notesById, cacheUpdates, errors };
   }
 

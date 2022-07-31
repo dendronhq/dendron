@@ -659,7 +659,9 @@ export class FileStorage implements DStore {
       cache: notesCache,
       engine: this.engine,
       logger: this.logger,
-    }).parseFiles(noteFiles, vault);
+    }).parseFiles(noteFiles, vault, {
+      useSQLiteMetadataStore: this.config.workspace.metadataStore === "sqlite",
+    });
 
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });

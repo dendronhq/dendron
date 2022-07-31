@@ -17,7 +17,7 @@ export class SQLiteMetadataStore {
     _prisma = new PrismaClient({
       datasources: {
         db: {
-          url: `file://${wsRoot}`,
+          url: `file://${wsRoot}/metadata.db`,
         },
       },
     });

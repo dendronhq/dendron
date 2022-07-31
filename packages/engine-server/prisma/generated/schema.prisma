@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "darwin"]
+  output = "./generated"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = ""
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model notes {
+  fname   String?
+  id      String  @id
+  title   String?
+  vault   String?
+  updated Int?
+  stub    Boolean?
+
+  @@index([id], map: "idx_notes_id")
+}

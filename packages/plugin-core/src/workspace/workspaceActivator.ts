@@ -362,7 +362,7 @@ type WorkspaceActivatorOpts = {
   workspaceInitializer?: WorkspaceInitializer;
 };
 
-type WorkspaceActivatorSkipOpts = {
+export type WorkspaceActivatorSkipOpts = {
   opts?: Partial<{
     /**
      * Skip setting up language features (eg. code action providesr)
@@ -588,12 +588,6 @@ export class WorkspaceActivator {
         context,
         providerConstructor,
       });
-
-      // force focus the tree view if we are initializing a tutorial workspace.
-      const isTutorialWorkspace = workspaceInitializer?.name === "tutorial";
-      if (isTutorialWorkspace) {
-        vscode.commands.executeCommand("dendron.treeView.focus");
-      }
     }
 
     // Add the current workspace to the recent workspace list. The current
@@ -601,6 +595,12 @@ export class WorkspaceActivator {
     // folder (Native Workspace)
     const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
     MetadataService.instance().addToRecentWorkspaces(workspace);
+
+    if (workspaceInitializer?.onWorkspaceActivate) {
+      workspaceInitializer.onWorkspaceActivate({
+        skipOpts: { opts },
+      });
+    }
     return { data: true };
   }
 

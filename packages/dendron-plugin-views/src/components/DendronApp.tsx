@@ -182,29 +182,28 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     }
   });
 
+  const isLocked = props.ide.isLocked;
+
   const handleLock = (event: SyntheticEvent<HTMLElement>) => {
-    if (!(event.target instanceof HTMLElement)) {
+    if (!(event.currentTarget instanceof HTMLElement)) {
       return;
     }
 
-    const _islocked = event.target.dataset.islocked === "true";
-
     postVSCodeMessage({
-      type: _islocked
+      type: isLocked
         ? NoteViewMessageEnum.onUnlock
         : NoteViewMessageEnum.onLock,
-      data: {},
+      data: {
+        fName: props.ide.noteActive?.fname,
+      },
       source: DMessageSource.webClient,
     });
   };
-
-  const isLocked = props.ide.isLocked;
 
   return (
     <>
       <Component {...props} />
       <Button
-        data-islocked={isLocked}
         shape="circle"
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}
         onClick={handleLock}

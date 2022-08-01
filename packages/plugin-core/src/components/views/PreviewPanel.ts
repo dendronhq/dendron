@@ -152,13 +152,20 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
-  lock() {
+  lock(fileName?: string) {
     const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-    if (activeTextEditor) {
-      this._lockedEditorFileName = activeTextEditor?.document.fileName;
+    const lockedEditorFileName =
+      fileName ?? activeTextEditor?.document.fileName;
+    if (lockedEditorFileName) {
+      this._lockedEditorFileName = lockedEditorFileName;
       this.sendLockMessage(this._panel, this.isLocked());
     } else {
-      Logger.error({ ctx: "lock preview", msg: "No active texteditor found" });
+      Logger.error({
+        ctx: "lock preview",
+        msg: activeTextEditor
+          ? "Did not find note to lock."
+          : "No active texteditor found.",
+      });
     }
   }
   unlock() {
@@ -252,8 +259,10 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           break;
         }
         case NoteViewMessageEnum.onLock: {
+          const { data } = msg;
           Logger.debug({ ctx, "msg.type": "onLock" });
-          this.lock();
+          // TODO data.fName points only to the fileName but not the whole filePath. use note id instead.
+          this.lock(data.fName);
           break;
         }
         case NoteViewMessageEnum.onUnlock: {

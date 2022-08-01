@@ -15,6 +15,7 @@ suite("CreateNoteWithTraitCommand tests", () => {
     "GIVEN a Note Trait",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 1e4,
     },
     (ctx) => {
       describe(`WHEN creating a note with that trait applied`, () => {
@@ -28,7 +29,7 @@ suite("CreateNoteWithTraitCommand tests", () => {
 
         test(`THEN expect the title to have been modified AND have the foo template applied`, async () => {
           const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const testTrait = new TestTrait();
+          const testTrait = new TestTrait("foo");
 
           const mockExtension = new MockDendronExtension({
             engine,
@@ -64,6 +65,44 @@ suite("CreateNoteWithTraitCommand tests", () => {
 
           expect(props?.title).toEqual(testTrait.TEST_TITLE_MODIFIER);
           expect(props?.body).toEqual("foo body");
+        });
+        test(`WHEN cross vault template is given, THEN correct template should be applied`, async () => {
+          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const testTrait = new TestTrait("dendron://vault1/bar");
+          const mockExtension = new MockDendronExtension({
+            engine,
+            wsRoot,
+            context: ctx,
+            vaults,
+          });
+
+          const cmd = new CreateNoteWithTraitCommand(
+            mockExtension,
+            "test-create-note-with-trait",
+            testTrait
+          );
+
+          await cmd.execute({ fname: "xvault", vaultOverride: vaults[1] });
+
+          const expectedFName = path.join(
+            wsRoot,
+            VaultUtils.getRelPath(vaults[1]),
+            "xvault.md"
+          );
+
+          expect(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath
+          ).toEqual(expectedFName);
+
+          const props = (
+            await engine.findNotes({
+              fname: "xvault",
+              vault: vaults[1],
+            })
+          )[0];
+
+          expect(props?.title).toEqual(testTrait.TEST_TITLE_MODIFIER);
+          expect(props?.body).toEqual("bar body");
         });
       });
     }

@@ -393,6 +393,43 @@ export class LinkUtils {
       position: link.position,
     };
   }
+
+  /**
+   * Get links from note body while maintaining existing backlinks
+   */
+  static findLinks({
+    note,
+    engine,
+    type,
+    filter,
+  }: {
+    note: NoteProps;
+    engine: DEngineClient;
+    filter?: LinkFilter;
+    type: "regular" | "candidate";
+  }): DLink[] {
+    let links = [];
+    switch (type) {
+      case "regular":
+        links = LinkUtils.findLinksFromBody({
+          note,
+          engine,
+          filter,
+        });
+        break;
+      case "candidate":
+        links = LinkUtils.findLinkCandidates({
+          note,
+          engine,
+        });
+        break;
+      default:
+        assertUnreachable(type);
+    }
+    const backlinks = note.links.filter((link) => link.type === "backlink");
+    return links.concat(backlinks);
+  }
+
   /**
    * Get all links from the note body
    * Currently, just look for wiki links
@@ -402,7 +439,7 @@ export class LinkUtils {
    * - type: filter by {@link DendronASTTypes}
    * - loc: filter by {@link DLoc}
    */
-  static findLinks({
+  static findLinksFromBody({
     note,
     engine,
     filter,

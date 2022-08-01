@@ -423,7 +423,7 @@ export class WorkspaceWatcher {
           fname: newFname,
           vaultName: VaultUtils.getName(newVault),
         },
-        isEventSourceEngine: false,
+        metaOnly: true,
       };
       AnalyticsUtils.track(ContextualUIEvents.ContextualUIRename);
       const engine = this._extension.getEngine();

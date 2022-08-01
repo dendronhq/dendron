@@ -415,7 +415,7 @@ export class MoveHeaderCommand extends BasicCommand<
     origin: NoteProps,
     anchorNamesToUpdate: string[]
   ) {
-    const links = LinkUtils.findLinks({
+    const links = LinkUtils.findLinksFromBody({
       note,
       engine,
     }).filter((link) => {

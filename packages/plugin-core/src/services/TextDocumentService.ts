@@ -7,6 +7,7 @@ import {
 import { DLogger, string2Note } from "@dendronhq/common-server";
 import {
   DendronASTDest,
+  EngineUtils,
   MDUtilsV5,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
@@ -82,7 +83,7 @@ export class TextDocumentService implements ITextDocumentService {
     this._textDocumentEventHandle.dispose();
   }
 
-  private async updateNoteContents(opts: {
+  private updateNoteContents(opts: {
     oldNote: NoteProps;
     content: string;
     fmChangeOnly: boolean;
@@ -108,12 +109,10 @@ export class TextDocumentService implements ITextDocumentService {
         keepBackLinks: true,
       },
     });
-    note = await NoteUtils.updateNoteMetadata({
+    EngineUtils.refreshNoteLinksAndAnchors({
       note,
       fmChangeOnly,
       engine: this._extension.getEngine(),
-      enableLinkCandidates:
-        this._extension.workspaceService?.config.dev?.enableLinkCandidates,
     });
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
@@ -167,7 +166,7 @@ export class TextDocumentService implements ITextDocumentService {
       return noteHydrated;
     }
 
-    const props = await this.updateNoteContents({
+    const props = this.updateNoteContents({
       oldNote: noteHydrated,
       content,
       fmChangeOnly: false,

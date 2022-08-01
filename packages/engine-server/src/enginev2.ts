@@ -1,5 +1,4 @@
 import {
-  assertUnreachable,
   BulkWriteNotesOpts,
   Cache,
   ConfigUtils,
@@ -174,33 +173,25 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
-   * TODO: Fix backlinks not being updated when adding new reference to another note or renaming old reference
+   * @deprecated: Use {@link LinkUtils.findLinks}
    */
   async getLinks(
     opts: Optional<GetLinksRequest, "ws">
   ): Promise<GetNoteLinksPayload> {
     const { type, note } = opts;
-    let links;
-    switch (type) {
-      case "regular":
-        links = LinkUtils.findLinks({
-          note,
-          engine: this,
-        });
-        break;
-      case "candidate":
-        links = LinkUtils.findLinkCandidates({
-          note,
-          engine: this,
-        });
-        break;
-      default:
-        assertUnreachable(type);
-    }
-    const backlinks = note.links.filter((link) => link.type === "backlink");
-    return { data: links.concat(backlinks), error: null };
+    return {
+      data: LinkUtils.findLinks({
+        note,
+        type,
+        engine: this,
+      }),
+      error: null,
+    };
   }
 
+  /**
+   * @deprecated: Use {@link AnchorUtils.findAnchors}
+   */
   async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
     return {
       data: AnchorUtils.findAnchors({
@@ -689,11 +680,11 @@ export class DendronEngineV2 implements DEngine {
             notesByFname: this.noteFnames,
           });
         } else {
-          const note = await EngineUtils.refreshNoteLinksAndAnchors({
+          EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
           });
-          this.store.updateNote(note);
+          this.store.updateNote(ent.note);
         }
       })
     );
@@ -728,12 +719,12 @@ export class DendronEngineV2 implements DEngine {
     this.logger.debug({ ctx, msg: "enter", note: NoteUtils.toNoteLoc(note) });
     const engine = this as DEngineClient;
     try {
-      const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+      EngineUtils.refreshNoteLinksAndAnchors({
         note,
         engine,
       });
       this.logger.debug({ ctx, msg: "post:refreshed note links and anchors" });
-      const out = this.store.updateNote(noteWithLinks, opts);
+      const out = this.store.updateNote(note, opts);
       this.logger.debug({ ctx, msg: "post:updateNote" });
       await this.updateIndex("note");
       this.logger.debug({ ctx, msg: "post:updateIndex" });
@@ -798,11 +789,11 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+    EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
     });
-    const out = await this.store.writeNote(noteWithLinks, opts);
+    const out = await this.store.writeNote(note, opts);
     this.fuseEngine.replaceNotesIndex(this.notes);
     return out;
   }

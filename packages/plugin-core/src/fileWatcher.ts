@@ -11,6 +11,7 @@ import {
 import { file2Note } from "@dendronhq/common-server";
 import {
   EngineFileWatcher,
+  EngineUtils,
   FileWatcherAdapter,
   HistoryService,
 } from "@dendronhq/engine-server";
@@ -134,7 +135,7 @@ export class FileWatcher {
         //TODO recognise vscode's create new file menu option to create a note.
       }
 
-      note = await NoteUtils.updateNoteMetadata({
+      EngineUtils.refreshNoteLinksAndAnchors({
         note,
         fmChangeOnly: false,
         engine,

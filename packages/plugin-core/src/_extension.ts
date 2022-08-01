@@ -581,6 +581,8 @@ async function _setupCommands({
       );
     }
 
+    const preview = PreviewPanelFactory.create(ext);
+
     if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW.key)) {
       context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -589,9 +591,7 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
-            await new TogglePreviewCommand(PreviewPanelFactory.create(ext)).run(
-              args
-            );
+            await new TogglePreviewCommand(preview).run(args);
           })
         )
       );
@@ -605,7 +605,7 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
-            await new TogglePreviewLock(PreviewPanelFactory.preview).run(args);
+            await new TogglePreviewLock(preview).run(args);
           })
         )
       );

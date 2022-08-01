@@ -30,6 +30,7 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
+import { WorkspaceActivatorSkipOpts } from "./workspaceActivator";
 import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
@@ -184,6 +185,16 @@ export class TutorialInitializer
       // This will only show if the user indicated they've used Obsidian in 'Prior Tools'
       toaster.showSpecificToast(new ObsidianImportTip());
       this.triedToShowImportToast = true;
+    }
+  }
+
+  async onWorkspaceActivate(opts: { skipOpts: WorkspaceActivatorSkipOpts }) {
+    const { skipOpts } = opts;
+    if (skipOpts.opts?.skipTreeView) {
+      // for tutorial workspaces,
+      // we want the tree view to be focused
+      // so that new users can discover the tree view feature.
+      vscode.commands.executeCommand("dendron.treeView.focus");
     }
   }
 }

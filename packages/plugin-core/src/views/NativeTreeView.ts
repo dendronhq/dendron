@@ -68,17 +68,32 @@ export class NativeTreeView implements Disposable {
     >;
 
     result.then(() => {
-      this.treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
+      const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
         treeDataProvider,
         showCollapseAll: true,
       });
+
+      treeView.onDidChangeVisibility(async (e) => {
+        // when the tree view is first shown ever during the session,
+        // VSCode fires a tree view `.reveal` internally to initially load in the nodes.
+        // when this is happening, if we trigger a `reveal` again, there will be an error.
+        // onDidChangeVisibility doesn't seem to wait for the reveal to finish, so
+        // we have to waitfor the initial load to finish before triggering `reveal`.
+        // It seems like setting a very short timeout is enough to this cooperate with VSCode.
+        // TODO: Remove timeout once this bug is resolved.
+        setTimeout(() => {
+          if (e.visible) {
+            this.forceReveal({ treeView });
+          }
+        }, 0);
+      });
+
+      this.treeView = treeView;
 
       this._handler = window.onDidChangeActiveTextEditor(
         this.onOpenTextDocument,
         this
       );
-
-      this.forceReveal({ treeView: this.treeView });
     });
   }
 

@@ -42,6 +42,7 @@ import { WSUtils } from "../WSUtils";
 import { DendronCodeWorkspace } from "./codeWorkspace";
 import { DendronNativeWorkspace } from "./nativeWorkspace";
 import { WorkspaceInitFactory } from "./WorkspaceInitFactory";
+import { WorkspaceInitializer } from "./workspaceInitializer";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -358,9 +359,10 @@ type WorkspaceActivatorOpts = {
   ext: IDendronExtension;
   context: vscode.ExtensionContext;
   wsRoot: string;
+  workspaceInitializer?: WorkspaceInitializer;
 };
 
-type WorkspaceActivatorSkipOpts = {
+export type WorkspaceActivatorSkipOpts = {
   opts?: Partial<{
     /**
      * Skip setting up language features (eg. code action providesr)
@@ -530,6 +532,7 @@ export class WorkspaceActivator {
     wsRoot,
     opts,
     engine,
+    workspaceInitializer,
   }: WorkspaceActivatorOpts &
     WorkspaceActivatorSkipOpts & {
       engine: EngineAPIService;
@@ -581,8 +584,10 @@ export class WorkspaceActivator {
       return new EngineNoteProvider(engine);
     };
     if (!opts?.skipTreeView) {
-      await initTreeView({ context, providerConstructor });
-      vscode.commands.executeCommand("dendron.treeView.focus");
+      await initTreeView({
+        context,
+        providerConstructor,
+      });
     }
 
     // Add the current workspace to the recent workspace list. The current
@@ -590,6 +595,12 @@ export class WorkspaceActivator {
     // folder (Native Workspace)
     const workspace = DendronExtension.tryWorkspaceFile()?.fsPath || wsRoot;
     MetadataService.instance().addToRecentWorkspaces(workspace);
+
+    if (workspaceInitializer?.onWorkspaceActivate) {
+      workspaceInitializer.onWorkspaceActivate({
+        skipOpts: { opts },
+      });
+    }
     return { data: true };
   }
 

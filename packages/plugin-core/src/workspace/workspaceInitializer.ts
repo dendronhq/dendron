@@ -1,5 +1,6 @@
 import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
+import { WorkspaceActivatorSkipOpts } from "./workspaceActivator";
 
 export type OnWorkspaceCreationOpts = {
   wsVault?: DVault;
@@ -26,4 +27,12 @@ export type WorkspaceInitializer = {
    * Invoked after the workspace has been opened. Perform any operations such as re-arranging the layout.
    */
   onWorkspaceOpen?(opts: { ws: DWorkspaceV2 }): Promise<void>;
+
+  /**
+   * Invoked after the workspace has been activated.
+   * @param opts
+   */
+  onWorkspaceActivate?(opts: {
+    skipOpts: WorkspaceActivatorSkipOpts;
+  }): Promise<void>;
 };

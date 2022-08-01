@@ -110,6 +110,11 @@
           "name": "Graph Panel",
           "type": "webview",
           "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
+          "when": "dendron:pluginActive"
         }
       ]
     },
@@ -916,6 +921,10 @@
         },
         {
           "command": "dendron.dev.validateEngine",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
         }
       ],

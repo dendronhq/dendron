@@ -70,7 +70,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
       // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
       case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
-        const { sync, note, syncChangedNote, activeNote, isLocked } = cmsg.data;
+        const { sync, note, syncChangedNote, activeNote } = cmsg.data;
         if (sync) {
           // skip the initial ?
           logger.info({
@@ -89,9 +89,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
             note: note ? NoteUtils.toLogObj(note) : "no note",
           });
           await ideDispatch(engineSlice.syncNote({ ...workspace, note }));
-        }
-        if (isLocked) {
-          ideDispatch(ideSlice.actions.setLock(isLocked));
         }
         logger.info({ ctx, msg: "setNoteActive:pre" });
         // If activeNote is in the data payload, set that as active note. Otherwise default to changed note

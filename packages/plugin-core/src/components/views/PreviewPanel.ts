@@ -388,7 +388,6 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           data: {
             note,
             syncChangedNote,
-            isLocked: this.isLocked(),
           },
           source: "vscode",
         } as OnDidChangeActiveTextEditorMsg);

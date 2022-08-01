@@ -84,7 +84,21 @@ const stubVaultPick = (vaults: DVault[]) => {
     .returns(Promise.resolve(vault));
 };
 
-export function expectQuickPick(quickPick: DendronQuickPickerV2) {
+export function expectQuickPick(quickPick: DendronQuickPickerV2 | undefined) {
+  if (quickPick === undefined) {
+    const message = "quickpick is undefined.";
+    return {
+      toIncludeFname: (_fname: string) => {
+        assert.fail(message);
+      },
+      toNotIncludeFname: (_fname: string) => {
+        assert.fail(message);
+      },
+      toBeEmpty: () => {
+        assert.fail(message);
+      },
+    };
+  }
   return {
     toIncludeFname: (fname: string) => {
       assert.ok(
@@ -448,6 +462,20 @@ suite("NoteLookupCommand", function () {
     });
   });
 
+  async function runLookupTest(
+    initialValue: string,
+    assertions: (out: CommandOutput | undefined) => void
+  ) {
+    const cmd = new NoteLookupCommand();
+    const out = await cmd.run({
+      noConfirm: true,
+      initialValue,
+    });
+
+    assertions(out);
+    cmd.cleanUp();
+  }
+
   /**
    * Notes to choose from (root.md excluded):
    *
@@ -466,133 +494,84 @@ suite("NoteLookupCommand", function () {
    └── foo.md
    </pre>
    * */
-  async function runLookupInHierarchyTestWorkspace(
-    initialValue: string,
-    assertions: (out: CommandOutput) => void,
-    done: Done
-  ) {
-    await runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS.only(
+    "GIVEN default note lookup settings:",
+    {
       preSetupHook: async ({ wsRoot, vaults }) => {
-        await ENGINE_HOOKS.setupHierarchyForLookupTests({ wsRoot, vaults });
+        await ENGINE_HOOKS.setupHierarchyForLookupTests({
+          wsRoot,
+          vaults,
+        });
       },
-      onInit: async () => {
-        const cmd = new NoteLookupCommand();
-
-        const out: CommandOutput = (await cmd.run({
-          noConfirm: true,
-          initialValue,
-        }))!;
-
-        assertions(out);
-        cmd.cleanUp();
-        done();
-      },
-    });
-  }
-
-  describe(`GIVEN default note look up settings:`, () => {
-    test("WHEN running simplest query THEN find the matching value", (done) => {
-      runLookupInHierarchyTestWorkspace(
-        "ends-with-ch1",
-        (out) => {
-          expectQuickPick(out.quickpick).toIncludeFname(
-            "goo.ends-with-ch1.no-ch1-by-itself"
-          );
-        },
-        done
-      );
-    });
-
-    describe(`Test: Queries ending with dot`, () => {
-      test("WHEN querying with 'with-ch1.' THEN find partial match within hierarchy and show its children..", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "with-ch1.",
-          (out) => {
-            expectQuickPick(out.quickpick).toIncludeFname(
+      timeout: 5e3,
+    },
+    () => {
+      describe("WHEN running simple query", () => {
+        test("THEN find the matching value", async () => {
+          await runLookupTest("ends-with-ch1", (out) => {
+            expectQuickPick(out?.quickpick).toIncludeFname(
               "goo.ends-with-ch1.no-ch1-by-itself"
             );
-            expectQuickPick(out.quickpick).toNotIncludeFname("foo.ch1.gch1");
-          },
-          done
-        );
+          });
+        });
       });
 
-      test("WHEN querying with 'ch1.gch1.' THEN finds direct match within hierarchy.", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "ch1.gch1.",
-          (out) => {
-            // Showing direct children of matches in different hierarchies:
-            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1.gch1.ggch1");
-            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1.gch1.ggch1");
-            // Not showing our own match
-            expectQuickPick(out.quickpick).toNotIncludeFname("bar.ch1.gch1");
-          },
-          done
-        );
+      describe("WHEN query end with a dot", () => {
+        describe("WHEN query is `with-ch1.`", () => {
+          test("THEN find partial match with in hierarchy and show its children", async () => {
+            await runLookupTest("with-ch1.", (out) => {
+              expectQuickPick(out?.quickpick).toIncludeFname(
+                "goo.ends-with-ch1.no-ch1-by-itself"
+              );
+              expectQuickPick(out?.quickpick).toNotIncludeFname("foo.ch1.gch1");
+            });
+          });
+        });
+        describe("WHEN query is `ch1.gch1.`", () => {
+          test("THEN finds direct match within hierarchy.", async () => {
+            await runLookupTest("ch1.gch1.", (out) => {
+              // Showing direct children of matches in different hierarchies:
+              expectQuickPick(out?.quickpick).toIncludeFname(
+                "bar.ch1.gch1.ggch1"
+              );
+              expectQuickPick(out?.quickpick).toIncludeFname(
+                "foo.ch1.gch1.ggch1"
+              );
+              // Not showing our own match
+              expectQuickPick(out?.quickpick).toNotIncludeFname("bar.ch1.gch1");
+            });
+          });
+        });
       });
-
-      // Closest candidate is 'goo.ends-with-ch1.no-ch1-by-itself' which does contain 'ends-with-'
-      // however since we add the dot to the query we expect at least the postfix of the part
-      // of the hierarchy to match such as with 'with-ch1.' test. Here we deem it as not matching anything.
-      test("WHEN querying with 'ends-with-.' THEN empty quick pick", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "ends-with-.",
-          (out) => {
-            expectQuickPick(out.quickpick).toBeEmpty();
-          },
-          done
-        );
+      describe("extended search:", () => {
+        test("WHEN running querying with exclusion THEN exclude unwanted but keep others", async () => {
+          await runLookupTest("!bar ch1", (out) => {
+            expectQuickPick(out?.quickpick).toIncludeFname("foo.ch1");
+            expectQuickPick(out?.quickpick).toNotIncludeFname("bar.ch1");
+          });
+        });
+        test("WHEN running `ends with query` THEN filter to values that end with desired query.", async () => {
+          await runLookupTest("foo$", (out) => {
+            expectQuickPick(out?.quickpick).toIncludeFname("foo");
+            expectQuickPick(out?.quickpick).toNotIncludeFname("foo.ch1");
+          });
+        });
+        test("WHEN running query with (|) THEN match both values", async () => {
+          await runLookupTest("foo | bar", (out) => {
+            expectQuickPick(out?.quickpick).toIncludeFname("foo.ch1");
+            expectQuickPick(out?.quickpick).toIncludeFname("bar.ch1");
+          });
+        });
       });
-    });
-
-    describe(`Test extended search`, () => {
-      test("WHEN running query with exclusion THEN exclude unwanted but keep others", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "!bar ch1",
-          (out) => {
-            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1");
-            expectQuickPick(out.quickpick).toNotIncludeFname("bar.ch1");
-          },
-          done
-        );
+      describe("WHEN user looks up a note without using a space where the query doesn't match the note's case", () => {
+        test("THEN lookup result must cantain all matching values irrespective of case", async () => {
+          await runLookupTest("bar.CH1", (out) => {
+            expectQuickPick(out?.quickpick).toIncludeFname("bar.ch1");
+          });
+        });
       });
-
-      test("WHEN running `ends with query` THEN filter to values that end with desired query.", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "foo$",
-          (out) => {
-            expectQuickPick(out.quickpick).toIncludeFname("foo");
-            expectQuickPick(out.quickpick).toNotIncludeFname("foo.ch1");
-          },
-          done
-        );
-      });
-
-      test("WHEN running query with (|) THEN match both values", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "foo | bar",
-          (out) => {
-            expectQuickPick(out.quickpick).toIncludeFname("foo.ch1");
-            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1");
-          },
-          done
-        );
-      });
-    });
-
-    describe(`WHEN user look up a note (without using a space) where the query doesn't match the note's case`, () => {
-      test("THEN lookup result must cantain all matching values irrespective of case", (done) => {
-        runLookupInHierarchyTestWorkspace(
-          "bar.CH1",
-          (out) => {
-            expectQuickPick(out.quickpick).toIncludeFname("bar.ch1");
-          },
-          done
-        );
-      });
-    });
-  });
+    }
+  );
 
   describe("onAccept", () => {
     describeMultiWS(

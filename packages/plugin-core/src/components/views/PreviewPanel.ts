@@ -138,7 +138,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           this._onTextChanged = undefined;
         }
 
-        this.dispose();
+        this._panel = undefined;
+        this.unlock();
       });
 
       this._panel.reveal(viewColumn, preserveFocus);
@@ -155,14 +156,14 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     const activeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (activeTextEditor) {
       this._lockedEditorFileName = activeTextEditor?.document.fileName;
-      this.sendLockMessage(this._panel!, this.isLocked());
+      this.sendLockMessage(this._panel, this.isLocked());
     } else {
       vscode.window.showInformationMessage("No active texteditor found");
     }
   }
   unlock() {
     this._lockedEditorFileName = undefined;
-    this.sendLockMessage(this._panel!, this.isLocked());
+    this.sendLockMessage(this._panel, this.isLocked());
   }
   isOpen(): boolean {
     return this._panel !== undefined;
@@ -403,7 +404,10 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     return;
   }
 
-  private sendLockMessage(panel: vscode.WebviewPanel, isLocked: boolean) {
+  private sendLockMessage(
+    panel: vscode.WebviewPanel | undefined,
+    isLocked: boolean
+  ) {
     try {
       return panel?.webview.postMessage({
         type: isLocked

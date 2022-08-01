@@ -158,7 +158,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       this._lockedEditorFileName = activeTextEditor?.document.fileName;
       this.sendLockMessage(this._panel, this.isLocked());
     } else {
-      vscode.window.showInformationMessage("No active texteditor found");
+      Logger.error({ ctx: "lock preview", msg: "No active texteditor found" });
     }
   }
   unlock() {

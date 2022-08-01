@@ -29,7 +29,7 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe, Done } from "mocha";
+import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
 import * as vscode from "vscode";

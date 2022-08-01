@@ -6,7 +6,9 @@ import { ExportPodConfigurationV2 } from "./PodV2Types";
 /**
  * Complete Pod Config for Google Docs V2
  */
-export type GoogleDocsV2PodConfig = ExportPodConfigurationV2;
+export type GoogleDocsV2PodConfig = ExportPodConfigurationV2 & {
+  wikiLinkToURL?: boolean;
+};
 /**
  * This is the persisted version of the config that gets serialized into a YAML
  * file. It must contain a reference to a google service connection ID.
@@ -73,6 +75,11 @@ export function createRunnableGoogleDocsV2PodConfigSchema(): JSONSchemaType<Runn
       },
       description: {
         type: "string",
+        nullable: true,
+      },
+      wikiLinkToURL: {
+        type: "boolean",
+        default: false,
         nullable: true,
       },
     },

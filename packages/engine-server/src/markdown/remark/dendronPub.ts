@@ -61,6 +61,7 @@ type PluginOpts = NoteRefsOptsV2 & {
   transformNoPublish?: boolean;
   /** Don't display randomly generated colors for tags, only display color if it's explicitly set by the user. */
   noRandomlyColoredTags?: boolean;
+  wikiLinkToURL?: boolean;
 };
 
 /**
@@ -359,13 +360,25 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         const alias = data.alias ? data.alias : value;
-        const href = SiteUtils.getSiteUrlPathForNote({
-          addPrefix: pOpts.flavor === ProcFlavor.PUBLISHING,
+        let href = SiteUtils.getSiteUrlPathForNote({
+          addPrefix:
+            pOpts.flavor === ProcFlavor.PUBLISHING || opts?.wikiLinkToURL,
           pathValue: value,
           config,
           pathAnchor: data.anchorHeader,
           note,
         });
+        // wikiLinkToURL implies full site path
+        if (opts?.wikiLinkToURL) {
+          const { url: root, index } = SiteUtils.getSiteUrlRootForVault({
+            vault,
+            config,
+          });
+          if (_.isUndefined(root)) {
+            throw new DendronError({ message: "siteUrl not set" });
+          }
+          href = href === "/" ? root : [root, href].join("");
+        }
         const exists = true;
         // for rehype
         //_node.value = newValue;

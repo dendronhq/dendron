@@ -332,6 +332,7 @@ export class MDUtilsV5 {
           proc = proc.use(dendronPub, {
             insertTitle,
             transformNoPublish: opts.flavor === ProcFlavor.PUBLISHING,
+            wikiLinkToURL: true,
             ...data.publishOpts,
           });
 

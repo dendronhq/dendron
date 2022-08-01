@@ -44,6 +44,7 @@
         "configuration": "./language-configuration.json"
       }
     ],
+<<<<<<< HEAD
     "viewsWelcome": [
       {
         "view": "dendron.backlinks",
@@ -63,6 +64,8 @@
         }
       ]
     },
+=======
+>>>>>>> 541cc19d253689375efba2d061d62e9f1c1cec74
     "views": {
       "explorer": [
         {
@@ -91,6 +94,7 @@
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
+<<<<<<< HEAD
           "id": "dendron.calendar-view",
           "name": "Calendar View",
           "type": "webview",
@@ -113,6 +117,11 @@
           "when": "dendron:pluginActive"
 =======
 >>>>>>> 541cc19d2 (feat: add schema validator entry)
+=======
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
+          "when": "dendron:pluginActive"
+>>>>>>> 541cc19d253689375efba2d061d62e9f1c1cec74
         }
       ]
     },
@@ -572,6 +581,7 @@
       },
       {
 <<<<<<< HEAD
+<<<<<<< HEAD
         "command": "dendron.instrumentedWrapperCommand",
         "title": "Dendron: Instrumented Wrapper Command"
       },
@@ -586,6 +596,10 @@
         "command": "dendron.showSchemaValidator",
         "title": "Dendron: Show Schema Validator"
 >>>>>>> 541cc19d2 (feat: add schema validator entry)
+=======
+        "command": "dendron.showSchemaValidator",
+        "title": "Dendron: Show Schema Validator"
+>>>>>>> 541cc19d253689375efba2d061d62e9f1c1cec74
       }
     ],
     "menus": {
@@ -915,7 +929,6 @@
           "when": "dendron:pluginActive"
         },
         {
-<<<<<<< HEAD
           "command": "dendron.instrumentedWrapperCommand",
           "when": "false"
         },
@@ -924,10 +937,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.openSchemaValidator",
-=======
           "command": "dendron.showSchemaValidator",
->>>>>>> 541cc19d2 (feat: add schema validator entry)
           "when": "dendron:pluginActive"
         }
       ],

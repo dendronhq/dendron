@@ -1273,8 +1273,6 @@ type SchemaMatchResult = {
   schema: SchemaProps;
   namespace: boolean;
   notePath: string;
-<<<<<<< HEAD
-=======
   /**
    * True if only a partial match.
    */

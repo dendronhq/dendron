@@ -11,8 +11,6 @@ export class TemplateInitializer
   extends BlankInitializer
   implements WorkspaceInitializer
 {
-  name = "template";
-
   async onWorkspaceCreation(opts: OnWorkspaceCreationOpts): Promise<void> {
     await super.onWorkspaceCreation(opts);
 

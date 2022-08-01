@@ -11,8 +11,6 @@ import {
  * Blank Workspace Initializer. Creates the barebones requirements for a functioning workspace
  */
 export class BlankInitializer implements WorkspaceInitializer {
-  name = "blank";
-
   createVaults(wsVault?: DVault) {
     const vaultPath = wsVault?.fsPath || "vault";
     return { wsVault: { fsPath: vaultPath } };

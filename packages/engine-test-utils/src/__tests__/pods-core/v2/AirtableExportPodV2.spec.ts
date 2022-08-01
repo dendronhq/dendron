@@ -145,7 +145,12 @@ const setupTestFactoryForNote = (opts: {
   return _setupTestFactoryCommon({
     ...opts,
     cb: async ({ engine, pod }) => {
-      const note = TestEngineUtils.getNoteByFname(engine, opts.fname);
+      const note = (
+        await engine.findNotes({
+          fname: opts.fname,
+          vault: engine.vaults[0],
+        })
+      )[0];
       return pod.exportNotes([note!]);
     },
   });

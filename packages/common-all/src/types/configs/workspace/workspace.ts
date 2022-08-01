@@ -25,6 +25,7 @@ export type DendronWorkspaceConfig = {
   disableTelemetry?: boolean;
   enableAutoCreateOnDefinition: boolean;
   enableXVaultWikiLink: boolean;
+  enableHandlebarTemplates: boolean;
   enableRemoteVaultInit: boolean;
   workspaceVaultSyncMode: VaultSyncMode;
   enableAutoFoldFrontmatter: boolean;
@@ -35,6 +36,7 @@ export type DendronWorkspaceConfig = {
   maxPreviewsCached: number;
   maxNoteLength: number;
   enableEditorDecorations: boolean;
+  enableSmartRefs?: boolean;
   //
   feedback?: boolean;
   apiEndpoint?: string;
@@ -65,6 +67,7 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     task: genDefaultTaskConfig(),
     graph: genDefaultGraphConfig(),
     enableAutoCreateOnDefinition: false,
+    enableHandlebarTemplates: true,
     enableXVaultWikiLink: false,
     enableRemoteVaultInit: true,
     enableUserTags: true,
@@ -75,5 +78,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
     enableFullHierarchyNoteTitle: false,
+    enableSmartRefs: false,
   };
 }

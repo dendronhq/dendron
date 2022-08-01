@@ -7,7 +7,11 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
+import {
+  FileExtensionUtils,
+  findNonNoteFile,
+  TemplateUtils,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Position, Selection, Uri, window } from "vscode";
@@ -20,6 +24,7 @@ import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
 import { PluginFileUtils } from "../utils/files";
 import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
 import { IWSUtilsV2 } from "../WSUtilsV2Interface";
 import { BasicCommand } from "./base";
 import {
@@ -238,7 +243,7 @@ export class GotoNoteCommand extends BasicCommand<
     // Non-note files use `qs` for full path, and set vault to null
     if (opts.kind === TargetKind.NON_NOTE && qs) {
       let type: GotoFileType;
-      if (ExtensionUtils.isTextFileExtension(path.extname(qs))) {
+      if (FileExtensionUtils.isTextFileExtension(path.extname(qs))) {
         // Text file, open inside of VSCode
         type = GotoFileType.TEXT;
         const editor = await VSCodeUtils.openFileInEditor(
@@ -275,30 +280,44 @@ export class GotoNoteCommand extends BasicCommand<
     let pos: undefined | Position;
     const out = await this.extension.pauseWatchers<GoToNoteCommandOutput>(
       async () => {
-        const { data } = await client.getNoteByPath({
-          npath: qs,
-          createIfNew: true,
-          vault,
-          overrides,
-        });
-        const note = data?.note as NoteProps;
+        const notes = await client.findNotes({ fname: qs, vault });
+        let note: NoteProps;
 
-        const noteCreated =
-          undefined !==
-          _.find(
-            data?.changed,
-            (ent) => ent.status === "create" && ent.note.fname === qs
-          );
-        // If a new note was created, check if we should send meeting
-        // note telemetry.
-        if (noteCreated) {
-          let type = "general";
+        // If note doesn't exist, create note with schema
+        if (notes.length === 0) {
+          const newNote = NoteUtils.createWithSchema({
+            noteOpts: {
+              fname: qs,
+              vault,
+            },
+            engine: client,
+          });
+          await TemplateUtils.findAndApplyTemplate({
+            note: newNote,
+            engine: client,
+            pickNote: async (choices: NoteProps[]) => {
+              return WSUtilsV2.instance().promptForNoteAsync({
+                notes: choices,
+                quickpickTitle:
+                  "Select which template to apply or press [ESC] to not apply a template",
+                nonStubOnly: true,
+              });
+            },
+          });
+          note = _.merge(newNote, overrides || {});
+          await client.writeNote(note);
 
-          if (qs.startsWith("user.")) {
-            type = "userTag";
-          }
-
+          // check if we should send meeting note telemetry.
+          const type = qs.startsWith("user.") ? "userTag" : "general";
           maybeSendMeetingNoteTelemetry(type);
+        } else {
+          note = notes[0];
+          // If note exists and its a stub note, delete stub and create new note
+          if (note.stub) {
+            delete note.stub;
+            note = _.merge(note, overrides || {});
+            await client.writeNote(note);
+          }
         }
 
         const npath = NoteUtils.getFullPath({

@@ -1,11 +1,11 @@
 import {
   FuseEngine,
-  NotePropsDict,
+  getCleanThresholdValue,
   NoteIndexProps,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import Fuse from "fuse.js";
-import { getCleanThresholdValue } from "@dendronhq/common-all";
 
 type TestData = {
   fname: string;
@@ -13,12 +13,13 @@ type TestData = {
   stub?: boolean;
 };
 
-async function testDataToNotePropsDict(
+async function testDataToNotePropsByIdDict(
   testData: TestData[]
-): Promise<NotePropsDict> {
-  const dict: NotePropsDict = {};
+): Promise<NotePropsByIdDict> {
+  const dict: NotePropsByIdDict = {};
 
   for (const td of testData) {
+    // eslint-disable-next-line no-await-in-loop
     const note = await NoteTestUtilsV4.createNote({
       fname: td.fname,
       vault: { fsPath: "/tmp/vault-path" },
@@ -49,8 +50,9 @@ function assertDoesNotHaveFName(queryResult: NoteIndexProps[], fname: string) {
 
 async function initializeFuseEngine(testData: TestData[]): Promise<FuseEngine> {
   const fuseEngine = new FuseEngine({ fuzzThreshold: 0.2 });
-  const notePropsDict: NotePropsDict = await testDataToNotePropsDict(testData);
-  await fuseEngine.updateNotesIndex(notePropsDict);
+  const notePropsByIdDict: NotePropsByIdDict =
+    await testDataToNotePropsByIdDict(testData);
+  await fuseEngine.replaceNotesIndex(notePropsByIdDict);
   return fuseEngine;
 }
 
@@ -68,7 +70,7 @@ const queryTestV1 = ({
   expectedFNames.forEach((expectedFname) => {
     const wasFound = notes.some((n) => n.fname === expectedFname);
     if (!wasFound) {
-      fail(`Did not find '${expectedFname}' when querying for '${qs}'`);
+      throw Error(`Did not find '${expectedFname}' when querying for '${qs}'`);
     }
   });
 };
@@ -508,8 +510,8 @@ describe("FuseEngine tests with extracted data.", () => {
         (qs: string, expectedFNames: string[]) => {
           queryTestV1({
             fuseEngine,
-            qs: qs,
-            expectedFNames: expectedFNames,
+            qs,
+            expectedFNames,
           });
         }
       );

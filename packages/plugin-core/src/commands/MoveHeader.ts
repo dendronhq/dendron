@@ -2,10 +2,15 @@ import {
   asyncLoopOneAtATime,
   DendronError,
   DLink,
+  DNodeUtils,
+  DNoteHeaderAnchor,
   DNoteLink,
   DVault,
+  ErrorUtils,
   ERROR_SEVERITY,
+  extractNoteChangeEntryCounts,
   getSlugger,
+  NoteChangeEntry,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
@@ -16,34 +21,38 @@ import {
   Anchor,
   AnchorUtils,
   DendronASTDest,
+  DendronASTNode,
   DendronASTTypes,
   Heading,
   HistoryEvent,
   LinkUtils,
+  MdastUtils,
   MDUtilsV5,
   Node,
   Processor,
   RemarkUtils,
   visit,
 } from "@dendronhq/engine-server";
+import { error } from "console";
 import _ from "lodash";
 import path from "path";
 import { Location } from "vscode";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
-import { PickerUtilsV2 } from "../components/lookup/utils";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
-import { delayedUpdateDecorations } from "../features/windowDecorations";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { findReferences, FoundRefT } from "../utils/md";
-import { BasicCommand } from "./base";
-import { ExtensionProvider } from "../ExtensionProvider";
 import {
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { findReferences, FoundRefT } from "../utils/md";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { BasicCommand } from "./base";
 
 type CommandInput =
   | {
@@ -59,7 +68,7 @@ type CommandOpts = {
   engine: IEngineAPIService;
 } & CommandInput;
 type CommandOutput = {
-  updated: NoteProps[];
+  changed: NoteChangeEntry[];
 } & CommandOpts;
 
 export class MoveHeaderCommand extends BasicCommand<
@@ -108,6 +117,7 @@ export class MoveHeaderCommand extends BasicCommand<
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
+    targetHeaderIndex: number;
   } {
     const { editor, selection } = VSCodeUtils.getSelection();
 
@@ -125,18 +135,39 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // parse selection and get the target header node
     const proc = this.getProc(engine, maybeNote);
+
+    // TODO: shoudl account for line number
+    const bodyAST: DendronASTNode = proc.parse(
+      maybeNote.body
+    ) as DendronASTNode;
+
     const parsedLine = proc.parse(line);
     let targetHeader: Heading | undefined;
+    let targetIndex: number | undefined;
     // Find the first occurring heading node in selected line.
     // This should be our target.
-    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading) => {
+    visit(parsedLine, [DendronASTTypes.HEADING], (heading: Heading, index) => {
       targetHeader = heading;
+      targetIndex = index;
       return false;
     });
-    if (!targetHeader) {
+    if (!targetHeader || _.isUndefined(targetIndex)) {
       throw this.headerNotSelectedError;
     }
-    return { proc, origin: maybeNote, targetHeader };
+
+    const resp = MdastUtils.findHeader({
+      nodes: bodyAST.children,
+      match: targetHeader,
+    });
+    if (!resp) {
+      throw Error("did not find header");
+    }
+    return {
+      proc,
+      origin: maybeNote,
+      targetHeader,
+      targetHeaderIndex: resp.index,
+    };
   }
 
   /**
@@ -212,13 +243,15 @@ export class MoveHeaderCommand extends BasicCommand<
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = ExtensionProvider.getEngine();
-    const { proc, origin, targetHeader } = this.validateAndProcessInput(engine);
+    const { proc, origin, targetHeader, targetHeaderIndex } =
+      this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);
     const nodesToMove = RemarkUtils.extractHeaderBlock(
       originTree,
-      targetHeader
+      targetHeader.depth,
+      targetHeaderIndex
     );
 
     if (nodesToMove.length === 0) {
@@ -280,9 +313,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
     // add the stringified blocks to destination note body
     dest.body = `${dest.body}\n\n${destContentToAppend}`;
-    await engine.writeNote(dest, {
-      updateExisting: true,
-    });
+    await engine.writeNote(dest);
   }
 
   /**
@@ -479,8 +510,9 @@ export class MoveHeaderCommand extends BasicCommand<
     engine: IEngineAPIService,
     origin: NoteProps,
     dest: NoteProps
-  ): Promise<NoteProps[]> {
-    const updated: NoteProps[] = [];
+  ): Promise<NoteChangeEntry[]> {
+    let noteChangeEntries: NoteChangeEntry[] = [];
+    const ctx = `${this.key}:updateReferences`;
     const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
@@ -488,34 +520,42 @@ export class MoveHeaderCommand extends BasicCommand<
       .filter((note) => note !== undefined);
 
     await asyncLoopOneAtATime(refsToProcess, async (note) => {
-      const vaultPath = vault2Path({
-        vault: note!.vault,
-        wsRoot: engine.wsRoot,
-      });
-      const _note = file2Note(
-        path.join(vaultPath, note!.fname + ".md"),
-        note!.vault
-      );
-      const linksToUpdate = this.findLinksToUpdate(
-        _note,
-        engine,
-        origin,
-        anchorNamesToUpdate
-      );
-      const modifiedNote = this.updateLinksInNote({
-        note: _note,
-        engine,
-        linksToUpdate,
-        dest,
-      });
-      note!.body = modifiedNote.body;
-      const writeResp = await engine.writeNote(note!, {
-        updateExisting: true,
-      });
-      updated.push(writeResp.data[0].note);
+      try {
+        const vaultPath = vault2Path({
+          vault: note!.vault,
+          wsRoot: engine.wsRoot,
+        });
+        const resp = file2Note(
+          path.join(vaultPath, note!.fname + ".md"),
+          note!.vault
+        );
+        if (ErrorUtils.isErrorResp(resp)) {
+          throw error;
+        }
+        const _note = resp.data;
+        const linksToUpdate = this.findLinksToUpdate(
+          _note,
+          engine,
+          origin,
+          anchorNamesToUpdate
+        );
+        const modifiedNote = this.updateLinksInNote({
+          note: _note,
+          engine,
+          linksToUpdate,
+          dest,
+        });
+        note!.body = modifiedNote.body;
+        const writeResp = await engine.writeNote(note!);
+        if (writeResp.data) {
+          noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+        }
+      } catch (error) {
+        // TODO: should notify which one we failed during update.
+        this.L.error({ ctx, error });
+      }
     });
-
-    return updated;
+    return noteChangeEntries;
   }
 
   /**
@@ -546,9 +586,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
     origin.body = modifiedOriginContent;
 
-    await engine.writeNote(origin, {
-      updateExisting: true,
-    });
+    await engine.writeNote(origin);
 
     return modifiedOriginContent;
   }
@@ -597,6 +635,82 @@ export class MoveHeaderCommand extends BasicCommand<
       origin,
       dest
     );
-    return { ...opts, updated };
+
+    return { ...opts, changed: updated };
+  }
+
+  trackProxyMetrics({
+    out,
+    noteChangeEntryCounts,
+  }: {
+    out: CommandOutput;
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults } = engine;
+
+    // only look at origin note
+    const { origin } = out;
+
+    const headers = _.toArray(origin.anchors).filter((anchor) => {
+      return anchor !== undefined && anchor.type === "header";
+    }) as DNoteHeaderAnchor[];
+
+    const numOriginHeaders = headers.length;
+    const originHeaderDepths = headers.map((header) => header.depth);
+    const maxOriginHeaderDepth = _.max(originHeaderDepths);
+    const meanOriginHeaderDepth = _.mean(originHeaderDepths);
+    const movedHeaders = out.nodesToMove.filter((node) => {
+      return node.type === "heading";
+    }) as Heading[];
+    const numMovedHeaders = movedHeaders.length;
+    const movedHeaderDepths = movedHeaders.map((header) => header.depth);
+    const maxMovedHeaderDepth = _.max(movedHeaderDepths);
+    const meanMovedHeaderDepth = _.mean(movedHeaderDepths);
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props: {
+        command: this.key,
+        numVaults: vaults.length,
+        traits: origin.traits || [],
+        numChildren: origin.children.length,
+        numLinks: origin.links.length,
+        numChars: origin.body.length,
+        noteDepth: DNodeUtils.getDepth(origin),
+      },
+      extra: {
+        ...noteChangeEntryCounts,
+        numOriginHeaders,
+        maxOriginHeaderDepth,
+        meanOriginHeaderDepth,
+        numMovedHeaders,
+        maxMovedHeaderDepth,
+        meanMovedHeaderDepth,
+      },
+    });
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+
+    try {
+      this.trackProxyMetrics({ out, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+
+    return noteChangeEntryCounts;
   }
 }

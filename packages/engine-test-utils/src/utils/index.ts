@@ -7,6 +7,7 @@ import {
   WorkspaceOpts,
   WorkspaceSettings,
   WorkspaceType,
+  normalizeUnixPath,
 } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
@@ -110,7 +111,9 @@ export async function checkVaults(opts: WorkspaceOpts, expect: any) {
     const wsFolders = getWorkspaceFolders(wsRoot);
     expect(wsFolders).toEqual(
       vaults.map((ent) => {
-        const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
+        const out: WorkspaceFolderRaw = {
+          path: normalizeUnixPath(VaultUtils.getRelPath(ent)),
+        };
         if (ent.name) {
           out.name = ent.name;
         }

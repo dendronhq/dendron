@@ -10,7 +10,6 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaTemplate,
-  SchemaUtils,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -83,43 +82,6 @@ const stubVaultPick = (vaults: DVault[]) => {
   return sinon
     .stub(PickerUtilsV2, "getOrPromptVaultForNewNote")
     .returns(Promise.resolve(vault));
-};
-
-/**
- * Setup schema that references template that may or may not lie in same vault
- */
-const setupSchemaCrossVault = (opts: {
-  wsRoot: string;
-  vault: DVault;
-  template: SchemaTemplate;
-}) => {
-  const { wsRoot, vault, template } = opts;
-  return NoteTestUtilsV4.createSchema({
-    fname: "food",
-    wsRoot,
-    vault,
-    modifier: (schema) => {
-      const schemas = [
-        SchemaUtils.createFromSchemaOpts({
-          id: "food",
-          parent: "root",
-          fname: "food",
-          children: ["ch2"],
-          vault,
-        }),
-        SchemaUtils.createFromSchemaRaw({
-          id: "ch2",
-          template,
-          namespace: true,
-          vault,
-        }),
-      ];
-      schemas.map((s) => {
-        schema.schemas[s.id] = s;
-      });
-      return schema;
-    },
-  });
 };
 
 export function expectQuickPick(quickPick: DendronQuickPickerV2) {
@@ -725,7 +687,7 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN a note is created and stub property is removed", async () => {
-          const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
           stubVaultPick(vaults);
@@ -734,12 +696,12 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           }))!;
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
-          const fooNote = NoteUtils.getNoteOrThrow({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
+          const fooNote = (
+            await engine.findNotes({
+              fname: "foo",
+              vault,
+            })
+          )[0];
           expect(fooNote.stub).toBeFalsy();
         });
       }
@@ -915,7 +877,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -966,7 +932,11 @@ suite("NoteLookupCommand", function () {
             id: `dendron://${VaultUtils.getName(vaults[2])}/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1018,7 +988,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1078,7 +1052,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1151,7 +1129,11 @@ suite("NoteLookupCommand", function () {
             id: "template.ch2",
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1209,7 +1191,11 @@ suite("NoteLookupCommand", function () {
             id: `dendron://missingVault/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1223,7 +1209,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            `Warning: Problem with food schema. No vault found for missingVault`
+            `Warning: Problem with food.ch2 schema. No vault found for missingVault`
           );
 
           cmd.cleanUp();
@@ -1250,7 +1236,11 @@ suite("NoteLookupCommand", function () {
             id: `blah://${VaultUtils.getName(vaults[1])}/template.ch2`,
             type: "note",
           };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1264,7 +1254,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            `Warning: Problem with food schema. No note found for blah`
+            `Warning: Problem with food.ch2 schema. No note found`
           );
 
           cmd.cleanUp();
@@ -1280,7 +1270,11 @@ suite("NoteLookupCommand", function () {
         postSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
           const template: SchemaTemplate = { id: "food.missing", type: "note" };
-          await setupSchemaCrossVault({ wsRoot, vault, template });
+          await NoteTestUtilsV4.setupSchemaCrossVault({
+            wsRoot,
+            vault,
+            template,
+          });
         },
       },
       () => {
@@ -1294,7 +1288,7 @@ suite("NoteLookupCommand", function () {
           });
           const warningMsg = windowSpy.getCall(0).args[0];
           expect(warningMsg).toEqual(
-            "Warning: Problem with food schema. No note found for food.missing"
+            "Warning: Problem with food.ch2 schema. No note found"
           );
 
           cmd.cleanUp();
@@ -2361,7 +2355,7 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ wsRoot, vaults, engine }) => {
+          onInit: async ({ vaults, engine }) => {
             const { selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
@@ -2370,12 +2364,12 @@ suite("NoteLookupCommand", function () {
 
             const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
             const today = Time.now().toFormat(dateFormat);
-            const newNote = NoteUtils.getNoteOrThrow({
-              fname: `foo.journal.${today}`,
-              notes: engine.notes,
-              vault: vaults[0],
-              wsRoot,
-            });
+            const newNote = (
+              await engine.findNotes({
+                fname: `foo.journal.${today}`,
+                vault: vaults[0],
+              })
+            )[0];
 
             expect(newNote.body.trim()).toEqual(selectedText);
 
@@ -2391,19 +2385,19 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ wsRoot, vaults, engine }) => {
+          onInit: async ({ vaults, engine }) => {
             const { cmdOut, selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
               noteType: LookupNoteTypeEnum.scratch,
             });
 
-            const newNote = NoteUtils.getNoteOrThrow({
-              fname: cmdOut!.quickpick.value,
-              notes: engine.notes,
-              vault: vaults[0],
-              wsRoot,
-            });
+            const newNote = (
+              await engine.findNotes({
+                fname: cmdOut!.quickpick.value,
+                vault: vaults[0],
+              })
+            )[0];
             expect(newNote.body.trim()).toEqual(selectedText);
 
             cmd.cleanUp();

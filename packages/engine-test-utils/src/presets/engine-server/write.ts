@@ -2,7 +2,6 @@ import {
   CONSTANTS,
   DNodeUtils,
   NoteChangeUpdateEntry,
-  NoteProps,
   NoteUtils,
   SchemaUtils,
   extractNoteChangeEntriesByType,
@@ -15,7 +14,10 @@ import {
   SCHEMA_PRESETS_V4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { setupBasic } from "./utils";
@@ -111,11 +113,12 @@ const SCHEMAS = {
 const NOTES = {
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const vault = vaults[0];
+    const logger = (engine as DendronEngineClient).logger;
     const cachePath = path.join(
       vault2Path({ wsRoot, vault }),
       CONSTANTS.DENDRON_CACHE_FILE
     );
-    const notesCache = new NotesFileSystemCache({ cachePath });
+    const notesCache = new NotesFileSystemCache({ cachePath, logger });
     const keySet = notesCache.getCacheEntryKeys();
     const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
       wsRoot,
@@ -123,11 +126,12 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtils.getNoteByFnameFromEngine({
-      fname: note.fname,
-      engine,
-      vault,
-    }) as NoteProps;
+    const noteRoot = (
+      await engine.findNotes({
+        fname: note.fname,
+        vault,
+      })
+    )[0];
     await engine.init();
     return [
       {
@@ -143,32 +147,34 @@ const NOTES = {
         expected: 1,
       },
       {
-        actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-          .size,
+        actual: new NotesFileSystemCache({
+          cachePath,
+          logger,
+        }).getCacheEntryKeys().size,
         expected: 2,
       },
     ];
   }),
   CUSTOM_ATT_ADD: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      const note = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
       note.custom = { bond: 43 };
-      await engine.writeNote(note, { updateExisting: true });
-      const newNote = NoteUtils.getNoteByFnameV5({
-        fname: "foo",
-        notes: engine.notes,
-        vault: vaults[0],
-        wsRoot: engine.wsRoot,
-      }) as NoteProps;
+      await engine.writeNote(note);
+      const newNote = (
+        await engine.findNotes({
+          fname: "foo",
+          vault: vaults[0],
+        })
+      )[0];
       return [
         {
-          actual: newNote,
-          expected: note,
+          actual: _.omit(newNote, "contentHash"),
+          expected: _.omit(note, "contentHash"),
         },
       ];
     },
@@ -198,16 +204,18 @@ const NOTES = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data[0];
+    const note = resp.data![0];
 
     return [
       {
         actual: note,
-        expected: engine.notes[note.id],
+        expected: await engine.getNote(note.id),
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(
+          (await engine.getNote(note.parent as string))!
+        ),
         expected: true,
       },
     ];
@@ -225,12 +233,12 @@ const NOTES = {
 
       return [
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "foo.ch1",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.schema,
+          actual: (
+            await engine.findNotes({
+              fname: "foo.ch1",
+              vault,
+            })
+          )[0].schema,
           expected: {
             moduleId: "foo",
             schemaId: "ch1",
@@ -264,26 +272,25 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const { notes } = engine;
     const vault = vaults[0];
-    const root = NoteUtils.getNoteByFnameV5({
-      fname: "root",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
-    const bar = NoteUtils.getNoteByFnameV5({
-      fname: "bar",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
-    const child = NoteUtils.getNoteByFnameV5({
-      fname: "bar.ch1",
-      notes,
-      vault,
-      wsRoot: engine.wsRoot,
-    }) as NoteProps;
+    const root = (
+      await engine.findNotes({
+        fname: "root",
+        vault,
+      })
+    )[0];
+    const bar = (
+      await engine.findNotesMeta({
+        fname: "bar",
+        vault,
+      })
+    )[0];
+    const child = (
+      await engine.findNotes({
+        fname: "bar.ch1",
+        vault,
+      })
+    )[0];
     return [
       {
         actual: _.size(root.children),
@@ -407,30 +414,30 @@ const NOTES = {
       await engine.writeNote(noteC);
       return [
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "Upper Upper",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "Upper Upper",
+              vault,
+            })
+          )[0].title,
           expected: "Upper Upper",
         },
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "lower lower",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "lower lower",
+              vault,
+            })
+          )[0].title,
           expected: "Lower Lower",
         },
         {
-          actual: NoteUtils.getNoteByFnameV5({
-            fname: "lower Upper",
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          })?.title,
+          actual: (
+            await engine.findNotes({
+              fname: "lower Upper",
+              vault,
+            })
+          )[0].title,
           expected: "lower Upper",
         },
       ];
@@ -453,21 +460,21 @@ const NOTES = {
     await engine.writeNote(noteB);
     return [
       {
-        actual: NoteUtils.getNoteByFnameV5({
-          fname: "foo-with-dash",
-          notes: engine.notes,
-          vault,
-          wsRoot: engine.wsRoot,
-        })?.title,
+        actual: (
+          await engine.findNotes({
+            fname: "foo-with-dash",
+            vault,
+          })
+        )[0].title,
         expected: "Foo with Dash",
       },
       {
-        actual: NoteUtils.getNoteByFnameV5({
-          fname: "foo.foo-with-dash",
-          notes: engine.notes,
-          vault,
-          wsRoot: engine.wsRoot,
-        })?.title,
+        actual: (
+          await engine.findNotes({
+            fname: "foo.foo-with-dash",
+            vault,
+          })
+        )[0].title,
         expected: "Foo with Dash",
       },
     ];
@@ -490,16 +497,18 @@ const NOTES_MULTI = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data[0];
+    const note = resp.data![0];
 
     return [
       {
         actual: note,
-        expected: engine.notes[note.id],
+        expected: await engine.getNote(note.id),
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(
+          (await engine.getNote(note.parent as string))!
+        ),
         expected: true,
       },
     ];
@@ -522,16 +531,18 @@ const NOTES_MULTI = {
         originalQS: "bar",
         vault,
       });
-      const note = resp.data[0];
+      const note = resp.data![0];
 
       return [
         {
           actual: note,
-          expected: engine.notes[note.id],
+          expected: await engine.getNote(note.id),
           msg: "bar should be written in engine",
         },
         {
-          actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
+          actual: DNodeUtils.isRoot(
+            (await engine.getNote(note.parent as string))!
+          ),
           expected: true,
         },
       ];
@@ -539,22 +550,27 @@ const NOTES_MULTI = {
   ),
   ID_UPDATED: new TestPresetEntryV4(
     async ({ engine }) => {
-      const fooNote = engine.notes["foo"];
-      const fooUpdated = { ...fooNote };
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
-      const changes = await engine.writeNote(fooUpdated);
+      const changes = await engine.writeNote(fooUpdated, {
+        overrideExisting: true,
+      });
+
+      const deletedFooNote = await engine.getNote("foo");
+      const newFooNote = await engine.getNote("updatedID");
       const createEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "create"
       );
 
       const deleteEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "delete"
       );
 
       const updateEntries = extractNoteChangeEntriesByType(
-        changes.data,
+        changes.data!,
         "update"
       ) as NoteChangeUpdateEntry[];
 
@@ -609,6 +625,69 @@ const NOTES_MULTI = {
           actual: updatedChild?.note.parent,
           expected: "updatedID",
           msg: "updated child's parent should be updatedID.",
+        },
+        {
+          actual: deletedFooNote,
+          expected: undefined,
+          msg: "Foo should be deleted",
+        },
+        {
+          actual: newFooNote?.id,
+          expected: "updatedID",
+          msg: "New Foo should be created",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  BODY_UPDATED: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fooNote = await engine.getNote("foo");
+      const fooUpdated = { ...fooNote! };
+      fooUpdated.body = "updatedBody";
+      const changes = await engine.writeNote(fooUpdated);
+      const createEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "create"
+      );
+
+      const deleteEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "delete"
+      );
+
+      const updateEntries = extractNoteChangeEntriesByType(
+        changes.data!,
+        "update"
+      ) as NoteChangeUpdateEntry[];
+
+      return [
+        {
+          actual: updateEntries.length,
+          expected: 1,
+          msg: "1 update should happen.",
+        },
+        {
+          actual: deleteEntries.length,
+          expected: 0,
+          msg: "0 delete should happen.",
+        },
+        {
+          actual: createEntries.length,
+          expected: 0,
+          msg: "0 creates should happen.",
+        },
+        {
+          actual: updateEntries[0].note.fname,
+          expected: "foo",
+          msg: "foo note is updated.",
+        },
+        {
+          actual: updateEntries[0].note.body,
+          expected: "updatedBody",
+          msg: "updated foo note's body is updatedBody",
         },
       ];
     },

@@ -6,6 +6,7 @@ import {
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
+  TransformedQueryString,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/engine-server";
@@ -15,7 +16,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
-import { DendronQuickPickerV2, TransformedQueryString } from "./types";
+import { DendronQuickPickerV2 } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
 
 export const PAGINATE_LIMIT = 50;
@@ -119,8 +120,7 @@ export class NotePickerUtils {
   }) {
     const engine = ExtensionProvider.getDWorkspace().engine;
     const resp = await NoteLookupUtils.lookup({
-      qs: picker.value,
-      originalQS: picker.value,
+      qsRaw: picker.value,
       engine,
       showDirectChildrenOnly: picker.showDirectChildrenOnly,
     });
@@ -170,7 +170,11 @@ export class NotePickerUtils {
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
-    let nodes: NoteProps[] = resp.data;
+    let nodes = resp.data;
+
+    if (!nodes) {
+      return [];
+    }
 
     // We need to filter our results to abide by different variations of our
     // transformed query. We should do filtering prior to doing pagination cut off.

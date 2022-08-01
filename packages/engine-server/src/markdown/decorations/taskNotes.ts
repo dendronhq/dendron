@@ -1,7 +1,6 @@
 import {
   ConfigUtils,
   DEngine,
-  NoteUtils,
   TaskNoteUtils,
   VaultUtils,
   VSRange,
@@ -16,7 +15,7 @@ export type DecorationTaskNote = Decoration & {
 };
 
 /** Decorates the note `fname` in vault `vaultName` if the note is a task note. */
-export function decorateTaskNote({
+export async function decorateTaskNote({
   engine,
   range,
   fname,
@@ -33,11 +32,7 @@ export function decorateTaskNote({
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
 
-  const note = NoteUtils.getNotesByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  })[0];
+  const note = (await engine.findNotes({ fname, vault }))[0];
   if (!note || !TaskNoteUtils.isTaskNote(note)) return;
 
   // Determines whether the task link is preceded by an empty or full checkbox

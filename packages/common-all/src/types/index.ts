@@ -19,6 +19,7 @@ export * from "./unified";
 export * from "./events";
 export * from "./cacheData";
 export * from "./errorTypes";
+export * from "./store";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {
@@ -69,6 +70,10 @@ export type DendronSiteFM = {
   canonicalUrl?: string;
   nav_order?: number;
   nav_exclude?: boolean;
+  /**
+   * Should exclude children from nav
+   */
+  nav_exclude_children?: boolean;
   permalink?: string;
   /**
    * If collection, don't show in nav

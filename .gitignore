@@ -32,3 +32,4 @@ pkgjson.code-search
 packages/nextjs-template/public
 .npmrc
 .env.production
+packages/dendron-viz/lib

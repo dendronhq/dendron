@@ -2,27 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "test:watch",
-      "command": "yarn test:watch ${relativeFile} -u",
-      "type": "shell",
-      "problemMatcher": [],
-      "options": {
-        "env": {
-          "LOG_DST": "../../logs/dendron-cli.log"
-        }
-      }
-    },
-    {
-      "type": "npm",
-      "label": "test:all",
-      "script": "test",
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "chmod +x",
       "command": "chmod +x lib/bin/dendron-cli.js",
       "type": "shell",
@@ -93,6 +72,17 @@
       "label": "gdoc-export-v2",
       "type": "shell",
       "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPodV2 --inlineConfig Key=exportScope,Value=Note --vault vault --fname dendron.alternatives --podId testing-gdoc --wsRoot ${workspaceFolder}/../../test-workspace ",
+      "problemMatcher": []
+    },
+    {
+      "label": "publish --help",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli publish --help --wsRoot ${workspaceFolder}/../../test-workspace "
+    },
+    {
+      "label": "visualize",
+      "type": "shell",
+      "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli visualize --wsRoot ${workspaceFolder}/../../test-workspace",
       "problemMatcher": []
     }
   ]

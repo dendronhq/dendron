@@ -25,6 +25,16 @@ const execaHookPayload = `module.exports = async function({note, execa, _}) {
     return {note};
 };
 `;
+
+const axiosHookPayload = `module.exports = async function({note, axios}) {
+  // Get some axios property that's very unlikely to change
+  // expected here: 'application/json'
+  const contentType = axios.defaults.headers.common.Accept.split(",")[0];
+  note.body = note.body + " " + contentType;
+  return {note};
+};
+`;
+
 const { writeJSHook } = TestHookUtils;
 
 const writeExecaHook = (root: string, fname: string) => {
@@ -40,7 +50,7 @@ const writeNote = async ({
   engine: DEngineClient;
 }) => {
   const note = NoteUtils.create(noteOpts);
-  await engine.writeNote(note, { newNode: true });
+  await engine.writeNote(note);
   const out = engine.notes[note.id];
   return { note: out };
 };
@@ -76,7 +86,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -119,7 +129,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -168,7 +178,7 @@ describe("engine", () => {
         body: "hooked body",
         vault,
       });
-      await engine.writeNote(note, { newNode: true });
+      await engine.writeNote(note);
       const ent = engine.notes["hooked"];
       expect(
         await AssertUtils.assertInString({
@@ -190,6 +200,54 @@ describe("engine", () => {
               onCreate: [
                 {
                   id: "hello",
+                  pattern: "*",
+                  type: "js",
+                },
+              ],
+            };
+            ConfigUtils.setHooks(config, hooks);
+            return config;
+          },
+          { wsRoot }
+        );
+      },
+    }
+  );
+
+  testWithEngine(
+    "axios available",
+    async ({ engine, vaults }) => {
+      const vault = _.find(vaults, { fsPath: "vault1" })!;
+      const note = NoteUtils.create({
+        id: "hooked",
+        fname: "hooked",
+        body: "hooked body",
+        vault,
+      });
+      await engine.writeNote(note);
+      const ent = engine.notes["hooked"];
+      expect(
+        await AssertUtils.assertInString({
+          body: ent.body,
+          match: ["hooked body application/json"],
+        })
+      ).toBeTruthy();
+    },
+    {
+      initHooks: true,
+      preSetupHook: async ({ wsRoot }) => {
+        const hookPath = path.join(
+          wsRoot,
+          CONSTANTS.DENDRON_HOOKS_BASE,
+          "content.js"
+        );
+        fs.writeFileSync(hookPath, axiosHookPayload);
+        TestConfigUtils.withConfig(
+          (config) => {
+            const hooks: DHookDict = {
+              onCreate: [
+                {
+                  id: "content",
                   pattern: "*",
                   type: "js",
                 },
@@ -268,7 +326,7 @@ describe("engine", () => {
           body: "hooked body",
           vault,
         });
-        await engine.writeNote(note, { newNode: true, runHooks: false });
+        await engine.writeNote(note, { runHooks: false });
         const ent = engine.notes["hooked"];
         expect(
           await AssertUtils.assertInString({
@@ -349,7 +407,7 @@ describe("remote engine", () => {
           body: "hooked body",
           vault,
         });
-        const resp = await engine.writeNote(note, { newNode: true });
+        const resp = await engine.writeNote(note);
         expect(
           resp.error!.message.startsWith("NoteProps is undefined")
         ).toBeTruthy();

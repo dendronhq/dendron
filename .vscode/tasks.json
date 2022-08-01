@@ -9,6 +9,18 @@
       "problemMatcher": [],
       "label": "generate JSON schema",
       "detail": "node packages/dendron-cli/lib/bin/dendron-cli.js dev generate_json_schema_from_config"
-    }
+    },
+    {
+      "label": "test:watch",
+      "command": "yarn test ${relativeFile} --watch --bail -u",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "LOG_LEVEL": "info",
+          "LOG_DST": "${workspaceFolder}/engine-test-utils.log",
+        }
+      }
+    },
   ]
 }

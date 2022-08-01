@@ -27,6 +27,10 @@ export enum VSCodeEvents {
   FeatureShowcaseDisplayed = "FeatureShowcasedDisplayed",
   FeatureShowcaseResponded = "FeatureShowcaseResponded",
   HelpAndFeedbackItemClicked = "HelpAndFeedbackItemClicked",
+  BacklinksPanelUsed = "BacklinksPanelUsed",
+  RecentWorkspacesPanelUsed = "RecentWorkspacesPanelUsed",
+  V100ReleaseNotesShown = "V100ReleaseNotesShown",
+  NoteTraitsInitialized = "NoteTraitsInitialized",
 }
 
 export enum CLIEvents {
@@ -40,13 +44,22 @@ export enum CLIEvents {
 export enum TutorialEvents {
   WelcomeShow = "WelcomeShow",
   ClickStart = "Getting_Started_Clicked",
-  Tutorial_0_Show = "Tutorial_0_Show",
-  Tutorial_1_Show = "Tutorial_1_Show",
-  Tutorial_2_Show = "Tutorial_2_Show",
-  Tutorial_3_Show = "Tutorial_3_Show",
-  Tutorial_4_Show = "Tutorial_4_Show",
-  Tutorial_5_Show = "Tutorial_5_Show",
+  TutorialNoteViewed = "TutorialNoteViewed",
+  TutorialPreviewLinkClicked = "TutorialPreviewLinkClicked",
+  TutorialWorkspaceLaunching = "TutorialWorkspaceLaunching",
 }
+
+export type TutorialPreviewLinkClickedPayload = {
+  linkType: "WIKI" | "ASSET" | "WEBSITE" | "TEXT" | "COMMAND" | "UNKNOWN";
+  href: string;
+};
+
+export type TutorialNoteViewedPayload = {
+  tutorialType: string;
+  fname: string;
+  currentStep: number;
+  totalSteps: number;
+};
 
 export enum KeybindingConflictDetectedSource {
   activation = "activation",
@@ -58,6 +71,16 @@ export enum ConfirmStatus {
   rejected = "rejected",
 }
 
+export type RefactoringCommandUsedPayload = {
+  command: string;
+  numVaults: number;
+  traits: string[];
+  numChildren: number;
+  numLinks: number;
+  numChars: number;
+  noteDepth: number;
+};
+
 export enum ExtensionEvents {
   VimExtensionInstalled = "Vim_Extension_Installed",
   IncompatibleExtensionsWarned = "Incompatible_Extensions_Warned",
@@ -65,6 +88,8 @@ export enum ExtensionEvents {
   KeybindingConflictDetected = "Keybinding_Conflict_Detected",
   ShowKeybindingConflictAccepted = "Show_Keybinding_Conflict_Accepted",
   ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
+  DeprecationNoticeShow = "DeprecationNoticeShow",
+  DeprecationNoticeAccept = "DeprecationNoticeAccept",
 }
 
 export enum LookupEvents {
@@ -115,13 +140,19 @@ export enum ConfigEvents {
   DeprecatedConfigMessageConfirm = "DeprecatedConfigMessageConfirm",
   DeprecatedConfigMessageShow = "ShowDeprecatedConfigMessage",
   MissingDefaultConfigMessageConfirm = "MissingDefaultConfigMessageConfirm",
+  DuplicateConfigEntryMessageShow = "DuplicateConfigEntryMessageShow",
+  DuplicateConfigEntryMessageConfirm = "DuplicateConfigEntryMessageConfirm",
   MissingSelfContainedVaultsMessageShow = "MissingSelfContainedVaultsMessageShow",
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
+  OutdatedSeedVaultMessageShow = "OutdatedSeedVaultMessageShow",
+  OutdatedSeedVaultMessageAccept = "OutdatedSeedVaultMessageAccept",
 }
 
 export enum MigrationEvents {
   MigrationSucceeded = "Migration_Succeeded",
   MigrationFailed = "Migration_Failed",
+  ManualUpgradeMessageShow = "ManualUpgradeMessageShow",
+  ManualUpgradeMessageConfirm = "ManualUpgradeMessageConfirm",
 }
 
 export enum ContextualUIEvents {
@@ -134,6 +165,7 @@ export enum ContextualUIEvents {
 export enum WorkspaceEvents {
   AutoFix = "AutoFix",
   DuplicateNoteFound = "DuplicateNoteFound",
+  TransitiveDepsWarningShow = "TransitiveDepsWarningShow",
 }
 
 export enum NativeWorkspaceEvents {
@@ -142,8 +174,16 @@ export enum NativeWorkspaceEvents {
 
 export enum EngagementEvents {
   NoteViewed = "NoteViewed",
+  NoteScrolled = "NoteScrolled",
   EngineStateChanged = "EngineStateChanged",
   AdditionalNoteFromMeetingNoteCreated = "AdditionalNoteFromMeetingNoteCreated",
+  TemplateApplied = "TemplateApplied",
+  RefactoringCommandUsed = "RefactoringCommandUsed",
+}
+
+export enum NoteScrolledSource {
+  EDITOR = "EDITOR",
+  PREVIEW = "PREVIEW",
 }
 
 export enum AppNames {
@@ -154,6 +194,13 @@ export enum AppNames {
 
 export enum GraphEvents {
   GraphThemeChanged = "GraphThemeChanged",
+  GraphViewUsed = "GraphViewUsed",
+  GraphPanelUsed = "GraphPanelUsed",
+}
+
+export enum TreeViewEvents {
+  NoteOmittedErrorMessageShow = "NoteOmittedErrorMessageShow",
+  NoteOmittedErrorMessageConfirm = "NoteOmittedErrorMessageConfirm",
 }
 
 export const DendronEvents = {
@@ -169,4 +216,5 @@ export const DendronEvents = {
   WorkspaceEvents,
   EngagementEvents,
   GraphEvents,
+  TreeViewEvents,
 };

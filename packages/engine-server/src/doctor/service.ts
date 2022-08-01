@@ -10,24 +10,28 @@ import {
   genUUID,
   isNotUndefined,
   NoteChangeEntry,
+  NoteDicts,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
   isSelfContainedVaultFolder,
-  vault2Path,
+  pathForVaultRoot,
 } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DEPRECATED_PATHS, Git, WorkspaceService } from "..";
+import { DEPRECATED_PATHS, Git, MDUtilsV5, WorkspaceService } from "..";
+import { DConfig } from "../config";
+import { ProcMode } from "../markdown";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
 import { DendronASTDest } from "../markdown/types";
-import { MDUtilsV4 } from "../markdown/utils";
-import fs from "fs-extra";
-import { DConfig } from "../config";
 
 export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",
@@ -74,8 +78,12 @@ export class DoctorService implements Disposable {
     this.loggerDispose();
   }
 
-  findBrokenLinks(note: NoteProps, notes: NoteProps[], engine: DEngineClient) {
-    const { wsRoot, vaults } = engine;
+  findBrokenLinks(
+    note: NoteProps,
+    noteDicts: NoteDicts,
+    engine: DEngineClient
+  ) {
+    const { vaults } = engine;
     const links = note.links;
     if (_.isEmpty(links)) {
       return [];
@@ -96,12 +104,11 @@ export class DoctorService implements Disposable {
         if (!vault) return false;
       }
       const isMultiVault = vaults.length > 1;
-      const noteExists = NoteUtils.getNoteByFnameV5({
-        fname: link.to!.fname as string,
-        vault: hasVaultPrefix ? vault! : note.vault,
-        notes,
-        wsRoot,
-      });
+      const noteExists: NoteProps | undefined = NoteDictsUtils.findByFname(
+        link.to!.fname as string,
+        noteDicts,
+        hasVaultPrefix ? vault! : note.vault
+      )[0];
       if (hasVaultPrefix) {
         // true: link w/ vault prefix that points to nothing. (candidate for sure)
         // false: link w/ vault prefix that points to a note. (valid link)
@@ -123,12 +130,19 @@ export class DoctorService implements Disposable {
   getBrokenLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
     const { vaults } = engine;
     let brokenWikiLinks: DLink[] = [];
+    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
         return;
       }
-      const brokenLinks = this.findBrokenLinks(note, notes, engine);
+      const brokenLinks = this.findBrokenLinks(
+        note,
+        { notesById, notesByFname },
+        engine
+      );
       brokenWikiLinks = brokenWikiLinks.concat(brokenLinks);
 
       return true;
@@ -183,13 +197,19 @@ export class DoctorService implements Disposable {
 
     let notes: NoteProps[];
     if (_.isUndefined(candidates)) {
-      notes = query
-        ? engine.queryNotesSync({ qs: query, originalQS: query }).data
-        : _.values(engine.notes);
+      notes =
+        (query
+          ? engine.queryNotesSync({ qs: query, originalQS: query }).data
+          : _.values(engine.notes)) ?? [];
     } else {
       notes = candidates;
     }
-    notes = notes.filter((n) => !n.stub);
+    if (notes) {
+      notes = notes.filter((n) => !n.stub);
+    }
+    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
     // this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
     let resp: any;
@@ -202,12 +222,6 @@ export class DoctorService implements Disposable {
     const engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
-          // @ts-ignore
-          leading: true,
-        });
-    const engineGetNoteByPath = dryRun
-      ? () => {}
-      : throttle(_.bind(engine.getNoteByPath, engine), 300, {
           // @ts-ignore
           leading: true,
         });
@@ -294,18 +308,24 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
+          const proc = MDUtilsV5._procRemark(
+            {
+              mode: ProcMode.IMPORT,
+              flavor: ProcFlavor.REGULAR,
+            },
+            {
+              dest: DendronASTDest.MD_DENDRON,
+              engine,
+              fname: note.fname,
+              vault: note.vault,
+            }
+          );
           const newBody = await proc()
             .use(RemarkUtils.h1ToTitle(note, changes))
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note, { updateExisting: true });
+            await engineWrite(note);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -318,18 +338,24 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const proc = MDUtilsV4.procFull({
-            dest: DendronASTDest.MD_DENDRON,
-            engine,
-            fname: note.fname,
-            vault: note.vault,
-          });
+          const proc = MDUtilsV5._procRemark(
+            {
+              mode: ProcMode.IMPORT,
+              flavor: ProcFlavor.REGULAR,
+            },
+            {
+              dest: DendronASTDest.MD_DENDRON,
+              engine,
+              fname: note.fname,
+              vault: note.vault,
+            }
+          );
           const newBody = await proc()
             .use(RemarkUtils.h1ToH2(note, changes))
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note, { updateExisting: true });
+            await engineWrite(note);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -349,7 +375,7 @@ export class DoctorService implements Disposable {
             });
           }
           if (!_.isEmpty(changes)) {
-            await engineDelete(note);
+            await engineDelete(note.id);
             const vname = VaultUtils.getName(note.vault);
             this.L.info(
               `doctor ${DoctorActionsEnum.REMOVE_STUBS} ${note.fname} ${vname}`
@@ -365,11 +391,7 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
         notes = this.getBrokenLinkDestinations(notes, engine);
         doctorAction = async (note: NoteProps) => {
-          await engineGetNoteByPath({
-            npath: note.fname,
-            createIfNew: true,
-            vault: note.vault,
-          });
+          await engineWrite(note);
           numChanges += 1;
         };
         break;
@@ -380,7 +402,6 @@ export class DoctorService implements Disposable {
           note.id = genUUID();
           await engine.writeNote(note, {
             runHooks: false,
-            updateExisting: true,
           });
           numChanges += 1;
         };
@@ -389,7 +410,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         resp = [];
         doctorAction = async (note: NoteProps) => {
-          const brokenLinks = this.findBrokenLinks(note, notes, engine);
+          const brokenLinks = this.findBrokenLinks(
+            note,
+            { notesById, notesByFname },
+            engine
+          );
           if (brokenLinks.length > 0) {
             resp.push({
               file: note.fname,
@@ -418,7 +443,7 @@ export class DoctorService implements Disposable {
         const vaultsToFix = (
           await Promise.all(
             vaults.map(async (vault) => {
-              const vaultDir = vault2Path({ wsRoot, vault });
+              const vaultDir = pathForVaultRoot({ wsRoot, vault });
               const gitPath = path.join(vaultDir, ".git");
               // Already a remote vault
               if (vault.remote !== undefined) return;
@@ -451,7 +476,7 @@ export class DoctorService implements Disposable {
           await asyncLoopOneAtATime(
             vaultsToFix,
             async ({ vault, remoteUrl }) => {
-              const vaultDir = vault2Path({ wsRoot, vault });
+              const vaultDir = pathForVaultRoot({ wsRoot, vault });
               this.L.info({
                 ctx,
                 vaultDir,
@@ -557,7 +582,7 @@ export class DoctorService implements Disposable {
             custom: { ...note.custom, pods },
           };
           // update note
-          await engine.writeNote(updatedNote, { updateExisting: true });
+          await engine.writeNote(updatedNote);
         };
         break;
       }

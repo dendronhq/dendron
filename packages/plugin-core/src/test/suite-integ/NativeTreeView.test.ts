@@ -1,18 +1,19 @@
-import { expect } from "../testUtilsv2";
-import { describe, beforeEach } from "mocha";
-import { EngineNoteProvider } from "../../views/EngineNoteProvider";
-import { describeMultiWS } from "../testUtilsV3";
-import { MockEngineEvents } from "./MockEngineEvents";
-import { NoteProps } from "@dendronhq/common-all";
-import { ExtensionProvider } from "../../ExtensionProvider";
-import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
+import { DendronError, NoteProps, TreeUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import { Uri } from "vscode";
-import path from "path";
-import { VSCodeUtils } from "../../vsCodeUtils";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
+import { after, before, beforeEach, describe } from "mocha";
+import path from "path";
+import sinon from "sinon";
+import { Uri } from "vscode";
+import { DeleteCommand } from "../../commands/DeleteCommand";
+import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { EngineNoteProvider } from "../../views/EngineNoteProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { expect } from "../testUtilsv2";
+import { describeMultiWS } from "../testUtilsV3";
+import { MockEngineEvents } from "./MockEngineEvents";
 
 function getNoteUri(opts: { note: NoteProps; wsRoot: string }) {
   const { note, wsRoot } = opts;
@@ -58,7 +59,7 @@ async function runDeleteNote(opts: { noteId: string }) {
   const { noteId } = opts;
   const noteToDelete = engine.notes[noteId];
   const _fsPath = getNoteUri({ note: noteToDelete, wsRoot }).fsPath;
-  const deleteCmd = new DeleteNodeCommand();
+  const deleteCmd = new DeleteCommand();
   const deleteOpts = {
     _fsPath,
     noConfirm: true,
@@ -1789,6 +1790,67 @@ suite("NativeTreeView tests", function () {
         });
       });
     });
+  });
+  describe("error handling", function () {
+    describeMultiWS(
+      "GIVEN note id that is not in noteDict",
+      {
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: vaults[0],
+            fname: "foo",
+          });
+        },
+      },
+      () => {
+        let sortNotesAtLevelSpy: sinon.SinonSpy;
+
+        before(() => {
+          sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
+        });
+
+        after(() => {
+          sortNotesAtLevelSpy.restore();
+        });
+
+        test("THEN gracefully render only the available notes and log omitted note id.", async () => {
+          const mockEvents = new MockEngineEvents();
+          const provider = new EngineNoteProvider(mockEvents);
+
+          const props = await (provider.getChildren() as Promise<NoteProps[]>);
+
+          const vault1RootProps = props[0];
+
+          vault1RootProps.children.push("fake-id");
+
+          const fullTree = await getFullTree({
+            root: vault1RootProps,
+            provider,
+          });
+
+          const sortResps = sortNotesAtLevelSpy.returnValues;
+          const sortRespWithError = sortResps.find((sortResp) => {
+            return sortResp.error instanceof DendronError;
+          });
+          expect(fullTree).toEqual({
+            fname: "root",
+            childNodes: [
+              {
+                fname: "foo",
+                childNodes: [],
+              },
+            ],
+          });
+
+          expect(sortRespWithError !== undefined);
+          expect(sortRespWithError.error.payload).toEqual(
+            '{"omitted":["fake-id"]}'
+          );
+        });
+      }
+    );
   });
   describe("filesystem change interactions", function () {});
 });

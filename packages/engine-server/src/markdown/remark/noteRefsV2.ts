@@ -1,7 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable func-names */
 import {
+  ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
   DendronError,
+  DEngineClient,
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
@@ -9,23 +12,25 @@ import {
   DVault,
   ErrorFactory,
   getSlugger,
+  IDendronError,
+  IntermediateDendronConfig,
   isBlockAnchor,
   NoteProps,
   NoteUtils,
   RespV2,
   VaultUtils,
-  ConfigUtils,
-  DEngineClient,
-  IDendronError,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import { RemarkUtils } from "../remark";
 import _ from "lodash";
-import { brk, html, paragraph, root } from "mdast-builder";
+import { Heading } from "mdast";
+import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { MdastUtils } from "..";
 import { SiteUtils } from "../../topics/site";
+import { RemarkUtils } from "../remark";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -37,7 +42,6 @@ import { ParentWithIndex } from "../utils";
 import { MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
-import { MdastUtils, MDUtilsV4 } from "..";
 
 const LINK_REGEX = /^!\[\[(.+?)\]\]/;
 
@@ -66,6 +70,76 @@ const createMissingNoteErrorMsg = (opts: { fname: string; vname?: string }) => {
   }
   return out.join(" ");
 };
+
+function gatherNoteRefs({
+  link,
+  engine,
+  vault,
+}: {
+  link: DNoteRefLink;
+  engine: DEngineClient;
+  vault: DVault;
+}) {
+  let noteRefs: DNoteLoc[] = [];
+  if (link.from.fname.endsWith("*")) {
+    const resp = engine.queryNotesSync({
+      qs: link.from.fname,
+      originalQS: link.from.fname,
+      vault,
+    });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      "fname"
+    );
+  } else {
+    noteRefs.push(link.from);
+  }
+  return noteRefs;
+}
+
+function isBeginBlockAnchorId(anchorId: string) {
+  return anchorId === "begin";
+}
+
+function isEndBlockAnchorId(anchorId: string) {
+  return anchorId === "end";
+}
+
+function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
+  const procData = MDUtilsV5.getProcData(proc);
+  const { config, fname, engine, vault, dest } = procData;
+
+  // pretty refs not valid for regular markdown
+  if (
+    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
+  ) {
+    return false;
+  }
+
+  // The note that contains this reference might override the pretty refs option for references inside it.
+  const containingNote = NoteUtils.getNoteByFnameFromEngine({
+    fname,
+    vault,
+    engine,
+  });
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
+
+  let prettyRefs =
+    ConfigUtils.getEnablePrettyRefs(config, {
+      note: containingNote,
+      shouldApplyPublishRules,
+    }) ?? true;
+  if (
+    containingNote?.custom.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom.usePrettyRefs)
+  ) {
+    prettyRefs = containingNote.custom.usePrettyRefs;
+  }
+  return prettyRefs;
+}
 
 const tryGetNotes = ({
   fname,
@@ -113,29 +187,6 @@ function attachParser(proc: Unified.Processor) {
     return value.indexOf("![[", fromIndex);
   }
 
-  function inlineTokenizer(eat: Eat, value: string) {
-    const match = LINK_REGEX.exec(value);
-    if (match) {
-      const linkMatch = match[1].trim();
-      const link = LinkUtils.parseNoteRef(linkMatch);
-      // If the link is same file [[#header]], it's implicitly to the same file it's located in
-      if (link.from.fname === "")
-        link.from.fname = MDUtilsV5.getProcData(proc).fname;
-      const { value } = LinkUtils.parseLink(linkMatch);
-
-      const refNote: NoteRefNoteV4 = {
-        type: DendronASTTypes.REF_LINK_V2,
-        data: {
-          link,
-        },
-        value,
-      };
-
-      return eat(match[0])(refNote);
-    }
-    return;
-  }
-
   function inlineTokenizerV5(eat: Eat, value: string) {
     const procOpts = MDUtilsV5.getProcOpts(proc);
     const match = LINK_REGEX.exec(value);
@@ -170,32 +221,27 @@ function attachParser(proc: Unified.Processor) {
     }
     return;
   }
-  inlineTokenizer.locator = locator;
   inlineTokenizerV5.locator = locator;
 
   const Parser = proc.Parser;
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   const inlineMethods = Parser.prototype.inlineMethods;
 
-  if (MDUtilsV5.isV5Active(proc)) {
-    inlineTokenizers.refLinkV2 = inlineTokenizerV5;
-    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
-  } else {
-    inlineTokenizers.refLinkV2 = inlineTokenizer;
-    inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
-  }
+  inlineTokenizers.refLinkV2 = inlineTokenizerV5;
+  inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
   return Parser;
 }
 
-function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
+function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
-  const copts = _.defaults(opts || {}, {});
   const { dest } = MDUtilsV5.getProcData(proc);
 
   if (visitors) {
     visitors.refLinkV2 = function refLinkV2(node: NoteRefNoteV4) {
       const ndata = node.data;
+
+      // converting to itself (used for doctor commands. preserve existing format)
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
 
@@ -218,164 +264,17 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
         return `![[${vaultPrefix}${link}${suffix}]]`;
       }
-
-      const { error, data } = convertNoteRef({
-        link: ndata.link,
-        proc,
-        compilerOpts: copts,
-      });
-      if (error) {
-        return `ERROR converting ref: ${error.message}`;
-      }
-      return data;
+      return;
     };
   }
 }
 
 const MAX_REF_LVL = 3;
 
+// ^m0vy37pdpzgy
 /**
- * Look at links and do initial pass
+ * This exists because {@link dendronPub} converts note refs using the AST
  */
-function convertNoteRef(opts: ConvertNoteRefOpts): {
-  error: DendronError | undefined;
-  data: string | undefined;
-} {
-  let data: string | undefined;
-  const errors: IDendronError[] = [];
-  const { link, proc, compilerOpts } = opts;
-  const procData = MDUtilsV5.getProcData(proc);
-  const { noteRefLvl: refLvl, dest, config, fname } = procData;
-  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
-  let { vault } = procData;
-  const shouldApplyPublishRules =
-    MDUtilsV5.shouldApplyPublishingRules(proc) ||
-    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
-
-  if (link.data.vaultName) {
-    vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaults,
-      vname: link.data.vaultName,
-    })!;
-  }
-  if (!vault) {
-    return {
-      error: new DendronError({ message: "no vault specified" }),
-      data: "",
-    };
-  }
-  const { wikiLinkOpts } = compilerOpts;
-  let { prettyRefs } = compilerOpts;
-  if (refLvl >= MAX_REF_LVL) {
-    return {
-      error: new DendronError({ message: "too many nested note refs" }),
-      data,
-    };
-  }
-
-  // The note that contains this reference might override the pretty refs option for references inside it.
-  const containingNote = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  });
-  if (prettyRefs === undefined) {
-    prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
-      note: containingNote,
-      shouldApplyPublishRules,
-    });
-  }
-  if (
-    containingNote?.custom.usePrettyRefs !== undefined &&
-    _.isBoolean(containingNote.custom.usePrettyRefs)
-  ) {
-    prettyRefs = containingNote.custom.usePrettyRefs;
-  }
-
-  let noteRefs: DNoteLoc[] = [];
-  if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({
-      qs: link.from.fname,
-      originalQS: link.from.fname,
-      vault,
-    });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
-    );
-    noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
-      "fname"
-    );
-  } else {
-    noteRefs.push(link.from);
-  }
-  const out = noteRefs.map((ref) => {
-    const fname = ref.fname;
-    // TODO: find first unit with path
-    const npath = DNodeUtils.getFullPath({
-      wsRoot: engine.wsRoot,
-      vault,
-      basename: fname + ".md",
-    });
-    try {
-      const note = file2Note(npath, vault);
-      const body = note.body;
-      const { error, data } = convertNoteRefHelper({
-        body,
-        note,
-        link,
-        refLvl: refLvl + 1,
-        proc,
-        compilerOpts,
-      });
-      if (error) {
-        errors.push(error);
-      }
-      if (prettyRefs) {
-        let suffix = "";
-        let href = wikiLinkOpts?.useId ? note.id : fname;
-        if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-            fname,
-            engine,
-            vault,
-          });
-          if (!MDUtilsV5.isV5Active(proc)) {
-            suffix = ".html";
-          }
-          if (maybeNote?.custom.permalink === "/") {
-            href = "";
-            suffix = "";
-          }
-        }
-        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
-          suffix = ".md";
-        }
-        const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
-        const title = getTitle({
-          config,
-          note,
-          loc: ref,
-          shouldApplyPublishRules,
-        });
-        return renderPretty({
-          content: data,
-          title,
-          link,
-        });
-      } else {
-        return data;
-      }
-    } catch (err) {
-      const msg = `error reading file, ${npath}`;
-      errors.push(new DendronError({ message: msg }));
-      return msg;
-    }
-  });
-  return { error: undefined, data: out.join("\n") };
-}
-
 export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
@@ -440,12 +339,6 @@ export function convertNoteRefASTV2(
             suffix = "";
           }
         }
-        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
-          suffix = ".md";
-          // NOTE: parsing doesn't work properly for first line, not sure why
-          // this HACK fixes it
-          data.children = [brk].concat(data.children);
-        }
         let isPublished = true;
         if (dest === DendronASTDest.HTML) {
           // check if we need to check publishign rules
@@ -484,7 +377,7 @@ export function convertNoteRefASTV2(
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const engine = procData.engine || MDUtilsV4.getEngineFromProc(proc).engine;
+  const engine = procData.engine;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -495,50 +388,20 @@ export function convertNoteRefASTV2(
   }
 
   // figure out configs that change how we process the note reference
-  const { dest, config, vault: vaultFromProc, fname, vault } = procData;
+  const { dest, config, vault: vaultFromProc } = procData;
   // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
-  const shouldApplyPublishRules =
-    MDUtilsV5.shouldApplyPublishingRules(proc) ||
-    MDUtilsV4.getDendronData(proc).shouldApplyPublishRules;
-
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   const { wikiLinkOpts } = compilerOpts;
 
-  // The note that contains this reference might override the pretty refs option for references inside it.
-  const containingNote = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  });
-  let prettyRefs = ConfigUtils.getEnablePrettyRefs(config, {
-    shouldApplyPublishRules,
-    note: containingNote,
-  });
-  if (
-    prettyRefs &&
-    _.includes([DendronASTDest.MD_DENDRON, DendronASTDest.MD_REGULAR], dest)
-  ) {
-    prettyRefs = false;
-  }
+  const prettyRefs = shouldRenderPretty({ proc });
 
   const publishingConfig = ConfigUtils.getPublishingConfig(config);
   const duplicateNoteConfig = publishingConfig.duplicateNoteBehavior;
   // process note references.
-  let noteRefs: DNoteLoc[] = [];
+  // let noteRefs: DNoteLoc[] = [];
+  const vault = procData.vault;
+  const noteRefs: DNoteLoc[] = gatherNoteRefs({ link, engine, vault });
   if (link.from.fname.endsWith("*")) {
-    // wildcard reference case
-    const vault = procData.vault;
-    const resp = engine.queryNotesSync({
-      qs: link.from.fname,
-      originalQS: link.from.fname,
-      vault,
-    });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
-    );
-    noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
-      "fname"
-    );
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
       return { error: undefined, data: [MdastUtils.genMDErrorMsg(msg)] };
@@ -553,7 +416,11 @@ export function convertNoteRefASTV2(
       });
       let note: NoteProps;
       try {
-        note = file2Note(npath, vault as DVault);
+        const resp = file2Note(npath, vault as DVault);
+        if (ErrorUtils.isErrorResp(resp)) {
+          throw resp.error;
+        }
+        note = resp.data;
       } catch (err) {
         const msg = `error reading file, ${npath}`;
         return MdastUtils.genMDMsg(msg);
@@ -633,7 +500,6 @@ export function convertNoteRefASTV2(
       note = resp.data[0];
     }
 
-    noteRefs.push(link.from);
     const processedRefs = noteRefs.map((ref) => {
       const fname = note.fname;
       return processRef(ref, note, fname);
@@ -721,20 +587,26 @@ function prepareNoteRefIndices<T>({
   anchorEnd,
   bodyAST,
   makeErrorData,
+  enableSmartRef,
 }: {
   anchorStart?: string;
   anchorEnd?: string;
   bodyAST: DendronASTNode;
-  makeErrorData: (anchorName: string, anchorType: "Start" | "End") => T;
+  makeErrorData: (msg: string) => T;
+  enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;
   data: T | null;
   error: any;
 } {
+  const genErrorMsg = (anchorName: string, anchorType: "Start" | "End") => {
+    return `${anchorType} anchor ${anchorName} not found`;
+  };
+
   // TODO: can i just strip frontmatter when reading?
   let start: FindAnchorResult = {
-    type: "header",
+    type: "none",
     index: bodyAST.children[0]?.type === "yaml" ? 1 : 0,
   };
   let end: FindAnchorResult = null;
@@ -744,9 +616,19 @@ function prepareNoteRefIndices<T>({
       nodes: bodyAST.children,
       match: anchorStart,
     });
+    if (start?.type === "block-end") {
+      return {
+        data: makeErrorData(
+          "the '^end' anchor cannot be used as the starting anchor"
+        ),
+        start: null,
+        end: null,
+        error: null,
+      };
+    }
     if (_.isNull(start)) {
       return {
-        data: makeErrorData(anchorStart, "Start"),
+        data: makeErrorData(genErrorMsg(anchorStart, "Start")),
         start: null,
         end: null,
         error: null,
@@ -769,7 +651,7 @@ function prepareNoteRefIndices<T>({
     }
     if (_.isNull(end)) {
       return {
-        data: makeErrorData(anchorEnd, "End"),
+        data: makeErrorData(genErrorMsg(anchorEnd, "End")),
         start: null,
         end: null,
         error: null,
@@ -782,6 +664,29 @@ function prepareNoteRefIndices<T>({
   } else if (start.type === "list") {
     // If no end is specified and the start is a block anchor in a list, the end is the list element referenced by the start.
     end = { ...start };
+  }
+
+  if (
+    !anchorEnd &&
+    // smart header ref
+    ((start.type === "header" && enableSmartRef) ||
+      // smart block
+      start.type === "block-begin") &&
+    start.node
+  ) {
+    // if block-begin, accept header of any depth
+    const startHeaderDepth: number =
+      start.type === "header" ? start.node.depth : 99;
+    // anchor end is next header that is smaller or equal
+    const nodes = RemarkUtils.extractHeaderBlock(
+      bodyAST,
+      startHeaderDepth,
+      start.index,
+      // stop at first header
+      start.type === "block-begin"
+    );
+    // TODO: diff behavior if we fail at extracting header block
+    end = { index: start.index + nodes.length - 1, type: "header" };
   }
 
   // Handle anchors inside lists. Lists need to slice out sibling list items, and extract out nested lists.
@@ -824,9 +729,7 @@ function convertNoteRefHelperAST(
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
   // Workaround until all usages of MDUtilsV4 are removed
-  const engine =
-    MDUtilsV5.getProcData(proc).engine ||
-    MDUtilsV4.getEngineFromProc(proc).engine;
+  const { engine, config } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -843,8 +746,7 @@ function convertNoteRefHelperAST(
     MDUtilsV5.getProcOpts(proc)
   );
 
-  const wsRoot = engine.wsRoot;
-  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note, wsRoot }));
+  noteRefProc = noteRefProc.data("fm", MDUtilsV5.getFM({ note }));
   MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
 
   const bodyAST: DendronASTNode = noteRefProc.parse(
@@ -858,12 +760,11 @@ function convertNoteRefHelperAST(
 
   const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
+    enableSmartRef: ConfigUtils.getWorkspace(config).enableSmartRefs,
     anchorEnd,
     bodyAST,
-    makeErrorData: (anchorName, anchorType) => {
-      return MdastUtils.genMDMsg(
-        `${anchorType} anchor ${anchorName} not found`
-      );
+    makeErrorData: (msg) => {
+      return MdastUtils.genMDMsg(msg);
     },
   });
   if (data) return { data, error };
@@ -886,13 +787,6 @@ function convertNoteRefHelperAST(
       data,
     };
   } catch (err) {
-    console.log(
-      JSON.stringify({
-        ctx: "convertNoteRefHelperAST",
-        msg: "Failed to render note reference",
-        err,
-      })
-    );
     return {
       error: new DendronError({
         message: "error processing note ref",
@@ -903,66 +797,38 @@ function convertNoteRefHelperAST(
   }
 }
 
-function convertNoteRefHelper(
-  opts: ConvertNoteRefHelperOpts
-): Required<RespV2<string>> {
-  const { body, proc, refLvl, link } = opts;
-  const noteRefProc = proc();
-  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
-  MDUtilsV5.setProcData(noteRefProc, { fname: link.from.fname });
-  MDUtilsV5.setNoteRefLvl(noteRefProc, refLvl);
-  const bodyAST = noteRefProc.parse(body) as DendronASTNode;
-  const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
-
-  // Make sure to get all footnote definitions, including ones not within the range, in case they are used inside the range
-  const footnotes = RemarkUtils.extractFootnoteDefs(bodyAST);
-  const { start, end, data, error } = prepareNoteRefIndices({
-    anchorStart,
-    anchorEnd,
-    bodyAST,
-    makeErrorData: (anchorName, anchorType) => {
-      return `${anchorType} anchor ${anchorName} not found`;
-    },
-  });
-  if (data) return { data, error };
-
-  // slice of interested range
-  try {
-    bodyAST.children = bodyAST.children.slice(start?.index, end?.index);
-    // Add all footnote definitions back. We might be adding duplicates if the definition was already in range, but rendering handles this correctly.
-    // We also might be adding definitions that weren't used in this range, but rendering will simply ignore those.
-    bodyAST.children.push(...footnotes);
-    const procTree = noteRefProc.runSync(bodyAST);
-    let out = noteRefProc.stringify(procTree);
-    if (anchorStartOffset) {
-      out = out.split("\n").slice(anchorStartOffset).join("\n");
-    }
-
-    return { error: null, data: out };
-  } catch (err) {
-    console.log("ERROR WITH REF");
-    console.log(JSON.stringify(err));
-    return {
-      error: new DendronError({
-        message: "error processing note ref",
-        payload: err,
-      }),
-      data: "error processing ref",
-    };
-  }
-}
-
 type FindAnchorResult =
   | {
-      type: "header" | "block";
+      type: "block";
       index: number;
-      anchorType?: "block" | "header";
+      anchorType?: "block";
+      node?: Node;
+    }
+  | {
+      type: "header";
+      index: number;
+      anchorType?: "header";
+      node?: Heading;
+    }
+  | {
+      type: "block-begin";
+      index: number;
+      node: Node;
+    }
+  | {
+      type: "block-end";
+      index: number;
+      node: Node;
     }
   | {
       type: "list";
       index: number;
       ancestors: ParentWithIndex[];
       anchorType?: "block";
+    }
+  | {
+      type: "none";
+      index: number;
     }
   | null;
 
@@ -981,29 +847,46 @@ function findAnchor({
 }): FindAnchorResult {
   if (isBlockAnchor(match)) {
     const anchorId = match.slice(1);
+    if (isBeginBlockAnchorId(anchorId)) {
+      return findBeginBlockAnchor({ nodes });
+    }
+    if (isEndBlockAnchorId(anchorId)) {
+      return findEndBlockAnchor({ nodes });
+    }
     return findBlockAnchor({ nodes, match: anchorId });
   } else {
-    return findHeader({ nodes, match, slugger: getSlugger() });
+    return MdastUtils.findHeader({ nodes, match, slugger: getSlugger() });
   }
 }
 
-function findHeader({
-  nodes,
-  match,
-  slugger,
-}: {
-  nodes: DendronASTNode["children"];
-  match: string;
-  slugger: ReturnType<typeof getSlugger>;
-}): FindAnchorResult {
-  const foundIndex = MdastUtils.findIndex(nodes, (node: Node, idx: number) => {
-    if (idx === 0 && match === "*") {
-      return false;
-    }
-    return MdastUtils.matchHeading(node, match, { slugger });
-  });
-  if (foundIndex < 0) return null;
-  return { type: "header", index: foundIndex, anchorType: "header" };
+/**
+ * Search for start of document and traverse until first header
+ */
+function findBeginBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
+  // TODO: error if no first node found
+  const firstNode = nodes[0];
+  return {
+    type: "block-begin",
+    index: 0,
+    node: firstNode,
+  };
+}
+
+/**
+ * Search for end of document;
+ */
+function findEndBlockAnchor({ nodes }: { nodes: Node[] }): FindAnchorResult {
+  // TODO: error if no first node found
+  const lastNode = _.last(nodes);
+  if (!lastNode) {
+    // TODO: should not happen
+    throw Error("no nodes found for end-anchor");
+  }
+  return {
+    type: "block-end",
+    index: nodes.length,
+    node: lastNode,
+  };
 }
 
 /** Searches for block anchors, then returns the index for the top-level ancestor.
@@ -1059,25 +942,6 @@ function findBlockAnchor({
   }
   // Otherwise, it's an anchor inside some regular block. The anchor refers to the block it's inside of.
   return { type: "block", index: foundIndex, anchorType: "block" };
-}
-
-function renderPretty(opts: { content: string; title: string; link: string }) {
-  const { content, title, link } = opts;
-  return `<div class="portal-container">
-<div class="portal-head">
-<div class="portal-backlink" >
-<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
-</div>
-</div>
-<div id="portal-parent-anchor" class="portal-parent" markdown="1">
-<div class="portal-parent-fader-top"></div>
-<div class="portal-parent-fader-bottom"></div>        
-
-${_.trim(content)}
-
-</div>    
-</div>`;
 }
 
 function getTitle(opts: {

@@ -462,9 +462,7 @@ export class AirtableUtils {
           ...note,
           custom: { ...note.custom, pods },
         };
-        const out = await engine.writeNote(updatedNote, {
-          updateExisting: true,
-        });
+        const out = await engine.writeNote(updatedNote);
         return out;
       })
     );

@@ -4,6 +4,7 @@ import {
   DendronError,
   DEngineClient,
   DVault,
+  FOLDERS,
   IDendronError,
   IntermediateDendronConfig,
   NoteProps,
@@ -62,7 +63,7 @@ export class MarkdownExportPodV2
     const { destination, exportScope } = this._config;
 
     if (destination === "clipboard") {
-      const exportedNotes = this.renderNote(input[0]);
+      const exportedNotes = await this.renderNote(input[0]);
       return ResponseUtil.createHappyResponse({
         data: {
           exportedNotes,
@@ -83,7 +84,7 @@ export class MarkdownExportPodV2
     const result = await Promise.all(
       input.map(async (note) => {
         try {
-          const body = this.renderNote(note);
+          const body = await this.renderNote(note);
           const hpath = this.dot2Slash(note.fname) + ".md";
           const vname = VaultUtils.getName(note.vault);
           const fpath = path.join(destination, vname, hpath);
@@ -116,12 +117,12 @@ export class MarkdownExportPodV2
         const destPath = path.join(
           destination,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         const srcPath = path.join(
           this._engine.wsRoot,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         if (fs.pathExistsSync(srcPath)) {
           await fs.copy(srcPath, destPath);
@@ -151,7 +152,7 @@ export class MarkdownExportPodV2
     }
   }
 
-  renderNote(input: NoteProps) {
+  async renderNote(input: NoteProps) {
     const {
       convertTagNotesToLinks = false,
       convertUserNotesToLinks = false,
@@ -191,7 +192,7 @@ export class MarkdownExportPodV2
     } else {
       remark = remark.use(RemarkUtils.convertLinksFromDotNotation(input, []));
     }
-    const out = remark.processSync(input.body).toString();
+    const out = (await remark.process(input.body)).toString();
     return _.trim(out);
   }
 

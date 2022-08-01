@@ -124,7 +124,7 @@ suite("DoctorCommandTest", function () {
     },
     () => {
       test("THEN fix id", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         await WSUtils.openNote(note);
 
         const ext = ExtensionProvider.getExtension();
@@ -136,12 +136,7 @@ suite("DoctorCommandTest", function () {
           })
         );
         await cmd.run();
-        note = NoteUtils.getNoteByFnameV5({
-          wsRoot,
-          notes: engine.notes,
-          fname: "test",
-          vault: vaults[0],
-        })!;
+        note = (await engine.findNotes({ fname: "test", vault: vaults[0] }))[0];
         expect(note.id === "-bad-id").toBeFalsy();
       });
     }
@@ -153,6 +148,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     "AND when cancelled",
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 5e3,
     },
     () => {
       test("THEN create no notes", async () => {
@@ -200,6 +196,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
     "GIVEN broken link with alias",
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 5e3,
     },
     () => {
       test("THEN fix link", async () => {
@@ -483,14 +480,14 @@ suite("REGENERATE_NOTE_ID", function () {
     },
     () => {
       test("THEN fix file", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
-        const oldNote = NoteUtils.getNoteOrThrow({
-          fname: "foo",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        });
+        const oldNote = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         const oldId = oldNote.id;
         await WSUtils.openNote(oldNote);
         const ext = ExtensionProvider.getExtension();
@@ -510,12 +507,7 @@ suite("REGENERATE_NOTE_ID", function () {
               Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
             );
           await cmd.run();
-          const note = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
+          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
           expect(note?.id).toNotEqual(oldId);
         } finally {
           gatherInputsStub.restore();
@@ -532,26 +524,26 @@ suite("REGENERATE_NOTE_ID", function () {
     },
     () => {
       test("THEN regenerate note id", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
-        const oldRootId = NoteUtils.getNoteOrThrow({
-          fname: "root",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        }).id;
-        const oldFooId = NoteUtils.getNoteOrThrow({
-          fname: "foo",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        }).id;
-        const oldBarId = NoteUtils.getNoteOrThrow({
-          fname: "bar",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        }).id;
+        const oldRootId = (
+          await engine.findNotes({
+            fname: "root",
+            vault,
+          })
+        )[0].id;
+        const oldFooId = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0].id;
+        const oldBarId = (
+          await engine.findNotes({
+            fname: "bar",
+            vault,
+          })
+        )[0].id;
 
         const ext = ExtensionProvider.getExtension();
         const cmd = new DoctorCommand(ext);
@@ -570,27 +562,57 @@ suite("REGENERATE_NOTE_ID", function () {
               Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
             );
           await cmd.run();
-          const root = NoteUtils.getNoteByFnameV5({
-            fname: "root",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          const foo = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          const bar = NoteUtils.getNoteByFnameV5({
-            fname: "bar",
-            notes: engine.notes,
-            vault,
-            wsRoot,
-          });
-          expect(root?.id).toNotEqual(oldRootId);
+          const root = (await engine.findNotes({ fname: "root", vault }))[0];
+          const foo = (await engine.findNotes({ fname: "foo", vault }))[0];
+          const bar = (await engine.findNotes({ fname: "bar", vault }))[0];
+          // Root should not change
+          expect(root?.id).toEqual(oldRootId);
           expect(foo?.id).toNotEqual(oldFooId);
           expect(bar?.id).toNotEqual(oldBarId);
+        } finally {
+          gatherInputsStub.restore();
+          quickPickStub.restore();
+        }
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a note as an argument",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("THEN fix the provided note", async () => {
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const vault = vaults[0];
+        const oldNote = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
+        const oldId = oldNote.id;
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new DoctorCommand(ext);
+        const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActionsEnum.REGENERATE_NOTE_ID,
+            scope: "file",
+            data: { note: oldNote },
+          })
+        );
+        const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+
+        try {
+          quickPickStub
+            .onCall(0)
+            .returns(
+              Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+            );
+          await cmd.run();
+          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
+          expect(note?.id).toNotEqual(oldId);
         } finally {
           gatherInputsStub.restore();
           quickPickStub.restore();

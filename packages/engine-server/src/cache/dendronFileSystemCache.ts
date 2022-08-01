@@ -1,4 +1,5 @@
 import { Cache, FileSystemCache } from "@dendronhq/common-all";
+import { DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 
@@ -8,16 +9,22 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
   protected _cacheContents: T;
   private _cachePath: string;
   private _noCaching: boolean | undefined;
+  private _logger: DLogger;
+  private _numCacheMisses: number;
 
   constructor({
     cachePath,
     noCaching,
+    logger,
   }: {
     cachePath: string;
+    logger: DLogger;
     noCaching?: boolean;
   }) {
     this._cachePath = cachePath;
     this._noCaching = noCaching;
+    this._logger = logger;
+    this._numCacheMisses = 0;
     if (this._noCaching) {
       this._cacheContents = this.createEmptyCacheContents();
     } else {
@@ -25,13 +32,23 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
     }
   }
 
+  get numCacheMisses() {
+    return this._numCacheMisses;
+  }
+
   /**
    * Read contents from filesystem including version and cache entries
    * @returns cache contents
    */
   private readFromFileSystem(): T {
+    const ctx = "DendronFileSystemCache:readFromFileSystem";
     if (fs.existsSync(this._cachePath)) {
-      return fs.readJSONSync(this._cachePath) as T;
+      try {
+        return fs.readJSONSync(this._cachePath) as T;
+      } catch (_err: any) {
+        this._logger.error({ ctx, _err });
+        return this.createEmptyCacheContents();
+      }
     } else {
       return this.createEmptyCacheContents();
     }
@@ -57,9 +74,14 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
    * Delete cache file if it exists
    */
   removeFromFileSystem(): void {
+    this.createEmptyCacheContents();
     if (fs.pathExistsSync(this._cachePath)) {
       return fs.removeSync(this._cachePath);
     }
     return;
+  }
+
+  incrementCacheMiss(): void {
+    this._numCacheMisses += 1;
   }
 }

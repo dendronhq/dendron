@@ -5,8 +5,7 @@ import {
   DVault,
   DVaultVisibility,
   NoteProps,
-  NotePropsDict,
-  NoteUtils,
+  NotePropsByIdDict,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -55,8 +54,8 @@ const dupNote = (payload: DVault | string[]) => {
 };
 
 const checkNotes = (opts: {
-  filteredNotes: NotePropsDict;
-  engineNotes: NotePropsDict;
+  filteredNotes: NotePropsByIdDict;
+  engineNotes: NotePropsByIdDict;
   match: ({
     id: string;
   } & Partial<NoteProps>)[];
@@ -380,12 +379,12 @@ describe("SiteUtils", () => {
             engine,
             config,
           });
-          const root = NoteUtils.getNoteByFnameV5({
-            fname: "root",
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot: engine.wsRoot,
-          });
+          const root = (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[0],
+            })
+          )[0];
           expect(domains.length).toEqual(3);
           checkNotes({
             filteredNotes: notes,
@@ -721,17 +720,17 @@ describe("SiteUtils", () => {
 
     test("blacklist vault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults, wsRoot }) => {
+        async ({ engine, vaults }) => {
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config: engine.config,
           });
-          const root = NoteUtils.getNoteByFnameV5({
-            fname: "root",
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
+          const root = (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[0],
+            })
+          )[0];
           expect(domains.length).toEqual(2);
           checkNotes({
             filteredNotes: notes,

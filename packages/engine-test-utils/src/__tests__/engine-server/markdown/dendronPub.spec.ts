@@ -155,6 +155,50 @@ describe("GIVEN dendronPub", () => {
         await verifyPublicLink(resp, fnameAlpha);
       });
     });
+
+    describe("WHEN publishing links to task notes", () => {
+      const taskNote = "alpha.task";
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname,
+              linkText: `[[${taskNote}]]`,
+            });
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupLinks(opts);
+              const { vaults, wsRoot } = opts;
+              await NoteTestUtilsV4.createNote({
+                fname: taskNote,
+                vault: vaults[0],
+                wsRoot,
+                custom: {
+                  status: "x",
+                  due: "2022-08-28",
+                  owner: "turing",
+                  priority: "high",
+                },
+              });
+            },
+            expect,
+          }
+        );
+      });
+      test("THEN all links are rendered", async () => {
+        await checkVFile(
+          resp,
+          "x",
+          "priority:high",
+          "due:2022-08-28",
+          "@turing"
+        );
+      });
+    });
   });
 
   describe("WHEN publish and private hierarchies", () => {
@@ -282,7 +326,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
           assetsPrefix: "bond/",
         }
       ).processSync(`![alt-text](image-url.jpg)`);
-      await checkVFile(out, '<img src="image-url.jpg" alt="alt-text">');
+      await checkVFile(out, '<img src="/image-url.jpg" alt="alt-text">');
     });
 
     testWithEngine(
@@ -882,13 +926,15 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       await runEngineTestV5(
         async ({ engine, vaults }) => {
           ConfigUtils.unsetPublishProp(engine.config, "duplicateNoteBehavior");
-          const out = await proc(engine, {
-            fname: "ref",
-            dest: DendronASTDest.HTML,
-            shouldApplyPublishRules: true,
-            vault: vaults[0],
-            config: engine.config,
-          }).process("![[dupe]]");
+          const out = await MDUtilsV5.procRehypeFull(
+            {
+              engine,
+              fname: "ref",
+              vault: vaults[0],
+              config: engine.config,
+            },
+            { flavor: ProcFlavor.PUBLISHING }
+          ).process("![[dupe]]");
           await checkVFile(
             out,
             "Error rendering note reference. There are multiple notes with the name"

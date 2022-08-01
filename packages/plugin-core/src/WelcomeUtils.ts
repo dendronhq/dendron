@@ -1,13 +1,25 @@
-import { Time, TutorialEvents, WorkspaceType } from "@dendronhq/common-all";
-import { FileUtils, readMD, resolveTilde } from "@dendronhq/common-server";
-import { MetadataService } from "@dendronhq/engine-server";
+import {
+  QuickstartTutorialTestGroups,
+  TutorialEvents,
+} from "@dendronhq/common-all";
+import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import * as vscode from "vscode";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
+import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspaceCommand";
+import { LaunchTutorialCommandInvocationPoint } from "./constants";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
+
+async function initWorkspace() {
+  // ^z5hpzc3fdkxs
+  await AnalyticsUtils.trackForNextRun(TutorialEvents.ClickStart);
+
+  await new LaunchTutorialWorkspaceCommand().run({
+    invocationPoint: LaunchTutorialCommandInvocationPoint.WelcomeWebview,
+  });
+  return;
+}
 
 export function showWelcome(assetUri: vscode.Uri) {
   try {
@@ -18,6 +30,11 @@ export function showWelcome(assetUri: vscode.Uri) {
       "vault",
       "welcome.html"
     );
+    const group = TutorialInitializer.getTutorialType();
+
+    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcome"]) {
+      return initWorkspace();
+    }
 
     const { content } = readMD(uri.fsPath);
     const title = "Welcome to Dendron";
@@ -41,24 +58,7 @@ export function showWelcome(assetUri: vscode.Uri) {
 
           case "initializeWorkspace": {
             // ^z5hpzc3fdkxs
-            // it takes up to 8s to do a synchronous track call which becomes noticable to the user
-            // instead of doing that, we write the timestamp when the welcome was clicked and async track it during initialization
-            MetadataService.instance().setMeta(
-              "welcomeClickedTime",
-              Time.now().toMillis()
-            );
-            // Try to put into a eefault '~/Dendron' folder first. If path is occupied, create a new folder with an numbered suffix
-            const { filePath } =
-              FileUtils.genFilePathWithSuffixThatDoesNotExist({
-                fpath: path.join(resolveTilde("~"), "Dendron"),
-              });
-
-            await new SetupWorkspaceCommand().execute({
-              rootDirRaw: filePath,
-              workspaceInitializer: new TutorialInitializer(),
-              workspaceType: WorkspaceType.CODE,
-            });
-
+            await initWorkspace();
             return;
           }
           default:
@@ -68,7 +68,9 @@ export function showWelcome(assetUri: vscode.Uri) {
       undefined,
       undefined
     );
+    return;
   } catch (err) {
     vscode.window.showErrorMessage(JSON.stringify(err));
+    return;
   }
 }

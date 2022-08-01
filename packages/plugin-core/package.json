@@ -4,9 +4,12 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.93.0",
+  "version": "0.105.2",
+  "sponsor": {
+    "url": "https://accounts.dendron.so/account/subscribe"
+  },
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.62.0"
   },
   "categories": [
     "Other"
@@ -41,12 +44,30 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "viewsWelcome": [
+      {
+        "view": "dendron.backlinks",
+        "contents": "There are no backlinks to this note."
+      },
+      {
+        "view": "dendron.recent-workspaces",
+        "contents": "No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](command:dendron.launchTutorialWorkspace?%7B%22invocationPoint%22%3A%22RecentWorkspacesPanel%22%7D)."
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dendron-view",
+          "title": "Dendron",
+          "icon": "media/icons/dendron-activity-bar-icon.svg"
+        }
+      ]
+    },
     "views": {
       "explorer": [
         {
           "id": "dendron.sample",
           "name": "Sample View",
-          "contextualTitle": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
         },
@@ -60,20 +81,34 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "contextualTitle": "Tree View",
           "when": "dendron:pluginActive",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
           "id": "dendron.lookup-view",
           "name": "Lookup View",
-          "contextualTitle": "Lookup View",
           "type": "webview",
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
-          "id": "dendron.backlinks",
-          "name": "Backlinks",
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "type": "webview",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "id": "dendron.recent-workspaces",
+          "name": "Recent Dendron Workspaces",
+          "when": "!dendron:pluginActive"
+        },
+        {
+          "id": "dendron.help-and-feedback",
+          "name": "Help and Feedback"
+        },
+        {
+          "id": "dendron.graph-panel",
+          "name": "Graph Panel",
+          "type": "webview",
           "when": "dendron:pluginActive"
         }
       ]
@@ -84,18 +119,73 @@
     "commands": [
       {
         "command": "dendron.backlinks.sortByLastUpdated",
-        "title": "Sort by last updated (currently sorted by path names)",
-        "icon": "$(list-ordered)"
+        "title": "Sort by Last Updated"
+      },
+      {
+        "command": "dendron.backlinks.sortByLastUpdatedChecked",
+        "title": "✓ Sort by Last Updated"
       },
       {
         "command": "dendron.backlinks.sortByPathNames",
-        "title": "Sort by path names (currently sorted by last updated)",
-        "icon": "$(list-ordered)"
+        "title": "Sort by Path Names"
+      },
+      {
+        "command": "dendron.backlinks.sortByPathNamesChecked",
+        "title": "✓ Sort by Path Names"
       },
       {
         "command": "dendron.backlinks.expandAll",
         "title": "Expand All",
         "icon": "$(expand-all)"
+      },
+      {
+        "command": "dendron.treeView.labelByTitle",
+        "title": "Label and sort notes by title",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.labelByFilename",
+        "title": "Label and sort notes by filename",
+        "icon": "$(list-ordered)"
+      },
+      {
+        "command": "dendron.treeView.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "dendron.graph-panel.increaseDepth",
+        "title": "Increase Depth",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "dendron.graph-panel.decreaseDepth",
+        "title": "Decrease Depth",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "dendron.graph-panel.showBacklinks",
+        "title": "Show Backlinks"
+      },
+      {
+        "command": "dendron.graph-panel.showOutwardLinks",
+        "title": "Show Outward Links"
+      },
+      {
+        "command": "dendron.graph-panel.showHierarchy",
+        "title": "Show Hierarchy"
+      },
+      {
+        "command": "dendron.graph-panel.showBacklinksChecked",
+        "title": "✓ Show Backlinks"
+      },
+      {
+        "command": "dendron.graph-panel.showOutwardLinksChecked",
+        "title": "✓ Show Outward Links"
+      },
+      {
+        "command": "dendron.graph-panel.showHierarchyChecked",
+        "title": "✓ Show Hierarchy"
       },
       {
         "command": "dendron.browseNote",
@@ -134,12 +224,8 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
-        "command": "dendron.deleteNode",
-        "title": "Dendron: Delete Node"
-      },
-      {
-        "command": "dendron.insertNote",
-        "title": "Dendron: Insert Note"
+        "command": "dendron.delete",
+        "title": "Dendron: Delete"
       },
       {
         "command": "dendron.insertNoteLink",
@@ -156,6 +242,10 @@
       {
         "command": "dendron.randomNote",
         "title": "Dendron: Random Note"
+      },
+      {
+        "command": "dendron.renameNoteV2a",
+        "title": "Dendron: Rename Note V2a"
       },
       {
         "command": "dendron.renameNote",
@@ -210,6 +300,18 @@
         "title": "Dendron: Create Task Note"
       },
       {
+        "command": "dendron.setTaskStatus",
+        "title": "Dendron: Set Task Status"
+      },
+      {
+        "command": "dendron.completeTask",
+        "title": "Dendron: Complete Task"
+      },
+      {
+        "command": "dendron.applyTemplate",
+        "title": "Dendron: Apply Template"
+      },
+      {
         "command": "dendron.archiveHierarchy",
         "title": "Dendron: Archive Hierarchy"
       },
@@ -232,6 +334,10 @@
       {
         "command": "dendron.goDownHierarchy",
         "title": "Dendron: Go Down"
+      },
+      {
+        "command": "dendron.gotoBacklink",
+        "title": "Dendron: Go To Backlink"
       },
       {
         "command": "dendron.addAndCommit",
@@ -284,6 +390,10 @@
         "title": "Dendron: Import Pod"
       },
       {
+        "command": "dendron.importObsidianPod",
+        "title": "Dendron: Import Obsidian Vault"
+      },
+      {
         "command": "dendron.exportPod",
         "title": "Dendron: Export Pod"
       },
@@ -319,6 +429,10 @@
       {
         "command": "dendron.registerNoteTrait",
         "title": "Dendron: Register Note Trait"
+      },
+      {
+        "command": "dendron.configureNoteTraits",
+        "title": "Dendron: Configure Note Traits"
       },
       {
         "command": "dendron.createNoteWithTraits",
@@ -361,11 +475,11 @@
         "title": "Dendron: Show Help"
       },
       {
-        "command": "dendron.showNoteGraph",
+        "command": "dendron.showNoteGraphView",
         "title": "Dendron: Show Note Graph"
       },
       {
-        "command": "dendron.showSchemaGraph",
+        "command": "dendron.showSchemaGraphView",
         "title": "Dendron: Show Schema Graph"
       },
       {
@@ -373,8 +487,8 @@
         "title": "Dendron: Show Preview (legacy)"
       },
       {
-        "command": "dendron.showPreview",
-        "title": "Dendron: Show Preview",
+        "command": "dendron.togglePreview",
+        "title": "Dendron: Toggle Preview",
         "icon": "$(open-preview)"
       },
       {
@@ -392,6 +506,10 @@
       {
         "command": "dendron.configureGraphStyle",
         "title": "Dendron: Configure Graph Style (css)"
+      },
+      {
+        "command": "dendron.configureLocalOverride",
+        "title": "Dendron: Configure Local Override"
       },
       {
         "command": "dendron.seedAdd",
@@ -426,6 +544,10 @@
         "title": "Dendron:Dev: Run Migration"
       },
       {
+        "command": "dendron.dev.migrateSelfContained",
+        "title": "Dendron: Migrate to Self Contained Vault"
+      },
+      {
         "command": "dendron.dev.openLogs",
         "title": "Dendron:Dev: Open Logs"
       },
@@ -434,8 +556,12 @@
         "title": "Dendron:Dev: Diagnostics Report"
       },
       {
-        "command": "dendron.launchTutorial",
+        "command": "dendron.showWelcomePage",
         "title": "Dendron: Launch Tutorial"
+      },
+      {
+        "command": "dendron.launchTutorialWorkspace",
+        "title": "Dendron: Launch Tutorial Workspace"
       },
       {
         "command": "dendron.openBackup",
@@ -444,10 +570,22 @@
       {
         "command": "dendron.showSchemaValidator",
         "title": "Dendron: Show Schema Validator"
+      },
+      {
+        "command": "dendron.instrumentedWrapperCommand",
+        "title": "Dendron: Instrumented Wrapper Command"
+      },
+      {
+        "command": "dendron.dev.validateEngine",
+        "title": "Dendron:Dev: Validate Engine"
       }
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "dendron.treeView.expandAll",
+          "when": "dendron:devMode"
+        },
         {
           "command": "dendron.browseNote",
           "when": "dendron:pluginActive"
@@ -481,11 +619,7 @@
           "when": "false"
         },
         {
-          "command": "dendron.deleteNode",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.insertNote",
+          "command": "dendron.delete",
           "when": "dendron:pluginActive"
         },
         {
@@ -503,6 +637,10 @@
         {
           "command": "dendron.randomNote",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.renameNoteV2a",
+          "when": "false"
         },
         {
           "command": "dendron.renameNote",
@@ -557,6 +695,18 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.setTaskStatus",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.completeTask",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.applyTemplate",
+          "when": "dendron:pluginActive"
+        },
+        {
           "command": "dendron.archiveHierarchy",
           "when": "dendron:pluginActive"
         },
@@ -579,6 +729,10 @@
         {
           "command": "dendron.goDownHierarchy",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.gotoBacklink",
+          "when": "false"
         },
         {
           "command": "dendron.addAndCommit",
@@ -613,6 +767,10 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.importObsidianPod",
+          "when": "dendron:pluginActive"
+        },
+        {
           "command": "dendron.exportPod",
           "when": "dendron:pluginActive"
         },
@@ -642,6 +800,10 @@
         },
         {
           "command": "dendron.registerNoteTrait",
+          "when": "false"
+        },
+        {
+          "command": "dendron.configureNoteTraits",
           "when": "dendron:pluginActive"
         },
         {
@@ -665,11 +827,11 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.showNoteGraph",
+          "command": "dendron.showNoteGraphView",
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.showSchemaGraph",
+          "command": "dendron.showSchemaGraphView",
           "when": "dendron:pluginActive"
         },
         {
@@ -677,7 +839,7 @@
           "when": "dendron:pluginActive && dendron:hasLegacyPreview"
         },
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "dendron:pluginActive"
         },
         {
@@ -694,6 +856,10 @@
         },
         {
           "command": "dendron.configureGraphStyle",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.configureLocalOverride",
           "when": "dendron:pluginActive"
         },
         {
@@ -721,16 +887,20 @@
           "when": "dendron:devMode"
         },
         {
-          "command": "dendron.dev.resetConfig",
+          "command": "dendron.dev.runMigration",
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.dev.runMigration",
+          "command": "dendron.dev.migrateSelfContained",
           "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.diagnosticsReport",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.launchTutorialWorkspace",
+          "when": "false"
         },
         {
           "command": "dendron.openBackup",
@@ -739,23 +909,88 @@
         {
           "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.instrumentedWrapperCommand",
+          "when": "false"
+        },
+        {
+          "command": "dendron.dev.validateEngine",
+          "when": "dendron:pluginActive"
         }
       ],
       "view/title": [
         {
           "command": "dendron.backlinks.sortByLastUpdated",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
-          "group": "navigation@1"
+          "group": "sort@1"
+        },
+        {
+          "command": "dendron.backlinks.sortByLastUpdatedChecked",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
+          "group": "sort@1"
         },
         {
           "command": "dendron.backlinks.sortByPathNames",
           "when": "view == dendron.backlinks && dendron:backlinksSortOrder == LastUpdated",
-          "group": "navigation@1"
+          "group": "sort@2"
+        },
+        {
+          "command": "dendron.backlinks.sortByPathNamesChecked",
+          "when": "view == dendron.backlinks && dendron:backlinksSortOrder == PathNames",
+          "group": "sort@2"
         },
         {
           "command": "dendron.backlinks.expandAll",
           "when": "view == dendron.backlinks",
           "group": "navigation@2"
+        },
+        {
+          "command": "dendron.treeView.labelByTitle",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == filename"
+        },
+        {
+          "command": "dendron.treeView.labelByFilename",
+          "when": "view == dendron.treeView && dendron:treeviewItemLabelType == title"
+        },
+        {
+          "command": "dendron.treeView.expandAll",
+          "when": "view == dendron.treeView && dendron:devMode",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.increaseDepth",
+          "when": "view == dendron.graph-panel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.decreaseDepth",
+          "when": "view == dendron.graph-panel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.graph-panel.showBacklinksChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showBacklinks"
+        },
+        {
+          "command": "dendron.graph-panel.showOutwardLinksChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showOutwardLinks"
+        },
+        {
+          "command": "dendron.graph-panel.showHierarchyChecked",
+          "when": "view == dendron.graph-panel && dendron.graph-panel.showHierarchy"
+        },
+        {
+          "command": "dendron.graph-panel.showBacklinks",
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showBacklinks"
+        },
+        {
+          "command": "dendron.graph-panel.showOutwardLinks",
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showOutwardLinks"
+        },
+        {
+          "command": "dendron.graph-panel.showHierarchy",
+          "when": "view == dendron.graph-panel && !dendron.graph-panel.showHierarchy"
         }
       ],
       "explorer/context": [
@@ -771,7 +1006,12 @@
         },
         {
           "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
-          "command": "dendron.deleteNode",
+          "command": "dendron.delete",
+          "group": "2_workspace"
+        },
+        {
+          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
+          "command": "dendron.delete",
           "group": "2_workspace"
         },
         {
@@ -780,7 +1020,7 @@
           "group": "2_workspace"
         },
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "navigation"
         }
@@ -794,14 +1034,14 @@
       ],
       "editor/title": [
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
-          "command": "dendron.showPreview",
+          "command": "dendron.togglePreview",
           "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "1_open"
         }
@@ -943,20 +1183,20 @@
         },
         "dendron.enableSelfContainedVaultWorkspace": {
           "type": "boolean",
-          "default": false,
-          "description": "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature."
+          "default": true,
+          "description": "When enabled, newly created workspaces will be created as self contained vaults."
         }
       }
     },
     "keybindings": [
       {
         "command": "dendron.goto",
-        "when": "editorFocus"
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.gotoNote",
         "key": "ctrl+enter",
-        "when": "editorFocus"
+        "when": "editorFocus && dendron:pluginActive"
       },
       {
         "command": "dendron.createSchemaFromHierarchy",
@@ -981,7 +1221,7 @@
         "when": "editorFocus && dendron:pluginActive"
       },
       {
-        "command": "dendron.deleteNode",
+        "command": "dendron.delete",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
         "when": "dendron:pluginActive"
@@ -1053,8 +1293,8 @@
         "when": "dendron:pluginActive && dendron:hasLegacyPreview"
       },
       {
-        "command": "dendron.showPreview",
-        "windows": "windows+ctrl+p",
+        "command": "dendron.togglePreview",
+        "windows": "ctrl+k v",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"
       }
@@ -1093,8 +1333,8 @@
     "rimraf": "npx rimraf"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.93.0",
-    "@dendronhq/engine-test-utils": "^0.93.0",
+    "@dendronhq/common-test-utils": "^0.105.2",
+    "@dendronhq/engine-test-utils": "^0.105.2",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1130,14 +1370,14 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.93.0",
-    "@dendronhq/common-all": "^0.93.0",
-    "@dendronhq/common-server": "^0.93.0",
-    "@dendronhq/engine-server": "^0.93.0",
-    "@dendronhq/pods-core": "^0.93.0",
+    "@dendronhq/api-server": "^0.105.2",
+    "@dendronhq/common-all": "^0.105.2",
+    "@dendronhq/common-server": "^0.105.2",
+    "@dendronhq/engine-server": "^0.105.2",
+    "@dendronhq/pods-core": "^0.105.2",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
-    "@types/vscode": "1.58",
+    "@types/vscode": "1.62.0",
     "cross-path-sort": "^1.0.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
@@ -1148,7 +1388,6 @@
     "open": "^8.2.1",
     "open-graph-scraper": "^4.7.1",
     "query-string": "^7.0.1",
-    "replace-in-file": "^6.2.0",
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
     "textextensions": "^5.15.0",

@@ -1,5 +1,5 @@
 import { MenuOutlined } from "@ant-design/icons";
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import { Col, Divider, Layout, Row } from "antd";
 import Script from "next/script";
 import * as React from "react";
@@ -38,6 +38,7 @@ export default function DendronLayout(
         position: "fixed",
         overflow: "auto",
         height: `calc(100vh - ${HEADER.HEIGHT}px)`,
+        backgroundColor: `transparent`,
       }}
       trigger={null}
     >
@@ -103,6 +104,7 @@ export default function DendronLayout(
             // initialize
             mermaid.init();
           }}
+          strategy="lazyOnload"
         />
       )}
       <Header
@@ -154,8 +156,8 @@ export default function DendronLayout(
           marginTop: 64,
         }}
       >
-        <Layout className="site-layout" style={{ flexDirection: "row" }}>
-          <Layout
+        <Layout className="site-layout">
+          <div
             className="site-layout-sidebar"
             style={{
               flex: "0 0 auto",
@@ -173,7 +175,7 @@ export default function DendronLayout(
             }}
           >
             {sidebar}
-          </Layout>
+          </div>
           <Layout
             className="side-layout-main"
             style={{

@@ -17,7 +17,7 @@ import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import vscode, { Uri } from "vscode";
+import vscode, { MarkdownString, Uri } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -237,7 +237,11 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         });
       }
       if (rendered.data) {
-        return new vscode.Hover(rendered.data, hoverRange);
+        const markdownString = new MarkdownString(rendered.data);
+
+        // Support the usage of command URI's for gotoNote navigation
+        markdownString.isTrusted = true;
+        return new vscode.Hover(markdownString, hoverRange);
       }
       return null;
     } catch (error) {

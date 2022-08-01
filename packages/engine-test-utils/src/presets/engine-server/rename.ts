@@ -18,7 +18,10 @@ import {
   TestPresetEntryV4,
   TestResult,
 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -530,7 +533,10 @@ const NOTES = {
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({
+        cachePath,
+        logger: (engine as DendronEngineClient).logger,
+      });
       const keySet = notesCache.getCacheEntryKeys();
       return [
         {
@@ -775,12 +781,12 @@ const NOTES = {
         match: ["gamma.md"],
         nomatch: [`${fnameOld}.md`],
       });
-      const changedNote = NoteUtils.getNoteByFnameV5({
-        fname: "root",
-        notes: engine.notes,
-        vault,
-        wsRoot: engine.wsRoot,
-      });
+      const changedNote = (
+        await engine.findNotes({
+          fname: "root",
+          vault,
+        })
+      )[0];
       return [
         {
           actual: changed.data?.length,
@@ -903,13 +909,13 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
-            { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![4].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -965,14 +971,14 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             // this is a diff vault
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
-            { status: "update", fname: "bar" },
           ],
         },
         {
-          actual: _.trim(changed![4].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
         },
         {
@@ -1032,9 +1038,9 @@ const NOTES = {
           expected: [
             { status: "update", fname: "root" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "create", fname: "gamma" },
-            { status: "update", fname: "beta" },
           ],
         },
         {
@@ -1175,12 +1181,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["#bar"],
@@ -1220,12 +1226,12 @@ const NOTES = {
         },
         newLoc: { fname: "user.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["@bar"],
@@ -1264,12 +1270,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["tags: bar"],
@@ -1314,12 +1320,12 @@ const NOTES = {
         },
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         match: ["bar"],
@@ -1364,12 +1370,12 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: [
@@ -1418,12 +1424,12 @@ const NOTES = {
         },
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
-      const note = NoteUtils.getNoteByFnameV5({
-        fname: "primary",
-        notes: engine.notes,
-        wsRoot,
-        vault: vaults[0],
-      });
+      const note = (
+        await engine.findNotes({
+          fname: "primary",
+          vault: vaults[0],
+        })
+      )[0];
       const containsTag = checkFileNoExpect({
         fpath: NoteUtils.getFullPath({ note: note!, wsRoot }),
         nomatch: ["foo", "bar", "undefined"],
@@ -1474,8 +1480,12 @@ const NOTES = {
   //     const vault = vaults[0];
   //     const notes = engine.notes;
   //     const alphaFname = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
-  //     const noteOrig = NoteUtils.getNoteByFnameV5({fname: alphaFname, vault, notes});
-
+  //     const noteOrig = (
+  //      await engine.findNotes({
+  //        fname: "alphaFname",
+  //        vault,
+  //      })
+  //    )[0];
   //   let alphaNoteNew = NoteUtils.create({
   //     fname: "alpha",
   //     id: "alpha",
@@ -1580,21 +1590,44 @@ const NOTES = {
       });
 
       const changedEntries: RenameNotePayload | undefined = out.data;
-      const isReplacingStubCreated = changedEntries?.find((entry) => {
+      const fooStub = changedEntries?.find((entry) => {
         return entry.status === "create" && entry.note.fname === "foo";
-      })?.note.stub;
+      })?.note;
+      const root = (
+        await engine.findNotes({
+          fname: "root",
+          vault: vaults[0],
+        })
+      )[0];
+      const fooChild = (
+        await engine.findNotes({
+          fname: "foo.bar",
+          vault: vaults[0],
+        })
+      )[0];
+
       return [
         {
-          actual: isReplacingStubCreated,
+          actual: fooStub?.stub,
           expected: true,
         },
         {
-          actual: engine.notes["foo"].fname,
+          actual: (await engine.getNote("foo"))!.fname,
           expected: "foo1",
         },
         {
-          actual: changedEntries && changedEntries.length === 5,
+          actual: changedEntries && changedEntries.length === 6,
           expected: true,
+        },
+        {
+          // root's children is now the replacing stub and renamed note
+          actual: root.children.length === 2,
+          expected: true,
+        },
+        {
+          // children's parent points to replaced stub
+          actual: fooChild.parent,
+          expected: fooStub?.id,
         },
       ];
     },

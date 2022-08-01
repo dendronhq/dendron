@@ -1,6 +1,6 @@
 import {
   assert,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   CONSTANTS,
   DendronCompositeError,
   IntermediateDendronConfig,
@@ -15,7 +15,7 @@ import {
   DStore,
   DVault,
   EngineDeleteNotePayload,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
@@ -25,8 +25,7 @@ import {
   isNotUndefined,
   NoteChangeEntry,
   NoteProps,
-  NotePropsDict,
-  NoteFNamesDict,
+  NotePropsByIdDict,
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
@@ -47,7 +46,12 @@ import {
   NoteChangeUpdateEntry,
   DNodeUtils,
   asyncLoopOneAtATime,
-  DuplicateNoteError,
+  NotePropsByFnameDict,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
+  FindNoteOpts,
+  isNotNull,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -75,8 +79,8 @@ export class FileStorage implements DStore {
    * populated upon initialization. However, the update note operations do not change
    * the backlink data in this dictionary hence it starts to contain stale backlink data.
    *  */
-  public notes: NotePropsDict;
-  public noteFnames: NoteFNamesDict;
+  public notes: NotePropsByIdDict;
+  public noteFnames: NotePropsByFnameDict;
   public schemas: SchemaModuleDict;
   public logger: DLogger;
   public links: DLink[];
@@ -93,7 +97,7 @@ export class FileStorage implements DStore {
     this.configRoot = wsRoot;
     this.vaults = vaults;
     this.notes = {};
-    this.noteFnames = new NoteFNamesDict();
+    this.noteFnames = {};
     this.schemas = {};
     this.links = [];
     this.anchors = [];
@@ -114,22 +118,9 @@ export class FileStorage implements DStore {
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
-      const { notes: _notes, errors: initErrors } = await this.initNotes();
+      const { errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
-      _notes.map((ent) => {
-        // Check for duplicate IDs when adding notes to the map
-        if (this.notes[ent.id] !== undefined) {
-          const duplicate = this.notes[ent.id];
-          errors.push(
-            new DuplicateNoteError({
-              noteA: duplicate,
-              noteB: ent,
-            })
-          );
-        }
-        this.notes[ent.id] = ent;
-        this.noteFnames.add(ent);
-      });
+
       // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
       if (this.engine.config.dev?.enableLinkCandidates) {
         const ctx = "_addLinkCandidates";
@@ -199,17 +190,49 @@ export class FileStorage implements DStore {
   }
 
   /**
+   * See {@link DStore.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    const maybeNote = this.notes[id];
+    if (maybeNote) {
+      return _.cloneDeep(maybeNote);
+    } else {
+      return undefined;
+    }
+  }
+
+  /**
+   * See {@link DStore.findNotes}
+   */
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    const { fname, vault } = opts;
+    if (fname) {
+      return _.cloneDeep(
+        NoteDictsUtils.findByFname(
+          fname,
+          { notesById: this.notes, notesByFname: this.noteFnames },
+          vault
+        )
+      );
+    } else if (vault) {
+      return _.cloneDeep(
+        _.values(this.notes).filter((note) =>
+          VaultUtils.isEqualV2(note.vault, vault)
+        )
+      );
+    } else {
+      return [];
+    }
+  }
+
+  /**
    *
    * @param id id of note to be deleted
-   * @param opts EngineDeleteOptsV2 the flag `replaceWithNewStub` is used
-   *             for a specific case where this method is called from
-   *             `renameNote`. TODO: remove this flag so that this is handled
-   *             automatically.
    * @returns
    */
   async deleteNote(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<StoreDeleteNoteResp> {
     const ctx = "deleteNote";
     if (id === "root") {
@@ -237,54 +260,63 @@ export class FileStorage implements DStore {
     // remove from fs
     if (!opts?.metaOnly) {
       this.logger.info({ ctx, noteAsLog, msg: "removing from disk", fpath });
-      fs.unlinkSync(fpath);
+      await fs.unlink(fpath);
     }
 
-    // if have children, keep this node around as a stub
+    // if have children, create stub note with a new id
     if (!_.isEmpty(noteToDelete.children)) {
-      if (!opts?.replaceWithNewStub) {
-        this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
-        const prevNote = { ...noteToDelete };
-        noteToDelete.stub = true;
-        this.updateNote(noteToDelete);
-        out.push({ note: noteToDelete, status: "update", prevNote });
-      } else {
-        // the delete operation originated from rename.
-        // since _noteToDelete_ in this case is renamed and
-        // moved to another location, simply adding stub: true
-        // will not work.
-        // we need a fresh stub note that will fill in the old note's place.
-        const replacingStub = NoteUtils.create({
-          // the replacing stub should not keep the old note's body and link.
-          // otherwise, it will be captured while processing links and will
-          // fail because this note is not actually in the file system.
-          ..._.omit(noteToDelete, ["id", "links", "body"]),
-          stub: true,
+      const replacingStub = NoteUtils.create({
+        // the replacing stub should not keep the old note's body and link.
+        // otherwise, it will be captured while processing links and will
+        // fail because this note is not actually in the file system.
+        ..._.omit(noteToDelete, ["id", "links", "body"]),
+        stub: true,
+      });
+      this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
+      if (!noteToDelete.parent) {
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
-        this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
-        if (!noteToDelete.parent) {
-          throw DendronError.createFromStatus({
-            status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-          });
-        }
-        const parentNote = this.notes[noteToDelete.parent] as NoteProps;
+      }
+      const parentNote: NoteProps | undefined = this.notes[noteToDelete.parent];
+      if (parentNote) {
         const parentNotePrev = { ...parentNote };
-        parentNote.children = _.reject(
-          parentNote.children,
-          (ent) => ent === noteToDelete.id
-        );
+        DNodeUtils.removeChild(parentNote, noteToDelete);
+        DNodeUtils.addChild(parentNote, replacingStub);
         out.push({
           note: parentNote,
           status: "update",
           prevNote: parentNotePrev,
         });
-
-        delete this.notes[noteToDelete.id];
-        this.noteFnames.delete(noteToDelete);
-        await this.writeNote(replacingStub, { newNode: true });
-        out.push({ note: noteToDelete, status: "delete" });
-        out.push({ note: replacingStub, status: "create" });
+      } else {
+        this.logger.error({
+          ctx,
+          noteToDelete,
+          message: "Parent note missing from state",
+        });
       }
+
+      // Update children's parent id to new note
+      noteToDelete.children.forEach((child) => {
+        const childNote = this.notes[child];
+        const prevChildNoteState = { ...childNote };
+        childNote.parent = replacingStub.id;
+
+        // add one entry for each child updated
+        out.push({
+          prevNote: prevChildNoteState,
+          note: childNote,
+          status: "update",
+        });
+      });
+
+      NoteDictsUtils.delete(noteToDelete, {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      });
+      await this.updateNote(replacingStub);
+      out.push({ note: replacingStub, status: "create" });
+      out.push({ note: noteToDelete, status: "delete" });
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -293,40 +325,52 @@ export class FileStorage implements DStore {
           status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
-      // remove from parent
-      let parentNote = this.notes[noteToDelete.parent] as NoteProps;
-      const parentNotePrev = { ...parentNote };
-      parentNote.children = _.reject(
-        parentNote.children,
-        (ent) => ent === noteToDelete.id
-      );
       // delete from note dictionary
-      delete this.notes[noteToDelete.id];
-      this.noteFnames.delete(noteToDelete);
-      // if parent note is not a stub, update it
-      if (!parentNote.stub) {
-        out.push({
-          note: parentNote,
-          status: "update",
-          prevNote: parentNotePrev,
+      NoteDictsUtils.delete(noteToDelete, {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      });
+
+      // remove from parent
+      const resps: Promise<EngineDeleteNotePayload>[] = [];
+      let parentNote = this.notes[noteToDelete.parent];
+
+      if (parentNote) {
+        const parentNotePrev = { ...parentNote };
+        parentNote.children = _.reject(
+          parentNote.children,
+          (ent) => ent === noteToDelete.id
+        );
+        // if parent note is not a stub, update it
+        if (!parentNote.stub) {
+          out.push({
+            note: parentNote,
+            status: "update",
+            prevNote: parentNotePrev,
+          });
+        }
+        // check all stubs
+        while (parentNote.stub && !opts?.noDeleteParentStub) {
+          const newParent = parentNote.parent;
+          const resp = this.deleteNote(parentNote.id, {
+            metaOnly: true,
+            noDeleteParentStub: true,
+          });
+          resps.push(resp);
+          if (newParent) {
+            parentNote = this.notes[newParent];
+          } else {
+            assert(false, "illegal state in note delete");
+          }
+        }
+      } else {
+        this.logger.error({
+          ctx,
+          noteToDelete,
+          message: "Parent note missing from state",
         });
       }
       out.push({ note: noteToDelete, status: "delete" });
-      // check all stubs
-      const resps: Promise<EngineDeleteNotePayload>[] = [];
-      while (parentNote.stub && !opts?.noDeleteParentStub) {
-        const newParent = parentNote.parent;
-        const resp = this.deleteNote(parentNote.id, {
-          metaOnly: true,
-          noDeleteParentStub: true,
-        });
-        resps.push(resp);
-        if (newParent) {
-          parentNote = this.notes[newParent];
-        } else {
-          assert(false, "illegal state in note delete");
-        }
-      }
       for (const resp of await Promise.all(resps)) {
         out = out.concat(resp);
       }
@@ -336,7 +380,7 @@ export class FileStorage implements DStore {
 
   async deleteSchema(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<DEngineDeleteSchemaResp> {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
@@ -418,6 +462,7 @@ export class FileStorage implements DStore {
     if (_.isEmpty(schemaFiles)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.NO_SCHEMA_FOUND,
+        message: JSON.stringify(vault),
       });
     }
     const { schemas, errors } = await new SchemaParser({
@@ -430,36 +475,41 @@ export class FileStorage implements DStore {
     };
   }
 
-  async initNotes(): Promise<{ notes: NoteProps[]; errors: DendronError[] }> {
+  async initNotes(): Promise<{
+    errors: IDendronError[];
+  }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
 
     let notesWithLinks: NoteProps[] = [];
-    let errors: DendronError[] = [];
+    let errors: IDendronError<any>[] = [];
+    const start = process.hrtime();
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
-          notes,
+          notesById,
           cacheUpdates,
           errors: initErrors,
         } = await this._initNotes(vault);
         errors = errors.concat(initErrors);
         notesWithLinks = notesWithLinks.concat(
-          _.filter(notes, (n) => !_.isEmpty(n.links))
+          _.filter(notesById, (n) => !_.isEmpty(n.links))
         );
 
         this.logger.info({
           ctx,
           vault,
-          numEntries: _.size(notes),
+          numEntries: _.size(notesById),
           numCacheUpdates: _.size(cacheUpdates),
         });
 
-        return notes;
+        return notesById;
       })
     );
-    const allNotes = _.flatten(out);
-    if (allNotes.length === 0) {
+    this.notes = Object.assign({}, ...out);
+    this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
+    const allNotes = _.values(this.notes);
+    if (_.size(this.notes) === 0) {
       errors.push(
         new DendronError({
           message: "No vaults initialized!",
@@ -469,8 +519,10 @@ export class FileStorage implements DStore {
     }
 
     this._addBacklinks({ notesWithLinks, allNotes });
+    const duration = getDurationMilliseconds(start);
+    this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 
-    return { notes: allNotes, errors };
+    return { errors };
   }
 
   /** Adds backlinks mutating 'allNotes' argument in place. */
@@ -549,12 +601,12 @@ export class FileStorage implements DStore {
   }
 
   async _initNotes(vault: DVault): Promise<{
-    notes: NoteProps[];
+    notesById: NotePropsByIdDict;
     cacheUpdates: NotesCacheEntryMap;
-    errors: DendronError[];
+    errors: IDendronError[];
   }> {
     const ctx = "initNotes";
-    let errors: DendronError[] = [];
+    let errors: IDendronError[] = [];
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
@@ -578,19 +630,20 @@ export class FileStorage implements DStore {
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
       noCaching: this.engine.config.noCaching,
+      logger: this.logger,
     });
     if (!out.data) {
       return {
         cacheUpdates: {},
         errors,
-        notes: [],
+        notesById: {},
       };
     }
     const noteFiles = out.data;
     const maxNoteLength = ConfigUtils.getWorkspace(this.config).maxNoteLength;
 
     const {
-      notes,
+      notesById,
       cacheUpdates,
       errors: parseErrors,
     } = await new NoteParser({
@@ -604,26 +657,48 @@ export class FileStorage implements DStore {
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });
 
-    return { notes, cacheUpdates, errors };
+    return { notesById, cacheUpdates, errors };
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    this.logger.info({ ctx: "bulkAddNotes", msg: "enter" });
-    await Promise.all(
-      opts.notes.map((note) => {
-        return note2File({
-          note,
-          vault: note.vault,
-          wsRoot: this.wsRoot,
-        });
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    this.logger.info({ ctx: "bulkWriteNotes", msg: "enter" });
+    if (opts.skipMetadata) {
+      const noteDicts = {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      };
+      await Promise.all(
+        opts.notes.map((note) => {
+          NoteDictsUtils.add(note, noteDicts);
+          return note2File({
+            note,
+            vault: note.vault,
+            wsRoot: this.wsRoot,
+          });
+        })
+      );
+      const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
+        return { note: n, status: "create" as const };
+      });
+      return {
+        error: null,
+        data: notesChanged,
+      };
+    }
+    const writeResponses = await Promise.all(
+      opts.notes.flatMap(async (note) => {
+        return this.writeNote(note, opts.opts);
       })
     );
-    const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
-      return { note: n, status: "create" as const };
-    });
+    const errors = writeResponses
+      .flatMap((response) => response.error)
+      .filter(isNotNull);
+
     return {
-      error: null,
-      data: notesChanged,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
+      data: writeResponses
+        .flatMap((response) => response.data)
+        .filter(isNotUndefined),
     };
   }
 
@@ -648,12 +723,19 @@ export class FileStorage implements DStore {
     oldLoc: DNoteLoc;
     newLoc: DNoteLoc;
   }): Promise<NoteChangeUpdateEntry | undefined> {
+    const ctx = "store:processNoteChangedByRename";
     const prevNote = { ...note };
     const vault = note.vault;
     const vaultPath = vault2Path({ vault, wsRoot: this.wsRoot });
 
     // read note in case its changed
-    const _n = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
+    const resp = file2Note(path.join(vaultPath, note.fname + ".md"), vault);
+    if (ErrorUtils.isErrorResp(resp)) {
+      // couldn't read note. log it and return.
+      this.logger.error({ ctx, error: stringifyError(resp.error) });
+      return;
+    }
+    const _n = resp.data;
     const foundLinks = LinkUtils.findLinks({
       note: _n,
       engine: this.engine,
@@ -815,8 +897,14 @@ export class FileStorage implements DStore {
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
+
+    // TODO: Move this business logic to engine so we can update metadata
     // read from disk since contents might have changed
-    const noteRaw = file2Note(oldLocPath, oldVault);
+    const resp = file2Note(oldLocPath, oldVault);
+    if (ErrorUtils.isErrorResp(resp)) {
+      throw new DendronError({ message: "file not found" });
+    }
+    const noteRaw = resp.data;
     const oldNote = NoteUtils.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
@@ -859,7 +947,11 @@ export class FileStorage implements DStore {
      * delete the original files. We just update the references on onWillRenameFiles and return.
      */
     if (!_.isUndefined(opts.isEventSourceEngine)) {
-      return this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
+      return (
+        await this.bulkWriteNotes({
+          notes: notesChangedEntries.map((ent) => ent.note),
+        })
+      ).data;
     }
     const newNote: NoteProps = {
       ...oldNote,
@@ -883,7 +975,7 @@ export class FileStorage implements DStore {
     });
     let deleteOldFile = false;
     let changedFromDelete: EngineDeleteNotePayload = [];
-    let changeFromWrite: NoteChangeEntry[];
+    let changeFromWrite: NoteChangeEntry[] | undefined;
     if (
       oldNote.fname.toLowerCase() === newNote.fname.toLowerCase() &&
       VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
@@ -895,7 +987,7 @@ export class FileStorage implements DStore {
       // but we don't want that in this case. we need to add the old note's children back in
       newNote.children = oldNote.children;
 
-      const out = await this.writeNote(newNote, { updateExisting: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     } else {
       // The file is being renamed to a new file.
@@ -903,7 +995,6 @@ export class FileStorage implements DStore {
       try {
         changedFromDelete = await this.deleteNote(oldNote.id, {
           metaOnly: true,
-          replaceWithNewStub: true,
         });
       } catch (err) {
         throw new DendronError({
@@ -922,40 +1013,30 @@ export class FileStorage implements DStore {
         msg: "writeNewNote:pre",
         note: NoteUtils.toLogObj(newNote),
       });
-      const out = await this.writeNote(newNote, { newNode: true });
+      const out = await this.writeNote(newNote);
       changeFromWrite = out.data;
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
-    await this.writeManyNotes(notesChangedEntries.map((ent) => ent.note));
+    await this.bulkWriteNotes({
+      notes: notesChangedEntries.map((ent) => ent.note),
+    });
     if (deleteOldFile) fs.removeSync(oldLocPath);
 
     // create needs to be very last element added
-    notesChangedEntries = changedFromDelete
-      .concat(changeFromWrite)
-      .concat(notesChangedEntries);
+
+    notesChangedEntries = changedFromDelete.concat(notesChangedEntries);
+
+    if (changeFromWrite) {
+      notesChangedEntries = notesChangedEntries.concat(changeFromWrite);
+    }
+
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
     return notesChangedEntries;
   }
 
-  /** Utility function to write many notes concurrently. */
-  private async writeManyNotes(notesToWrite: NoteProps[]) {
-    const responses = await Promise.all(
-      notesToWrite.map((n) => {
-        this.logger.info({
-          ctx: "writeManyNotes",
-          msg: "writeNote:pre",
-          note: NoteUtils.toLogObj(n),
-        });
-        return this.writeNote(n, { updateExisting: true });
-      })
-    );
-    return responses.flatMap((response) => response.data);
-  }
-
   /**
-   * Update a note. If note exists, call {@link NoteUtils.hydrate} to populate new note with parent/children/backlink properties
-   * of the existing note
+   * Update a note.
    *
    * If {@link newNode} is set, set the {@link NoteProps["parent"]} property and create stubs as necessary
    *
@@ -966,25 +1047,45 @@ export class FileStorage implements DStore {
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const ctx = "updateNote";
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note), msg: "enter" });
-    const maybeNote: NoteProps | undefined = this.notes[note.id];
-    if (maybeNote) {
-      note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
+
+    const changes: NoteChangeEntry[] = [];
+
+    try {
+      const noteDicts = {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      };
+      if (opts?.newNode) {
+        const changesToParents = NoteUtils.addOrUpdateParents({
+          note,
+          noteDicts,
+          createStubs: true,
+          wsRoot: this.wsRoot,
+        });
+        changesToParents.forEach((changedEntry) => {
+          NoteDictsUtils.add(changedEntry.note, noteDicts);
+          changes.push(changedEntry);
+        });
+
+        changes.push({
+          note,
+          status: "create",
+        });
+      } else {
+        const prevNote = noteDicts.notesById[note.id];
+        changes.push({
+          prevNote,
+          note,
+          status: "update",
+        });
+      }
+      this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
+      NoteDictsUtils.add(note, noteDicts);
+    } catch (error: any) {
+      return { error };
     }
-    if (opts?.newNode) {
-      NoteUtils.addOrUpdateParents({
-        note,
-        notesList: _.values(this.notes),
-        createStubs: true,
-        wsRoot: this.wsRoot,
-      });
-    }
-    this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
-    this.notes[note.id] = note;
-    if (maybeNote && maybeNote.fname !== note.fname) {
-      this.noteFnames.delete(maybeNote);
-    }
-    this.noteFnames.add(note);
-    return note;
+
+    return { data: changes, error: null };
   }
 
   async updateSchema(schemaModule: SchemaModuleProps) {
@@ -995,7 +1096,9 @@ export class FileStorage implements DStore {
   }
 
   /**
-   * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note
+   * Write a new note. Also take care of updating logic of parents and children if new note replaces an existing note that has a different id.
+   * If the existing and new note have the same id, then do nothing.
+   *
    * @param param0
    * @returns - Changed Entries
    */
@@ -1016,12 +1119,20 @@ export class FileStorage implements DStore {
     });
 
     let changed: NoteChangeEntry[] = [];
+    const noteDicts = {
+      notesById: this.notes,
+      notesByFname: this.noteFnames,
+    };
+    const isSameNote = existingNote ? existingNote.id === note.id : false;
+
     // in this case, we are deleting the old note and writing a new note in its place with the same hierarchy
     // the parent of this note needs to have the old note removed (because the id is now different)
     // the new note needs to have the old note's children
-    if (existingNote) {
+    if (existingNote && !isSameNote) {
       // make sure existing note actually has a parent.
       if (!existingNote.parent) {
+        // TODO: We should be able to handle rewriting of root. This happens
+        // with certain operations such as Doctor FixFrontmatter
         throw new DendronError({
           message: `no parent found for ${note.fname}`,
         });
@@ -1032,19 +1143,15 @@ export class FileStorage implements DStore {
       const prevParentState = { ...parent };
 
       // delete the existing note.
-      delete this.notes[existingNote.id];
-      this.noteFnames.delete(existingNote);
+      NoteDictsUtils.delete(existingNote, noteDicts);
 
       // first, update existing note's parent
       // so that it doesn't hold the deleted existing note's id as children
-      NoteUtils.deleteChildFromParent({
-        childToDelete: existingNote,
-        notes: this.notes,
-      });
+      DNodeUtils.removeChild(parent, existingNote);
 
       // then update parent note of existing note
       // so that the newly created note is a child
-      DNodeUtils.addChild(this.notes[existingNote.parent], note);
+      DNodeUtils.addChild(parent, note);
 
       // add an entry for the updated parent if there was a change
       changed.push({
@@ -1066,6 +1173,8 @@ export class FileStorage implements DStore {
           status: "update",
         });
       });
+
+      changed.push({ note: existingNote, status: "delete" });
     }
     // check if we need to add parents
     // eg. if user created `baz.one.two` and neither `baz` or `baz.one` exist, then they need to be created
@@ -1074,10 +1183,11 @@ export class FileStorage implements DStore {
     if (!opts?.noAddParent && !existingNote) {
       const out = NoteUtils.addOrUpdateParents({
         note,
-        notesList: _.values(this.notes),
+        noteDicts,
         createStubs: true,
         wsRoot: this.wsRoot,
       });
+      // add one entry for each parent updated
       changed = changed.concat(out);
     }
     this.logger.info({
@@ -1102,34 +1212,23 @@ export class FileStorage implements DStore {
       note: NoteUtils.toLogObj(note),
     });
     // check if note might already exist
-    const maybeNote = NoteUtils.getNoteByFnameV5({
-      fname: note.fname,
-      notes: this.notes,
-      vault: note.vault,
-      wsRoot: this.wsRoot,
-    });
+    const maybeNote = NoteDictsUtils.findByFname(
+      note.fname,
+      { notesById: this.notes, notesByFname: this.noteFnames },
+      note.vault
+    )[0];
     this.logger.info({
       ctx,
       msg: "check:existing",
       maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"]),
     });
 
-    // don't count as delete if we're updating existing note
-    // we need to preserve the ids, otherwise can result in data conflict
-    let noDelete = false;
-    if (maybeNote?.stub || opts?.updateExisting) {
-      note = { ...maybeNote, ...note };
-      note = _.omit(note, "stub");
-      if (opts?.updateExisting) noDelete = true;
-    }
-
-    if (!opts?.updateExisting) {
-      changedEntries = await this._writeNewNote({
-        note,
-        existingNote: maybeNote,
-        opts,
-      });
-    }
+    // Override existing note if ids are different
+    changedEntries = await this._writeNewNote({
+      note,
+      existingNote: maybeNote,
+      opts,
+    });
 
     // add schema if applicable
     const schemaMatch = SchemaUtils.matchPath({
@@ -1188,11 +1287,12 @@ export class FileStorage implements DStore {
       }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
-    await note2File({
+    const hash = await note2File({
       note,
       vault: note.vault,
       wsRoot: this.wsRoot,
     });
+    note.contentHash = hash;
 
     // schema metadata is only applicable at runtime
     // we therefore write it after we persist note to store
@@ -1213,14 +1313,19 @@ export class FileStorage implements DStore {
     });
     await Promise.all(
       [note]
-        .concat(changedEntries.map((entry) => entry.note))
+        .concat(
+          changedEntries
+            .filter((entry) => entry.status !== "delete")
+            .map((entry) => entry.note)
+        )
         .map((ent) => this.updateNote(ent))
     );
 
-    if (maybeNote && !noDelete) {
-      changedEntries.push({ note: maybeNote, status: "delete" });
+    if (maybeNote && maybeNote.id === note.id) {
+      changedEntries.push({ prevNote: maybeNote, note, status: "update" });
+    } else {
+      changedEntries.push({ note, status: "create" });
     }
-    changedEntries.push({ note, status: "create" });
     this.logger.info({
       ctx,
       msg: "exit",

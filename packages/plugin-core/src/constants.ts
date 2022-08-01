@@ -2,15 +2,18 @@ import {
   DendronTreeViewKey,
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
+  TreeViewItemLabelTypeEnum,
   TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { BacklinkSortOrder, CodeConfigKeys } from "./types";
+import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
+import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  PLUGIN_NOT_ACTIVE = "!dendron:pluginActive",
   DEV_MODE = "dendron:devMode",
   HAS_LEGACY_PREVIEW = "dendron:hasLegacyPreview",
   HAS_CUSTOM_MARKDOWN_VIEW = "hasCustomMarkdownPreview",
@@ -18,6 +21,10 @@ export enum DendronContext {
   SHOULD_SHOW_LOOKUP_VIEW = "dendron:shouldShowLookupView",
   BACKLINKS_SORT_ORDER = "dendron:backlinksSortOrder",
   ENABLE_EXPORT_PODV2 = "dendron:enableExportPodV2",
+  TREEVIEW_TREE_ITEM_LABEL_TYPE = "dendron:treeviewItemLabelType",
+  GRAPH_PANEL_SHOW_BACKLINKS = "dendron.graph-panel.showBacklinks",
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS = "dendron.graph-panel.showOutwardLinks",
+  GRAPH_PANEL_SHOW_HIERARCHY = "dendron.graph-panel.showHierarchy",
 }
 
 const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
@@ -25,17 +32,50 @@ const treeViewConfig2VSCodeEntry = (id: DendronTreeViewKey) => {
   const out: {
     id: string;
     name: string;
-    contextualTitle: string;
     type?: "webview";
   } = {
     id,
     name: entry.label,
-    contextualTitle: entry.label,
   };
   if (isWebViewEntry(entry)) {
     out.type = "webview";
   }
   return out;
+};
+
+/**
+ * Invocation point for the LaunchTutorialCommand. Used for telemetry purposes
+ */
+export enum LaunchTutorialCommandInvocationPoint {
+  RecentWorkspacesPanel = "RecentWorkspacesPanel",
+  WelcomeWebview = "WelcomeWebview",
+}
+
+const args = {
+  invocationPoint: LaunchTutorialCommandInvocationPoint.RecentWorkspacesPanel,
+};
+const encodedArgs = encodeURIComponent(JSON.stringify(args));
+const commandUri = `command:dendron.launchTutorialWorkspace?${encodedArgs}`;
+
+export const DENDRON_VIEWS_WELCOME = [
+  {
+    view: DendronTreeViewKey.BACKLINKS,
+    contents: "There are no backlinks to this note.",
+  },
+  {
+    view: DendronTreeViewKey.RECENT_WORKSPACES,
+    contents: `No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](${commandUri}).`,
+  },
+];
+
+export const DENDRON_VIEWS_CONTAINERS = {
+  activitybar: [
+    {
+      id: "dendron-view",
+      title: "Dendron",
+      icon: "media/icons/dendron-activity-bar-icon.svg",
+    },
+  ],
 };
 
 export const DENDRON_VIEWS = [
@@ -45,26 +85,49 @@ export const DENDRON_VIEWS = [
     where: "explorer",
   },
   {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
-    where: "explorer",
+    id: DendronTreeViewKey.TIP_OF_THE_DAY,
+    name: "Tip of the Day",
     when: DendronContext.PLUGIN_ACTIVE,
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE}`,
-    where: "explorer",
-    icon: "media/icons/dendron-vscode.svg",
-  },
-  {
-    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
-    where: "explorer",
+    type: "webview",
+    where: "dendron-view",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
     when: DendronContext.PLUGIN_ACTIVE,
-    where: "explorer",
+    where: "dendron-view",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
+    where: "dendron-view",
+    icon: "media/icons/dendron-vscode.svg",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.LOOKUP_VIEW),
+    when: `${DendronContext.PLUGIN_ACTIVE} && ${DendronContext.NOTE_LOOK_UP_ACTIVE} && ${DendronContext.SHOULD_SHOW_LOOKUP_VIEW}`,
+    where: "dendron-view",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "dendron-view",
+  },
+  {
+    id: DendronTreeViewKey.RECENT_WORKSPACES,
+    name: "Recent Dendron Workspaces",
+    where: "dendron-view",
+    when: DendronContext.PLUGIN_NOT_ACTIVE,
+  },
+  {
+    id: DendronTreeViewKey.HELP_AND_FEEDBACK,
+    name: "Help and Feedback",
+    where: "dendron-view",
+  },
+  {
+    ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "dendron-view",
   },
 ];
 
@@ -150,18 +213,75 @@ export const DENDRON_MENUS = {
      * */
     {
       command: "dendron.backlinks.sortByLastUpdated",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.PathNames}`,
-      group: "navigation@1",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.PathNames}`,
+      group: "sort@1",
+    },
+    {
+      command: "dendron.backlinks.sortByLastUpdatedChecked",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.LastUpdated}`,
+      group: "sort@1",
     },
     {
       command: "dendron.backlinks.sortByPathNames",
-      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkSortOrder.LastUpdated}`,
-      group: "navigation@1",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.LastUpdated}`,
+      group: "sort@2",
+    },
+    {
+      command: "dendron.backlinks.sortByPathNamesChecked",
+      when: `view == dendron.backlinks && ${DendronContext.BACKLINKS_SORT_ORDER} == ${BacklinkPanelSortOrder.PathNames}`,
+      group: "sort@2",
     },
     {
       command: "dendron.backlinks.expandAll",
       when: "view == dendron.backlinks",
       group: "navigation@2",
+    },
+    {
+      command: "dendron.treeView.labelByTitle",
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.filename}`,
+    },
+    {
+      command: "dendron.treeView.labelByFilename",
+      when: `view == dendron.treeView && ${DendronContext.TREEVIEW_TREE_ITEM_LABEL_TYPE} == ${TreeViewItemLabelTypeEnum.title}`,
+    },
+    {
+      command: "dendron.treeView.expandAll",
+      when: `view == dendron.treeView && ${DendronContext.DEV_MODE}`,
+      group: "navigation@2",
+    },
+    {
+      command: "dendron.graph-panel.increaseDepth",
+      when: "view == dendron.graph-panel",
+      group: "navigation@2",
+    },
+    {
+      command: "dendron.graph-panel.decreaseDepth",
+      when: "view == dendron.graph-panel",
+      group: "navigation@2",
+    },
+    {
+      command: "dendron.graph-panel.showBacklinksChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_BACKLINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showOutwardLinksChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showHierarchyChecked",
+      when: `view == dendron.graph-panel && ${DendronContext.GRAPH_PANEL_SHOW_HIERARCHY}`,
+    },
+    {
+      command: "dendron.graph-panel.showBacklinks",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_BACKLINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showOutwardLinks",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_OUTWARD_LINKS}`,
+    },
+    {
+      command: "dendron.graph-panel.showHierarchy",
+      when: `view == dendron.graph-panel && !${DendronContext.GRAPH_PANEL_SHOW_HIERARCHY}`,
     },
   ],
   "explorer/context": [
@@ -178,7 +298,13 @@ export const DENDRON_MENUS = {
     {
       // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
       when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
-      command: "dendron.deleteNode",
+      command: "dendron.delete",
+      group: "2_workspace",
+    },
+    {
+      // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
+      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive",
+      command: "dendron.delete",
       group: "2_workspace",
     },
     {
@@ -187,7 +313,7 @@ export const DENDRON_MENUS = {
       group: "2_workspace",
     },
     {
-      command: "dendron.showPreview",
+      command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
       when: "resourceLangId == markdown && dendron:pluginActive",
       group: "navigation",
@@ -202,7 +328,7 @@ export const DENDRON_MENUS = {
   ],
   "editor/title": [
     {
-      command: "dendron.showPreview",
+      command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
       when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
       group: "navigation",
@@ -210,7 +336,7 @@ export const DENDRON_MENUS = {
   ],
   "editor/title/context": [
     {
-      command: "dendron.showPreview",
+      command: "dendron.togglePreview",
       when: "resourceLangId == markdown && dendron:pluginActive",
       group: "1_open",
     },
@@ -218,21 +344,79 @@ export const DENDRON_MENUS = {
 };
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
-  // ---
+  // --- backlinks panel buttons
   BACKLINK_SORT_BY_LAST_UPDATED: {
     key: "dendron.backlinks.sortByLastUpdated",
-    title: "Sort by last updated (currently sorted by path names)",
-    icon: "$(list-ordered)",
+    title: "Sort by Last Updated",
+  },
+  BACKLINK_SORT_BY_LAST_UPDATED_CHECKED: {
+    key: "dendron.backlinks.sortByLastUpdatedChecked",
+    title: "✓ Sort by Last Updated",
   },
   BACKLINK_SORT_BY_PATH_NAMES: {
     key: "dendron.backlinks.sortByPathNames",
-    title: "Sort by path names (currently sorted by last updated)",
-    icon: "$(list-ordered)",
+    title: "Sort by Path Names",
+  },
+  BACKLINK_SORT_BY_PATH_NAMES_CHECKED: {
+    key: "dendron.backlinks.sortByPathNamesChecked",
+    title: "✓ Sort by Path Names",
   },
   BACKLINK_EXPAND_ALL: {
     key: "dendron.backlinks.expandAll",
     title: "Expand All",
     icon: "$(expand-all)",
+  },
+  // --- tree view panel buttons
+  TREEVIEW_LABEL_BY_TITLE: {
+    key: "dendron.treeView.labelByTitle",
+    title: "Label and sort notes by title",
+    icon: "$(list-ordered)",
+  },
+  TREEVIEW_LABEL_BY_FILENAME: {
+    key: "dendron.treeView.labelByFilename",
+    title: "Label and sort notes by filename",
+    icon: "$(list-ordered)",
+  },
+  TREEVIEW_EXPAND_ALL: {
+    key: "dendron.treeView.expandAll",
+    title: "Expand All",
+    icon: "$(expand-all)",
+    when: DendronContext.DEV_MODE,
+  },
+  // graph panel buttons
+  GRAPH_PANEL_INCREASE_DEPTH: {
+    key: "dendron.graph-panel.increaseDepth",
+    title: "Increase Depth",
+    icon: "$(arrow-up)",
+  },
+  GRAPH_PANEL_DECREASE_DEPTH: {
+    key: "dendron.graph-panel.decreaseDepth",
+    title: "Decrease Depth",
+    icon: "$(arrow-down)",
+  },
+  GRAPH_PANEL_SHOW_BACKLINKS: {
+    key: "dendron.graph-panel.showBacklinks",
+    title: "Show Backlinks",
+  },
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS: {
+    key: "dendron.graph-panel.showOutwardLinks",
+    title: "Show Outward Links",
+  },
+  GRAPH_PANEL_SHOW_HIERARCHY: {
+    key: "dendron.graph-panel.showHierarchy",
+    title: "Show Hierarchy",
+  },
+  GRAPH_PANEL_SHOW_BACKLINKS_CHECKED: {
+    key: "dendron.graph-panel.showBacklinksChecked",
+    title: "✓ Show Backlinks",
+  },
+  GRAPH_PANEL_SHOW_OUTWARD_LINKS_CHECKED: {
+    key: "dendron.graph-panel.showOutwardLinksChecked",
+    title: "✓ Show Outward Links",
+  },
+  GRAPH_PANEL_SHOW_HIERARCHY_CHECKED: {
+    key: "dendron.graph-panel.showHierarchyChecked",
+    title: "✓ Show Hierarchy",
   },
   // --- Notes
   BROWSE_NOTE: {
@@ -304,19 +488,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy To Clipboard`,
     when: "false",
   },
-  DELETE_NODE: {
-    key: "dendron.deleteNode",
-    title: `${CMD_PREFIX} Delete Node`,
+  DELETE: {
+    key: "dendron.delete",
+    title: `${CMD_PREFIX} Delete`,
     keybindings: {
       key: "ctrl+shift+d",
       mac: "cmd+shift+d",
       when: DendronContext.PLUGIN_ACTIVE,
     },
-    when: DendronContext.PLUGIN_ACTIVE,
-  },
-  INSERT_NOTE: {
-    key: "dendron.insertNote",
-    title: `${CMD_PREFIX} Insert Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   INSERT_NOTE_LINK: {
@@ -338,6 +517,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.randomNote",
     title: `${CMD_PREFIX} Random Note`,
     when: DendronContext.PLUGIN_ACTIVE,
+  },
+  RENAME_NOTE_V2A: {
+    key: "dendron.renameNoteV2a",
+    title: `${CMD_PREFIX} Rename Note V2a`,
+    when: "false", // this is internal only.
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
@@ -449,6 +633,21 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create Task Note`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  TASK_SET_STATUS: {
+    key: "dendron.setTaskStatus",
+    title: `${CMD_PREFIX} Set Task Status`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  TASK_COMPLETE: {
+    key: "dendron.completeTask",
+    title: `${CMD_PREFIX} Complete Task`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  APPLY_TEMPLATE: {
+    key: "dendron.applyTemplate",
+    title: `${CMD_PREFIX} Apply Template`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   // --- Hierarchies
   ARCHIVE_HIERARCHY: {
     key: "dendron.archiveHierarchy",
@@ -497,6 +696,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
     when: DendronContext.PLUGIN_ACTIVE,
+  },
+  GOTO_BACKLINK: {
+    key: "dendron.gotoBacklink",
+    title: `${CMD_PREFIX} Go To Backlink`,
+    when: "false",
   },
   // --- Workspace
   ADD_AND_COMMIT: {
@@ -558,6 +762,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Import Pod`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  IMPORT_OBSIDIAN_POD: {
+    key: "dendron.importObsidianPod",
+    title: `${CMD_PREFIX} Import Obsidian Vault`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   EXPORT_POD: {
     key: "dendron.exportPod",
     title: `${CMD_PREFIX} Export Pod`,
@@ -607,6 +816,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   REGISTER_NOTE_TRAIT: {
     key: "dendron.registerNoteTrait",
     title: `${CMD_PREFIX} Register Note Trait`,
+    when: "false",
+  },
+  CONFIGURE_NOTE_TRAITS: {
+    key: "dendron.configureNoteTraits",
+    title: `${CMD_PREFIX} Configure Note Traits`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   CREATE_USER_DEFINED_NOTE: {
@@ -658,12 +872,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Show Help`,
   },
   SHOW_NOTE_GRAPH: {
-    key: "dendron.showNoteGraph",
+    key: "dendron.showNoteGraphView",
     title: `${CMD_PREFIX} Show Note Graph`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   SHOW_SCHEMA_GRAPH: {
-    key: "dendron.showSchemaGraph",
+    key: "dendron.showSchemaGraphView",
     title: `${CMD_PREFIX} Show Schema Graph`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
@@ -677,12 +891,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: "dendron:pluginActive && dendron:hasLegacyPreview",
   },
-  SHOW_PREVIEW: {
-    key: "dendron.showPreview",
-    title: `${CMD_PREFIX} Show Preview`,
+  TOGGLE_PREVIEW: {
+    key: "dendron.togglePreview",
+    title: `${CMD_PREFIX} Toggle Preview`,
     icon: `$(open-preview)`,
     keybindings: {
-      windows: "windows+ctrl+p",
+      windows: "ctrl+k v",
       mac: "cmd+ctrl+p",
       when: "dendron:pluginActive",
     },
@@ -708,6 +922,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CONFIGURE_GRAPH_STYLES: {
     key: "dendron.configureGraphStyle",
     title: `${CMD_PREFIX} Configure Graph Style (css)`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  CONFIGURE_LOCAL_OVERRIDE: {
+    key: "dendron.configureLocalOverride",
+    title: `${CMD_PREFIX} Configure Local Override`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   //-- Seeds
@@ -745,11 +964,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,
-    when: DendronContext.PLUGIN_ACTIVE,
   },
   RUN_MIGRATION: {
     key: "dendron.dev.runMigration",
     title: `${CMD_PREFIX}Dev: Run Migration`,
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  MIGRATE_SELF_CONTAINED: {
+    key: "dendron.dev.migrateSelfContained",
+    title: `${CMD_PREFIX} Migrate to Self Contained Vault`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
   OPEN_LOGS: {
@@ -761,9 +984,21 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX}Dev: Diagnostics Report`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
-  LAUNCH_TUTORIAL: {
-    key: "dendron.launchTutorial",
+  /**
+   * This launches the welcome screen, which has a button that will launch the
+   * tutorial when clicked.
+   */
+  SHOW_WELCOME_PAGE: {
+    key: "dendron.showWelcomePage",
     title: `${CMD_PREFIX} Launch Tutorial`,
+  },
+  /**
+   * This command actually launches the tutorial workspace
+   */
+  LAUNCH_TUTORIAL_WORKSPACE: {
+    key: "dendron.launchTutorialWorkspace",
+    title: `${CMD_PREFIX} Launch Tutorial Workspace`,
+    when: "false",
   },
   OPEN_BACKUP: {
     key: "dendron.openBackup",
@@ -773,6 +1008,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   SHOW_SCHEMA_VALIDATOR: {
     key: "dendron.showSchemaValidator",
     title: `${CMD_PREFIX} Show Schema Validator`,
+  },
+  INSTRUMENTED_WRAPPER_COMMAND: {
+    key: "dendron.instrumentedWrapperCommand",
+    title: `${CMD_PREFIX} Instrumented Wrapper Command`,
+    when: "false",
+  },
+  VALIDATE_ENGINE: {
+    key: "dendron.dev.validateEngine",
+    title: `${CMD_PREFIX}Dev: Validate Engine`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
 };
@@ -966,9 +1210,9 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   ENABLE_SELF_CONTAINED_VAULT_WORKSPACE: {
     key: DENDRON_VSCODE_CONFIG_KEYS.ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE,
     type: "boolean",
-    default: false,
+    default: true,
     description:
-      "When enabled, newly created workspaces will be created as self contained vaults. This is an experimental feature.",
+      "When enabled, newly created workspaces will be created as self contained vaults.",
   },
 };
 

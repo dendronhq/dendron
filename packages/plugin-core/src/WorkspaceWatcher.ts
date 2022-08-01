@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   ContextualUIEvents,
   DNodeUtils,
+  ErrorUtils,
   NoteUtils,
   SchemaUtils,
   Time,
@@ -28,6 +29,7 @@ import {
   window,
   workspace,
 } from "vscode";
+import { DoctorUtils } from "./components/doctor/utils";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
@@ -183,6 +185,8 @@ export class WorkspaceWatcher {
       await this._schemaSyncService.onDidSave({
         document,
       });
+    } else {
+      await this.onDidSaveNote(document);
     }
   }
 
@@ -233,6 +237,10 @@ export class WorkspaceWatcher {
         msg: "Note opened",
         fname: NoteUtils.uri2Fname(document.uri),
       });
+      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+        document,
+        "onDidOpenTextDocument"
+      );
     } catch (error) {
       Sentry.captureException(error);
       throw error;
@@ -334,11 +342,20 @@ export class WorkspaceWatcher {
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
+        await engine.updateNote(note);
         return resolve(changes);
       });
       event.waitUntil(p);
     }
     return { changes };
+  }
+
+  private async onDidSaveNote(document: TextDocument) {
+    // check and prompt duplicate warning.
+    await DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
+      document,
+      "onDidSaveNote"
+    );
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`
@@ -378,6 +395,12 @@ export class WorkspaceWatcher {
       const files = args.files[0];
       const { vaults, wsRoot } = this._extension.getDWorkspace();
       const { oldUri, newUri } = files;
+
+      // No-op if we are not dealing with a Dendron note.
+      if (!NoteUtils.isNote(oldUri)) {
+        return;
+      }
+
       const oldVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
@@ -427,6 +450,12 @@ export class WorkspaceWatcher {
       const fname = DNodeUtils.fname(newUri.fsPath);
       const engine = this._extension.getEngine();
       const { vaults, wsRoot } = this._extension.getDWorkspace();
+
+      // No-op if we are not dealing with a Dendron note.
+      if (!NoteUtils.isNote(newUri)) {
+        return;
+      }
+
       const newVault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
@@ -434,13 +463,17 @@ export class WorkspaceWatcher {
       });
       const vpath = vault2Path({ wsRoot, vault: newVault });
       const newLocPath = path.join(vpath, fname + ".md");
-      const noteRaw = file2Note(newLocPath, newVault);
+      const resp = file2Note(newLocPath, newVault);
+      if (ErrorUtils.isErrorResp(resp)) {
+        throw resp.error;
+      }
+      const noteRaw = resp.data;
       const newNote = NoteUtils.hydrate({
         noteRaw,
         noteHydrated: engine.notes[noteRaw.id],
       });
       newNote.title = NoteUtils.genTitle(fname);
-      await engine.writeNote(newNote, { updateExisting: true });
+      await engine.writeNote(newNote);
     } catch (error: any) {
       Sentry.captureException(error);
       throw error;

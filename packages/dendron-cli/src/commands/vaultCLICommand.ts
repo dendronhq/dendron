@@ -88,6 +88,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
               vault,
               addToConfig: true,
               addToCodeWorkspace: true,
+              newVault: true,
             });
           } else {
             const vault: DVault = {

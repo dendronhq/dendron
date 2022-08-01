@@ -1,4 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import {
   NoteTrait,
@@ -7,9 +6,7 @@ import {
 } from "@dendronhq/common-all";
 
 /**
- * A NoteTrait that will execute end-user defined javascript code. TODO: Support
- * hot reload (user doesn't need to reload window in order for their changes to
- * take effect)
+ * A Note Trait that will execute end-user defined javascript code.
  */
 export class UserDefinedTraitV1 implements NoteTrait {
   id: string;
@@ -27,20 +24,59 @@ export class UserDefinedTraitV1 implements NoteTrait {
   constructor(traitId: string, scriptPath: string) {
     this.id = traitId;
     this.scriptPath = scriptPath;
-
-    this.OnCreate = UserDefinedTraitV1.getOnCreateProps(scriptPath);
-    this.OnWillCreate = UserDefinedTraitV1.getOnWillCreateProps(scriptPath);
   }
 
-  private static getOnWillCreateProps(noteTypeScriptPath: string) {
+  /**
+   * This method needs to be called before a user defined trait's defined
+   * methods will be invoked.
+   */
+  async initialize() {
     const hack = require(`./webpack-require-hack.js`);
-    const req: NoteTrait = hack(noteTypeScriptPath);
-    return req.OnWillCreate;
+    const trait: UserDefinedTraitV1 = hack(this.scriptPath);
+
+    this.OnWillCreate = {
+      setNameModifier: trait.OnWillCreate?.setNameModifier
+        ? this.wrapFnWithRequiredModules(trait.OnWillCreate!.setNameModifier)
+        : undefined,
+    };
+
+    this.OnCreate = {
+      setTitle: trait.OnCreate?.setTitle
+        ? this.wrapFnWithRequiredModules(trait.OnCreate!.setTitle)
+        : undefined,
+      setTemplate: trait.OnCreate?.setTemplate
+        ? this.wrapFnWithRequiredModules(trait.OnCreate!.setTemplate)
+        : undefined,
+    };
   }
 
-  private static getOnCreateProps(noteTypeScriptPath: string) {
-    const hack = require(`./webpack-require-hack.js`);
-    const req: NoteTrait = hack(noteTypeScriptPath);
-    return req.OnCreate;
+  /**
+   * Helper method that returns a modified form of the passed in function. The
+   * modified form allows the function to access lodash and luxon modules as if
+   * they were imported modules. It does this by temporarily modifying the
+   * global Object prototype, which allows module access with '_.*' or 'luxon.*'
+   * syntax
+   * @param fn
+   * @returns
+   */
+  private wrapFnWithRequiredModules(
+    fn: (args?: any) => any
+  ): (args?: any) => any {
+    return function (args: any) {
+      const objectPrototype = Object.prototype as any;
+
+      const _ = require("lodash");
+      const luxon = require("luxon");
+
+      try {
+        objectPrototype._ = _;
+        objectPrototype.luxon = luxon;
+        return fn(args);
+      } finally {
+        // Make sure to clean up the global object after we're done.
+        delete objectPrototype._;
+        delete objectPrototype.luxon;
+      }
+    };
   }
 }

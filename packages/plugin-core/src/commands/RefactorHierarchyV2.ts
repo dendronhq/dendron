@@ -4,7 +4,10 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
+  extractNoteChangeEntryCounts,
   NoteUtils,
+  RefactoringCommandUsedPayload,
+  StatisticsUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -18,7 +21,6 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutputV2a, RenameNoteV2aCommand } from "./RenameNoteV2a";
 import {
@@ -27,6 +29,7 @@ import {
 } from "../components/lookup/buttons";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 const md = _md();
 
@@ -37,7 +40,9 @@ type CommandOpts = {
   noConfirm?: boolean;
 };
 
-type CommandOutput = any;
+export type CommandOutput = RenameNoteOutputV2a & {
+  operations: RenameOperation[];
+};
 
 type RenameOperation = {
   vault: DVault;
@@ -50,6 +55,13 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
 
   entireWorkspaceQuickPickItem = {
     label: "Entire Workspace",
@@ -195,7 +207,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     };
   }
 
-  async showPreview(operations: RenameOperation[]) {
+  showPreview(operations: RenameOperation[]) {
     let content = [
       "# Refactor Preview",
       "",
@@ -221,7 +233,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const panel = window.createWebviewPanel(
       "refactorPreview", // Identifies the type of the webview. Used internally
       "Refactor Preview", // Title of the panel displayed to the user
-      ViewColumn.One, // Editor column to show the new webview panel in.
+      { viewColumn: ViewColumn.One, preserveFocus: true }, // Editor column to show the new webview panel in.
       {} // Webview options. More on these later.
     );
     panel.webview.html = md.render(content.join("\n"));
@@ -365,24 +377,58 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     if (noConfirm) return true;
     const options = ["Proceed", "Cancel"];
     const resp = await VSCodeUtils.showQuickPick(options, {
+      title: "Proceed with Refactor?",
       placeHolder: "Proceed",
       ignoreFocusOut: true,
     });
     return resp === "Proceed";
   }
 
+  prepareProxyMetricPayload(capturedNotes: DNodeProps[]) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
+    const engine = ExtensionProvider.getEngine();
+
+    const basicStats = StatisticsUtils.getBasicStatsFromNotes(capturedNotes);
+    if (basicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth, ...rest } = basicStats;
+
+    const traitsAcc = capturedNotes.flatMap((note) =>
+      note.traits && note.traits.length > 0 ? note.traits : []
+    );
+    const traitsSet = new Set(traitsAcc);
+    this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
+      traits: [...traitsSet],
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
+      extra: {
+        numProcessed: capturedNotes.length,
+        ...rest,
+      },
+    };
+  }
+
   async execute(opts: CommandOpts): Promise<any> {
     const ctx = "RefactorHierarchy:execute";
     const { scope, match, replace, noConfirm } = opts;
     this.L.info({ ctx, opts, msg: "enter" });
-    const ext = getExtension();
-    const { engine } = getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
+    const { engine } = ExtensionProvider.getDWorkspace();
     const matchRE = new RegExp(match);
     const capturedNotes = this.getCapturedNotes({
       scope,
       matchRE,
       engine,
     });
+
+    this.prepareProxyMetricPayload(capturedNotes);
 
     const operations = this.getRenameOperations({
       capturedNotes,
@@ -395,7 +441,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       return;
     }
 
-    await this.showPreview(operations);
+    this.showPreview(operations);
 
     const shouldProceed = await this.promptConfirmation(noConfirm);
     if (!shouldProceed) {
@@ -418,7 +464,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         return out;
       }
     );
-    return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
+    return { ...out, operations };
   }
 
   async showResponse(res: CommandOutput) {
@@ -429,7 +475,52 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     window.showInformationMessage("Done refactoring.");
     const { changed } = res;
     if (changed.length > 0) {
-      window.showInformationMessage(`Dendron updated ${changed.length} files`);
+      window.showInformationMessage(
+        `Dendron updated ${
+          _.uniqBy(changed, (ent) => ent.note.fname).length
+        } files`
+      );
     }
+  }
+
+  trackProxyMetrics({
+    noteChangeEntryCounts,
+  }: {
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    if (this._proxyMetricPayload === undefined) {
+      return;
+    }
+
+    const { extra, ...props } = this._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+      },
+    });
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+    try {
+      this.trackProxyMetrics({ noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+    return noteChangeEntryCounts;
   }
 }

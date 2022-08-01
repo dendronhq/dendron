@@ -1,27 +1,32 @@
 import {
   ConfigUtils,
+  DendronASTDest,
   IntermediateDendronConfig,
   NoteProps,
+  ProcFlavor,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,
+  PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV5 } from "@dendronhq/engine-server";
+import { MDUtilsV5 } from "@dendronhq/engine-server";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
 import {
   checkNotInVFile,
   checkVFile,
+  createProcCompileTests,
   createProcTests,
   generateVerifyFunction,
   processNote,
   processTextV2,
   ProcTests,
 } from "./utils";
+import { getOpts, runTestCases } from "./v5/utils";
 
 function runAllTests(opts: {
   name: string;
@@ -55,38 +60,347 @@ export const modifyNote = async (
   );
 };
 
-describe("legacy note ref", () => {
-  const badRef = "((foo))";
-  const BAD_REF = createProcTests({
-    name: "BAD_REF",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = MDUtilsV5.procRemarkFull({
-        config: {
-          ...engine.config,
-        },
-        engine,
-        fname: "foo",
-        wikiLinksOpts: { useId: true },
-        dest: extra.dest,
-        vault: vaults[0],
-      });
-      const resp = await proc2.process(badRef);
-      return { resp };
-    },
-    verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        expect(resp).toMatchSnapshot();
-        checkVFile(resp, badRef);
-      },
-    },
-    preSetupHook: ENGINE_HOOKS.setupBasic,
+describe("noteRefV2", () => {
+  const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, "foo", (note: NoteProps) => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        "## Header 1",
+        "task1",
+        "### Header 1.1",
+        "task1.1",
+        "## Header 2",
+        "task2",
+        "### Header 2.1",
+        "task2.1",
+        "## Header 3",
+        "task3",
+      ];
+      note.body = txt.join("\n");
+      return note;
+    });
+  };
+
+  describe("WHEN parse header", () => {
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await ANCHOR_WITH_SPACE_PRE_SETUP(opts);
+      TestConfigUtils.withConfig((config) => {
+        config.workspace.enableSmartRefs = true;
+        return config;
+      }, opts);
+    };
+    describe("AND parse from start header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse start header and sub headers",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-1]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "task1", "task1.1");
+                await checkNotInVFile(resp, "task2", "task3");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND parse from middle header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse middle header and sub headers",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-2]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "task2", "task2.1");
+                await checkNotInVFile(resp, "task1", "task3");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND parse from end header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse end header and sub headers",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "# Foo Bar\n![[foo#header-3]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "task3");
+                await checkNotInVFile(resp, "task1");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
   });
 
-  runAllTests({ name: "compile", testCases: BAD_REF });
-});
+  describe("WHEN parse begin block", () => {
+    const BEGIN_BLOCK_ANCHOR_SETUP = async (opts: WorkspaceOpts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "---",
+          "Some text at the beginning",
+          "## Header 1",
+        ];
+        note.body = txt.join("\n");
+        return note;
+      });
+    };
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await BEGIN_BLOCK_ANCHOR_SETUP(opts);
+    };
 
-describe("noteRefV2", () => {
+    describe("AND note has beginning section", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "Some text at the beginning");
+                await checkNotInVFile(resp, "Header 1");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note starts with a header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkNotInVFile(resp, "Some text at the beginning");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "# Foo",
+                "Some text at the beginning",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+
+    describe("AND note has beginning section but no headers", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^begin]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "Some text at the beginning");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "Some text at the beginning",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+  });
+
+  describe("WHEN parse end block", () => {
+    const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "---",
+          "begin section",
+          "## Header 1",
+          "body 1.1",
+          "## Header 2",
+          "body 2.2",
+          "end section",
+        ];
+        note.body = txt.join("\n");
+        return note;
+      });
+    };
+
+    describe("AND WHEN try parse #^end anchor as start anchor", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN show error",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(
+                  resp,
+                  "the '^end' anchor cannot be used as the starting anchor"
+                );
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note has beginning section", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#header-1:^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "end section");
+                await checkNotInVFile(resp, "begin section");
+              },
+            },
+          },
+          preSetupHook: preSetupHookForHeaders,
+        })
+      );
+    });
+
+    describe("AND note ends on a header", () => {
+      runTestCases(
+        createProcCompileTests({
+          name: "THEN parse beginning section",
+          fname: "foo",
+          setup: async (opts) => {
+            const text = "![[foo#header-1:^end]]";
+            const { proc } = getOpts(opts);
+            const resp = await proc.process(text);
+            return { resp, proc };
+          },
+          verify: {
+            [DendronASTDest.MD_REGULAR]: {
+              [ProcFlavor.REGULAR]: async ({ extra }) => {
+                const { resp } = extra;
+                await checkVFile(resp, "end section", "## Header 3");
+              },
+            },
+          },
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await modifyNote(opts, "foo", (note: NoteProps) => {
+              const txt = [
+                "---",
+                "id: foo",
+                "---",
+                "begin section",
+                "## Header 1",
+                "body 1.1",
+                "## Header 2",
+                "body 2.2",
+                "end section",
+                "## Header 3",
+              ];
+              note.body = txt.join("\n");
+              return note;
+            });
+          },
+        })
+      );
+    });
+  });
+
   describe("common cases", () => {
     const linkWithNoExtension = "![[foo]]";
 
@@ -136,19 +450,6 @@ describe("noteRefV2", () => {
           );
           return [];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: ["foo body", "portal"],
-              }),
-              expected: true,
-            },
-          ];
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -165,24 +466,6 @@ describe("noteRefV2", () => {
           "## Header1",
           "task1",
           "## Header2",
-          "task2",
-        ];
-        note.body = txt.join("\n");
-        return note;
-      });
-    };
-
-    const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
-      await ENGINE_HOOKS.setupBasic(opts);
-      await modifyNote(opts, "foo", (note: NoteProps) => {
-        const txt = [
-          "---",
-          "id: foo",
-          "---",
-          `# Tasks`,
-          "## Header 1",
-          "task1",
-          "## HeadeR 2",
           "task2",
         ];
         note.body = txt.join("\n");
@@ -243,19 +526,7 @@ describe("noteRefV2", () => {
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
-      verifyFuncDict: {
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["task2"],
-              nomatch: ["task1"],
-            })
-          ).toBeTruthy();
-        },
-      },
+      verifyFuncDict: {},
     });
 
     const WITH_NOTE_LINK_TITLE = createProcTests({
@@ -288,50 +559,6 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
-        },
-      },
-    });
-
-    const WITH_ANCHOR_WITH_SPACE = createProcTests({
-      name: "WITH_ANCHOR_WITH_SPACE",
-      setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
-        return processTextV2({
-          text: "# Foo Bar\n![[foo#header-2]]",
-          dest: opts.extra.dest,
-          engine,
-          vault: vaults[0],
-          fname: "foo",
-        });
-      },
-      preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
-      verifyFuncDict: {
-        [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["task2"],
-              nomatch: ["task1"],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.toString(),
-              match: ["![[foo#header-2]]"],
-            })
-          ).toBeTruthy();
-        },
-        ...generateVerifyFunction({
-          target: DendronASTDest.MD_REGULAR,
-          exclude: [DendronASTDest.MD_DENDRON],
-        }),
       },
     });
 
@@ -691,19 +918,6 @@ describe("noteRefV2", () => {
             },
           ];
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          return [
-            {
-              actual: await AssertUtils.assertInString({
-                body: resp.toString(),
-                match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
-              }),
-              expected: true,
-            },
-          ];
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
     });
@@ -754,10 +968,6 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-        },
       },
       preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
     });
@@ -797,16 +1007,6 @@ describe("noteRefV2", () => {
           ).toBeTruthy();
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents,
-              match: ["two content"],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
           expect(
@@ -867,17 +1067,6 @@ describe("noteRefV2", () => {
             await AssertUtils.assertInString({
               body: resp.contents,
               nomatch: ['href="bar.md"'],
-            })
-          ).toBeTruthy();
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          // for preview, show links
-          const { resp } = extra;
-          expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents,
-              match: ['href="bar.md"'],
             })
           ).toBeTruthy();
         },
@@ -976,12 +1165,6 @@ describe("noteRefV2", () => {
           await checkNotInVFile(resp, "Tags");
           await checkNotInVFile(resp, "sed", "eum");
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "Sint minus fuga omnis non.");
-          await checkNotInVFile(resp, "Tags");
-          await checkNotInVFile(resp, "sed", "eum");
-        },
       },
     });
 
@@ -995,7 +1178,6 @@ describe("noteRefV2", () => {
       ...RECURSIVE_TEST_CASES,
       ...WITH_ANCHOR,
       ...WITH_FM_TITLE,
-      ...WITH_ANCHOR_WITH_SPACE,
       ...WITH_START_ANCHOR_INVALID,
       ...WITH_END_ANCHOR_INVALID,
       ...WITH_START_ANCHOR_OFFSET,
@@ -1366,7 +1548,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1380,7 +1562,7 @@ describe("noteRefV2", () => {
             "* Sapiente sed accusamus eum.",
             "* Ullam optio est quia. ^start",
             "* Reprehenderit doloribus.",
-            "* Sint minus fuga omnis non. ^end",
+            "* Sint minus fuga omnis non. ^fin",
             "* Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1411,7 +1593,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1426,7 +1608,7 @@ describe("noteRefV2", () => {
             "* Sapiente sed accusamus eum.",
             "  * Ullam optio est quia. ^start",
             "* Reprehenderit doloribus.",
-            "  * Sint minus fuga omnis non. ^end",
+            "  * Sint minus fuga omnis non. ^fin",
             "  * Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1457,7 +1639,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1474,7 +1656,7 @@ describe("noteRefV2", () => {
             "",
             "Sapiente sed accusamus eum.",
             "",
-            "* Sint minus fuga omnis non. ^end",
+            "* Sint minus fuga omnis non. ^fin",
             "* Iure neque alias dolorem.",
           ];
           note.body = txt.join("\n");
@@ -1552,7 +1734,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^invalid-start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^invalid-start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1567,7 +1749,7 @@ describe("noteRefV2", () => {
             "",
             "Ullam optio est quia. ^start",
             "",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1610,7 +1792,7 @@ describe("noteRefV2", () => {
             "",
             "Ullam optio est quia. ^start",
             "",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1638,7 +1820,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start2:#^end2]]",
+          text: "# Foo Bar\n![[foo.ch1#^start2:#^fin2]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1653,13 +1835,13 @@ describe("noteRefV2", () => {
             "",
             "Aut id architecto quia. ^start1",
             "",
-            "Sapiente sed accusamus eum. ^end1",
+            "Sapiente sed accusamus eum. ^fin1",
             "",
             "Ullam optio est quia. ^start2",
             "",
-            "![[foo.ch1#^start1:#^end1]]",
+            "![[foo.ch1#^start1:#^fin1]]",
             "",
-            "Reprehenderit doloribus. ^end2",
+            "Reprehenderit doloribus. ^fin2",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1691,7 +1873,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start2:#^end2]]",
+          text: "# Foo Bar\n![[foo.ch1#^start2:#^fin2]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1706,13 +1888,13 @@ describe("noteRefV2", () => {
             "",
             "Aut id architecto quia. ^start1",
             "",
-            "Sapiente sed accusamus eum. ^end1",
+            "Sapiente sed accusamus eum. ^fin1",
             "",
             "Ullam optio est quia. ^start2",
             "",
-            "![[#^start1:#^end1]]",
+            "![[#^start1:#^fin1]]",
             "",
-            "Reprehenderit doloribus. ^end2",
+            "Reprehenderit doloribus. ^fin2",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1744,7 +1926,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1760,7 +1942,7 @@ describe("noteRefV2", () => {
             "* Reprehenderit doloribus.",
             "",
             "Sapiente sed accusamus eum.",
-            "Sint minus fuga omnis non. ^end",
+            "Sint minus fuga omnis non. ^fin",
             "",
             "Iure neque alias dolorem.",
           ];
@@ -1792,7 +1974,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#^start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#^start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1809,7 +1991,7 @@ describe("noteRefV2", () => {
             "Sapiente sed accusamus eum. ^start",
             "",
             "* Reprehenderit doloribus.",
-            "* Ullam optio est quia. ^end",
+            "* Ullam optio est quia. ^fin",
             "* Aut id architecto quia.",
             "",
             "Iure neque alias dolorem.",
@@ -1843,7 +2025,7 @@ describe("noteRefV2", () => {
       setupFunc: async (opts) => {
         const { engine, vaults } = opts;
         return processTextV2({
-          text: "# Foo Bar\n![[foo.ch1#start:#^end]]",
+          text: "# Foo Bar\n![[foo.ch1#start:#^fin]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
@@ -1857,7 +2039,7 @@ describe("noteRefV2", () => {
             "# start",
             "",
             "Sint minus fuga omnis non.",
-            "Sapiente sed accusamus eum. ^end",
+            "Sapiente sed accusamus eum. ^fin",
             "",
             "Aut id architecto quia.",
             "Iure neque alias dolorem.",

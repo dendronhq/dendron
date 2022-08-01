@@ -13,6 +13,9 @@
       "name": "root"
     },
     {
+      "path": "packages/dendron-viz"
+    },
+    {
       "path": "packages/common-all"
     },
     {
@@ -37,9 +40,6 @@
       "path": "packages/pods-core"
     },
     {
-      "path": "packages/dendron-cli"
-    },
-    {
       "path": "packages/api-server"
     },
     {
@@ -50,9 +50,6 @@
     },
     {
       "path": "packages/engine-test-utils"
-    },
-    {
-      "path": "packages/dendron-next-server"
     },
     {
       "path": "packages/nextjs-template"
@@ -108,8 +105,6 @@
     "markdown-preview-enhanced.wikiLinkFileExtension": ".md"
   },
   "extensions": {
-    "recommendations": [
-      "esbenp.prettier-vscode"
-    ]
+    "recommendations": ["esbenp.prettier-vscode"]
   }
 }

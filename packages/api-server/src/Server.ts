@@ -67,6 +67,10 @@ export function appModule({
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 
+  // this is the first time we are accessing the segment client instance (when this is run as a separate process).
+  // unlock Segment client.
+  SegmentClient.unlock();
+
   if (!SegmentClient.instance().hasOptedOut && getStage() === "prod") {
     initializeSentry({ environment: getStage(), release: getSentryRelease() });
   }
@@ -76,19 +80,6 @@ export function appModule({
 
   app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
-  // for dev environment, get preview from next-server in monorepo
-  if (getStage() !== "prod") {
-    // packages/api-server/lib/Server.ts
-    const devStaticRoot = path.join(
-      __dirname,
-      "..",
-      "..",
-      "dendron-next-server",
-      "out"
-    );
-    logger.info({ ctx, msg: "devStaticRoot:add", devStaticRoot });
-    app.use(express.static(devStaticRoot));
-  }
   if (nextStaticRoot) {
     logger.info({ ctx, msg: "nextStaticRoot:add", nextStaticRoot });
     app.use(express.static(nextStaticRoot));

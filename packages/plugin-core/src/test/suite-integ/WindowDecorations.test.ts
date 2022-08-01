@@ -71,6 +71,7 @@ suite("GIVEN a text document with decorations", function () {
   const CREATED = "1625648278263";
   const UPDATED = "1625758878263";
   const FNAME = "bar";
+  this.timeout(5e3);
 
   describe("AND GIVEN links ", () => {
     function checkTimestampsDecorated({

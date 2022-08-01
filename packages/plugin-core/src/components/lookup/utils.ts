@@ -13,6 +13,7 @@ import {
   OrderedMatcher,
   RenameNoteOpts,
   RespV2,
+  TransformedQueryString,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -33,10 +34,10 @@ import {
 } from "./constants";
 import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
 import { OnAcceptHook } from "./LookupProviderV3Interface";
+import { TabUtils } from "./TabUtils";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
-  TransformedQueryString,
   VaultSelectionMode,
 } from "./types";
 
@@ -232,7 +233,28 @@ export class PickerUtilsV2 {
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
     quickPick.sortByLabel = false;
-    quickPick.showNote = async (uri) => window.showTextDocument(uri);
+    quickPick.showNote = async (uri) => {
+      let viewColumn;
+
+      // if current tab is a preview, open note in a different view
+      if (TabUtils.tabAPIAvailable()) {
+        const allTabGroups = TabUtils.getAllTabGroups();
+        const activeTabGroup = allTabGroups.activeTabGroup;
+        if (
+          activeTabGroup.activeTab &&
+          TabUtils.isPreviewTab(activeTabGroup.activeTab)
+        ) {
+          const nonPreviewTabGroup = _.find(
+            allTabGroups.all,
+            (tb) => tb.viewColumn !== activeTabGroup.viewColumn
+          );
+          if (nonPreviewTabGroup) {
+            viewColumn = nonPreviewTabGroup.viewColumn;
+          }
+        }
+      }
+      return window.showTextDocument(uri, { viewColumn });
+    };
     if (initialValue !== undefined) {
       quickPick.rawValue = initialValue;
       quickPick.prefix = initialValue;
@@ -532,16 +554,18 @@ export class PickerUtilsV2 {
 
     const vaultsWithMatchingHierarchy: VaultPickerItem[] | undefined =
       queryResponse.data
-        .filter((value) => value.fname === newQs)
-        .map((value) => value.vault)
-        .sort(sortByPathNameFn)
-        .map((value) => {
-          return {
-            vault: value,
-            detail: HIERARCHY_MATCH_DETAIL,
-            label: VaultUtils.getName(value),
-          };
-        });
+        ? queryResponse.data
+            .filter((value) => value.fname === newQs)
+            .map((value) => value.vault)
+            .sort(sortByPathNameFn)
+            .map((value) => {
+              return {
+                vault: value,
+                detail: HIERARCHY_MATCH_DETAIL,
+                label: VaultUtils.getName(value),
+              };
+            })
+        : undefined;
 
     if (!vaultsWithMatchingHierarchy) {
       // Suggest current vault context as top suggestion
@@ -630,15 +654,6 @@ export class PickerUtilsV2 {
     delete picker.moreResults;
     delete picker.offset;
     delete picker.allResults;
-  }
-
-  /**
-   @deprecated use {@link NoteLookupUtils.slashToDot}
-   * @param ent
-   * @returns
-   */
-  static slashToDot(ent: string) {
-    return ent.replace(/\//g, ".");
   }
 }
 

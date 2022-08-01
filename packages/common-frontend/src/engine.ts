@@ -2,14 +2,14 @@ import {
   IntermediateDendronConfig,
   DEngineClient,
   DVault,
-  NotePropsDict,
+  NotePropsByIdDict,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { EngineState } from "./features/engine/slice";
 
 // @ts-ignore
 export class WebEngine implements DEngineClient {
-  public notes: NotePropsDict;
+  public notes: NotePropsByIdDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
   public configRoot: string;

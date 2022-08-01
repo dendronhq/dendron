@@ -1,0 +1,440 @@
+<html>
+  <style>
+    h1 {
+      font-size: 36px;
+      font-weight: 500;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 14;
+    }
+
+    body {
+      box-sizing: border-box;
+      font-weight: var(--vscode-font-weight);
+      -webkit-font-smoothing: antialiased;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      font-variant: tabular-nums;
+      line-height: 1.5715;
+      font-feature-settings: "tnum";
+      color: var(--vscode-editor-foreground);
+      background-color: var(--vscode-editor-background);
+    }
+  </style>
+  <body
+    onload="onload()"
+    data-theme-override=""
+    role="document"
+    class="vscode-light"
+    data-vscode-theme-kind="vscode-light"
+    data-vscode-theme-name="GitHub Light"
+  >
+    <div id="main-content-wrap" class="main-content-wrap">
+      <div id="main-content" class="main-content">
+        <div id="root">
+          <section class="ant-layout" style="padding: 33px">
+            <main class="ant-layout-content">
+              <div>
+                <h1 id="latest">Release 0.100.0</h1>
+                <style>
+                  .alert {
+                    --docsearch-text-color: #1c1e21;
+                    --docsearch-spacing: 12px;
+                    --docsearch-icon-stroke-width: 1.4;
+                    --docsearch-highlight-color: var(--docsearch-primary-color);
+                    --docsearch-muted-color: #969faf;
+                    --docsearch-container-background: rgba(101, 108, 133, 0.8);
+                    --docsearch-modal-width: 560px;
+                    --docsearch-modal-height: 600px;
+                    --docsearch-modal-background: #f5f6f7;
+                    --docsearch-modal-shadow: inset 1px 1px 0 0
+                        hsla(0, 0%, 100%, 0.5),
+                      0 3px 8px 0 #555a64;
+                    --docsearch-searchbox-height: 56px;
+                    --docsearch-searchbox-background: #ebedf0;
+                    --docsearch-searchbox-focus-background: #fff;
+                    --docsearch-searchbox-shadow: inset 0 0 0 2px
+                      var(--docsearch-primary-color);
+                    --docsearch-hit-height: 56px;
+                    --docsearch-hit-color: #444950;
+                    --docsearch-hit-active-color: #fff;
+                    --docsearch-hit-background: #fff;
+                    --docsearch-hit-shadow: 0 1px 3px 0 #d4d9e1;
+                    --docsearch-key-gradient: linear-gradient(
+                      -225deg,
+                      #d5dbe4,
+                      #f8f8f8
+                    );
+                    --docsearch-key-shadow: inset 0 -2px 0 0 #cdcde6,
+                      inset 0 0 1px 1px #fff,
+                      0 1px 2px 1px rgba(30, 35, 90, 0.4);
+                    --docsearch-footer-height: 44px;
+                    --docsearch-footer-background: #fff;
+                    --docsearch-footer-shadow: 0 -1px 0 0 #e0e3e8,
+                      0 -3px 6px 0 rgba(69, 98, 155, 0.12);
+                    --bs-blue: #0d6efd;
+                    --bs-indigo: #6610f2;
+                    --bs-purple: #6f42c1;
+                    --bs-pink: #d63384;
+                    --bs-red: #dc3545;
+                    --bs-orange: #fd7e14;
+                    --bs-yellow: #ffc107;
+                    --bs-green: #198754;
+                    --bs-teal: #20c997;
+                    --bs-cyan: #0dcaf0;
+                    --bs-black: #000;
+                    --bs-white: #fff;
+                    --bs-gray: #6c757d;
+                    --bs-gray-dark: #343a40;
+                    --bs-gray-100: #f8f9fa;
+                    --bs-gray-200: #e9ecef;
+                    --bs-gray-300: #dee2e6;
+                    --bs-gray-400: #ced4da;
+                    --bs-gray-500: #adb5bd;
+                    --bs-gray-600: #6c757d;
+                    --bs-gray-700: #495057;
+                    --bs-gray-800: #343a40;
+                    --bs-gray-900: #212529;
+                    --bs-primary: #0d6efd;
+                    --bs-secondary: #6c757d;
+                    --bs-success: #198754;
+                    --bs-info: #0dcaf0;
+                    --bs-warning: #ffc107;
+                    --bs-danger: #dc3545;
+                    --bs-light: #f8f9fa;
+                    --bs-dark: #212529;
+                    --bs-primary-rgb: 13, 110, 253;
+                    --bs-secondary-rgb: 108, 117, 125;
+                    --bs-success-rgb: 25, 135, 84;
+                    --bs-info-rgb: 13, 202, 240;
+                    --bs-warning-rgb: 255, 193, 7;
+                    --bs-danger-rgb: 220, 53, 69;
+                    --bs-light-rgb: 248, 249, 250;
+                    --bs-dark-rgb: 33, 37, 41;
+                    --bs-white-rgb: 255, 255, 255;
+                    --bs-black-rgb: 0, 0, 0;
+                    --bs-body-color-rgb: 33, 37, 41;
+                    --bs-body-bg-rgb: 255, 255, 255;
+                    --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI",
+                      Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans",
+                      Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+                      "Segoe UI Symbol", "Noto Color Emoji";
+                    --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
+                      "Liberation Mono", "Courier New", monospace;
+                    --bs-gradient: linear-gradient(
+                      180deg,
+                      rgba(255, 255, 255, 0.15),
+                      rgba(255, 255, 255, 0)
+                    );
+                    --bs-body-font-family: var(--bs-font-sans-serif);
+                    --bs-body-font-size: 1rem;
+                    --bs-body-font-weight: 400;
+                    --bs-body-line-height: 1.5;
+                    --bs-body-color: #212529;
+                    --bs-body-bg: #fff;
+                    --bs-border-width: 1px;
+                    --bs-border-style: solid;
+                    --bs-border-color: #dee2e6;
+                    --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
+                    --bs-border-radius: 0.375rem;
+                    --bs-border-radius-sm: 0.25rem;
+                    --bs-border-radius-lg: 0.5rem;
+                    --bs-border-radius-xl: 1rem;
+                    --bs-border-radius-2xl: 2rem;
+                    --bs-border-radius-pill: 50rem;
+                    --bs-heading-color: ;
+                    --bs-link-color: #0d6efd;
+                    --bs-link-hover-color: #0a58ca;
+                    --bs-code-color: #d63384;
+                    --bs-highlight-bg: #fff3cd;
+                    --bd-purple: #4c0bce;
+                    --bd-violet: #712cf9;
+                    --bd-accent: #ffe484;
+                    --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+                    --bd-accent-rgb: 255, 228, 132;
+                    --bd-pink-rgb: 214, 51, 132;
+                    --bd-teal-rgb: 32, 201, 151;
+                    --docsearch-primary-color: var(--bd-violet);
+                    --docsearch-logo-color: var(--bd-violet);
+                    --base00: #fff;
+                    --base01: #f5f5f5;
+                    --base02: #c8c8fa;
+                    --base03: #565c64;
+                    --base04: #030303;
+                    --base05: #333;
+                    --base06: #fff;
+                    --base07: #9a6700;
+                    --base08: #bc4c00;
+                    --base09: #087990;
+                    --base0A: #795da3;
+                    --base0B: #183691;
+                    --base0C: #183691;
+                    --base0D: #795da3;
+                    --base0E: #a71d5d;
+                    --base0F: #333;
+                    font-family: var(--bs-body-font-family);
+                    font-size: var(--bs-body-font-size);
+                    font-weight: var(--bs-body-font-weight);
+                    line-height: var(--bs-body-line-height);
+                    text-align: var(--bs-body-text-align);
+                    -webkit-text-size-adjust: 100%;
+                    -webkit-tap-highlight-color: transparent;
+                    --bs-gutter-y: 0;
+                    --bs-gutter-x: 3rem;
+                    --bd-example-padding: 1.5rem;
+                    box-sizing: border-box;
+                    --bs-alert-padding-x: 1rem;
+                    --bs-alert-padding-y: 1rem;
+                    --bs-alert-margin-bottom: 1rem;
+                    --bs-alert-border: 1px solid var(--bs-alert-border-color);
+                    --bs-alert-border-radius: 0.375rem;
+                    position: relative;
+                    padding: var(--bs-alert-padding-y) var(--bs-alert-padding-x);
+                    margin-bottom: var(--bs-alert-margin-bottom);
+                    color: var(--bs-alert-color);
+                    background-color: var(--bs-alert-bg);
+                    border: var(--bs-alert-border);
+                    border-radius: var(--bs-alert-border-radius, 0);
+                    --bs-alert-color: #0f5132;
+                    --bs-alert-bg: #d1e7dd;
+                    --bs-alert-border-color: #badbcc;
+                    margin-top: 1rem;
+                  }
+                </style>
+                <div class="alert alert-primary" role="alert">
+                  Dendron is launching on product hunt today. If Dendron has
+                  been of use to you, please leave feedback on our
+                  <a href="https://link.dendron.so/8OK-"
+                    >launch page</a
+                  >
+                  - this would help us out a lot! 🙏
+                </div>
+                <h3 id="context">Context</h3>
+                <p>
+                  Two years ago, we launched Dendron because we believed there
+                  was a
+                  <a
+                    href="https://www.kevinslin.com/notes/e1455752-b052-4212-ac6e-cc054659f2bb.html"
+                    >better way of managing knowledge</a
+                  >.
+                </p>
+                <p>
+                  The problem - we are all drowning in information! Existing
+                  tools try to make it easy to get knowledge in but fail at
+                  getting that information back out when needed.
+                </p>
+                <p>
+                  Dendron is a developer-focused, open-source, note-taking tool.
+                  It combines the simplicity of markdown with the power of
+                  VSCode. To manage information at scale, Dendron applies the
+                  insights we've learned from five decades of developer tooling
+                  and brings it to general knowledge.
+                </p>
+                <p>
+                  Since 2020, we've been iterating on this thesis with weekly
+                  releases to make Dendron better, faster and stronger! With the
+                  v100 release, we'll take a moment to go over some highlights.
+                </p>
+                <h3 id="better">Better</h3>
+                <p>
+                  In a well-designed system, easy things should be easy and hard
+                  things possible.
+                </p>
+                <p>
+                  This hasn't always been the case at Dendron and it's something
+                  we've put in a lot of effort addressing through improved
+                  documentation, feature work, and better defaults.
+                </p>
+                <p>
+                  Besides creating a catalog of
+                  <a
+                    href="https://wiki.dendron.so/notes/ordz7r99w1v099v14hrwgnp"
+                    >talks</a
+                  >
+                  and
+                  <a
+                    href="https://wiki.dendron.so/notes/9313b845-d9bf-42c9-aad1-0da34794ce26"
+                    >guides</a
+                  >
+                  of how Dendron is used in the wild, we've also kicked off a
+                  <a
+                    href="https://handbook.dendron.so/notes/ebpudfrf6rg5uut75d29lhg"
+                    >standardization effort</a
+                  >
+                  across all our docs so that any feature, command, or config is
+                  just a
+                  <a
+                    href="https://wiki.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3"
+                    >lookup</a
+                  >
+                  away!
+                </p>
+                <p>
+                  Feature wise, the following are some areas we've invested in
+                  to make common workflows easy:
+                </p>
+                <ul>
+                  <li>
+                    the
+                    <a
+                      href="https://wiki.dendron.so/notes/9b059u38o0b7fydjgoazt06"
+                      >Dendron Sidebar</a
+                    >
+                    provides one click access to most frequently used features
+                    like backlinks and the tree view
+                  </li>
+                  <li>
+                    the
+                    <a
+                      href="https://wiki.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47/#import-obsidian-vault"
+                      >Import Obsidian Vault</a
+                    >
+                    command provides a one click method for importing your notes
+                  </li>
+                  <li>
+                    the
+                    <a
+                      href="https://wiki.dendron.so/notes/c877f1204xn2ev5djgwc7do"
+                      >Help and Feedback</a
+                    >
+                    panel provides a cheatsheet of useful resources and docs
+                  </li>
+                  <li>
+                    the
+                    <a
+                      href="https://wiki.dendron.so/notes/te9obzegtn5vjrsdf4sp5xx"
+                      >Tip of the Day</a
+                    >
+                    panel highlights new features and enhancements
+                  </li>
+                </ul>
+                <p>
+                  Finally, many of Dendron's core use cases now come with better
+                  defaults. For example,
+                  <a href="https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd"
+                    >daily journals</a
+                  >
+                  and
+                  <a
+                    href="https://wiki.dendron.so/notes/5c213aa6-e4ba-49e8-85c5-1bdcb33ce202"
+                    >meeting notes</a
+                  >
+                  have built-in
+                  <a
+                    href="https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2"
+                    >templates</a
+                  >
+                  that get created the first time these commands are invoked.
+                </p>
+                <h3 id="faster">Faster</h3>
+                <p>Life is too short to wait for your notes to load.</p>
+                <p>
+                  Dendron has always been fast - much of this we get for free
+                  because your notes are just local plaintext files stored in
+                  your computer. Over the past year, we've optimized all the
+                  parts of Dendron's lifecycle, which include initialization,
+                  lookup, publishing, and autocomplete just to name a few.
+                </p>
+                <p>
+                  These changes resulted in orders of magnitude better
+                  performance across the board and &lt;100ms of latency for the
+                  most common actions in Dendron 🚀 🚀 🚀
+                </p>
+                <h3 id="stronger">Stronger</h3>
+                <p>
+                  Our goal is to make Dendron an IDE for knowledge. Since 2020,
+                  we've released <strong>over 600 features</strong> to augment
+                  what you can do with plaintext.
+                </p>
+                <p>Some highlights:</p>
+                <ul>
+                  <li>
+                    <a
+                      href="https://wiki.dendron.so/notes/1mu1qb1vilhqr7tlatwyqxm"
+                      >Handlebar Templates</a
+                    >
+                    that allow augmentation of your templates with conditions,
+                    variables, and for loops
+                  </li>
+                  <li>
+                    <a
+                      href="https://wiki.dendron.so/notes/ckkmesn09bye11sdnaoqcut"
+                      >Hovers</a
+                    >
+                    over links and backlinks
+                  </li>
+                  <li>
+                    <a
+                      href="https://wiki.dendron.so/notes/bdZhT3nF8Yz3WDzKp7hqh"
+                      >Note Traits</a
+                    >
+                    that allow you to create notes with custom behavior
+                  </li>
+                  <li>
+                    <a
+                      href="https://wiki.dendron.so/notes/4ushYTDoX0TYQ1FDtGQSg"
+                      >Publishing using NextJS</a
+                    >
+                    with selective publishing
+                  </li>
+                </ul>
+                <p>
+                  For the full changelog of all features, see the
+                  <a href="https://wiki.dendron.so/notes/FPXeGgv44ZlJHVoXmU8Ku"
+                    >release notes</a
+                  >.
+                </p>
+                <h3 id="conclusion">Conclusion</h3>
+                <p>
+                  Prior to Dendron, I worked at Amazon for over half a decade.
+                  Something that stuck with me from my time there is that it's
+                  always
+                  <a
+                    href="https://aws.amazon.com/executive-insights/content/how-amazon-defines-and-operationalizes-a-day-1-culture/"
+                    >day one</a
+                  >.
+                </p>
+                <p>
+                  This is especially relevant when dealing with knowledge
+                  management today because how humans manage information in the
+                  age of the internet is fundamentally an unsolved problem. With
+                  Dendron, we think we have something that works. Whether you
+                  are an individual managing a handful of notes or a team with
+                  tens of thousands of notes, Dendron helps you stay organized
+                  and on top of it all.
+                </p>
+                <p>
+                  We've spent the past 100 releases iterating on our
+                  <a
+                    href="https://blog.dendron.so/notes/3dd58f62-fee5-4f93-b9f1-b0f0f59a9b64"
+                    >hierarchy first approach to note taking</a
+                  >
+                  and we'll spend a few hundred more building on top of this
+                  foundation. On behalf of the entire Dendron team, I would like
+                  to say thanks to everyone that helped make this happen -
+                  chiefly our wonderful community and our steadfast investors.
+                  Here's to the next 100 releases!
+                </p>
+                <p>- Kevin</p>
+              </div>
+            </main>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

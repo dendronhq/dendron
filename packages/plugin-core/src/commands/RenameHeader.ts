@@ -1,6 +1,9 @@
 import {
   DendronError,
+  DNodeUtils,
+  extractNoteChangeEntryCounts,
   getSlugger,
+  NoteProps,
   RenameNotePayload,
   RespV2,
   VaultUtils,
@@ -22,6 +25,8 @@ import { getAnalyticsPayload } from "../utils/analytics";
 import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { WSUtils } from "../WSUtils";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandOpts =
   | {
@@ -36,6 +41,8 @@ type CommandOpts =
       newHeader?: string;
       /** added for contextual UI analytics. */
       source?: string;
+      /** current note that the rename is happening */
+      note?: NoteProps;
     }
   | undefined;
 export type CommandOutput = RespV2<RenameNotePayload> | undefined;
@@ -50,9 +57,17 @@ export class RenameHeaderCommand extends BasicCommand<
     opts: CommandOpts
   ): Promise<Required<CommandOpts> | undefined> {
     let { oldHeader, newHeader, source } = opts || {};
+    const { editor, selection } = VSCodeUtils.getSelection();
+    const extension = ExtensionProvider.getExtension();
+    const { wsUtils } = extension;
+    const note = wsUtils.getActiveNote();
+    if (_.isUndefined(note)) {
+      throw new DendronError({
+        message: "You must first open a note to rename a header.",
+      });
+    }
     if (_.isUndefined(oldHeader)) {
       // parse from current selection
-      const { editor, selection } = VSCodeUtils.getSelection();
       if (!editor || !selection)
         throw new DendronError({
           message: "You must first select the header you want to rename.",
@@ -93,7 +108,12 @@ export class RenameHeaderCommand extends BasicCommand<
     if (_.isUndefined(source)) {
       source = "command palette";
     }
-    return { oldHeader, newHeader, source };
+    return {
+      oldHeader,
+      newHeader,
+      source,
+      note,
+    };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
@@ -148,7 +168,63 @@ export class RenameHeaderCommand extends BasicCommand<
     return out;
   }
 
-  addAnalyticsPayload(opts?: CommandOpts) {
-    return getAnalyticsPayload(opts?.source);
+  trackProxyMetrics({
+    opts,
+    noteChangeEntryCounts,
+  }: {
+    opts: CommandOpts;
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    if (_.isUndefined(opts)) {
+      return;
+    }
+
+    const { note } = opts;
+    if (_.isUndefined(note)) {
+      return;
+    }
+
+    const extension = ExtensionProvider.getExtension();
+    const engine = extension.getEngine();
+    const { vaults } = engine;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props: {
+        command: this.key,
+        numVaults: vaults.length,
+        traits: note.traits || [],
+        numChildren: note.children.length,
+        numLinks: note.links.length,
+        numChars: note.body.length,
+        noteDepth: DNodeUtils.getDepth(note),
+      },
+      extra: {
+        ...noteChangeEntryCounts,
+      },
+    });
+  }
+
+  addAnalyticsPayload(opts?: CommandOpts, out?: CommandOutput) {
+    const noteChangeEntryCounts =
+      out?.data !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.data) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+    try {
+      this.trackProxyMetrics({ opts, noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+    return {
+      ...noteChangeEntryCounts,
+      ...getAnalyticsPayload(opts?.source),
+    };
   }
 }

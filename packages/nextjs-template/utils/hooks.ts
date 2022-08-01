@@ -3,7 +3,7 @@ import {
   FuseEngine,
   IntermediateDendronConfig,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { Grid } from "antd";
@@ -32,7 +32,7 @@ export function useDendronRouter() {
   const getActiveNote = ({
     notes,
   }: {
-    notes: NotePropsDict;
+    notes: NotePropsByIdDict;
   }): NoteProps | undefined => {
     const maybeIdByQuery = query?.id;
     return !_.isUndefined(maybeIdByQuery) ? notes[maybeIdByQuery] : undefined;
@@ -61,7 +61,7 @@ export function useDendronRouter() {
  * Get instance of fuse js
  * @param setNoteIndex
  */
-export function useDendronLookup() {
+export function useDendronLookup(notes?: NotePropsByIdDict) {
   const engine = useEngineAppSelector((state) => state.engine);
   const config = engine.config as IntermediateDendronConfig;
   const fuzzThreshold = ConfigUtils.getLookup(config).note.fuzzThreshold;
@@ -70,13 +70,12 @@ export function useDendronLookup() {
     undefined
   );
   React.useEffect(() => {
-    fetchNotes().then(async (noteData) => {
-      const { notes } = noteData;
+    if (notes) {
       const noteIndex = new FuseEngine({ mode: "fuzzy", fuzzThreshold });
-      noteIndex.updateNotesIndex(notes);
+      noteIndex.replaceNotesIndex(notes);
       setNoteIndex(noteIndex);
-    });
-  }, []);
+    }
+  }, [notes]);
   return noteIndex;
 }
 

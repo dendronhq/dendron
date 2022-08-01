@@ -1,7 +1,8 @@
 import _ from "lodash";
+import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
-import { NotePropsDict, NoteProps } from "../types";
-import { isNotUndefined } from "../utils";
+import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
+import { isNotUndefined, PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 
 export enum TreeMenuNodeIcon {
@@ -25,9 +26,19 @@ export type TreeMenu = {
   child2parent: { [key: string]: string | null };
 };
 
+export enum TreeViewItemLabelTypeEnum {
+  title = "title",
+  filename = "filename",
+}
+
+export type TreeNode = {
+  fname: string;
+  children: TreeNode[];
+};
+
 export class TreeUtils {
   static generateTreeData(
-    allNotes: NotePropsDict,
+    allNotes: NotePropsByIdDict,
     domains: NoteProps[]
   ): TreeMenu {
     // --- Calc
@@ -70,9 +81,32 @@ export class TreeUtils {
     noteDict,
   }: {
     noteId: string;
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
   }): TreeMenuNode | undefined {
     const note = noteDict[noteId];
+
+    // return children of the curren tnote
+    const getChildren = () => {
+      if (fm.nav_exclude_children || fm.has_collection) {
+        return [];
+      }
+
+      const { data } = this.sortNotesAtLevel({
+        noteIds: note.children,
+        noteDict,
+        reverse: fm.sort_order === "reverse",
+      });
+
+      return data
+        .map((noteId) =>
+          TreeUtils.note2Tree({
+            noteId,
+            noteDict,
+          })
+        )
+        .filter(isNotUndefined);
+    };
+
     if (_.isUndefined(note)) {
       return undefined;
     }
@@ -85,6 +119,7 @@ export class TreeUtils {
     } else if (note.stub) {
       icon = TreeMenuNodeIcon.plusOutlined;
     }
+    const fm = PublishUtils.getPublishFM(note);
 
     return {
       key: note.id,
@@ -92,19 +127,8 @@ export class TreeUtils {
       icon,
       hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
       vaultName: VaultUtils.getName(note.vault),
-      navExclude: note.custom?.nav_exclude,
-      children: this.sortNotesAtLevel({
-        noteIds: note.children,
-        noteDict,
-        reverse: note.custom?.sort_order === "reverse",
-      })
-        .map((noteId) =>
-          TreeUtils.note2Tree({
-            noteId,
-            noteDict,
-          })
-        )
-        .filter(isNotUndefined),
+      navExclude: fm.nav_exclude || false,
+      children: getChildren(),
     };
   }
 
@@ -112,17 +136,46 @@ export class TreeUtils {
     noteIds,
     noteDict,
     reverse,
+    labelType,
   }: {
     noteIds: string[];
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
     reverse?: boolean;
-  }): string[] => {
+    labelType?: TreeViewItemLabelTypeEnum;
+  }): { data: string[]; error?: DendronError } => {
+    const unsafeNoteIds: string[] = [];
+    const safeNoteIds = noteIds.filter((noteId) => {
+      const props = _.get(noteDict, noteId);
+      if (props === undefined) {
+        unsafeNoteIds.push(noteId);
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    let error: DendronError | undefined;
+    if (unsafeNoteIds.length > 0) {
+      error = new DendronError({
+        message: "Omitted sorting note ids not found in noteDict",
+        payload: { omitted: unsafeNoteIds },
+      });
+    }
+
     const out = _.sortBy(
-      noteIds,
+      safeNoteIds,
       // Sort by nav order if set
       (noteId) => noteDict[noteId]?.custom?.nav_order,
-      // Sort by titles
-      (noteId) => noteDict[noteId]?.title,
+      // Sort by label
+      (noteId) => {
+        if (labelType) {
+          return labelType === TreeViewItemLabelTypeEnum.filename
+            ? _.last(noteDict[noteId]?.fname.split("."))
+            : noteDict[noteId]?.title;
+        } else {
+          return noteDict[noteId]?.title;
+        }
+      },
       // If titles are identical, sort by last updated date
       (noteId) => noteDict[noteId]?.updated
     );
@@ -139,8 +192,105 @@ export class TreeUtils {
       out.push(maybeTagsHierarchy);
     }
     if (reverse) {
-      return _.reverse(out);
+      return { data: _.reverse(out), error };
     }
-    return out;
+
+    return { data: out, error };
   };
+
+  /**
+   * Create tree starting from given root note. Use note's children properties to define TreeNode children relationship
+   *
+   * @param allNotes
+   * @param rootNoteId
+   * @returns
+   */
+  static createTreeFromEngine(
+    allNotes: NotePropsByIdDict,
+    rootNoteId: string
+  ): TreeNode {
+    const note = allNotes[rootNoteId];
+
+    if (note) {
+      const children = note.children
+        .filter((child) => child !== note.id)
+        .sort((a, b) => a.localeCompare(b))
+        .map((note) => this.createTreeFromEngine(allNotes, note));
+
+      const fnames = note.fname.split(".");
+      return { fname: fnames[fnames.length - 1], children };
+    } else {
+      throw new DendronError({
+        message: `No note found in engine for "${rootNoteId}"`,
+      });
+    }
+  }
+
+  /**
+   * Create tree from list of file names. Use the delimiter "." to define TreeNode children relationship
+   */
+  static createTreeFromFileNames(fNames: string[], rootNote: string) {
+    const result: TreeNode[] = [];
+    fNames.forEach((name) => {
+      if (name !== rootNote) {
+        name.split(".").reduce(
+          (object, fname) => {
+            let item = (object.children = object.children || []).find(
+              (q: { fname: string }) => q.fname === fname
+            );
+            if (!item) {
+              object.children.push((item = { fname, children: [] }));
+            }
+            return item;
+          },
+          { children: result }
+        );
+      }
+    });
+    return { fname: rootNote, children: result };
+  }
+
+  /**
+   * Check if two trees are equal.
+   * Two trees are equal if and only if fnames are equal and children tree nodes are equal
+   */
+  static validateTreeNodes(
+    expectedTree: TreeNode,
+    actualTree: TreeNode
+  ): RespV3<void> {
+    if (expectedTree.fname !== actualTree.fname) {
+      return {
+        error: new DendronError({
+          message: `Fname differs. Expected: "${expectedTree.fname}". Actual "${actualTree.fname}"`,
+        }),
+      };
+    }
+
+    expectedTree.children.sort((a, b) => a.fname.localeCompare(b.fname));
+    actualTree.children.sort((a, b) => a.fname.localeCompare(b.fname));
+
+    if (expectedTree.children.length !== actualTree.children.length) {
+      const expectedChildren = expectedTree.children.map(
+        (child) => child.fname
+      );
+      const actualChildren = actualTree.children.map((child) => child.fname);
+      return {
+        error: new DendronError({
+          message: `Mismatch at ${expectedTree.fname}'s children. Expected: "${expectedChildren}". Actual "${actualChildren}"`,
+        }),
+      };
+    }
+
+    for (const [idx, value] of expectedTree.children.entries()) {
+      const resp = this.validateTreeNodes(value, actualTree.children[idx]);
+      if (resp.error) {
+        return {
+          error: new DendronError({
+            message: `Mismatch at ${expectedTree.fname}'s children. ${resp.error.message}.`,
+          }),
+        };
+      }
+    }
+    return { data: undefined };
+  }
 }

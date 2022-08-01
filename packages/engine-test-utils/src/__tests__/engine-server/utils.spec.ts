@@ -3,12 +3,12 @@ import {
   matchRefMarker,
   parseDendronRef,
   parseFileLink,
-  refLink2String,
   stripLocalOnlyTags,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+
 function createFileLink(data?: Partial<DNoteRefData>): DNoteRefLink {
-  let cleanData: DNoteRefData = _.defaults(data, { type: "file" });
+  const cleanData: DNoteRefData = _.defaults(data, { type: "file" });
   return {
     from: {
       fname: "foo",
@@ -48,50 +48,6 @@ describe("parseFileLink", () => {
     expect(parseFileLink("[[foo]]#head1:#*")).toEqual(
       createFileLink({ anchorStart: "head1", anchorEnd: "*" })
     );
-  });
-});
-
-describe("link2String", () => {
-  test("file", () => {
-    expect(
-      refLink2String({
-        type: "ref",
-        from: {
-          fname: "foo",
-        },
-        data: {
-          type: "file",
-        },
-      })
-    ).toEqual("[[foo]]");
-  });
-
-  it("one anchor", () => {
-    expect(refLink2String(createFileLink({ anchorStart: "head1" }))).toEqual(
-      "[[foo]]#head1"
-    );
-  });
-
-  it("all parts", () => {
-    expect(
-      refLink2String(
-        createFileLink({
-          anchorEnd: "head2",
-          anchorStart: "head1",
-        })
-      )
-    ).toEqual("[[foo]]#head1:#head2");
-  });
-
-  it("next anchor", () => {
-    expect(
-      refLink2String(
-        createFileLink({
-          anchorEnd: "*",
-          anchorStart: "head1",
-        })
-      )
-    ).toEqual("[[foo]]#head1:#*");
   });
 });
 

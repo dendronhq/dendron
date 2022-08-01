@@ -1,8 +1,10 @@
 import { DendronError, NoteTrait } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { getExtension } from "../workspace";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { TraitUtils } from "../traits/TraitUtils";
 import { BaseCommand } from "./base";
+import { RegisterNoteTraitCommand } from "./RegisterNoteTraitCommand";
 
 type CommandOpts = {
   trait: NoteTrait;
@@ -26,19 +28,36 @@ export class CreateNoteWithUserDefinedTrait extends BaseCommand<
   key = DENDRON_COMMANDS.CREATE_USER_DEFINED_NOTE.key;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const items = getExtension().traitRegistrar.registeredTraits;
-    const picked = await vscode.window.showQuickPick(
-      items.map((item) => item.id),
-      { canPickMany: false }
-    );
-
-    if (!picked) {
+    if (!TraitUtils.checkWorkspaceTrustAndWarn()) {
       return;
     }
 
-    const pickedType = items.find((t) => t.id === picked);
+    const registeredTraits =
+      ExtensionProvider.getExtension().traitRegistrar.registeredTraits;
 
-    return { trait: pickedType! };
+    if (registeredTraits.size === 0) {
+      const createOption = "Create Trait";
+      const response = await vscode.window.showErrorMessage(
+        "No registered traits. Create a trait first before running this command.",
+        createOption
+      );
+
+      if (response === createOption) {
+        const cmd = new RegisterNoteTraitCommand();
+        cmd.run();
+      }
+    }
+    const items = registeredTraits.keys();
+    const picked = await vscode.window.showQuickPick(Array.from(items), {
+      canPickMany: false,
+      title: "Select a Note Trait",
+    });
+
+    if (!picked || !registeredTraits.get(picked)) {
+      return;
+    }
+
+    return { trait: registeredTraits.get(picked)! };
   }
 
   async enrichInputs(inputs: CommandInput): Promise<CommandInput> {
@@ -48,9 +67,10 @@ export class CreateNoteWithUserDefinedTrait extends BaseCommand<
   }
 
   async execute(opts: CommandOpts): Promise<CommandOpts> {
-    const cmd = getExtension().traitRegistrar.getRegisteredCommandForTrait(
-      opts.trait
-    );
+    const cmd =
+      ExtensionProvider.getExtension().traitRegistrar.getRegisteredCommandForTrait(
+        opts.trait
+      );
 
     if (!cmd) {
       throw new DendronError({ message: "Unexpected unregistered type" });

@@ -1,21 +1,22 @@
-import { ConfigUtils, DVault, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DailyJournalTestGroups,
+  DVault,
+  Time,
+  _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { MetadataService } from "@dendronhq/engine-server";
+import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
+import { beforeEach } from "mocha";
 import sinon from "sinon";
-import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
-import { WSUtils } from "../../WSUtils";
-import { MockDendronExtension } from "../MockDendronExtension";
-import { getActiveEditorBasename } from "../testUtils";
-import { expect } from "../testUtilsv2";
-import {
-  EditorUtils,
-  runLegacyMultiWorkspaceTest,
-  setupBeforeAfter,
-  withConfig,
-} from "../testUtilsV3";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { expect, getNoteFromTextEditor } from "../testUtilsv2";
+import { describeMultiWS, EditorUtils } from "../testUtilsV3";
 
 const stubVaultPick = (vaults: DVault[]) => {
   const vault = _.find(vaults, { fsPath: vaults[2].fsPath });
@@ -26,156 +27,352 @@ const stubVaultPick = (vaults: DVault[]) => {
   return vault;
 };
 
+/**
+ * These tests can timeout otherwise
+ * eg. https://github.com/dendronhq/dendron/runs/6942599059?check_suite_focus=true
+ */
+const timeout = 5e3;
+
 suite("Create Daily Journal Suite", function () {
-  const ctx: vscode.ExtensionContext = setupBeforeAfter(this);
+  const TEMPLATE_BODY = "test daily template";
 
-  test("basic", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-          vaults,
-        });
-
-        await new CreateDailyJournalCommand(mockExtension).run();
-        expect(
-          getActiveEditorBasename().startsWith("daily.journal")
-        ).toBeTruthy();
-        done();
-      },
-    });
+  beforeEach(() => {
+    MetadataService.instance().deleteMeta("firstDailyJournalTime");
+    MetadataService.instance().setInitialInstall(
+      Time.DateTime.fromISO("2022-06-30").toSeconds()
+    );
+    sinon
+      .stub(_2022_05_DAILY_JOURNAL_TEMPLATE_TEST, "getUserGroup")
+      .returns(DailyJournalTestGroups.withTemplate!);
   });
 
-  test("default journal vault", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        withConfig(
-          (config) => {
-            ConfigUtils.setNoteLookupProps(
-              config,
-              "confirmVaultOnCreate",
-              false
-            );
-            const dailyVaultName = VaultUtils.getName(vaults[0]);
-            ConfigUtils.setJournalProps(config, "dailyVault", dailyVaultName);
-            return config;
-          },
-          { wsRoot }
-        );
-        const mockExtension = new MockDendronExtension({
-          engine,
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
           wsRoot,
-          context: ctx,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
         });
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then daily journal with template applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+        const metadataService = MetadataService.instance();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeFalsy();
 
-        await new CreateDailyJournalCommand(mockExtension).run();
+        await cmd.run();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema.fname === "dendron.daily").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and DAILY JOURNAL has already been run before",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then default template and schema is not created", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+        const metadataService = MetadataService.instance();
+        metadataService.setFirstDailyJournalTime();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+
+        await cmd.run();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is NOT applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeFalsy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is NOT created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema).toBeFalsy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and first install is before 5/31/22",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then default template and schema is not created", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+        const metadataService = MetadataService.instance();
+        metadataService.setInitialInstall(
+          Time.DateTime.fromISO("2022-04-30").toSeconds()
+        );
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeFalsy();
+
+        await cmd.run();
+        expect(metadataService.getMeta().firstDailyJournalTime).toBeTruthy();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is NOT applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeFalsy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is NOT created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema).toBeFalsy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and dailyVault set",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
+      modConfigCb: (config) => {
+        ConfigUtils.setNoteLookupProps(config, "confirmVaultOnCreate", false);
+        ConfigUtils.setJournalProps(config, "dailyVault", "vault2");
+        return config;
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then daily journal is created in daily vault with template applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema.fname === "dendron.daily").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
-            vaults[0].fsPath
+            engine.vaults[1].fsPath
           )
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("default journal vault set with lookup Confirm", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        withConfig(
-          (config) => {
-            ConfigUtils.setNoteLookupProps(
-              config,
-              "confirmVaultOnCreate",
-              true
-            );
-            const dailyVaultName = VaultUtils.getName(vaults[0]);
-            ConfigUtils.setJournalProps(config, "dailyVault", dailyVaultName);
-            return config;
-          },
-          { wsRoot }
-        );
-        const mockExtension = new MockDendronExtension({
-          engine,
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and dailyVault set with lookup Confirm",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
           wsRoot,
-          context: ctx,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
         });
+      },
+      modConfigCb: (config) => {
+        ConfigUtils.setNoteLookupProps(config, "confirmVaultOnCreate", true);
+        ConfigUtils.setJournalProps(config, "dailyVault", "vault1");
+        return config;
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then daily journal is created in daily vault with template is applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
 
-        await new CreateDailyJournalCommand(mockExtension).run();
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema.fname === "dendron.daily").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
-            vaults[0].fsPath
+            engine.vaults[0].fsPath
           )
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("default journal vault not set with lookup Confirm", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        withConfig(
-          (config) => {
-            ConfigUtils.setNoteLookupProps(
-              config,
-              "confirmVaultOnCreate",
-              true
-            );
-            return config;
-          },
-          { wsRoot }
-        );
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and dailyVault not set with lookup Confirm",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
+      modConfigCb: (config) => {
+        ConfigUtils.setNoteLookupProps(config, "confirmVaultOnCreate", true);
+        return config;
+      },
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then daily journal is created in daily vault with template applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         stubVaultPick(vaults);
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-        });
+        const cmd = new CreateDailyJournalCommand(ext);
 
-        await new CreateDailyJournalCommand(mockExtension).run();
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema.fname === "dendron.daily").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+
         expect(
           (await EditorUtils.getURIForActiveEditor()).fsPath.includes(
-            vaults[2].fsPath
+            engine.vaults[2].fsPath
           )
         ).toBeTruthy();
-        done();
-      },
-    });
-  });
+      });
+    }
+  );
 
-  test("with config override", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and dailyDomain set",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".bar",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
+      },
       modConfigCb: (config) => {
         ConfigUtils.setJournalProps(config, "dailyDomain", "bar");
         return config;
       },
-      onInit: async ({ engine, wsRoot }) => {
-        const mockExtension = new MockDendronExtension({
-          engine,
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then daily journal is created with right domain and with template applied.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("bar.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["bar"];
+        expect(dailySchema.fname === "dendron.bar").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note and deprecated config",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daisy",
           wsRoot,
-          context: ctx,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
         });
-
-        await new CreateDailyJournalCommand(mockExtension).run();
-        expect(
-          getActiveEditorBasename().startsWith("bar.journal")
-        ).toBeTruthy();
-        done();
       },
-    });
-  });
-
-  test("ignores deprecated config", (done) => {
-    runLegacyMultiWorkspaceTest({
-      ctx,
       wsSettingsOverride: {
         settings: {
           [CONFIG.DEFAULT_JOURNAL_DATE_FORMAT.key]: "'q'q",
@@ -190,27 +387,74 @@ suite("Create Daily Journal Suite", function () {
         ConfigUtils.setJournalProps(config, "name", "journey");
         return config;
       },
-      onInit: async ({ engine, wsRoot, vaults }) => {
-        const current = await NoteTestUtilsV4.createNote({
-          wsRoot,
-          vault: vaults[0],
-          fname: "foo.bar.baz",
-        });
-        await WSUtils.openNote(current);
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed, then deprecated config is ignored.", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
 
-        const mockExtension = new MockDendronExtension({
-          engine,
-          wsRoot,
-          context: ctx,
-        });
-
-        await new CreateDailyJournalCommand(mockExtension).run();
-        const fname = getActiveEditorBasename();
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, "0");
-        expect(fname).toEqual(`daisy.journey.${dd}.md`);
-        done();
+        expect(activeNote.fname).toEqual(`daisy.journey.${dd}`);
+        // TODO: Enable when/if we support applying templates to journals with configured dateFormat
+        //expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daisy"];
+        expect(dailySchema.fname === "dendron.daisy").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "GIVEN a basic workspace with a daily journal template note",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout,
+      preActivateHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: CreateDailyJournalCommand.DENDRON_TEMPLATES_FNAME + ".daily",
+          wsRoot,
+          vault: vaults[0],
+          body: TEMPLATE_BODY,
+        });
       },
-    });
-  });
+    },
+    () => {
+      test("WHEN CreateDailyJournalCommand is executed multiple times, then template and schema are not generated again", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const cmd = new CreateDailyJournalCommand(ext);
+
+        await cmd.run();
+        const activeNote = getNoteFromTextEditor();
+        // Verify template body is applied
+        expect(activeNote.fname.startsWith("daily.journal")).toBeTruthy();
+        expect(activeNote.body.includes(TEMPLATE_BODY)).toBeTruthy();
+
+        // Verify trait is applied
+        const traits = (activeNote as any).traitIds;
+        expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
+
+        // Verify schema is created
+        const engine = ExtensionProvider.getEngine();
+        const dailySchema = engine.schemas["daily"];
+        expect(dailySchema.fname === "dendron.daily").toBeTruthy();
+        expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
+        const numNotesBefore = _.size(engine.notes);
+        const numSchemasBefore = _.size(engine.schemas);
+        await cmd.run();
+        expect(numNotesBefore).toEqual(_.size(engine.notes));
+        expect(numSchemasBefore).toEqual(_.size(engine.schemas));
+      });
+    }
+  );
 });

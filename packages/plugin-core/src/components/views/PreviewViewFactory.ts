@@ -18,6 +18,8 @@ export class PreviewPanelFactory {
   public static create(extension: IDendronExtension): PreviewProxy {
     // Simple singleton implementation, since we only want one preview panel at
     // any given time.
+
+    // if preview panel doesn't exist yet, create a new one.
     if (!PreviewPanelFactory._preview) {
       PreviewPanelFactory._preview = new PreviewPanel({
         extension,

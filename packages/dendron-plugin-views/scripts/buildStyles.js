@@ -16,7 +16,7 @@ const filesToThemeMap = (root) => {
  */
 const fetchBaseStyles = (dst) => {
   const themes = ["light", "dark"];
-  const nextRoot = path.join("..", "dendron-next-server", "public");
+  const nextRoot = path.join("..", "common-assets", "public");
   themes.forEach((th) => {
     fs.copyFileSync(
       path.join(nextRoot, `${th}-theme.css`),
@@ -26,14 +26,14 @@ const fetchBaseStyles = (dst) => {
 };
 
 /**
- * Copy scss styles from dendron-next-server
+ * Copy scss styles from common-assets
  * This is all Dendron customizations
  * - how blockquotes are rendered
  * - table borders
  * - etc
  */
 const fetchCustomStyles = (dst) => {
-  const nextRoot = path.join("..", "dendron-next-server", "styles", "scss");
+  const nextRoot = path.join("..", "common-assets", "styles", "scss");
   fs.copySync(nextRoot, dst);
 };
 

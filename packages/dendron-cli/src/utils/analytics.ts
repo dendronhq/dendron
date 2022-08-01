@@ -1,5 +1,5 @@
 import { AppNames, RuntimeUtils } from "@dendronhq/common-all";
-import { SegmentUtils } from "@dendronhq/common-server";
+import { SegmentClient, SegmentUtils } from "@dendronhq/common-server";
 import { CLIUtils } from "./cli";
 
 export class CLIAnalyticsUtils {
@@ -23,6 +23,7 @@ export class CLIAnalyticsUtils {
 
   static identify() {
     const cliVersion = CLIUtils.getClientVersion();
+    SegmentClient.unlock();
     SegmentUtils.identify({ type: AppNames.CLI, cliVersion });
   }
 

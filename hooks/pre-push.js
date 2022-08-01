@@ -9,7 +9,7 @@ const path = require("path");
  * circular dependencies detected
  */
 function checkCircularDependencies() {
-  const CIRCULAR_DEP_THRESHOLD = 2; // Lower this each time we fix a circular dependency
+  const CIRCULAR_DEP_THRESHOLD = 1; // Lower this each time we fix a circular dependency
   const rootPath = exec("git rev-parse --show-toplevel").stdout;
   const filePath = path.resolve(rootPath, "packages/plugin-core");
   madge(filePath, {
@@ -57,10 +57,11 @@ function main() {
       ".only": {
         rgx: /(suite|describe|it|test)\.only/,
         fileRgx: /(\.spec\.ts$)|(\.test\.ts$)/,
+        fileIgnoreRgx: /dnode\.spec\.ts/,
       },
       "debugger;": { rgx: /(^|\s)debugger/, fileRgx: /\.ts$/ },
       "rel import of monorepo pkg": {
-        rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils|dendron-next-server))/,
+        rgx: /(\.\.\/(common-frontend|common-all|common-server|engine-server|dendron-cli|pods-core|api-server|common-test-utils|engine-test-utils))/,
         fileRgx: /\.ts[x]?$/,
       },
     },

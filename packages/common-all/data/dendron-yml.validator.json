@@ -490,9 +490,6 @@
         "randomNote": {
           "$ref": "#/definitions/RandomNoteConfig"
         },
-        "insertNote": {
-          "$ref": "#/definitions/InsertNoteConfig"
-        },
         "insertNoteLink": {
           "$ref": "#/definitions/InsertNoteLinkConfig"
         },
@@ -501,12 +498,15 @@
         },
         "copyNoteLink": {
           "$ref": "#/definitions/CopyNoteLinkConfig"
+        },
+        "templateHierarchy": {
+          "type": "string",
+          "description": "Default template hiearchy used when running commands like `Apply template`"
         }
       },
       "required": [
         "lookup",
         "randomNote",
-        "insertNote",
         "insertNoteLink",
         "insertNoteIndex",
         "copyNoteLink"
@@ -594,16 +594,6 @@
       },
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  RandomNoteCommand }"
-    },
-    "InsertNoteConfig": {
-      "type": "object",
-      "properties": {
-        "initialValue": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "description": "Namespace for configuring  {@link  InsertNoteCommand }"
     },
     "InsertNoteLinkConfig": {
       "type": "object",
@@ -733,6 +723,9 @@
         "enableXVaultWikiLink": {
           "type": "boolean"
         },
+        "enableHandlebarTemplates": {
+          "type": "boolean"
+        },
         "enableRemoteVaultInit": {
           "type": "boolean"
         },
@@ -760,6 +753,9 @@
         "enableEditorDecorations": {
           "type": "boolean"
         },
+        "enableSmartRefs": {
+          "type": "boolean"
+        },
         "feedback": {
           "type": "boolean"
         },
@@ -775,6 +771,7 @@
         "graph",
         "enableAutoCreateOnDefinition",
         "enableXVaultWikiLink",
+        "enableHandlebarTemplates",
         "enableRemoteVaultInit",
         "workspaceVaultSyncMode",
         "enableAutoFoldFrontmatter",
@@ -933,6 +930,13 @@
           },
           "description": "Maps each status to a symbol, word, or sentence. This will be displayed for the task."
         },
+        "taskCompleteStatus": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Sets which statuses mark the task as completed."
+        },
         "prioritySymbols": {
           "type": "object",
           "additionalProperties": {
@@ -965,6 +969,7 @@
         "name",
         "prioritySymbols",
         "statusSymbols",
+        "taskCompleteStatus",
         "todoIntegration"
       ],
       "description": "Namespace for configuring scratch note behavior"
@@ -982,10 +987,15 @@
       "properties": {
         "zoomSpeed": {
           "type": "number"
+        },
+        "createStub": {
+          "type": "boolean",
+          "description": "If true, create a note if it hasn't been created already when clicked on a graph node"
         }
       },
       "required": [
-        "zoomSpeed"
+        "zoomSpeed",
+        "createStub"
       ],
       "additionalProperties": false,
       "description": "Namespace for all graph related configurations."
@@ -1025,6 +1035,9 @@
         },
         "automaticallyShowPreview": {
           "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/definitions/Theme"
         }
       },
       "required": [
@@ -1039,6 +1052,14 @@
       ],
       "additionalProperties": false,
       "description": "Namespace for all preview related configurations"
+    },
+    "Theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light",
+        "custom"
+      ]
     },
     "DendronPublishingConfig": {
       "type": "object",
@@ -1115,6 +1136,9 @@
         "enableRandomlyColoredTags": {
           "type": "boolean"
         },
+        "enableTaskNotes": {
+          "type": "boolean"
+        },
         "hierarchy": {
           "type": "object",
           "additionalProperties": {
@@ -1133,6 +1157,9 @@
         "github": {
           "$ref": "#/definitions/GithubConfig"
         },
+        "theme": {
+          "$ref": "#/definitions/Theme"
+        },
         "segmentKey": {
           "type": "string"
         },
@@ -1144,6 +1171,9 @@
         },
         "enablePrettyLinks": {
           "type": "boolean"
+        },
+        "siteBanner": {
+          "type": "string"
         }
       },
       "required": [

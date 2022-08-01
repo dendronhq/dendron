@@ -1,13 +1,13 @@
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Image } from "mdast";
-import { DendronASTTypes } from "../types";
+import { Image, Link, Text } from "mdast";
 import path from "path";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { RemarkUtils } from ".";
+import { AnchorUtils, RemarkUtils } from ".";
+import { DendronASTTypes, HashTag, UserTag, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 
 type PluginOpts = {};
@@ -26,8 +26,67 @@ export function makeImageUrlFullPath({
   }
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-  const fpath = path.join(vault2Path({ wsRoot, vault }), node.url);
+  const fpath = path.join(vault2Path({ wsRoot, vault }), decodeURI(node.url));
   node.url = fpath;
+}
+
+/**
+ * Transforms any wiklinks into a vscode command URI for gotoNote.
+ */
+function modifyWikilinkValueToCommandUri({
+  proc,
+  node,
+}: {
+  proc: Unified.Processor;
+  node: WikiLinkNoteV4;
+}) {
+  const { vault } = MDUtilsV5.getProcData(proc);
+
+  const anchor = node.data.anchorHeader
+    ? AnchorUtils.string2anchor(node.data.anchorHeader)
+    : undefined;
+
+  const goToNoteCommandOpts = {
+    qs: node.value,
+    vault,
+    anchor,
+  };
+
+  const encodedArgs = encodeURIComponent(JSON.stringify(goToNoteCommandOpts));
+  node.value = `command:dendron.gotoNote?${encodedArgs}`;
+}
+
+/**
+ * Transforms any UserTag or HashTag nodes into a vscode command URI for gotoNote.
+ */
+function modifyTagValueToCommandUri({
+  proc,
+  node,
+}: {
+  proc: Unified.Processor;
+  node: UserTag | HashTag;
+}) {
+  const { vault } = MDUtilsV5.getProcData(proc);
+
+  const goToNoteCommandOpts = {
+    qs: node.fname,
+    vault,
+  };
+
+  const encodedArgs = encodeURIComponent(JSON.stringify(goToNoteCommandOpts));
+
+  // Convert the node to a 'link' type so that it can behave properly like a
+  // link instead of the tag behavior, since we've changed the value to a
+  // command URI
+  (node as unknown as Link).type = "link";
+  (node as unknown as Link).url = `command:dendron.gotoNote?${encodedArgs}`;
+
+  const childTextNode: Text = {
+    type: "text",
+    value: node.value,
+  };
+
+  (node as unknown as Link).children = [childTextNode];
 }
 
 export function dendronHoverPreview(
@@ -42,6 +101,9 @@ export function dendronHoverPreview(
         DendronASTTypes.FRONTMATTER,
         DendronASTTypes.IMAGE,
         DendronASTTypes.EXTENDED_IMAGE,
+        DendronASTTypes.WIKI_LINK,
+        DendronASTTypes.USERTAG,
+        DendronASTTypes.HASHTAG,
       ],
       (node, index, parent) => {
         // Remove the frontmatter because it will break the output
@@ -53,6 +115,10 @@ export function dendronHoverPreview(
         }
         if (RemarkUtils.isImage(node) || RemarkUtils.isExtendedImage(node)) {
           makeImageUrlFullPath({ proc, node });
+        } else if (RemarkUtils.isWikiLink(node)) {
+          modifyWikilinkValueToCommandUri({ proc, node });
+        } else if (RemarkUtils.isUserTag(node) || RemarkUtils.isHashTag(node)) {
+          modifyTagValueToCommandUri({ proc, node });
         }
         return undefined; // continue
       }

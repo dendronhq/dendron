@@ -18,14 +18,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -62,6 +61,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -70,7 +72,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -81,6 +85,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
     seeds:
         dendron.foo: {}
 preview:
@@ -115,6 +120,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -167,14 +173,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -211,6 +216,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -219,7 +227,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -230,6 +240,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
     seeds:
         dendron.foo:
             site:
@@ -267,6 +278,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -317,14 +329,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults: []
     journal:
@@ -350,6 +361,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -358,7 +372,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -369,6 +385,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -401,6 +418,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
 "
 `;
@@ -421,14 +439,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -456,6 +473,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -464,7 +484,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -475,6 +497,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -507,6 +530,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -544,14 +568,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -579,6 +602,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -587,7 +613,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -598,6 +626,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: true
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -630,6 +659,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -669,14 +699,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -709,6 +738,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -717,7 +749,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -728,6 +762,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
     seeds: {}
 preview:
     enableFMTitle: true
@@ -761,6 +796,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -768,7 +804,6 @@ publishing:
             - vault1
             - vault2
             - vaultThree
-            - dendron.foo
 "
 `;
 
@@ -786,14 +821,13 @@ commands:
             bubbleUpCreateNew: true
             fuzzThreshold: 0.2
     randomNote: {}
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     vaults:
         -
@@ -826,6 +860,9 @@ workspace:
             delegated: l
             dropped: d
             pending: 'y'
+        taskCompleteStatus:
+            - done
+            - x
         prioritySymbols:
             H: high
             M: medium
@@ -834,7 +871,9 @@ workspace:
         createTaskSelectionType: selection2link
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
+    enableHandlebarTemplates: true
     enableXVaultWikiLink: false
     enableRemoteVaultInit: true
     enableUserTags: true
@@ -845,6 +884,7 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
     seeds: {}
 preview:
     enableFMTitle: true
@@ -878,6 +918,7 @@ publishing:
     enableFrontmatterTags: true
     enableHashesForFMTags: false
     enableRandomlyColoredTags: true
+    enableTaskNotes: true
     enablePrettyLinks: true
     duplicateNoteBehavior:
         action: useVault
@@ -885,6 +926,5 @@ publishing:
             - vault1
             - vault2
             - vaultThree
-            - dendron.foo
 "
 `;

@@ -1,6 +1,7 @@
 import {
   ContextualUIEvents,
   DVault,
+  ErrorUtils,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -92,7 +93,7 @@ export class FileWatcher {
     // check if ignore
     const recentEvents = HistoryService.instance().lookBack();
     this.L.debug({ ctx, recentEvents, fname });
-    let note: NoteProps | undefined;
+    let note: NoteProps;
     if (
       _.find(recentEvents, (event) => {
         return _.every([
@@ -108,14 +109,17 @@ export class FileWatcher {
 
     try {
       this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-      const { vaults, engine } = ExtensionProvider.getDWorkspace();
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,
         wsRoot,
       });
-      note = file2Note(fsPath, vault);
+      const resp = file2Note(fsPath, vault);
+      if (ErrorUtils.isErrorResp(resp)) {
+        throw resp.error;
+      }
+      note = resp.data;
 
       // check if note exist as
       const maybeNote = NoteUtils.getNoteByFnameFromEngine({
@@ -135,7 +139,7 @@ export class FileWatcher {
         fmChangeOnly: false,
         engine,
       });
-      await engine.updateNote(note as NoteProps, {
+      await engine.updateNote(note, {
         newNode: true,
       });
     } catch (err: any) {
@@ -172,9 +176,14 @@ export class FileWatcher {
       return;
     }
     try {
-      const engine = ExtensionProvider.getEngine();
+      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const vault = VaultUtils.getVaultByFilePath({
+        vaults,
+        fsPath,
+        wsRoot,
+      });
       this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-      const nodeToDelete = _.find(engine.notes, { fname });
+      const nodeToDelete = (await engine.findNotes({ fname, vault }))[0];
       if (_.isUndefined(nodeToDelete)) {
         throw new Error(`${fname} not found`);
       }

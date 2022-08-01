@@ -4,14 +4,17 @@ import {
   configIsV4,
   ConfigUtils,
   CONSTANTS,
+  DataWithOptError,
   DeepPartial,
   DendronError,
   DendronPublishingConfig,
   DendronSiteConfig,
   ErrorFactory,
+  ErrorUtils,
   ERROR_STATUS,
   getStage,
   GithubEditViewModeEnum,
+  IDendronError,
   IntermediateDendronConfig,
   RespV3,
   StrictConfigV5,
@@ -29,6 +32,20 @@ export enum LocalConfigScope {
 }
 
 export class DConfig {
+  static createSync({
+    wsRoot,
+    defaults,
+  }: {
+    wsRoot: string;
+    defaults?: DeepPartial<StrictConfigV5>;
+  }) {
+    const configPath = DConfig.configPath(wsRoot);
+    const config: IntermediateDendronConfig =
+      ConfigUtils.genLatestConfig(defaults);
+    writeYAML(configPath, config);
+    return config;
+  }
+
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
@@ -43,9 +60,12 @@ export class DConfig {
    * Get without filling in defaults
    * @param wsRoot
    */
-  static getRaw(wsRoot: string) {
+  static getRaw(wsRoot: string, overwriteDuplcate?: boolean) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
+    const config = readYAML(
+      configPath,
+      overwriteDuplcate ?? false
+    ) as Partial<IntermediateDendronConfig>;
     return config;
   }
 
@@ -227,7 +247,7 @@ export class DConfig {
   static readConfigSync(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
     // TODO: validate
-    const config = readYAML(configPath) as IntermediateDendronConfig;
+    const config = readYAML(configPath, true) as IntermediateDendronConfig;
     return config;
   }
 
@@ -236,23 +256,42 @@ export class DConfig {
    * @param wsRoot
    * @returns
    */
-  static readConfigAndApplyLocalOverrideSync(wsRoot: string) {
+  static readConfigAndApplyLocalOverrideSync(
+    wsRoot: string
+  ): DataWithOptError<IntermediateDendronConfig> {
     const config = this.readConfigSync(wsRoot);
     const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
+
+    let localConfigValidOrError: boolean | IDendronError = true;
+
     if (maybeLocalConfig.data) {
-      _.mergeWith(
-        config,
-        maybeLocalConfig.data,
-        (objValue: any, srcValue: any) => {
-          // TODO: optimize, check for keys of known arrays instead
-          if (_.isArray(objValue)) {
-            return srcValue.concat(objValue);
+      const respValidate = this.validateLocalConfig({
+        config: maybeLocalConfig.data,
+      });
+      if (respValidate.error) {
+        localConfigValidOrError = respValidate.error;
+      }
+
+      if (!respValidate.error) {
+        _.mergeWith(
+          config,
+          maybeLocalConfig.data,
+          (objValue: any, srcValue: any) => {
+            // TODO: optimize, check for keys of known arrays instead
+            if (_.isArray(objValue)) {
+              return srcValue.concat(objValue);
+            }
+            return;
           }
-          return;
-        }
-      );
+        );
+      }
     }
-    return config;
+    return {
+      data: config,
+      error: ErrorUtils.isDendronError(localConfigValidOrError)
+        ? localConfigValidOrError
+        : undefined,
+    };
   }
 
   static writeConfig({
@@ -277,6 +316,30 @@ export class DConfig {
   }): Promise<void> {
     const configPath = DConfig.configOverridePath(wsRoot, configScope);
     return writeYAMLAsync(configPath, config);
+  }
+
+  /**
+   * Sanity check local config properties
+   */
+  static validateLocalConfig({
+    config,
+  }: {
+    config: DeepPartial<IntermediateDendronConfig>;
+  }): RespV3<boolean> {
+    if (config.workspace) {
+      if (
+        _.isEmpty(config.workspace) ||
+        (config.workspace.vaults && !_.isArray(config.workspace.vaults))
+      ) {
+        return {
+          error: new DendronError({
+            message:
+              "workspace must not be empty and vaults must be an array if workspace is set",
+          }),
+        };
+      }
+    }
+    return { data: true };
   }
 
   /**

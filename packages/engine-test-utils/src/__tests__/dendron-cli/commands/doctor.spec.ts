@@ -1,4 +1,9 @@
-import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  ErrorUtils,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { file2Note, tmpDir } from "@dendronhq/common-server";
 import {
   BackupService,
@@ -150,7 +155,11 @@ describe("h1 to h2", () => {
               vault.fsPath,
               `${nm.toLowerCase()}.md`
             );
-            const note = file2Note(fpath, vault);
+            const resp = file2Note(fpath, vault);
+            if (ErrorUtils.isErrorResp(resp)) {
+              throw resp.error;
+            }
+            const note = resp.data;
             expect(note).toMatchSnapshot();
             expect(
               await AssertUtils.assertInString({
@@ -173,12 +182,12 @@ describe("h1 to h2", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -187,7 +196,11 @@ describe("h1 to h2", () => {
         });
 
         const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
-        const noteFoo = file2Note(fpathFoo, vault);
+        const resp1 = file2Note(fpathFoo, vault);
+        if (ErrorUtils.isErrorResp(resp1)) {
+          throw resp1.error;
+        }
+        const noteFoo = resp1.data;
         expect(noteFoo).toMatchSnapshot();
         expect(
           await AssertUtils.assertInString({
@@ -198,7 +211,11 @@ describe("h1 to h2", () => {
 
         // bar.md should be untouched.
         const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
-        const note = file2Note(fpathBar, vault);
+        const resp2 = file2Note(fpathBar, vault);
+        if (ErrorUtils.isErrorResp(resp2)) {
+          throw resp2.error;
+        }
+        const note = resp2.data;
         expect(note).toMatchSnapshot();
         expect(
           await AssertUtils.assertInString({
@@ -233,7 +250,11 @@ describe("h1 to h2", () => {
               vault.fsPath,
               `${nm.toLowerCase()}.md`
             );
-            const note = file2Note(fpath, vault);
+            const resp = file2Note(fpath, vault);
+            if (ErrorUtils.isErrorResp(resp)) {
+              throw resp.error;
+            }
+            const note = resp.data;
             expect(note).toMatchSnapshot();
             expect(
               await AssertUtils.assertInString({
@@ -272,7 +293,11 @@ describe("H1_TO_TITLE", () => {
               vault.fsPath,
               `${nm.toLowerCase()}.md`
             );
-            const note = file2Note(fpath, vault);
+            const resp = file2Note(fpath, vault);
+            if (ErrorUtils.isErrorResp(resp)) {
+              throw resp.error;
+            }
+            const note = resp.data;
             expect(note).toMatchSnapshot();
             expect(note.title).toEqual(`${nm} Header`);
           })
@@ -290,12 +315,12 @@ describe("H1_TO_TITLE", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -303,12 +328,20 @@ describe("H1_TO_TITLE", () => {
           action,
         });
         const fpathFoo = path.join(wsRoot, vault.fsPath, "foo.md");
-        const noteFoo = file2Note(fpathFoo, vault);
+        const resp1 = file2Note(fpathFoo, vault);
+        if (ErrorUtils.isErrorResp(resp1)) {
+          throw resp1.error;
+        }
+        const noteFoo = resp1.data;
         expect(noteFoo).toMatchSnapshot();
         expect(noteFoo.title).toEqual("Foo Header");
 
         const fpathBar = path.join(wsRoot, vault.fsPath, "bar.md");
-        const noteBar = file2Note(fpathBar, vault);
+        const resp2 = file2Note(fpathBar, vault);
+        if (ErrorUtils.isErrorResp(resp2)) {
+          throw resp2.error;
+        }
+        const noteBar = resp2.data;
         expect(noteBar).toMatchSnapshot();
         expect(noteBar.title).toEqual("Bar");
       },
@@ -377,12 +410,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -429,12 +462,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -484,12 +517,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,
@@ -585,12 +618,12 @@ describe("CREATE_MISSING_LINKED_NOTES", () => {
             "[[qaaaz note|dendron://vault2/qaaaz2]]",
           ].join("\n"),
         });
-        const resp = await engine.getNoteByPath({
-          npath: "foo",
-          createIfNew: false,
-          vault: vault1,
-        });
-        const fooFile = resp.data!.note;
+        const fooFile = (
+          await engine.findNotes({
+            fname: "foo",
+            vault: vault1,
+          })
+        )[0];
         await runDoctor({
           candidates: [fooFile!],
           wsRoot,

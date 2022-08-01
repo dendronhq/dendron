@@ -1,15 +1,19 @@
 import {
   APIUtils,
+  CONSTANTS,
   DendronEditorViewKey,
+  DendronError,
   DendronTreeViewKey,
   DUtils,
   getStage,
   getWebTreeViewEntry,
+  ThemeType,
 } from "@dendronhq/common-all";
 import {
   findUpTo,
   getDurationMilliseconds,
   WebViewCommonUtils,
+  WebViewThemeMap,
 } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
@@ -17,6 +21,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
+import fs from "fs-extra";
 
 export class WebViewUtils {
   /**
@@ -28,9 +33,17 @@ export class WebViewUtils {
     const assetUri = VSCodeUtils.getAssetUri(
       ExtensionProvider.getExtension().context
     );
-    const pkgRoot = path.dirname(
-      findUpTo({ base: __dirname, fname: "package.json", maxLvl: 5 })!
-    );
+    const pkgRoot = findUpTo({
+      base: __dirname,
+      fname: "package.json",
+      maxLvl: 5,
+      returnDirPath: true,
+    });
+    if (!pkgRoot) {
+      throw new DendronError({
+        message: "Unable to find the folder where Dendron assets are stored",
+      });
+    }
     return getStage() === "dev"
       ? vscode.Uri.file(
           path.join(pkgRoot, "..", "dendron-plugin-views", "build")
@@ -73,6 +86,7 @@ export class WebViewUtils {
     port,
     wsRoot,
     panel,
+    initialTheme,
   }: {
     name: string;
     jsSrc: vscode.Uri;
@@ -80,12 +94,21 @@ export class WebViewUtils {
     port: number;
     wsRoot: string;
     panel: vscode.WebviewPanel | vscode.WebviewView;
+    initialTheme?: string;
   }) {
     const root = VSCodeUtils.getAssetUri(
       ExtensionProvider.getExtension().context
     );
     const themes = ["light", "dark"];
-    const themeMap: any = {};
+    const themeMap: { [key: string]: string } = {};
+
+    const customThemePath = path.join(wsRoot, CONSTANTS.CUSTOM_THEME_CSS);
+    if (await fs.pathExists(customThemePath)) {
+      themeMap["custom"] = panel.webview
+        .asWebviewUri(vscode.Uri.file(customThemePath))
+        .toString();
+    }
+
     themes.map((th) => {
       themeMap[th] = panel.webview
         .asWebviewUri(
@@ -93,6 +116,14 @@ export class WebViewUtils {
         )
         .toString();
     });
+
+    const vscodeColorTheme = vscode.window.activeColorTheme.kind;
+    const defaultInitialTheme =
+      vscodeColorTheme === vscode.ColorThemeKind.Dark ||
+      vscodeColorTheme === vscode.ColorThemeKind.HighContrast
+        ? ThemeType.DARK
+        : ThemeType.LIGHT;
+
     const out = WebViewCommonUtils.genVSCodeHTMLIndex({
       jsSrc: panel.webview.asWebviewUri(jsSrc).toString(),
       cssSrc: panel.webview.asWebviewUri(cssSrc).toString(),
@@ -112,7 +143,8 @@ export class WebViewUtils {
       // You must hang onto the instance of the VS Code API returned by this method,
       // and hand it out to any other functions that need to use it.
       acquireVsCodeApi: `const vscode = acquireVsCodeApi(); window.vscode = vscode;`,
-      themeMap,
+      themeMap: themeMap as WebViewThemeMap,
+      initialTheme: initialTheme ?? defaultInitialTheme,
       name,
     });
     return out;

@@ -16,7 +16,6 @@
         "@dendronhq/engine-server",
         "@dendronhq/dendron-cli",
         "@dendronhq/pods-core",
-        "@dendronhq/lsp-server",
         "@dendronhq/plugin-core"
       ]
     }
@@ -32,20 +31,11 @@
       "problemMatcher": []
     },
     {
-      "label": "Test",
-      "type": "shell",
-      "command": "./scripts/testAll.sh",
-      "options": {
-        "env": {
-          "LOG_LEVEL": "info",
-          "LOG_DST": "${workspaceFolder}/engine-test-utils.log"
-        }
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "Plugin: Pack, Install, Release",
-      "dependsOn": ["Plugin: Package and Install", "Plugin: Release"],
+      "dependsOn": [
+        "Plugin: Package and Install",
+        "Plugin: Release"
+      ],
       "dependsOrder": "sequence",
       "problemMatcher": []
     },

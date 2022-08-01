@@ -1,6 +1,7 @@
 import {
   ALIAS_NAME,
   assertUnreachable,
+  asyncLoop,
   ConfigUtils,
   CONSTANTS,
   DendronError,
@@ -29,6 +30,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
+  parseDendronURI,
   Point,
   Position,
   TAGS_HIERARCHY,
@@ -44,9 +46,11 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
+  Code,
   FootnoteDefinition,
   FrontmatterContent,
   Heading,
+  HTML,
   Image,
   InlineCode,
   Link,
@@ -210,7 +214,7 @@ const getLinks = ({
   });
   const dlinks: DLink[] = [];
 
-  if (isNotUndefined(note.tags)) {
+  if (!_.isNil(note.tags)) {
     let tags: string[];
     if (_.isString(note.tags)) {
       tags = [note.tags];
@@ -318,13 +322,6 @@ const getLinkCandidates = ({
   const linkCandidates: DLink[] = [];
   _.map(textNodes, (textNode: Text) => {
     const value = textNode.value as string;
-    // handling text nodes that start with \n
-    if (textNode.position!.start.line !== textNode.position!.end.line) {
-      textNode.position!.start = {
-        line: textNode.position!.start.line + 1,
-        column: 1,
-      };
-    }
     value.split(/\s+/).forEach((word) => {
       const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
         fname: word,
@@ -333,11 +330,30 @@ const getLinkCandidates = ({
       }).filter((note) => note.stub !== true);
       linkCandidates.push(
         ...possibleCandidates.map((candidate): DLink => {
+          const startColumn = value.indexOf(word) + 1;
+          const endColumn = startColumn + word.length;
+
+          const position: Position = {
+            start: {
+              line: textNode.position!.start.line,
+              column: startColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + startColumn - 1
+                : undefined,
+            },
+            end: {
+              line: textNode.position!.start.line,
+              column: endColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + endColumn - 1
+                : undefined,
+            },
+          };
           return {
             type: "linkCandidate",
             from: NoteUtils.toNoteLoc(note),
             value: value.trim(),
-            position: textNode.position as Position,
+            position,
             to: {
               fname: word,
               vaultName: VaultUtils.getName(candidate.vault),
@@ -436,21 +452,6 @@ export class LinkUtils {
     return { alias, value: NoteUtils.normalizeFname(value) };
   }
 
-  static parseDendronURI(linkString: string) {
-    if (linkString.startsWith(CONSTANTS.DENDRON_DELIMETER)) {
-      const [vaultName, link] = linkString
-        .split(CONSTANTS.DENDRON_DELIMETER)[1]
-        .split("/");
-      return {
-        vaultName,
-        link,
-      };
-    }
-    return {
-      link: linkString,
-    };
-  }
-
   /** Either value or anchorHeader will always be present if the function did not
    *  return null. A missing value means that the file containing this link is
    *  the value.
@@ -473,12 +474,13 @@ export class LinkUtils {
       if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
       if (value) {
-        ({ vaultName, link: value } = this.parseDendronURI(value));
+        // remove spaces
+        value = _.trim(value);
+        ({ vaultName, link: value } = parseDendronURI(value));
         if (!alias && !explicitAlias) {
           alias = value;
         }
         alias = _.trim(alias);
-        value = _.trim(value);
       }
       return {
         alias,
@@ -582,7 +584,7 @@ export class LinkUtils {
 
     // pre-parse vault name if it exists
     let vaultName: string | undefined;
-    ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
+    ({ vaultName, link: ref } = parseDendronURI(ref));
 
     const groups = reLink.exec(ref)?.groups;
     const clean: DNoteRefData = {
@@ -1033,8 +1035,7 @@ export class RemarkUtils {
   }
 
   static isParent(node: Node): node is Parent {
-    // @ts-ignore
-    return _.isArray(node.children);
+    return _.isArray((node as Parent).children);
   }
 
   static isParagraph(node: Node): node is Paragraph {
@@ -1087,6 +1088,26 @@ export class RemarkUtils {
 
   static isFrontmatter(node: Node): node is FrontmatterContent {
     return node.type === DendronASTTypes.FRONTMATTER;
+  }
+
+  static isHTML(node: Node): node is HTML {
+    return node.type === DendronASTTypes.HTML;
+  }
+
+  static isCode(node: Node): node is Code {
+    return node.type === DendronASTTypes.CODE;
+  }
+
+  static isYAML(node: Node): node is YAML {
+    return node.type === DendronASTTypes.YAML;
+  }
+
+  static isHashTag(node: Node): node is HashTag {
+    return node.type === DendronASTTypes.HASHTAG;
+  }
+
+  static isUserTag(node: Node): node is UserTag {
+    return node.type === DendronASTTypes.USERTAG;
   }
 
   static isNodeWithPosition<N extends Node>(
@@ -1155,14 +1176,14 @@ export class RemarkUtils {
     const prevNote = { ...note };
     // eslint-disable-next-line func-names
     return function (this: Processor) {
-      return (tree: Node, _vfile: VFile) => {
+      return async (tree: Node, _vfile: VFile) => {
         const root = tree as DendronASTRoot;
         const wikiLinks: WikiLinkNoteV4[] = selectAll(
           DendronASTTypes.WIKI_LINK,
           root
         ) as WikiLinkNoteV4[];
         let dirty = false;
-        wikiLinks.forEach((linkNode) => {
+        await asyncLoop(wikiLinks, async (linkNode) => {
           let vault: DVault | undefined;
           if (!_.isUndefined(linkNode.data.vaultName)) {
             vault = VaultUtils.getVaultByName({
@@ -1170,13 +1191,9 @@ export class RemarkUtils {
               vname: linkNode.data.vaultName,
             });
           }
-          const existingNote = NoteUtils.getNoteFromMultiVault({
-            fname: linkNode.value,
-            engine,
-            fromVault: note.vault,
-            toVault: vault,
-            wsRoot: engine.wsRoot,
-          });
+          const existingNote = (
+            await engine.findNotes({ fname: linkNode.value, vault })
+          )[0];
           if (existingNote) {
             const publishingConfig =
               ConfigUtils.getPublishingConfig(dendronConfig);
@@ -1289,46 +1306,43 @@ export class RemarkUtils {
    * This will extract all nodes until it hits the next heading
    * with the same depth of the target heading.
    * @param tree Abstract syntax tree
-   * @param targetHeader Heading to target
+   * @param startHeaderDepth Heading to target
    * @returns nodes to extract
    */
-  static extractHeaderBlock(tree: Node, targetHeader: Heading) {
-    let headerFound = false;
-    let foundHeaderIndex: number | undefined;
+  static extractHeaderBlock(
+    tree: Node,
+    startHeaderDepth: number,
+    startHeaderIndex: number,
+    stopAtFirstHeader?: boolean
+  ) {
     let nextHeaderIndex: number | undefined;
-    visit(tree, (node, index) => {
+    if (!RemarkUtils.isParent(tree)) {
+      return [];
+    }
+    visit(tree, (node, _index) => {
+      // we are still before the start index
+      if (_index <= startHeaderIndex && !stopAtFirstHeader) {
+        return;
+      }
       if (nextHeaderIndex) {
         return;
       }
-      // @ts-ignore
-      const depth = node.depth as Heading["depth"];
-      if (!headerFound) {
-        if (node.type === DendronASTTypes.HEADING) {
-          if (
-            depth === targetHeader!.depth &&
-            RemarkUtils.hasIdenticalChildren(node, targetHeader!)
-          ) {
-            headerFound = true;
-            foundHeaderIndex = index;
-            return;
-          }
-        }
-      } else if (node.type === DendronASTTypes.HEADING) {
-        if (foundHeaderIndex) {
-          if (depth <= targetHeader!.depth) nextHeaderIndex = index;
-        }
+      if (node.type === DendronASTTypes.HEADING) {
+        const depth = (node as Heading).depth;
+        if (depth <= startHeaderDepth) nextHeaderIndex = _index;
       }
     });
 
-    if (!headerFound || !RemarkUtils.isParent(tree)) {
+    // edge case when we extract from beginning of note
+    if (startHeaderIndex === 0 && nextHeaderIndex === 0) {
       return [];
     }
+
+    // if we find a next header index, extract up to nextHedaer index
+    // otherwise, extract from start
     const nodesToExtract = nextHeaderIndex
-      ? tree.children.splice(
-          foundHeaderIndex!,
-          nextHeaderIndex! - foundHeaderIndex!
-        )
-      : tree.children.splice(foundHeaderIndex!);
+      ? tree.children.slice(startHeaderIndex, nextHeaderIndex)
+      : tree.children.slice(startHeaderIndex);
     return nodesToExtract;
   }
 

@@ -1,6 +1,7 @@
 import {
   DendronEditorViewKey,
   DMessageEnum,
+  getWebEditorViewEntry,
   SeedBrowserMessage,
   SeedBrowserMessageType,
 } from "@dendronhq/common-all";
@@ -8,6 +9,7 @@ import { SeedService } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { ViewColumn } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { WebViewUtils } from "../views/utils";
 import { SeedAddCommand } from "./SeedAddCommand";
 import { SeedCommandBase } from "./SeedCommandBase";
@@ -21,9 +23,13 @@ export class WebViewPanelFactory {
 
   static create(svc: SeedService): vscode.WebviewPanel {
     if (!this.panel) {
+      const ext = ExtensionProvider.getExtension();
+      const { bundleName: name, label } = getWebEditorViewEntry(
+        DendronEditorViewKey.SEED_BROWSER
+      );
       this.panel = vscode.window.createWebviewPanel(
-        "dendronIframe",
-        "Seed Registry",
+        name,
+        label,
         {
           viewColumn: ViewColumn.Active,
           preserveFocus: false,
@@ -32,6 +38,9 @@ export class WebViewPanelFactory {
           enableScripts: true,
           retainContextWhenHidden: true,
           enableFindWidget: true,
+          localResourceRoots: WebViewUtils.getLocalResourceRoots(
+            ext.context
+          ).concat(vscode.Uri.file(ext.getDWorkspace().wsRoot)),
         }
       );
 
@@ -102,12 +111,23 @@ export class SeedBrowseCommand extends SeedCommandBase<
   }
 
   async execute() {
-    const resp = await WebViewUtils.genHTMLForWebView({
-      title: "Seed Browser",
-      view: DendronEditorViewKey.SEED_BROWSER,
+    const { bundleName: name } = getWebEditorViewEntry(
+      DendronEditorViewKey.SEED_BROWSER
+    );
+    const ext = ExtensionProvider.getExtension();
+    const port = ext.port!;
+    const engine = ext.getEngine();
+    const { wsRoot } = engine;
+    const webViewAssets = WebViewUtils.getJsAndCss();
+    const html = await WebViewUtils.getWebviewContent({
+      ...webViewAssets,
+      port,
+      wsRoot,
+      panel: this._panel,
+      name,
     });
 
-    this._panel.webview.html = resp;
+    this._panel.webview.html = html;
 
     this._panel.reveal();
   }

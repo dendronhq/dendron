@@ -26,7 +26,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const engine = getDWorkspace().engine;
     const nparent = DNodeUtils.findClosestParent(
       path.basename(maybeTextEditor.document.uri.fsPath, ".md"),
-      _.values(engine.notes),
+      { notesById: engine.notes, notesByFname: engine.noteFnames },
       {
         noStubs: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),

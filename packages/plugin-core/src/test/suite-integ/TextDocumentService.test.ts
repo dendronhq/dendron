@@ -1,16 +1,18 @@
 import {
   assert,
+  genHash,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
   extractNoteChangeEntriesByType,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { genHash } from "@dendronhq/common-server";
 import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
   testAssertsInsideCallback,
 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import _ from "lodash";
 import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -388,58 +390,35 @@ suite("TextDocumentService", function testSuite() {
 
           expect(updatedNote?.links).toEqual(note.links);
           expect(engine.notes[fname].links).toEqual(note.links);
-          expect(updatedNote?.links).toEqual([
-            {
-              alias: "beta",
-              from: {
-                fname: "alpha",
-                id: "alpha",
-                vaultName: "vault",
-              },
-              position: {
-                end: {
-                  column: 9,
-                  line: 1,
-                  offset: 8,
-                },
-                indent: [],
-                start: {
-                  column: 1,
-                  line: 1,
-                  offset: 0,
-                },
-              },
-              sameFile: false,
-              to: {
-                fname: "beta",
-              },
-              type: "wiki",
-              value: "beta",
-              xvault: false,
+          expect(updatedNote?.links.length).toEqual(2);
+          expect(updatedNote?.links[0].alias).toEqual("beta");
+          expect(updatedNote?.links[0].position).toEqual({
+            end: {
+              column: 9,
+              line: 1,
+              offset: 8,
             },
-            {
-              alias: "alpha",
-              from: {
-                fname: "beta",
-                vaultName: "vault",
-              },
-              position: {
-                end: {
-                  column: 13,
-                  line: 1,
-                  offset: 12,
-                },
-                indent: [],
-                start: {
-                  column: 1,
-                  line: 1,
-                  offset: 0,
-                },
-              },
-              type: "backlink",
-              value: "alpha",
+            indent: [],
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
             },
-          ]);
+          });
+          expect(updatedNote?.links[1].alias).toEqual("alpha");
+          expect(updatedNote?.links[1].position).toEqual({
+            end: {
+              column: 13,
+              line: 1,
+              offset: 12,
+            },
+            indent: [],
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
+            },
+          });
         });
       }
     );
@@ -457,26 +436,19 @@ suite("TextDocumentService", function testSuite() {
 
           expect(updatedNote?.links).toEqual(note.links);
           expect(engine.notes[fname].links).toEqual(note.links);
-          expect(updatedNote?.links[0]).toEqual({
-            from: {
-              fname: "simple-note-ref",
-              vaultName: "vault",
+          expect(updatedNote?.links[0].value).toEqual("simple-note-ref.one");
+          expect(updatedNote?.links[0].position).toEqual({
+            end: {
+              column: 25,
+              line: 1,
+              offset: 24,
             },
-            position: {
-              end: {
-                column: 25,
-                line: 1,
-                offset: 24,
-              },
-              indent: [],
-              start: {
-                column: 1,
-                line: 1,
-                offset: 0,
-              },
+            indent: [],
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
             },
-            type: "backlink",
-            value: "simple-note-ref.one",
           });
         });
       }
@@ -493,6 +465,7 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN the fm-tag should remain unchanged", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
           const fname = "fm-tag";
           const { onDidSave } = setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);
@@ -506,7 +479,7 @@ suite("TextDocumentService", function testSuite() {
               from: {
                 fname: "fm-tag",
                 id: "fm-tag",
-                vaultName: "vault",
+                vaultName: VaultUtils.getName(vaults[0]),
               },
               to: {
                 fname: "tags.foo",

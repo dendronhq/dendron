@@ -2,7 +2,7 @@ import { baseTheme, Theme } from "./theme-classic";
 
 const blockBasicTheme = {
   links: {
-    curveStyle: "unbundled-bezier",
+    curveStyle: "bezier",
   },
   hierarchy: {
     curveStyle: "taxi",

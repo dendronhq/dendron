@@ -10,6 +10,7 @@ import {
   InitialSurveyStatusEnum,
   LapsedUserSurveyStatusEnum,
   MetadataService,
+  PriorTools,
 } from "@dendronhq/engine-server";
 
 export class DendronQuickInputSurvey {
@@ -219,7 +220,6 @@ export class UseCaseSurvey extends DendronQuickPickSurvey {
       { label: "Team knowledge base" },
       { label: "Todos and Agenda" },
       { label: "Meeting notes" },
-      { label: "Publishing" },
       { label: "Research" },
       { label: "Other" },
     ];
@@ -245,6 +245,12 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
       results: results.map((result) => result.label),
       other: maybeOtherResult,
     });
+
+    // Store the results into metadata so that we can later alter functionality
+    // based on the user's response
+    MetadataService.instance().priorTools = resultsList.map(
+      (result) => PriorTools[result as keyof typeof PriorTools]
+    );
   }
 
   onReject() {
@@ -254,16 +260,17 @@ export class PriorToolsSurvey extends DendronQuickPickSurvey {
   static create() {
     const title = "Are you coming from an existing tool?";
     const choices = [
-      { label: "No" },
-      { label: "Foam" },
-      { label: "Roam" },
-      { label: "Logseq" },
-      { label: "Notion" },
-      { label: "OneNote" },
-      { label: "Obsidian" },
-      { label: "Evernote" },
-      { label: "Google Keep" },
-      { label: "Other" },
+      { label: PriorTools.No },
+      { label: PriorTools.Foam },
+      { label: PriorTools.Roam },
+      { label: PriorTools.Logseq },
+      { label: PriorTools.Notion },
+      { label: PriorTools.OneNote },
+      { label: PriorTools.Obsidian },
+      { label: PriorTools.Evernote },
+      { label: PriorTools.Confluence },
+      { label: PriorTools.GoogleKeep },
+      { label: PriorTools.Other },
     ];
     return new PriorToolsSurvey({ title, choices, canPickMany: true });
   }
@@ -293,7 +300,7 @@ export class PublishingUseCaseSurvey extends DendronQuickPickSurvey {
 
   static create() {
     const title =
-      "Dendron lets you easily publish your notes. Do you have any plans to publish your notes?";
+      "Dendron lets you publish your notes as a static website. Is this something you'd be interested in?";
     const choices = Object.keys(PublishingUseCaseSurvey.CHOICES).map((key) => {
       return { label: key };
     });

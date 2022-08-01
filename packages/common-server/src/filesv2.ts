@@ -3,7 +3,9 @@ import {
   DendronError,
   DNodeUtils,
   DVault,
+  ERROR_STATUS,
   FOLDERS,
+  genHash,
   isNotUndefined,
   NoteProps,
   NoteUtils,
@@ -21,7 +23,6 @@ import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import path from "path";
-import SparkMD5 from "spark-md5";
 // @ts-ignore
 import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
@@ -124,10 +125,6 @@ export async function file2Schema(
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
-export function genHash(contents: any) {
-  return SparkMD5.hash(contents); // OR raw hash (binary string)
-}
-
 export async function string2Schema({
   vault,
   content,
@@ -190,15 +187,28 @@ export function string2Note({
   return note;
 }
 
+// TODO: consider throwing error if no frontmatter
 export function file2Note(
   fpath: string,
   vault: DVault,
   toLowercase?: boolean
-): NoteProps {
-  const content = fs.readFileSync(fpath, { encoding: "utf8" });
-  const { name } = path.parse(fpath);
-  const fname = toLowercase ? name.toLowerCase() : name;
-  return string2Note({ content, fname, vault });
+): RespV3<NoteProps> {
+  if (!fs.existsSync(fpath)) {
+    const error = DendronError.createFromStatus({
+      status: ERROR_STATUS.INVALID_STATE,
+      message: `${fpath} does not exist`,
+    });
+    return {
+      error,
+    };
+  } else {
+    const content = fs.readFileSync(fpath, { encoding: "utf8" });
+    const { name } = path.parse(fpath);
+    const fname = toLowercase ? name.toLowerCase() : name;
+    return {
+      data: string2Note({ content, fname, vault }),
+    };
+  }
 }
 
 /** Read the contents of a note from the filesystem.
@@ -342,7 +352,10 @@ export function uniqueOutermostFolders(folders: string[]) {
   );
 }
 
-export function note2File({
+/**
+ * Return hash of written file
+ */
+export async function note2File({
   note,
   vault,
   wsRoot,
@@ -355,7 +368,8 @@ export function note2File({
   const ext = ".md";
   const payload = NoteUtils.serialize(note, { excludeStub: true });
   const vpath = vault2Path({ vault, wsRoot });
-  return fs.writeFile(path.join(vpath, fname + ext), payload);
+  await fs.writeFile(path.join(vpath, fname + ext), payload);
+  return genHash(payload);
 }
 
 function serializeModuleProps(moduleProps: SchemaModuleProps) {
@@ -637,7 +651,25 @@ export async function isSelfContainedVaultFolder(dir: string) {
   );
 }
 
-export class ExtensionUtils {
+/** Move a file or folder from `from` to `to`, if the file exists.
+ *
+ * @returns True if the file did exist and was moved successfully, false otherwise.
+ */
+export async function moveIfExists(from: string, to: string): Promise<boolean> {
+  try {
+    if (await fs.pathExists(from)) {
+      await fs.move(from, to);
+      return true;
+    }
+  } catch (err) {
+    // Permissions error or similar issue when moving the path
+    // deliberately left empty
+  }
+  return false;
+}
+
+/** Utility functions for dealing with file extensions. */
+export class FileExtensionUtils {
   private static textExtensions: ReadonlySet<string>;
   private static ensureTextExtensions() {
     if (this.textExtensions === undefined) {

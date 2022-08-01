@@ -3,6 +3,7 @@
 import {
   NoteProps,
   NoteUtils,
+  VaultUtils,
   WorkspaceOpts,
   Wrap,
 } from "@dendronhq/common-all";
@@ -113,7 +114,7 @@ suite("WorkspaceWatcher", function () {
       postSetupHook: setupBasic,
     },
     () => {
-      test("WHEN user renames a file outside of dendron rename command, THEN all of its references are also updated", (done) => {
+      test("WHEN user renames a file outside of dendron rename command, THEN all of its references are also updated", async () => {
         const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         const previewProxy = new MockPreviewProxy();
         const extension = ExtensionProvider.getExtension();
@@ -128,9 +129,17 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const oldPath = path.join(wsRoot, vaults[0].fsPath, "oldfile.md");
+        const oldPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "oldfile.md"
+        );
         const oldUri = vscode.Uri.file(oldPath);
-        const newPath = path.join(wsRoot, vaults[0].fsPath, "newfile.md");
+        const newPath = path.join(
+          wsRoot,
+          VaultUtils.getRelPath(vaults[0]),
+          "newfile.md"
+        );
         const newUri = vscode.Uri.file(newPath);
         const args: vscode.FileWillRenameEvent = {
           files: [
@@ -141,15 +150,14 @@ suite("WorkspaceWatcher", function () {
           ],
           // eslint-disable-next-line no-undef
           waitUntil: (_args: Thenable<any>) => {
-            _args.then(() => {
-              const reference = NoteUtils.getNoteOrThrow({
-                fname: "foo.one",
-                vault: vaults[0],
-                wsRoot,
-                notes: engine.notes,
-              });
-              expect(reference.body).toEqual(`[[newfile]]\n`);
-              done();
+            _args.then(async () => {
+              const reference = (
+                await engine.findNotes({
+                  fname: "foo.one",
+                  vault: vaults[0],
+                })
+              )[0];
+              expect(reference.body).toEqual(`[[newfile]]`);
             });
           },
         };
@@ -196,12 +204,12 @@ suite("WorkspaceWatcher", function () {
         const success = await vscode.workspace.applyEdit(edit);
         if (success) {
           await watcher.onDidRenameFiles(args);
-          const newFile = NoteUtils.getNoteOrThrow({
-            fname: "newfile",
-            vault: vaults[0],
-            wsRoot,
-            notes: engine.notes,
-          });
+          const newFile = (
+            await engine.findNotes({
+              fname: "newfile",
+              vault: vaults[0],
+            })
+          )[0];
           expect(newFile.title).toEqual(`Newfile`);
         }
       });

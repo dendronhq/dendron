@@ -181,7 +181,7 @@ export async function setupLegacyWorkspace(
     workspaceType: WorkspaceType.CODE,
     preSetupHook: async () => {},
     postSetupHook: async () => {},
-    selfContained: false,
+    selfContained: true,
   });
   const wsRoot = tmpDir().name;
   if (opts.selfContained) {
@@ -200,14 +200,18 @@ export async function setupLegacyWorkspace(
     wsRoot,
   });
 
-  const vaults = await new SetupWorkspaceCommand().execute({
-    rootDirRaw: wsRoot,
-    skipOpenWs: true,
-    ...copts.setupWsOverride,
-    workspaceInitializer: new BlankInitializer(),
-    workspaceType: copts.workspaceType,
-    selfContained: copts.selfContained,
-  });
+  const { wsVault, additionalVaults } =
+    await new SetupWorkspaceCommand().execute({
+      rootDirRaw: wsRoot,
+      skipOpenWs: true,
+      ...copts.setupWsOverride,
+      workspaceInitializer: new BlankInitializer(),
+      workspaceType: copts.workspaceType,
+      selfContained: copts.selfContained,
+    });
+  const vaults = [wsVault, ...(additionalVaults || [])].filter(
+    (v) => !_.isUndefined(v)
+  ) as DVault[];
   stubWorkspaceFolders(wsRoot, vaults);
 
   // update config
@@ -307,7 +311,12 @@ export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspace(opts);
-  await _activate(opts.ctx!);
+  await _activate(opts.ctx!, {
+    skipLanguageFeatures: true,
+    skipInteractiveElements: true,
+    skipMigrations: true,
+    skipTreeView: true,
+  });
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
@@ -318,10 +327,20 @@ export async function runLegacySingleWorkspaceTest(
  * @deprecated please use {@link describeMultiWS} instead
  */
 export async function runLegacyMultiWorkspaceTest(
-  opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
+  opts: SetupLegacyWorkspaceMultiOpts & {
+    onInit: OnInitHook;
+    skipMigrations?: boolean;
+  }
 ) {
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
-  await _activate(opts.ctx!);
+  await _activate(opts.ctx!, {
+    skipLanguageFeatures: true,
+    skipInteractiveElements: true,
+    skipMigrations: _.isBoolean(opts.skipMigrations)
+      ? opts.skipMigrations
+      : true,
+    skipTreeView: true,
+  });
   const engine = getDWorkspace().engine;
   await opts.onInit({ wsRoot, vaults, engine });
 
@@ -533,6 +552,7 @@ export function describeMultiWS(
      */
     timeout?: number;
     noSetInstallStatus?: boolean;
+    skipMigrations?: boolean;
   },
   fn: (ctx: ExtensionContext) => void
 ) {
@@ -553,7 +573,14 @@ export function describeMultiWS(
       if (opts.preActivateHook) {
         await opts.preActivateHook({ ctx, ...out });
       }
-      await _activate(ctx);
+      await _activate(ctx, {
+        skipLanguageFeatures: true,
+        skipInteractiveElements: true,
+        skipMigrations: _.isBoolean(opts.skipMigrations)
+          ? opts.skipMigrations
+          : true,
+        skipTreeView: true,
+      });
     });
 
     const result = fn(ctx);
@@ -568,6 +595,20 @@ export function describeMultiWS(
     });
   });
 }
+describeMultiWS.only = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.only("", () => {
+    describeMultiWS(...params);
+  });
+};
+describeMultiWS.skip = function (
+  ...params: Parameters<typeof describeMultiWS>
+) {
+  describe.skip("", () => {
+    describeMultiWS(...params);
+  });
+};
 
 /**
  * Use to run tests with a single-vault workspace. Used in the same way as
@@ -599,7 +640,12 @@ export function describeSingleWS(
     before(async () => {
       setupWorkspaceStubs({ ...opts, ctx });
       await setupLegacyWorkspace(opts);
-      await _activate(ctx);
+      await _activate(ctx, {
+        skipLanguageFeatures: true,
+        skipInteractiveElements: true,
+        skipMigrations: true,
+        skipTreeView: true,
+      });
     });
 
     const result = fn(ctx);
@@ -611,6 +657,20 @@ export function describeSingleWS(
     });
   });
 }
+describeSingleWS.only = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.only("", () => {
+    describeSingleWS(...params);
+  });
+};
+describeSingleWS.skip = function (
+  ...params: Parameters<typeof describeSingleWS>
+) {
+  describe.skip("", () => {
+    describeSingleWS(...params);
+  });
+};
 
 /**
  * Helper function for Describe*WS to do a run-time check to make sure an async
@@ -658,6 +718,8 @@ export function setupWorkspaceStubs(opts: {
 export function cleanupWorkspaceStubs(ctx: ExtensionContext): void {
   HistoryService.instance().clearSubscriptions();
   cleanupVSCodeContextSubscriptions(ctx);
+  const ext = ExtensionProvider.getExtension();
+  ext.deactivate();
   sinon.restore();
 }
 

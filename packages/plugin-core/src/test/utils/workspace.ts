@@ -35,9 +35,6 @@ export class WorkspaceTestUtils {
         },
         randomNote: {},
         copyNoteLink: {},
-        insertNote: {
-          initialValue: "templates",
-        },
         insertNoteLink: {
           aliasMode: InsertNoteLinkAliasModeEnum.none,
           enableMultiSelect: false,
@@ -45,6 +42,7 @@ export class WorkspaceTestUtils {
         insertNoteIndex: {
           enableMarker: false,
         },
+        templateHierarchy: "template",
       },
       workspace: {
         vaults,
@@ -63,6 +61,7 @@ export class WorkspaceTestUtils {
           name: "task",
           dateFormat: "y.MM.dd",
           addBehavior: NoteAddBehaviorEnum.asOwnDomain,
+          taskCompleteStatus: ["done", "x"],
           statusSymbols: {
             "": " ",
             wip: "w",
@@ -84,7 +83,9 @@ export class WorkspaceTestUtils {
         },
         graph: {
           zoomSpeed: 1,
+          createStub: false,
         },
+        enableHandlebarTemplates: true,
         enableAutoCreateOnDefinition: false,
         enableXVaultWikiLink: false,
         enableRemoteVaultInit: true,
@@ -96,6 +97,7 @@ export class WorkspaceTestUtils {
         maxPreviewsCached: 10,
         maxNoteLength: 204800,
         enableFullHierarchyNoteTitle: false,
+        enableSmartRefs: true,
       },
       preview: {
         enableFMTitle: true,
@@ -131,6 +133,7 @@ export class WorkspaceTestUtils {
         },
         enableSiteLastModified: true,
         enableRandomlyColoredTags: true,
+        enableTaskNotes: true,
         enablePrettyLinks: true,
       },
     };

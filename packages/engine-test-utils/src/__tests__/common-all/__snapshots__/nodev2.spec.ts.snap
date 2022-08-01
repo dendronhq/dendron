@@ -8,7 +8,6 @@ desc: ''
 updated: 1
 created: 1
 ---
-
 "
 `;
 
@@ -20,7 +19,6 @@ desc: ''
 updated: 1
 created: 1
 ---
-
 "
 `;
 
@@ -33,7 +31,6 @@ updated: 1
 created: 1
 bond: 42
 ---
-
 "
 `;
 
@@ -45,6 +42,5 @@ desc: ''
 updated: 1
 created: 1
 ---
-
 "
 `;

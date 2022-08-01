@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WHEN using html publish pod to publish note THEN generate correct HTML 1`] = `
+"<h1 id=\\"foo\\">Foo</h1>
+<p>foo body</p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>"
+`;

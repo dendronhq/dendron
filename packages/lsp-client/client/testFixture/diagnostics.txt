@@ -1,1 +1,0 @@
-ANY browsers, ANY OS.

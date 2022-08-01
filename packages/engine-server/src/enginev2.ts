@@ -1,9 +1,11 @@
 import {
-  BulkAddNoteOpts,
+  assertUnreachable,
+  BulkWriteNotesOpts,
   Cache,
+  ConfigUtils,
   ConfigWriteOpts,
+  DendronASTDest,
   DendronCompositeError,
-  IntermediateDendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
@@ -15,26 +17,39 @@ import {
   DNodeType,
   DStore,
   DVault,
-  EngineDeleteOptsV2,
+  EngineDeleteOpts,
+  EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  FindNoteOpts,
   FuseEngine,
+  GetAnchorsRequest,
+  GetDecorationsOpts,
+  GetDecorationsPayload,
+  GetLinksRequest,
+  GetNoteAnchorsPayload,
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
+  GetNoteLinksPayload,
   IDendronError,
+  IntermediateDendronConfig,
   LruCache,
   milliseconds,
+  newRange,
   NoteChangeEntry,
+  NoteDictsUtils,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
+  NotePropsMeta,
+  NoteQueryResp,
   NoteUtils,
   NullCache,
+  Optional,
   QueryNotesOpts,
+  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -45,21 +60,10 @@ import {
   SchemaModuleProps,
   SchemaQueryResp,
   StatusCodes,
+  stringifyError,
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
-  ConfigUtils,
-  RefreshNotesOpts,
-  GetDecorationsOpts,
-  newRange,
-  GetDecorationsPayload,
-  DendronASTDest,
-  GetAnchorsRequest,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
-  GetNoteLinksPayload,
-  Optional,
-  assertUnreachable,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -208,7 +212,11 @@ export class DendronEngineV2 implements DEngine {
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
-    const config = DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+    const { error, data: config } =
+      DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
+    if (error) {
+      LOGGER.error(stringifyError(error));
+    }
 
     return new DendronEngineV2({
       wsRoot,
@@ -232,9 +240,17 @@ export class DendronEngineV2 implements DEngine {
     return DendronEngineV2._instance;
   }
 
-  get notes(): NotePropsDict {
+  /**
+   * @deprecated
+   * For accessing a specific note by id, see {@link DendronEngineV2.getNote}.
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
+   */
+  get notes(): NotePropsByIdDict {
     return this.store.notes;
   }
+  /**
+   * @deprecated see {@link DendronEngineV2.findNotes}
+   */
   get noteFnames() {
     return this.store.noteFnames;
   }
@@ -246,7 +262,7 @@ export class DendronEngineV2 implements DEngine {
     return this._vaults;
   }
 
-  set notes(notes: NotePropsDict) {
+  set notes(notes: NotePropsByIdDict) {
     this.store.notes = notes;
   }
 
@@ -325,15 +341,36 @@ export class DendronEngineV2 implements DEngine {
     }
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    const changed = await this.store.bulkAddNotes(opts);
-    await this.refreshNotesV2(changed.data);
+  /**
+   * See {@link DEngine.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    return this.store.getNote(id);
+  }
+
+  /**
+   * See {@link DEngine.findNotes}
+   */
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    return this.store.findNotes(opts);
+  }
+
+  /**
+   * See {@link DEngine.findNotesMeta}
+   */
+  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+    return this.findNotes(opts);
+  }
+
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    const changed = await this.store.bulkWriteNotes(opts);
+    this.fuseEngine.replaceNotesIndex(this.notes);
     return changed;
   }
 
   async deleteNote(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): ReturnType<DEngineClient["deleteNote"]> {
     try {
       const note = this.notes[id];
@@ -359,7 +396,7 @@ export class DendronEngineV2 implements DEngine {
 
   async deleteSchema(
     id: string,
-    opts?: EngineDeleteOptsV2
+    opts?: EngineDeleteOpts
   ): Promise<DEngineDeleteSchemaResp> {
     try {
       const data = (await this.store.deleteSchema(
@@ -382,49 +419,6 @@ export class DendronEngineV2 implements DEngine {
         error: err,
       };
     }
-  }
-
-  async getNoteByPath({
-    npath,
-    createIfNew,
-    vault,
-    overrides,
-  }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
-    const ctx = "getNoteByPath";
-    this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-      fname: npath,
-      engine: this,
-      vault,
-    });
-    this.logger.debug({ ctx, maybeNote, msg: "post-query" });
-    let noteNew: NoteProps | undefined = maybeNote;
-    let changed: NoteChangeEntry[] = [];
-    let error = null;
-    let updateExisting = false;
-    if ((!maybeNote || maybeNote.stub) && createIfNew) {
-      this.logger.debug({ ctx, maybeNote, msg: "create-new" });
-      if (maybeNote?.stub) {
-        noteNew = maybeNote;
-        delete noteNew.stub;
-        updateExisting = true;
-      } else {
-        noteNew = NoteUtils.createWithSchema({
-          noteOpts: { fname: npath, vault },
-          engine: this,
-        });
-      }
-      noteNew = _.merge(noteNew, overrides || {});
-      changed = (await this.writeNote(noteNew, { updateExisting })).data;
-    }
-    if (!createIfNew && !maybeNote) {
-      error = new DendronError({ message: "no_note_found" });
-    }
-    await this.refreshNotesV2(changed);
-    return {
-      data: { note: noteNew, changed },
-      error,
-    };
   }
 
   async getConfig() {
@@ -450,10 +444,19 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async info() {
+  async info(): Promise<RespV2<EngineInfoResp>> {
+    const version = NodeJSUtils.getVersionFromPkg();
+    if (!version) {
+      return {
+        data: undefined,
+        error: DendronError.createPlainError({
+          message: "Unable to read Dendron version",
+        }),
+      };
+    }
     return {
       data: {
-        version: NodeJSUtils.getVersionFromPkg(),
+        version,
       },
       error: null,
     };
@@ -494,11 +497,9 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async queryNotes(
-    opts: QueryNotesOpts
-  ): ReturnType<DEngineClient["queryNotes"]> {
+  async queryNotes(opts: QueryNotesOpts): Promise<NoteQueryResp> {
     const ctx = "Engine:queryNotes";
-    const { qs, vault, createIfNew, onlyDirectChildren, originalQS } = opts;
+    const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
@@ -515,24 +516,6 @@ export class DendronEngineV2 implements DEngine {
       return { error: null, data: [] };
     }
 
-    const item = this.notes[items[0].id];
-    if (createIfNew) {
-      let noteNew: NoteProps;
-      if (item?.fname === qs && item?.stub) {
-        noteNew = item;
-        noteNew.stub = false;
-      } else {
-        if (_.isUndefined(vault)) {
-          return {
-            error: new DendronError({ message: "no vault specified" }),
-            data: null as any,
-          };
-        }
-        noteNew = NoteUtils.create({ fname: qs, vault });
-      }
-      const changed = await this.writeNote(noteNew, { newNode: true });
-      await this.refreshNotesV2(changed.data);
-    }
     this.logger.info({ ctx, msg: "exit" });
     let notes = items.map((ent) => this.notes[ent.id]);
     if (!_.isUndefined(vault)) {
@@ -559,7 +542,7 @@ export class DendronEngineV2 implements DEngine {
       note = this.notes[id];
     } else {
       // `procRehype` needs the note to be in the engine, so we have to add it in case it's a dummy note
-      this.notes[id] = note;
+      this.store.updateNote(note);
     }
 
     // If note was not provided and we couldn't find it, we can't render.
@@ -624,7 +607,7 @@ export class DendronEngineV2 implements DEngine {
 
     if (NoteUtils.isFileId(note.id)) {
       // Dummy note, we should remove it once we're done rendering
-      delete this.notes[note.id];
+      this.store.deleteNote(note.id);
     }
 
     return ResponseUtil.createHappyResponse({ data });
@@ -700,20 +683,21 @@ export class DendronEngineV2 implements DEngine {
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
-        const { id } = ent.note;
         if (ent.status === "delete") {
-          delete this.notes[id];
-          this.noteFnames.delete(ent.note);
+          NoteDictsUtils.delete(ent.note, {
+            notesById: this.notes,
+            notesByFname: this.noteFnames,
+          });
         } else {
           const note = await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
           });
-          this.notes[id] = note;
+          this.store.updateNote(note);
         }
       })
     );
-    this.fuseEngine.updateNotesIndex(this.notes);
+    this.fuseEngine.replaceNotesIndex(this.notes);
   }
 
   async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
@@ -733,22 +717,38 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
+   * TODO: this should return a ERROR
    * See {@link FileStorageV2.updateNote}
    * @param note
    * @param opts
    * @returns
    */
   async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
-    const out = this.store.updateNote(note, opts);
-    await this.updateIndex("note");
-    return out;
+    const ctx = "updateNote";
+    this.logger.debug({ ctx, msg: "enter", note: NoteUtils.toNoteLoc(note) });
+    const engine = this as DEngineClient;
+    try {
+      const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+        note,
+        engine,
+      });
+      this.logger.debug({ ctx, msg: "post:refreshed note links and anchors" });
+      const out = this.store.updateNote(noteWithLinks, opts);
+      this.logger.debug({ ctx, msg: "post:updateNote" });
+      await this.updateIndex("note");
+      this.logger.debug({ ctx, msg: "post:updateIndex" });
+      return out;
+    } catch (err) {
+      this.logger.error({ ctx, msg: error2PlainObject(err as Error) });
+      throw err;
+    }
   }
 
   async updateIndex(mode: DNodeType) {
     if (mode === "schema") {
       this.fuseEngine.updateSchemaIndex(this.schemas);
     } else {
-      this.fuseEngine.updateNotesIndex(this.notes);
+      this.fuseEngine.replaceNotesIndex(this.notes);
     }
   }
 
@@ -798,8 +798,12 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const out = await this.store.writeNote(note, opts);
-    await this.refreshNotesV2(out.data);
+    const noteWithLinks = await EngineUtils.refreshNoteLinksAndAnchors({
+      note,
+      engine: this,
+    });
+    const out = await this.store.writeNote(noteWithLinks, opts);
+    this.fuseEngine.replaceNotesIndex(this.notes);
     return out;
   }
 

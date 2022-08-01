@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { NoteProps, NotePropsByIdDict } from "@dendronhq/common-all";
 import { getNoteUrl } from "../utils/links";
 import _ from "lodash";
 import Link from "next/link";
@@ -36,13 +36,11 @@ export function DendronCollectionItem(props: {
 
 export function prepChildrenForCollection(
   note: NoteProps,
-  notes: any,
-  noteIndex: NoteProps
+  notes: NotePropsByIdDict,
 ) {
   if (note.children.length <= 0) {
     return null;
   }
-  // console.log({note, notes, noteIndex});
   let children = note.children.map((id) => notes[id]);
   children = _.sortBy(children, (ent) => {
     if (_.has(ent, "custom.date")) {
@@ -57,17 +55,18 @@ export function prepChildrenForCollection(
   return children;
 }
 
-function ISO2FormattedDate(time: string, format: Intl.DateTimeFormatOptions) {
+function ISO2FormattedDate(
+  time: string,
+  format: Intl.DateTimeFormatOptions,
+): string {
   const dt = DateTime.fromISO(time);
   return dt.toLocaleString(format);
 }
 
-function millisToJSDate(ts: number) {
-  const dt = DateTime.fromMillis(_.toInteger(ts));
-  return dt.toJSDate();
-}
-
-function millisToFormattedDate(ts: number, format: Intl.DateTimeFormatOptions) {
+function millisToFormattedDate(
+  ts: number,
+  format: Intl.DateTimeFormatOptions,
+): string {
   const dt = DateTime.fromMillis(ts);
   return dt.toLocaleString(format);
 }

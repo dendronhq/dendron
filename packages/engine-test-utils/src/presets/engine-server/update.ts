@@ -4,19 +4,24 @@ import {
   TestPresetEntryV4,
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
-import { NotesFileSystemCache } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  NotesFileSystemCache,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
+import { setupBasic } from "./utils";
 
 const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
       const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
       const cachePath = path.join(
         vault2Path({ wsRoot, vault }),
         CONSTANTS.DENDRON_CACHE_FILE
       );
-      const notesCache = new NotesFileSystemCache({ cachePath });
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
       const keySet = notesCache.getCacheEntryKeys();
       const noteOld = NoteUtils.getNoteByFnameFromEngine({
         fname: "foo",
@@ -47,8 +52,10 @@ const NOTES = {
           expected: 2,
         },
         {
-          actual: new NotesFileSystemCache({ cachePath }).getCacheEntryKeys()
-            .size,
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
           expected: 2,
         },
       ];
@@ -57,6 +64,57 @@ const NOTES = {
       preSetupHook: async ({ vaults, wsRoot }) => {
         await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ wsRoot, vault: vaults[0] });
       },
+    }
+  ),
+  NOTE_UPDATE_CHILDREN: new TestPresetEntryV4(
+    async ({ vaults, wsRoot, engine }) => {
+      const vault = vaults[0];
+      const logger = (engine as DendronEngineClient).logger;
+      const cachePath = path.join(
+        vault2Path({ wsRoot, vault }),
+        CONSTANTS.DENDRON_CACHE_FILE
+      );
+      const notesCache = new NotesFileSystemCache({ cachePath, logger });
+      const keySet = notesCache.getCacheEntryKeys();
+      const noteOld = NoteUtils.getNoteByFnameFromEngine({
+        fname: "foo",
+        engine,
+        vault,
+      }) as NoteProps;
+      const cnote = _.clone(noteOld);
+      cnote.children = ["random note"];
+      await engine.updateNote(cnote);
+      const noteNew = NoteUtils.getNoteByFnameFromEngine({
+        fname: "foo",
+        engine,
+        vault,
+      }) as NoteProps;
+      await engine.init();
+
+      return [
+        {
+          actual: noteOld.children[0],
+          expected: "foo.ch1",
+        },
+        {
+          actual: noteNew.children[0],
+          expected: "random note",
+        },
+        {
+          actual: keySet.size,
+          expected: 4,
+        },
+        {
+          actual: new NotesFileSystemCache({
+            cachePath,
+            logger,
+          }).getCacheEntryKeys().size,
+          expected: 4,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
     }
   ),
 };

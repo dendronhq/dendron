@@ -1,7 +1,6 @@
 version: 5
 dev:
     enablePreviewV2: true
-    enableWebUI: true
 commands:
     lookup:
         note:
@@ -20,13 +19,10 @@ commands:
     insertNoteIndex:
         enableMarker: false
     copyNoteLink: {}
+    templateHierarchy: template
 workspace:
     dendronVersion: 0.83.0
-    workspaces:
-        dendron-docs:
-            remote:
-                type: git
-                url: git@github.com:dendronhq/dendron-docs.git
+    workspaces: {}
     seeds:
         dendron.dendron-site:
             branch: dev
@@ -36,9 +32,13 @@ workspace:
         dendron.templates: {}
     vaults:
         -
-            fsPath: vault
+            fsPath: dendron-docs
             name: dendron.docs
-            workspace: dendron-docs
+            selfContained: true
+            siteUrl: https://docs.dendron.so
+            remote:
+                type: git
+                url: https://github.com/dendronhq/dendron-docs.git
         -
             fsPath: vault
             seed: dendron.dendron-site
@@ -54,6 +54,7 @@ workspace:
         addBehavior: asOwnDomain
     graph:
         zoomSpeed: 1
+        createStub: false
     enableAutoCreateOnDefinition: false
     enableXVaultWikiLink: true
     enableRemoteVaultInit: true
@@ -83,8 +84,13 @@ workspace:
             L: low
         todoIntegration: false
         createTaskSelectionType: selection2link
+        taskCompleteStatus:
+            - done
+            - x
     enableEditorDecorations: true
     enableFullHierarchyNoteTitle: false
+    enableHandlebarTemplates: true
+    enableSmartRefs: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -119,3 +125,4 @@ publishing:
         editBranch: main
         editViewMode: tree
     enablePrettyLinks: true
+    enableTaskNotes: true

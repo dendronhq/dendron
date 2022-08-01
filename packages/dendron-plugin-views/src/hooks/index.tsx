@@ -17,7 +17,6 @@ export const useCurrentTheme = () => {
     "light"
   );
   React.useEffect(() => {
-    // @ts-ignore
     window.currentTheme && setCurrentTheme(window.currentTheme);
     // @ts-ignore
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +77,10 @@ export const useRenderedNoteBody = ({
 };
 
 /**
- * Initialize mermaid if it is enabled
+ * Initialize mermaid if it is enabled in the config file.
+ * Converts all divs with the class "mermaid" into svgs.
+ *
+ * https://mermaid-js.github.io/mermaid/#/
  */
 export const useMermaid = ({
   config,

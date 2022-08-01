@@ -1,5 +1,5 @@
 import {
-  DendronError,
+  genUUID,
   NoteUtils,
   SchemaCreationUtils,
   SchemaToken,
@@ -37,17 +37,12 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
    * @param noConfirm - for testing purposes only; don't set in production code
    */
   constructor(ext: IDendronExtension, noConfirm?: boolean) {
-    const workspaceService = ext.workspaceService;
+    const initTrait = () => {
+      const config = ExtensionProvider.getDWorkspace().config;
+      return new MeetingNote(config, ext, noConfirm ?? false);
+    };
 
-    if (!workspaceService) {
-      throw new DendronError({ message: "Workspace Service not initialized!" });
-    }
-
-    super(
-      ext,
-      "dendron.meeting",
-      new MeetingNote(workspaceService.config, ext, noConfirm ?? false)
-    );
+    super(ext, "dendron.meeting", initTrait);
     this.key = DENDRON_COMMANDS.CREATE_MEETING_NOTE.key;
     this._ext = ext;
   }
@@ -179,7 +174,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     const templateNoteProps = NoteUtils.create({
       fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
       vault,
-      id: "dendronMeetingNoteTemplate",
+      id: genUUID(),
       title: "Meeting Notes Template",
       body,
     });
@@ -187,7 +182,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
     await this._ext.getEngine().writeNote(templateNoteProps);
 
     vscode.window.showInformationMessage(
-      `Created a new template for your meeting notes at ${CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME}`
+      `Created template for your meeting notes at ${CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME}`
     );
 
     return true;

@@ -1,9 +1,6 @@
 {
   "folders": [
     {
-      "path": "packages/lsp-server"
-    },
-    {
       "path": "packages/engine-server"
     },
     {
@@ -16,14 +13,8 @@
       "path": "packages/api-server"
     },
     {
-      "path": "packages/lsp-client"
-    },
-    {
       "path": "packages/common-test-utils"
     },
-    // {
-    //   "path": "vendor/vscode-languageserver-node"
-    // },
   ],
   "settings": {
     "files.exclude": {

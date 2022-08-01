@@ -11,7 +11,6 @@ import {
   WikiLinkNoteV4,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import path from "path";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { checkVFile, createProcForTest, createProcTests } from "./utils";
@@ -50,6 +49,15 @@ describe("wikiLinks", () => {
       expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
         type: DendronASTTypes.WIKI_LINK,
         value: "foo bar",
+      });
+    });
+
+    test("cross vault wikilink with spaces", () => {
+      const resp = proc().parse(`[[foo | dendron://vault1/foo]]`);
+      expect(getWikiLink(resp)).toMatchSnapshot();
+      expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
+        type: DendronASTTypes.WIKI_LINK,
+        value: "foo",
       });
     });
 
@@ -117,10 +125,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo">Foo</a>');
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Foo](foo.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -149,10 +153,6 @@ describe("wikiLinks", () => {
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo#one">Foo</a>');
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -183,10 +183,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo#^block">Foo</a>');
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Foo](foo.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -213,11 +209,7 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="root#^block">Root</a>');
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Root](root.md)");
+          await checkVFile(resp, '<a href="/">Root</a>');
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -248,10 +240,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo">Foo</a>');
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Foo](foo.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -281,10 +269,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, `<a href="foo">bar doesn't foo</a>`);
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[bar doesn't foo](foo.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -313,10 +297,6 @@ describe("wikiLinks", () => {
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo">#bar</a>');
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[#bar](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -351,13 +331,6 @@ describe("wikiLinks", () => {
           await checkVFile(
             resp,
             '<a href="kb.note.20211011124050">Coulomb\'s Constant</a>'
-          );
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(
-            resp,
-            "[Coulomb's Constant](kb.note.20211011124050.md)"
           );
         },
       },
@@ -417,10 +390,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, "[bar](foo%20bar)");
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[bar](foo%20bar.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -449,10 +418,6 @@ describe("wikiLinks", () => {
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo">bar</a>');
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[bar](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -483,10 +448,6 @@ describe("wikiLinks", () => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo">Foo</a>');
         },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          await checkVFile(resp, "[Foo](foo.md)");
-        },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
@@ -516,11 +477,6 @@ describe("wikiLinks", () => {
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
           await checkVFile(resp, '<a href="foo-2">Foo</a>');
-        },
-        [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-          const { resp } = extra;
-          const expectedPath = path.join("..", "vault2", "foo.md");
-          await checkVFile(resp, `[Foo](${expectedPath})`);
         },
       },
       preSetupHook: async ({ wsRoot, vaults }) => {

@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  BulkAddNoteOpts,
+  BulkWriteNotesOpts,
   ConfigWriteOpts,
   DendronAPI,
   DEngineClient,
@@ -17,6 +17,7 @@ import {
   EngineWriteOptsV2,
   Event,
   extractNoteChangeEntriesByType,
+  FindNoteOpts,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -25,13 +26,12 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
-  NoteFNamesDict,
   NoteProps,
-  NotePropsDict,
+  NotePropsByFnameDict,
+  NotePropsByIdDict,
+  NotePropsMeta,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -39,10 +39,10 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
-  RespRequired,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import {
   DendronEngineClient,
@@ -124,17 +124,25 @@ export class EngineAPIService
     this._trustedWorkspace = value;
   }
 
-  public get notes(): NotePropsDict {
+  /**
+   * @deprecated
+   * For accessing a specific note by id, see {@link EngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
+   */
+  public get notes(): NotePropsByIdDict {
     return this._internalEngine.notes;
   }
-  public set notes(arg: NotePropsDict) {
+  public set notes(arg: NotePropsByIdDict) {
     this._internalEngine.notes = arg;
   }
 
-  public get noteFnames(): NoteFNamesDict {
+  /**
+   * @deprecated see {@link EngineAPIService.findNotes}
+   */
+  public get noteFnames(): NotePropsByFnameDict {
     return this._internalEngine.noteFnames;
   }
-  public set noteFnames(arg: NoteFNamesDict) {
+  public set noteFnames(arg: NotePropsByFnameDict) {
     this._internalEngine.noteFnames = arg;
   }
 
@@ -191,18 +199,39 @@ export class EngineAPIService
     return this._engineEventEmitter;
   }
 
+  /**
+   * See {@link IEngineAPIService.getNote}
+   */
+  async getNote(id: string): Promise<NoteProps | undefined> {
+    return this._internalEngine.getNote(id);
+  }
+
+  /**
+   * See {@link IEngineAPIService.findNotes}
+   */
+  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+    return this._internalEngine.findNotes(opts);
+  }
+
+  /**
+   * See {@link IEngineAPIService.findNotesMeta}
+   */
+  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+    return this._internalEngine.findNotesMeta(opts);
+  }
+
   async refreshNotes(opts: RefreshNotesOpts) {
     return this._internalEngine.refreshNotes(opts);
   }
 
-  async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return this._internalEngine.bulkAddNotes(opts);
+  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+    return this._internalEngine.bulkWriteNotes(opts);
   }
 
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
-  ): Promise<NoteProps> {
+  ): Promise<UpdateNoteResp> {
     return this._internalEngine.updateNote(note, opts);
   }
 
@@ -213,7 +242,7 @@ export class EngineAPIService
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>> {
+  ): Promise<RespV2<NoteChangeEntry[]>> {
     if (!this._trustedWorkspace) {
       if (!opts) {
         opts = { runHooks: false };
@@ -236,7 +265,7 @@ export class EngineAPIService
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
+  ): Promise<RespV2<EngineDeleteNotePayload>> {
     return this._internalEngine.deleteNote(id, opts);
   }
 
@@ -247,17 +276,12 @@ export class EngineAPIService
     return this._internalEngine.deleteSchema(id, opts);
   }
 
-  info(): Promise<RespRequired<EngineInfoResp>> {
+  info(): Promise<RespV2<EngineInfoResp>> {
     return this._internalEngine.info();
   }
 
   sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp> {
     return this._internalEngine.sync(opts);
-  }
-
-  getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
-    // opts.npath = opts.overrides?.types
-    return this._internalEngine.getNoteByPath(opts);
   }
 
   getSchema(qs: string): Promise<RespV2<SchemaModuleProps>> {
@@ -268,7 +292,7 @@ export class EngineAPIService
     return this._internalEngine.querySchema(qs);
   }
 
-  queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>> {
+  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
     return this._internalEngine.queryNotes(opts);
   }
 
@@ -280,7 +304,7 @@ export class EngineAPIService
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): Required<RespV2<NoteProps[]>> {
+  }): RespV2<NoteProps[]> {
     return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 

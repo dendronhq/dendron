@@ -12,6 +12,7 @@ import {
   OnDidChangeActiveTextEditorMsg,
   memoize,
   DendronError,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
@@ -100,6 +101,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         },
         {
           enableScripts: true,
+          enableCommandUris: true,
           retainContextWhenHidden: true,
           enableFindWidget: true,
           localResourceRoots: WebViewUtils.getLocalResourceRoots(
@@ -109,13 +111,15 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       );
 
       const webViewAssets = WebViewUtils.getJsAndCss();
-
+      const initialTheme =
+        ConfigUtils.getPreview(this._ext.getDWorkspace().config).theme || "";
       const html = await WebViewUtils.getWebviewContent({
         ...webViewAssets,
         name,
         port,
         wsRoot,
         panel: this._panel,
+        initialTheme,
       });
 
       this._panel.webview.html = html;
@@ -336,15 +340,24 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       }
       note = this.rewriteImageUrls(note, panel);
 
-      return panel.webview.postMessage({
-        type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-        data: {
-          note,
-          syncChangedNote,
-        },
-        source: "vscode",
-      } as OnDidChangeActiveTextEditorMsg);
+      try {
+        return panel.webview.postMessage({
+          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
+          data: {
+            note,
+            syncChangedNote,
+          },
+          source: "vscode",
+        } as OnDidChangeActiveTextEditorMsg);
+      } catch (err) {
+        Logger.info({
+          ctx: "sendRefreshMessage",
+          state: "webview is disposed",
+        });
+        return;
+      }
     }
+
     return;
   }
 

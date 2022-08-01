@@ -7,7 +7,6 @@ import {
   DVault,
   DWorkspace,
   IntermediateDendronConfig,
-  NoteUtils,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
@@ -28,6 +27,7 @@ import {
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
+  createEngineV3,
   DConfig,
   WorkspaceConfig,
   WorkspaceService,
@@ -75,6 +75,17 @@ export type AsyncCreateEngineFunction = (
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
   return {
     engine: engineServerCreateEngine(opts) as DEngineClient,
+    port: undefined,
+    server: undefined,
+  };
+}
+
+/**
+ * Create an {@link DendronEngine}
+ */
+export async function createEngineV3FromEngine(opts: WorkspaceOpts) {
+  return {
+    engine: createEngineV3(opts) as DEngineClient,
     port: undefined,
     server: undefined,
   };
@@ -176,7 +187,7 @@ export async function setupWS(opts: {
         await resp;
         await WorkspaceService.createWorkspace({
           wsRoot: path.join(wsRoot, ent.name),
-          vaults: ent.vaults,
+          additionalVaults: ent.vaults,
         });
         return ws.addWorkspace({ workspace: ent });
       },
@@ -386,14 +397,5 @@ export class TestEngineUtils {
   } & WorkspaceOpts) {
     const vault = vaults[0];
     return NoteTestUtilsV4.createNote({ wsRoot, vault, fname, body, custom });
-  }
-
-  /**
-   * Sugar for retrieving a note in the first vault
-   */
-  static getNoteByFname(engine: DEngineClient, fname: string) {
-    const { wsRoot, vaults, notes } = engine;
-    const vault = vaults[0];
-    return NoteUtils.getNoteByFnameV5({ fname, notes, vault, wsRoot });
   }
 }

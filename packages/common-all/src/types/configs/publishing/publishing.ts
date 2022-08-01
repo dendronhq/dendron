@@ -2,6 +2,12 @@ import { DVault } from "../../workspace";
 import { GithubConfig, genDefaultGithubConfig } from "./github";
 import { SEOConfig, genDefaultSEOConfig } from "./seo";
 
+export enum Theme {
+  DARK = "dark",
+  LIGHT = "light",
+  CUSTOM = "custom",
+}
+
 /**
  * Namespace for all publishing related configurations
  */
@@ -31,16 +37,18 @@ export type DendronPublishingConfig = {
   enableFrontmatterTags: boolean;
   enableHashesForFMTags: boolean;
   enableRandomlyColoredTags?: boolean;
+  enableTaskNotes?: boolean;
   hierarchy?: { [key: string]: HierarchyConfig };
   duplicateNoteBehavior?: DuplicateNoteBehavior;
   writeStubs: boolean;
   seo: SEOConfig;
   github: GithubConfig;
-
+  theme?: Theme;
   segmentKey?: string;
   cognitoUserPoolId?: string;
   cognitoClientId?: string;
   enablePrettyLinks: boolean;
+  siteBanner?: string;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &
@@ -98,6 +106,7 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableFrontmatterTags: true,
     enableHashesForFMTags: false,
     enableRandomlyColoredTags: true,
+    enableTaskNotes: true,
     enablePrettyLinks: true,
   };
 }

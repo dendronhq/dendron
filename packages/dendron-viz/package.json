@@ -1,0 +1,54 @@
+{
+  "name": "@dendronhq/dendron-viz",
+  "version": "0.105.2",
+  "description": "dendron-viz",
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/dendron-viz"
+  },
+  "author": {
+    "name": "Dendron INC",
+    "email": "eng@dendron.so",
+    "url": "https://www.dendron.so"
+  },
+  "keywords": [
+    "common"
+  ],
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib && rimraf coverage",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean",
+    "build": "yarn copyNonTSFiles && yarn compile",
+    "buildCI": "yarn copyNonTSFiles && yarn compile",
+    "copyNonTSFiles": "node ./ensureDir && cross-env cp ./src/loadModule.js lib/",
+    "compile": "tsc -p tsconfig.build.json",
+    "watch": "yarn copyNonTSFiles && yarn compile --watch"
+  },
+  "dependencies": {
+    "@dendronhq/common-all": "^0.105.2",
+    "@dendronhq/engine-server": "^0.105.2",
+    "d3": "^7.0.0",
+    "lodash": "^4.17.21",
+    "micromatch": "^4.0.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "yargs": "^17.4.1"
+  },
+  "devDependencies": {
+    "@types/micromatch": "^4.0.2",
+    "rimraf": "^2.6.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

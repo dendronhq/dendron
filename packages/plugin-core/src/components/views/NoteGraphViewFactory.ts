@@ -1,4 +1,5 @@
 import {
+  ConfigUtils,
   DendronEditorViewKey,
   DendronError,
   DMessageEnum,
@@ -38,10 +39,11 @@ export class NoteGraphPanelFactory {
   private static _ext: DendronExtension;
   private static initWithNote: NoteProps | undefined;
   /**
-   * This property temporarily stores the graph theme selected by user and is written
+   * These properties temporarily stores the graph theme and depth selected by user and is written
    * back to MetadataService once the panel is disposed.
    */
   private static defaultGraphTheme: GraphThemeEnum | undefined;
+  private static graphDepth: number | undefined;
 
   static create(
     ext: DendronExtension,
@@ -87,14 +89,25 @@ export class NoteGraphPanelFactory {
       this._panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
         const ctx = "ShowNoteGraph:onDidReceiveMessage";
         Logger.debug({ ctx, msgType: msg.type });
+        const createStub = ConfigUtils.getWorkspace(
+          this._ext.getDWorkspace().config
+        ).graph.createStub;
         switch (msg.type) {
           case GraphViewMessageEnum.onSelect: {
-            const note = this._ext.getEngine().notes[msg.data.id];
-            await new GotoNoteCommand(this._ext).execute({
-              qs: note.fname,
-              vault: note.vault,
-              column: ViewColumn.One,
-            });
+            const note: NoteProps = this._ext.getEngine().notes[msg.data.id];
+            if (note.stub && !createStub) {
+              this.refresh(note, createStub);
+            } else {
+              if (this._ext.wsUtils.getActiveNote()?.fname === note.fname) {
+                this.refresh(note);
+                break;
+              }
+              await new GotoNoteCommand(this._ext).execute({
+                qs: note.fname,
+                vault: note.vault,
+                column: ViewColumn.One,
+              });
+            }
             AnalyticsUtils.track(DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key, {
               message: GraphViewMessageEnum.onSelect,
             });
@@ -105,19 +118,24 @@ export class NoteGraphPanelFactory {
             this.onOpenTextDocument(editor);
             break;
           }
-          case GraphViewMessageEnum.onRequestGraphStyleAndTheme: {
+          case GraphViewMessageEnum.onRequestGraphOpts: {
             // Set graph styles
             const styles = GraphStyleService.getParsedStyles();
             const graphTheme = MetadataService.instance().getGraphTheme();
+            const graphDepth = MetadataService.instance().graphDepth;
             if (graphTheme) {
               this.defaultGraphTheme = graphTheme;
             }
-            if (styles || graphTheme) {
+            if (graphDepth) {
+              this.graphDepth = graphDepth;
+            }
+            if (styles || graphTheme || graphDepth) {
               this._panel!.webview.postMessage({
-                type: GraphViewMessageEnum.onGraphStyleAndThemeLoad,
+                type: GraphViewMessageEnum.onGraphLoad,
                 data: {
                   styles,
                   graphTheme,
+                  graphDepth,
                 },
                 source: "vscode",
               });
@@ -173,6 +191,19 @@ export class NoteGraphPanelFactory {
             });
             break;
           }
+
+          case GraphViewMessageEnum.toggleGraphView: {
+            AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
+              type: "GraphTypeChanged",
+              state: msg.data.graphType,
+            });
+            break;
+          }
+
+          case GraphViewMessageEnum.onGraphDepthChange: {
+            this.graphDepth = msg.data.graphDepth;
+            break;
+          }
           default:
             break;
         }
@@ -184,8 +215,18 @@ export class NoteGraphPanelFactory {
           this._onEngineNoteStateChangedDisposable.dispose();
         }
         if (this.defaultGraphTheme) {
+          AnalyticsUtils.track(GraphEvents.GraphThemeChanged, {
+            defaultTheme: this.defaultGraphTheme,
+          });
           MetadataService.instance().setGraphTheme(this.defaultGraphTheme);
           this.defaultGraphTheme = undefined;
+        }
+        if (this.graphDepth) {
+          AnalyticsUtils.track(GraphEvents.GraphViewUsed, {
+            graphDepth: this.graphDepth,
+          });
+          MetadataService.instance().graphDepth = this.graphDepth;
+          this.graphDepth = undefined;
         }
       });
     }
@@ -196,14 +237,15 @@ export class NoteGraphPanelFactory {
    * Post message to the webview content.
    * @param note
    */
-  static refresh(note: NoteProps): any {
+  static refresh(note: NoteProps, createStub?: boolean): any {
     if (this._panel) {
       this._panel.webview.postMessage({
         type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
         data: {
           note,
           syncChangedNote: true,
-          activeNote: this._ext.wsUtils.getActiveNote(),
+          activeNote:
+            note.stub && !createStub ? note : this._ext.wsUtils.getActiveNote(),
         },
         source: DMessageSource.vscode,
       } as OnDidChangeActiveTextEditorMsg);

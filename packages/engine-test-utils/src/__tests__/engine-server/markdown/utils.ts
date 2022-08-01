@@ -13,6 +13,7 @@ import {
   DendronASTData,
   DendronASTDest,
   MDUtilsV5,
+  ProcDataFullOptsV5,
   Processor,
   ProcFlavor,
   VFile,
@@ -99,6 +100,7 @@ export const cleanVerifyOpts = (opts: any): ProcVerifyOpts => {
 };
 
 /**
+ * @deprecated - use {@link createProcCompileTests} instead
  * Generator for processor tests
  *
  * @param name name of test
@@ -170,6 +172,7 @@ export const createProcCompileTests = (opts: {
     [key in DendronASTDest]?: FlavorDict;
   };
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
+  procOpts?: Partial<ProcDataFullOptsV5>;
 }): ProcTests[] => {
   const {
     name,
@@ -229,6 +232,7 @@ export const createProcCompileTests = (opts: {
                         engine,
                         fname,
                         vault,
+                        ...opts.procOpts,
                       },
                       { flavor: flavor as ProcFlavor }
                     );

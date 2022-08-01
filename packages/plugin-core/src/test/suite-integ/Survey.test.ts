@@ -4,14 +4,14 @@ import {
   MetadataService,
 } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import { describe, after, beforeEach, afterEach } from "mocha";
-import sinon, { SinonStub, SinonSpy } from "sinon";
+import { after, afterEach, beforeEach, describe } from "mocha";
+import sinon, { SinonSpy, SinonStub } from "sinon";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { StateService } from "../../services/stateService";
 import { SurveyUtils } from "../../survey";
-import { StartupUtils } from "../../utils/StartupUtils";
+import { StartupPrompts } from "../../utils/StartupPrompts";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TutorialInitializer } from "../../workspace/tutorialInitializer";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
@@ -125,32 +125,6 @@ suite("SurveyUtils", function () {
           surveySpy.restore();
         });
 
-        describe("AND initialSurveyStatus is not set", () => {
-          test("THEN metadata is backfilled AND showInitialSurvey is not called", async () => {
-            const tutorialInitializer = new TutorialInitializer();
-            const ws = ExtensionProvider.getDWorkspace();
-            // metadata is not set yet, we expect this to be backfilled
-            expect(
-              MetadataService.instance().getMeta().initialSurveyStatus
-            ).toEqual(undefined);
-            // global state is already set.
-            expect(
-              await StateService.instance().getGlobalState(
-                GLOBAL_STATE.INITIAL_SURVEY_SUBMITTED
-              )
-            ).toEqual("submitted");
-
-            await tutorialInitializer.onWorkspaceOpen({ ws });
-
-            expect(surveySpy.calledOnce).toBeFalsy();
-
-            // metadata is backfilled.
-            expect(
-              MetadataService.instance().getMeta().initialSurveyStatus
-            ).toEqual(InitialSurveyStatusEnum.submitted);
-          });
-        });
-
         describe("AND initialSurveyStatus is set to submitted", () => {
           test("THEN showInitialSurvey is not called", async () => {
             const tutorialInitializer = new TutorialInitializer();
@@ -209,7 +183,7 @@ suite("SurveyUtils", function () {
 
         describe("AND lapsedUserSurveyStatus is not set", () => {
           test("THEN showLapsedUserSurvey is called", async () => {
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -226,7 +200,7 @@ suite("SurveyUtils", function () {
             MetadataService.instance().setLapsedUserSurveyStatus(
               LapsedUserSurveyStatusEnum.submitted
             );
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -282,7 +256,7 @@ suite("SurveyUtils", function () {
               )
             ).toEqual("submitted");
 
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {
@@ -311,7 +285,7 @@ suite("SurveyUtils", function () {
               )
             ).toEqual("submitted");
 
-            await StartupUtils.showLapsedUserMessage(
+            await StartupPrompts.showLapsedUserMessage(
               VSCodeUtils.getAssetUri(ctx)
             );
             await new Promise((resolve: any) => {

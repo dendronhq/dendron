@@ -1,9 +1,4 @@
-import {
-  ConfigUtils,
-  NoteUtils,
-  VaultUtils,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -364,12 +359,12 @@ describe("markdown import pod", () => {
             vaultName,
           },
         });
-        const note = NoteUtils.getNoteOrThrow({
-          fname: "project.p2.n1",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname: "project.p2.n1",
+            vault,
+          })
+        )[0];
         expect(_.trim(note.body)).toEqual("[[project.p1.n1]]");
       },
       {
@@ -403,12 +398,12 @@ describe("markdown import pod", () => {
         });
         const vault = vaults[0];
         vpath = vault2Path({ wsRoot, vault });
-        const note = NoteUtils.getNoteOrThrow({
-          fname: "project.p1.n1",
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname: "project.p1.n1",
+            vault: vaults[0],
+          })
+        )[0];
         expect(note.id).toEqual("project.p1.n1");
       },
       {
@@ -440,12 +435,12 @@ describe("markdown import pod", () => {
         });
         const vault = vaults[0];
         vpath = vault2Path({ wsRoot, vault });
-        const note = NoteUtils.getNoteOrThrow({
-          fname: "project.p1.n1",
-          notes: engine.notes,
-          vault: vaults[0],
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname: "project.p1.n1",
+            vault: vaults[0],
+          })
+        )[0];
         expect(note.custom.banana).toEqual(42);
       },
       {
@@ -673,12 +668,12 @@ describe("markdown import pod", () => {
             },
           },
         });
-        const note = NoteUtils.getNoteOrThrow({
-          fname: "frontmatterTest",
-          notes: engine.notes,
-          vault,
-          wsRoot,
-        });
+        const note = (
+          await engine.findNotes({
+            fname: "frontmatterTest",
+            vault,
+          })
+        )[0];
         expect(note.custom.obsidianId).toContain(`testing`);
         expect(note.custom.status).toContain(`wip`);
         expect(note.custom.created_imported).toContain(`10 Jan`);

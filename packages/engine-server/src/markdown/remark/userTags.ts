@@ -1,16 +1,15 @@
-import _ from "lodash";
 import {
   ConfigUtils,
   DendronError,
   USERS_HIERARCHY,
 } from "@dendronhq/common-all";
+import { Element } from "hast";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
-import { MDUtilsV4 } from "../utils";
-import { Element } from "hast";
-import { PUNCTUATION_MARKS } from "./hashtag";
 import { MDUtilsV5 } from "../../markdown";
+import { SiteUtils } from "../../topics/site";
+import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
+import { PUNCTUATION_MARKS } from "./hashtag";
 
 /** Can have period in the middle */
 const GOOD_MIDDLE_CHARACTER = `[^#@|\\[\\]\\s${PUNCTUATION_MARKS}]`;
@@ -44,21 +43,28 @@ export const USERTAG_REGEX_LOOSE = new RegExp(
     `)`
 );
 
-/**
- *
- * @param text The text to check if it matches an hashtag.
- * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
- * @returns The identifier for the matched hashtag, or undefined if it did not match.
- */
-export const matchUserTag = (
-  text: string,
-  matchLoose: boolean = true
-): string | undefined => {
-  const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
-  if (match && match.groups)
-    return match.groups.tagContents || match.groups.userTagContents;
-  return undefined;
-};
+export class UserTagUtils {
+  static extractTagFromMatch(match: RegExpMatchArray | null) {
+    if (match && match.groups) {
+      return match.groups.tagContents || match.groups.userTagContents;
+    }
+    return;
+  }
+
+  /**
+   *
+   * @param text The text to check if it matches an hashtag.
+   * @param matchLoose If true, a hashtag anywhere in the string will match. Otherwise the string must contain only the anchor.
+   * @returns The identifier for the matched hashtag, or undefined if it did not match.
+   */
+  static matchUserTag = (
+    text: string,
+    matchLoose: boolean = true
+  ): string | undefined => {
+    const match = (matchLoose ? USERTAG_REGEX : USERTAG_REGEX_LOOSE).exec(text);
+    return this.extractTagFromMatch(match);
+  };
+}
 
 type PluginOpts = {};
 
@@ -74,7 +80,19 @@ const plugin: Plugin<[PluginOpts?]> = function plugin(
 
 function attachParser(proc: Unified.Processor) {
   function locator(value: string, fromIndex: number) {
-    return value.indexOf("@", fromIndex);
+    // Do not locate a symbol if the previous character is non-whitespace.
+    // Unified cals tokenizer starting at the index we return here,
+    // so tokenizer won't be able to reject it for not starting with a non-space character.
+    const atSymbol = value.indexOf("@", fromIndex);
+    if (atSymbol === 0) {
+      return atSymbol;
+    } else if (atSymbol > 0) {
+      const previousSymbol = value[atSymbol - 1];
+      if (!previousSymbol || /[\s]/.exec(previousSymbol)) {
+        return atSymbol;
+      }
+    }
+    return -1;
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
@@ -108,8 +126,8 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
 
   if (visitors) {
     visitors.usertag = (node: HashTag): string | Element => {
-      const { dest } = MDUtilsV4.getDendronData(proc);
-      const prefix = MDUtilsV4.getProcOpts(proc).wikiLinksOpts?.prefix || "";
+      const { dest, config } = MDUtilsV5.getProcData(proc);
+      const prefix = SiteUtils.getSitePrefixForNote(config);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
           return node.value;

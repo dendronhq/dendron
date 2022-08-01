@@ -1,19 +1,20 @@
 import {
   DVault,
+  genHash,
   genUUID,
   NoteProps,
   NoteUtils,
   SchemaModuleProps,
   SchemaUtils,
   DNodePropsQuickInputV2,
-  NotePropsDict,
   DEngineClient,
   EngineWriteOptsV2,
+  SchemaTemplate,
+  ErrorUtils,
 } from "@dendronhq/common-all";
 import {
   file2Note,
   file2Schema,
-  genHash,
   note2File,
   resolvePath,
   schemaModuleProps2File,
@@ -27,10 +28,11 @@ export type CreateNoteOptsV4 = {
   wsRoot: string;
   fname: string;
   body?: string;
-  props?: Partial<Omit<NoteProps, "vault|fname|body">>;
+  props?: Partial<Omit<NoteProps, "vault" | "fname" | "body" | "custom">>;
   genRandomId?: boolean;
   noWrite?: boolean;
   custom?: any;
+  stub?: boolean;
 };
 
 export type CreateNoteInputOpts = {
@@ -113,16 +115,6 @@ export class TestNoteFactory {
   async createForFNames(fnames: string[]): Promise<NoteProps[]> {
     return Promise.all(fnames.map((name) => this.createForFName(name)));
   }
-
-  toNotePropsDict(notes: NoteProps[]): NotePropsDict {
-    const dict: NotePropsDict = {};
-
-    for (const note of notes) {
-      dict[note.id] = note;
-    }
-
-    return dict;
-  }
 }
 
 export class NoteTestUtilsV4 {
@@ -151,8 +143,17 @@ export class NoteTestUtilsV4 {
    * @returns
    */
   static createNote = async (opts: CreateNoteOptsV4) => {
-    const { fname, vault, props, body, genRandomId, noWrite, wsRoot, custom } =
-      _.defaults(opts, { noWrite: false });
+    const {
+      fname,
+      vault,
+      props,
+      body,
+      genRandomId,
+      noWrite,
+      wsRoot,
+      custom,
+      stub,
+    } = _.defaults(opts, { noWrite: false });
     /**
      * Make sure snapshots stay consistent
      */
@@ -169,8 +170,9 @@ export class NoteTestUtilsV4 {
       fname,
       vault,
       body,
+      stub,
     });
-    if (!noWrite) {
+    if (!noWrite && !stub) {
       await note2File({ note, vault, wsRoot });
     }
     return note;
@@ -215,7 +217,11 @@ export class NoteTestUtilsV4 {
   ) {
     const { fname, vault, wsRoot } = opts;
     const npath = path.join(vault2Path({ vault, wsRoot }), fname + ".md");
-    const note = file2Note(npath, vault);
+    const resp = file2Note(npath, vault);
+    if (ErrorUtils.isErrorResp(resp)) {
+      throw resp.error;
+    }
+    const note = resp.data;
     const newNote = cb(note);
     return note2File({ note: newNote, vault, wsRoot });
   }
@@ -231,4 +237,41 @@ export class NoteTestUtilsV4 {
     const newSchema = cb(schema);
     return schemaModuleProps2File(newSchema, vpath, fname);
   }
+
+  /**
+   * Setup schema that references template that may or may not lie in same vault
+   */
+  static setupSchemaCrossVault = (opts: {
+    wsRoot: string;
+    vault: DVault;
+    template: SchemaTemplate;
+  }) => {
+    const { wsRoot, vault, template } = opts;
+    return NoteTestUtilsV4.createSchema({
+      fname: "food",
+      wsRoot,
+      vault,
+      modifier: (schema) => {
+        const schemas = [
+          SchemaUtils.createFromSchemaOpts({
+            id: "food",
+            parent: "root",
+            fname: "food",
+            children: ["ch2"],
+            vault,
+          }),
+          SchemaUtils.createFromSchemaRaw({
+            id: "ch2",
+            template,
+            namespace: true,
+            vault,
+          }),
+        ];
+        schemas.map((s) => {
+          schema.schemas[s.id] = s;
+        });
+        return schema;
+      },
+    });
+  };
 }

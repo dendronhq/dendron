@@ -31,6 +31,8 @@ export enum DendronTreeViewKey {
   LOOKUP_VIEW = "dendron.lookup-view",
   TIP_OF_THE_DAY = "dendron.tip-of-the-day",
   HELP_AND_FEEDBACK = "dendron.help-and-feedback",
+  GRAPH_PANEL = "dendron.graph-panel",
+  RECENT_WORKSPACES = "dendron.recent-workspaces",
 }
 
 export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
@@ -58,9 +60,10 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     type: "webview",
   },
   [DendronEditorViewKey.SEED_BROWSER]: {
-    desc: "TODO",
-    label: "TODO",
-    type: "nativeview",
+    desc: "Seed Registry",
+    label: "Seed Registry",
+    bundleName: "SeedBrowser",
+    type: "webview",
   },
   [DendronEditorViewKey.SCHEMA_VALIDATOR]: {
     desc: "Schema Validator",
@@ -105,12 +108,24 @@ export const TREE_VIEWS: Record<DendronTreeViewKey, DendronViewEntry> = {
   [DendronTreeViewKey.TIP_OF_THE_DAY]: {
     desc: "Feature Showcase",
     label: "Feature Showcase",
+    type: "webview",
+    bundleName: "DendronTipOfTheDay",
+  },
+  [DendronTreeViewKey.RECENT_WORKSPACES]: {
+    desc: "Recent Dendron Workspaces",
+    label: "Recent Dendron Workspaces",
     type: "nativeview",
   },
   [DendronTreeViewKey.HELP_AND_FEEDBACK]: {
     desc: "Help and Feedback",
     label: "Help and Feedback",
     type: "nativeview",
+  },
+  [DendronTreeViewKey.GRAPH_PANEL]: {
+    desc: "Graph Panel (side)",
+    label: "Graph Panel",
+    bundleName: "DendronSideGraphPanel",
+    type: "webview",
   },
 };
 

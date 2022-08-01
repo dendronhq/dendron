@@ -2,11 +2,12 @@ import {
   DendronApiV2,
   DEngineInitPayload,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
   stringifyError,
   NoteUtils,
   ConfigGetPayload,
-  NoteFNamesDict,
+  NoteFnameDictUtils,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -14,6 +15,7 @@ import { EngineSliceState, LoadingStatus } from "../../types";
 import { createLogger } from "../../utils";
 // @ts-ignore
 import internal from "@reduxjs/toolkit/node_modules/immer/dist/internal";
+
 /**
  * Equivalent to engine.init
  */
@@ -148,7 +150,7 @@ const initialState: InitialState = {
   currentRequestId: undefined,
   vaults: [],
   notes: {},
-  noteFName: new NoteFNamesDict([]),
+  noteFName: {},
   schemas: {},
   notesRendered: {},
   error: null,
@@ -166,12 +168,12 @@ export const engineSlice = createSlice({
       state.schemas = schemas;
       state.vaults = vaults;
       state.config = config;
-      state.noteFName = new NoteFNamesDict(_.values(notes));
+      state.noteFName = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
     },
     setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
       state.config = action.payload;
     },
-    setNotes: (state, action: PayloadAction<NotePropsDict>) => {
+    setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {
       state.notes = action.payload;
     },
     setError: (state, action: PayloadAction<any>) => {
@@ -188,6 +190,7 @@ export const engineSlice = createSlice({
       state.schemas = {};
       state.notesRendered = {};
       state.error = null;
+      state.noteFName = {};
     },
     setRenderNote: (
       state,
@@ -202,15 +205,22 @@ export const engineSlice = createSlice({
         state.notes = {};
       }
       // this is a new node
+      const noteDicts = {
+        notesById: state.notes,
+        notesByFname: state.noteFName,
+      };
       if (!state.notes[note.id]) {
-        NoteUtils.addOrUpdateParents({
+        const changed = NoteUtils.addOrUpdateParents({
           note,
-          notesList: _.values(state.notes),
+          noteDicts,
           createStubs: true,
           wsRoot: state.wsRoot!,
         });
+        changed.forEach((noteChangeEntry) =>
+          NoteDictsUtils.add(noteChangeEntry.note, noteDicts)
+        );
       }
-      state.notes[note.id] = note;
+      NoteDictsUtils.add(note, noteDicts);
     },
   },
   extraReducers: (builder) => {

@@ -4,9 +4,7 @@ import {
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import { tmpdir } from "os";
-import path from "path";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
 
 const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
   await NoteTestUtilsV4.createNote({ fname: "foo", vault: vaults[0], wsRoot });
@@ -44,68 +42,6 @@ describe("NoteUtils", () => {
       expect(
         NoteUtils.match({ notePath: "foo.one", pattern: "foo.*" })
       ).toBeTruthy();
-    });
-  });
-
-  describe("getNoteByFnameV5", () => {
-    test("basic", async () => {
-      await runEngineTestV5(
-        async ({ vaults, engine, wsRoot }) => {
-          const fname = "foo";
-          const resp = NoteUtils.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault: vaults[0],
-            wsRoot,
-          });
-          expect(resp).toEqual(engine.notes["foo"]);
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-
-    test("full path on input", async () => {
-      await runEngineTestV5(
-        async ({ vaults, engine, wsRoot }) => {
-          const fname = "foo";
-          const resp = NoteUtils.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
-            wsRoot,
-          });
-          expect(resp).toEqual(engine.notes["foo"]);
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-
-    test("full path on node", async () => {
-      await runEngineTestV5(
-        async ({ vaults, engine, wsRoot }) => {
-          const fname = "foo";
-          const resp = NoteUtils.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
-            wsRoot,
-          });
-          expect(resp).toEqual(engine.notes["foo"]);
-          return [];
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
     });
   });
 

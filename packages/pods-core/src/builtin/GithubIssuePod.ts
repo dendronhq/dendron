@@ -289,7 +289,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
         n.custom.status = note.custom.status;
         n.custom.issueID = note.custom.issueID;
         updatedNotes = [...updatedNotes, n];
-        await engine.writeNote(n, { newNode: true });
+        await engine.writeNote(n);
       }
     });
     return updatedNotes;
@@ -354,7 +354,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
     const newNotes = this.getNewNotes(notes, engine, vault);
     const updatedNotes = await this.getUpdatedNotes(notes, engine, vault);
 
-    await engine.bulkAddNotes({ notes: newNotes });
+    await engine.bulkWriteNotes({ notes: newNotes, skipMetadata: true });
 
     return { importedNotes: [...newNotes, ...updatedNotes] };
   }
@@ -707,7 +707,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         note.custom.issueID = issue.id;
         note.custom.url = issue.url;
         note.custom.status = issue.state;
-        await engine.writeNote(note, { updateExisting: true });
+        await engine.writeNote(note);
         showMessage.info(GITHUBMESSAGE.ISSUE_CREATED);
         resp = issue.url;
       }
@@ -775,7 +775,7 @@ export class GithubIssuePublishPod extends PublishPod<GithubIssuePublishPodConfi
         note.custom.discussionID = discussion.id;
         note.custom.url = discussion.url;
         note.custom.author = discussion.author.url;
-        await engine.writeNote(note, { updateExisting: true });
+        await engine.writeNote(note);
         showMessage.info(GITHUBMESSAGE.DISCUSSION_CREATED);
         resp = discussion.url;
       }

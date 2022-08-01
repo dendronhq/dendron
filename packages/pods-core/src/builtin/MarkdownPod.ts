@@ -1,6 +1,7 @@
 import {
   DNodeUtils,
   DVault,
+  FOLDERS,
   genUUIDInsecure,
   NoteProps,
   NoteUtils,
@@ -503,7 +504,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           return note;
         })
     );
-    await engine.bulkAddNotes({ notes: notesClean });
+    await engine.bulkWriteNotes({ notes: notesClean, skipMetadata: true });
     this.L.info({
       ctx,
       wsRoot,
@@ -556,7 +557,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     } else {
       remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
     }
-    const out = remark.processSync(note.body).toString();
+    const out = (await remark.process(note.body)).toString();
     return _.trim(out);
   }
 }
@@ -602,16 +603,15 @@ export class MarkdownExportPod extends ExportPod {
     // Export Assets
     await Promise.all(
       vaults.map(async (vault) => {
-        //TODO: Avoid hardcoding of assets directory, or else extract to global const
         const destPath = path.join(
           dest.fsPath,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         const srcPath = path.join(
           wsRoot,
           VaultUtils.getRelPath(vault),
-          "assets"
+          FOLDERS.ASSETS
         );
         if (fs.pathExistsSync(srcPath)) {
           await fs.copy(srcPath, destPath);

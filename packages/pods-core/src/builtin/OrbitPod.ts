@@ -2,10 +2,10 @@ import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { ConflictHandler, PodUtils } from "../utils";
 import {
+  cleanName,
   Conflict,
   DendronError,
   DEngineClient,
-  DNodeUtils,
   DVault,
   ERROR_SEVERITY,
   MergeConflictOptions,
@@ -159,7 +159,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       } else {
         let noteName =
           name || github || discord || twitter || this.getNameFromEmail(email);
-        noteName = DNodeUtils.cleanFname(noteName);
+        noteName = cleanName(noteName);
         this.L.debug({ ctx: "membersToNotes", msg: "enter", member });
         let fname;
         const note = NoteUtils.getNoteByFnameFromEngine({
@@ -253,7 +253,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       }
     });
     if (shouldUpdate) {
-      await engine.writeNote(note, { updateExisting: true });
+      await engine.writeNote(note);
     }
   };
 
@@ -281,9 +281,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     switch (resp) {
       case MergeConflictOptions.OVERWRITE_LOCAL: {
         conflict.conflictEntry.fname = conflict.conflictNote.fname;
-        await engine.writeNote(conflict.conflictEntry, {
-          updateExisting: true,
-        });
+        await engine.writeNote(conflict.conflictEntry);
         break;
       }
       case MergeConflictOptions.SKIP:
@@ -366,7 +364,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
       created: create.length,
       conflicted: conflicts.length,
     });
-    await engine.bulkAddNotes({ notes: create });
+    await engine.bulkWriteNotes({ notes: create, skipMetadata: true });
     const { handleConflict } = utilityMethods as ConflictHandler;
     const conflictResolveOpts: PodConflictResolveOpts = {
       options: this.getMergeConflictOptions,

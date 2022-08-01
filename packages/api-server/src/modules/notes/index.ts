@@ -2,19 +2,16 @@ import {
   DendronError,
   EngineDeletePayload,
   EngineDeleteRequest,
-  EngineGetNoteByPathPayload,
-  EngineGetNoteByPathRequest,
   EngineInfoResp,
   EngineRenameNotePayload,
   EngineRenameNoteRequest,
-  EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
   NoteQueryRequest,
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
-  RespRequired,
   RespV2,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import { NodeJSUtils } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
@@ -48,22 +45,6 @@ export class NoteController {
     }
   }
 
-  async getByPath({
-    ws,
-    ...opts
-  }: EngineGetNoteByPathRequest): Promise<EngineGetNoteByPathPayload> {
-    const engine = await getWSEngine({ ws });
-    try {
-      const data = await engine.getNoteByPath(opts);
-      return data;
-    } catch (err) {
-      return {
-        error: new DendronError({ message: JSON.stringify(err) }),
-        data: undefined,
-      };
-    }
-  }
-
   async render({
     ws,
     ...opts
@@ -88,16 +69,24 @@ export class NoteController {
     }
   }
 
-  async info(): Promise<RespRequired<EngineInfoResp>> {
+  async info(): Promise<RespV2<EngineInfoResp>> {
     const ctx = "NoteController:info";
     getLogger().info({ ctx, msg: "enter" });
     try {
       const version = NodeJSUtils.getVersionFromPkg();
+      if (!version) {
+        return {
+          data: undefined,
+          error: DendronError.createPlainError({
+            message: "Unable to read the Dendron version",
+          }),
+        };
+      }
       return {
         data: {
           version,
         },
-        error: undefined,
+        error: null,
       };
     } catch (err) {
       getLogger().error({ ctx, err });
@@ -137,11 +126,10 @@ export class NoteController {
     ws,
     note,
     opts,
-  }: EngineUpdateNoteRequest): Promise<EngineUpdateNotePayload> {
+  }: EngineUpdateNoteRequest): Promise<UpdateNoteResp> {
     const engine = await getWSEngine({ ws });
     try {
-      const data = await engine.updateNote(note, opts);
-      return { error: null, data };
+      return engine.updateNote(note, opts);
     } catch (err) {
       return {
         error: new DendronError({ message: JSON.stringify(err) }),

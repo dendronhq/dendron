@@ -6,6 +6,7 @@ import {
   LookupViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
+  SeedBrowserMessageType,
 } from "@dendronhq/common-all";
 import {
   combinedStore,
@@ -19,6 +20,7 @@ import {
   setLogLevel,
 } from "@dendronhq/common-frontend";
 import { Layout } from "antd";
+import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
 import "../styles/scss/main.scss";
@@ -97,9 +99,16 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));
         logger.info({ ctx, msg: "refreshLookup:post" });
         break;
-      case GraphViewMessageEnum.onGraphStyleAndThemeLoad: {
+      case GraphViewMessageEnum.onGraphLoad: {
         const cmsg = msg;
-        const { styles, graphTheme } = cmsg.data;
+        const {
+          styles,
+          graphTheme,
+          graphDepth,
+          showBacklinks,
+          showOutwardLinks,
+          showHierarchy,
+        } = cmsg.data;
         logger.info({ ctx, styles, msg: "styles" });
         if (styles) {
           ideDispatch(ideSlice.actions.setGraphStyles(styles));
@@ -111,8 +120,48 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         if (!graphTheme && styles) {
           ideDispatch(ideSlice.actions.setGraphTheme(GraphThemeEnum.Custom));
         }
+        if (graphDepth) {
+          logger.info({ ctx, graphDepth, msg: "default graph depth" });
+          ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
+        }
+        ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
+        ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
+        ideDispatch(ideSlice.actions.setShowHierarchy(showHierarchy));
         break;
       }
+      case SeedBrowserMessageType.onSeedStateChange: {
+        const seeds = msg.data.msg;
+        logger.info({ ctx, seeds, msg: "seeds" });
+        ideDispatch(ideSlice.actions.setSeedsInWorkspace(seeds));
+        break;
+      }
+
+      case GraphViewMessageEnum.onGraphDepthChange: {
+        const cmsg = msg;
+        const { graphDepth } = cmsg.data;
+        logger.info({ ctx, graphDepth, msg: "onGraphDepthChange" });
+        ideDispatch(ideSlice.actions.setGraphDepth(graphDepth));
+        break;
+      }
+      case GraphViewMessageEnum.toggleGraphEdges: {
+        const cmsg = msg;
+        const { showBacklinks, showOutwardLinks, showHierarchy } = cmsg.data;
+        if (!_.isUndefined(showBacklinks)) {
+          logger.info({ ctx, showBacklinks, msg: "showBacklinks" });
+          ideDispatch(ideSlice.actions.setShowBacklinks(showBacklinks));
+        }
+        if (!_.isUndefined(showOutwardLinks)) {
+          logger.info({ ctx, showOutwardLinks, msg: "showOutwardLinks" });
+          ideDispatch(ideSlice.actions.setShowOutwardLinks(showOutwardLinks));
+        }
+
+        if (!_.isUndefined(showHierarchy)) {
+          logger.info({ ctx, showHierarchy, msg: "showHierarchy" });
+          ideDispatch(ideSlice.actions.setShowHierarchy(showHierarchy));
+        }
+        break;
+      }
+
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;

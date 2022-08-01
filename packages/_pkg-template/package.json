@@ -1,0 +1,44 @@
+{
+  "name": "@dendronhq/$PKG_NAME",
+  "version": "$CURRENT_VERSION",
+  "description": "$PKG_NAME",
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/$PKG_NAME"
+  },
+  "author": {
+    "name": "Dendron INC",
+    "email": "eng@dendron.so",
+    "url": "https://www.dendron.so"
+  },
+  "keywords": [
+    "common"
+  ],
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib && rimraf coverage",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean",
+    "build": "yarn compile",
+    "buildCI": "yarn compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "watch": "yarn compile --watch"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

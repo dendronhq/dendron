@@ -1,4 +1,4 @@
-import { ConfigUtils, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
+import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
@@ -10,7 +10,7 @@ import { WorkspaceWatcher } from "../../WorkspaceWatcher";
 import { WSUtils } from "../../WSUtils";
 import { MockDendronExtension } from "../MockDendronExtension";
 import { MockPreviewProxy } from "../MockPreviewProxy";
-import { expect, runSingleVaultTest } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,
   runLegacyMultiWorkspaceTest,
@@ -35,11 +35,15 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
   let watcher: WindowWatcher | undefined;
 
   describe("WHEN onDidChangeActiveTextEditor is triggered", () => {
-    test("basic", (done) => {
-      runSingleVaultTest({
-        ctx,
+    describeSingleWS(
+      "WHEN check decorator",
+      {
         postSetupHook: setupBasic,
-        onInit: async ({ vault, wsRoot }) => {
+        ctx,
+      },
+      () => {
+        test("decorators are updated", async () => {
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot,
@@ -52,16 +56,14 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension: mockExtension,
             previewProxy,
           });
-          const vaultPath = vault.fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           const editor = await VSCodeUtils.openFileInEditor(uri);
           await watcher.triggerUpdateDecorations(editor!);
-          // TODO: check for decorations
-          done();
-        },
-      });
-    });
+        });
+      }
+    );
 
     describeSingleWS(
       "AND WHEN automaticallyShowPreview is set to false",
@@ -96,7 +98,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher.activate();
 
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);
@@ -134,7 +136,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher.activate();
 
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-          const vaultPath = vaults[0].fsPath;
+          const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);
@@ -157,7 +159,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
     test("does when opening new note", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({ vaults, wsRoot, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
           const previewProxy = new MockPreviewProxy();
@@ -178,12 +180,12 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher!.activate();
           // Open a note
           await WSUtils.openNote(
-            NoteUtils.getNoteByFnameV5({
-              vault: vaults[0],
-              notes: engine.notes,
-              wsRoot,
-              fname: "root",
-            })!
+            (
+              await engine.findNotes({
+                fname: "root",
+                vault: vaults[0],
+              })
+            )[0]
           );
           // The selection should have been moved to after the frontmatter
           checkPosition(7);
@@ -195,7 +197,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
     test("does not when switching between open notes", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        onInit: async ({ vaults, wsRoot, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           // Try to make sure we're opening this for the first time
           await VSCodeUtils.closeAllEditors();
 
@@ -217,12 +219,12 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
 
           watcher!.activate();
           // Open a note
-          const first = NoteUtils.getNoteByFnameV5({
-            vault: vaults[0],
-            notes: engine.notes,
-            wsRoot,
-            fname: "root",
-          })!;
+          const first = (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[0],
+            })
+          )[0];
           await WSUtils.openNote(first);
           checkPosition(7);
           // Move the selection so it's not where it has been auto-moved
@@ -233,12 +235,12 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           );
           checkPosition(3);
           // Switch to another note
-          const second = NoteUtils.getNoteByFnameV5({
-            vault: vaults[1],
-            notes: engine.notes,
-            wsRoot,
-            fname: "root",
-          })!;
+          const second = (
+            await engine.findNotes({
+              fname: "root",
+              vault: vaults[1],
+            })
+          )[0];
           await WSUtils.openNote(second);
           checkPosition(7);
           // Switch back to first note again

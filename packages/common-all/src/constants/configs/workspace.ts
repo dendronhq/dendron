@@ -42,6 +42,10 @@ const GRAPH: DendronConfigEntryCollection<DendronGraphConfig> = {
     label: "Zoom Speed",
     desc: "The speed at which the graph zooms in and out. Lower is slower, higher is faster.",
   },
+  createStub: {
+    label: "Create Stub",
+    desc: "When enabled, create a note if it hasn't been created already when clicked on a graph node",
+  },
 };
 
 /**
@@ -132,6 +136,10 @@ const TASK: DendronConfigEntryCollection<TaskConfig> = {
       return [key, value];
     })
   ),
+  taskCompleteStatus: {
+    label: "When is a task complete",
+    desc: "If the note state is set to any of these values, the note is considered to be done.",
+  },
 };
 
 export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
@@ -170,6 +178,10 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   enableXVaultWikiLink: {
     label: "Enable cross-vault wikilink",
     desc: "Enable cross-vault wikilinks",
+  },
+  enableHandlebarTemplates: {
+    label: "Enable handlebar style templates",
+    desc: "",
   },
   enableRemoteVaultInit: {
     label: "Enable Remote Vault Init",
@@ -211,5 +223,9 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   enableFullHierarchyNoteTitle: {
     label: "Enable FullHierarchyNoteTitle mode",
     desc: "When enabled, the full hierarchy position of a note is used to generate the note title",
+  },
+  enableSmartRefs: {
+    label: "Enable smart references",
+    desc: "When enabled, note references that include a header will transclude said header and all sub headers",
   },
 };

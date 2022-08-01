@@ -8,6 +8,7 @@ import {
   VaultUtils,
   WorkspaceType,
   ConfigUtils,
+  SeedVault,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -175,7 +176,6 @@ export class SeedService {
         writeYAML(cpath, seed);
         const ws = await WorkspaceService.createWorkspace({
           wsRoot,
-          vaults: [],
           createCodeWorkspace: true,
         });
         const config = ws.config;
@@ -297,11 +297,13 @@ export class SeedService {
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
-  getSeedsInWorkspace(): string[] {
+  getSeedVaultsInWorkspace(): SeedVault[] {
     const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
     const vaults = ConfigUtils.getVaults(config);
-    return vaults
-      .filter((vault) => vault.seed !== undefined)
-      .map((vault) => vault.seed!);
+    return vaults.filter(VaultUtils.isSeed);
+  }
+
+  getSeedsInWorkspace(): string[] {
+    return this.getSeedVaultsInWorkspace().map((vault) => vault.seed!);
   }
 }

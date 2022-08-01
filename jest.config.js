@@ -1,6 +1,19 @@
-module.exports = {
-  preset: "ts-jest",
+const commonConfig = {
   clearMocks: true,
+  moduleFileExtensions: ["ts", "tsx", "js", "json"],
+  modulePathIgnorePatterns: ["lib", "build", "docs"],
+  notify: true,
+  notifyMode: "always",
+  snapshotSerializers: ["jest-serializer-path"],
+  testEnvironment: "node",
+  testPathIgnorePatterns: ["utils.ts"],
+  transformIgnorePatterns: [
+    // These are ESM modules that need to be transpiled before Jest can run them
+    "/node_modules/(?!(d3.*|internmap|delaunator|robust-predicates)/)",
+  ],
+};
+
+module.exports = {
   coverageDirectory: "coverage",
   coverageReporters: ["text", "clover"],
   coverageThreshold: {
@@ -11,23 +24,17 @@ module.exports = {
       statements: 80,
     },
   },
-  globals: {
-    "ts-jest": {
-      tsConfig: "tsconfig.json",
-      diagnostics: false,
+  ...commonConfig,
+  projects: [
+    {
+      displayName: "non-plugin-tests",
+      testMatch: [
+        "<rootDir>/packages/engine-test-utils/**/?(*.)+(spec|test).[jt]s?(x)",
+        // see https://github.com/facebook/jest/issues/7914
+        "<rootDir>/packages/engine-test-utils/**/__tests__/**/*.[jt]s?(x)",
+        "<rootDir>/packages/engine-test-utils/**/*(*.)@(spec|test).[tj]s?(x)",
+      ],
+      ...commonConfig,
     },
-  },
-  moduleFileExtensions: ["ts", "tsx", "js", "json"],
-  modulePathIgnorePatterns: ["lib"],
-  notify: true,
-  notifyMode: "always",
-  snapshotSerializers: ["jest-serializer-path"],
-  testEnvironment: "node",
-  testPathIgnorePatterns: ["utils.ts"],
-  //roots: ["<rootDir>/packages"],
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
-  //setupTestFrameworkScriptFile: "<rootDir>src/setupTests.ts",
-  //snapshotSerializers: ["enzyme-to-json/serializer"],
+  ],
 };

@@ -1,19 +1,17 @@
 import Fuse from "fuse.js";
 import _, { ListIterator, NotVoid } from "lodash";
 import {
-  DEngineMode,
-  SchemaProps,
-  NoteProps,
-  SchemaModuleDict,
-  SchemaUtils,
-  NotePropsDict,
-  SchemaModuleProps,
-  NoteUtils,
-  DNodeUtils,
-  DEngineClient,
   ConfigUtils,
+  DEngineMode,
+  DNodeUtils,
+  NoteProps,
+  NotePropsByIdDict,
+  SchemaModuleDict,
+  SchemaModuleProps,
+  SchemaProps,
+  SchemaUtils,
 } from ".";
-import { DVault } from "./types";
+import { DVault, NoteChangeEntry } from "./types";
 import { levenshteinDistance } from "./util/stringUtil";
 
 export type NoteIndexProps = {
@@ -60,7 +58,7 @@ function createFuse<T>(
 }
 
 export function createFuseNote(
-  publishedNotes: NotePropsDict | NoteProps[],
+  publishedNotes: NotePropsByIdDict | NoteProps[],
   overrideOpts?: Partial<Fuse.IFuseOptions<NoteProps>>,
   index?: Fuse.FuseIndex<NoteProps>
 ) {
@@ -83,7 +81,7 @@ export function createFuseNote(
 }
 
 export function createSerializedFuseNoteIndex(
-  publishedNotes: NotePropsDict | NoteProps[],
+  publishedNotes: NotePropsByIdDict | NoteProps[],
   overrideOpts?: Partial<Parameters<typeof createFuse>[1]>
 ) {
   return createFuseNote(publishedNotes, overrideOpts).getIndex().toJSON();
@@ -201,6 +199,7 @@ export class FuseEngine {
         _.filter(results, (ent) => ent.item.fname === "root"),
         (ent) => ent.item
       );
+      /// seearch eveyrthing
     } else if (qs === "*") {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];
@@ -251,7 +250,7 @@ export class FuseEngine {
     );
   }
 
-  async updateNotesIndex(notes: NotePropsDict) {
+  async replaceNotesIndex(notes: NotePropsByIdDict) {
     this.notesIndex.setCollection(
       _.map(notes, ({ fname, title, id, vault, updated, stub }, _key) => ({
         fname,
@@ -264,6 +263,29 @@ export class FuseEngine {
     );
   }
 
+  async updateNotesIndex(noteChanges: NoteChangeEntry[]) {
+    noteChanges.forEach((change) => {
+      switch (change.status) {
+        case "create": {
+          this.addNoteToIndex(change.note);
+          break;
+        }
+        case "delete": {
+          this.removeNoteFromIndex(change.note);
+          break;
+        }
+        case "update": {
+          // Fuse has no update. Must remove old and add new
+          this.removeNoteFromIndex(change.prevNote);
+          this.addNoteToIndex(change.note);
+          break;
+        }
+        default:
+          break;
+      }
+    });
+  }
+
   async removeNoteFromIndex(note: NoteProps) {
     this.notesIndex.remove((doc) => {
       // FIXME: can be undefined, dunno why
@@ -272,6 +294,19 @@ export class FuseEngine {
       }
       return doc.id === note.id;
     });
+  }
+
+  async addNoteToIndex(note: NoteProps) {
+    const indexProps: NoteIndexProps = _.pick(note, [
+      "fname",
+      "id",
+      "title",
+      "vault",
+      "updated",
+      "stub",
+    ]);
+
+    this.notesIndex.add(indexProps);
   }
 
   async removeSchemaFromIndex(smod: SchemaModuleProps) {
@@ -284,6 +319,10 @@ export class FuseEngine {
     });
   }
 
+  /**
+   * Fuse does not support '*' as a wildcard. This replaces the `*` to a fuse equivalent
+   * to make the engine do the right thing
+   */
   static formatQueryForFuse({ qs }: { qs: string }): string {
     // Fuse does not appear to see [*] as anything special.
     // For example:
@@ -295,9 +334,7 @@ export class FuseEngine {
     // Fuse extended search https://fusejs.io/examples.html#extended-search
     // uses spaces for AND and '|' for OR hence this function will replace '*' with spaces.
     // We do this replacement since VSCode quick pick actually appears to respect '*'.
-    let result = qs.split("*").join(" ");
-
-    return result;
+    return qs.split("*").join(" ");
   }
 
   /**
@@ -340,7 +377,7 @@ export class FuseEngine {
       },
     ];
 
-    let sorted = _.orderBy(
+    const sorted = _.orderBy(
       results.map((res) => ({
         ...res,
         levenshteinDist: levenshteinDistance(res.item.fname, originalQS),
@@ -415,60 +452,5 @@ export class FuseEngine {
    * */
   static doesContainSpecialQueryChars(str: string) {
     return this.SPECIAL_QUERY_CHARACTERS.some((char) => str.includes(char));
-  }
-}
-
-const PAGINATE_LIMIT = 50;
-
-export class NoteLookupUtils {
-  /**
-   * Get qs for current level of the hierarchy
-   * @param qs
-   * @returns
-   */
-  static getQsForCurrentLevel = (qs: string) => {
-    const lastDotIndex = qs.lastIndexOf(".");
-    return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
-  };
-
-  static fetchRootResults = (notes: NotePropsDict) => {
-    const roots: NoteProps[] = NoteUtils.getRoots(notes);
-
-    const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
-    return roots.concat(childrenOfRootNotes);
-  };
-
-  static async lookup({
-    qs,
-    originalQS,
-    engine,
-    showDirectChildrenOnly,
-  }: {
-    qs: string;
-    originalQS: string;
-    engine: DEngineClient;
-    showDirectChildrenOnly?: boolean;
-  }): Promise<NoteProps[]> {
-    const { notes } = engine;
-    const qsClean = this.slashToDot(qs);
-    if (_.isEmpty(qsClean)) {
-      return NoteLookupUtils.fetchRootResults(notes);
-    }
-    const resp = await engine.queryNotes({
-      qs,
-      originalQS,
-      onlyDirectChildren: showDirectChildrenOnly,
-    });
-    let nodes = resp.data;
-
-    if (nodes.length > PAGINATE_LIMIT) {
-      nodes = nodes.slice(0, PAGINATE_LIMIT);
-    }
-    return nodes;
-  }
-
-  static slashToDot(ent: string) {
-    return ent.replace(/\//g, ".");
   }
 }

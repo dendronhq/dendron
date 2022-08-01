@@ -1,5 +1,6 @@
 import {
-  BulkAddNoteOpts,
+  BulkResp,
+  BulkWriteNotesOpts,
   ConfigWriteOpts,
   DEngineInitResp,
   DEngineSyncOpts,
@@ -11,6 +12,7 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  FindNoteOpts,
   GetAnchorsRequest,
   GetDecorationsOpts,
   GetDecorationsPayload,
@@ -19,13 +21,12 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  GetNoteOptsV2,
-  GetNotePayload,
   IntermediateDendronConfig,
   NoteChangeEntry,
-  NoteFNamesDict,
   NoteProps,
-  NotePropsDict,
+  NotePropsByFnameDict,
+  NotePropsByIdDict,
+  NotePropsMeta,
   Optional,
   QueryNotesOpts,
   RefreshNotesOpts,
@@ -33,17 +34,25 @@ import {
   RenameNotePayload,
   RenderNoteOpts,
   RenderNotePayload,
-  RespRequired,
   RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
+  UpdateNoteResp,
 } from "@dendronhq/common-all";
 import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
-  notes: NotePropsDict;
-  noteFnames: NoteFNamesDict;
+  /**
+   * @deprecated
+   * For accessing a specific note by id, see {@link IEngineAPIService.getNote}
+   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
+   */
+  notes: NotePropsByIdDict;
+  /**
+   * @deprecated see {@link IEngineAPIService.findNotes}
+   */
+  noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   schemas: SchemaModuleDict;
   links: DLink[];
@@ -53,23 +62,36 @@ export interface IEngineAPIService {
   hooks: DHookDict;
   engineEventEmitter: EngineEventEmitter;
 
+  /**
+   * Get NoteProps by id. If note doesn't exist, return undefined
+   */
+  getNote: (id: string) => Promise<NoteProps | undefined>;
+  /**
+   * Find NoteProps by note properties. If no notes match, return empty list
+   */
+  findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
+  /**
+   * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
+   */
+  findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
+
   refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 
-  bulkAddNotes(
-    opts: BulkAddNoteOpts
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  bulkWriteNotes(
+    opts: BulkWriteNotesOpts
+  ): Promise<BulkResp<NoteChangeEntry[]>>;
 
   updateNote(
     note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
-  ): Promise<NoteProps>;
+  ): Promise<UpdateNoteResp>;
 
   updateSchema(schema: SchemaModuleProps): Promise<void>;
 
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<Required<RespV2<NoteChangeEntry[]>>>;
+  ): Promise<RespV2<NoteChangeEntry[]>>;
 
   writeSchema(schema: SchemaModuleProps): Promise<void>;
 
@@ -78,24 +100,22 @@ export interface IEngineAPIService {
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<Required<RespV2<EngineDeleteNotePayload>>>;
+  ): Promise<RespV2<EngineDeleteNotePayload>>;
 
   deleteSchema(
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<DEngineInitResp>;
 
-  info(): Promise<RespRequired<EngineInfoResp>>;
+  info(): Promise<RespV2<EngineInfoResp>>;
 
   sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp>;
-
-  getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>>;
 
   getSchema(qs: string): Promise<RespV2<SchemaModuleProps>>;
 
   querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>>;
 
-  queryNotes(opts: QueryNotesOpts): Promise<Required<RespV2<NoteProps[]>>>;
+  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>>;
 
   queryNotesSync({
     qs,
@@ -105,7 +125,7 @@ export interface IEngineAPIService {
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): Required<RespV2<NoteProps[]>>;
+  }): RespV2<NoteProps[]>;
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
 

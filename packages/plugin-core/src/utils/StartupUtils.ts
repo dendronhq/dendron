@@ -11,12 +11,12 @@ import {
   VSCodeEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
+import { readMD } from "@dendronhq/common-server";
 import {
   DConfig,
   DEPRECATED_PATHS,
   DoctorActionsEnum,
   InactvieUserMsgStatusEnum,
-  LapsedUserSurveyStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
   MigrationUtils,
@@ -24,19 +24,77 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
+import _md from "markdown-it";
 import * as vscode from "vscode";
 import { DoctorCommand, PluginDoctorActionsEnum } from "../commands/Doctor";
-import { GLOBAL_STATE, INCOMPATIBLE_EXTENSIONS } from "../constants";
+import { INCOMPATIBLE_EXTENSIONS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
-import { StateService } from "../services/stateService";
 import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { showWelcome } from "../WelcomeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
+import semver from "semver";
 
 export class StartupUtils {
+  static shouldShowManualUpgradeMessage({
+    previousWorkspaceVersion,
+    currentVersion,
+  }: {
+    previousWorkspaceVersion: string;
+    currentVersion: string;
+  }) {
+    const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
+      previousWorkspaceVersion,
+      currentVersion,
+    });
+
+    return (
+      workspaceInstallStatus === InstallStatus.UPGRADED &&
+      semver.lte(previousWorkspaceVersion, "0.63.0")
+    );
+  }
+
+  static showManualUpgradeMessage() {
+    const SHOW_ME_HOW = "Show Me How";
+    const MESSAGE =
+      "You are upgrading from a legacy version of Dendron. Please follow the instructions to manually migrate your configuration.";
+    vscode.window
+      .showInformationMessage(MESSAGE, SHOW_ME_HOW)
+      .then(async (resp) => {
+        if (resp === SHOW_ME_HOW) {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.accepted,
+          });
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/4119x15gl9w90qx8qh1truj"
+          );
+        } else {
+          AnalyticsUtils.track(MigrationEvents.ManualUpgradeMessageConfirm, {
+            status: ConfirmStatus.rejected,
+          });
+        }
+      });
+  }
+
+  static async showManualUpgradeMessageIfNecessary({
+    previousWorkspaceVersion,
+    currentVersion,
+  }: {
+    previousWorkspaceVersion: string;
+    currentVersion: string;
+  }) {
+    if (
+      StartupUtils.shouldShowManualUpgradeMessage({
+        previousWorkspaceVersion,
+        currentVersion,
+      })
+    ) {
+      StartupUtils.showManualUpgradeMessage();
+    }
+  }
+
   static async runMigrationsIfNecessary({
     wsService,
     currentVersion,
@@ -88,6 +146,108 @@ export class StartupUtils {
         currentVersion,
       });
     }
+  }
+
+  static showDuplicateConfigEntryMessageIfNecessary(opts: {
+    ext: IDendronExtension;
+  }) {
+    const message = StartupUtils.getDuplicateKeysMessage(opts);
+    if (message !== undefined) {
+      StartupUtils.showDuplicateConfigEntryMessage({
+        ...opts,
+        message,
+      });
+    }
+  }
+
+  static getDuplicateKeysMessage(opts: { ext: IDendronExtension }) {
+    const wsRoot = opts.ext.getDWorkspace().wsRoot;
+    try {
+      DConfig.getRaw(wsRoot);
+    } catch (error: any) {
+      if (
+        error.name === "YAMLException" &&
+        error.reason === "duplicated mapping key"
+      ) {
+        return error.message;
+      }
+    }
+  }
+
+  static showDuplicateConfigEntryMessage(opts: {
+    ext: IDendronExtension;
+    message: string;
+  }) {
+    AnalyticsUtils.track(ConfigEvents.DuplicateConfigEntryMessageShow);
+    const FIX_ISSUE = "Fix Issue";
+    const MESSAGE =
+      "We have detected duplicate key(s) in dendron.yml. Dendron has activated using the last entry of the duplicate key(s)";
+    vscode.window
+      .showInformationMessage(MESSAGE, FIX_ISSUE)
+      .then(async (resp) => {
+        if (resp === FIX_ISSUE) {
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.accepted,
+            }
+          );
+          const wsRoot = opts.ext.getDWorkspace().wsRoot;
+          const configPath = DConfig.configPath(wsRoot);
+          const configUri = vscode.Uri.file(configPath);
+
+          const message = opts.message;
+          const content = [
+            `# Duplicate Keys in \`dendron.yml\``,
+            "",
+            "The message at the bottom displays the _first_ duplicate key mapping that was detected in `dendron.yml`",
+            "",
+            "**There may be more duplicate key mappings**.",
+            "",
+            "Take the following steps to fix this issue.",
+            "1. Look through `dendron.yml` and remove all duplicate mappings.",
+            "",
+            `    - We recommend installing the [YAML extension](${vscode.Uri.parse(
+              `command:workbench.extensions.search?${JSON.stringify(
+                "@id:redhat.vscode-yaml"
+              )}`
+            )}) for validating \`dendron.yml\``,
+            "",
+            "1. When you are done, save your changes made to `dendron.yml`",
+            "",
+            `1. Reload the window for it to take effect. [Click here to reload window](${vscode.Uri.parse(
+              `command:workbench.action.reloadWindow`
+            )})`,
+            "",
+            "## Error message",
+            "```",
+            message,
+            "```",
+            "",
+            "",
+          ].join("\n");
+          const panel = vscode.window.createWebviewPanel(
+            "showDuplicateConfigMessagePreview",
+            "Duplicated Mapping Keys Preview",
+            vscode.ViewColumn.One,
+            {
+              enableCommandUris: true,
+            }
+          );
+          const md = _md();
+          panel.webview.html = md.render(content);
+          await VSCodeUtils.openFileInEditor(configUri, {
+            column: vscode.ViewColumn.Beside,
+          });
+        } else {
+          AnalyticsUtils.track(
+            ConfigEvents.DuplicateConfigEntryMessageConfirm,
+            {
+              status: ConfirmStatus.rejected,
+            }
+          );
+        }
+      });
   }
 
   static showDeprecatedConfigMessageIfNecessary(opts: {
@@ -191,92 +351,6 @@ export class StartupUtils {
               status: ConfirmStatus.rejected,
             }
           );
-        }
-      });
-  }
-
-  static async showLapsedUserMessageIfNecessary(opts: {
-    assetUri: vscode.Uri;
-  }) {
-    if (StartupUtils.shouldDisplayLapsedUserMsg()) {
-      await StartupUtils.showLapsedUserMessage(opts.assetUri);
-    }
-  }
-
-  static shouldDisplayLapsedUserMsg(): boolean {
-    const ONE_DAY = Duration.fromObject({ days: 1 });
-    const ONE_WEEK = Duration.fromObject({ weeks: 1 });
-    const CUR_TIME = Duration.fromObject({ seconds: Time.now().toSeconds() });
-    const metaData = MetadataService.instance().getMeta();
-
-    // If we haven't prompted the user yet and it's been a day since their
-    // initial install OR if it's been one week since we last prompted the user
-
-    const lapsedUserMsgSendTime = metaData.lapsedUserMsgSendTime;
-    if (lapsedUserMsgSendTime !== undefined) {
-      MetadataService.instance().setLapsedUserSurveyStatus(
-        LapsedUserSurveyStatusEnum.cancelled
-      );
-    }
-
-    const refreshMsg =
-      (metaData.lapsedUserMsgSendTime === undefined &&
-        ONE_DAY <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.firstInstall })
-          )) ||
-      (metaData.lapsedUserMsgSendTime !== undefined &&
-        ONE_WEEK <=
-          CUR_TIME.minus(
-            Duration.fromObject({ seconds: metaData.lapsedUserMsgSendTime })
-          ));
-
-    // If the user has never initialized, has never activated a dendron workspace,
-    // and it's time to refresh the lapsed user message
-    return (
-      !metaData.dendronWorkspaceActivated &&
-      !metaData.firstWsInitialize &&
-      refreshMsg
-    );
-  }
-
-  static async showLapsedUserMessage(assetUri: vscode.Uri) {
-    const START_TITLE = "Get Started";
-
-    AnalyticsUtils.track(VSCodeEvents.ShowLapsedUserMessage);
-    MetadataService.instance().setLapsedUserMsgSendTime();
-    vscode.window
-      .showInformationMessage(
-        "Hey, we noticed you haven't started using Dendron yet. Would you like to get started?",
-        { modal: true },
-        { title: START_TITLE }
-      )
-      .then(async (resp) => {
-        if (resp?.title === START_TITLE) {
-          AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageAccepted);
-          showWelcome(assetUri);
-        } else {
-          AnalyticsUtils.track(VSCodeEvents.LapsedUserMessageRejected);
-          const lapsedSurveySubmittedState =
-            await StateService.instance().getGlobalState(
-              GLOBAL_STATE.LAPSED_USER_SURVEY_SUBMITTED
-            );
-
-          if (lapsedSurveySubmittedState) {
-            MetadataService.instance().setLapsedUserSurveyStatus(
-              LapsedUserSurveyStatusEnum.submitted
-            );
-          }
-
-          const lapsedUserSurveySubmitted =
-            MetadataService.instance().getLapsedUserSurveyStatus();
-
-          if (
-            lapsedUserSurveySubmitted !== LapsedUserSurveyStatusEnum.submitted
-          ) {
-            await SurveyUtils.showLapsedUserSurvey();
-          }
-          return;
         }
       });
   }
@@ -414,5 +488,61 @@ export class StartupUtils {
           }
         });
     }
+  }
+
+  static showUninstallMarkdownLinksExtensionMessage() {
+    if (VSCodeUtils.isExtensionInstalled("dendron.dendron-markdown-links")) {
+      vscode.window
+        .showInformationMessage(
+          "Please uninstall the Dendron Markdown Links extension. Dendron has the note graph feature built-in now and having this legacy extension installed will interfere with its functionality.",
+          { modal: true },
+          { title: "Uninstall" }
+        )
+        .then(async (resp) => {
+          if (resp?.title === "Uninstall") {
+            await vscode.commands.executeCommand(
+              "workbench.extensions.uninstallExtension",
+              "dendron.dendron-markdown-links"
+            );
+          }
+        });
+    }
+  }
+
+  /**
+   * A one-off logic to show a special webview message for the v0.100.0 launch.
+   * @returns
+   */
+  static maybeShowProductHuntMessage() {
+    // only show once
+    if (MetadataService.instance().v100ReleaseMessageShown) {
+      return;
+    }
+
+    const uri = VSCodeUtils.joinPath(
+      VSCodeUtils.getAssetUri(ExtensionProvider.getExtension().context),
+      "dendron-ws",
+      "vault",
+      "v100.html"
+    );
+
+    const { content } = readMD(uri.fsPath);
+    const title = "Dendron Release Notes";
+
+    const panel = vscode.window.createWebviewPanel(
+      _.kebabCase(title),
+      title,
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+      }
+    );
+
+    panel.webview.html = content;
+    panel.reveal();
+
+    AnalyticsUtils.track(VSCodeEvents.V100ReleaseNotesShown);
+
+    MetadataService.instance().v100ReleaseMessageShown = true;
   }
 }

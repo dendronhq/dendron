@@ -347,8 +347,9 @@ export class GoogleDocsUtils {
           ...note.custom,
           documentId,
           revisionId,
+          uri: `https://docs.google.com/document/d/${documentId}/edit`,
         };
-        await engine.writeNote(note, { updateExisting: true });
+        await engine.writeNote(note);
       })
     );
   }

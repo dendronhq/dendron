@@ -1,11 +1,11 @@
-import { EngineUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { clipboard } from "../utils";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 const L = Logger;
@@ -35,13 +35,18 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
     const serverLastLines = serverLogFile.slice(-3000);
 
-    const config = JSON.stringify(getDWorkspace().config);
-    const wsRoot = getDWorkspace().wsRoot;
-    const port = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
-    const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
+    const ext = ExtensionProvider.getExtension();
+    const config = ext.getDWorkspace().config;
+    const port = ext.port;
 
-    const workspaceFile = DendronExtension.workspaceFile().fsPath;
-    const wsFile = fs.readFileSync(workspaceFile, { encoding: "utf8" });
+    let wsFile: string;
+    try {
+      const workspaceFile = DendronExtension.workspaceFile().fsPath;
+      wsFile = await fs.readFile(workspaceFile, { encoding: "utf8" });
+    } catch {
+      // Workspace file is missing, may be a native workspace
+      wsFile = "<!-- workspace file doesn't exist -->";
+    }
 
     const content = [
       "# Plugin Logs",
@@ -54,7 +59,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       "# Dendron Confg",
       config,
       "# Port",
-      portFromFile,
+      port,
       "# Workspace File",
       wsFile,
     ].join("\n");

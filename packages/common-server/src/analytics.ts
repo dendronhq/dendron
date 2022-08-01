@@ -137,13 +137,38 @@ export class SegmentClient {
   private logger: DLogger;
   private _cachePath?: string;
 
+  static _locked: boolean = true;
   static _singleton: undefined | SegmentClient;
 
+  /**
+   * This is used to _unlock_ Segment client.
+   * Before this is called, calling {@link SegmentClient.instance()} will throw an error.
+   * This is to prevent accidental instantiation during module load time, as this will globally affect
+   * how clients report data.
+   */
+  static unlock() {
+    this._locked = false;
+  }
+
   static instance(opts?: SegmentClientOpts) {
-    if (_.isUndefined(this._singleton) || opts?.forceNew) {
-      this._singleton = new SegmentClient(opts);
+    if (this._locked) {
+      const message = `
+        You are trying to instantiate Segment client before _activate.
+        Please check that your code change isn't unexpectedly instantiating the Segment client
+        during module load time.
+      `;
+      throw new DendronError({
+        message,
+        payload: {
+          message,
+        },
+      });
+    } else {
+      if (_.isUndefined(this._singleton) || opts?.forceNew) {
+        this._singleton = new SegmentClient(opts);
+      }
+      return this._singleton;
     }
-    return this._singleton;
   }
 
   /** Legacy: If exists, Dendron telemetry has been disabled. */
@@ -563,6 +588,11 @@ type UserProfileProps = {
    * Email of user. Retrieved from initial survey.
    */
   email?: string;
+
+  /**
+   * Did the user express interest in using Dendron for a team?
+   */
+  teamIntent?: boolean;
 };
 
 // platform props

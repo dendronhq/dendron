@@ -1,15 +1,12 @@
 import {
-  NoteUtils,
-  SchemaUtils,
   DVault,
-  SchemaOpts,
-  NoteProps,
   genUUID,
+  NoteUtils,
+  SchemaOpts,
+  SchemaUtils,
 } from "@dendronhq/common-all";
-import sinon from "sinon";
-import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { runEngineTestV5 } from "../../engine";
-import { ENGINE_HOOKS } from "../../presets";
 import { makeSchemaTests, SchemaTest } from "../../utils/schema";
 
 describe(`NoteUtils tests:`, () => {
@@ -115,149 +112,6 @@ describe(`NoteUtils tests:`, () => {
 });
 
 describe(`SchemaUtil tests:`, () => {
-  describe(`WHEN running applyTemplate tests`, () => {
-    const noteFactory: TestNoteFactory =
-      TestNoteFactory.defaultUnitTestFactory();
-    let note: NoteProps;
-    const currentDate = new Date(2022, 0, 10);
-    let clock: sinon.SinonFakeTimers;
-
-    describe(`GIVEN current note's body is empty`, () => {
-      beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
-        clock = sinon.useFakeTimers(currentDate);
-      });
-      afterEach(() => {
-        sinon.restore();
-        clock.restore();
-      });
-
-      it("WHEN applying a template, THEN replace note's body with template's body", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            const resp = SchemaUtils.applyTemplate({
-              templateNote,
-              note,
-              engine,
-            });
-            expect(resp).toBeTruthy();
-            expect(note.body).toEqual(engine.notes["foo"].body);
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-          }
-        );
-      });
-
-      it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const dateTemplate: NoteProps = engine.notes["date-variables"];
-            const resp = SchemaUtils.applyTemplate({
-              templateNote: dateTemplate,
-              note,
-              engine,
-            });
-
-            expect(resp).toBeTruthy();
-            expect(note.body).not.toEqual(engine.notes["date-variables"].body);
-            expect(note.body.trim()).toEqual(
-              `Today is 2022.01.10` +
-                "\n" +
-                "It is week 02 of the year" +
-                "\n" +
-                `This link goes to [[daily.journal.2022.01.10]]` +
-                "\n" +
-                `{{ 1 + 1 }} should not be evalated to 2`
-            );
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupRefs,
-          }
-        );
-      });
-
-      it("WHEN applying a template with fm variables, THEN replace note's body with template's body without errors", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const fmTemplate: NoteProps = engine.notes["fm-variables"];
-            const resp = SchemaUtils.applyTemplate({
-              templateNote: fmTemplate,
-              note,
-              engine,
-            });
-
-            expect(resp).toBeTruthy();
-            expect(note.body).toEqual(engine.notes["fm-variables"].body);
-            expect(note.body.trim()).toEqual(`Title is {{ fm.title }}`);
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupRefs,
-          }
-        );
-      });
-    });
-
-    describe(`GIVEN current note's body is not empty`, () => {
-      const noteBody = "test test";
-
-      beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
-        note.body = noteBody;
-      });
-
-      it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            const resp = SchemaUtils.applyTemplate({
-              templateNote,
-              note,
-              engine,
-            });
-            expect(resp).toBeTruthy();
-            expect(note.body).toEqual(
-              noteBody + "\n" + engine.notes["foo"].body
-            );
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-          }
-        );
-      });
-    });
-
-    describe("GIVEN template type is not a note", () => {
-      beforeEach(async () => {
-        note = await noteFactory.createForFName("new note");
-      });
-
-      it("WHEN applying a template, THEN do nothing and return false ", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            templateNote.type = "schema";
-            const resp = SchemaUtils.applyTemplate({
-              templateNote,
-              note,
-              engine,
-            });
-            expect(resp).toBeFalsy();
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-          }
-        );
-      });
-    });
-  });
-
   describe("Schema match tests", () => {
     describe("GIVEN schema anatomy example from the wiki", () => {
       runAllTests(
@@ -419,8 +273,10 @@ schemas:
 /** Run all schema tests.
  *
  * Supports `.skip` pattern (you can write `runAllTests.skip(...` if you are trying to skip a test).
- * Also supports `.only` pattern, but you need to specify which test to do.
- * Should look like `runAllTests.only("rfc.41", ...`
+ *
+ * NOTE: space between o nly because of husky hook that will block test otherwise
+ * Also supports `.o nly` pattern, but you need to specify which test to do.
+ * Should look like `runAllTests.o nly("rfc.41", ...`
  */
 function runAllTests(tests: SchemaTest[], onlyFname?: string) {
   tests.forEach(({ testCase, preSetupHook, name, testedFname }) => {

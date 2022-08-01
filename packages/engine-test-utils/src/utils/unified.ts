@@ -23,7 +23,7 @@ export class TestUnifiedUtils {
     contents: string;
     value: string;
   }) => {
-    return checkString(contents, "color: brown", value + " (Private)");
+    return checkString(contents, 'class="private"', value + " (Private)");
   };
 
   /** Gets the descendent (child, or child of child...) node of a given node.

@@ -1,10 +1,9 @@
-import { ABTest } from "@dendronhq/common-server";
-import { DefaultMap, genUUID } from "@dendronhq/common-all";
+import { ABTest, DefaultMap, genUUID } from "@dendronhq/common-all";
 import _ from "lodash";
 
 // To make checks more accurate, make FLOAT_SAME smaller and LOOP much larger.
 // The tests to pass when the accuracy is higher, they just take longer.
-const FLOAT_SAME = 0.01; // accurate to 1 percent
+const FLOAT_SAME = 0.05; // accurate to 1 percent
 const LOOP = 20000;
 
 function estimateABTestOutcomes<Out>(test: ABTest<Out>): Map<Out, number> {

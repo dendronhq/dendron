@@ -11,7 +11,7 @@ export const getStaticProps: GetStaticProps = async (
   const config = await getConfig();
   const customHeadContent: string | null = await getCustomHead();
   const collectionChildren = note.custom?.has_collection
-    ? prepChildrenForCollection(note, notes, note)
+    ? prepChildrenForCollection(note, notes)
     : null;
   const props: DendronNotePageProps = {
     body,

@@ -4,7 +4,6 @@ import {
   DendronError,
   DVault,
   NoteProps,
-  NoteUtils,
   RenderNotePayload,
 } from "@dendronhq/common-all";
 import { createServer, runEngineTestV5 } from "../../engine";
@@ -67,20 +66,19 @@ describe("api/note/render tests", () => {
     beforeAll(async () => {
       await runEngineTestV5(
         async ({ wsRoot, vaults, engine }) => {
-          const notes = engine.notes;
           const vault1 = vaults[0];
 
-          const fooNote = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes,
-            vault: vault1,
-            wsRoot,
-          }) as NoteProps;
+          const fooNote = (
+            await engine.findNotes({
+              fname: "foo",
+              vault: vault1,
+            })
+          )[0];
 
           const api = await getApiWithInitializedWS(wsRoot, vaults);
 
           renderFoo = async () => {
-            return await api.noteRender({
+            return api.noteRender({
               ws: wsRoot,
               id: fooNote.id,
             });
@@ -138,22 +136,21 @@ describe("api/note/render tests", () => {
       await runEngineTestV5(
         async ({ wsRoot: _wsRoot, vaults, engine }) => {
           wsRoot = _wsRoot;
-          const notes = engine.notes;
           const vault1 = vaults[0];
 
-          fooNote = NoteUtils.getNoteByFnameV5({
-            fname: "foo",
-            notes,
-            vault: vault1,
-            wsRoot,
-          }) as NoteProps;
+          fooNote = (
+            await engine.findNotes({
+              fname: "foo",
+              vault: vault1,
+            })
+          )[0];
 
-          fooTwo = NoteUtils.getNoteByFnameV5({
-            fname: "foo.two",
-            notes,
-            vault: vault1,
-            wsRoot,
-          }) as NoteProps;
+          fooTwo = (
+            await engine.findNotes({
+              fname: "foo.two",
+              vault: vault1,
+            })
+          )[0];
 
           api = await getApiWithInitializedWS(wsRoot, vaults);
         },

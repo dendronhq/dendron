@@ -1,4 +1,7 @@
-import { DEngineInitPayload, NoteFNamesDict } from "@dendronhq/common-all";
+import {
+  DEngineInitPayload,
+  NotePropsByFnameDict,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 
 export enum LoadingStatus {
@@ -11,7 +14,7 @@ export type EngineSliceState = {
   error: any;
   loading: LoadingStatus;
   currentRequestId: string | undefined;
-  noteFName: NoteFNamesDict;
+  noteFName: NotePropsByFnameDict;
 } & Partial<DEngineInitPayload> &
   Pick<DEngineInitPayload, "notes" | "schemas" | "vaults">;
 

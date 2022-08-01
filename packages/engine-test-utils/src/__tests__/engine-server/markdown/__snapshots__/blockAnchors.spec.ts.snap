@@ -3,7 +3,7 @@
 exports[`blockAnchors rendering compile "HTML: after code block" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a></p><pre><code>const x = 1;
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a></p><pre><code>const x = 1;
 </code></pre><p></p>
 <p></p>
 <hr>
@@ -19,10 +19,35 @@ VFile {
 }
 `;
 
+exports[`blockAnchors rendering compile "HTML: after table" 1`] = `
+"<h1 id=\\"root\\">Root</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>t</th><th>a</th></tr></thead><tbody><tr><td>c</td><td>d</td></tr></tbody></table>
+<p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>"
+`;
+
 exports[`blockAnchors rendering compile "HTML: end of paragraph" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Lorem ipsum dolor amet </p>
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>Lorem ipsum dolor amet </p>
 <hr>
 <strong>Children</strong>
 <ol>
@@ -38,7 +63,7 @@ VFile {
 
 exports[`blockAnchors rendering compile "HTML: simple" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"><svg viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>Root</h1>
 <p></p>
 <hr>
 <strong>Children</strong>

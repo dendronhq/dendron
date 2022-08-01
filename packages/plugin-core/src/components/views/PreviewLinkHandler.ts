@@ -2,12 +2,14 @@ import {
   DEngineClient,
   DNoteAnchorBasic,
   ErrorFactory,
+  isVSCodeCommandUri,
   isWebUri,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
+  TutorialEvents,
 } from "@dendronhq/common-all";
-import { ExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
+import { FileExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
@@ -17,12 +19,16 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { PluginFileUtils } from "../../utils/files";
+import { GotoNoteCommand } from "../../commands/GotoNote";
+import { AnalyticsUtils } from "../../utils/analytics";
+import { ExtensionUtils } from "../../utils/ExtensionUtils";
 
 export enum LinkType {
   WIKI = "WIKI",
   ASSET = "ASSET",
   WEBSITE = "WEBSITE",
   TEXT = "TEXT",
+  COMMAND = "COMMAND",
   UNKNOWN = "UNKNOWN",
 }
 
@@ -42,6 +48,14 @@ export interface IPreviewLinkHandler {
  */
 export class PreviewLinkHandler implements IPreviewLinkHandler {
   private _ext: IDendronExtension;
+  /**
+   * set of tutorial note ids that we will allow tracking of link clicked events.
+   * TODO: consolidate tracking of tutorial ids to a central place
+   * TODO: this logic is specific to the tutorial workspace
+   *       add a way to register callbacks to the link handler in the future
+   */
+  private _trackAllowedIds = ExtensionUtils.getTutorialIds();
+
   constructor(ext: IDendronExtension) {
     this._ext = ext;
   }
@@ -55,10 +69,41 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     // If href is missing, something is wrong with our link handler. Just let the VSCode's default handle it.
     if (!data.href) return LinkType.UNKNOWN;
     // First check if it's a web URL.
+
     if (isWebUri(data.href)) {
       // There's nothing to do then, the default handler opens them automatically.
       // If we try to open it too, it will open twice.
+
+      // track the link if it comes from a tutorial
+      // TODO: this logic is specific to the tutorial workspace
+      //       add a way to register callbacks to the link handler in the future
+      if (data.id && this._trackAllowedIds.has(data.id)) {
+        AnalyticsUtils.track(TutorialEvents.TutorialPreviewLinkClicked, {
+          LinkType: LinkType.WEBSITE,
+          href: data.href,
+        });
+        // some questions signal intent
+        if (data.href.endsWith("98f6d928-3f61-49fb-9c9e-70c27d25f838")) {
+          AnalyticsUtils.identify({ teamIntent: true });
+        }
+      }
       return LinkType.WEBSITE;
+    }
+
+    if (isVSCodeCommandUri(data.href)) {
+      // If it's a command uri, do nothing.
+      // Let VSCode handle them.
+
+      // but track the command uri if it comes from a tutorial
+      // TODO: this logic is specific to the tutorial workspace
+      //       add a way to register callbacks to the link handler in the future
+      if (data.id && this._trackAllowedIds.has(data.id)) {
+        AnalyticsUtils.track(TutorialEvents.TutorialPreviewLinkClicked, {
+          LinkType: LinkType.COMMAND,
+          href: data.href,
+        });
+      }
+      return LinkType.COMMAND;
     }
 
     const uri = vscode.Uri.parse(data.href);
@@ -71,7 +116,9 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
 
       if (noteData.note) {
         // Found a note, open that
-        await this._ext.commandFactory.goToNoteCmd().execute({
+        const cmd = new GotoNoteCommand(this._ext);
+
+        await cmd.execute({
           qs: noteData.note.fname,
           vault: noteData.note.vault,
           // Avoid replacing the preview
@@ -97,7 +144,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       })) || {};
     if (fullPath) {
       // Found a matching non-note file.
-      if (ExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
+      if (FileExtensionUtils.isTextFileExtension(path.extname(fullPath))) {
         // If it's a text file, open it inside VSCode.
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(fullPath),

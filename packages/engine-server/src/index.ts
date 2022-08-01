@@ -26,3 +26,5 @@ export * from "./doctor";
 export * from "./backup";
 export * from "./backfillV2";
 export * from "./cache";
+export * from "./store";
+export * from "./DendronEngineV3";

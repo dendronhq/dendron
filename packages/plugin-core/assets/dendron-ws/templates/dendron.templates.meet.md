@@ -1,4 +1,4 @@
-_Edit the [[dendron.templates.meet]] to change this template generated for Dendron Meeting Notes._
+_Edit the [[dendron.templates.meet]] note to change this template generated for Dendron Meeting Notes._
 
 ## Attendees
 <!-- Meeting attendees. If you prefix users with an '@', you can then optionally click Ctrl+Enter to create a note for that user. -->

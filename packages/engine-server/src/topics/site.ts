@@ -10,7 +10,7 @@ import {
   DVault,
   DVaultVisibility,
   HierarchyConfig,
-  NotePropsDict,
+  NotePropsByIdDict,
   NoteProps,
   NoteUtils,
   UseVaultBehavior,
@@ -157,7 +157,7 @@ export class SiteUtils {
     engine: DEngineClient;
     config: IntermediateDendronConfig;
     noExpandSingleDomain?: boolean;
-  }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
+  }): Promise<{ notes: NotePropsByIdDict; domains: NoteProps[] }> {
     const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
@@ -176,7 +176,7 @@ export class SiteUtils {
     const { siteHierarchies } = cleanPublishingConfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NoteProps[] = [];
-    const hiearchiesToPublish: NotePropsDict[] = [];
+    const hiearchiesToPublish: NotePropsByIdDict[] = [];
 
     // async pass to process all notes
     const domainsAndhiearchiesToPublish = await Promise.all(
@@ -240,7 +240,7 @@ export class SiteUtils {
     config: IntermediateDendronConfig;
     engine: DEngineClient;
     navOrder: number;
-  }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
+  }): Promise<{ notes: NotePropsByIdDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     const logger = createLogger(LOGGER_NAME);
     logger.info({ ctx: "filterByHierarchy:enter", domain, config });
@@ -318,7 +318,7 @@ export class SiteUtils {
     });
 
     // gather all the children of this hierarchy
-    const out: NotePropsDict = {};
+    const out: NotePropsByIdDict = {};
     const processQ = [domainNote];
 
     while (!_.isEmpty(processQ)) {
@@ -339,6 +339,9 @@ export class SiteUtils {
         delete note.stub;
         // eslint-disable-next-line no-await-in-loop
         await engine.writeNote(note);
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        await engine.updateNote(note);
       }
 
       // if `skipLevels` is enabled, the children of the current note are descendants
@@ -469,27 +472,44 @@ export class SiteUtils {
     return { url: siteUrl, index: siteIndex };
   }
 
+  static getSitePrefixForNote(config: IntermediateDendronConfig) {
+    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
+    return assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+  }
+
   static getSiteUrlPathForNote({
     pathValue,
     pathAnchor,
     config,
     addPrefix,
+    note,
   }: {
     pathValue?: string;
     pathAnchor?: string;
     config: IntermediateDendronConfig;
     addPrefix?: boolean;
+    note?: NoteProps;
   }): string {
     // add path prefix if valid
     let pathPrefix: string = "";
     if (addPrefix) {
-      const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
-      pathPrefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+      pathPrefix = this.getSitePrefixForNote(config);
     }
 
     // slug anchor if it is not a block anchor
     if (pathAnchor && !isBlockAnchor(pathAnchor)) {
       pathAnchor = `${getSlugger().slug(pathAnchor)}`;
+    }
+
+    // no prefix if we are at the index note
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtils.isIndexNote({
+          indexNote: config.publishing?.siteIndex,
+          note,
+        });
+    if (isIndex) {
+      return `/`;
     }
     // remove extension for pretty links
     const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
@@ -509,7 +529,7 @@ export class SiteUtils {
     fname: string;
     config: IntermediateDendronConfig;
     noteCandidates: NoteProps[];
-    noteDict: NotePropsDict;
+    noteDict: NotePropsByIdDict;
   }) {
     const {
       engine,

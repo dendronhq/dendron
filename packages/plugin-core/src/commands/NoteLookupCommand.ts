@@ -2,24 +2,24 @@ import {
   ConfigUtils,
   DendronError,
   DVault,
-  ERROR_STATUS,
+  EngagementEvents,
   ErrorFactory,
   ErrorMessages,
+  ERROR_STATUS,
+  getJournalTitle,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  RespV3,
-  SchemaUtils,
-  VaultUtils,
   VSCodeEvents,
-  SchemaTemplate,
-  getJournalTitle,
-  LookupSelectionTypeEnum,
-  LookupNoteTypeEnum,
-  LookupNoteType,
-  LookupSelectionType,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  TemplateUtils,
+} from "@dendronhq/common-server";
 import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri, window } from "vscode";
@@ -36,39 +36,38 @@ import {
   TaskBtn,
 } from "../components/lookup/buttons";
 import {
-  DendronQuickPickerV2,
-  DendronQuickPickState,
-  VaultSelectionMode,
-} from "../components/lookup/types";
-import {
+  LookupFilterType,
   LookupSplitType,
   LookupSplitTypeEnum,
-  LookupFilterType,
 } from "../components/lookup/ButtonTypes";
-import {
-  node2Uri,
-  OldNewLocation,
-  PickerUtilsV2,
-} from "../components/lookup/utils";
-import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
-import { DENDRON_COMMANDS, DendronContext } from "../constants";
-import { Logger } from "../logger";
-import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
-import { BaseCommand } from "./base";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { AutoCompletable } from "../utils/AutoCompletable";
-import { ExtensionProvider } from "../ExtensionProvider";
+import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import {
   ILookupProviderV3,
   NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
-import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
-import { AutoCompleter } from "../utils/autoCompleter";
-import { parseRef } from "../utils/md";
+import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
+import {
+  DendronQuickPickerV2,
+  DendronQuickPickState,
+  VaultSelectionMode,
+} from "../components/lookup/types";
+import {
+  node2Uri,
+  OldNewLocation,
+  PickerUtilsV2,
+} from "../components/lookup/utils";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
-import { WSUtilsV2 } from "../WSUtilsV2";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
+import { Logger } from "../logger";
 import { JournalNote } from "../traits/journal";
+import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
+import { AutoCompletable } from "../utils/AutoCompletable";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { VSCodeUtils } from "../vsCodeUtils";
+import { WSUtilsV2 } from "../WSUtilsV2";
+import { BaseCommand } from "./base";
 
 export type CommandRunOpts = {
   initialValue?: string;
@@ -382,6 +381,9 @@ export class NoteLookupCommand
     return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
 
+  /**
+   * Executed after user accepts a quickpick item
+   */
   async execute(opts: CommandOpts) {
     const ctx = "NoteLookupCommand:execute";
     Logger.info({ ctx, msg: "enter" });
@@ -428,14 +430,14 @@ export class NoteLookupCommand
           return this.acceptItem(item);
         })
       );
-      const outClean = out.filter(
+      const notesToShow = out.filter(
         (ent) => !_.isUndefined(ent)
       ) as OnDidAcceptReturn[];
       if (!_.isUndefined(quickpick.copyNoteLinkFunc)) {
-        await quickpick.copyNoteLinkFunc!(outClean.map((item) => item.node));
+        await quickpick.copyNoteLinkFunc!(notesToShow.map((item) => item.node));
       }
       await _.reduce(
-        outClean,
+        notesToShow,
         async (acc, item) => {
           await acc;
           return quickpick.showNote!(item.uri);
@@ -511,58 +513,49 @@ export class NoteLookupCommand
         // are going to cancel the creation of the note.
         return;
       }
-      nodeNew = NoteUtils.create({
-        fname,
-        vault,
-        title: item.title,
-        traits: item.traits,
+      nodeNew = NoteUtils.createWithSchema({
+        noteOpts: {
+          fname,
+          vault,
+          title: item.title,
+          traits: item.traits,
+        },
+        engine,
       });
       if (picker.selectionProcessFunc !== undefined) {
         nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
       }
-
-      const schemaMatchResult = SchemaUtils.matchPath({
-        notePath: fname,
-        schemaModDict: engine.schemas,
-      });
-      if (schemaMatchResult) {
-        NoteUtils.addSchema({
-          note: nodeNew,
-          schemaModule: schemaMatchResult.schemaModule,
-          schema: schemaMatchResult.schema,
-        });
-      }
     }
 
-    const maybeSchema = SchemaUtils.getSchemaFromNote({
+    const templateAppliedResp = await TemplateUtils.findAndApplyTemplate({
       note: nodeNew,
       engine,
-    });
-    const maybeTemplate =
-      maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
-    if (maybeSchema && maybeTemplate) {
-      const resp = await this.getNoteForSchemaTemplate(maybeTemplate);
-      if (resp.error) {
-        window.showWarningMessage(
-          `Warning: Problem with ${maybeSchema.fname} schema. ${resp.error.message}`
-        );
-      } else if (!_.isUndefined(resp.data)) {
-        // Only apply schema if note is found
-        SchemaUtils.applyTemplate({
-          templateNote: resp.data,
-          note: nodeNew,
-          engine,
+      pickNote: async (choices: NoteProps[]) => {
+        return WSUtilsV2.instance().promptForNoteAsync({
+          notes: choices,
+          quickpickTitle:
+            "Select which template to apply or press [ESC] to not apply a template",
+          nonStubOnly: true,
         });
-      }
+      },
+    });
+
+    if (templateAppliedResp.error) {
+      window.showWarningMessage(
+        `Warning: Problem with ${nodeNew.fname} schema. ${templateAppliedResp.error.message}`
+      );
+    } else if (templateAppliedResp.data) {
+      AnalyticsUtils.track(EngagementEvents.TemplateApplied, {
+        source: this.key,
+        ...TemplateUtils.genTrackPayload(nodeNew),
+      });
     }
 
     if (picker.onCreate) {
       const nodeModified = await picker.onCreate(nodeNew);
       if (nodeModified) nodeNew = nodeModified;
     }
-    const resp = await engine.writeNote(nodeNew, {
-      newNode: true,
-    });
+    const resp = await engine.writeNote(nodeNew);
     if (resp.error) {
       Logger.error({ ctx, error: resp.error });
       return;
@@ -573,49 +566,6 @@ export class NoteLookupCommand
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
     return { uri, node: nodeNew, resp };
-  }
-
-  /**
-   * Find corresponding note for given schema template. Supports cross-vault lookup.
-   *
-   * @param schemaTemplate
-   */
-  private async getNoteForSchemaTemplate(
-    schemaTemplate: SchemaTemplate
-  ): Promise<RespV3<NoteProps | undefined>> {
-    let maybeVault: DVault | undefined;
-    const { ref, vaultName } = parseRef(schemaTemplate.id);
-    const engine = ExtensionProvider.getEngine();
-
-    // If vault is specified, lookup by template id + vault
-    if (!_.isUndefined(vaultName)) {
-      maybeVault = VaultUtils.getVaultByName({
-        vname: vaultName,
-        vaults: engine.vaults,
-      });
-      // If vault is not found, skip lookup through rest of notes and return error
-      if (_.isUndefined(maybeVault)) {
-        return {
-          error: new DendronError({
-            message: `No vault found for ${vaultName}`,
-          }),
-        };
-      }
-    }
-
-    if (!_.isUndefined(ref)) {
-      return WSUtilsV2.instance().findNoteFromMultiVaultAsync({
-        fname: ref,
-        quickpickTitle:
-          "Select which template to apply or press [ESC] to not apply a template",
-        nonStubOnly: true,
-        vault: maybeVault,
-      });
-    } else {
-      return {
-        data: undefined,
-      };
-    }
   }
 
   /**

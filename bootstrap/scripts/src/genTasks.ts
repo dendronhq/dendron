@@ -9,12 +9,9 @@ const enum PACKAGE {
   "common-server" = "common-server",
   "common-test-utils" = "common-test-utils",
   "dendron-cli" = "dendron-cli",
-  "dendron-next-server" = "dendron-next-server",
   "engine-server" = "engine-server",
   "engine-test-utils" = "engine-test-utils",
   "generator-dendron" = "generator-dendron",
-  //   'LSP_CLIENT_UBER'='lsp-client-uber',
-  //   'LSP_SERVER'='lsp-server',
   "plugin-core" = "plugin-core",
   "pods-core" = "pods-core",
 }
@@ -148,14 +145,7 @@ const overrides = {
 };
 
 async function main() {
-  const blacklist = [
-    ".DS_Store",
-    "plugin-core",
-    "dendron-next-server",
-    "lsp-client",
-    "lsp-server",
-    PACKAGE["generator-dendron"],
-  ];
+  const blacklist = [".DS_Store", "plugin-core", PACKAGE["generator-dendron"]];
   const packages = fs.readdirSync("packages");
   packages
     .filter((ent) => !blacklist.includes(ent))

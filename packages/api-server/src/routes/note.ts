@@ -1,7 +1,6 @@
 import {
   EngineBulkAddRequest,
   EngineDeleteRequest,
-  EngineGetNoteByPathRequest,
   EngineRenameNoteRequest,
   EngineUpdateNoteRequest,
   EngineWriteRequest,
@@ -31,16 +30,6 @@ router.post(
     const { ws, id, opts } = req.body as EngineDeleteRequest;
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(res, await engine.deleteNote(id, opts));
-  })
-);
-
-router.post(
-  "/getByPath",
-  asyncHandler(async (req: Request, res: Response) => {
-    const { ws, ...opts } = req.body as EngineGetNoteByPathRequest;
-    const engine = await getWSEngine({ ws: ws || "" });
-    const resp = await engine.getNoteByPath(opts);
-    res.json(resp);
   })
 );
 
@@ -110,7 +99,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response<WriteNoteResp>) => {
     const { ws, opts } = req.body as EngineBulkAddRequest;
     const engine = await getWSEngine({ ws: ws || "" });
-    const out = await engine.bulkAddNotes(opts);
+    const out = await engine.bulkWriteNotes(opts);
     ExpressUtils.setResponse(res, out);
   })
 );

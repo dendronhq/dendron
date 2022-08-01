@@ -1,7 +1,6 @@
 import { ConfigUtils } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
@@ -48,17 +47,12 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const vault = WSUtils.getVaultFromDocument(maybeTextEditor.document);
 
-    const maybeNote = WSUtils.getNoteFromDocument(maybeTextEditor.document);
-    if (_.isUndefined(maybeNote)) {
+    const note = WSUtils.getNoteFromDocument(maybeTextEditor.document);
+    if (_.isUndefined(note)) {
       window.showErrorMessage("You need to be in a note to use this command");
       return;
     }
-    const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     const engine = getDWorkspace().engine;
-    const note = _.find(engine.notes, { fname });
-    if (!note) {
-      throw Error(`${fname} not found in engine`);
-    }
 
     // add the anchor if one is selected and exists
     const { selection, editor } = VSCodeUtils.getSelection();

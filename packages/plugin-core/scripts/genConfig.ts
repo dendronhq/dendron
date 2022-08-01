@@ -1,10 +1,14 @@
+/* eslint-disable no-console */
 import fs from "fs-extra";
 import _ from "lodash";
 import {
   CONFIG,
+  DendronContext,
   DENDRON_COMMANDS,
-  DENDRON_VIEWS,
   DENDRON_MENUS,
+  DENDRON_VIEWS,
+  DENDRON_VIEWS_CONTAINERS,
+  DENDRON_VIEWS_WELCOME,
 } from "../src/constants";
 
 function genEntry(entryDict: any) {
@@ -70,8 +74,19 @@ function updateKeybindings() {
     DENDRON_COMMANDS,
     (ent) => !_.isEmpty(ent.keybindings)
   ).map((keyEnt) => {
-    const configProps = keyEnt.keybindings;
+    let configProps = keyEnt.keybindings;
     const key = keyEnt["key"];
+
+    // sanity, if command depends on plugin being active, add same when clause to keybinding
+    if (
+      keyEnt.when === DendronContext.PLUGIN_ACTIVE &&
+      !configProps?.when?.includes(DendronContext.PLUGIN_ACTIVE)
+    ) {
+      const when = configProps?.when
+        ? configProps.when + ` && ${DendronContext.PLUGIN_ACTIVE}`
+        : DendronContext.PLUGIN_ACTIVE;
+      configProps = { ...configProps, when };
+    }
     return {
       command: key,
       ...configProps,
@@ -97,6 +112,8 @@ function main() {
   const commands = updateCommands();
   const menus = updateMenus();
   const keybindings = updateKeybindings();
+  const viewsWelcome = DENDRON_VIEWS_WELCOME;
+  const viewsContainers = DENDRON_VIEWS_CONTAINERS;
   const views = updateViews();
   const languages = [
     {
@@ -119,6 +136,8 @@ function main() {
   const categories = ["Other"];
   const contributes = {
     languages,
+    viewsWelcome,
+    viewsContainers,
     views,
     categories,
     commands,

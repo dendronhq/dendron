@@ -1,7 +1,10 @@
 import {
   AppNames,
+  asyncLoop,
   ContextualUIEvents,
   DWorkspaceV2,
+  FOLDERS,
+  genUUID,
   getStage,
   Time,
 } from "@dendronhq/common-all";
@@ -21,6 +24,7 @@ import fs from "fs-extra";
 import { setupSegmentClient } from "../telemetry";
 import { Logger } from "../logger";
 import path from "path";
+import os from "os";
 
 export type SegmentContext = Partial<{
   app: Partial<{ name: string; version: string; build: string }>;
@@ -133,6 +137,85 @@ export class AnalyticsUtils {
     );
   }
 
+  /** Saves analytics to be sent during the next run of Dendron.
+   *
+   * Make sure any properties you use can be trivially serialized and
+   * deserialized, numbers, strings, plain JSON objects, arrays are fine. No
+   * Maps or complex objects.
+   *
+   * This is required for actions that reload the window, where the analytics
+   * won't get sent in time before the reload and where delaying the reload
+   * would be undesirable.
+   */
+  static async trackForNextRun(event: string, customProps?: any) {
+    const ctx = "AnalyticsUtils.trackForNextRun";
+    Logger.debug({
+      ctx,
+      event,
+    });
+    const analyticsProps = this._trackCommon({
+      event,
+      props: {
+        ...customProps,
+        savedAnalytics: true,
+      },
+      timestamp: new Date(),
+    });
+    const telemetryDir = path.join(
+      os.homedir(),
+      FOLDERS.DENDRON_SYSTEM_ROOT,
+      FOLDERS.SAVED_TELEMETRY
+    );
+    await fs.ensureDir(telemetryDir);
+    await fs.writeFile(
+      path.join(telemetryDir, `${genUUID()}.json`),
+      JSON.stringify({
+        ...analyticsProps,
+        timestamp: analyticsProps.timestamp?.toISOString(),
+      })
+    );
+  }
+
+  static async sendSavedAnalytics() {
+    const ctx = "AnalyticsUtils.sendSavedAnalytics";
+    Logger.info({ ctx, message: "start" });
+    const telemetryDir = path.join(
+      os.homedir(),
+      FOLDERS.DENDRON_SYSTEM_ROOT,
+      FOLDERS.SAVED_TELEMETRY
+    );
+    let files: string[] = [];
+    try {
+      files = await fs.readdir(telemetryDir);
+    } catch {
+      Logger.warn({
+        ctx,
+        msg: "failed to read the saved telemetry dir",
+        telemetryDir,
+      });
+    }
+
+    return asyncLoop(
+      files.filter((filename) => path.extname(filename) === ".json"),
+      async (filename) => {
+        const filePath = path.join(telemetryDir, filename);
+        try {
+          const contents = await fs.readFile(filePath, { encoding: "utf-8" });
+          const payload = JSON.parse(contents);
+          payload.timestamp = new Date(payload.timestamp);
+          await SegmentUtils.trackSync(payload);
+          await fs.rm(filePath);
+        } catch (err) {
+          Logger.warn({
+            ctx,
+            msg: "failed to read or parse saved telemetry",
+            filePath,
+          });
+        }
+      }
+    );
+  }
+
   static identify(props?: Partial<VSCodeIdentifyProps>) {
     const defaultProps = AnalyticsUtils.getVSCodeIdentifyProps();
     // if partial props is passed, fill them with defaults before calling identify.
@@ -149,16 +232,19 @@ export class AnalyticsUtils {
     ws,
   }: {
     context: vscode.ExtensionContext;
-    ws: DWorkspaceV2;
+    ws?: DWorkspaceV2;
   }) {
     if (getStage() === "prod") {
       const segmentResidualCacheDir = context.globalStorageUri.fsPath;
       fs.ensureDir(segmentResidualCacheDir);
 
-      setupSegmentClient(
+      setupSegmentClient({
         ws,
-        path.join(segmentResidualCacheDir, "segmentresidualcache.log")
-      );
+        cachePath: path.join(
+          segmentResidualCacheDir,
+          "segmentresidualcache.log"
+        ),
+      });
 
       // Try to flush the Segment residual cache every hour:
       (function tryFlushSegmentCache() {

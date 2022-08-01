@@ -1,7 +1,7 @@
 import {
   IntermediateDendronConfig,
   NoteProps,
-  NotePropsDict,
+  NotePropsByIdDict,
 } from "@dendronhq/common-all";
 import {
   createSlice,
@@ -33,7 +33,7 @@ export const slice = createSlice({
     ) => {
       state.config = action.payload;
     },
-    setNotes: (state, action: PayloadAction<NotePropsDict>) => {
+    setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {
       state.notes = action.payload;
     },
     setNoteIndex: (state, action: PayloadAction<NoteProps>) => {

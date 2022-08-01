@@ -77,6 +77,7 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "redhat.vscode-yaml" },
   { default: "dendron.dendron-markdown-links", action: "REMOVE" },
   { default: "dendron.dendron-markdown-notes", action: "REMOVE" },
+  { default: "dendron.dendron-markdown-preview-enhanced", action: "REMOVE" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
   { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
   { default: "mushan.vscode-paste-image", action: "REMOVE" },
@@ -88,6 +89,14 @@ export type WriteConfigOpts = {
 };
 
 export class WorkspaceConfig {
+  static genDefaults(): WorkspaceSettings {
+    return {
+      folders: [],
+      settings: Settings.defaults(),
+      extensions: Extensions.defaults(),
+    };
+  }
+
   static workspaceFile(wsRoot: string) {
     return path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME);
   }
@@ -104,7 +113,9 @@ export class WorkspaceConfig {
       vaults,
       overrides: {},
     });
+    const defaultSettings = this.genDefaults();
     const jsonBody: WorkspaceSettings = _.merge(
+      defaultSettings,
       {
         folders: cleanOpts.vaults
           ? cleanOpts.vaults.map((ent) => ({
@@ -112,8 +123,6 @@ export class WorkspaceConfig {
               name: ent.name,
             }))
           : [],
-        settings: Settings.defaults(),
-        extensions: Extensions.defaults(),
       },
       cleanOpts.overrides
     );

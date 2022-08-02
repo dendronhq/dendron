@@ -11,18 +11,21 @@ import {
   TransformedQueryString,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import stringSimilarity from "string-similarity";
+import { inject, injectable } from "tsyringe";
 import { window } from "vscode";
+import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import {
   ILookupProvider,
   provideItemsProps,
   workspaceState,
 } from "./ILookupProvider";
 
+@injectable()
 export class NoteLookupProvider implements ILookupProvider {
-  // TODO: Use DI
-  constructor(private engine: IReducedEngineAPIService) {}
+  constructor(
+    @inject("IReducedEngineAPIService") private engine: IReducedEngineAPIService
+  ) {}
 
   async provideItems(
     opts: provideItemsProps

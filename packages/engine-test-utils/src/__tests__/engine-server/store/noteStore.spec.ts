@@ -77,6 +77,75 @@ describe("GIVEN NoteStore", () => {
     );
   });
 
+  test("WHEN workspace contains notes with links, THEN find and findMetadata by linkedNote should return correct notes", async () => {
+    await runEngineTestV5(
+      async ({ vaults, wsRoot, engine }) => {
+        const noteStore = new NoteStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new NoteMetadataStore(),
+          wsRoot,
+        });
+
+        _.values(engine.notes).forEach(async (note) => {
+          const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
+          await noteStore.writeMetadata({ key: note.id, noteMeta });
+        });
+
+        const noteWithLink = await noteStore.get("simple-note-ref");
+        const refNote = await noteStore.get("simple-note-ref.one");
+
+        // Test NoteStore.find linkedToNote property
+        const findResp = await noteStore.find({ linkedToNote: refNote.data });
+        expect(findResp.data!.length).toEqual(1);
+        expect(findResp.data![0]).toEqual(noteWithLink.data);
+
+        // Test NoteStore.findMetaData linkedToNote property
+        let metadataResp = await noteStore.findMetaData({
+          linkedToNote: refNote.data,
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+        const noteMetadata = metadataResp.data![0];
+        expect(noteMetadata.fname).toEqual("simple-note-ref");
+
+        // No note is referencing this one. Return empty
+        metadataResp = await noteStore.findMetaData({
+          linkedToNote: noteWithLink.data,
+        });
+        expect(metadataResp.data!.length).toEqual(0);
+
+        // Test NoteStore.findMetaData linkedToNote + fname
+        metadataResp = await noteStore.findMetaData({
+          linkedToNote: refNote.data,
+          fname: "simple-note-ref",
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+
+        metadataResp = await noteStore.findMetaData({
+          linkedToNote: refNote.data,
+          fname: "baz",
+        });
+        expect(metadataResp.data!.length).toEqual(0);
+
+        // Test NoteStore.findMetaData linkedToNote + vault
+        metadataResp = await noteStore.findMetaData({
+          linkedToNote: refNote.data,
+          vault: vaults[0],
+        });
+        expect(metadataResp.data!.length).toEqual(1);
+
+        metadataResp = await noteStore.findMetaData({
+          linkedToNote: refNote.data,
+          vault: vaults[1],
+        });
+        expect(metadataResp.data!.length).toEqual(0);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupRefs,
+      }
+    );
+  });
+
   test("WHEN writing a note, THEN get and getMetadata should retrieve same note", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {

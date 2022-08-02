@@ -14,6 +14,9 @@ export type FindNoteOpts = {
   fname?: string;
   // If vault is provided, filter results so that only notes with matching vault is returned
   vault?: DVault;
+  // Find notes with links referencing to passed in note props value.
+  // E.g. if linkedToNote = "{ fname: foo.123, ... }", return all notes pointing to this note
+  linkedToNote?: NotePropsMeta;
 };
 
 export type WriteNoteOpts<K> = {

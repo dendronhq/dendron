@@ -644,18 +644,18 @@ const NOTES = {
           expected: 8,
         },
         {
-          actual: changed.data!.map((ent) => [ent.note.fname, ent.status]),
+          actual: changed
+            .data!.sort((a, b) => a.status.localeCompare(b.status))
+            .map((ent) => [ent.note.fname, ent.status]),
           expected: [
-            // from deletion
-            ["baz.one.two", "delete"],
-            ["baz.one", "delete"],
-            ["root", "update"],
-            ["baz", "delete"],
-            // from creation
             ["baz", "create"],
             ["baz.one", "create"],
-            ["root", "update"],
             ["baz.one.three", "create"],
+            ["baz.one", "delete"],
+            ["baz", "delete"],
+            ["baz.one.two", "delete"],
+            ["root", "update"],
+            ["root", "update"],
           ],
         },
         {
@@ -682,27 +682,33 @@ const NOTES = {
       const vault = vaults[0];
       const alpha = "scratch.2020.02.03.0123";
       //const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
+      const notesInVaultBefore = await engine.findNotes({ vault });
       const changed = await engine.renameNote({
         oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
         newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
+      const notesInVaultAfter = await engine.findNotes({ vault });
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
         vault,
         match: ["gamma.md"],
         nomatch: [`${alpha}.md`],
       });
-      const notes = engine.notes;
       return [
         // alpha deleted, gamma created
         {
           actual: changed.data?.length,
           expected: 8,
         },
-        // 3 notes, gamma and 3 roots
+        // 6 notes in vault before
         {
-          actual: _.size(notes),
-          expected: _.size(vaults) + 1,
+          actual: _.size(notesInVaultBefore),
+          expected: 6,
+        },
+        // 2 notes in vault after (gamma + root)
+        {
+          actual: _.size(notesInVaultAfter),
+          expected: 2,
         },
         {
           actual: checkVault,
@@ -1156,7 +1162,7 @@ const NOTES = {
           expected: { severity: "fatal" },
         },
         {
-          actual: error?.message?.includes("Unable to delete"),
+          actual: error?.message?.includes("Unable to rename"),
           expected: true,
         },
       ];

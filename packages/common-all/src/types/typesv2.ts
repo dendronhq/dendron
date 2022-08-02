@@ -451,7 +451,7 @@ export type DCommonMethods = {
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   /**
-   *
+   * @deprecated: Use {@link DEngine.writeNote}
    * @param note
    * @param opts
    * @returns The updated note. If `newNode` is set, this will have the updated parent id

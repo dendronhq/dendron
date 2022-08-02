@@ -52,8 +52,11 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
    * See {@link IDataStore.find}
    */
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
-    const { fname, vault } = opts;
-    let noteMetadata: NotePropsMeta[] = [];
+    const { fname, vault, linkedToNote } = opts;
+    if (!fname && !vault && !linkedToNote) {
+      return { data: [] };
+    }
+    let noteMetadata: NotePropsMeta[];
 
     if (fname) {
       const cleanedFname = cleanName(fname);
@@ -64,15 +67,23 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
       noteMetadata = ids
         .map((id) => this._noteMetadataById[id])
         .filter(isNotUndefined);
+    } else {
+      noteMetadata = _.values(this._noteMetadataById);
     }
 
     if (vault) {
-      // If other properties are not set, then filter entire note set instead
-      if (!fname) {
-        noteMetadata = _.values(this._noteMetadataById);
-      }
       noteMetadata = noteMetadata.filter((note) =>
         VaultUtils.isEqualV2(note.vault, vault)
+      );
+    }
+
+    if (linkedToNote) {
+      noteMetadata = noteMetadata.filter((note) =>
+        _.find(note.links, (l) => {
+          return (
+            l.to?.fname?.toLowerCase() === linkedToNote.fname.toLowerCase()
+          );
+        })
       );
     }
 

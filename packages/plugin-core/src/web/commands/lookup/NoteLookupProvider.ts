@@ -14,33 +14,23 @@ import _ from "lodash";
 import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import stringSimilarity from "string-similarity";
 import { window } from "vscode";
-import { ILookupProvider, provideItemsProps } from "./ILookupProvider";
-
-// type FilterQuickPickFunction = (items: NoteQuickInput[]) => NoteQuickInput[];
+import {
+  ILookupProvider,
+  provideItemsProps,
+  workspaceState,
+} from "./ILookupProvider";
 
 export class NoteLookupProvider implements ILookupProvider {
   // TODO: Use DI
-  constructor(private engine: IReducedEngineAPIService) {
-    console.log("inside constructor");
-  }
+  constructor(private engine: IReducedEngineAPIService) {}
 
   async provideItems(
-    opts: provideItemsProps // TODO: Check the type parameter
+    opts: provideItemsProps
   ): Promise<NoteQuickInput[] | undefined> {
     const { token, fuzzThreshold, showDirectChildrenOnly, workspaceState } =
       opts;
 
-    // debugger;
     const { pickerValue } = opts;
-
-    // Just activated picker's have special behavior:
-    //
-    // We slice the postfix off until the first dot to show all results at the same
-    // level so that when a user types `foo.one`, they will see all results in `foo.*`
-    // if (_justActivated) {
-    //   pickerValue = NoteLookupUtils.getQsForCurrentLevel(pickerValue);
-    // }
-
     const transformedQuery = NoteLookupUtils.transformQueryString({
       query: pickerValue,
       onlyDirectChildren: showDirectChildrenOnly,
@@ -57,8 +47,6 @@ export class NoteLookupProvider implements ILookupProvider {
     try {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
-        // Logger.debug({ ctx, msg: "empty qs" });
-
         const items = this.fetchRootQuickPickResults({
           wsRoot: workspaceState.wsRoot,
           vaults: workspaceState.vaults,
@@ -226,7 +214,6 @@ export class NoteLookupProvider implements ILookupProvider {
       });
 
       return updatedItems;
-      // picker.items = updatedItems;
     } catch (err: any) {
       window.showErrorMessage(err);
       throw Error(err);

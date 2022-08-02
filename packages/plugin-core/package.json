@@ -850,7 +850,7 @@
           "when": "dendron:pluginActive"
         },
         {
-          "command": "dendron.lockPreview",
+          "command": "dendron.togglePreviewLock",
           "when": "dendron:pluginActive"
         },
         {

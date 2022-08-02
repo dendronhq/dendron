@@ -1280,23 +1280,6 @@ type SchemaMatchResult = {
 };
 
 export class SchemaUtils {
-  /** The props of a template note that will get copied over when the template is applied. */
-  static TEMPLATE_COPY_PROPS: readonly (keyof NoteProps)[] = [
-    "desc",
-    "custom",
-    "color",
-    "tags",
-    "image",
-  ];
-
->>>>>>> 83ce6420f (feat: Echo case matches)
-  /**
-   * True if only a partial match.
-   */
-  partial: boolean;
-};
-
-export class SchemaUtils {
   static createFromSchemaRaw(opts: SchemaRaw & { vault: DVault }): SchemaProps {
     const schemaDataOpts: (keyof SchemaData)[] = [
       "namespace",

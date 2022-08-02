@@ -65,7 +65,7 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     bundleName: "SeedBrowser",
     type: "webview",
   },
-  [DendronEditorViewKey.SCHEMA_PAGE]: {
+  [DendronEditorViewKey.SCHEMA_VALIDATOR]: {
     desc: "Schema Validator",
     label: "Schemas",
     bundleName: "schemaPageView",

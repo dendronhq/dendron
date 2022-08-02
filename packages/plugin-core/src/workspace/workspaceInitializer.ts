@@ -1,6 +1,5 @@
 import { DVault, DWorkspaceV2 } from "@dendronhq/common-all";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import { WorkspaceActivatorSkipOpts } from "./workspaceActivator";
 
 export type OnWorkspaceCreationOpts = {
   wsVault?: DVault;
@@ -33,6 +32,10 @@ export type WorkspaceInitializer = {
    * @param opts
    */
   onWorkspaceActivate?(opts: {
-    skipOpts: WorkspaceActivatorSkipOpts;
+    skipOpts:
+      | Partial<{
+          skipTreeView: boolean;
+        }>
+      | undefined;
   }): Promise<void>;
 };

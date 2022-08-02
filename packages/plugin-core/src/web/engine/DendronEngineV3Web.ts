@@ -3,11 +3,11 @@ import {
   DendronCompositeError,
   DendronError,
   DEngine,
-  DEngineClient,
   DEngineDeleteSchemaResp,
   DNodeUtils,
   DVault,
   DVaultUriVariant,
+  EngineDeleteNoteResp,
   EngineWriteOptsV2,
   // error2PlainObject,
   ERROR_SEVERITY,
@@ -87,7 +87,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
           }),
         };
       }
-      this.fuseEngine.updateNotesIndex(notes);
+      this.fuseEngine.replaceNotesIndex(notes);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
 
@@ -178,7 +178,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     throw new Error("bulkWriteNotes not implemented");
   }
 
-  async deleteNote(): ReturnType<DEngineClient["deleteNote"]> {
+  async deleteNote(): Promise<EngineDeleteNoteResp> {
     throw Error("deleteNote not implemented");
   }
 
@@ -250,7 +250,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
-    let error: DendronError | null = null;
+    const error: DendronError | null = null;
     const ctx = "writeNewNote";
     // this.logger.info({
     //   ctx,

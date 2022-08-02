@@ -1,7 +1,5 @@
-import { QuickPickItem, QuickPick, QuickPickOptions } from "vscode";
 import * as vscode from "vscode";
-// import { NoteQuickInput } from "@dendronhq/common-all";
-import { NoteLookupProvider } from "./NoteLookupProvider";
+import { QuickPick, QuickPickOptions } from "vscode";
 import {
   DNodePropsQuickInputV2,
   DNodeUtils,
@@ -10,15 +8,16 @@ import {
   NoteQuickInput,
 } from "@dendronhq/common-all";
 import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
-import { ILookupProvider } from "./ILookupProvider";
+import path from "path";
 import { WSUtilsWeb } from "../../utils/WSUtils";
+import { ILookupProvider } from "./ILookupProvider";
+import { NoteLookupProvider } from "./NoteLookupProvider";
+import { VaultQuickPick } from "./VaultQuickPick";
 
 export type LookupQuickpickFactoryCreateOpts = QuickPickOptions & {
   buttons?: vscode.QuickInputButton[];
   provider?: ILookupProvider;
-  initalValue?: string;
-  // wsRoot: string;
-  // vaults: DVault[];
+  initialValue?: string;
 };
 
 export type LookupAcceptPayload = {
@@ -31,17 +30,19 @@ const CREATE_NEW_LABEL = "Create New";
 function createNoActiveItem({
   fname,
   detail,
+  vault, // TODO: This shouldn't be a parameter
 }: {
   fname: string;
   detail: string;
+  vault: DVault;
 }): DNodePropsQuickInputV2 {
   const props = DNodeUtils.create({
     id: CREATE_NEW_LABEL,
     fname,
     type: "note",
-    // @ts-ignore
-    vault: {},
+    vault,
   });
+
   return {
     ...props,
     label: CREATE_NEW_LABEL,
@@ -52,6 +53,7 @@ function createNoActiveItem({
 
 export class LookupQuickpickFactory {
   private _engine: IReducedEngineAPIService;
+  private FUZZ_THRESHOLD = 0.2;
 
   // TODO: Add injection annotations
   constructor(
@@ -66,11 +68,17 @@ export class LookupQuickpickFactory {
   public ShowLookup(
     opts?: LookupQuickpickFactoryCreateOpts
   ): Promise<LookupAcceptPayload | undefined> {
+    let initialValue = opts?.initialValue;
+    if (!initialValue) {
+      console.log(`QP Initial Value Set`);
+      initialValue = this.getInitialValueBasedOnActiveNote();
+    }
+
     const qp = this.Create({
       title: "Lookup Note",
       buttons: [],
       provider: new NoteLookupProvider(this._engine),
-      initalValue: opts?.initalValue,
+      initialValue,
     });
 
     const outerPromise = new Promise<LookupAcceptPayload | undefined>(
@@ -84,28 +92,37 @@ export class LookupQuickpickFactory {
             qp.dispose();
           });
 
-          // qp.hi;
           qp.onDidHide(() => {
             resolve(undefined);
           });
         });
 
-        foo.then((value) => {
+        foo.then(async (value) => {
+          if (
+            value?.items.length === 1 &&
+            value.items[0].id === CREATE_NEW_LABEL
+          ) {
+            const vaultPicker = new VaultQuickPick(this._engine);
+            const currentNote = await this.wsUtils.getActiveNote();
+            const vault = await vaultPicker.getOrPromptVaultForNewNote({
+              fname: value.items[0].fname,
+              vault: currentNote?.vault ?? this.vaults[0],
+              vaults: this.vaults,
+            });
+
+            if (!vault) {
+              outerResolve(undefined);
+            } else {
+              value.items[0].vault = vault;
+            }
+          }
           // TODO: Show the vault picker control if necessary
           outerResolve(value);
         });
       }
     );
 
-    // Do this asynchronously
-    if (!opts?.initalValue) {
-      this.populateValueBasedOnInitialNote().then((activeNote) => {
-        if (activeNote) {
-          qp.value = activeNote.fname;
-        }
-      });
-    }
-
+    console.log(`QP Show`);
     qp.show();
 
     return outerPromise;
@@ -116,23 +133,25 @@ export class LookupQuickpickFactory {
   ): QuickPick<NoteQuickInput> {
     const qp = vscode.window.createQuickPick<NoteQuickInput>();
 
+    let initialized = false; // Not really sure why this is needed. For some reason onDidChangeValue seems to get called before I think the callback is set up.
+
     qp.title = opts.title;
     qp.buttons = opts.buttons ?? [];
 
     // We slice the postfix off until the first dot to show all results at the same
     // level so that when a user types `foo.one`, they will see all results in `foo.*`
     const initialQueryValue = NoteLookupUtils.getQsForCurrentLevel(
-      opts.initalValue ?? ""
+      opts.initialValue ?? ""
     );
 
-    qp.value = opts.initalValue ?? "";
+    qp.value = opts.initialValue ?? "";
 
     opts
       .provider! // TODO: Fix !
       .provideItems({
-        // _justActivated,
         pickerValue: initialQueryValue,
         showDirectChildrenOnly: false,
+        fuzzThreshold: this.FUZZ_THRESHOLD, // TODO: Make this configurable
         workspaceState: {
           wsRoot: this.wsRoot,
           vaults: this.vaults,
@@ -141,15 +160,25 @@ export class LookupQuickpickFactory {
       })
       .then((initialItems) => {
         if (initialItems) {
+          console.log(
+            `Initial Item Set Added with length ${initialItems.length}`
+          );
           qp.items = initialItems;
+          initialized = true;
         }
       });
 
-    qp.onDidChangeValue(async (_newInput) => {
+    qp.onDidChangeValue(async (newInput) => {
+      if (!initialized) {
+        return;
+      }
+      console.log(
+        `Provide Items called in onDidChangeValue for picker value ${newInput}`
+      );
       const items = await opts.provider!.provideItems({
-        // _justActivated,
-        pickerValue: _newInput,
+        pickerValue: newInput,
         showDirectChildrenOnly: false,
+        fuzzThreshold: this.FUZZ_THRESHOLD,
         workspaceState: {
           wsRoot: this.wsRoot,
           vaults: this.vaults,
@@ -157,32 +186,31 @@ export class LookupQuickpickFactory {
         },
       });
 
-      console.log(`Items Provided: ${items?.length}`);
+      console.log(`Items Provided in onDidChangeValue: ${items?.length}`);
 
-      // _justActivated = false;
+      // TODO: Get the vault from a prompt if needed:
 
       const createItem = createNoActiveItem({
         fname: qp.value,
         detail: "Note does not exist. Create?",
+        vault: this.vaults[0], // TODO: This is wrong
       });
 
       if (items) {
         items.push(createItem);
         qp.items = items;
+        console.log("Items Replaced");
       }
     });
 
     return qp;
   }
 
-  private populateValueBasedOnInitialNote() {
-    return this.wsUtils.getActiveNote();
+  private getInitialValueBasedOnActiveNote() {
+    const initialValue = path.basename(
+      vscode.window.activeTextEditor?.document.uri.fsPath || "",
+      ".md"
+    );
+    return initialValue;
   }
 }
-
-// export class LookupQuickPick<T extends QuickPickItem> {
-//   get QuickPick<T>() {}
-// }
-
-// export interface LookupQuickPick<T extends QuickPickItem>
-//   extends QuickPick<T> {}

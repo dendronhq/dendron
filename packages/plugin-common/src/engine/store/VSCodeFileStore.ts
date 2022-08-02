@@ -61,7 +61,7 @@ export class VSCodeFileStore implements IFileStore {
     try {
       await vscode.workspace.fs.writeFile(
         uri,
-        new Uint8Array(Buffer.from(content, "base64"))
+        new Uint8Array(Buffer.from(content, "utf-8"))
       );
       return { data: uri };
     } catch (err) {

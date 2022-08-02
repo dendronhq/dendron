@@ -70,12 +70,18 @@
           "name": "Sample View",
           "type": "webview",
           "when": "dendron:devMode"
+        }
+      ],
+      "dendron-view": [
+        {
+          "id": "dendron.tip-of-the-day",
+          "name": "Tip of the Day",
+          "when": "dendron:pluginActive",
+          "type": "webview"
         },
         {
-          "id": "dendron.calendar-view",
-          "name": "Calendar View",
-          "contextualTitle": "Calendar View",
-          "type": "webview",
+          "id": "dendron.backlinks",
+          "name": "Backlinks",
           "when": "dendron:pluginActive"
         },
         {
@@ -91,6 +97,12 @@
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
+          "id": "dendron.calendar-view",
+          "name": "Calendar View",
+          "type": "webview",
+          "when": "dendron:pluginActive"
+        },
+        {
           "id": "dendron.recent-workspaces",
           "name": "Recent Dendron Workspaces",
           "when": "!dendron:pluginActive"
@@ -103,11 +115,6 @@
           "id": "dendron.graph-panel",
           "name": "Graph Panel",
           "type": "webview",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "id": "dendron.backlinks",
-          "name": "Backlinks",
           "when": "dendron:pluginActive"
         }
       ]
@@ -482,6 +489,10 @@
         "title": "Dendron: Show Schema Graph"
       },
       {
+        "command": "dendron.showSchemaValidator",
+        "title": "Dendron: Show Schema Validator"
+      },
+      {
         "command": "dendron.showLegacyPreview",
         "title": "Dendron: Show Preview (legacy)"
       },
@@ -565,10 +576,6 @@
       {
         "command": "dendron.openBackup",
         "title": "Dendron: Open Backup"
-      },
-      {
-        "command": "dendron.showSchemaValidator",
-        "title": "Dendron: Show Schema Validator"
       },
       {
         "command": "dendron.instrumentedWrapperCommand",
@@ -834,6 +841,10 @@
           "when": "dendron:pluginActive"
         },
         {
+          "command": "dendron.showSchemaValidator",
+          "when": "dendron:pluginActive"
+        },
+        {
           "command": "dendron.showLegacyPreview",
           "when": "dendron:pluginActive && dendron:hasLegacyPreview"
         },
@@ -903,10 +914,6 @@
         },
         {
           "command": "dendron.openBackup",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
         },
         {
@@ -1293,7 +1300,7 @@
       },
       {
         "command": "dendron.togglePreview",
-        "windows": "ctrl+k v",
+        "key": "ctrl+k v",
         "mac": "cmd+ctrl+p",
         "when": "dendron:pluginActive"
       }

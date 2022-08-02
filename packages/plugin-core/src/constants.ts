@@ -902,6 +902,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: "dendron:pluginActive",
   },
+  TOGGLE_PREVIEW_LOCK: {
+    key: "dendron.togglePreviewLock",
+    title: `${CMD_PREFIX} Toggle Preview Lock`,
+    icon: `$(lock)`,
+    when: "dendron:pluginActive",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,

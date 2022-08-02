@@ -31,6 +31,7 @@ type InitialState = {
   showBacklinks?: boolean;
   showOutwardLinks?: boolean;
   showHierarchy?: boolean;
+  isLocked?: boolean;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -47,6 +48,7 @@ const INITIAL_STATE: InitialState = {
   showBacklinks: true,
   showOutwardLinks: true,
   showHierarchy: true,
+  isLocked: false,
 };
 
 export { InitialState as IDEState };
@@ -98,6 +100,9 @@ export const ideSlice = createSlice({
     },
     setShowHierarchy: (state, action: PayloadAction<boolean>) => {
       state.showHierarchy = action.payload;
+    },
+    setLock: (state, action: PayloadAction<boolean>) => {
+      state.isLocked = action.payload;
     },
   },
 });

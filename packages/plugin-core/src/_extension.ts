@@ -36,8 +36,9 @@ import {
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
-import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
+import { TogglePreviewLock } from "./commands/TogglePreviewLock";
+import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
@@ -580,6 +581,8 @@ async function _setupCommands({
       );
     }
 
+    const preview = PreviewPanelFactory.create(ext);
+
     if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW.key)) {
       context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -588,9 +591,21 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
-            await new TogglePreviewCommand(PreviewPanelFactory.create(ext)).run(
-              args
-            );
+            await new TogglePreviewCommand(preview).run(args);
+          })
+        )
+      );
+    }
+
+    if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key,
+          sentryReportingCallback(async (args) => {
+            if (args === undefined) {
+              args = {};
+            }
+            await new TogglePreviewLock(preview).run(args);
           })
         )
       );

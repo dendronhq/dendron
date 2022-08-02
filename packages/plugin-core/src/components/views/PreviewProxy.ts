@@ -22,6 +22,16 @@ export interface PreviewProxy {
   hide(): void;
 
   /**
+   * lock the preview webview
+   */
+  lock(): void;
+
+  /**
+   * unlock the preview webview
+   */
+  unlock(): void;
+
+  /**
    * Is the view visible?
    */
   isVisible(): boolean;
@@ -32,4 +42,9 @@ export interface PreviewProxy {
    * visible, then it is necessarily open.
    */
   isOpen(): boolean;
+
+  /**
+   * Is the view locked?
+   */
+  isLocked(): boolean;
 }

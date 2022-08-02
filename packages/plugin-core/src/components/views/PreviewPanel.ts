@@ -49,6 +49,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     undefined;
   private _onTextChanged: vscode.Disposable | undefined = undefined;
   private _linkHandler: IPreviewLinkHandler;
+  private _lockedEditorFileName: string | undefined;
 
   /**
    *
@@ -138,6 +139,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         }
 
         this._panel = undefined;
+        this.unlock();
       });
 
       this._panel.reveal(viewColumn, preserveFocus);
@@ -150,13 +152,42 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
+  lock() {
+    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+    if (activeTextEditor) {
+      this._lockedEditorFileName = activeTextEditor?.document.fileName;
+      this.sendLockMessage(this._panel, this.isLocked());
+    } else {
+      Logger.error({ ctx: "lock preview", msg: "No active texteditor found" });
+    }
+  }
+  unlock() {
+    this._lockedEditorFileName = undefined;
+    this.sendLockMessage(this._panel, this.isLocked());
+  }
   isOpen(): boolean {
     return this._panel !== undefined;
   }
   isVisible(): boolean {
     return this._panel !== undefined && this._panel.visible;
   }
+
+  isLocked(): boolean {
+    return this._lockedEditorFileName !== undefined;
+  }
+
+  /**
+   * If the Preview is locked and the active note does not match the locked note.
+   */
+  isLockedAndDirty(): boolean {
+    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
+    return (
+      this.isLocked() &&
+      activeTextEditor?.document.fileName !== this._lockedEditorFileName
+    );
+  }
   dispose() {
+    this.unlock();
     if (this._panel) {
       this._panel.dispose();
       this._panel = undefined;
@@ -220,6 +251,16 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           }
           break;
         }
+        case NoteViewMessageEnum.onLock: {
+          Logger.debug({ ctx, "msg.type": "onLock" });
+          this.lock();
+          break;
+        }
+        case NoteViewMessageEnum.onUnlock: {
+          Logger.debug({ ctx, "msg.type": "onUnlock" });
+          this.unlock();
+          break;
+        }
         default:
           assertUnreachable(msg.type);
       }
@@ -234,7 +275,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             if (
               !editor ||
               editor.document.uri.fsPath !==
-                vscode.window.activeTextEditor?.document.uri.fsPath
+                vscode.window.activeTextEditor?.document.uri.fsPath ||
+              this.isLockedAndDirty()
             ) {
               return;
             }
@@ -361,6 +403,27 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     return;
   }
 
+  private sendLockMessage(
+    panel: vscode.WebviewPanel | undefined,
+    isLocked: boolean
+  ) {
+    try {
+      return panel?.webview.postMessage({
+        type: isLocked
+          ? NoteViewMessageEnum.onLock
+          : NoteViewMessageEnum.onUnlock,
+        data: {},
+        source: "vscode",
+      } as NoteViewMessage);
+    } catch (err) {
+      Logger.info({
+        ctx: "sendLockMessage",
+        state: "webview is disposed",
+      });
+      return;
+    }
+  }
+
   /**
    * If panel is visible, update preview panel with text document changes
    */
@@ -370,7 +433,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     if (textDocument.document.isDirty === false) {
       return;
     }
-    if (this.isVisible()) {
+    if (this.isVisible() && !this.isLockedAndDirty()) {
       const note =
         await this._textDocumentService.processTextDocumentChangeEvent(
           textDocument

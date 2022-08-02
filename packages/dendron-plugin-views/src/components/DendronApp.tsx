@@ -4,6 +4,7 @@ import {
   GraphThemeEnum,
   GraphViewMessageEnum,
   LookupViewMessageEnum,
+  NoteViewMessageEnum,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   SeedBrowserMessageType,
@@ -19,7 +20,8 @@ import {
   Provider,
   setLogLevel,
 } from "@dendronhq/common-frontend";
-import { Layout } from "antd";
+import { Layout, Button } from "antd";
+import LockFilled from "@ant-design/icons/lib/icons/LockFilled";
 import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
@@ -161,14 +163,45 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         }
         break;
       }
-
+      case NoteViewMessageEnum.onLock: {
+        logger.info({ ctx, msg: "onLock" });
+        ideDispatch(ideSlice.actions.setLock(true));
+        break;
+      }
+      case NoteViewMessageEnum.onUnlock: {
+        logger.info({ ctx, msg: "onUnlock" });
+        ideDispatch(ideSlice.actions.setLock(false));
+        break;
+      }
       default:
         logger.error({ ctx, msg: "unknown message", payload: msg });
         break;
     }
   });
 
-  return <Component {...props} />;
+  const isLocked = props.ide.isLocked;
+
+  const handleLock = () => {
+    postVSCodeMessage({
+      type: NoteViewMessageEnum.onUnlock,
+      data: {},
+      source: DMessageSource.webClient,
+    });
+  };
+
+  return (
+    <>
+      <Component {...props} />
+      {isLocked && (
+        <Button
+          shape="circle"
+          icon={<LockFilled />}
+          onClick={handleLock}
+          style={{ position: "absolute", top: 33, right: 33 }}
+        />
+      )}
+    </>
+  );
 }
 
 export type DendronAppProps = {

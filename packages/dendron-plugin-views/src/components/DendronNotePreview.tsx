@@ -121,6 +121,7 @@ const DendronNotePreview: DendronComponent = (props) => {
   if (!noteRenderedBody || !config) {
     return <div>Loading...</div>;
   }
+
   return <DendronNote noteContent={noteRenderedBody} config={config} />;
 };
 

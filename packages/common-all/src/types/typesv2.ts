@@ -843,6 +843,8 @@ export enum CalendarViewMessageType {
 export enum NoteViewMessageEnum {
   "onClick" = "onClick",
   "onGetActiveEditor" = "onGetActiveEditor",
+  "onLock" = "onLock",
+  "onUnlock" = "onUnlock",
 }
 
 export enum LookupViewMessageEnum {

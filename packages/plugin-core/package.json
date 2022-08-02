@@ -91,12 +91,6 @@
           "when": "dendron:pluginActive && dendron:noteLookupActive && dendron:shouldShowLookupView"
         },
         {
-          "id": "dendron.calendar-view",
-          "name": "Calendar View",
-          "type": "webview",
-          "when": "dendron:pluginActive"
-        },
-        {
           "id": "dendron.recent-workspaces",
           "name": "Recent Dendron Workspaces",
           "when": "!dendron:pluginActive"
@@ -921,10 +915,6 @@
         },
         {
           "command": "dendron.dev.validateEngine",
-          "when": "dendron:pluginActive"
-        },
-        {
-          "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
         }
       ],

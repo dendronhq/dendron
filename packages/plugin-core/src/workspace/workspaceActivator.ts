@@ -362,7 +362,7 @@ type WorkspaceActivatorOpts = {
   workspaceInitializer?: WorkspaceInitializer;
 };
 
-export type WorkspaceActivatorSkipOpts = {
+type WorkspaceActivatorSkipOpts = {
   opts?: Partial<{
     /**
      * Skip setting up language features (eg. code action providesr)
@@ -598,7 +598,7 @@ export class WorkspaceActivator {
 
     if (workspaceInitializer?.onWorkspaceActivate) {
       workspaceInitializer.onWorkspaceActivate({
-        skipOpts: { opts },
+        skipOpts: opts,
       });
     }
     return { data: true };

@@ -30,7 +30,6 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "./blankInitializer";
-import { WorkspaceActivatorSkipOpts } from "./workspaceActivator";
 import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
@@ -188,9 +187,13 @@ export class TutorialInitializer
     }
   }
 
-  async onWorkspaceActivate(opts: { skipOpts: WorkspaceActivatorSkipOpts }) {
+  async onWorkspaceActivate(opts: {
+    skipOpts: Partial<{
+      skipTreeView: boolean;
+    }>;
+  }) {
     const { skipOpts } = opts;
-    if (skipOpts.opts?.skipTreeView) {
+    if (skipOpts.skipTreeView) {
       // for tutorial workspaces,
       // we want the tree view to be focused
       // so that new users can discover the tree view feature.

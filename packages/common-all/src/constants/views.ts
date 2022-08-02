@@ -67,20 +67,8 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
   },
   [DendronEditorViewKey.SCHEMA_VALIDATOR]: {
     desc: "Schema Validator",
-    label: "Schemas",
-    bundleName: "schemaPageView",
-    type: "webview",
-  },
-  [DendronEditorViewKey.SCHEMA_VALIDATOR]: {
-    desc: "Schema Validator",
-    label: "Schemas",
-    bundleName: "schemaValidatorView",
-    type: "webview",
-  },
-  [DendronEditorViewKey.SCHEMA_VALIDATOR]: {
-    desc: "Schema Validator",
-    label: "Schemas",
-    bundleName: "schemaValidatorView",
+    label: "Schema Validator",
+    bundleName: "DendronSchemaValidator",
     type: "webview",
   },
 };

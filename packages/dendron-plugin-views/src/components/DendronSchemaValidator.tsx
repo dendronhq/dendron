@@ -55,20 +55,31 @@ function SchemaBox({
             : match && partialMatch
             ? "#e4ffb1"
             : "#FFFFFF",
-        borderRadius: "15px",
+        borderRadius: "5px",
+        margin: "10px",
         border: "1px solid #a9a9a9",
-        padding: "1em",
-        margin: "1em",
       }}
     >
-      <h2>
+      <h2
+        style={{
+          fontSize: "15px",
+          color: "#1d1d1d",
+        }}
+      >
         {schema.title}{" "}
-        <span style={{ color: "#a9a9a9" }}>
+        <span style={{ color: "#5e5e5e", paddingLeft: "5px" }}>
           {match && (partialMatch ? "(partial match)" : "(match)")}
         </span>
       </h2>
-      <h3>({generatePath(schemaModule, schema)})</h3>
-      <div style={{ paddingLeft: "1em" }}>
+      <h3
+        style={{
+          fontSize: "12px",
+          color: "#1d1d1d",
+        }}
+      >
+        ({generatePath(schemaModule, schema)})
+      </h3>
+      <div style={{ paddingLeft: "12px" }}>
         {schema.children.map((childID) => (
           <SchemaBox
             key={childID}
@@ -121,8 +132,8 @@ export default function DendronSchemaValidator({ engine }: DendronProps) {
     label: schema.root.fname,
   }));
   return (
-    <div>
-      <h1>Schemas</h1>
+    <div style={{ padding: "1em" }}>
+      <h1>Schema Validator</h1>
       <div>select a schema file</div>
       <div style={{ padding: "1em" }}>
         <Select
@@ -135,7 +146,7 @@ export default function DendronSchemaValidator({ engine }: DendronProps) {
       </div>
       {schemaModule !== null && (
         <div style={{ padding: "1em" }}>
-          <div>enter a schema path</div>
+          <div>enter a schema path to validate it</div>
           <div>
             <AutoComplete
               placeholder={`type a schema hierarchy starting with ${selectedDomain}`}
@@ -150,7 +161,7 @@ export default function DendronSchemaValidator({ engine }: DendronProps) {
               }
             />
           </div>
-          <div style={{ padding: "1em" }}>
+          <div style={{ padding: "10px" }}>
             <SchemaBox
               schema={schemaModule.schemas[schemaModule.root.id]}
               schemaModule={schemaModule}

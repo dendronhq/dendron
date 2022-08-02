@@ -1,9 +1,9 @@
 import { DVault, VaultUtils } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import _ from "lodash";
 import { VaultSelectionMode } from "../../../components/lookup/types";
 import { VaultPickerItem } from "../../../components/lookup/utils";
 import * as vscode from "vscode";
+import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 
 export class VaultQuickPick {
   private CONTEXT_DETAIL = "current note context";

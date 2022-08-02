@@ -9,7 +9,6 @@ import {
   DVaultUriVariant,
   EngineDeleteNoteResp,
   EngineWriteOptsV2,
-  // error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
@@ -35,35 +34,42 @@ import {
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import _ from "lodash";
+import { inject, singleton } from "tsyringe";
 import { Utils } from "vscode-uri";
+import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
 
-type DendronEngineOptsV3 = {
-  wsRoot: string;
-  vaults: DVaultUriVariant[];
-  fileStore: IFileStore;
-  noteStore: INoteStore<string>;
-};
-type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
+// type DendronEngineOptsV3 = {
+//   wsRoot: string;
+//   vaults: DVaultUriVariant[];
+//   fileStore: IFileStore;
+//   noteStore: INoteStore<string>;
+// };
+// type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
 
+@singleton()
 export class DendronEngineV3Web implements IReducedEngineAPIService {
   private wsRoot: string;
   private fuseEngine: FuseEngine;
   private _vaults: DVaultUriVariant[];
   private _noteStore: INoteStore<string>;
-  private _fileStore: IFileStore; // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
+  private _fileStore: IFileStore;
 
-  constructor(props: DendronEnginePropsV3) {
-    this.wsRoot = props.wsRoot;
+  constructor(
+    @inject("wsRootString") wsRoot: string,
+    @inject("vaults") vaults: DVaultUriVariant[],
+    @inject("IFileStore") fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
+    @inject("INoteStore") noteStore: INoteStore<string>
+  ) {
+    this.wsRoot = wsRoot;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 1,
       // fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
-    this._vaults = props.vaults;
-    this._noteStore = props.noteStore;
-    this._fileStore = props.fileStore;
+    this._vaults = vaults;
+    this._noteStore = noteStore;
+    this._fileStore = fileStore;
   }
 
   /**

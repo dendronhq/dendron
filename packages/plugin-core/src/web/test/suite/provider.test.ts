@@ -1,7 +1,7 @@
 // You can import and use all API from the 'vscode' module
 // import * as myExtension from '../../extension';
 import { DVault } from "@dendronhq/common-all";
-import { NoteLookupProvider } from "@dendronhq/plugin-common";
+import { NoteLookupProvider } from "../../commands/lookup/NoteLookupProvider";
 import { MockEngineAPIService } from "../helpers/MockEngineAPIService";
 
 suite("Note Lookup Provider Tests", () => {

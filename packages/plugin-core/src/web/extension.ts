@@ -1,90 +1,107 @@
-import * as vscode from "vscode";
-// import { DENDRON_COMMANDS } from "../constants";
 import {
   CONSTANTS,
-  DNodeUtils,
   DVaultUriVariant,
+  IDataStore,
+  IFileStore,
+  INoteStore,
   IntermediateDendronConfig,
+  NotePropsMeta,
 } from "@dendronhq/common-all";
-import {
-  IReducedEngineAPIService,
-  NoteMetadataStore,
-  NoteStore,
-  VSCodeFileStore,
-} from "@dendronhq/plugin-common";
 import YAML from "js-yaml";
-import path from "path";
+import "reflect-metadata";
+import { container, Lifecycle } from "tsyringe";
+import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { Utils } from "vscode-uri";
+import { ILookupProvider } from "./commands/lookup/ILookupProvider";
+import { NoteLookupProvider } from "./commands/lookup/NoteLookupProvider";
 import { WebNoteLookupCmd } from "./commands/WebNoteLookupCmd";
 import { DendronEngineV3Web } from "./engine/DendronEngineV3Web";
-import { LookupQuickpickFactory } from "./commands/lookup/LookupQuickpickFactory";
-import { WSUtilsWeb } from "./utils/WSUtils";
+import { IReducedEngineAPIService } from "./engine/IReducedEngineApiService";
+import { NoteMetadataStore } from "./engine/store/NoteMetadataStore";
+import { NoteStore } from "./engine/store/NoteStore";
+import { VSCodeFileStore } from "./engine/store/VSCodeFileStore";
 
 export async function activate(context: vscode.ExtensionContext) {
   vscode.window.showInformationMessage("Hello World");
 
-  const { workspaceFile, workspaceFolders } = vscode.workspace;
+  await setupWebExtensionInjectionContainer();
 
-  if (workspaceFile) {
-    console.log(path.normalize(workspaceFile.fsPath));
-  }
+  setupCommands(context);
 
+  vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
+}
+
+export function deactivate() {}
+
+async function setupWebExtensionInjectionContainer() {
   const wsRoot = await getWSRoot();
 
-  console.log(`wsRoot is ${wsRoot?.fsPath}`);
-
-  if (wsRoot) {
-    const vaults = await getVaults(wsRoot);
-
-    console.log(`vaults are ${vaults.length} in length`);
-    // TODO: should just be wsRoot
-    const engine = await getWebEngine(wsRoot.fsPath, vaults);
-
-    const note = await engine.getNote("foo");
-    console.log(`vaults are ${vaults.length} in length`);
-
-    _setupCommands({ context, wsRoot, vaults });
-
-    vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
+  if (!wsRoot) {
+    throw new Error("Unable to find wsRoot!");
   }
+  const vaults = await getVaults(wsRoot);
+
+  container.register<IReducedEngineAPIService>(
+    "IReducedEngineAPIService",
+    {
+      useClass: DendronEngineV3Web,
+    },
+    { lifecycle: Lifecycle.Singleton }
+  );
+
+  container.register<IFileStore>("IFileStore", {
+    useClass: VSCodeFileStore,
+  });
+
+  container.register<INoteStore<string>>(
+    "INoteStore",
+    {
+      useClass: NoteStore,
+    },
+    { lifecycle: Lifecycle.Singleton }
+  );
+
+  container.register<IDataStore<string, NotePropsMeta>>(
+    "IDataStore",
+    {
+      useClass: NoteMetadataStore,
+    },
+    { lifecycle: Lifecycle.Singleton }
+  );
+
+  container.register<ILookupProvider>("NoteProvider", {
+    useClass: NoteLookupProvider,
+  });
+
+  container.afterResolution<DendronEngineV3Web>(
+    "IReducedEngineAPIService",
+    (_t, result) => {
+      if ("init" in result) {
+        console.log("Initializing Engine");
+        result.init().then(
+          (result) => {
+            console.log("Finished Initializing Engine");
+          },
+          (reason) => {
+            throw new Error("Failed Engine Init");
+          }
+        );
+      }
+    },
+    { frequency: "Once" }
+  );
+
+  container.register("wsRoot", { useValue: wsRoot });
+  container.register("wsRootString", { useValue: wsRoot.fsPath });
+  container.register("vaults", { useValue: vaults });
 }
 
-export function deactivate() {
-  // require("./_extension").deactivate(); // eslint-disable-line global-require
-}
-
-async function _setupCommands({
-  context,
-  wsRoot,
-  vaults,
-}: {
-  wsRoot: Uri;
-  context: vscode.ExtensionContext;
-  vaults: DVaultUriVariant[];
-}) {
+async function setupCommands(context: vscode.ExtensionContext) {
   const existingCommands = await vscode.commands.getCommands();
 
   const key = "dendron.lookupNote";
-
-  const engine = await getWebEngine(wsRoot.fsPath, vaults);
-
-  const wsUtils = new WSUtilsWeb(
-    engine,
-    wsRoot,
-    vaults
-    // vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault))
-  );
-
-  const factory = new LookupQuickpickFactory(
-    engine,
-    wsRoot.fsPath,
-    vaults,
-    // vaults.map((vault) => DNodeUtils.convertDVaultVersions(vault)),
-    wsUtils
-  );
-
-  const cmd = new WebNoteLookupCmd(factory, wsRoot, engine);
+  const cmd = container.resolve(WebNoteLookupCmd);
 
   if (!existingCommands.includes(key))
     context.subscriptions.push(
@@ -92,29 +109,6 @@ async function _setupCommands({
         await cmd.run();
       })
     );
-}
-
-async function getWebEngine(
-  wsRoot: string,
-  vaults: DVaultUriVariant[]
-): Promise<IReducedEngineAPIService> {
-  const fileStore = new VSCodeFileStore();
-
-  const engine = new DendronEngineV3Web({
-    wsRoot,
-    vaults,
-    fileStore,
-    noteStore: new NoteStore({
-      fileStore,
-      dataStore: new NoteMetadataStore(),
-      wsRoot,
-    }),
-  });
-
-  await engine.init();
-
-  // const res = await engine.findNotes({ fname: "root.md" });
-  return engine;
 }
 
 // function isInsidePath(outer: string, inner: string) {

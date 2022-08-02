@@ -1,12 +1,11 @@
 import {
   BulkResp,
   BulkWriteNotesOpts,
-  EngineDeleteNotePayload,
+  EngineDeleteNoteResp,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNoteOpts,
   NoteChangeEntry,
-  NoteIndexProps,
   NoteProps,
   NotePropsMeta,
   QueryNotesOpts,
@@ -46,7 +45,7 @@ export interface IReducedEngineAPIService {
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<Required<RespV2<EngineDeleteNotePayload>>>;
+  ): Promise<EngineDeleteNoteResp>;
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
 

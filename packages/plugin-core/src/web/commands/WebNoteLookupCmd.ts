@@ -1,8 +1,7 @@
-import { DEngineClient, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { IReducedEngineAPIService } from "packages/plugin-common/lib";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
-import { WSUtilsWeb } from "../utils/WSUtils";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
 export class WebNoteLookupCmd {
@@ -60,12 +59,16 @@ export class WebNoteLookupCmd {
         //   },
         // });
         // note = _.merge(newNote, overrides || {});
-        await this.engine.writeNote(newNote); // TODO: Error checking
+        const res = await this.engine.writeNote(newNote); // TODO: Error checking
+        console.log("temp");
       }
 
-      // TODO: Adjust for native vs non-native vault
       const doc = await vscode.workspace.openTextDocument(
-        Utils.joinPath(this.wsRoot, "notes", value.fname + ".md")
+        Utils.joinPath(
+          this.wsRoot,
+          VaultUtils.getRelPath(value.vault),
+          value.fname + ".md"
+        )
       );
 
       await vscode.window.showTextDocument(doc);

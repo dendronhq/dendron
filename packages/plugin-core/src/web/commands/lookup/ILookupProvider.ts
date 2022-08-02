@@ -6,15 +6,11 @@ import {
 import { CancellationToken } from "vscode";
 
 export type provideItemsProps = {
-  // _justActivated: boolean;
-  // nonInteractive: boolean;
-  // forceAsIsPickerValueUsage: boolean;
   token?: CancellationToken;
-  fuzzThreshold?: number;
+  fuzzThreshold?: number; // TODO: Remove - pass all these into Provider Constructor
   pickerValue: string;
-  showDirectChildrenOnly: boolean;
-  // filterMiddleware?: FilterQuickPickFunction;
-  workspaceState: workspaceState;
+  showDirectChildrenOnly: boolean; // TODO: Remove
+  workspaceState: workspaceState; // TODO: Remove
 };
 
 export type workspaceState = {

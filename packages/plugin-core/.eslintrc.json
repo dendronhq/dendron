@@ -5,14 +5,18 @@
     "ecmaVersion": 6,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "env": {
     "mocha": true
   },
   "rules": {
     // 1. allow anonymous functions inside of mocha tests
     "prefer-arrow-callback": 0,
-    "func-names": "off"
+    "func-names": "off",
+    "no-useless-constructor": "off",
+    "no-empty-function": "off"
     // 1. end
   }
 }

@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-import { QuickPick, QuickPickOptions } from "vscode";
 import {
   DNodePropsQuickInputV2,
   DNodeUtils,
@@ -7,16 +5,18 @@ import {
   NoteLookupUtils,
   NoteQuickInput,
 } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import path from "path";
+import { inject, injectable } from "tsyringe";
+import * as vscode from "vscode";
+import { QuickPick, QuickPickOptions } from "vscode";
+import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { ILookupProvider } from "./ILookupProvider";
-import { NoteLookupProvider } from "./NoteLookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
 
 export type LookupQuickpickFactoryCreateOpts = QuickPickOptions & {
+  provider: ILookupProvider;
   buttons?: vscode.QuickInputButton[];
-  provider?: ILookupProvider;
   initialValue?: string;
 };
 
@@ -51,22 +51,22 @@ function createNoActiveItem({
   };
 }
 
+@injectable()
 export class LookupQuickpickFactory {
   private _engine: IReducedEngineAPIService;
   private FUZZ_THRESHOLD = 0.2;
 
-  // TODO: Add injection annotations
   constructor(
-    engine: IReducedEngineAPIService,
-    private wsRoot: string,
-    private vaults: DVault[],
+    @inject("IReducedEngineAPIService") engine: IReducedEngineAPIService,
+    @inject("wsRootString") private wsRoot: string,
+    @inject("vaults") private vaults: DVault[],
     private wsUtils: WSUtilsWeb
   ) {
     this._engine = engine;
   }
 
-  public ShowLookup(
-    opts?: LookupQuickpickFactoryCreateOpts
+  public showLookup(
+    opts: LookupQuickpickFactoryCreateOpts
   ): Promise<LookupAcceptPayload | undefined> {
     let initialValue = opts?.initialValue;
     if (!initialValue) {
@@ -74,10 +74,10 @@ export class LookupQuickpickFactory {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
 
-    const qp = this.Create({
+    const qp = this.create({
       title: "Lookup Note",
       buttons: [],
-      provider: new NoteLookupProvider(this._engine),
+      provider: opts.provider,
       initialValue,
     });
 
@@ -128,9 +128,7 @@ export class LookupQuickpickFactory {
     return outerPromise;
   }
 
-  public Create(
-    opts: LookupQuickpickFactoryCreateOpts
-  ): QuickPick<NoteQuickInput> {
+  create(opts: LookupQuickpickFactoryCreateOpts): QuickPick<NoteQuickInput> {
     const qp = vscode.window.createQuickPick<NoteQuickInput>();
 
     let initialized = false; // Not really sure why this is needed. For some reason onDidChangeValue seems to get called before I think the callback is set up.
@@ -146,8 +144,7 @@ export class LookupQuickpickFactory {
 
     qp.value = opts.initialValue ?? "";
 
-    opts
-      .provider! // TODO: Fix !
+    opts.provider
       .provideItems({
         pickerValue: initialQueryValue,
         showDirectChildrenOnly: false,

@@ -1,15 +1,20 @@
 import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "packages/plugin-common/lib";
+import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
+import { ILookupProvider } from "./lookup/ILookupProvider";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
+@injectable()
 export class WebNoteLookupCmd {
   private _factory;
   constructor(
     factory: LookupQuickpickFactory,
-    private wsRoot: URI,
-    private engine: IReducedEngineAPIService
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("IReducedEngineAPIService")
+    private engine: IReducedEngineAPIService,
+    @inject("NoteProvider") private noteProvider: ILookupProvider
   ) {
     this._factory = factory;
   }
@@ -17,10 +22,8 @@ export class WebNoteLookupCmd {
   static key = "dendron.lookupNote";
 
   public async run() {
-    // const note = await this.wsUtils.getActiveNote();
-
-    const result = await this._factory.ShowLookup({
-      // initalValue: "foo",
+    const result = await this._factory.showLookup({
+      provider: this.noteProvider,
     });
 
     if (!result) {

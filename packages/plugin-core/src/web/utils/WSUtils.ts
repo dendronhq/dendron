@@ -1,15 +1,17 @@
 import { DVault, NoteProps, VaultUtils } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "@dendronhq/plugin-common";
 import path from "path";
+import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
 import { URI } from "vscode-uri";
+import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 
+@injectable()
 export class WSUtilsWeb {
-  // eslint-disable-next-line no-useless-constructor
   constructor(
-    private _engine: IReducedEngineAPIService,
-    private wsRoot: URI,
-    private vaults: DVault[]
+    @inject("IReducedEngineAPIService")
+    private engine: IReducedEngineAPIService,
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("vaults") private vaults: DVault[]
   ) {}
 
   private getVaultFromDocument(document: vscode.TextDocument) {
@@ -33,7 +35,7 @@ export class WSUtilsWeb {
       return undefined;
     }
 
-    return this._engine.findNotes({
+    return this.engine.findNotes({
       fname,
       vault,
     });

@@ -1005,6 +1005,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Open Backup`,
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  SHOW_SCHEMA_VALIDATOR: {
+    key: "dendron.showSchemaValidator",
+    title: `${CMD_PREFIX} Show Schema Validator`,
+  },
   INSTRUMENTED_WRAPPER_COMMAND: {
     key: "dendron.instrumentedWrapperCommand",
     title: `${CMD_PREFIX} Instrumented Wrapper Command`,

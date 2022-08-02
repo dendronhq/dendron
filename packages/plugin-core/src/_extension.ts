@@ -37,10 +37,12 @@ import {
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
+import { ShowSchemaValidatorCommand } from "./commands/ShowSchemaValidator";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import { SchemaGraphViewFactory } from "./components/views/SchemaGraphViewFactory";
+import { SchemaValidatorViewFactory } from "./components/views/SchemaValidatorViewFactory";
 import { DendronContext, DENDRON_COMMANDS } from "./constants";
 import { codeActionProvider } from "./features/codeActionProvider";
 import { completionProvider } from "./features/completionProvider";
@@ -603,6 +605,21 @@ async function _setupCommands({
           sentryReportingCallback(async () => {
             await new ShowSchemaGraphCommand(
               SchemaGraphViewFactory.create(ext)
+            ).run();
+          })
+        )
+      );
+    }
+
+    if (
+      !existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_VALIDATOR.key)
+    ) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.SHOW_SCHEMA_VALIDATOR.key,
+          sentryReportingCallback(async () => {
+            await new ShowSchemaValidatorCommand(
+              SchemaValidatorViewFactory.create(ext)
             ).run();
           })
         )

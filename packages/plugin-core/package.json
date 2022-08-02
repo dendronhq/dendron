@@ -489,6 +489,10 @@
         "title": "Dendron: Show Schema Graph"
       },
       {
+        "command": "dendron.showSchemaValidator",
+        "title": "Dendron: Show Schema Validator"
+      },
+      {
         "command": "dendron.showLegacyPreview",
         "title": "Dendron: Show Preview (legacy)"
       },
@@ -834,6 +838,10 @@
         },
         {
           "command": "dendron.showSchemaGraphView",
+          "when": "dendron:pluginActive"
+        },
+        {
+          "command": "dendron.showSchemaValidator",
           "when": "dendron:pluginActive"
         },
         {

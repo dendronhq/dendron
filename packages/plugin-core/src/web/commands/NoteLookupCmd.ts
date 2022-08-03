@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
@@ -7,22 +7,19 @@ import { ILookupProvider } from "./lookup/ILookupProvider";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
 @injectable()
-export class WebNoteLookupCmd {
-  private _factory;
+export class NoteLookupCmd {
   constructor(
-    factory: LookupQuickpickFactory,
+    private factory: LookupQuickpickFactory,
     @inject("wsRoot") private wsRoot: URI,
     @inject("IReducedEngineAPIService")
     private engine: IReducedEngineAPIService,
     @inject("NoteProvider") private noteProvider: ILookupProvider
-  ) {
-    this._factory = factory;
-  }
+  ) {}
 
   static key = "dendron.lookupNote";
 
   public async run() {
-    const result = await this._factory.showLookup({
+    const result = await this.factory.showLookup({
       provider: this.noteProvider,
     });
 
@@ -31,17 +28,13 @@ export class WebNoteLookupCmd {
     }
 
     result.items.forEach(async (value) => {
-      // console.log(
-      //   `Path is ${Utils.joinPath(this.wsRoot, "notes", value.fname + ".md")}`
-      // );
-      let note: NoteProps;
-
       if (value.id === "Create New") {
         const newNote = NoteUtils.create({
           fname: value.fname,
           vault: value.vault,
         });
 
+        // TODO: Add Schema and Template functionality
         // const newNote = NoteUtils.createWithSchema({
         //   noteOpts: {
         //     fname: value.fname,
@@ -62,8 +55,11 @@ export class WebNoteLookupCmd {
         //   },
         // });
         // note = _.merge(newNote, overrides || {});
-        const res = await this.engine.writeNote(newNote); // TODO: Error checking
-        console.log("temp");
+        const res = await this.engine.writeNote(newNote);
+
+        if (res.error) {
+          vscode.window.showErrorMessage("Failed to write note to engine!");
+        }
       }
 
       const doc = await vscode.workspace.openTextDocument(

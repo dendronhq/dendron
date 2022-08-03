@@ -4606,6 +4606,11 @@
     "@types/node" "*"
     "@types/responselike" "*"
 
+"@types/chai@*":
+  version "4.3.1"
+  resolved "https://registry.npmjs.org/@types/chai/-/chai-4.3.1.tgz#e2c6e73e0bdeb2521d00756d099218e9f5d90a04"
+  integrity sha512-/zPMqDkzSZ8t3VtxOa4KPq7uzzW978M9Tvh+j7GHKuo6k6GTLxPJ4J5gE5cjfJ26pnXst0N5Hax8Sr0T2Mi9zQ==
+
 "@types/comment-json@^1.1.1":
   version "1.1.1"
   resolved "https://registry.npmjs.org/@types/comment-json/-/comment-json-1.1.1.tgz#b4ae889912a93e64619f97989aecaff8ce889dca"
@@ -4979,6 +4984,11 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-13.13.52.tgz#03c13be70b9031baaed79481c0c0cfb0045e53f7"
   integrity sha512-s3nugnZumCC//n4moGGe6tkNMyYEdaDBitVjwPxXmR5lnMG5dHePinH2EdxkG3Rh1ghFHHixAG4NJhpJW1rthQ==
 
+"@types/node@^14.6.1":
+  version "14.18.23"
+  resolved "https://registry.npmjs.org/@types/node/-/node-14.18.23.tgz#70f5f20b0b1b38f696848c1d3647bb95694e615e"
+  integrity sha512-MhbCWN18R4GhO8ewQWAFK4TGQdBpXWByukz7cWyJmXhvRuCIaM/oWytGPqVmDzgEnnaIc9ss6HbU5mUi+vyZPA==
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
   resolved "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
@@ -5157,7 +5167,22 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
-"@types/sinon@^9.0.9":
+"@types/sinon-chai@^3.2.4":
+  version "3.2.8"
+  resolved "https://registry.npmjs.org/@types/sinon-chai/-/sinon-chai-3.2.8.tgz#5871d09ab50d671d8e6dd72e9073f8e738ac61dc"
+  integrity sha512-d4ImIQbT/rKMG8+AXpmcan5T2/PNeSjrYhvkwet6z0p8kzYtfgA32xzOBlbU0yqJfq+/0Ml805iFoODO0LP5/g==
+  dependencies:
+    "@types/chai" "*"
+    "@types/sinon" "*"
+
+"@types/sinon@*":
+  version "10.0.13"
+  resolved "https://registry.npmjs.org/@types/sinon/-/sinon-10.0.13.tgz#60a7a87a70d9372d0b7b38cc03e825f46981fb83"
+  integrity sha512-UVjDqJblVNQYvVNUsj0PuYYw0ELRmgt1Nt5Vk0pT5f16ROGfcKJY8o1HVuMOJOpD727RrGB9EGvoaTQE5tgxZQ==
+  dependencies:
+    "@types/sinonjs__fake-timers" "*"
+
+"@types/sinon@^9.0.5", "@types/sinon@^9.0.9":
   version "9.0.11"
   resolved "https://registry.npmjs.org/@types/sinon/-/sinon-9.0.11.tgz#7af202dda5253a847b511c929d8b6dda170562eb"
   integrity sha512-PwP4UY33SeeVKodNE37ZlOsR9cReypbMJOhZ7BVE0lB+Hix3efCOxiJWiE5Ia+yL9Cn2Ch72EjFTRze8RZsNtg==
@@ -22954,7 +22979,7 @@ simple-swizzle@^0.2.2:
   dependencies:
     is-arrayish "^0.3.1"
 
-sinon@^9.2.1:
+sinon@^9.0.3, sinon@^9.2.1:
   version "9.2.4"
   resolved "https://registry.npmjs.org/sinon/-/sinon-9.2.4.tgz#e55af4d3b174a4443a8762fa8421c2976683752b"
   integrity sha512-zljcULZQsJxVra28qIAL6ow1Z9tpattkCTEJR4RBP3TGc00FcttsP5pK284Nas5WjMZU5Yzy3kAIp3B3KRf5Yg==
@@ -24575,6 +24600,16 @@ ts-pnp@1.2.0, ts-pnp@^1.1.6:
   version "1.2.0"
   resolved "https://registry.npmjs.org/ts-pnp/-/ts-pnp-1.2.0.tgz#a500ad084b0798f1c3071af391e65912c86bca92"
   integrity sha512-csd+vJOb/gkzvcCHgTGSChYpy5f1/XKNsmvBGO4JXS+z1v2HobugDz4s1IeFXM3wZB44uczs+eazB5Q/ccdhQw==
+
+ts-sinon@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.npmjs.org/ts-sinon/-/ts-sinon-2.0.2.tgz#9e020ad1e76b41e71cb7344b71923dbc3c6bc7ca"
+  integrity sha512-Eh6rXPQruACHPn+/e5HsIMaHZa17tGP/scGjUeW5eJ/Levn8hBV6zSP/6QkEDUP7wLkTyY0yeYikjpTzgC9Gew==
+  dependencies:
+    "@types/node" "^14.6.1"
+    "@types/sinon" "^9.0.5"
+    "@types/sinon-chai" "^3.2.4"
+    sinon "^9.0.3"
 
 tsconfig-paths@^3.12.0, tsconfig-paths@^3.9.0:
   version "3.12.0"

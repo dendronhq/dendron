@@ -27,6 +27,53 @@ export type LookupAcceptPayload = {
 
 const CREATE_NEW_LABEL = "Create New";
 
+// if new notes are allowed and we didn't get a perfect match, append `Create New` option
+// to picker results
+// NOTE: order matters. we always pick the first item in single select mode
+// Logger.debug({ ctx, msg: "active != qs" });
+
+// If each of the vaults in the workspace already have exact match of the file name
+// then we should not allow create new option.
+// const queryOrigLowerCase = queryOrig.toLowerCase();
+// const numberOfExactMatches = updatedItems.filter(
+//   (item) => item.fname.toLowerCase() === queryOrigLowerCase
+// ).length;
+// Move this logic to controller:
+// const vaultsHaveSpaceForExactMatch =
+//   workspaceState.vaults.length > numberOfExactMatches;
+
+// const shouldAddCreateNew =
+//   // sometimes lookup is in mode where new notes are not allowed (eg. move an existing note, this option is manually passed in)
+//   this.opts.allowNewNote &&
+//   // notes can't end with dot, invalid note
+//   !queryOrig.endsWith(".") &&
+//   // if you can select mult notes, new note is not valid
+//   !picker.canSelectMany &&
+//   // when you create lookup from selection, new note is not valid
+//   !transformedQuery.wasMadeFromWikiLink &&
+//   vaultsHaveSpaceForExactMatch;
+
+// if (shouldAddCreateNew) {
+//   const entryCreateNew = NotePickerUtils.createNoActiveItem({
+//     fname: queryOrig,
+//     detail: CREATE_NEW_NOTE_DETAIL,
+//   });
+
+//   const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
+//     .bubbleUpCreateNew;
+//   if (
+//     shouldBubbleUpCreateNew({
+//       numberOfExactMatches,
+//       querystring: queryOrig,
+//       bubbleUpCreateNew,
+//     })
+//   ) {
+//     updatedItems = [entryCreateNew, ...updatedItems];
+//   } else {
+//     updatedItems = [...updatedItems, entryCreateNew];
+//   }
+// }
+
 function createNoActiveItem({
   fname,
   detail,

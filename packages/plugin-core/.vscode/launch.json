@@ -86,6 +86,7 @@
       "type": "extensionHost",
       "debugWebWorkerHost": true,
       "request": "launch",
+      "webRoot": "${workspaceFolder}/plugin-core/src",
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
@@ -96,6 +97,9 @@
         "${workspaceFolder}/dist/web/**/*.js"
       ],
       "preLaunchTask": "npm: watch-web",
+      "sourceMapPathOverrides": {
+        "*": "${webRoot}/*"
+      }
     },
     // {
     //   "name": "Extension Integ Tests - File",

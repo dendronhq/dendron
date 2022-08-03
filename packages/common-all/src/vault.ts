@@ -3,8 +3,9 @@ import path from "path";
 import { FOLDERS, normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
-import { DVault, WorkspaceFolderRaw } from "./types";
+import { DVault, DVaultUriVariant, WorkspaceFolderRaw } from "./types";
 import { NonOptional } from "./utils";
+import { Utils } from "vscode-uri";
 
 export type SelfContainedVault = Omit<DVault, "selfContained"> & {
   selfContained: true;
@@ -78,6 +79,33 @@ export class VaultUtils {
       return path.join("seeds", vault.seed, vault.fsPath);
     }
     return vault.fsPath;
+  }
+
+  /**
+   * Path for the location of notes in this vault, relative to the workspace
+   * root.
+   *
+   * While for old vaults this is the same as
+   * {@link VaultUtils.getRelVaultRootPath}, for self contained vaults the notes
+   * are located inside the vault in the `notes` subdirectory.
+   *
+   * @param vault
+   * @returns path for location of the notes in the vault, relative to the
+   * workspace root
+   */
+  static getRelPathUriVariant(vault: DVaultUriVariant) {
+    if (VaultUtils.isSelfContained(vault)) {
+      // Return the path to the notes folder inside the vault. This is for
+      // compatibility with existing code.
+      return Utils.joinPath(vault.path, FOLDERS.NOTES);
+    }
+    if (vault.workspace) {
+      return Utils.joinPath(vault.path, vault.workspace); // TODO: Not sure if this is
+    }
+    if (vault.seed) {
+      return Utils.joinPath(vault.path, "seeds", vault.seed);
+    }
+    return vault.path;
   }
 
   /**

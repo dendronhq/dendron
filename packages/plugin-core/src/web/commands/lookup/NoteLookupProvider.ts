@@ -1,5 +1,4 @@
 import {
-  DNodeProps,
   DNodeUtils,
   DVault,
   NoteLookupUtils,
@@ -21,6 +20,9 @@ import {
   workspaceState,
 } from "./ILookupProvider";
 
+/**
+ * Provides Note Lookup results by querying the engine.
+ */
 @injectable()
 export class NoteLookupProvider implements ILookupProvider {
   constructor(
@@ -30,8 +32,7 @@ export class NoteLookupProvider implements ILookupProvider {
   async provideItems(
     opts: provideItemsProps
   ): Promise<NoteQuickInput[] | undefined> {
-    const { token, fuzzThreshold, showDirectChildrenOnly, workspaceState } =
-      opts;
+    const { token, showDirectChildrenOnly, workspaceState } = opts;
 
     const { pickerValue } = opts;
     const transformedQuery = NoteLookupUtils.transformQueryString({
@@ -39,7 +40,6 @@ export class NoteLookupProvider implements ILookupProvider {
       onlyDirectChildren: showDirectChildrenOnly,
     });
 
-    // debugger;
     const queryOrig = NoteLookupUtils.slashToDot(pickerValue);
 
     const queryUpToLastDot =
@@ -55,11 +55,6 @@ export class NoteLookupProvider implements ILookupProvider {
           vaults: workspaceState.vaults,
           schemas: workspaceState.schemas,
         });
-        // const extraItems = this.opts.extraItems;
-        // if (extraItems) {
-        //   items.unshift(...extraItems);
-        // }
-        // picker.items = items;
         return items;
       }
 
@@ -153,64 +148,6 @@ export class NoteLookupProvider implements ILookupProvider {
         }
       }
 
-      // filter the results through optional middleware
-      // if (filterMiddleware) {
-      //   updatedItems = filterMiddleware(updatedItems);
-      // }
-
-      // if new notes are allowed and we didn't get a perfect match, append `Create New` option
-      // to picker results
-      // NOTE: order matters. we always pick the first item in single select mode
-      // Logger.debug({ ctx, msg: "active != qs" });
-
-      // If each of the vaults in the workspace already have exact match of the file name
-      // then we should not allow create new option.
-      // const queryOrigLowerCase = queryOrig.toLowerCase();
-      // const numberOfExactMatches = updatedItems.filter(
-      //   (item) => item.fname.toLowerCase() === queryOrigLowerCase
-      // ).length;
-      // Move this logic to controller:
-      // const vaultsHaveSpaceForExactMatch =
-      //   workspaceState.vaults.length > numberOfExactMatches;
-
-      // const shouldAddCreateNew =
-      //   // sometimes lookup is in mode where new notes are not allowed (eg. move an existing note, this option is manually passed in)
-      //   this.opts.allowNewNote &&
-      //   // notes can't end with dot, invalid note
-      //   !queryOrig.endsWith(".") &&
-      //   // if you can select mult notes, new note is not valid
-      //   !picker.canSelectMany &&
-      //   // when you create lookup from selection, new note is not valid
-      //   !transformedQuery.wasMadeFromWikiLink &&
-      //   vaultsHaveSpaceForExactMatch;
-
-      // if (shouldAddCreateNew) {
-      //   const entryCreateNew = NotePickerUtils.createNoActiveItem({
-      //     fname: queryOrig,
-      //     detail: CREATE_NEW_NOTE_DETAIL,
-      //   });
-
-      //   const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
-      //     .bubbleUpCreateNew;
-      //   if (
-      //     shouldBubbleUpCreateNew({
-      //       numberOfExactMatches,
-      //       querystring: queryOrig,
-      //       bubbleUpCreateNew,
-      //     })
-      //   ) {
-      //     updatedItems = [entryCreateNew, ...updatedItems];
-      //   } else {
-      //     updatedItems = [...updatedItems, entryCreateNew];
-      //   }
-      // }
-
-      // check fuzz threshold. tune fuzzyness. currently hardcoded
-      // TODO: in the future this should be done in the engine
-      if (fuzzThreshold === 1) {
-        updatedItems = updatedItems.filter((ent) => ent.fname === pickerValue);
-      }
-
       // We do NOT want quick pick to filter out items since it does not match with FuseJS.
       updatedItems.forEach((item) => {
         item.alwaysShow = true;
@@ -221,24 +158,6 @@ export class NoteLookupProvider implements ILookupProvider {
       window.showErrorMessage(err);
       throw Error(err);
     }
-    // finally {
-    //   profile = getDurationMilliseconds(start);
-    //   picker.busy = false;
-    //   picker._justActivated = false;
-    //   picker.prevValue = picker.value;
-    //   picker.prevQuickpickValue = picker.value;
-    //   Logger.info({
-    //     ctx,
-    //     msg: "exit",
-    //     queryOrig,
-    //     profile,
-    //     cancelled: token?.isCancellationRequested,
-    //   });
-    //   AnalyticsUtils.track(VSCodeEvents.NoteLookup_Update, {
-    //     duration: profile,
-    //   });
-    //   return; // eslint-disable-line no-unsafe-finally -- probably can be just removed
-    // }
   }
 
   private fetchRootQuickPickResults = async ({
@@ -250,10 +169,8 @@ export class NoteLookupProvider implements ILookupProvider {
     schemas: SchemaModuleDict;
     vaults: DVault[];
   }) => {
-    // debugger;
     const nodes = await this.fetchRootResults();
 
-    // debugger;
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot,
@@ -265,7 +182,7 @@ export class NoteLookupProvider implements ILookupProvider {
   };
 
   private fetchRootResults = async () => {
-    //TODO: Change to findNotesMeta
+    // TODO: Change to findNotesMeta
     const roots = await this.engine.findNotes({ fname: "root" });
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
@@ -280,54 +197,29 @@ export class NoteLookupProvider implements ILookupProvider {
     originalQS: string;
     workspaceState: workspaceState;
   }) {
-    // const PAGINATE_LIMIT = 50;
-    // const ctx = "createPickerItemsFromEngine";
-    // const start = process.hrtime();
     const { transformedQuery, originalQS } = opts;
-    // const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-    // if we are doing a query, reset pagination options
-    // PickerUtilsV2.resetPaginationOpts(picker);
 
     const resp = await this.engine.queryNotes({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
-    // debugger;
     const nodes = resp.data;
 
     if (!nodes) {
       return [];
     }
 
-    // We need to filter our results to abide by different variations of our
-    // transformed query. We should do filtering prior to doing pagination cut off.
-    // nodes = filterPickerResults({ itemsToFilter: nodes, transformedQuery });
-
-    // Logger.info({ ctx, msg: "post:queryNotes" });
-    // if (nodes.length > PAGINATE_LIMIT) {
-    //   picker.allResults = nodes;
-    //   // picker.offset = PAGINATE_LIMIT;
-    //   // picker.moreResults = true;
-    //   nodes = nodes.slice(0, PAGINATE_LIMIT);
-    // } else {
-    //   PickerUtilsV2.resetPaginationOpts(picker);
-    // }
-
     return Promise.all(
       nodes.map(async (ent) =>
         DNodeUtils.enhancePropForQuickInputV3({
           wsRoot: opts.workspaceState.wsRoot,
-          props: ent as DNodeProps<any, any>, // TODO: Error casting
+          props: ent,
           schemas: opts.workspaceState.schemas,
           vaults: opts.workspaceState.vaults,
         })
       )
     );
-
-    // const profile = getDurationMilliseconds(start);
-    // Logger.info({ ctx, msg: "engine.query", profile });
-    // return updatedItems;
   }
 
   /**

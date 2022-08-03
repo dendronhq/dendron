@@ -40,11 +40,13 @@ import {
   NoteDicts,
   NoteDictsUtils,
   NoteFnameDictUtils,
+  NoteMetadataStore,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
   NoteQueryResp,
+  NoteStore,
   NoteUtils,
   Optional,
   QueryNotesOpts,
@@ -70,10 +72,9 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import { NodeJSFileStore, NoteStore } from "./store";
+import { NodeJSFileStore } from "./store";
 import { DConfig } from "./config";
 import { AnchorUtils, LinkUtils } from "./markdown";
-import { NoteMetadataStore } from "./store/NoteMetadataStore";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import path from "path";
@@ -146,11 +147,7 @@ export class DendronEngineV3 implements DEngine {
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
       forceNew: true,
-      noteStore: new NoteStore({
-        fileStore,
-        dataStore: new NoteMetadataStore(),
-        wsRoot,
-      }),
+      noteStore: new NoteStore(fileStore, new NoteMetadataStore(), wsRoot),
       fileStore,
       mode: "fuzzy",
       logger: LOGGER,

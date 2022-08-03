@@ -1,18 +1,16 @@
-import {
-  cleanName,
-  DendronError,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  FindNoteOpts,
-  IDataStore,
-  isNotUndefined,
-  NoteFnameDictUtils,
-  NotePropsByFnameDict,
-  NotePropsMeta,
-  RespV3,
-  VaultUtils,
-} from "@dendronhq/common-all";
 import _ from "lodash";
+import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
+import { DendronError } from "../error";
+import { NoteFnameDictUtils } from "../noteDictsUtils";
+import {
+  NotePropsMeta,
+  NotePropsByFnameDict,
+  RespV3,
+  FindNoteOpts,
+} from "../types";
+import { cleanName, isNotUndefined } from "../utils";
+import { VaultUtils } from "../vault";
+import { IDataStore } from "./IDataStore";
 
 export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
   /**
@@ -54,29 +52,27 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
     const { fname, vault } = opts;
     let noteMetadata: NotePropsMeta[] = [];
-
     if (fname) {
       const cleanedFname = cleanName(fname);
-      const ids = this._noteIdsByFname[cleanedFname];
+      const ids: string[] | undefined = this._noteIdsByFname[cleanedFname];
       if (!ids) {
         return { data: [] };
       }
       noteMetadata = ids
         .map((id) => this._noteMetadataById[id])
         .filter(isNotUndefined);
-    }
-
-    if (vault) {
-      // If other properties are not set, then filter entire note set instead
-      if (!fname) {
-        noteMetadata = _.values(this._noteMetadataById);
+      if (vault) {
+        noteMetadata = noteMetadata.filter((note) =>
+          VaultUtils.isEqualV2(note.vault, vault)
+        );
       }
-      noteMetadata = noteMetadata.filter((note) =>
+      return { data: _.cloneDeep(noteMetadata) };
+    } else if (vault) {
+      noteMetadata = _.values(this._noteMetadataById).filter((note) =>
         VaultUtils.isEqualV2(note.vault, vault)
       );
     }
-
-    return { data: _.cloneDeep(noteMetadata) };
+    return { data: noteMetadata };
   }
 
   /**

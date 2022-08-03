@@ -1,5 +1,4 @@
 import {
-  ConfigUtils,
   DendronError,
   DEngineClient,
   DVault,
@@ -167,11 +166,7 @@ export class TemplateUtils {
       TemplateHelpers.init();
       _INIT_HELPERS = true;
     }
-    if (ConfigUtils.getWorkspace(opts.engine.config).enableHandlebarTemplates) {
-      return this.applyHBTemplate(opts);
-    } else {
-      return this.applyLodashTemplate(opts);
-    }
+    return this.applyHBTemplate(opts);
   }
 
   /**
@@ -259,63 +254,6 @@ export class TemplateUtils {
       ...context,
     });
     addOrAppendTemplateBody({ templateBody, targetNote });
-    return targetNote;
-  }
-
-  // @deprecate
-  static applyLodashTemplate(opts: {
-    templateNote: NoteProps;
-    targetNote: NoteProps;
-    engine: DEngineClient;
-  }) {
-    const { templateNote, targetNote } = opts;
-    copyTemplateProps({ templateNote, targetNote });
-    // If note body exists, append template's body instead of overriding
-    addOrAppendTemplateBody({
-      templateBody: templateNote.body,
-      targetNote,
-    });
-
-    // Apply date variable substitution to the body based on lodash interpolate delimiter if applicable
-    // E.g. if template has <%= CURRENT_YEAR %>, new note will contain 2021
-    const currentDate = Time.now();
-
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_YEAR\s*%>/g,
-      currentDate.toFormat("yyyy")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_MONTH\s*%>/g,
-      currentDate.toFormat("LL")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_MONTH_NAME\s*%>/g,
-      currentDate.toFormat("LLLL")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_MONTH_NAME_SHORT\s*%>/g,
-      currentDate.toFormat("LLL")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_WEEK\s*%>/g,
-      currentDate.toFormat("WW")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_DAY\s*%>/g,
-      currentDate.toFormat("dd")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_HOUR\s*%>/g,
-      currentDate.toFormat("HH")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_MINUTE\s*%>/g,
-      currentDate.toFormat("mm")
-    );
-    targetNote.body = targetNote.body.replace(
-      /<%=\s*CURRENT_SECOND\s*%>/g,
-      currentDate.toFormat("ss")
-    );
     return targetNote;
   }
 

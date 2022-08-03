@@ -794,11 +794,6 @@ export const setupRefs: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
     vault,
     wsRoot,
   });
-  // create note with date variables
-  await NOTE_PRESETS_V4.NOTE_WITH_DATE_VARIABLES.create({
-    vault,
-    wsRoot,
-  });
   // create note with fm variables
   await NOTE_PRESETS_V4.NOTE_WITH_FM_VARIABLES.create({
     vault,

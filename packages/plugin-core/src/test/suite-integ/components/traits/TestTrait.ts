@@ -10,6 +10,10 @@ import {
 export class TestTrait implements NoteTrait {
   TEST_NAME_MODIFIER = "Test Name Modifier";
   TEST_TITLE_MODIFIER = "Test Title Modifier";
+  public template: string;
+  constructor(template: string) {
+    this.template = template;
+  }
 
   id: string = "test-trait";
   OnWillCreate: onWillCreateProps = {
@@ -25,7 +29,7 @@ export class TestTrait implements NoteTrait {
       return this.TEST_TITLE_MODIFIER;
     },
     setTemplate: () => {
-      return "foo";
+      return this.template;
     },
   };
 }

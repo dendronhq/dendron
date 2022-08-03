@@ -7,6 +7,8 @@ import {
   EngagementEvents,
   NoteUtils,
   SetNameModifierResp,
+  parseDendronURI,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
@@ -198,10 +200,27 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       } catch (Error: any) {
         this.L.error({ ctx: "trait.OnCreate.setTemplate", msg: Error });
       }
+      let maybeVault: DVault | undefined;
+      // for cross vault template
+      const { link: fname, vaultName } = parseDendronURI(templateNoteName);
+      if (!_.isUndefined(vaultName)) {
+        maybeVault = VaultUtils.getVaultByName({
+          vname: vaultName,
+          vaults: ExtensionProvider.getEngine().vaults,
+        });
+        // If vault is not found, skip lookup through rest of notes and return error
+        if (_.isUndefined(maybeVault)) {
+          this.L.error({
+            ctx: "trait.OnCreate.setTemplate",
+            msg: `No vault found for ${vaultName}`,
+          });
+          return;
+        }
+      }
 
       const notes = await ExtensionProvider.getEngine().findNotes({
-        fname: templateNoteName,
-        vault,
+        fname,
+        vault: maybeVault,
       });
 
       const dummy = NoteUtils.createForFake({

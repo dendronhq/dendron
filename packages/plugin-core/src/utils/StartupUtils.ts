@@ -270,6 +270,7 @@ export class StartupUtils {
         config: rawConfig,
         deprecatedPaths: DEPRECATED_PATHS,
       });
+      console.log({ pathsToDelete });
       return pathsToDelete.length > 0;
     } else {
       return false;

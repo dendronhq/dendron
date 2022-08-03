@@ -17,6 +17,7 @@ import _ from "lodash";
 import { WikiLinkNoteV4 } from "../types";
 import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
 import { findNonNoteFile } from "@dendronhq/common-server";
+import { isBeginBlockAnchorId, isEndBlockAnchorId } from "../remark/noteRefsV2";
 
 export type DecorationWikilink = Decoration & {
   type: DECORATION_TYPES.wikiLink | DECORATION_TYPES.brokenWikilink;
@@ -102,6 +103,9 @@ function checkIfAnchorIsValid({
 }): boolean {
   // if there's no anchor, there's nothing that could be invalid
   if (!anchor) return true;
+  // if it's a ^begin or ^end, it's valid;
+  if (anchor && isBeginBlockAnchorId(anchor.slice(1))) return true;
+  if (anchor && isEndBlockAnchorId(anchor.slice(1))) return true;
   // wildcard header anchor or line anchor. These are hard to check, so let's just say they exist.
   if (anchor && /^[*L]/.test(anchor)) return true;
   // otherwise, check that the anchor actually exists inside the note

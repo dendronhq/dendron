@@ -494,7 +494,7 @@ suite("NoteLookupCommand", function () {
    └── foo.md
    </pre>
    * */
-  describeMultiWS.only(
+  describeMultiWS(
     "GIVEN default note lookup settings:",
     {
       preSetupHook: async ({ wsRoot, vaults }) => {

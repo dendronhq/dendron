@@ -2,7 +2,6 @@ import {
   BulkResp,
   DendronCompositeError,
   DendronError,
-  DEngine,
   DEngineDeleteSchemaResp,
   DNodeUtils,
   DVault,
@@ -40,14 +39,6 @@ import { Utils } from "vscode-uri";
 import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
 
-// type DendronEngineOptsV3 = {
-//   wsRoot: string;
-//   vaults: DVaultUriVariant[];
-//   fileStore: IFileStore;
-//   noteStore: INoteStore<string>;
-// };
-// type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
-
 @singleton()
 export class DendronEngineV3Web implements IReducedEngineAPIService {
   private wsRoot: string;
@@ -64,8 +55,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   ) {
     this.wsRoot = wsRoot;
     this.fuseEngine = new FuseEngine({
-      fuzzThreshold: 1,
-      // fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+      fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
     this._vaults = vaults;
     this._noteStore = noteStore;
@@ -75,7 +65,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   /**
    * Does not throw error but returns it
    */
-  async init(): Promise<any> {
+  async init(): Promise<RespV2<any>> {
     // async init(): Promise<DEngineInitResp> {
     try {
       const { data: notes, error: storeError } = await this.initNotesNew(
@@ -132,16 +122,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
           error = new DendronCompositeError(allErrors);
       }
       // this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
-      return {
-        error,
-        data: {
-          notes,
-          schemas,
-          wsRoot: this.wsRoot,
-          // vaults: this.vaults,
-          // config: this.config,
-        },
-      };
+      return { error };
     } catch (error: any) {
       const { message, stack, status } = error;
       const payload = { message, stack };

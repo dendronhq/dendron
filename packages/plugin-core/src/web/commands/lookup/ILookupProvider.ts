@@ -7,7 +7,6 @@ import { CancellationToken } from "vscode";
 
 export type provideItemsProps = {
   token?: CancellationToken;
-  fuzzThreshold?: number; // TODO: Remove - pass all these into Provider Constructor
   pickerValue: string;
   showDirectChildrenOnly: boolean; // TODO: Remove
   workspaceState: workspaceState; // TODO: Remove
@@ -20,5 +19,9 @@ export type workspaceState = {
 };
 
 export interface ILookupProvider {
+  /**
+   * Provide items to populate the lookup quick pick with
+   * @param opts
+   */
   provideItems(opts: provideItemsProps): Promise<NoteQuickInput[] | undefined>;
 }

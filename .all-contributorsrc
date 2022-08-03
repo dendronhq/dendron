@@ -2028,6 +2028,15 @@
         "bug",
         "content"
       ]
+    },
+    {
+      "login": "doylejg",
+      "name": "doylejg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6617453?v=4",
+      "profile": "https://github.com/doylejg",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

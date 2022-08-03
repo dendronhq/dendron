@@ -70,26 +70,25 @@ export class WebViewCommonUtils {
       <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
       <link rel="stylesheet" href="${cssSrc}" />
       <title>Dendron </title>
-
       <style id="${builtinStyle}">
-      body, h1, h2, h3, h4 {
-        color: var(--vscode-editor-foreground);
-      }
+        body, h1, h2, h3, h4 {
+          color: var(--vscode-editor-foreground);
+        }
 
-      .main-content ul {
-        list-style: unset;
-        list-style-type: disc;
-      }
+        .main-content ul {
+          list-style: unset;
+          list-style-type: disc;
+        }
 
-      body {
-        background-color: var(--vscode-editor-background);
-      }
+        body {
+          background-color: var(--vscode-editor-background);
+        }
 
-      a,
-      a:hover,
-      a:active {
-        color: var(--vscode-textLink-foreground);
-      }
+        a,
+        a:hover,
+        a:active {
+          color: var(--vscode-textLink-foreground);
+        }
       </style>
     </head>
 

@@ -1,4 +1,3 @@
-import { convertLegacyProps } from "antd/lib/button/button";
 import React from "react";
 
 export interface DendronState {

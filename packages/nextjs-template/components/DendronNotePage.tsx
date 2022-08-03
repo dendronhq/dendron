@@ -12,7 +12,6 @@ import {
 } from "@dendronhq/common-frontend";
 import { Col, Row } from "antd";
 import _ from "lodash";
-import dynamic from "next/dynamic";
 import React from "react";
 import { DendronCollectionItem } from "../components/DendronCollection";
 import DendronCustomHead from "../components/DendronCustomHead";
@@ -23,6 +22,7 @@ import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
+import { MermaidScript } from "./MermaidScript";
 
 const { HEADER } = DENDRON_STYLE_CONSTANTS;
 
@@ -110,6 +110,7 @@ export default function Note({
 
   return (
     <>
+      <MermaidScript noteBody={noteBody} />
       <DendronSEO note={note} config={config} />
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}
       <Row>

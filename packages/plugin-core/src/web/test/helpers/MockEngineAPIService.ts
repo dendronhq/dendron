@@ -14,11 +14,9 @@ import {
   QueryNotesOpts,
   NoteUtils,
   genUUID,
-} from "@dendronhq/common-all";
-import {
-  IReducedEngineAPIService,
   NoteMetadataStore,
-} from "@dendronhq/plugin-common";
+} from "@dendronhq/common-all";
+import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 
 export class MockEngineAPIService implements IReducedEngineAPIService {
   // private noteProps: NoteProps[];

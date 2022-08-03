@@ -1,10 +1,13 @@
+import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
+
 import {
   IDataStore,
   IFileStore,
   INoteStore,
+  NoteMetadataStore,
   NotePropsMeta,
+  NoteStore,
 } from "@dendronhq/common-all";
-import "reflect-metadata";
 import { container, Lifecycle } from "tsyringe";
 import * as vscode from "vscode";
 import { ILookupProvider } from "./commands/lookup/ILookupProvider";
@@ -12,8 +15,6 @@ import { NoteLookupProvider } from "./commands/lookup/NoteLookupProvider";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { DendronEngineV3Web } from "./engine/DendronEngineV3Web";
 import { IReducedEngineAPIService } from "./engine/IReducedEngineApiService";
-import { NoteMetadataStore } from "./engine/store/NoteMetadataStore";
-import { NoteStore } from "./engine/store/NoteStore";
 import { VSCodeFileStore } from "./engine/store/VSCodeFileStore";
 import { getVaults } from "./injection-providers/getVaults";
 import { getWSRoot } from "./injection-providers/getWSRoot";

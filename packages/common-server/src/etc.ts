@@ -70,7 +70,7 @@ export class WebViewCommonUtils {
       <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
       <link rel="stylesheet" href="${cssSrc}" />
       <title>Dendron </title>
-      
+
       <style id="${builtinStyle}">
       body, h1, h2, h3, h4 {
         color: var(--vscode-editor-foreground);
@@ -81,7 +81,7 @@ export class WebViewCommonUtils {
         list-style-type: disc;
       }
 
-      body, .ant-layout {
+      body {
         background-color: var(--vscode-editor-background);
       }
 
@@ -169,7 +169,7 @@ export class WebViewCommonUtils {
         if (overrideTheme === "light" || overrideTheme === "dark") {
             // If user picked light or dark as the override, only apply the override
             console.log("Theme override is overriding the default theme", overrideTheme);
-          
+
             defaultTheme = overrideTheme;
             addThemeCSS(defaultTheme, "${defaultStyle}");
         } else if (overrideTheme === "custom") {

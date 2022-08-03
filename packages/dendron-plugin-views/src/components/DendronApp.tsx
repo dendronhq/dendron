@@ -224,9 +224,13 @@ export type DendronAppProps = {
 };
 
 function DendronApp(props: DendronAppProps) {
+  const style = {
+    padding: props.opts.padding,
+    backgroundColor: "var(--vscode-editor-background)",
+  } as React.CSSProperties;
   return (
     <Provider store={combinedStore}>
-      <Layout style={{ padding: props.opts.padding }}>
+      <Layout style={style}>
         <Content>
           <DendronVSCodeApp {...props} />
         </Content>

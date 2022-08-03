@@ -1,4 +1,4 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
 import { AssertUtils, TestNoteFactory } from "@dendronhq/common-test-utils";
 import sinon from "sinon";
@@ -13,6 +13,7 @@ async function expectStringMatch(note: NoteProps, matchTxt: string) {
 
 describe(`WHEN running applyTemplate tests`, () => {
   const noteFactory: TestNoteFactory = TestNoteFactory.defaultUnitTestFactory();
+  // @ts-ignore
   let targetNote: NoteProps;
   const currentDate = new Date(2022, 0, 10);
   let clock: sinon.SinonFakeTimers;
@@ -44,10 +45,6 @@ describe(`WHEN running applyTemplate tests`, () => {
       {
         expect,
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        modConfigCb: (cfg) => {
-          cfg.workspace.enableHandlebarTemplates = true;
-          return cfg;
-        },
       }
     );
   }
@@ -332,8 +329,8 @@ describe(`WHEN running applyTemplate tests`, () => {
     });
 
     describe("AND apply a template with date variables", () => {
-      it("THEN replace note's body with template's body and with proper date substitution", () => {
-        setupTemplateTest(
+      it("THEN replace note's body with template's body and with proper date substitution", async () => {
+        await setupTemplateTest(
           {
             templateNoteFname: "new-note",
             templateNoteBody: [
@@ -372,128 +369,6 @@ describe(`WHEN running applyTemplate tests`, () => {
                 "FNAME: new-note",
               ].join("\n")
             );
-          }
-        );
-      });
-    });
-  });
-
-  describe("WHEN non-handlebars", () => {
-    const modConfigCb = (cfg: IntermediateDendronConfig) => {
-      cfg.workspace.enableHandlebarTemplates = false;
-      return cfg;
-    };
-    describe(`GIVEN current note's body is empty`, () => {
-      beforeEach(async () => {
-        targetNote = await noteFactory.createForFName("new note");
-        clock = sinon.useFakeTimers(currentDate);
-      });
-      afterEach(() => {
-        sinon.restore();
-        clock.restore();
-      });
-
-      it("WHEN applying a template, THEN replace note's body with template's body", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            const resp = TemplateUtils.applyTemplate({
-              templateNote,
-              targetNote,
-              engine,
-            });
-            expect(resp).toBeTruthy();
-            expect(targetNote.body).toEqual(engine.notes["foo"].body);
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-            modConfigCb,
-          }
-        );
-      });
-
-      it("WHEN applying a template with date variables, THEN replace note's body with template's body and with proper date substitution", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const dateTemplate: NoteProps = engine.notes["date-variables"];
-            const resp = TemplateUtils.applyTemplate({
-              templateNote: dateTemplate,
-              targetNote,
-              engine,
-            });
-
-            expect(resp).toBeTruthy();
-            expect(targetNote.body).not.toEqual(
-              engine.notes["date-variables"].body
-            );
-            expect(targetNote.body.trim()).toEqual(
-              `Today is 2022.01.10` +
-                "\n" +
-                "It is week 02 of the year" +
-                "\n" +
-                `This link goes to [[daily.journal.2022.01.10]]` +
-                "\n" +
-                `{{ 1 + 1 }} should not be evalated to 2`
-            );
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupRefs,
-            modConfigCb,
-          }
-        );
-      });
-
-      it("WHEN applying a template with fm variables, THEN replace note's body with template's body without errors", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const fmTemplate: NoteProps = engine.notes["fm-variables"];
-            const resp = TemplateUtils.applyTemplate({
-              templateNote: fmTemplate,
-              targetNote,
-              engine,
-            });
-
-            expect(resp).toBeTruthy();
-            expect(targetNote.body).toEqual(engine.notes["fm-variables"].body);
-            expect(targetNote.body.trim()).toEqual(`Title is {{ fm.title }}`);
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupRefs,
-            modConfigCb,
-          }
-        );
-      });
-    });
-
-    describe(`GIVEN current note's body is not empty`, () => {
-      const noteBody = "test test";
-
-      beforeEach(async () => {
-        targetNote = await noteFactory.createForFName("new note");
-        targetNote.body = noteBody;
-      });
-
-      it("WHEN applying a template, THEN append note's body with a \\n + template's body", async () => {
-        await runEngineTestV5(
-          async ({ engine }) => {
-            const templateNote: NoteProps = engine.notes["foo"];
-            const resp = TemplateUtils.applyTemplate({
-              templateNote,
-              targetNote,
-              engine,
-            });
-            expect(resp).toBeTruthy();
-            expect(targetNote.body).toEqual(
-              noteBody + "\n" + engine.notes["foo"].body
-            );
-          },
-          {
-            expect,
-            preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
-            modConfigCb,
           }
         );
       });

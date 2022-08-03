@@ -1,58 +1,48 @@
-import {
-  DendronError,
-  Disposable,
-  DNoteLoc,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  FindNoteOpts,
-  genHash,
-  IDataStore,
-  IFileStore,
-  INoteStore,
-  isNotUndefined,
-  NoteProps,
-  NotePropsMeta,
-  NoteUtils,
-  RespV3,
-  WriteNoteMetaOpts,
-  WriteNoteOpts,
-} from "@dendronhq/common-all";
-import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
+import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
+import { NoteUtils } from "../dnode";
+import { DendronError, DendronCompositeError } from "../error";
+import {
+  Disposable,
+  NotePropsMeta,
+  RespV3,
+  NoteProps,
+  FindNoteOpts,
+  WriteNoteOpts,
+  WriteNoteMetaOpts,
+  DNoteLoc,
+} from "../types";
+import { genHash, isNotUndefined } from "../utils";
+import { IDataStore } from "./IDataStore";
+import { IFileStore } from "./IFileStore";
+import { INoteStore } from "./INoteStore";
+import { inject, injectable } from "tsyringe";
 
 /**
  * Responsible for storing NoteProps non-metadata and NoteProps metadata
  */
+@injectable()
 export class NoteStore implements Disposable, INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
   private _wsRoot: string;
-  private _logger: DLogger;
-  private _loggerDispose: () => any;
 
-  constructor(opts: {
-    fileStore: IFileStore;
-    dataStore: IDataStore<string, NotePropsMeta>;
-    wsRoot: string;
-  }) {
-    this._fileStore = opts.fileStore;
-    this._metadataStore = opts.dataStore;
-    this._wsRoot = opts.wsRoot;
-    const { logger, dispose } = createDisposableLogger();
-    this._logger = logger;
-    this._loggerDispose = dispose;
+  constructor(
+    @inject("IFileStore") fileStore: IFileStore,
+    @inject("IDataStore") dataStore: IDataStore<string, NotePropsMeta>,
+    @inject("wsRootString") wsRoot: string
+  ) {
+    this._fileStore = fileStore;
+    this._metadataStore = dataStore;
+    this._wsRoot = wsRoot;
   }
 
-  dispose() {
-    this._loggerDispose();
-  }
+  dispose() {}
 
   /**
    * See {@link INoteStore.get}
    */
   async get(key: string): Promise<RespV3<NoteProps>> {
-    const ctx = "NoteStore:get";
-    this._logger.info({ ctx, msg: `Getting NoteProps for ${key}` });
     const metadata = await this.getMetadata(key);
     if (metadata.error) {
       return { error: metadata.error };
@@ -97,9 +87,6 @@ export class NoteStore implements Disposable, INoteStore<string> {
    * See {@link INoteStore.bulkGet}
    */
   async bulkGet(keys: string[]): Promise<RespV3<NoteProps>[]> {
-    const ctx = "NoteStore:bulkGet";
-    this._logger.info({ ctx, msg: `Bulk getting NoteProps for ${keys}` });
-
     return Promise.all(keys.map((key) => this.get(key)));
   }
 

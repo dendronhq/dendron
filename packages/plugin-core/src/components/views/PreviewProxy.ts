@@ -24,7 +24,7 @@ export interface PreviewProxy {
   /**
    * lock the preview webview
    */
-  lock(): void;
+  lock(noteId?: string): void;
 
   /**
    * unlock the preview webview

@@ -23,7 +23,7 @@ export class MockPreviewProxy implements PreviewProxy {
   isOpen(): boolean {
     return this._isOpen;
   }
-  lock(): void {
+  lock(_noteId?: string): void {
     this._isLocked = true;
   }
   unlock(): void {

@@ -16,7 +16,7 @@ export class TogglePreviewLock extends BasicCommand<
   key = DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key;
   _panel: PreviewProxy | undefined;
 
-  constructor(previewPanel: PreviewProxy | undefined) {
+  constructor(previewPanel: PreviewProxy) {
     super();
     this._panel = previewPanel;
   }
@@ -30,14 +30,14 @@ export class TogglePreviewLock extends BasicCommand<
 
   async execute(_opts?: CommandOpts) {
     if (this._panel) {
+      const note = ExtensionProvider.getWSUtils().getActiveNote();
       if (this._panel.isLocked()) {
         this._panel.unlock();
-        const note = ExtensionProvider.getWSUtils().getActiveNote();
         if (note) {
           this._panel.show(note);
         }
       } else {
-        this._panel.lock();
+        this._panel.lock(note?.id);
       }
     }
 

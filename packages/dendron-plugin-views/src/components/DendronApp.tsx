@@ -194,7 +194,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         ? NoteViewMessageEnum.onUnlock
         : NoteViewMessageEnum.onLock,
       data: {
-        fName: props.ide.noteActive?.fname,
+        id: props.ide.noteActive?.id,
       },
       source: DMessageSource.webClient,
     });

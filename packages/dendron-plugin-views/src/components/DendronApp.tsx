@@ -211,7 +211,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           position: "absolute",
           top: 33,
           right: 33,
-          opacity: isLocked ? 1 : 0.5,
+          opacity: isLocked ? 1 : 0.3,
         }}
       />
     </>

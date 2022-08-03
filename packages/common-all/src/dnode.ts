@@ -1048,6 +1048,15 @@ export class NoteUtils {
     return true;
   }
 
+  static validateFname(fname: string) {
+    // Each hierarchy string
+    // 1. should not be empty
+    // 2. should not have leading trailing whitespace
+    return fname.split(".").every((value) => {
+      return value !== "" && !value.startsWith(" ") && !value.endsWith(" ");
+    });
+  }
+
   /** Generate a random color for `note`, but allow the user to override that color selection.
    *
    * @param note The fname of note that you want to get the color of.

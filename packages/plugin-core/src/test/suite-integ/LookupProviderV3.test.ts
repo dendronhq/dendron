@@ -1,8 +1,13 @@
-import { NoteProps } from "@dendronhq/common-all";
+import {
+  asyncLoopOneAtATime,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4, TestNoteFactory } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { beforeEach, describe, it, suite } from "mocha";
+import sinon from "sinon";
 import { ExtensionContext, Selection } from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import {
@@ -280,6 +285,54 @@ suite("selection2Items", () => {
         expect(expectedItemLabels).toEqual(actualItemLabels);
 
         cmd.cleanUp();
+      });
+    }
+  );
+});
+
+suite("onAccept", () => {
+  describeMultiWS(
+    "GIVEN invalid fname",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    },
+    () => {
+      test("THEN rejected", async () => {
+        const validateFnameSpy = sinon.spy(NoteUtils, "validateFname");
+        const cmd = new NoteLookupCommand();
+        const { controller, provider, quickpick } = await cmd.gatherInputs();
+        const invalidFnames = [
+          "foo.", // trailing dot
+          "foo..", // multiple trailing dots
+          ".foo", // leading dot
+          "..foo", // multiple leading dots
+          " foo", // leading whitespace
+          "  foo", // multiple leading whitespace
+          "foo ", // trailing whitespace
+          "foo  ", // multiple trailing whitespace
+          " foo ", // leading and trailing whitespace
+          "  foo  ", // multiple leading and trailing whitespace
+          "foo..bar", // empty hierarchy
+          "foo...bar", // multiple empty hierarchy
+          "foo. .bar", // whitespace hierarchy
+          "foo.bar .baz", // hierarchy with trailing whitespace
+          "foo. bar.baz", // hierarchy with leading whitespace
+          "foo. bar .baz", // hierarchy with leading and trailing whitespace
+          " foo . . bar . . baz ", // everything
+        ];
+
+        await asyncLoopOneAtATime(invalidFnames, async (fname) => {
+          quickpick.value = fname;
+          await provider.onDidAccept({
+            quickpick,
+            cancellationToken: controller.cancelToken,
+          })();
+          const lastCall = validateFnameSpy.lastCall;
+          expect(lastCall.args[0]).toEqual(fname);
+          expect(lastCall.returnValue).toBeFalsy();
+        });
+        cmd.cleanUp();
+        validateFnameSpy.restore();
       });
     }
   );

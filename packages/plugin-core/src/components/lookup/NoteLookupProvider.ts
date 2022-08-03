@@ -130,6 +130,18 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           picker,
         });
       }
+
+      // validates fname.
+      if (selectedItems.length === 1) {
+        const item = selectedItems[0];
+        if (!NoteUtils.validateFname(item.fname)) {
+          window.showErrorMessage(
+            "Hierarchies cannot have leading / trailing whitespace or be empty."
+          );
+          return;
+        }
+      }
+
       // when doing lookup, opening existing notes don't require vault picker
       if (
         PickerUtilsV2.hasNextPicker(picker, {

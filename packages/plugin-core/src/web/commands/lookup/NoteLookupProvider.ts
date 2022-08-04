@@ -1,9 +1,8 @@
 import {
   DNodeUtils,
-  DVault,
   NoteLookupUtils,
   NoteProps,
-  NoteQuickInput,
+  NoteQuickInputV2,
   NoteUtils,
   SchemaModuleDict,
   SchemaUtils,
@@ -29,9 +28,7 @@ export class NoteLookupProvider implements ILookupProvider {
     @inject("IReducedEngineAPIService") private engine: IReducedEngineAPIService
   ) {}
 
-  async provideItems(
-    opts: provideItemsProps
-  ): Promise<NoteQuickInput[] | undefined> {
+  async provideItems(opts: provideItemsProps): Promise<NoteQuickInputV2[]> {
     const { token, showDirectChildrenOnly, workspaceState } = opts;
 
     const { pickerValue } = opts;
@@ -51,8 +48,6 @@ export class NoteLookupProvider implements ILookupProvider {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         const items = this.fetchRootQuickPickResults({
-          wsRoot: workspaceState.wsRoot,
-          vaults: workspaceState.vaults,
           schemas: workspaceState.schemas,
         });
         return items;
@@ -61,7 +56,7 @@ export class NoteLookupProvider implements ILookupProvider {
       // const items: NoteQuickInput[] = [...picker.items];
       // let updatedItems = PickerUtilsV2.filterDefaultItems(items);
       if (token?.isCancellationRequested) {
-        return;
+        return [];
       }
 
       let updatedItems = await this.fetchPickerResults({
@@ -71,7 +66,7 @@ export class NoteLookupProvider implements ILookupProvider {
       });
 
       if (token?.isCancellationRequested) {
-        return;
+        return [];
       }
 
       //TODO: Dunno if we still need this?
@@ -137,11 +132,9 @@ export class NoteLookupProvider implements ILookupProvider {
 
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
-              return DNodeUtils.enhancePropForQuickInputV3({
-                wsRoot: workspaceState.wsRoot,
+              return DNodeUtils.enhancePropForQuickInputV4({
                 props: ent,
                 schemas: workspaceState.schemas,
-                vaults: workspaceState.vaults,
               });
             })
           );
@@ -161,22 +154,16 @@ export class NoteLookupProvider implements ILookupProvider {
   }
 
   private fetchRootQuickPickResults = async ({
-    wsRoot,
     schemas,
-    vaults,
   }: {
-    wsRoot: string;
     schemas: SchemaModuleDict;
-    vaults: DVault[];
   }) => {
     const nodes = await this.fetchRootResults();
 
     return nodes.map((ent) => {
-      return DNodeUtils.enhancePropForQuickInput({
-        wsRoot,
+      return DNodeUtils.enhancePropForQuickInputV4({
         props: ent,
         schemas,
-        vaults,
       });
     });
   };
@@ -212,11 +199,9 @@ export class NoteLookupProvider implements ILookupProvider {
 
     return Promise.all(
       nodes.map(async (ent) =>
-        DNodeUtils.enhancePropForQuickInputV3({
-          wsRoot: opts.workspaceState.wsRoot,
+        DNodeUtils.enhancePropForQuickInputV4({
           props: ent,
           schemas: opts.workspaceState.schemas,
-          vaults: opts.workspaceState.vaults,
         })
       )
     );

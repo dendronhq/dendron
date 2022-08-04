@@ -28,7 +28,7 @@ export class NoteLookupCmd {
     }
 
     result.items.forEach(async (value) => {
-      if (value.id === "Create New") {
+      if (value.label === "Create New") {
         const newNote = NoteUtils.create({
           fname: value.fname,
           vault: value.vault,

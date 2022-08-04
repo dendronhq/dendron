@@ -30,7 +30,6 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       {
         noStubs: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),
-        wsRoot: getDWorkspace().wsRoot,
       }
     ) as NoteProps;
     const nppath = NoteUtils.getFullPath({

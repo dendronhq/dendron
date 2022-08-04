@@ -44,15 +44,13 @@ export async function setupWebExtContainer() {
   );
 
   container.register("wsRoot", { useValue: wsRoot });
-  container.register("wsRootString", { useValue: wsRoot.fsPath });
   container.register("vaults", { useValue: vaults });
 
   // TODO: Get rid of this in favor or using DI in Note Store / common-all package.
   const fs = container.resolve<IFileStore>("IFileStore");
   const ds = container.resolve<IDataStore<string, NotePropsMeta>>("IDataStore");
-  const wsRootStr = container.resolve<string>("wsRootString");
 
-  const noteStore = new NoteStore(fs, ds, wsRootStr);
+  const noteStore = new NoteStore(fs, ds, wsRoot);
 
   container.register<INoteStore<string>>("INoteStore", {
     useValue: noteStore,

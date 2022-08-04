@@ -1056,7 +1056,6 @@ export class FileStorage implements DStore {
           note,
           noteDicts,
           createStubs: true,
-          wsRoot: this.wsRoot,
         });
         changesToParents.forEach((changedEntry) => {
           NoteDictsUtils.add(changedEntry.note, noteDicts);
@@ -1181,7 +1180,6 @@ export class FileStorage implements DStore {
         note,
         noteDicts,
         createStubs: true,
-        wsRoot: this.wsRoot,
       });
       // add one entry for each parent updated
       changed = changed.concat(out);

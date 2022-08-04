@@ -1326,7 +1326,7 @@
     "buildCI": "yarn rimraf out && yarn compile",
     "build": "yarn compile",
     "build:dev": "yarn webpack",
-    "build:prod": "yarn webpack:prod && ./scripts/varSub.sh",
+    "build:prod": "yarn webpack:prod && ./scripts/varSub.sh && yarn package-web",
     "compile": "tsc -p tsconfig.build.json ",
     "test": "node ./out/src/test/runTestInteg.js",
     "format": "echo nop",

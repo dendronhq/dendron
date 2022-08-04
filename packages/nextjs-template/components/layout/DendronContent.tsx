@@ -15,6 +15,7 @@ export const DendronContent: React.FC<any> = (props) => {
       className="side-layout-main"
       style={{
         maxWidth: "1200px",
+        minWidth: 0,
         display: !isSidebarCollapsed && isResponsive ? "none" : "initial",
       }}
     >

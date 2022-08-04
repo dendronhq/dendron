@@ -267,6 +267,7 @@ suite("VaultAddCommand", function () {
     describeSingleWS(
       "WHEN add to existing folder",
       {
+        modConfigCb: disableSelfContainedVaults,
         postSetupHook: async ({ wsRoot }) => {
           const vpath = path.join(wsRoot, "vault2");
           fs.ensureDirSync(vpath);
@@ -280,6 +281,7 @@ suite("VaultAddCommand", function () {
           const schema = SchemaUtils.createRootModule({ vault });
           await schemaModuleOpts2File(schema, vault.fsPath, "root");
         },
+        timeout: 1e4,
       },
       () => {
         test("THEN do right thing", async () => {
@@ -289,6 +291,7 @@ suite("VaultAddCommand", function () {
 
           await new VaultAddCommand().run();
           expect(await fs.readdir(vpath)).toEqual([
+            ".gitignore",
             "root.md",
             "root.schema.yml",
           ]);
@@ -321,93 +324,112 @@ suite("VaultAddCommand", function () {
       }
     );
 
-    describeSingleWS("AND WHEN add absolute path inside wsRoot", {}, () => {
-      test("THEN do right thing", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vpath = path.join(wsRoot, "vault2");
-        stubVaultInput({ sourceType: "local", sourcePath: vpath });
-        await new VaultAddCommand().run();
+    describeSingleWS(
+      "AND WHEN add absolute path inside wsRoot",
+      { modConfigCb: disableSelfContainedVaults },
+      () => {
+        test("THEN do right thing", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const vpath = path.join(wsRoot, "vault2");
+          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          await new VaultAddCommand().run();
 
-        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
 
-        expect(vaultsAfter.length).toEqual(2);
-        expect(
-          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
-        ).toEqual([
-          ".dendron.cache.json",
-          ".vscode",
-          "assets",
-          "root.md",
-          "root.schema.yml",
-        ]);
-        await checkVaults(
-          {
-            wsRoot,
-            vaults: vaultsAfter,
-          },
-          expect
-        );
-      });
-    });
+          expect(vaultsAfter.length).toEqual(2);
+          expect(
+            await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+          ).toEqual([
+            ".dendron.cache.json",
+            ".vscode",
+            "assets",
+            "root.md",
+            "root.schema.yml",
+          ]);
+          await checkVaults(
+            {
+              wsRoot,
+              vaults: vaultsAfter,
+            },
+            expect
+          );
+        });
+      }
+    );
 
-    describeSingleWS("AND WHEN add rel path inside wsRoot", {}, () => {
-      test("THEN do right thing", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const sourcePath = "vault2";
-        stubVaultInput({ sourceType: "local", sourcePath });
-        await new VaultAddCommand().run();
+    describeSingleWS(
+      "AND WHEN add rel path inside wsRoot",
+      { modConfigCb: disableSelfContainedVaults, timeout: 1e4 },
+      () => {
+        test("THEN do right thing", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const sourcePath = "vault2";
+          stubVaultInput({ sourceType: "local", sourcePath });
+          await new VaultAddCommand().run();
 
-        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
-        expect(
-          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
-        ).toEqual([
-          ".dendron.cache.json",
-          ".vscode",
-          "assets",
-          "root.md",
-          "root.schema.yml",
-        ]);
-        await checkVaults(
-          {
-            wsRoot,
-            vaults: vaultsAfter,
-          },
-          expect
-        );
-      });
-    });
+          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          expect(
+            await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+          ).toEqual([
+            ".dendron.cache.json",
+            ".vscode",
+            "assets",
+            "root.md",
+            "root.schema.yml",
+          ]);
+          await checkVaults(
+            {
+              wsRoot,
+              vaults: vaultsAfter,
+            },
+            expect
+          );
+        });
+      }
+    );
 
-    describeSingleWS("AND WHEN add absolute path outside of wsRoot", {}, () => {
-      test("THEN do right thing", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vpath = tmpDir().name;
-        stubVaultInput({ sourceType: "local", sourcePath: vpath });
-        await new VaultAddCommand().run();
-        const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
-        expect(
-          await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
-        ).toEqual([
-          ".dendron.cache.json",
-          ".vscode",
-          "assets",
-          "root.md",
-          "root.schema.yml",
-        ]);
+    describeSingleWS(
+      "AND WHEN add absolute path outside of wsRoot",
+      {
+        modConfigCb: disableSelfContainedVaults,
+      },
+      () => {
+        test("THEN do right thing", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const vpath = tmpDir().name;
+          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          await new VaultAddCommand().run();
+          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          expect(
+            await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
+          ).toEqual([
+            ".dendron.cache.json",
+            ".vscode",
+            "assets",
+            "root.md",
+            "root.schema.yml",
+          ]);
 
-        await checkVaults(
-          {
-            wsRoot,
-            vaults: vaultsAfter,
-          },
-          expect
-        );
-      });
-    });
+          await checkVaults(
+            {
+              wsRoot,
+              vaults: vaultsAfter,
+            },
+            expect
+          );
+        });
+      }
+    );
   });
 });
 
 function enableSelfCOntainedVaults(config: IntermediateDendronConfig) {
   config.dev!.enableSelfContainedVaults = true;
+  return config;
+}
+
+function disableSelfContainedVaults(config: IntermediateDendronConfig) {
+  config.dev!.enableSelfContainedVaults = false;
   return config;
 }
 
@@ -635,8 +657,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         });
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
+        // vaults always use unix separators in config files. Added in #3096
         expect(vault?.fsPath).toEqual(
-          path.join(FOLDERS.DEPENDENCIES, vaultName)
+          path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
         );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });

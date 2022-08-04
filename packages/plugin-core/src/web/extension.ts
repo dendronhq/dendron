@@ -1,26 +1,13 @@
 import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
 
-import {
-  IDataStore,
-  IFileStore,
-  INoteStore,
-  NoteMetadataStore,
-  NotePropsMeta,
-  NoteStore,
-} from "@dendronhq/common-all";
-import { container, Lifecycle } from "tsyringe";
+import { container } from "tsyringe";
 import * as vscode from "vscode";
-import { ILookupProvider } from "./commands/lookup/ILookupProvider";
-import { NoteLookupProvider } from "./commands/lookup/NoteLookupProvider";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
-import { DendronEngineV3Web } from "./engine/DendronEngineV3Web";
-import { IReducedEngineAPIService } from "./engine/IReducedEngineApiService";
-import { VSCodeFileStore } from "./engine/store/VSCodeFileStore";
-import { getVaults } from "./injection-providers/getVaults";
-import { getWSRoot } from "./injection-providers/getWSRoot";
+import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 
 export async function activate(context: vscode.ExtensionContext) {
-  await setupWebExtensionInjectionContainer();
+  // Use the web extension injection container:
+  await setupWebExtContainer();
 
   setupCommands(context);
 
@@ -29,69 +16,6 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-async function setupWebExtensionInjectionContainer() {
-  const wsRoot = await getWSRoot();
-
-  if (!wsRoot) {
-    throw new Error("Unable to find wsRoot!");
-  }
-  const vaults = await getVaults(wsRoot);
-
-  container.register<IReducedEngineAPIService>(
-    "IReducedEngineAPIService",
-    {
-      useClass: DendronEngineV3Web,
-    },
-    { lifecycle: Lifecycle.Singleton }
-  );
-
-  container.register<IFileStore>("IFileStore", {
-    useClass: VSCodeFileStore,
-  });
-
-  container.register<INoteStore<string>>(
-    "INoteStore",
-    {
-      useClass: NoteStore,
-    },
-    { lifecycle: Lifecycle.Singleton }
-  );
-
-  container.register<IDataStore<string, NotePropsMeta>>(
-    "IDataStore",
-    {
-      useClass: NoteMetadataStore,
-    },
-    { lifecycle: Lifecycle.Singleton }
-  );
-
-  container.register<ILookupProvider>("NoteProvider", {
-    useClass: NoteLookupProvider,
-  });
-
-  container.afterResolution<DendronEngineV3Web>(
-    "IReducedEngineAPIService",
-    (_t, result) => {
-      if ("init" in result) {
-        console.log("Initializing Engine");
-        result.init().then(
-          (result) => {
-            console.log("Finished Initializing Engine");
-          },
-          (reason) => {
-            throw new Error("Failed Engine Init");
-          }
-        );
-      }
-    },
-    { frequency: "Once" }
-  );
-
-  container.register("wsRoot", { useValue: wsRoot });
-  container.register("wsRootString", { useValue: wsRoot.fsPath });
-  container.register("vaults", { useValue: vaults });
-}
 
 async function setupCommands(context: vscode.ExtensionContext) {
   const existingCommands = await vscode.commands.getCommands();

@@ -29,8 +29,6 @@ export interface IReducedEngineAPIService {
    */
   findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
 
-  // refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
-
   bulkWriteNotes(
     opts: BulkWriteNotesOpts
   ): Promise<BulkResp<NoteChangeEntry[]>>;
@@ -40,16 +38,12 @@ export interface IReducedEngineAPIService {
     opts?: EngineWriteOptsV2 | undefined
   ): Promise<RespV2<NoteChangeEntry[]>>;
 
-  // writeSchema(schema: SchemaModuleProps): Promise<void>;
-
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<EngineDeleteNoteResp>;
 
   renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
-
-  // renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>>;
 
   queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>>;
 }

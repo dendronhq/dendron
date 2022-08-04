@@ -115,7 +115,7 @@ export async function getAllFilesWithTypes(
     exclude: [".git", "Icon\r", ".*"],
   });
   try {
-    const allFiles = await fs.readdir(root, { withFileTypes: true });
+    const allFiles = await fs.readdir(root.fsPath, { withFileTypes: true });
     return {
       data: allFiles
         .map((dirent) => {

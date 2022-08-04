@@ -18,7 +18,6 @@
       "packages/dendron-cli",
       "packages/nextjs-template",
       "packages/plugin-core",
-      "packages/plugin-common",
       "packages/common-frontend",
       "packages/dendron-plugin-views"
     ],

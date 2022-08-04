@@ -101,7 +101,6 @@ function createNoActiveItem({
 @injectable()
 export class LookupQuickpickFactory {
   private _engine: IReducedEngineAPIService;
-  private FUZZ_THRESHOLD = 0.2;
 
   constructor(
     @inject("IReducedEngineAPIService") engine: IReducedEngineAPIService,
@@ -195,7 +194,6 @@ export class LookupQuickpickFactory {
       .provideItems({
         pickerValue: initialQueryValue,
         showDirectChildrenOnly: false,
-        fuzzThreshold: this.FUZZ_THRESHOLD, // TODO: Make this configurable
         workspaceState: {
           wsRoot: this.wsRoot,
           vaults: this.vaults,
@@ -222,7 +220,6 @@ export class LookupQuickpickFactory {
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
         showDirectChildrenOnly: false,
-        fuzzThreshold: this.FUZZ_THRESHOLD,
         workspaceState: {
           wsRoot: this.wsRoot,
           vaults: this.vaults,

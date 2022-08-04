@@ -133,8 +133,8 @@ function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
       shouldApplyPublishRules,
     }) ?? true;
   if (
-    containingNote?.custom.usePrettyRefs !== undefined &&
-    _.isBoolean(containingNote.custom.usePrettyRefs)
+    containingNote?.custom?.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom?.usePrettyRefs)
   ) {
     prettyRefs = containingNote.custom.usePrettyRefs;
   }

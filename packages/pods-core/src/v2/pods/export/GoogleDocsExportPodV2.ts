@@ -84,7 +84,7 @@ export class GoogleDocsExportPodV2
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
     const resp = await this.getPayloadForNotes(notes);
     let { accessToken } = this._config;
-    const { expirationTime, refreshToken } = this._config;
+    const { expirationTime, refreshToken, parentFolderId } = this._config;
     try {
       accessToken = await this.checkTokenExpiry(
         expirationTime,
@@ -112,6 +112,7 @@ export class GoogleDocsExportPodV2
       docToCreate,
       accessToken,
       limiter,
+      parentFolderId,
     });
     const updateRequest = await this.overwriteGdoc({
       docToUpdate,
@@ -199,8 +200,9 @@ export class GoogleDocsExportPodV2
     docToCreate: GoogleDocsPayload[];
     accessToken: string;
     limiter?: RateLimiter;
+    parentFolderId?: string;
   }): Promise<{ data: GoogleDocsFields[]; errors: IDendronError[] }> {
-    const { docToCreate, accessToken, limiter } = opts;
+    const { docToCreate, accessToken, limiter, parentFolderId = "root" } = opts;
     const errors: IDendronError[] = [];
     const out: GoogleDocsFields[] = await Promise.all(
       docToCreate.map(async ({ name, content, dendronId }) => {
@@ -211,7 +213,7 @@ export class GoogleDocsExportPodV2
           const metadata = {
             name,
             mimeType: "application/vnd.google-apps.document",
-            parents: ["root"],
+            parents: [`${parentFolderId}`],
           };
           const formData = new FormData();
           formData.append("metadata", JSON.stringify(metadata), {
@@ -325,8 +327,13 @@ export class GoogleDocsExportPodV2
       required: ["connectionId"],
       properties: {
         connectionId: {
-          description: "ID of the Airtable Connected Service",
+          description: "ID of the Google Connected Service",
           type: "string",
+        },
+        parentFolderId: {
+          description: "ID of parent folder in google drive",
+          type: "string",
+          nullable: true,
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;

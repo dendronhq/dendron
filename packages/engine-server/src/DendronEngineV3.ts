@@ -63,6 +63,7 @@ import {
   stringifyError,
   TAGS_HIERARCHY,
   UpdateNoteResp,
+  URI,
   USERS_HIERARCHY,
   VaultUtils,
   WorkspaceOpts,
@@ -1023,7 +1024,7 @@ export class DendronEngineV3 implements DEngine {
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: vpath,
+          root: URI.parse(vpath),
           include: ["*.md"],
         });
         if (maybeFiles.error) {

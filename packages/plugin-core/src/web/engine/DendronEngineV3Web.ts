@@ -73,7 +73,6 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
       );
 
       // TODO: add schemas to notes
-      const schemas = {};
 
       if (_.isUndefined(notes)) {
         return {
@@ -238,7 +237,6 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
     const error: DendronError | null = null;
-    const ctx = "writeNewNote";
     // this.logger.info({
     //   ctx,
     //   msg: `enter with ${opts}`,

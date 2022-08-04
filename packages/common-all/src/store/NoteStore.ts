@@ -16,21 +16,19 @@ import { genHash, isNotUndefined } from "../utils";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";
 import { INoteStore } from "./INoteStore";
-import { inject, injectable } from "tsyringe";
 
 /**
  * Responsible for storing NoteProps non-metadata and NoteProps metadata
  */
-@injectable()
 export class NoteStore implements Disposable, INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
   private _wsRoot: string;
 
   constructor(
-    @inject("IFileStore") fileStore: IFileStore,
-    @inject("IDataStore") dataStore: IDataStore<string, NotePropsMeta>,
-    @inject("wsRootString") wsRoot: string
+    fileStore: IFileStore,
+    dataStore: IDataStore<string, NotePropsMeta>,
+    wsRoot: string
   ) {
     this._fileStore = fileStore;
     this._metadataStore = dataStore;

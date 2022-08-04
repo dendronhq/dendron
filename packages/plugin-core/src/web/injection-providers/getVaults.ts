@@ -28,7 +28,7 @@ export async function getVaults(wsRoot: Uri): Promise<DVaultUriVariant[]> {
 
 async function readYAML(path: Uri, overwriteDuplicate?: boolean): Promise<any> {
   // @ts-ignore
-  const textDecoder = new TextDecoder();
+  const textDecoder = new TextDecoder(); // This line of code is browser specific. For Node, we need to use the utils version of TextDecoder
   const file = await vscode.workspace.fs.readFile(path);
   const bar = textDecoder.decode(file);
   return YAML.load(bar, {

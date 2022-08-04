@@ -3,6 +3,7 @@ import { createLogger, getAllFilesWithTypes } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { Uri } from "vscode";
 import { BasicCommand } from "./base";
 
 const L = createLogger("dendron");
@@ -66,7 +67,9 @@ export abstract class RefactorBaseCommand<
     opts: Required<Pick<RefactorCommandOpts, "root" | "exclude" | "include">>
   ) {
     const out = await getAllFilesWithTypes({
-      ...opts,
+      include: opts.include,
+      exclude: opts.exclude,
+      root: Uri.parse(opts.root),
     });
     if (out.data === undefined) throw out.error;
     return out.data;
@@ -120,7 +123,9 @@ export class RefactorCommand extends BasicCommand<RefactorCommandOpts> {
     opts: Required<Pick<RefactorCommandOpts, "root" | "exclude" | "include">>
   ) {
     const out = await getAllFilesWithTypes({
-      ...opts,
+      include: opts.include,
+      exclude: opts.exclude,
+      root: Uri.parse(opts.root),
     });
     if (out.data === undefined) throw out.error;
     return out.data;

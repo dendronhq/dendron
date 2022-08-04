@@ -168,6 +168,7 @@ export class GoogleDocsExportPodV2
           vaultName: input.vault,
           dest: "stdout",
           convertLinks: false,
+          enablePrettyRefs: false,
         };
         // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
         let data = await pod.plant({
@@ -178,7 +179,7 @@ export class GoogleDocsExportPodV2
           wsRoot: this._wsRoot,
         });
         // wrap data in html tags
-        data = `<html>${data}</html>`;
+        data = `<html><div>[[${input.fname}]]</div>${data}</html>`;
         const content = Buffer.from(data);
         const documentId = input.custom.documentId;
         return {

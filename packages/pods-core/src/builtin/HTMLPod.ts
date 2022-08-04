@@ -13,6 +13,7 @@ export type HTMLPublishPodConfig = PublishPodConfig & {
   convertLinks?: boolean;
   convertTagNotesToLinks?: boolean;
   convertUserNotesToLinks?: boolean;
+  enablePrettyRefs?: boolean;
 };
 
 export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
@@ -39,6 +40,11 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
           default: false,
           nullable: true,
         },
+        enablePrettyRefs: {
+          type: "boolean",
+          default: true,
+          nullable: true,
+        },
       },
     }) as JSONSchemaType<HTMLPublishPodConfig>;
   }
@@ -50,6 +56,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       convertLinks = true,
       convertTagNotesToLinks = false,
       convertUserNotesToLinks = false,
+      enablePrettyRefs = true,
     } = config;
     const { data: econfig } = await engine.getConfig();
     const overrideConfig = { ...econfig! };
@@ -57,6 +64,8 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
+    const previewConfig = ConfigUtils.getPreview(overrideConfig);
+    previewConfig.enablePrettyRefs = enablePrettyRefs;
     const proc = MDUtilsV5.procRehypeFull({
       engine,
       vault: note.vault,

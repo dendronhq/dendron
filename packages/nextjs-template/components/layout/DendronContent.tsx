@@ -6,7 +6,7 @@ import { FooterText } from "../DendronNoteFooter";
 import { DENDRON_STYLE_CONSTANTS } from "../../styles/constants";
 import { useDendronContext } from "../../context/useDendronContext";
 
-const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
+const { LAYOUT } = DENDRON_STYLE_CONSTANTS;
 
 export const DendronContent: React.FC<any> = (props) => {
   const { isResponsive, isSidebarCollapsed } = useDendronContext();

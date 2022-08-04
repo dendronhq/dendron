@@ -132,7 +132,8 @@ export class DNodeUtils {
       throw Error("enhancePropForQuickInput, no vault found");
     }
     const vname = VaultUtils.getName(vault);
-    const vaultSuffix = `(${vname})`;
+    // to ensure there is a space between the note title and vault name
+    const vaultSuffix = ` (${vname})`;
     if (props.type === "note") {
       const isRoot = DNodeUtils.isRoot(props);
       const label = isRoot ? "root" : props.fname;

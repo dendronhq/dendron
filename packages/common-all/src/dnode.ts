@@ -58,13 +58,6 @@ export class DNodeUtils {
     child.parent = parent.id;
   }
 
-  static convertDVaultVersions(vault: DVaultUriVariant): DVault {
-    const ret: DVault = { ...vault, fsPath: vault.path.fsPath };
-    // ret.fsPath = vault.path.fsPath;
-
-    return ret;
-  }
-
   static removeChild(parent: NotePropsMeta, child: NotePropsMeta) {
     parent.children = _.reject(parent.children, (ent) => ent === child.id);
   }

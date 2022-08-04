@@ -54,6 +54,7 @@
     "pino-pretty": "^4.3.0",
     "simple-git": "^3.3.0",
     "spark-md5": "^3.0.2",
+    "textextensions": "^5.15.0",
     "tmp": "^0.2.1",
     "vscode-uri": "^2.1.2",
     "yaml-unist-parser": "^1.3.1"

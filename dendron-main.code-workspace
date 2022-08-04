@@ -31,9 +31,6 @@
       "path": "packages/plugin-core"
     },
     {
-      "path": "packages/plugin-common"
-    },
-    {
       "path": "packages/engine-server"
     },
     {

@@ -11,7 +11,7 @@ const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
 export const DendronContent: React.FC<any> = (props) => {
   const { isResponsive, isSidebarCollapsed } = useDendronContext();
   return (
-    <Layout
+    <Content
       className="side-layout-main"
       style={{
         maxWidth: "1200px",
@@ -19,14 +19,14 @@ export const DendronContent: React.FC<any> = (props) => {
         display: !isSidebarCollapsed && isResponsive ? "none" : "initial",
       }}
     >
-      <Content
+      <div
         className="main-content"
         role="main"
         style={{ padding: `0 ${LAYOUT.PADDING}px` }}
       >
         <DendronBreadCrumb {...props} />
         {props.children}
-      </Content>
+      </div>
       <Divider />
       <Footer
         style={{
@@ -35,6 +35,6 @@ export const DendronContent: React.FC<any> = (props) => {
       >
         <FooterText />
       </Footer>
-    </Layout>
+    </Content>
   );
 };

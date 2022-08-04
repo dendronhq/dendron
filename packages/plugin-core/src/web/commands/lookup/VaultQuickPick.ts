@@ -68,6 +68,7 @@ export class VaultQuickPick {
     vaults: DVault[];
     fname: string;
   }): Promise<VaultPickerItem[]> {
+    // TODO: Filter out any vaults where a note with that fname already exists.
     let vaultSuggestions: VaultPickerItem[] = [];
 
     // Only 1 vault, no other options to choose from:

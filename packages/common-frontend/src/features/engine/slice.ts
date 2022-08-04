@@ -214,7 +214,6 @@ export const engineSlice = createSlice({
           note,
           noteDicts,
           createStubs: true,
-          wsRoot: state.wsRoot!,
         });
         changed.forEach((noteChangeEntry) =>
           NoteDictsUtils.add(noteChangeEntry.note, noteDicts)

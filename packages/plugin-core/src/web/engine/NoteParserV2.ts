@@ -23,13 +23,12 @@ import {
   RespV2,
   string2Note,
   stringifyError,
-  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode"; // NOTE: This version contains vscode.workspace.fs API references. Need to refactor that out somehow.
-import { Utils } from "vscode-uri";
+import { Utils, URI } from "vscode-uri";
 
 // NOTE: THIS FILE IS DUPLICATED IN ENGINE-SERVER. TODO: Refactor and
 // consolidate the two NoteParserV2 versions
@@ -66,15 +65,6 @@ function globMatch(patterns: string[] | string, fname: string): boolean {
 }
 
 export class NoteParserV2 {
-  private wsRoot: string;
-
-  constructor(
-    public opts: {
-      wsRoot: string;
-    }
-  ) {
-    this.wsRoot = opts.wsRoot;
-  }
   /**
    * Construct in-memory
    *
@@ -257,7 +247,6 @@ export class NoteParserV2 {
       },
     });
     const { fpath, noteDicts, vault } = cleanOpts;
-    const wsRoot = this.wsRoot;
     let changeEntries: NoteChangeEntry[] = [];
 
     try {
@@ -276,7 +265,6 @@ export class NoteParserV2 {
             note,
             noteDicts,
             createStubs: true,
-            wsRoot,
           });
           changeEntries = changeEntries.concat(changed);
         }

@@ -154,7 +154,11 @@ export class DendronEngineV3 implements DEngine {
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
       forceNew: true,
-      noteStore: new NoteStore(fileStore, new NoteMetadataStore(), wsRoot),
+      noteStore: new NoteStore(
+        fileStore,
+        new NoteMetadataStore(),
+        URI.parse(wsRoot)
+      ),
       fileStore,
       mode: "fuzzy",
       logger: LOGGER,

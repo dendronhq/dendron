@@ -349,7 +349,6 @@ export class NoteParser extends ParserBase {
         note: noteProps,
         noteDicts,
         createStubs: cleanOpts.createStubs,
-        wsRoot: this.opts.store.wsRoot,
       });
       changeEntries = changeEntries.concat(changed);
     }

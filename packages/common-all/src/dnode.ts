@@ -36,6 +36,7 @@ import {
   SchemaRaw,
   NotePropsMeta,
   DVaultUriVariant,
+  NoteQuickInputV2,
 } from "./types";
 import {
   DefaultMap,
@@ -169,13 +170,42 @@ export class DNodeUtils {
     return { ...this.enhancePropForQuickInput(opts), alwaysShow };
   }
 
+  /**
+   * This version skips unnecessary parameters such as wsRoot and vaults to
+   * simplify the ILookupProvider interface
+   * @param opts
+   * @returns
+   */
+  static enhancePropForQuickInputV4(opts: {
+    props: NoteProps;
+    schemas: SchemaModuleDict;
+    alwaysShow?: boolean;
+  }): NoteQuickInputV2 {
+    const { props, schemas } = opts;
+    const vname = VaultUtils.getName(opts.props.vault);
+    const vaultSuffix = `(${vname})`;
+    if (opts.props.type === "note") {
+      const isRoot = DNodeUtils.isRoot(props);
+      const label = isRoot ? "root" : props.fname;
+      const detail = props.desc;
+      const sm = props.schema ? schemas[props.schema.moduleId] : undefined;
+      const description = NoteUtils.genSchemaDesc(props, sm) + vaultSuffix;
+      const out = { ...props, label, detail, description };
+      return out;
+    } else {
+      const label = DNodeUtils.isRoot(props) ? "root" : props.id;
+      const detail = props.desc;
+      const out = { ...props, label, detail, description: vaultSuffix };
+      return out;
+    }
+  }
+
   static findClosestParent(
     fpath: string,
     noteDicts: NoteDicts,
     opts: {
       noStubs?: boolean;
       vault: DVault;
-      wsRoot: string;
     }
   ): NoteProps {
     const { vault } = opts;
@@ -324,9 +354,8 @@ export class NoteUtils {
     note: NoteProps;
     noteDicts: NoteDicts;
     createStubs: boolean;
-    wsRoot: string;
   }): NoteChangeEntry[] {
-    const { note, noteDicts, createStubs, wsRoot } = opts;
+    const { note, noteDicts, createStubs } = opts;
     const changed: NoteChangeEntry[] = [];
 
     // Ignore if root note
@@ -361,7 +390,6 @@ export class NoteUtils {
     if (!parent) {
       const ancestor = DNodeUtils.findClosestParent(note.fname, noteDicts, {
         vault: note.vault,
-        wsRoot,
       });
 
       const prevAncestorState = { ...ancestor };

@@ -163,6 +163,16 @@ export type NoteQuickInput = NoteProps & {
   alwaysShow?: boolean;
 };
 
+/**
+ * A reduced version of NoteQuickInput that only keeps the props necessary for
+ * lookup quick pick items
+ */
+export type NoteQuickInputV2 = Pick<NoteProps, "fname" | "vault" | "schema"> & {
+  label: string;
+  detail?: string;
+  alwaysShow?: boolean;
+};
+
 export type DNodePropsDict = {
   [key: string]: DNodeProps;
 };

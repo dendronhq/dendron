@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { URI, Utils } from "vscode-uri";
 import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
 import { NoteUtils } from "../dnode";
 import { DendronError, DendronCompositeError } from "../error";
@@ -13,6 +14,7 @@ import {
   DNoteLoc,
 } from "../types";
 import { genHash, isNotUndefined } from "../utils";
+import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";
 import { INoteStore } from "./INoteStore";
@@ -23,12 +25,12 @@ import { INoteStore } from "./INoteStore";
 export class NoteStore implements Disposable, INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
-  private _wsRoot: string;
+  private _wsRoot: URI;
 
   constructor(
     fileStore: IFileStore,
     dataStore: IDataStore<string, NotePropsMeta>,
-    wsRoot: string
+    wsRoot: URI
   ) {
     this._fileStore = fileStore;
     this._metadataStore = dataStore;
@@ -52,7 +54,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
         data: { ...metadata.data, body: "" },
       };
     }
-    const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
+    const uri = Utils.joinPath(
+      this._wsRoot,
+      VaultUtils.getRelPath(metadata.data.vault),
+      metadata.data.fname + ".md"
+    );
     const nonMetadata = await this._fileStore.read(uri);
     if (nonMetadata.error) {
       return { error: nonMetadata.error };
@@ -132,7 +138,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
 
     // If note is a stub, do not write to file
     if (!noteMeta.stub) {
-      const uri = NoteUtils.getURI({ note, wsRoot: this._wsRoot });
+      const uri = Utils.joinPath(
+        this._wsRoot,
+        VaultUtils.getRelPath(note.vault),
+        note.fname + ".md"
+      );
       const content = NoteUtils.serialize(note, { excludeStub: true });
       const writeResp = await this._fileStore.write(uri, content);
       if (writeResp.error) {
@@ -192,10 +202,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
 
     // If note is a stub, do not delete from file store since it won't exist
     if (!metadata.data.stub) {
-      const uri = NoteUtils.getURI({
-        note: metadata.data,
-        wsRoot: this._wsRoot,
-      });
+      const uri = Utils.joinPath(
+        this._wsRoot,
+        VaultUtils.getRelPath(metadata.data.vault),
+        metadata.data.fname + ".md"
+      );
       const deleteResp = await this._fileStore.delete(uri);
       if (deleteResp.error) {
         return { error: deleteResp.error };

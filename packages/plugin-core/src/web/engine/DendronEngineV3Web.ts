@@ -35,25 +35,21 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, singleton } from "tsyringe";
-import { Utils } from "vscode-uri";
 import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
 
 @singleton()
 export class DendronEngineV3Web implements IReducedEngineAPIService {
-  private wsRoot: string;
   private fuseEngine: FuseEngine;
   private _vaults: DVaultUriVariant[];
   private _noteStore: INoteStore<string>;
   private _fileStore: IFileStore;
 
   constructor(
-    @inject("wsRootString") wsRoot: string,
     @inject("vaults") vaults: DVaultUriVariant[],
     @inject("IFileStore") fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
-    this.wsRoot = wsRoot;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
@@ -212,7 +208,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
 
     if (!_.isUndefined(vault)) {
       modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqual(vault, ent.data!.vault, this.wsRoot)
+        VaultUtils.isEqualV2(vault, ent.data!.vault)
       );
     }
 
@@ -447,10 +443,9 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
 
     const allNotesList = await Promise.all(
       vaults.map(async (vault) => {
-        // const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: Utils.joinPath(vault.path, "notes"), // TODO: Only works on self-contained vaults
+          root: VaultUtils.getRelPathUriVariant(vault),
           include: ["*.md"],
         });
 
@@ -485,9 +480,10 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
         //   notesByFname: {},
         // };
 
-        const { data: notesDict, error } = await new NoteParserV2({
-          wsRoot: this.wsRoot,
-        }).parseFiles(filteredFiles, vault);
+        const { data: notesDict, error } = await new NoteParserV2().parseFiles(
+          filteredFiles,
+          vault
+        );
         if (error) {
           errors = errors.concat(error?.errors);
         }
@@ -644,8 +640,3 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     }
   }
 }
-
-// export const createEngineV3 = ({ wsRoot }: WorkspaceOpts) => {
-//   const engine = DendronEngineV3Web.create({ wsRoot });
-//   return engine as DEngineClient;
-// };

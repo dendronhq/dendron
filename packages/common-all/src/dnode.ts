@@ -293,7 +293,11 @@ export class NoteUtils {
     link: DLink;
   }): void {
     to.links.push({
-      from: { fname: from.fname, vaultName: VaultUtils.getName(from.vault) },
+      from: {
+        id: from.id,
+        fname: from.fname,
+        vaultName: VaultUtils.getName(from.vault),
+      },
       type: "backlink",
       position: link.position,
       value: link.value,

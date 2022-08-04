@@ -28,7 +28,7 @@ export enum ResponseCode {
 
 export type EngineDeleteOpts = {
   /**
-   * Only delete from meta
+   * If true, delete only from metadata store. Otherwise, delete from metadata store and filesystem.
    */
   metaOnly?: boolean;
   /**
@@ -328,7 +328,7 @@ export type EngineWriteOptsV2 = {
    */
   overrideExisting?: boolean;
   /**
-   * If true, write only to metadata store
+   * If true, write only to metadata store. Otherwise, write to metadata store and filesystem.
    */
   metaOnly?: boolean;
 };
@@ -346,7 +346,8 @@ export type RenameNoteOpts = {
   /**
    * Flag to determine whether we should touch metadata only
    * For example, if the code comes from vscode `rename` menu option,
-   * we do not want to touch the filesystem
+   * we do not want to touch the filesystem.
+   * If not provided, modify both metadata and filesystem.
    */
   metaOnly?: boolean;
 };

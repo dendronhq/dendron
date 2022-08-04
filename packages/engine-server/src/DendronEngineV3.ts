@@ -319,6 +319,7 @@ export class DendronEngineV3 implements DEngine {
     });
 
     // Update links/anchors based on note body
+    // TODO: update backlinks as well
     EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
@@ -675,6 +676,8 @@ export class DendronEngineV3 implements DEngine {
 
   /**
    * See {@link DEngine.renameNote}
+   *
+   * TODO: make atomic
    */
   async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     const ctx = "DEngine:renameNote";
@@ -721,30 +724,38 @@ export class DendronEngineV3 implements DEngine {
       newLoc.alias = newNoteTitle;
     }
 
-    const linkNotesResp = await this._noteStore.find({ linkedToNote: oldNote });
-    if (linkNotesResp.error) {
-      return {
-        error: new DendronError({
-          message: `Unable to find notes linking to ${oldNote.fname}`,
-          innerError: linkNotesResp.error,
-        }),
-      };
-    }
-    const notesWithLinkTo = linkNotesResp.data;
-    this.logger.info({
-      ctx,
-      msg: "notesWithLinkTo:gather",
-      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
-    });
+    // Get list of notes referencing old note. We need to rename those references
+    const notesReferencingOld = _.uniq(
+      oldNote.links
+        .map((link) => {
+          if (link.type === "backlink") {
+            return link.from.id;
+          } else {
+            return undefined;
+          }
+        })
+        .filter(isNotUndefined)
+    );
+
+    const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
-    const notesToUpdate = notesWithLinkTo
-      .map((note) => {
-        return this.processNoteChangedByRename({
-          note,
-          oldLoc,
-          newLoc,
-        });
+    const notesToUpdate = linkNotesResp
+      .map((resp) => {
+        if (resp.error) {
+          this.logger.error({
+            ctx,
+            message: `Unable to find note linking to ${oldNote.fname}`,
+            error: stringifyError(resp.error),
+          });
+          return undefined;
+        } else {
+          return this.processNoteChangedByRename({
+            note: resp.data,
+            oldLoc,
+            newLoc,
+          });
+        }
       })
       .filter(isNotUndefined);
 

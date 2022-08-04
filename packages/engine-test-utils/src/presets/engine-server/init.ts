@@ -419,6 +419,7 @@ const NOTES = {
               alias: "alpha",
               from: {
                 fname: "beta",
+                id: "beta",
                 vaultName: "vault1",
               },
               position: {

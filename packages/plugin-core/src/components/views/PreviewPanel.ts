@@ -49,7 +49,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     undefined;
   private _onTextChanged: vscode.Disposable | undefined = undefined;
   private _linkHandler: IPreviewLinkHandler;
-  private _lockedEditorFileName: string | undefined;
+  private _lockedEditorNoteId: string | undefined;
 
   /**
    *
@@ -152,17 +152,19 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
-  lock() {
-    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-    if (activeTextEditor) {
-      this._lockedEditorFileName = activeTextEditor?.document.fileName;
+  async lock(noteId?: string) {
+    if (noteId) {
+      this._lockedEditorNoteId = noteId;
       this.sendLockMessage(this._panel, this.isLocked());
     } else {
-      Logger.error({ ctx: "lock preview", msg: "No active texteditor found" });
+      Logger.error({
+        ctx: "lock preview",
+        msg: "Did not find note to lock.",
+      });
     }
   }
   unlock() {
-    this._lockedEditorFileName = undefined;
+    this._lockedEditorNoteId = undefined;
     this.sendLockMessage(this._panel, this.isLocked());
   }
   isOpen(): boolean {
@@ -173,18 +175,15 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   }
 
   isLocked(): boolean {
-    return this._lockedEditorFileName !== undefined;
+    return this._lockedEditorNoteId !== undefined;
   }
 
   /**
    * If the Preview is locked and the active note does not match the locked note.
    */
   isLockedAndDirty(): boolean {
-    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-    return (
-      this.isLocked() &&
-      activeTextEditor?.document.fileName !== this._lockedEditorFileName
-    );
+    const note = this._ext.wsUtils.getActiveNote();
+    return this.isLocked() && note?.id !== this._lockedEditorNoteId;
   }
   dispose() {
     this.unlock();
@@ -252,8 +251,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           break;
         }
         case NoteViewMessageEnum.onLock: {
+          const { data } = msg;
           Logger.debug({ ctx, "msg.type": "onLock" });
-          this.lock();
+          this.lock(data.id);
           break;
         }
         case NoteViewMessageEnum.onUnlock: {

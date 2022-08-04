@@ -16,7 +16,7 @@ export const DendronContent: React.FC<any> = (props) => {
       style={{
         maxWidth: "1200px",
         minWidth: 0,
-        display: !isSidebarCollapsed && isResponsive ? "none" : "initial",
+        display: !isSidebarCollapsed && isResponsive ? "none" : "block",
       }}
     >
       <div

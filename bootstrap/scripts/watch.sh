@@ -8,7 +8,6 @@ npx lerna run watch --parallel
     \ --scope @dendronhq/common-server 
     \ --scope @dendronhq/dendron-viz
     \ --scope @dendronhq/engine-server 
-    \ --scope @dendronhq/plugin-common
     \ --scope @dendronhq/plugin-core 
     \ --scope @dendronhq/dendron-cli 
     \ --scope @dendronhq/pods-core 

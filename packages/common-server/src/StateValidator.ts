@@ -4,6 +4,7 @@ import {
   ErrorFactory,
   RespV3,
   TreeUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import path from "path";
@@ -28,7 +29,7 @@ export class StateValidator {
 
             const vpath = vault2Path({ vault, wsRoot: engine.wsRoot });
             const out = await getAllFiles({
-              root: vpath,
+              root: URI.parse(vpath),
               include: ["*.md"],
             });
 

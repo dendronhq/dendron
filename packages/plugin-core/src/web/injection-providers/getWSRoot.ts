@@ -5,6 +5,10 @@ import { WorkspaceFolder } from "vscode";
 import { Utils } from "vscode-uri";
 import anymatch from "anymatch";
 
+/**
+ * Gets the workspace root of the currently opened folder(s) or workspace in VS Code
+ * @returns
+ */
 export async function getWSRoot(): Promise<vscode.Uri | undefined> {
   const { workspaceFile, workspaceFolders } = vscode.workspace;
 

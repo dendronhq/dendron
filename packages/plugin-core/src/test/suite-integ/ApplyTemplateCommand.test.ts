@@ -1,4 +1,4 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import sinon from "sinon";
@@ -69,11 +69,6 @@ async function runTemplateTest({
 
 const basicPreset = ENGINE_HOOKS.setupBasic;
 
-const enableHB = (cfg: IntermediateDendronConfig) => {
-  cfg.workspace.enableHandlebarTemplates = true;
-  return cfg;
-};
-
 suite("ApplyTemplate", function () {
   describeMultiWS(
     "WHEN ApplyTemplate run with regular template",
@@ -128,7 +123,6 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with template with frontmatter",
     {
       preSetupHook: basicPreset,
-      modConfigCb: enableHB,
       timeout,
     },
     () => {

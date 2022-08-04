@@ -723,9 +723,6 @@
         "enableXVaultWikiLink": {
           "type": "boolean"
         },
-        "enableHandlebarTemplates": {
-          "type": "boolean"
-        },
         "enableRemoteVaultInit": {
           "type": "boolean"
         },
@@ -771,7 +768,6 @@
         "graph",
         "enableAutoCreateOnDefinition",
         "enableXVaultWikiLink",
-        "enableHandlebarTemplates",
         "enableRemoteVaultInit",
         "workspaceVaultSyncMode",
         "enableAutoFoldFrontmatter",

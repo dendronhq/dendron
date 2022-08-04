@@ -47,6 +47,7 @@ suite("CopyNoteRef", function () {
           {
             preSetupHook,
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {

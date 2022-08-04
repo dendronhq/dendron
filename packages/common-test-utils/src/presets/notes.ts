@@ -161,15 +161,6 @@ export const NOTE_PRESETS_V4 = {
     fname: "000 Index.md",
     body: "[[alpha]]",
   }),
-  NOTE_WITH_DATE_VARIABLES: CreateNoteFactory({
-    fname: "date-variables",
-    body: [
-      "Today is <%= CURRENT_YEAR %>.<%=CURRENT_MONTH %>.<%=CURRENT_DAY%>",
-      "It is week <%= CURRENT_WEEK %> of the year",
-      "This link goes to [[daily.journal.<%=CURRENT_YEAR%>.<%= CURRENT_MONTH%>.<%= CURRENT_DAY %>]]",
-      "{{ 1 + 1 }} should not be evalated to 2",
-    ].join("\n"),
-  }),
   NOTE_WITH_FM_VARIABLES: CreateNoteFactory({
     fname: "fm-variables",
     body: "Title is {{ fm.title }}",

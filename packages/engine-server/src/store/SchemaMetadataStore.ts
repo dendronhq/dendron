@@ -39,7 +39,7 @@ export class SchemaMetadataStore
     }
   }
 
-  async find(opts: any): Promise<RespV3<SchemaModuleProps[]>> {
+  async find(_opts: any): Promise<RespV3<SchemaModuleProps[]>> {
     throw new Error("Method not implemented.");
   }
 

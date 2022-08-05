@@ -33,7 +33,6 @@ export class VSCodeFileStore implements IFileStore {
     }
   }
   async readDir(opts: GetAllFilesOpts): Promise<RespV3<string[]>> {
-    console.log("opts@@@@", opts);
     const { root } = _.defaults(opts, {
       exclude: [".git", "Icon\r", ".*"],
     });

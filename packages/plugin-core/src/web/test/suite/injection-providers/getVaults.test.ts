@@ -1,11 +1,10 @@
 import assert from "assert";
 import { getVaults } from "../../../injection-providers/getVaults";
-import { createTestWorkspaceDirectory } from "../../helpers/createTestWorkspaceDirectory";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 suite("GIVEN a workspace folder", () => {
   test("WHEN there's a single legacy (non self-contained) vault THEN the vault is returned correctly", async () => {
-    const wsRoot = await createTestWorkspaceDirectory();
+    const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
 
     const config = {
       workspace: {
@@ -28,7 +27,7 @@ suite("GIVEN a workspace folder", () => {
   });
 
   test("WHEN there's a single self-contained vault THEN the vault is returned correctly", async () => {
-    const wsRoot = await createTestWorkspaceDirectory();
+    const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
 
     const config = {
       workspace: {
@@ -50,7 +49,7 @@ suite("GIVEN a workspace folder", () => {
   });
 
   test("WHEN there are multiple vaults THEN all vaults are returned correctly", async () => {
-    const wsRoot = await createTestWorkspaceDirectory();
+    const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
 
     const config = {
       workspace: {

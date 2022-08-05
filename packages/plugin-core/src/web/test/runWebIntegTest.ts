@@ -14,7 +14,7 @@ async function main() {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ["--disable-extensions"],
+      launchArgs: ["--disable-extensions", "--extensionDevelopmentKind=web"],
     });
   } catch (err) {
     console.error("Failure(s) in test run.");

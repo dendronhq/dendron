@@ -151,7 +151,7 @@ const DendronNotePreview: DendronComponent = (props) => {
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}
         onClick={handleLock}
         style={{
-          position: "absolute",
+          position: "fixed",
           top: 33,
           right: 33,
           opacity: isLocked ? 1 : 0.3,

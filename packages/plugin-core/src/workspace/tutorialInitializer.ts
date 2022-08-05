@@ -6,6 +6,7 @@ import {
   getStage,
   isABTest,
   MAIN_TUTORIAL_TYPE_NAME,
+  QuickstartTutorialTestGroups,
   TutorialEvents,
   TutorialNoteViewedPayload,
   VaultUtils,
@@ -156,7 +157,13 @@ export class TutorialInitializer
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(async () => {
           await new TogglePreviewCommand(preview).execute();
-          await new TogglePreviewLock(preview).execute();
+          if (
+            CURRENT_TUTORIAL_TEST?.getUserGroup(
+              SegmentClient.instance().anonymousId
+            ) === QuickstartTutorialTestGroups["quickstart-with-lock"]
+          ) {
+            await new TogglePreviewLock(preview).execute();
+          }
         }, 1000);
       }
     } else {

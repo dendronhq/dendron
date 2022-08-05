@@ -6,11 +6,10 @@ import * as vscode from "vscode";
 import { Utils } from "vscode-uri";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
-import { createTestWorkspaceDirectory } from "../../helpers/createTestWorkspaceDirectory";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 async function setupEnvironment() {
-  const wsRoot = await createTestWorkspaceDirectory();
+  const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
 
   const config = {
     workspace: {

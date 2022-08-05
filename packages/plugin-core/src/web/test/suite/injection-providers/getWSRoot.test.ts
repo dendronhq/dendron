@@ -3,11 +3,11 @@ import sinon from "sinon";
 import * as vscode from "vscode";
 import { Utils } from "vscode-uri";
 import { getWSRoot } from "../../../injection-providers/getWSRoot";
-import { createTestWorkspaceDirectory } from "../../helpers/createTestWorkspaceDirectory";
+import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 suite("GIVEN a workspace", () => {
   test("WHEN a code-workspace file is opened THEN the getWSRoot injector returns the workspace root URI correctly", async () => {
-    const wsRoot = await createTestWorkspaceDirectory();
+    const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
 
     sinon.replaceGetter(vscode.workspace, "workspaceFile", () =>
       Utils.joinPath(wsRoot, "test.code-workspace")

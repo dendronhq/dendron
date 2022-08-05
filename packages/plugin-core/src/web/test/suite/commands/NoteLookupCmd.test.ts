@@ -5,8 +5,8 @@ import { stubInterface } from "ts-sinon";
 import * as vscode from "vscode";
 import { ILookupProvider } from "../../../commands/lookup/ILookupProvider";
 import {
-  LookupQuickpickFactory,
   LookupAcceptPayload,
+  LookupQuickpickFactory,
 } from "../../../commands/lookup/LookupQuickpickFactory";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { IReducedEngineAPIService } from "../../../engine/IReducedEngineApiService";

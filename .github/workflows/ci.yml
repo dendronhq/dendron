@@ -99,7 +99,7 @@ jobs:
         shell: bash
 
       - name: Start Xvfb
-        if: runner.os == 'Linux' && matrix.suite == 'plugin'
+        if: runner.os == 'Linux' && (matrix.suite == 'plugin' || matrix.suite == 'plugin-web')
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV

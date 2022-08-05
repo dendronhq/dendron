@@ -1414,6 +1414,7 @@
     "circular-dependency-plugin": "^5.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",
+    "crypto-randomuuid": "^1.0.0",
     "glob": "^7.1.6",
     "ignore-loader": "^0.1.2",
     "mocha": "^7.1.2",

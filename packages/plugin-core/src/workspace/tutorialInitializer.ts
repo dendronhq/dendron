@@ -34,6 +34,7 @@ import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
 } from "./workspaceInitializer";
+import { TogglePreviewLock } from "../commands/TogglePreviewLock";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -149,11 +150,13 @@ export class TutorialInitializer
       await vscode.window.showTextDocument(rootUri);
 
       if (getStage() !== "test") {
+        const preview = PreviewPanelFactory.create(
+          ExtensionProvider.getExtension()
+        );
         // TODO: HACK to wait for existing preview to be ready
-        setTimeout(() => {
-          new TogglePreviewCommand(
-            PreviewPanelFactory.create(ExtensionProvider.getExtension())
-          ).execute();
+        setTimeout(async () => {
+          await new TogglePreviewCommand(preview).execute();
+          await new TogglePreviewLock(preview).execute();
         }, 1000);
       }
     } else {

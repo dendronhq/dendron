@@ -1,6 +1,5 @@
 import {
   axios,
-  DendronError,
   ErrorFactory,
   NoteProps,
   ResponseUtil,
@@ -142,9 +141,11 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       const folderIdsHashMap = await this.candidateForParentFolders(
         accessToken
       );
-      const parentFolder = await this.promtForParentFolderId(
-        Object.keys(folderIdsHashMap)
-      );
+      const folders = Object.keys(folderIdsHashMap);
+      const parentFolder =
+        folders.length > 1
+          ? await this.promtForParentFolderId(Object.keys(folderIdsHashMap))
+          : "root";
       if (_.isUndefined(parentFolder)) return;
       parentFolderId = folderIdsHashMap[parentFolder];
     }
@@ -207,7 +208,8 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       const result = await this.getAllFoldersInDrive(accessToken);
       return result;
     } catch (err: any) {
-      throw new DendronError({ message: stringifyError(err) });
+      this.L.error(stringifyError(err));
+      return { root: "root" };
     }
   }
 

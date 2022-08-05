@@ -1,5 +1,6 @@
 import {
   asyncLoopOneAtATime,
+  NoteChangeEntry,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -122,61 +123,79 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       )
     );
 
+    let noteChangeEntries: NoteChangeEntry[] = [];
     await asyncLoopOneAtATime(noteIDsToUpdate, async (id) => {
-      const noteToUpdate = await this.extension.getEngine().getNote(id);
-      if (noteToUpdate !== undefined) {
-        const linksToUpdate = noteToUpdate.links.filter(
-          (link) => link.value === sourceNote.fname
-        );
-        console.log({ linksToUpdate });
-        const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
-        const modifiedNote = await _.reduce<
-          typeof linksToUpdate[0],
-          Promise<NoteProps>
-        >(
-          linksToUpdate,
-          async (prev, linkToUpdate) => {
-            const acc = await prev;
-            const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
-            const notesWithSameName = await this.extension
-              .getEngine()
-              .findNotes({
-                fname: destNote.fname,
+      try {
+        const noteToUpdate = await this.extension.getEngine().getNote(id);
+        if (noteToUpdate !== undefined) {
+          const linksToUpdate = noteToUpdate.links.filter(
+            (link) => link.value === sourceNote.fname
+          );
+          console.log({ linksToUpdate });
+          const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
+          const modifiedNote = await _.reduce<
+            typeof linksToUpdate[0],
+            Promise<NoteProps>
+          >(
+            // we need to do it backwards to not mess up the location we update
+            linksToUpdate.reverse(),
+            async (prev, linkToUpdate) => {
+              const acc = await prev;
+              const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
+              const notesWithSameName = await this.extension
+                .getEngine()
+                .findNotes({
+                  fname: destNote.fname,
+                });
+              const isXVault =
+                oldLink.data.xvault || notesWithSameName.length > 1;
+              const newLink = {
+                ...oldLink,
+                from: {
+                  ...oldLink.from,
+                  alias:
+                    oldLink.from.alias === oldLink.from.fname
+                      ? destNote.fname
+                      : oldLink.from.alias,
+                  fname: destNote.fname,
+                  vaultName: VaultUtils.getName(destNote.vault),
+                },
+                data: {
+                  ...oldLink.data,
+                  xvault: isXVault,
+                },
+              };
+              console.log({ newLink });
+              const newBody = LinkUtils.updateLink({
+                note: acc,
+                oldLink,
+                newLink,
               });
-            const isXVault =
-              oldLink.data.xvault || notesWithSameName.length > 1;
-            const newLink = {
-              ...oldLink,
-              from: {
-                ...oldLink.from,
-                fname: destNote.fname,
-                vaultName: VaultUtils.getName(destNote.vault),
-              },
-              data: {
-                xvault: isXVault,
-              },
-            };
-            console.log({ newLink });
-            const newBody = LinkUtils.updateLink({
-              note: acc,
-              oldLink,
-              newLink,
-            });
-            acc.body = newBody;
-            return acc;
-          },
-          Promise.resolve(noteToUpdateDeepCopy)
-        );
-        console.log({ modifiedNote });
+              acc.body = newBody;
+              return acc;
+            },
+            Promise.resolve(noteToUpdateDeepCopy)
+          );
+          console.log({ modifiedNote });
 
-        noteToUpdate.body = modifiedNote.body;
-        const writeResp = await this.extension
-          .getEngine()
-          .writeNote(noteToUpdate);
-        console.log({ writeResp });
+          noteToUpdate.body = modifiedNote.body;
+          const writeResp = await this.extension
+            .getEngine()
+            .writeNote(noteToUpdate);
+          if (writeResp.data) {
+            noteChangeEntries = noteChangeEntries.concat(writeResp.data);
+          }
+        }
+      } catch (error) {
+        this.L.error({ ctx, error });
       }
     });
     // delete old note
+    const deleteResp = await this.extension
+      .getEngine()
+      .deleteNote(sourceNote.id);
+    console.log({ deleteResp });
+
     return {};
   }
 }

@@ -708,7 +708,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   /**
-   * TODO: this should return a ERROR
+   * @deprecated: Use {@link DEngine.writeNote}
    * See {@link FileStorageV2.updateNote}
    * @param note
    * @param opts

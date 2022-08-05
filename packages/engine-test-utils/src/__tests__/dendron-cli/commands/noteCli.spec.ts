@@ -1,4 +1,4 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NoteCLICommand,
@@ -69,11 +69,12 @@ describe("WHEN run 'dendron note lookup'", () => {
             output: NoteCLIOutput.JSON,
           });
           expect(notesOutput).toEqual([]);
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: "gamma",
-            vault,
-            engine,
-          });
+          const note = (
+            await engine.findNotes({
+              fname: "gamma",
+              vault,
+            })
+          )[0];
           // note not created
           expect(note).toBeUndefined();
         },
@@ -569,7 +570,7 @@ describe("WHEN run 'dendron note move'", () => {
           ).toBeTruthy();
         },
         {
-          createEngine: createEngineFromServer,
+          createEngine: createEngineV3FromEngine,
           expect,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
@@ -600,7 +601,7 @@ describe("WHEN run 'dendron note move'", () => {
           ).toBeTruthy();
         },
         {
-          createEngine: createEngineFromServer,
+          createEngine: createEngineV3FromEngine,
           expect,
           preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         }
@@ -633,7 +634,7 @@ describe("WHEN run 'dendron note move'", () => {
           ).toBeTruthy();
         },
         {
-          createEngine: createEngineFromServer,
+          createEngine: createEngineV3FromEngine,
           expect,
           preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         }

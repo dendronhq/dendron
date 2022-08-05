@@ -49,20 +49,29 @@ export type NoteCommandData = {
 
 export enum NoteCommands {
   /**
-   * Like lookup, but only look for notes. Uses new engine/store
+   * Like lookup, but only look for notes.
    * Returns a list of notes
    */
   LOOKUP = "lookup",
   /**
-   * Get note by id. Uses new engine/store
+   * Get note by id.
    */
   GET = "get",
   /**
-   * Find note by note properties. Uses new engine/store
+   * Find note by note properties.
    */
   FIND = "find",
+  /**
+   * Find or create a note. Uses old engineV2/storeV2
+   */
   LOOKUP_LEGACY = "lookup_legacy",
+  /**
+   * Delete note by fname and vault.
+   */
   DELETE = "delete",
+  /**
+   * Move a note to another vault, or rename a note within a workspace.
+   */
   MOVE = "move",
 }
 
@@ -190,12 +199,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.addArgsToPayload({ cmd: args.cmd, output: args.output });
 
     // TODO remove after migration to new engine
-    if (
-      args.cmd === NoteCommands.GET ||
-      args.cmd === NoteCommands.LOOKUP ||
-      args.cmd === NoteCommands.FIND ||
-      args.cmd === NoteCommands.DELETE
-    ) {
+    if (args.cmd !== NoteCommands.LOOKUP_LEGACY) {
       args.newEngine = true;
     }
     const engineArgs = await setupEngine(args);
@@ -358,11 +362,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         }
         case NoteCommands.MOVE: {
           const { query, vault } = checkQueryAndVault(opts);
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: query,
-            vault,
-            engine,
-          });
+          const note = (
+            await engine.findNotes({
+              fname: query,
+              vault,
+            })
+          )[0];
           if (note) {
             const oldLoc = NoteUtils.toNoteLoc(note);
             const newLoc = {
@@ -373,11 +378,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               vname: destVaultName || oldLoc.fname,
               vaults: engine.vaults,
             });
-            const noteExists = NoteUtils.getNoteByFnameFromEngine({
-              fname: destFname || query,
-              engine,
-              vault: destVault || vault,
-            });
+            const noteExists = (
+              await engine.findNotes({
+                fname: destFname || query,
+                vault: destVault || vault,
+              })
+            )[0];
             const isStub = noteExists?.stub;
             if (noteExists && !isStub) {
               const vaultName = VaultUtils.getName(noteExists.vault);

@@ -256,13 +256,6 @@ export class FileStorage implements DStore {
     let out: NoteChangeEntry[] = [];
 
     const noteAsLog = NoteUtils.toLogObj(noteToDelete);
-
-    // remove from fs
-    if (!opts?.metaOnly) {
-      this.logger.info({ ctx, noteAsLog, msg: "removing from disk", fpath });
-      await fs.unlink(fpath);
-    }
-
     // if have children, create stub note with a new id
     if (!_.isEmpty(noteToDelete.children)) {
       const replacingStub = NoteUtils.create({
@@ -310,13 +303,8 @@ export class FileStorage implements DStore {
         });
       });
 
-      NoteDictsUtils.delete(noteToDelete, {
-        notesById: this.notes,
-        notesByFname: this.noteFnames,
-      });
       await this.updateNote(replacingStub);
       out.push({ note: replacingStub, status: "create" });
-      out.push({ note: noteToDelete, status: "delete" });
     } else {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
@@ -325,12 +313,6 @@ export class FileStorage implements DStore {
           status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
-      // delete from note dictionary
-      NoteDictsUtils.delete(noteToDelete, {
-        notesById: this.notes,
-        notesByFname: this.noteFnames,
-      });
-
       // remove from parent
       const resps: Promise<EngineDeleteNotePayload>[] = [];
       let parentNote = this.notes[noteToDelete.parent];
@@ -370,11 +352,22 @@ export class FileStorage implements DStore {
           message: "Parent note missing from state",
         });
       }
-      out.push({ note: noteToDelete, status: "delete" });
       for (const resp of await Promise.all(resps)) {
         out = out.concat(resp);
       }
     }
+    // remove from fs
+    if (!opts?.metaOnly) {
+      this.logger.info({ ctx, noteAsLog, msg: "removing from disk", fpath });
+      await fs.unlink(fpath);
+    }
+
+    // delete from note dictionary
+    NoteDictsUtils.delete(noteToDelete, {
+      notesById: this.notes,
+      notesByFname: this.noteFnames,
+    });
+    out.push({ note: noteToDelete, status: "delete" });
     return out;
   }
 
@@ -907,6 +900,18 @@ export class FileStorage implements DStore {
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
     });
+    if (!this.notes[noteRaw.id]) {
+      throw new DendronError({
+        status: ERROR_STATUS.DOES_NOT_EXIST,
+        message:
+          `Unable to rename note "${
+            oldNote.fname
+          }" in vault "${VaultUtils.getName(oldNote.vault)}".` +
+          ` Check that this note exists, and make sure it has a frontmatter with an id.`,
+        severity: ERROR_SEVERITY.FATAL,
+      });
+    }
+
     const newNoteTitle = NoteUtils.isDefaultTitle(oldNote)
       ? NoteUtils.genTitle(newLoc.fname)
       : oldNote.title;

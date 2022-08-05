@@ -6,7 +6,7 @@ const SCHEMAS = {};
 const NOTES = {
   BASIC: new TestPresetEntryV4(async ({ vaults, engine }) => {
     const vault = vaults[0];
-    const orig = _.size(engine.notes);
+    const orig = _.size(await engine.findNotesMeta({ vault }));
     const note1 = NoteUtils.create({
       id: "bar1",
       fname: "bar1",
@@ -26,7 +26,7 @@ const NOTES = {
     const barNote = (await engine.getNote("bar1"))!;
     return [
       {
-        actual: _.size(engine.notes),
+        actual: _.size(await engine.findNotesMeta({ vault })),
         expected: orig + 2,
         msg: "should be 2 more notes",
       },

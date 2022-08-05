@@ -16,7 +16,11 @@ describe("engine, notes/", () => {
         })
       )("%p", async (_key, TestCase) => {
         // TODO: remove after migrating schema work
-        if (_key === "MATCH_SCHEMA") {
+        if (
+          _key === "MATCH_SCHEMA" ||
+          _key === "DOMAIN_QUERY_WITH_SCHEMA" ||
+          _key === "CHILD_QUERY_WITH_SCHEMA"
+        ) {
           return;
         }
         // @ts-ignore
@@ -38,6 +42,13 @@ describe("engine, notes/multi/", () => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {
+        // TODO: remove after migrating schema work
+        if (
+          _key === "DOMAIN_QUERY_WITH_SCHEMA" ||
+          _key === "CHILD_QUERY_WITH_SCHEMA"
+        ) {
+          return;
+        }
         // @ts-ignore
         const { testFunc, ...opts } = TestCase;
         await runEngineTestV5(testFunc, { ...opts, createEngine, expect });

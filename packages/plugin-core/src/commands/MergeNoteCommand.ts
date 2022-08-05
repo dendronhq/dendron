@@ -24,7 +24,9 @@ type CommandOpts = {
   notes: readonly NoteProps[];
 } & CommandInput;
 
-type CommandOutput = {};
+type CommandOutput = {
+  changed: NoteChangeEntry[];
+} & CommandOpts;
 
 export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MERGE_NOTE.key;
@@ -90,13 +92,19 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     if (opts.notes.length === 0) {
       vscode.window.showWarningMessage("Merge destination not selected");
-      return {};
+      return {
+        ...opts,
+        changed: [],
+      };
     }
 
     const destNote = opts.notes[0];
     const sourceNote = this.extension.wsUtils.getActiveNote();
     if (!sourceNote) {
-      return {};
+      return {
+        ...opts,
+        changed: [],
+      };
     }
 
     // grab body from current active note
@@ -113,7 +121,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const sourceNoteBacklinks = sourceNote?.links.filter((link) => {
       return link.type === "backlink";
     });
-    console.log({ sourceNoteBacklinks });
 
     const noteIDsToUpdate = Array.from(
       new Set(
@@ -131,7 +138,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const linksToUpdate = noteToUpdate.links.filter(
             (link) => link.value === sourceNote.fname
           );
-          console.log({ linksToUpdate });
           const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
           const modifiedNote = await _.reduce<
             typeof linksToUpdate[0],
@@ -165,7 +171,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
                   xvault: isXVault,
                 },
               };
-              console.log({ newLink });
               const newBody = LinkUtils.updateLink({
                 note: acc,
                 oldLink,
@@ -176,7 +181,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             },
             Promise.resolve(noteToUpdateDeepCopy)
           );
-          console.log({ modifiedNote });
 
           noteToUpdate.body = modifiedNote.body;
           const writeResp = await this.extension
@@ -191,11 +195,22 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     });
     // delete old note
-    const deleteResp = await this.extension
-      .getEngine()
-      .deleteNote(sourceNote.id);
-    console.log({ deleteResp });
+    try {
+      const deleteResp = await this.extension
+        .getEngine()
+        .deleteNote(sourceNote.id);
+      if (deleteResp.data) {
+        noteChangeEntries = noteChangeEntries.concat(deleteResp.data);
+      }
+    } catch (error) {
+      this.L.error({ ctx, error });
+    }
 
-    return {};
+    // open the destination note
+    await this.extension.wsUtils.openNote(destNote);
+    return {
+      ...opts,
+      changed: noteChangeEntries,
+    };
   }
 }

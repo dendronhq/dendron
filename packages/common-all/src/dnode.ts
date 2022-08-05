@@ -35,7 +35,6 @@ import {
   SchemaPropsDict,
   SchemaRaw,
   NotePropsMeta,
-  DVaultUriVariant,
   NoteQuickInputV2,
 } from "./types";
 import {

@@ -38,14 +38,6 @@ const webExtensionConfig = {
       http: require.resolve("stream-http"),
       https: require.resolve("https-browserify"),
       constants: require.resolve("constants-browserify"),
-      fs: path.resolve(__dirname, "src/web/fs-fallback.js"), // TODO: Currently an empty export
-      child_process: false, // TODO: Currently an empty export
-      net: false,
-      tls: false,
-      dns: false,
-      zlib: false,
-      http2: false,
-      "node-loader": false,
       stream: require.resolve("stream-browserify"),
       buffer: require.resolve("buffer"),
     },

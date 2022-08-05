@@ -45,7 +45,6 @@ export class LookupQuickpickFactory {
   ): Promise<LookupAcceptPayload | undefined> {
     let initialValue = opts?.initialValue;
     if (!initialValue) {
-      console.log(`QP Initial Value Set`);
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
 
@@ -98,7 +97,6 @@ export class LookupQuickpickFactory {
       }
     );
 
-    console.log(`QP Show`);
     qp.show();
 
     return outerPromise;
@@ -131,9 +129,6 @@ export class LookupQuickpickFactory {
       })
       .then((initialItems) => {
         if (initialItems) {
-          console.log(
-            `Initial Item Set Added with length ${initialItems.length}`
-          );
           qp.items = initialItems;
           initialized = true;
         }
@@ -143,9 +138,6 @@ export class LookupQuickpickFactory {
       if (!initialized) {
         return;
       }
-      console.log(
-        `Provide Items called in onDidChangeValue for picker value ${newInput}`
-      );
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
         showDirectChildrenOnly: false,
@@ -155,11 +147,8 @@ export class LookupQuickpickFactory {
         },
       });
 
-      console.log(`Items Provided in onDidChangeValue: ${items?.length}`);
-
       const modifiedItems = this.addCreateNewOptionIfNecessary(newInput, items);
       qp.items = modifiedItems;
-      console.log("Items Replaced");
     });
 
     return qp;

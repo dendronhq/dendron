@@ -5,6 +5,10 @@ import * as vscode from "vscode";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 
+/**
+ * This is the entry point for the web extension variant of Dendron
+ * @param context
+ */
 export async function activate(context: vscode.ExtensionContext) {
   // Use the web extension injection container:
   await setupWebExtContainer();

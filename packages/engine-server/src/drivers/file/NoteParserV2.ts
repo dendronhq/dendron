@@ -35,7 +35,9 @@ import path from "path";
 import { createCacheEntry, EngineUtils } from "../../utils";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
 
-// NOTE: THIS FILE IS DUPLICATED IN COMMON-ALL
+// NOTE: This file has been forked in plugin-core to enable Dendron Web
+// Extension
+
 export type FileMeta = {
   // fpath: full path, eg: foo.md, fpath: foo.md
   fpath: string;

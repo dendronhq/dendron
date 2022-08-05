@@ -4,11 +4,7 @@ import {
   ERROR_STATUS,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
-import {
-  DLogger,
-  SchemaParserV2 as cSchemaParserV2,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { DLogger, SchemaParserV2, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -34,7 +30,7 @@ export class SchemaParser {
       await fs.readFile(path.join(vpath, fpath), "utf8")
     );
 
-    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
+    return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
   }
 
   async parse(

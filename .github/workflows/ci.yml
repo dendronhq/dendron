@@ -32,6 +32,7 @@ jobs:
         suite:
           - cli
           - plugin
+          - plugin-web
 
         include:
           - os: macos-latest

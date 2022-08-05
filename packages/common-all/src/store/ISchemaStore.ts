@@ -32,6 +32,14 @@ export interface ISchemaStore<K> {
   writeMetadata(opts: WriteSchemaOpts<K>): Promise<RespV3<K>>;
 
   /**
+   * Bulk write SchemaModuleProps metadata to storage layer for given key, overriding existing SchemaModuleProps metadata if it already exists
+   *
+   * @param opts: SchemaModuleProps write criteria array
+   * @return original key array
+   */
+  bulkWriteMetadata(opts: WriteSchemaOpts<K>[]): Promise<RespV3<K>[]>;
+
+  /**
    * Delete SchemaModuleProps from storage layer for given key.
    * If key does not exist, do nothing.
    *

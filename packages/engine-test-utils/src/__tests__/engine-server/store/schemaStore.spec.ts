@@ -112,6 +112,55 @@ describe("GIVEN SchemaStore", () => {
     );
   });
 
+  test("WHEN bulk writing metadata, THEN all metadata should be retrievable", async () => {
+    await runEngineTestV5(
+      async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const schemaStore = new SchemaStore({
+          fileStore: new NodeJSFileStore(),
+          dataStore: new SchemaMetadataStore(),
+          wsRoot,
+        });
+        const newSchema = await NoteTestUtilsV4.createSchema({
+          fname: "fname1",
+          vault,
+          wsRoot,
+          noWrite: true,
+        });
+        const anotherSchema = await NoteTestUtilsV4.createSchema({
+          fname: "bazSchema",
+          vault,
+          wsRoot,
+          noWrite: true,
+        });
+
+        const writeResp = await schemaStore.bulkWriteMetadata([
+          {
+            key: newSchema.root.id,
+            schema: newSchema,
+          },
+          {
+            key: anotherSchema.root.id,
+            schema: anotherSchema,
+          },
+        ]);
+        expect(writeResp.length).toEqual(2);
+
+        // Read back metadata
+        const metadata = await schemaStore.getMetadata(newSchema.root.id);
+        expect(metadata.data!.fname).toEqual(newSchema.fname);
+
+        const anotherMetadata = await schemaStore.getMetadata(
+          anotherSchema.root.id
+        );
+        expect(anotherMetadata.data!.fname).toEqual(anotherSchema.fname);
+      },
+      {
+        expect,
+      }
+    );
+  });
+
   test("WHEN deleting a root schema, THEN error should return and be CANT_DELETE_ROOT", async () => {
     await runEngineTestV5(
       async ({ wsRoot, engine }) => {

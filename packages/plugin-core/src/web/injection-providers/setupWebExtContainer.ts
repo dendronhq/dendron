@@ -15,6 +15,12 @@ import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
 import { getVaults } from "./getVaults";
 import { getWSRoot } from "./getWSRoot";
 
+/**
+ * This function prepares a TSyringe container suitable for the Web Extension
+ * flavor of the Dendron Plugin.
+ *
+ * It uses a VSCodeFileStore and includes a reduced engine that runs in-memory.
+ */
 export async function setupWebExtContainer() {
   const wsRoot = await getWSRoot();
 

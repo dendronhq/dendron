@@ -5,11 +5,11 @@ import {
   GetAllFilesOpts,
   IFileStore,
   isNotNull,
+  minimatch,
   RespV2,
   RespV3,
   URI,
 } from "@dendronhq/common-all";
-//import { globMatch } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 
@@ -127,23 +127,21 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
     return {
       data: allFiles
         .map((values) => {
-          // TODO: Finish the exclude/include filters implementation:
-
           // match exclusions
-          //const fname = values[0];
-          //const fileType = values[1];
-          // if (
-          //   _.some([
-          //     fileType === vscode.FileType.Directory,
-          //     globMatch(opts.exclude || [], fname),
-          //   ])
-          // ) {
-          //   return null;
-          // }
-          // // match inclusion
-          // if (opts.include && !globMatch(opts.include, fname)) {
-          //   return null;
-          // }
+          const fname = values[0];
+          const fileType = values[1];
+          if (
+            _.some([
+              fileType === vscode.FileType.Directory,
+              globMatch({ patterns: opts.exclude || [], fname }),
+            ])
+          ) {
+            return null;
+          }
+          // match inclusion
+          if (opts.include && !globMatch({ patterns: opts.include, fname })) {
+            return null;
+          }
           return values;
         })
         .filter(isNotNull),
@@ -160,4 +158,21 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
       }),
     };
   }
+}
+
+/**
+ * Implemented this function again here from common-server.
+ *  This uses minimatch of latest version which is independent of path module
+ */
+function globMatch({
+  patterns,
+  fname,
+}: {
+  patterns: string[] | string;
+  fname: string;
+}): boolean {
+  if (_.isString(patterns)) {
+    return minimatch(fname, patterns);
+  }
+  return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }

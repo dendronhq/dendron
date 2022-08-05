@@ -96,16 +96,13 @@ export class FeatureShowcaseToaster {
       )
       .then((resp) => {
         let userResponse;
+        MetadataService.instance().setFeatureShowcaseStatus(
+          message.showcaseEntry
+        );
         if (resp === undefined) {
           userResponse = FeatureShowcaseUserResponse.dismissed;
-          MetadataService.instance().setFeatureShowcaseStatus(
-            message.showcaseEntry
-          );
         } else if (resp === message.confirmText) {
           userResponse = FeatureShowcaseUserResponse.confirmed;
-          MetadataService.instance().setFeatureShowcaseStatus(
-            message.showcaseEntry
-          );
         } else {
           // Don't set the metadata because the user deferred let's toast the
           // user again later.

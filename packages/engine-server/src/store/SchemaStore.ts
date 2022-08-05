@@ -74,19 +74,6 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
   }
 
   /**
-   * See {@link ISchemaStore.bulkWriteMetadata}
-   */
-  async bulkWriteMetadata(
-    opts: WriteSchemaOpts<string>[]
-  ): Promise<RespV3<string>[]> {
-    return Promise.all(
-      opts.map((writeMetaOpt) => {
-        return this.writeMetadata(writeMetaOpt);
-      })
-    );
-  }
-
-  /**
    * See {@link ISchemaStore.writeMetadata}
    */
   async writeMetadata(opts: WriteSchemaOpts<string>): Promise<RespV3<string>> {
@@ -103,6 +90,19 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
       };
     }
     return this._metadataStore.write(key, schema);
+  }
+
+  /**
+   * See {@link ISchemaStore.bulkWriteMetadata}
+   */
+  async bulkWriteMetadata(
+    opts: WriteSchemaOpts<string>[]
+  ): Promise<RespV3<string>[]> {
+    return Promise.all(
+      opts.map((writeMetaOpt) => {
+        return this.writeMetadata(writeMetaOpt);
+      })
+    );
   }
 
   /**

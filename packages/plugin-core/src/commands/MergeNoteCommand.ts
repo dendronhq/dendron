@@ -2,6 +2,7 @@ import {
   asyncLoopOneAtATime,
   NoteProps,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import {
@@ -129,26 +130,42 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         );
         console.log({ linksToUpdate });
         const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
-        const modifiedNote = _.reduce<typeof linksToUpdate[0], NoteProps>(
+        const modifiedNote = await _.reduce<
+          typeof linksToUpdate[0],
+          Promise<NoteProps>
+        >(
           linksToUpdate,
-          (prev, linkToUpdate) => {
+          async (prev, linkToUpdate) => {
+            const acc = await prev;
             const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
+            const notesWithSameName = await this.extension
+              .getEngine()
+              .findNotes({
+                fname: destNote.fname,
+              });
+            const isXVault =
+              oldLink.data.xvault || notesWithSameName.length > 1;
             const newLink = {
               ...oldLink,
-              to: {
-                ...oldLink.to,
+              from: {
+                ...oldLink.from,
                 fname: destNote.fname,
+                vaultName: VaultUtils.getName(destNote.vault),
+              },
+              data: {
+                xvault: isXVault,
               },
             };
+            console.log({ newLink });
             const newBody = LinkUtils.updateLink({
-              note: prev,
+              note: acc,
               oldLink,
               newLink,
             });
-            prev.body = newBody;
-            return prev;
+            acc.body = newBody;
+            return acc;
           },
-          noteToUpdateDeepCopy
+          Promise.resolve(noteToUpdateDeepCopy)
         );
         console.log({ modifiedNote });
 

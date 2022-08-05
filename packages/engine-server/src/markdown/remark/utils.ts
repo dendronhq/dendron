@@ -719,6 +719,19 @@ export class LinkUtils {
     }
   }
 
+  /**
+   * Given a note, updates old link to new link.
+   * If you are calling this on a note multiple times,
+   * You need to start from the last link in the body
+   * Because each updateLink call will shift the location of
+   * every element in the note body that comes after
+   * the link you update
+   *
+   * @param note the note that contains link to update
+   * @param oldLink the old link that needs to be updated
+   * @param newLink new link
+   * @returns
+   */
   static updateLink({
     note,
     oldLink,

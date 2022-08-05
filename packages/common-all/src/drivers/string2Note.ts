@@ -6,7 +6,8 @@ import { DVault } from "../types";
 import { genHash } from "../utils";
 
 /**
- *
+ * NOTE: Temporarily duplicated from common-server/filesv2.ts to get Dendron Web
+ * Extension working
  * @param calculateHash - when set, add `contentHash` property to the note
  *  Default: false
  * @returns

@@ -128,6 +128,8 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
     return {
       data: allFiles
         .map((values) => {
+          // TODO: Finish the exclude/include filters implementation:
+
           // match exclusions
           //const fname = values[0];
           //const fileType = values[1];
@@ -153,7 +155,8 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
       error: new DendronError({
         message: "Error when reading the vault",
         payload: err,
-        // Marked as minor to avoid stopping initialization. Even if we can't read one vault, we might be able to read other vaults.
+        // Marked as minor to avoid stopping initialization. Even if we can't
+        // read one vault, we might be able to read other vaults.
         severity: ERROR_SEVERITY.MINOR,
       }),
     };

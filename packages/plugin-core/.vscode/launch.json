@@ -72,7 +72,7 @@
       "debugWebWorkerHost": true,
       "request": "launch",
       "args": [
-        // "--disable-extensions",
+        "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionDevelopmentKind=web"
       ],
@@ -100,50 +100,6 @@
       "sourceMapPathOverrides": {
         "*": "${webRoot}/*"
       }
-    },
-    // {
-    //   "name": "Extension Integ Tests - File",
-    //   "type": "extensionHost",
-    //   "request": "launch",
-    //   "runtimeExecutable": "${execPath}",
-    //   "args": [
-    //     //"${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
-    //     "--disable-extensions",
-    //     "--extensionDevelopmentPath=${workspaceFolder}",
-    //     "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index"
-    //   ],
-    //   "env": {
-    //     "STAGE": "test",
-    //     "TEST_TO_RUN": "${fileBasenameNoExtension}"
-    //   },
-    //   "skipFiles": [
-    //     "<node_internals>/**/*.js",
-    //     "${workspaceFolder}/**/node_modules/mocha/**/*.js",
-    //     "**/extensionHostProcess.js"
-    //   ],
-    //   "outFiles": [
-    //     "${workspaceFolder}/out/src/test/**/*.js"
-    //   ]
-    // },
-    {
-      "name": "Plugin Web Extension Tests in VS Code (File)",
-      "type": "extensionHost",
-      // "debugWebWorkerHost": true,
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        // "--extensionDevelopmentKind=web",
-        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index"
-      ],
-      "env": {
-        "STAGE": "test",
-        "TEST_TO_RUN": "${fileBasenameNoExtension}"
-      },
-      "outFiles": [
-        "${workspaceFolder}/out/src/test/**/*.js"
-      ],
     },
     {
       "name": "Run Extension - webpack",
@@ -211,7 +167,6 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        //"${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index"

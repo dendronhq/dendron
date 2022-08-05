@@ -1,17 +1,17 @@
 import _ from "lodash";
 import { URI, Utils } from "vscode-uri";
-import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
+import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { NoteUtils } from "../dnode";
-import { DendronError, DendronCompositeError } from "../error";
+import { DendronError } from "../error";
 import {
   Disposable,
+  DNoteLoc,
+  FindNoteOpts,
+  NoteProps,
   NotePropsMeta,
   RespV3,
-  NoteProps,
-  FindNoteOpts,
-  WriteNoteOpts,
   WriteNoteMetaOpts,
-  DNoteLoc,
+  WriteNoteOpts,
 } from "../types";
 import { genHash, isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";

@@ -33,7 +33,6 @@ import {
   RemarkUtils,
   visit,
 } from "@dendronhq/engine-server";
-// import { error } from "console";
 import _ from "lodash";
 import path from "path";
 import { Location } from "vscode";

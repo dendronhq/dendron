@@ -181,10 +181,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "workspace",
   },
-  "workspace.enableHandlebarTemplates": {
-    type: "boolean",
-    group: "workspace",
-  },
   "workspace.enableRemoteVaultInit": {
     type: "boolean",
     group: "workspace",

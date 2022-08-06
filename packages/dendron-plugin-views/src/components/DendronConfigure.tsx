@@ -30,6 +30,7 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   const [workspace] = useWorkspaceProps();
   const { useConfig } = engineHooks;
   const configGroupMap = new Map<string, string>();
+  const configSubMenuMap = new Map<string, string>();
 
   useEffect(() => {
     setConfig(engine.config);
@@ -73,6 +74,30 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
   const handleSearch = debounce((e: any) => {
     setSearchString(e.target.value);
   }, 500);
+
+  const subMenuCardList = (submenu: string) => {
+    return getSortedConfig()
+      .filter((config) => _.lowerCase(config).includes(_.lowerCase(submenu)))
+      .map((conf) => {
+        return (
+          <Card
+            title={cleanTitle(conf.substring(conf.lastIndexOf(".") + 1))}
+            id={conf}
+          >
+            <Typography.Paragraph>
+              {dendronConfig[conf]?.type !== "boolean"
+                ? ConfigUtils.getConfigDescription(conf)
+                : null}
+            </Typography.Paragraph>
+            <ConfigureElement
+              {...dendronConfig[conf]}
+              name={conf}
+              postMessage={postMessage}
+            />
+          </Card>
+        );
+      });
+  };
 
   return (
     <Layout style={{ height: "100vh", overflow: "hidden" }}>
@@ -134,6 +159,7 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
                       _.lowerCase(conf).includes(_.lowerCase(searchString))
                     )
                     .map((conf) => {
+                      const submenu = conf.substring(0, conf.lastIndexOf("."));
                       return (
                         <>
                           {!configGroupMap.has(dendronConfig[conf]?.group) &&
@@ -147,18 +173,33 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
                               </Typography.Title>
                             </Divider>
                           ) : null}
-                          <Card title={cleanTitle(conf)} id={conf}>
-                            <Typography.Paragraph>
-                              {dendronConfig[conf]?.type !== "boolean"
-                                ? ConfigUtils.getConfigDescription(conf)
-                                : null}
-                            </Typography.Paragraph>
-                            <ConfigureElement
-                              {...dendronConfig[conf]}
-                              name={conf}
-                              postMessage={postMessage}
-                            />
-                          </Card>
+                          {conf.split(".").length > 2 ? (
+                            !configSubMenuMap.has(submenu) &&
+                            configSubMenuMap.set(submenu, "") && (
+                              <Card title={cleanTitle(submenu)} id={submenu}>
+                                <Space
+                                  direction="vertical"
+                                  size="middle"
+                                  style={{ display: "flex" }}
+                                >
+                                  {subMenuCardList(submenu)}
+                                </Space>
+                              </Card>
+                            )
+                          ) : (
+                            <Card title={cleanTitle(conf)} id={conf}>
+                              <Typography.Paragraph>
+                                {dendronConfig[conf]?.type !== "boolean"
+                                  ? ConfigUtils.getConfigDescription(conf)
+                                  : null}
+                              </Typography.Paragraph>
+                              <ConfigureElement
+                                {...dendronConfig[conf]}
+                                name={conf}
+                                postMessage={postMessage}
+                              />
+                            </Card>
+                          )}
                         </>
                       );
                     })}

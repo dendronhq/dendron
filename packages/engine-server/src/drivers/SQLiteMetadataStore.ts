@@ -57,6 +57,15 @@ export class SQLiteMetadataStore {
         INSERT INTO notes_fts (fname, id)
         VALUES (new.fname, new.id);
     END;`);
+    queries.push(`CREATE TRIGGER notes_ad AFTER DELETE ON notes
+      BEGIN
+        INSERT INTO notes_fts (notes_fts, rowid, fname, id) VALUES ('delete', old.rowid, old.id, old.fname);
+      END;`);
+    queries.push(`CREATE TRIGGER notes_au AFTER UPDATE ON notes
+    BEGIN
+      INSERT INTO notes_fts(notes_fts, rowid, fname, id) VALUES('delete', old.rowid, old.id, old.fname);
+      INSERT INTO notes_fts(rowid, fname, id) VALUES (new.rowid, new.fname, new.id);
+    END;`);
     return asyncLoopOneAtATime<string>(queries, async (_query) => {
       return getPrismaClient().$queryRawUnsafe(_query);
     });
@@ -79,9 +88,21 @@ export class SQLiteMetadataStore {
     return prisma.$queryRawUnsafe(fullQuery);
   }
 
-  static async search(query: string): Promise<NoteIndexLightProps[]> {
+  static async search(
+    query: string
+  ): Promise<{ hits: NoteIndexLightProps[]; query: string }> {
+    query = transformQuery(query).join(" ");
     // Prisma.sql`SELECT * FROM User WHERE email = ${email}`;
-    const raw = `SELECT * FROM notes_fts WHERE notes_fts = '"fname" : NEAR("${query}"*)'`;
-    return getPrismaClient().$queryRawUnsafe(raw);
+    const raw = `SELECT * FROM notes_fts WHERE notes_fts = '"fname" : NEAR(${query})'`;
+    return {
+      hits: (await getPrismaClient().$queryRawUnsafe(
+        raw
+      )) as unknown as NoteIndexLightProps[],
+      query: raw,
+    };
   }
+}
+
+function transformQuery(query: string): string[] {
+  return query.split(" ").map((ent) => `"${ent}"*`);
 }

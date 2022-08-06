@@ -336,7 +336,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     if (this.config.workspace.metadataStore === "sqlite") {
-      noteIndexProps = await SQLiteMetadataStore.search(qs);
+      const resp = await SQLiteMetadataStore.search(qs);
+      noteIndexProps = resp.hits;
+      this.logger.debug({ ctx: "queryNote", query: resp.query });
     } else {
       noteIndexProps = await this.fuseEngine.queryNote({
         qs,

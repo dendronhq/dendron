@@ -57,12 +57,17 @@ import {
   RespV3,
   ERROR_STATUS,
   EngineEventEmitter,
+  NoteIndexProps,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
+import {
+  NoteIndexLightProps,
+  SQLiteMetadataStore,
+} from "./drivers/SQLiteMetadataStore";
 import { HistoryService } from "./history";
 import { EngineUtils } from "./utils";
 
@@ -329,18 +334,24 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     opts: Parameters<DEngineClient["queryNotes"]>[0]
   ): Promise<NoteProps[]> {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
-    let noteIndexProps = await this.fuseEngine.queryNote({
-      qs,
-      onlyDirectChildren,
-      originalQS,
-    });
+    let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
+    if (this.config.workspace.metadataStore === "sqlite") {
+      noteIndexProps = await SQLiteMetadataStore.search(qs);
+    } else {
+      noteIndexProps = await this.fuseEngine.queryNote({
+        qs,
+        onlyDirectChildren,
+        originalQS,
+      });
+    }
+    let noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
     // TODO: hack
     if (!_.isUndefined(vault)) {
-      noteIndexProps = noteIndexProps.filter((ent) =>
+      noteProps = noteProps.filter((ent) =>
         VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
       );
     }
-    return noteIndexProps.map((ent) => this.notes[ent.id]);
+    return noteProps;
   }
 
   async queryNotes(opts: QueryNotesOpts) {

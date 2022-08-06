@@ -11,6 +11,11 @@ function getPrismaClient(): PrismaClient {
   return _prisma;
 }
 
+export type NoteIndexLightProps = {
+  fname: string;
+  id: string;
+};
+
 export class SQLiteMetadataStore {
   constructor({ wsRoot }: { wsRoot: string }) {
     // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db"""
@@ -23,9 +28,13 @@ export class SQLiteMetadataStore {
     });
   }
 
-  static isInitialized(): boolean {
-    // TODO
-    return false;
+  static async isInitialized(): Promise<boolean> {
+    // valid result: [ { name: "notes", }, ]
+    const query = `SELECT name FROM sqlite_master WHERE type='table' AND name='notes'`;
+    const resp = (await getPrismaClient().$queryRawUnsafe(query)) as {
+      name: string;
+    }[];
+    return resp.length === 1;
   }
 
   static async createAllTables() {
@@ -38,15 +47,16 @@ export class SQLiteMetadataStore {
 	, updated INTEGER);
 	CREATE INDEX "idx_notes_id" ON "notes"("id");
 	CREATE VIRTUAL TABLE [notes_fts] USING FTS5 (
-			[fname],
+			fname, id,
 			content=[notes]
-	);
-	CREATE TABLE IF NOT EXISTS 'notes_fts_data'(id INTEGER PRIMARY KEY, block BLOB);
-	CREATE TABLE IF NOT EXISTS 'notes_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID;
-	CREATE TABLE IF NOT EXISTS 'notes_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB);
-	CREATE TABLE IF NOT EXISTS 'notes_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID;`
+	);`
       .split(";")
       .slice(0, -1);
+    queries.push(`CREATE TRIGGER notes_ai AFTER INSERT ON notes
+    BEGIN
+        INSERT INTO notes_fts (fname, id)
+        VALUES (new.fname, new.id);
+    END;`);
     return asyncLoopOneAtATime<string>(queries, async (_query) => {
       return getPrismaClient().$queryRawUnsafe(_query);
     });
@@ -56,8 +66,7 @@ export class SQLiteMetadataStore {
     const prisma = getPrismaClient();
 
     // create tables
-    // TODO: check if they exist
-    // await this.createAllTables();
+    await this.createAllTables();
 
     // bulk insert
     const sqlBegin = "INSERT INTO 'notes' ('fname', 'id') VALUES ";
@@ -68,5 +77,11 @@ export class SQLiteMetadataStore {
       .join(",");
     const fullQuery = sqlBegin + sqlEnd;
     return prisma.$queryRawUnsafe(fullQuery);
+  }
+
+  static async search(query: string): Promise<NoteIndexLightProps[]> {
+    // Prisma.sql`SELECT * FROM User WHERE email = ${email}`;
+    const raw = `SELECT * FROM notes_fts WHERE notes_fts = '"fname" : NEAR("${query}"*)'`;
+    return getPrismaClient().$queryRawUnsafe(raw);
   }
 }

@@ -275,7 +275,11 @@ export class NoteParser extends ParserBase {
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    if (opts?.useSQLiteMetadataStore && !SQLiteMetadataStore.isInitialized()) {
+    if (
+      opts?.useSQLiteMetadataStore &&
+      !(await SQLiteMetadataStore.isInitialized())
+    ) {
+      this.logger.info({ ctx, msg: "initialize metadata" });
       await SQLiteMetadataStore.initializeMetadata(notesById);
     }
     return { notesById, cacheUpdates, errors };

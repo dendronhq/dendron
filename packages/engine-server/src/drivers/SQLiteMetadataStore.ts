@@ -1,5 +1,5 @@
 import { asyncLoopOneAtATime, NotePropsByIdDict } from "@dendronhq/common-all";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated-prisma-client";
 import _ from "lodash";
 
 let _prisma: PrismaClient | undefined;
@@ -56,13 +56,14 @@ export class SQLiteMetadataStore {
     const prisma = getPrismaClient();
 
     // create tables
-    await this.createAllTables();
+    // TODO: check if they exist
+    // await this.createAllTables();
 
     // bulk insert
     const sqlBegin = "INSERT INTO 'notes' ('fname', 'id') VALUES ";
     const sqlEnd = _.values(notesIdDict)
       .map(({ fname, id }) => {
-        return `('${fname}', ${id})`;
+        return `('${fname}', '${id}')`;
       })
       .join(",");
     const fullQuery = sqlBegin + sqlEnd;

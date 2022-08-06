@@ -1,12 +1,13 @@
 generator client {
   provider = "prisma-client-js"
-  // binaryTargets = ["native", "darwin"]
+  binaryTargets = ["darwin-arm64"]
   // output = "./generated"
+  output = "./../src/generated-prisma-client"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = ""
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.

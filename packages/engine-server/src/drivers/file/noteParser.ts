@@ -281,10 +281,15 @@ export class NoteParser extends ParserBase {
       !(await SQLiteMetadataStore.isVaultInitialized(vault))
     ) {
       this.logger.info({ ctx, msg: "initialize metadata" });
-      await SQLiteMetadataStore.bulkInsertAllNotesAndUpdateVaultMetadata({
-        notesIdDict: notesById,
-        vault,
-      });
+      try {
+        await SQLiteMetadataStore.bulkInsertAllNotesAndUpdateVaultMetadata({
+          notesIdDict: notesById,
+          vault,
+        });
+      } catch (err) {
+        this.logger.error({ ctx, msg: "issue doing bulk insert", vault });
+        throw err;
+      }
     }
     return { notesById, cacheUpdates, errors };
   }

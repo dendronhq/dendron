@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = ""
+  // url      = "file:./dev.db"
 }
 
 model notes {

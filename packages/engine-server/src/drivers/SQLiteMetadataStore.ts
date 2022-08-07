@@ -115,6 +115,7 @@ export class SQLiteMetadataStore {
         schemaVersion: 0,
       },
     });
+    return { query: fullQuery };
   }
 
   static async search(

@@ -1,4 +1,8 @@
-import { asyncLoopOneAtATime, NotePropsByIdDict } from "@dendronhq/common-all";
+import {
+  asyncLoopOneAtATime,
+  DVault,
+  NotePropsByIdDict,
+} from "@dendronhq/common-all";
 import { PrismaClient } from "../generated-prisma-client";
 import _ from "lodash";
 
@@ -33,13 +37,20 @@ export class SQLiteMetadataStore {
     });
   }
 
-  static async isInitialized(): Promise<boolean> {
-    // valid result: [ { name: "notes", }, ]
+  static async isDBInitialized() {
     const query = `SELECT name FROM sqlite_master WHERE type='table' AND name='notes'`;
     const resp = (await getPrismaClient().$queryRawUnsafe(query)) as {
       name: string;
     }[];
     return resp.length === 1;
+  }
+
+  static async isVaultInitialized(vault: DVault): Promise<boolean> {
+    // valid result: [ { name: "notes", }, ]
+    const resp = await getPrismaClient().vaultMetadata.findFirst({
+      where: { relativePath: vault.fsPath },
+    });
+    return resp !== null;
   }
 
   static async createAllTables() {
@@ -50,6 +61,11 @@ export class SQLiteMetadataStore {
 			"vault" TEXT,
 			"stub" BIGINT
 	, updated INTEGER);
+  CREATE TABLE IF NOT EXISTS "VaultMetadata" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "relativePath" TEXT NOT NULL,
+    "schemaVersion" INTEGER NOT NULL
+  );
 	CREATE INDEX "idx_notes_id" ON "notes"("id");
 	CREATE VIRTUAL TABLE [notes_fts] USING FTS5 (
 			fname, id,
@@ -76,7 +92,13 @@ export class SQLiteMetadataStore {
     });
   }
 
-  static async bulkInsertAllNotes(notesIdDict: NotePropsByIdDict) {
+  static async bulkInsertAllNotesAndUpdateVaultMetadata({
+    notesIdDict,
+    vault,
+  }: {
+    notesIdDict: NotePropsByIdDict;
+    vault: DVault;
+  }) {
     const prisma = getPrismaClient();
     // bulk insert
     const sqlBegin = "INSERT INTO 'notes' ('fname', 'id') VALUES ";
@@ -86,7 +108,13 @@ export class SQLiteMetadataStore {
       })
       .join(",");
     const fullQuery = sqlBegin + sqlEnd;
-    return prisma.$queryRawUnsafe(fullQuery);
+    await prisma.$queryRawUnsafe(fullQuery);
+    await prisma.vaultMetadata.create({
+      data: {
+        relativePath: vault.fsPath,
+        schemaVersion: 0,
+      },
+    });
   }
 
   static async search(

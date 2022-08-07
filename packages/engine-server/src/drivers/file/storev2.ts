@@ -491,7 +491,7 @@ export class FileStorage implements DStore {
     if (this.config.workspace.metadataStore === "sqlite") {
       // eslint-disable-next-line no-new
       new SQLiteMetadataStore({ wsRoot: this.wsRoot });
-      if (!(await SQLiteMetadataStore.isInitialized())) {
+      if (!(await SQLiteMetadataStore.isDBInitialized())) {
         await SQLiteMetadataStore.createAllTables();
       }
     }

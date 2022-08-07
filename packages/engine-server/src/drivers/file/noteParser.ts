@@ -278,10 +278,13 @@ export class NoteParser extends ParserBase {
     if (
       opts?.useSQLiteMetadataStore &&
       // TODO
-      !(await SQLiteMetadataStore.isInitialized())
+      !(await SQLiteMetadataStore.isVaultInitialized(vault))
     ) {
       this.logger.info({ ctx, msg: "initialize metadata" });
-      await SQLiteMetadataStore.bulkInsertAllNotes(notesById);
+      await SQLiteMetadataStore.bulkInsertAllNotesAndUpdateVaultMetadata({
+        notesIdDict: notesById,
+        vault,
+      });
     }
     return { notesById, cacheUpdates, errors };
   }

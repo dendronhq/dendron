@@ -10,7 +10,6 @@ datasource db {
   url      = ""
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model notes {
   fname   String?
   id      String  @id
@@ -20,4 +19,10 @@ model notes {
   stub    Boolean?
 
   @@index([id], map: "idx_notes_id")
+}
+
+model VaultMetadata {
+    id        Int      @id @default(autoincrement())
+    relativePath String
+    schemaVersion Int
 }

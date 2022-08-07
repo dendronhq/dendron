@@ -487,6 +487,15 @@ export class FileStorage implements DStore {
     let notesWithLinks: NoteProps[] = [];
     let errors: IDendronError<any>[] = [];
     const start = process.hrtime();
+    // instantiate so we can use singleton later
+    if (this.config.workspace.metadataStore === "sqlite") {
+      // eslint-disable-next-line no-new
+      new SQLiteMetadataStore({ wsRoot: this.wsRoot });
+      if (!(await SQLiteMetadataStore.isInitialized())) {
+        await SQLiteMetadataStore.createAllTables();
+      }
+    }
+
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
@@ -643,12 +652,6 @@ export class FileStorage implements DStore {
       };
     }
     const noteFiles = out.data;
-
-    // instantiate so we can use singleton later
-    if (this.config.workspace.metadataStore === "sqlite") {
-      // eslint-disable-next-line no-new
-      new SQLiteMetadataStore({ wsRoot: this.wsRoot });
-    }
 
     const {
       notesById,

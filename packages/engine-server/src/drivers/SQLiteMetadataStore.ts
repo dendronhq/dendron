@@ -18,6 +18,11 @@ export type NoteIndexLightProps = {
 
 export class SQLiteMetadataStore {
   constructor({ wsRoot }: { wsRoot: string }) {
+    if (_prisma) {
+      throw new Error(
+        "SQLiteMetadataStore constructor should only be called once"
+      );
+    }
     // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db"""
     _prisma = new PrismaClient({
       datasources: {
@@ -71,12 +76,8 @@ export class SQLiteMetadataStore {
     });
   }
 
-  static async initializeMetadata(notesIdDict: NotePropsByIdDict) {
+  static async bulkInsertAllNotes(notesIdDict: NotePropsByIdDict) {
     const prisma = getPrismaClient();
-
-    // create tables
-    await this.createAllTables();
-
     // bulk insert
     const sqlBegin = "INSERT INTO 'notes' ('fname', 'id') VALUES ";
     const sqlEnd = _.values(notesIdDict)
@@ -92,7 +93,6 @@ export class SQLiteMetadataStore {
     query: string
   ): Promise<{ hits: NoteIndexLightProps[]; query: string }> {
     query = transformQuery(query).join(" ");
-    // Prisma.sql`SELECT * FROM User WHERE email = ${email}`;
     const raw = `SELECT * FROM notes_fts WHERE notes_fts = '"fname" : NEAR(${query})'`;
     return {
       hits: (await getPrismaClient().$queryRawUnsafe(

@@ -166,5 +166,4 @@ jobs:
       #   timeout-minutes: 30
 
       - name: Run Plugin-Web tests
-        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '16.x'
         run: yarn ci:test:plugin-web

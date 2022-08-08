@@ -22,6 +22,10 @@ export class NotesFileSystemCache extends DendronFileSystemCache<
     return new Set(_.keys(this._cacheContents.notes));
   }
 
+  getAllValues(): NotesCacheEntry[] {
+    return _.values(this._cacheContents.notes);
+  }
+
   createEmptyCacheContents(): NotesCache {
     return { version: 0, notes: {} };
   }

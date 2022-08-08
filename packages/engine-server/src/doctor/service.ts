@@ -2,6 +2,7 @@ import {
   assertInvalidState,
   asyncLoopOneAtATime,
   ConfigUtils,
+  CONSTANTS,
   DendronError,
   DEngineClient,
   Disposable,
@@ -20,14 +21,22 @@ import {
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
+  FakeLogger,
   isSelfContainedVaultFolder,
   pathForVaultRoot,
+  vault2Path,
 } from "@dendronhq/common-server";
 import throttle from "@jcoreio/async-throttle";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DEPRECATED_PATHS, Git, MDUtilsV5, WorkspaceService } from "..";
+import {
+  DEPRECATED_PATHS,
+  Git,
+  MDUtilsV5,
+  NotesFileSystemCache,
+  WorkspaceService,
+} from "..";
 import { DConfig } from "../config";
 import { ProcMode } from "../markdown";
 import { LinkUtils, RemarkUtils } from "../markdown/remark/utils";
@@ -46,6 +55,7 @@ export enum DoctorActionsEnum {
   ADD_MISSING_DEFAULT_CONFIGS = "addMissingDefaultConfigs",
   REMOVE_DEPRECATED_CONFIGS = "removeDeprecatedConfigs",
   FIX_SELF_CONTAINED_VAULT_CONFIG = "fixSelfContainedVaultsInConfig",
+  FIX_DUPLICATE_IDS = "fixDuplicateIds",
 }
 
 export type DoctorServiceOpts = {
@@ -60,6 +70,7 @@ export type DoctorServiceOpts = {
   podId?: string;
   hierarchy?: string;
   vault?: DVault | string;
+  wsRoot?: string;
 };
 
 /** DoctorService is a disposable, you **must** dispose instances you create
@@ -72,6 +83,34 @@ export class DoctorService implements Disposable {
     const { logger, dispose } = createDisposableLogger("DoctorService");
     this.L = logger;
     this.loggerDispose = dispose;
+  }
+
+  static actionRequireEngine(action: DoctorActionsEnum) {
+    return ![DoctorActionsEnum.FIX_DUPLICATE_IDS].includes(action);
+  }
+
+  _getNotes({
+    candidates,
+    query,
+    engine,
+  }: {
+    candidates?: NoteProps[];
+    query?: string;
+    engine: DEngineClient;
+  }) {
+    let notes: NoteProps[];
+    if (_.isUndefined(candidates)) {
+      notes =
+        (query
+          ? engine.queryNotesSync({ qs: query, originalQS: query }).data
+          : _.values(engine.notes)) ?? [];
+    } else {
+      notes = candidates;
+    }
+    if (notes) {
+      notes = notes.filter((n) => !n.stub);
+    }
+    return notes;
   }
 
   dispose() {
@@ -178,6 +217,55 @@ export class DoctorService implements Disposable {
     ).filter(isNotUndefined);
   }
 
+  async fixDuplicateIds(opts: { vault: DVault; wsRoot: string }) {
+    console.log("fixing", JSON.stringify(opts));
+    const vpath = vault2Path({ vault: opts.vault, wsRoot: opts.wsRoot });
+    const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+    const notesCache = new NotesFileSystemCache({
+      cachePath,
+      logger: new FakeLogger(),
+    });
+    const allNotes = notesCache.getAllValues();
+    const seen = new Set<string>();
+    const dup = [];
+    allNotes.map((ent) => {
+      const { id, fname } = ent.data;
+      if (seen.has(id)) {
+        dup.push(id);
+        console.log({ msg: "FOUND DUP", id, fname });
+      }
+      seen.add(ent.data.id);
+    });
+    if (dup.length === 0) {
+      console.log({ msg: "NO DUPS FOUND" });
+    }
+  }
+
+  async executeDoctorActionsWithoutEngine(opts: DoctorServiceOpts) {
+    switch (opts.action) {
+      case DoctorActionsEnum.FIX_DUPLICATE_IDS: {
+        const { error, data } = DConfig.readConfigAndApplyLocalOverrideSync(
+          opts.wsRoot!
+        );
+        if (error) {
+          throw error;
+        }
+        asyncLoopOneAtATime(ConfigUtils.getVaults(data), (vault) => {
+          return this.fixDuplicateIds({
+            vault,
+            wsRoot: opts.wsRoot!,
+          });
+        });
+        break;
+      }
+      default:
+        throw new DendronError({
+          message: "Unexpected Doctor action",
+        });
+    }
+    return { exit: false };
+  }
+
   async executeDoctorActions(opts: DoctorServiceOpts) {
     const {
       action,
@@ -195,18 +283,7 @@ export class DoctorService implements Disposable {
       exit: true,
     });
 
-    let notes: NoteProps[];
-    if (_.isUndefined(candidates)) {
-      notes =
-        (query
-          ? engine.queryNotesSync({ qs: query, originalQS: query }).data
-          : _.values(engine.notes)) ?? [];
-    } else {
-      notes = candidates;
-    }
-    if (notes) {
-      notes = notes.filter((n) => !n.stub);
-    }
+    let notes: NoteProps[] = this._getNotes({ candidates, engine, query });
     const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
     const notesByFname =
       NoteFnameDictUtils.createNotePropsByFnameDict(notesById);

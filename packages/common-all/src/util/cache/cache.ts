@@ -10,6 +10,11 @@ export interface Cache<K, T> {
   /** Drops the element if it exists in the cache.
    *  NO-OP if the element does not exist. */
   drop(key: K): void;
+
+  /**
+   * Get all values from cache
+   */
+  getAllValues(): T[];
 }
 
 /** Null object implementation of {@link Cache} to be used when we
@@ -25,5 +30,9 @@ export class NullCache<K, T> implements Cache<K, T> {
 
   drop(_key: K): void {
     // Empty since this is null object implementation
+  }
+
+  getAllValues(): T[] {
+    return [];
   }
 }

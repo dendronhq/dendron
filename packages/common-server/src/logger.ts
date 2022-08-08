@@ -6,6 +6,16 @@ import pino from "pino";
 
 export type LogLvl = "debug" | "info" | "error";
 
+/**
+ * Use when a logger is required but not necessary yfor the function
+ */
+export class FakeLogger implements DLogger {
+  level: any;
+  debug(_msg: any) {}
+  info(_msg: any) {}
+  error(_msg: any) {}
+}
+
 export class Logger {
   public name: string;
   public level: string;

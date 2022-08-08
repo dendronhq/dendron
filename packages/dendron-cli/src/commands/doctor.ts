@@ -73,14 +73,25 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   async enrichArgs(args: CommandCLIOpts) {
     this.addArgsToPayload({ action: args.action });
+    if (!DoctorService.actionRequireEngine(args.action)) {
+      return { data: { ...args } } as any;
+    }
     const engineArgs = await setupEngine(args);
     return { data: { ...args, ...engineArgs } };
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
+    debugger;
     const ds = new DoctorService();
-    const out = await ds.executeDoctorActions(opts);
-    ds.dispose();
-    return out;
+    console.log(opts);
+    if (!DoctorService.actionRequireEngine(opts.action)) {
+      const out = await ds.executeDoctorActionsWithoutEngine(opts);
+      ds.dispose();
+      return out;
+    } else {
+      const out = await ds.executeDoctorActions(opts);
+      ds.dispose();
+      return out;
+    }
   }
 }

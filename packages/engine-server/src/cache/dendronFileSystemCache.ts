@@ -55,6 +55,7 @@ export abstract class DendronFileSystemCache<T extends FileSystemCache, V>
   }
 
   abstract get(key: string): V | undefined;
+  abstract getAllValues(): V[];
   abstract set(key: string, data: V): void;
   abstract drop(key: string): void;
 

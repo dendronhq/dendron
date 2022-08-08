@@ -21,6 +21,13 @@
       "problemMatcher": []
     },
     {
+      "label": "doctor",
+      "type": "shell",
+      "command": "node --inspect lib/bin/dendron-cli.js doctor --action fixDuplicateIds --wsRoot /Users/kevinlin/workspaces/org-workspace",
+      "options": {},
+      "problemMatcher": []
+    },
+    {
       "label": "export-pod",
       "type": "shell",
       "command": "node --inspect ${workspaceFolder}/lib/bin/dendron-cli exportPod --wsRoot ${workspaceFolder}/../../test-workspace --podId dendron.airtable --podPkg @dendronhq/airtable-pod --showConfig",

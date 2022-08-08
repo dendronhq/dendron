@@ -126,11 +126,7 @@ jobs:
         run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 30
 
-      - name: Run Plugin-Web tests
-        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '16.x'
-        run: yarn ci:test:plugin-web
-
- test-plugin-web:
+  test-plugin-web:
     strategy:
       # Allow other matrix jobs to continue after one fails, allowing us to
       # isolate platform-specific issues.

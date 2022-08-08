@@ -8,7 +8,7 @@ type CommandInput = {};
 type CommandOpts = {};
 type CommandOutput = CommandOpts;
 
-export class TogglePreviewLock extends BasicCommand<
+export class TogglePreviewLockCommand extends BasicCommand<
   CommandOpts,
   CommandOutput,
   CommandInput

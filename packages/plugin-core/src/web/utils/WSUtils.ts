@@ -3,7 +3,7 @@ import path from "path";
 import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
 import { URI } from "vscode-uri";
-import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
+import { type IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 
 @injectable()
 export class WSUtilsWeb {

@@ -2,9 +2,10 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
+  string2Note,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DLogger, string2Note } from "@dendronhq/common-server";
+import { DLogger } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   EngineUtils,

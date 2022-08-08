@@ -10,9 +10,9 @@ import path from "path";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickOptions } from "vscode";
-import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
+import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { WSUtilsWeb } from "../../utils/WSUtils";
-import { ILookupProvider } from "./ILookupProvider";
+import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
 
 const CREATE_NEW_LABEL = "Create New";

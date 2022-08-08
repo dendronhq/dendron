@@ -12,7 +12,7 @@ import _ from "lodash";
 import stringSimilarity from "string-similarity";
 import { inject, injectable } from "tsyringe";
 import { window } from "vscode";
-import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
+import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import {
   ILookupProvider,
   provideItemsProps,

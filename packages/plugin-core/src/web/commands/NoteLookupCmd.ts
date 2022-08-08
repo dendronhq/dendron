@@ -2,8 +2,8 @@ import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
-import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
-import { ILookupProvider } from "./lookup/ILookupProvider";
+import { type IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
+import { type ILookupProvider } from "./lookup/ILookupProvider";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
 @injectable()

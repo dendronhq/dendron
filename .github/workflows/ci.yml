@@ -132,7 +132,7 @@ jobs:
       # isolate platform-specific issues.
       fail-fast: false
 
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     runs-on: ubuntu-latest
 
@@ -168,10 +168,6 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
-
-      # - name: Run Webpack for Web Extension
-      #   run: yarn ci:test:plugin-web
-      #   timeout-minutes: 30
 
       - name: Run Plugin-Web tests
         run: yarn ci:test:plugin-web

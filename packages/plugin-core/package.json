@@ -1390,7 +1390,8 @@
     "compile-web": "webpack --config webpack.webext.js",
     "watch-web": "webpack --watch --config webpack.webext.js",
     "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ."
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
+    "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.106.0",

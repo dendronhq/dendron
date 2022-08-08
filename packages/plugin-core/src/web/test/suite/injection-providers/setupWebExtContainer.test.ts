@@ -9,7 +9,7 @@ import { setupWebExtContainer } from "../../../injection-providers/setupWebExtCo
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 async function setupEnvironment() {
-  const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
+  const wsRoot = await WorkspaceHelpers.getWSRootForTest();
 
   const config = {
     workspace: {

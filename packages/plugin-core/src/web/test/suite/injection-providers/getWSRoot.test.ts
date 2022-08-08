@@ -7,7 +7,7 @@ import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 suite("GIVEN a workspace", () => {
   test("WHEN a code-workspace file is opened THEN the getWSRoot injector returns the workspace root URI correctly", async () => {
-    const wsRoot = await WorkspaceHelpers.createTestWorkspaceDirectory();
+    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
 
     sinon.replaceGetter(vscode.workspace, "workspaceFile", () =>
       Utils.joinPath(wsRoot, "test.code-workspace")

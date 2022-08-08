@@ -21,6 +21,17 @@ export class WorkspaceHelpers {
     return tmpDirectory;
   }
 
+  static async getWSRootForTest(): Promise<URI> {
+    if (
+      vscode.workspace.workspaceFolders &&
+      vscode.workspace.workspaceFolders.length > 0
+    ) {
+      return vscode.workspace.workspaceFolders[0].uri;
+    }
+
+    return this.createTestWorkspaceDirectory();
+  }
+
   /**
    * Create a test Dendron YAML config file at the specified location
    * @param wsRoot

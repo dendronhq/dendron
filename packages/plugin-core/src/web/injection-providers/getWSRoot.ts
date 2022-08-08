@@ -30,7 +30,7 @@ export async function getWSRoot(): Promise<vscode.Uri | undefined> {
     );
     const results = dendronWorkspaceFolders.filter(isNotUndefined);
 
-    if (results.length === 1) {
+    if (results.length <= 1) {
       return results[0];
     }
 

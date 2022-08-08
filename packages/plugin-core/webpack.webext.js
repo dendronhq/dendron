@@ -1,6 +1,5 @@
 const path = require("path");
 const webpack = require("webpack");
-const CopyPlugin = require("copy-webpack-plugin");
 
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 /** @type WebpackConfig */
@@ -82,11 +81,6 @@ const webExtensionConfig = {
     }),
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
-    }),
-    new CopyPlugin({
-      patterns: [
-        { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
-      ],
     }),
   ],
   externals: [

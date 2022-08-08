@@ -156,6 +156,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-9
 
+      - name: Bootstrap
+        run: yarn bootstrap:bootstrap
+        shell: bash
+
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &

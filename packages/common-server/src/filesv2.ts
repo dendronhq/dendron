@@ -1,7 +1,6 @@
 import {
   CONSTANTS,
   DendronError,
-  DNodeUtils,
   DVault,
   ERROR_STATUS,
   FOLDERS,
@@ -13,13 +12,13 @@ import {
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaUtils,
+  string2Note,
   VaultUtils,
 } from "@dendronhq/common-all";
 import anymatch from "anymatch";
 import { assign, CommentJSONValue, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
 import fs from "fs-extra";
-import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import path from "path";

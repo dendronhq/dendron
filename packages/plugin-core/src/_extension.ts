@@ -37,7 +37,7 @@ import {
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
-import { TogglePreviewLock } from "./commands/TogglePreviewLock";
+import { TogglePreviewLockCommand } from "./commands/TogglePreviewLock";
 import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
@@ -605,7 +605,7 @@ async function _setupCommands({
             if (args === undefined) {
               args = {};
             }
-            await new TogglePreviewLock(preview).run(args);
+            await new TogglePreviewLockCommand(preview).run(args);
           })
         )
       );

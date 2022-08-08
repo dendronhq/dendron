@@ -1,7 +1,7 @@
 import { describe, afterEach, beforeEach, test } from "mocha";
 import type { NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { TogglePreviewLock } from "../../commands/TogglePreviewLock";
+import { TogglePreviewLockCommand } from "../../commands/TogglePreviewLock";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -11,13 +11,13 @@ import { describeSingleWS } from "../testUtilsV3";
 
 suite("GIVEN TogglePreviewLock", function () {
   let previewPanel: PreviewPanel;
-  let cmd: TogglePreviewLock;
+  let cmd: TogglePreviewLockCommand;
 
   beforeEach(() => {
     previewPanel = PreviewPanelFactory.create(
       ExtensionProvider.getExtension()
     ) as PreviewPanel;
-    cmd = new TogglePreviewLock(previewPanel);
+    cmd = new TogglePreviewLockCommand(previewPanel);
   });
 
   afterEach(async () => {

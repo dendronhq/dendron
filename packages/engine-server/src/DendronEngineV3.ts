@@ -66,7 +66,6 @@ import {
   stringifyError,
   TAGS_HIERARCHY,
   UpdateNoteResp,
-  URI,
   USERS_HIERARCHY,
   VaultUtils,
   WorkspaceOpts,

@@ -179,7 +179,7 @@ export class NoteStore implements Disposable, INoteStore<string> {
     return this._metadataStore.write(key, noteMeta);
   }
 
-  /**s
+  /**
    * See {@link INoteStore.bulkWriteMetadata}
    */
   async bulkWriteMetadata(

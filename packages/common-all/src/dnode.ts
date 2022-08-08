@@ -1456,6 +1456,38 @@ export class SchemaUtils {
     return path.join(root, fname + ".schema.yml");
   }
 
+  static getFullPath({
+    schema,
+    wsRoot,
+  }: {
+    schema: SchemaModuleProps;
+    wsRoot: string;
+  }): string {
+    try {
+      const fpath = DNodeUtils.getFullPath({
+        wsRoot,
+        vault: schema.vault,
+        basename: schema.fname + ".schema.yml",
+      });
+      return fpath;
+    } catch (err) {
+      throw new DendronError({
+        message: "bad path",
+        payload: { schema, wsRoot },
+      });
+    }
+  }
+
+  static getURI({
+    schema,
+    wsRoot,
+  }: {
+    schema: SchemaModuleProps;
+    wsRoot: string;
+  }): URI {
+    return URI.file(this.getFullPath({ schema, wsRoot }));
+  }
+
   /**
    @deprecated
    */

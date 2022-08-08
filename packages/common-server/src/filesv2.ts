@@ -372,7 +372,7 @@ export async function note2File({
   return genHash(payload);
 }
 
-function serializeModuleProps(moduleProps: SchemaModuleProps) {
+export function serializeModuleProps(moduleProps: SchemaModuleProps) {
   const { version, imports, schemas } = moduleProps;
   // TODO: filter out imported schemas
   const out: any = {

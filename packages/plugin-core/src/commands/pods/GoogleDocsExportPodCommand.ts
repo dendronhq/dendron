@@ -281,7 +281,7 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     config: RunnableGoogleDocsV2PodConfig;
   }) {
     const engine = this.extension.getEngine();
-    const { exportReturnValue } = opts;
+    const { exportReturnValue, config } = opts;
     let errorMsg = "";
     const createdDocs = exportReturnValue.data?.created?.filter((ent) => !!ent);
     const updatedDocs = exportReturnValue.data?.updated?.filter((ent) => !!ent);
@@ -290,13 +290,15 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
     if (createdDocs && createdCount > 0) {
       await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         createdDocs,
-        engine
+        engine,
+        config.parentFolderId
       );
     }
     if (updatedDocs && updatedCount > 0) {
       await GoogleDocsUtils.updateNotesWithCustomFrontmatter(
         updatedDocs,
-        engine
+        engine,
+        config.parentFolderId
       );
     }
     if (ResponseUtil.hasError(exportReturnValue)) {

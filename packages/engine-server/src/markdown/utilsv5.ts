@@ -302,13 +302,12 @@ export class MDUtilsV5 {
 
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
-            proc = proc.use(hierarchies);
-            //do not convert backlinks if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
+            //do not convert backlinks, children if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
             if (
               _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
               data.wikiLinksOpts?.convertLinks
             ) {
-              proc = proc.use(backlinks);
+              proc = proc.use(hierarchies).use(backlinks);
             }
           }
           // Add flavor specific plugins. These need to come before `dendronPub`

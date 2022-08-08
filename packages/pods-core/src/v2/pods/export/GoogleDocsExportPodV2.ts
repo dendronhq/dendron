@@ -179,8 +179,9 @@ export class GoogleDocsExportPodV2
           vaults: this._vaults,
           wsRoot: this._wsRoot,
         });
+        const blockquote = `<blockquote>This note was exported from [[${input.fname}]] with <a href="https://dendron.so/">Dendron</a></blockquote>`;
         // wrap data in html tags
-        data = `<html><div>[[${input.fname}]]</div>${data}</html>`;
+        data = `<html>${blockquote}${data}</html>`;
         const content = Buffer.from(data);
         const documentId = input.custom.documentId;
         return {
@@ -343,7 +344,8 @@ export class GoogleDocsExportPodV2
 export class GoogleDocsUtils {
   static async updateNotesWithCustomFrontmatter(
     records: GoogleDocsFields[],
-    engine: DEngineClient
+    engine: DEngineClient,
+    parentFolderId?: string
   ) {
     await Promise.all(
       records.map(async (record) => {
@@ -356,6 +358,7 @@ export class GoogleDocsUtils {
           documentId,
           revisionId,
           uri: `https://docs.google.com/document/d/${documentId}/edit`,
+          parentFolderId,
         };
         await engine.writeNote(note);
       })

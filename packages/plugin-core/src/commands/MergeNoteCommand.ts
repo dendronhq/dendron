@@ -37,7 +37,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.extension = ext;
   }
 
-  createLookupController(): ILookupControllerV3 {
+  private createLookupController(): ILookupControllerV3 {
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: true,
@@ -46,10 +46,25 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return controller;
   }
 
-  createLookupProvider() {
+  private createLookupProvider(opts: { activeNote: NoteProps | undefined }) {
+    const { activeNote } = opts;
     return this.extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
+      preAcceptValidators: [
+        // disallow accepting the currently active note from the picker.
+        (selectedItems) => {
+          const maybeActiveNoteItem = selectedItems.find((item) => {
+            return item.id === activeNote?.id;
+          });
+          if (maybeActiveNoteItem) {
+            vscode.window.showErrorMessage(
+              "You cannot merge a note to itself."
+            );
+          }
+          return !maybeActiveNoteItem;
+        },
+      ],
     });
   }
 
@@ -67,7 +82,10 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     _opts?: CommandOpts | undefined
   ): Promise<CommandOpts | undefined> {
     const controller = this.createLookupController();
-    const provider = this.createLookupProvider();
+    const activeNote = this.extension.wsUtils.getActiveNote();
+    const provider = this.createLookupProvider({
+      activeNote,
+    });
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id: this.key,

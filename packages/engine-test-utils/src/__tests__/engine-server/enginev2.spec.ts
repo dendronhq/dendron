@@ -76,7 +76,7 @@ describe("engine, cache", () => {
           cachePath,
           logger: (engine as DendronEngineClient).logger,
         });
-        const alpha = { ...engine.notes["alpha"] };
+        const alpha = (await engine.getNote("alpha")).data!;
         const omitKeys = ["body", "links", "parent", "children"];
         expect(_.omit(notesCache.get("alpha")!.data, ...omitKeys)).toEqual(
           _.omit(alpha, ...omitKeys)
@@ -88,7 +88,7 @@ describe("engine, cache", () => {
           )
         ).toEqual(_.filter(alpha.links, (l) => l.type !== "backlink"));
         await engine.init();
-        const alpha2 = engine.notes["alpha"];
+        const alpha2 = (await engine.getNote("alpha")).data!;
         expect(alpha2).toEqual(alpha);
       },
       {

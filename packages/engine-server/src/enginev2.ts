@@ -55,6 +55,7 @@ import {
   RenderNotePayload,
   ResponseUtil,
   RespV2,
+  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaQueryResp,
@@ -245,6 +246,11 @@ export class DendronEngineV2 implements DEngine {
   get noteFnames() {
     return this.store.noteFnames;
   }
+  /**
+   * @deprecated
+   * For accessing a specific schema by id, see {@link DendronEngineV2.getSchema}.
+   * If you need all schemas, avoid modifying any schema as this will cause unintended changes on the store side
+   */
   get schemas(): SchemaModuleDict {
     return this.store.schemas;
   }
@@ -335,7 +341,7 @@ export class DendronEngineV2 implements DEngine {
   /**
    * See {@link DEngine.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
     return this.store.getNote(id);
   }
 
@@ -425,14 +431,20 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  async getSchema(id: string): Promise<RespV2<SchemaModuleProps>> {
-    const ctx = "getSchema";
-    const data = this.schemas[id];
-    this.logger.info({ ctx, msg: "exit" });
-    return {
-      data,
-      error: null,
-    };
+  async getSchema(id: string): Promise<RespV3<SchemaModuleProps>> {
+    const maybeSchema = this.schemas[id];
+
+    if (maybeSchema) {
+      return { data: _.cloneDeep(maybeSchema) };
+    } else {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `SchemaModuleProps not found for key ${id}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
+    }
   }
 
   async info(): Promise<RespV2<EngineInfoResp>> {
@@ -737,7 +749,7 @@ export class DendronEngineV2 implements DEngine {
 
   async updateIndex(mode: DNodeType) {
     if (mode === "schema") {
-      this.fuseEngine.updateSchemaIndex(this.schemas);
+      this.fuseEngine.replaceSchemaIndex(this.schemas);
     } else {
       this.fuseEngine.replaceNotesIndex(this.notes);
     }

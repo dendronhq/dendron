@@ -231,15 +231,15 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         case NoteCommands.GET: {
           const { query } = checkQuery(opts);
           const note = await engine.getNote(query);
-          if (note) {
+          if (note.data) {
             const resp = await formatNotes({
               output,
-              notes: [note],
+              notes: [note.data],
               engine,
             });
             this.print(resp);
             const data: NoteCommandData = {
-              notesOutput: [note],
+              notesOutput: [note.data],
               stringOutput: resp,
             };
             return { data };

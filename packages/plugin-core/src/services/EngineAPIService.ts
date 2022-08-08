@@ -40,6 +40,7 @@ import {
   RenderNoteOpts,
   RenderNotePayload,
   RespV2,
+  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   UpdateNoteResp,
@@ -202,7 +203,7 @@ export class EngineAPIService
   /**
    * See {@link IEngineAPIService.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
     return this._internalEngine.getNote(id);
   }
 
@@ -284,7 +285,7 @@ export class EngineAPIService
     return this._internalEngine.sync(opts);
   }
 
-  getSchema(qs: string): Promise<RespV2<SchemaModuleProps>> {
+  getSchema(qs: string): Promise<RespV3<SchemaModuleProps>> {
     return this._internalEngine.getSchema(qs);
   }
 

@@ -1517,39 +1517,6 @@ export class SchemaUtils {
     return URI.file(this.getFullPath({ schema, wsRoot }));
   }
 
-  /**
-   @deprecated
-   */
-  static getSchemaModuleByFnameV4({
-    fname,
-    schemas,
-    wsRoot,
-    vault,
-  }: {
-    fname: string;
-    schemas: SchemaModuleDict | SchemaModuleProps[];
-    wsRoot: string;
-    vault: DVault;
-  }): SchemaModuleProps | undefined {
-    if (!_.isArray(schemas)) {
-      schemas = _.values(schemas);
-    }
-    const out = _.find(schemas, (ent) => {
-      if (ent.fname.toLowerCase() !== fname.toLowerCase()) {
-        return false;
-      }
-      if (vault) {
-        return VaultUtils.isEqual(vault, ent.vault, wsRoot);
-      }
-      return true;
-    });
-    return out;
-  }
-
-  static getSchema({ engine, id }: { engine: DEngineClient; id: string }) {
-    return engine.schemas[id];
-  }
-
   static doesSchemaExist({
     id,
     engine,
@@ -1679,6 +1646,32 @@ export class SchemaUtils {
         schemaModule: match,
       });
     }
+  }
+
+  /**
+   * Find proper schema from schema module that can be applied to note
+   */
+  static findSchemaFromModule(opts: {
+    notePath: string;
+    schemaModule: SchemaModuleProps;
+  }): SchemaMatchResult | undefined {
+    const { notePath, schemaModule } = opts;
+    const domainName = DNodeUtils.domainName(notePath);
+    const domainSchema = schemaModule.schemas[schemaModule.root.id];
+    if (domainName.length === notePath.length) {
+      return {
+        schema: domainSchema,
+        notePath,
+        namespace: domainSchema.data.namespace || false,
+        schemaModule,
+      };
+    }
+    return SchemaUtils.matchPathWithSchema({
+      notePath,
+      matched: "",
+      schemaCandidates: [domainSchema],
+      schemaModule,
+    });
   }
 
   /**

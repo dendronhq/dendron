@@ -51,6 +51,19 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
   }
 
   /**
+   * See {@link ISchemaStore.bulkGetMetadata}
+   */
+  async bulkGetMetadata(keys: string[]): Promise<RespV3<SchemaModuleProps>[]> {
+    const ctx = "SchemaStore:bulkGetMetedata";
+    this._logger.info({
+      ctx,
+      msg: `Bulk getting SchemaModuleProps for ${keys}`,
+    });
+
+    return Promise.all(keys.map((key) => this.getMetadata(key)));
+  }
+
+  /**
    * See {@link ISchemaStore.write}
    */
   async write(opts: WriteSchemaOpts<string>): Promise<RespV3<string>> {

@@ -13,10 +13,7 @@ export class PluginSchemaUtils {
     });
   }
 
-  public static getSchema(id: string) {
-    return SchemaUtils.getSchema({
-      id,
-      engine: getDWorkspace().engine,
-    });
+  public static async getSchema(id: string) {
+    return getDWorkspace().engine.getSchema(id);
   }
 }

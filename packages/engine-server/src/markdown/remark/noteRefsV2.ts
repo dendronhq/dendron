@@ -100,11 +100,11 @@ function gatherNoteRefs({
   return noteRefs;
 }
 
-function isBeginBlockAnchorId(anchorId: string) {
+export function isBeginBlockAnchorId(anchorId: string) {
   return anchorId === "begin";
 }
 
-function isEndBlockAnchorId(anchorId: string) {
+export function isEndBlockAnchorId(anchorId: string) {
   return anchorId === "end";
 }
 

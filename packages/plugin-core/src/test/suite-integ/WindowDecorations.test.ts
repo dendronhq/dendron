@@ -378,6 +378,13 @@ suite("GIVEN a text document with decorations", function () {
               "![[#^anchor-not-exists]]",
               "![[#^anchor-1:#*]]",
               "![[#^anchor-not-exists]]",
+              "[[#^begin]]",
+              "[[#^end]]",
+              "![[#^begin]]",
+              "![[#^end]]",
+              "![[#^begin:#^end]]",
+              "![[#^anchor-1:#^end]]",
+              "![[#^begin:#^anchor-1]]",
             ].join("\n"),
             vault: vaults[0],
             wsRoot,
@@ -393,20 +400,24 @@ suite("GIVEN a text document with decorations", function () {
           const wikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.wikiLink
           );
-          expect(wikilinkDecorations!.length).toEqual(3);
-          expect(
-            isTextDecorated("[[#^anchor-1]]", wikilinkDecorations!, document)
-          ).toBeTruthy();
-          expect(
-            isTextDecorated("![[#^anchor-1]]", wikilinkDecorations!, document)
-          ).toBeTruthy();
-          expect(
-            isTextDecorated(
-              "![[#^anchor-1:#*]]",
-              wikilinkDecorations!,
-              document
-            )
-          ).toBeTruthy();
+          expect(wikilinkDecorations!.length).toEqual(10);
+          const shouldBeDecorated = [
+            "[[#^anchor-1]]",
+            "![[#^anchor-1]]",
+            "![[#^anchor-1:#*]]",
+            "[[#^begin]]",
+            "[[#^end]]",
+            "![[#^begin]]",
+            "![[#^end]]",
+            "![[#^begin:#^end]]",
+            "![[#^anchor-1:#^end]]",
+            "![[#^begin:#^anchor-1]]",
+          ];
+          shouldBeDecorated.forEach((text) => {
+            expect(
+              isTextDecorated(text, wikilinkDecorations!, document)
+            ).toBeTruthy();
+          });
 
           const brokenWikilinkDecorations = allDecorations!.get(
             EDITOR_DECORATION_TYPES.brokenWikilink

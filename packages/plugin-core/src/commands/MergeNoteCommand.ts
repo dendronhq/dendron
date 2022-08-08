@@ -7,10 +7,14 @@ import {
 } from "@dendronhq/common-all";
 import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
 import {
+  CreateQuickPickOpts,
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
-import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import {
+  ILookupProviderV3,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
@@ -18,7 +22,10 @@ import { BasicCommand, SanityCheckResults } from "./base";
 import * as vscode from "vscode";
 import _ from "lodash";
 
-type CommandInput = {};
+type CommandInput = {
+  dest?: string;
+  noConfirm?: boolean;
+};
 
 type CommandOpts = {
   notes: readonly NoteProps[];
@@ -78,9 +85,8 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return;
   }
 
-  async gatherInputs(
-    _opts?: CommandOpts | undefined
-  ): Promise<CommandOpts | undefined> {
+  async gatherInputs(opts: CommandOpts): Promise<CommandOpts | undefined> {
+    const { dest, noConfirm } = opts;
     const controller = this.createLookupController();
     const activeNote = this.extension.wsUtils.getActiveNote();
     const provider = this.createLookupProvider({
@@ -96,11 +102,22 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           resolve({ notes: data.selectedItems });
         },
       });
-      controller.show({
+      const showOpts: CreateQuickPickOpts & {
+        nonInteractive?: boolean | undefined;
+        initialValue?: string | undefined;
+        provider: ILookupProviderV3;
+      } = {
         title: "Select merge destination note",
         placeholder: "note",
         provider,
-      });
+      };
+      if (dest) {
+        showOpts.initialValue = dest;
+      }
+      if (noConfirm) {
+        showOpts.nonInteractive = noConfirm;
+      }
+      controller.show(showOpts);
     });
   }
 

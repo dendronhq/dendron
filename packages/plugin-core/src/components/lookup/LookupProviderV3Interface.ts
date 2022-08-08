@@ -53,6 +53,7 @@ export type ILookupProviderOptsV3 = {
    * when (and only when) nothing is queried.
    */
   extraItems?: DNodePropsQuickInputV2[];
+  preAcceptValidators?: ((selectedItems: NoteQuickInput[]) => boolean)[];
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {

@@ -119,6 +119,13 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       });
 
       let selectedItems = NotePickerUtils.getSelection(picker);
+      const { preAcceptValidators } = this.opts;
+      if (preAcceptValidators) {
+        const isValid = preAcceptValidators.every((validator) => {
+          return validator(selectedItems);
+        });
+        if (!isValid) return;
+      }
       Logger.debug({
         ctx,
         selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),

@@ -22,6 +22,7 @@ import {
 import {
   createDisposableLogger,
   FakeLogger,
+  file2Note,
   isSelfContainedVaultFolder,
   pathForVaultRoot,
   vault2Path,
@@ -34,6 +35,7 @@ import {
   DEPRECATED_PATHS,
   Git,
   MDUtilsV5,
+  NodeJSFileStore,
   NotesFileSystemCache,
   WorkspaceService,
 } from "..";
@@ -225,20 +227,51 @@ export class DoctorService implements Disposable {
       cachePath,
       logger: new FakeLogger(),
     });
-    const allNotes = notesCache.getAllValues();
-    const seen = new Set<string>();
-    const dup = [];
-    allNotes.map((ent) => {
-      const { id, fname } = ent.data;
-      if (seen.has(id)) {
-        dup.push(id);
+    const fileStore = new NodeJSFileStore();
+    const { error, data: allFiles } = await fileStore.readDir({
+      root: vpath,
+      include: ["*.md"],
+    });
+    if (error) {
+      throw error;
+    }
+    // --- check notes
+    const seenFromFiles = new Set<string>();
+    const dupFromFiles = [];
+    allFiles.map((ent) => {
+      const { error: _error, data } = file2Note(
+        path.join(vpath, ent),
+        opts.vault
+      );
+      if (_error) {
+        throw _error;
+      }
+      const { id, fname } = data;
+      if (seenFromFiles.has(id)) {
+        dupFromFiles.push(id);
         console.log({ msg: "FOUND DUP", id, fname });
       }
-      seen.add(ent.data.id);
+      seenFromFiles.add(id);
     });
-    if (dup.length === 0) {
-      console.log({ msg: "NO DUPS FOUND" });
+    if (dupFromFiles.length === 0) {
+      console.log({ msg: "NO DUPS FOUND", size: allFiles.length });
     }
+
+    // ---- check cache
+    // const allNotesFromCache = notesCache.getAllValues();
+    // const seen = new Set<string>();
+    // const dup = [];
+    // allNotesFromCache.map((ent) => {
+    //   const { id, fname } = ent.data;
+    //   if (seen.has(id)) {
+    //     dup.push(id);
+    //     console.log({ msg: "FOUND DUP", id, fname });
+    //   }
+    //   seen.add(ent.data.id);
+    // });
+    // if (dup.length === 0) {
+    //   console.log({ msg: "NO DUPS FOUND", size: allNotesFromCache.length });
+    // }
   }
 
   async executeDoctorActionsWithoutEngine(opts: DoctorServiceOpts) {

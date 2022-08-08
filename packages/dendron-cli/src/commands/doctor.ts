@@ -81,7 +81,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
-    debugger;
     const ds = new DoctorService();
     console.log(opts);
     if (!DoctorService.actionRequireEngine(opts.action)) {

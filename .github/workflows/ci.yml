@@ -160,6 +160,10 @@ jobs:
         run: yarn bootstrap:bootstrap
         shell: bash
 
+      - name: Build
+        run: yarn bootstrap:buildCI
+        shell: bash
+
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &

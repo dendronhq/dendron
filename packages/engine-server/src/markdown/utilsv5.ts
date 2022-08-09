@@ -239,7 +239,6 @@ export class MDUtilsV5 {
       .use(abbrPlugin)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
       .use(noteRefsV2)
-      .use(wikiLinks, data.wikiLinksOpts)
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)
@@ -248,6 +247,14 @@ export class MDUtilsV5 {
       .use(variables)
       .use(backlinksHover, data.backlinkHoverOpts)
       .data("errors", errors);
+
+    //do not convert wikilinks if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
+    if (
+      _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
+      data.wikiLinksOpts?.convertLinks
+    ) {
+      proc = proc.use(wikiLinks, data.wikiLinksOpts);
+    }
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
@@ -295,7 +302,13 @@ export class MDUtilsV5 {
 
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
-            proc = proc.use(hierarchies).use(backlinks);
+            //do not convert backlinks, children if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
+            if (
+              _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
+              data.wikiLinksOpts?.convertLinks
+            ) {
+              proc = proc.use(hierarchies).use(backlinks);
+            }
           }
           // Add flavor specific plugins. These need to come before `dendronPub`
           // to fix extended image URLs before they get converted to HTML

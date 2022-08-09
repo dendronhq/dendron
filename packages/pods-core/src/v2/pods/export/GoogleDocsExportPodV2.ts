@@ -84,7 +84,7 @@ export class GoogleDocsExportPodV2
   async exportNotes(notes: NoteProps[]): Promise<GoogleDocsExportReturnType> {
     const resp = await this.getPayloadForNotes(notes);
     let { accessToken } = this._config;
-    const { expirationTime, refreshToken } = this._config;
+    const { expirationTime, refreshToken, parentFolderId } = this._config;
     try {
       accessToken = await this.checkTokenExpiry(
         expirationTime,
@@ -112,6 +112,7 @@ export class GoogleDocsExportPodV2
       docToCreate,
       accessToken,
       limiter,
+      parentFolderId,
     });
     const updateRequest = await this.overwriteGdoc({
       docToUpdate,
@@ -168,6 +169,7 @@ export class GoogleDocsExportPodV2
           vaultName: input.vault,
           dest: "stdout",
           convertLinks: false,
+          enablePrettyRefs: false,
         };
         // converts markdown to html using HTMLPublish pod. The Drive API supports converting MIME types while creating a file.
         let data = await pod.plant({
@@ -177,8 +179,9 @@ export class GoogleDocsExportPodV2
           vaults: this._vaults,
           wsRoot: this._wsRoot,
         });
+        const blockquote = `<blockquote>This note was exported from [[${input.fname}]] with <a href="https://dendron.so/">Dendron</a></blockquote>`;
         // wrap data in html tags
-        data = `<html>${data}</html>`;
+        data = `<html>${blockquote}${data}</html>`;
         const content = Buffer.from(data);
         const documentId = input.custom.documentId;
         return {
@@ -198,8 +201,9 @@ export class GoogleDocsExportPodV2
     docToCreate: GoogleDocsPayload[];
     accessToken: string;
     limiter?: RateLimiter;
+    parentFolderId?: string;
   }): Promise<{ data: GoogleDocsFields[]; errors: IDendronError[] }> {
-    const { docToCreate, accessToken, limiter } = opts;
+    const { docToCreate, accessToken, limiter, parentFolderId = "root" } = opts;
     const errors: IDendronError[] = [];
     const out: GoogleDocsFields[] = await Promise.all(
       docToCreate.map(async ({ name, content, dendronId }) => {
@@ -210,7 +214,7 @@ export class GoogleDocsExportPodV2
           const metadata = {
             name,
             mimeType: "application/vnd.google-apps.document",
-            parents: ["root"],
+            parents: [`${parentFolderId}`],
           };
           const formData = new FormData();
           formData.append("metadata", JSON.stringify(metadata), {
@@ -324,8 +328,13 @@ export class GoogleDocsExportPodV2
       required: ["connectionId"],
       properties: {
         connectionId: {
-          description: "ID of the Airtable Connected Service",
+          description: "ID of the Google Connected Service",
           type: "string",
+        },
+        parentFolderId: {
+          description: "ID of parent folder in google drive",
+          type: "string",
+          nullable: true,
         },
       },
     }) as JSONSchemaType<GoogleDocsV2PodConfig>;
@@ -335,7 +344,8 @@ export class GoogleDocsExportPodV2
 export class GoogleDocsUtils {
   static async updateNotesWithCustomFrontmatter(
     records: GoogleDocsFields[],
-    engine: DEngineClient
+    engine: DEngineClient,
+    parentFolderId?: string
   ) {
     await Promise.all(
       records.map(async (record) => {
@@ -348,6 +358,7 @@ export class GoogleDocsUtils {
           documentId,
           revisionId,
           uri: `https://docs.google.com/document/d/${documentId}/edit`,
+          parentFolderId,
         };
         await engine.writeNote(note);
       })

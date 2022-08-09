@@ -6,7 +6,9 @@ import { ExportPodConfigurationV2 } from "./PodV2Types";
 /**
  * Complete Pod Config for Google Docs V2
  */
-export type GoogleDocsV2PodConfig = ExportPodConfigurationV2;
+export type GoogleDocsV2PodConfig = ExportPodConfigurationV2 & {
+  parentFolderId?: string;
+};
 /**
  * This is the persisted version of the config that gets serialized into a YAML
  * file. It must contain a reference to a google service connection ID.
@@ -19,7 +21,7 @@ export type PersistedGoogleDocsPodConfig = GoogleDocsV2PodConfig &
  */
 export type RunnableGoogleDocsV2PodConfig = Omit<
   GoogleDocsV2PodConfig,
-  "podId" | "podType"
+  "podId" | "podType" | "description"
 > &
   Pick<
     GoogleDocsConnection,
@@ -71,7 +73,7 @@ export function createRunnableGoogleDocsV2PodConfigSchema(): JSONSchemaType<Runn
       exportScope: {
         type: "string",
       },
-      description: {
+      parentFolderId: {
         type: "string",
         nullable: true,
       },

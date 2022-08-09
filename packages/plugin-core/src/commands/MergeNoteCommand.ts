@@ -1,8 +1,10 @@
 import {
   asyncLoopOneAtATime,
+  extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
-  NoteUtils,
+  RefactoringCommandUsedPayload,
+  StatisticsUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
@@ -21,14 +23,17 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { BasicCommand, SanityCheckResults } from "./base";
 import * as vscode from "vscode";
 import _ from "lodash";
+import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandInput = {
+  source?: string;
   dest?: string;
   noConfirm?: boolean;
 };
 
 type CommandOpts = {
-  notes: readonly NoteProps[];
+  sourceNote: NoteProps | undefined;
+  destNote: NoteProps | undefined;
 } & CommandInput;
 
 type CommandOutput = {
@@ -37,6 +42,13 @@ type CommandOutput = {
 
 export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MERGE_NOTE.key;
+  _proxyMetricPayload:
+    | (RefactoringCommandUsedPayload & {
+        extra: {
+          [key: string]: any;
+        };
+      })
+    | undefined;
   private extension: IDendronExtension;
 
   constructor(ext: IDendronExtension) {
@@ -75,9 +87,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
   }
 
-  async sanityCheck(
-    _opts?: Partial<{ notes: readonly NoteProps[] }> | undefined
-  ): Promise<SanityCheckResults> {
+  async sanityCheck(): Promise<SanityCheckResults> {
     const note = this.extension.wsUtils.getActiveNote();
     if (!note) {
       return "You need to have a note open to merge.";
@@ -86,7 +96,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts: CommandOpts): Promise<CommandOpts | undefined> {
-    const { dest, noConfirm } = opts;
     const controller = this.createLookupController();
     const activeNote = this.extension.wsUtils.getActiveNote();
     const provider = this.createLookupProvider({
@@ -97,9 +106,16 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         id: this.key,
         controller,
         logger: this.L,
-        onDone: (event: HistoryEvent) => {
+        onDone: async (event: HistoryEvent) => {
           const data: NoteLookupProviderSuccessResp = event.data;
-          resolve({ notes: data.selectedItems });
+          await this.prepareProxyMetricPayload({
+            sourceNote: activeNote,
+            destNote: data.selectedItems[0],
+          });
+          resolve({
+            sourceNote: activeNote,
+            destNote: data.selectedItems[0],
+          });
         },
       });
       const showOpts: CreateQuickPickOpts & {
@@ -111,32 +127,85 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         placeholder: "note",
         provider,
       };
-      if (dest) {
-        showOpts.initialValue = dest;
+      if (opts?.dest) {
+        showOpts.initialValue = opts.dest;
       }
-      if (noConfirm) {
-        showOpts.nonInteractive = noConfirm;
+      if (opts?.noConfirm) {
+        showOpts.nonInteractive = opts.noConfirm;
       }
       controller.show(showOpts);
     });
   }
 
+  private async prepareProxyMetricPayload(opts: {
+    sourceNote: NoteProps | undefined;
+    destNote: NoteProps | undefined;
+  }) {
+    const ctx = `${this.key}:prepareProxyMetricPayload`;
+    const { sourceNote, destNote } = opts;
+    if (sourceNote === undefined || destNote === undefined) {
+      // source or dest note undefined, this could be from cancellation.
+      // just return.
+      return;
+    }
+    const sourceBasicStats = StatisticsUtils.getBasicStatsFromNotes([
+      sourceNote,
+    ]);
+    const destBasicStats = StatisticsUtils.getBasicStatsFromNotes([destNote]);
+    if (sourceBasicStats === undefined || destBasicStats === undefined) {
+      this.L.error({ ctx, message: "failed to get basic stats from notes." });
+      return;
+    }
+
+    const { numChildren, numLinks, numChars, noteDepth } = sourceBasicStats;
+    const {
+      numChildren: destNumChildren,
+      numLinks: destNumLinks,
+      numChars: destNumChars,
+      noteDepth: destNoteDepth,
+    } = destBasicStats;
+
+    const sourceTraits = sourceNote.traits;
+    const destTraits = destNote.traits;
+
+    const engine = this.extension.getEngine();
+    this._proxyMetricPayload = {
+      command: this.key,
+      numVaults: engine.vaults.length,
+      numChildren,
+      numLinks,
+      numChars,
+      noteDepth,
+      traits: sourceTraits || [],
+      extra: {
+        destNumChildren,
+        destNumLinks,
+        destNumChars,
+        destNoteDepth,
+        destTraits: destTraits || [],
+      },
+    };
+  }
+
   /**
    * Given a source note and destination note,
    * append the entire body of source note to the destination note.
-   * @param source Source note
-   * @param dest Dest note
+   * @param sourceNote Source note
+   * @param destNote Dest note
    */
-  private async appendNote(opts: { source: NoteProps; dest: NoteProps }) {
-    const { source, dest } = opts;
+  private async appendNote(opts: {
+    sourceNote: NoteProps;
+    destNote: NoteProps;
+  }) {
+    const { sourceNote, destNote } = opts;
     // grab body from current active note
-    const appendPayload = source.body;
+    const appendPayload = sourceNote.body;
 
     // append to end
-    const destBody = dest.body;
+    const destBody = destNote.body;
     const newBody = `${destBody}\n\n${appendPayload}`;
-    dest.body = newBody;
-    const writeResp = await this.extension.getEngine().writeNote(dest);
+    destNote.body = newBody;
+    const writeResp = await this.extension.getEngine().writeNote(destNote);
     if (!writeResp.error) {
       return writeResp.data || [];
     } else {
@@ -154,15 +223,15 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
    */
   private async updateLinkInNote(opts: {
     id: string;
-    source: NoteProps;
-    dest: NoteProps;
+    sourceNote: NoteProps;
+    destNote: NoteProps;
   }) {
     const ctx = `${this.key}:updateLinkInNote`;
-    const { id, source, dest } = opts;
+    const { id, sourceNote, destNote } = opts;
     const noteToUpdate = await this.extension.getEngine().getNote(id);
     if (noteToUpdate !== undefined) {
       const linksToUpdate = noteToUpdate.links.filter(
-        (link) => link.value === source.fname
+        (link) => link.value === sourceNote.fname
       );
       const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
       const modifiedNote = await _.reduce<
@@ -175,7 +244,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const acc = await prev;
           const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
           const notesWithSameName = await this.extension.getEngine().findNotes({
-            fname: dest.fname,
+            fname: destNote.fname,
           });
           const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
           const newLink = {
@@ -184,10 +253,10 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
               ...oldLink.from,
               alias:
                 oldLink.from.alias === oldLink.from.fname
-                  ? dest.fname
+                  ? destNote.fname
                   : oldLink.from.alias,
-              fname: dest.fname,
-              vaultName: VaultUtils.getName(dest.vault),
+              fname: destNote.fname,
+              vaultName: VaultUtils.getName(destNote.vault),
             },
             data: {
               ...oldLink.data,
@@ -230,15 +299,18 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
    * Given a source note and dest note,
    * Look at all the backlinks source note has, and update them
    * to point to the dest note.
-   * @param source Source note
-   * @param dest Dest note
+   * @param sourceNote Source note
+   * @param destNote Dest note
    */
-  private async updateBacklinks(opts: { source: NoteProps; dest: NoteProps }) {
+  private async updateBacklinks(opts: {
+    sourceNote: NoteProps;
+    destNote: NoteProps;
+  }) {
     const ctx = "MergeNoteCommand:updateBacklinks";
-    const { source, dest } = opts;
+    const { sourceNote, destNote } = opts;
 
     // grab all backlinks from source note
-    const sourceBacklinks = source.links.filter((link) => {
+    const sourceBacklinks = sourceNote.links.filter((link) => {
       return link.type === "backlink";
     });
 
@@ -258,8 +330,8 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     await asyncLoopOneAtATime(noteIDsToUpdate, async (id) => {
       try {
         const changed = await this.updateLinkInNote({
-          source,
-          dest,
+          sourceNote,
+          destNote,
           id,
         });
         noteChangeEntries = noteChangeEntries.concat(changed);
@@ -272,13 +344,15 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   /**
    * Given a source note, delete it
-   * @param source source note
+   * @param sourceNote source note
    */
-  private async deleteSource(opts: { source: NoteProps }) {
+  private async deleteSource(opts: { sourceNote: NoteProps }) {
     const ctx = `${this.key}:deleteSource`;
-    const { source } = opts;
+    const { sourceNote } = opts;
     try {
-      const deleteResp = await this.extension.getEngine().deleteNote(source.id);
+      const deleteResp = await this.extension
+        .getEngine()
+        .deleteNote(sourceNote.id);
       if (deleteResp.data) {
         return deleteResp.data;
       } else {
@@ -294,9 +368,10 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "MergeNoteCommand";
-    this.L.info({ ctx, notes: opts.notes.map((n) => NoteUtils.toLogObj(n)) });
+    this.L.info({ ctx, msg: "execute" });
+    const { sourceNote, destNote } = opts;
 
-    if (opts.notes.length === 0) {
+    if (destNote === undefined) {
       vscode.window.showWarningMessage("Merge destination not selected");
       return {
         ...opts,
@@ -305,18 +380,19 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     // opts.notes should always have at most one element since we don't allow multiple destinations.
-    const dest = opts.notes[0];
-    const source = this.extension.wsUtils.getActiveNote();
-    if (!source) {
+    if (sourceNote === undefined) {
       return {
         ...opts,
         changed: [],
       };
     }
 
-    const appendNoteChanges = await this.appendNote({ source, dest });
-    const updateBacklinksChanges = await this.updateBacklinks({ source, dest });
-    const deleteSourceChanges = await this.deleteSource({ source });
+    const appendNoteChanges = await this.appendNote({ sourceNote, destNote });
+    const updateBacklinksChanges = await this.updateBacklinks({
+      sourceNote,
+      destNote,
+    });
+    const deleteSourceChanges = await this.deleteSource({ sourceNote });
 
     const noteChangeEntries = [
       ...appendNoteChanges,
@@ -325,11 +401,53 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     ];
 
     // open the destination note
-    await this.extension.wsUtils.openNote(dest);
+    await this.extension.wsUtils.openNote(destNote);
 
     return {
       ...opts,
       changed: noteChangeEntries,
     };
+  }
+
+  addAnalyticsPayload(_opts: CommandOpts, out: CommandOutput) {
+    const noteChangeEntryCounts =
+      out !== undefined
+        ? { ...extractNoteChangeEntryCounts(out.changed) }
+        : {
+            createdCount: 0,
+            updatedCount: 0,
+            deletedCount: 0,
+          };
+    try {
+      this.trackProxyMetrics({ noteChangeEntryCounts });
+    } catch (error) {
+      this.L.error({ error });
+    }
+
+    return noteChangeEntryCounts;
+  }
+
+  trackProxyMetrics({
+    noteChangeEntryCounts,
+  }: {
+    noteChangeEntryCounts: {
+      createdCount: number;
+      deletedCount: number;
+      updatedCount: number;
+    };
+  }) {
+    if (this._proxyMetricPayload === undefined) {
+      // something went wrong during prep. don't track.
+      return;
+    }
+    const { extra, ...props } = this._proxyMetricPayload;
+
+    ProxyMetricUtils.trackRefactoringProxyMetric({
+      props,
+      extra: {
+        ...extra,
+        ...noteChangeEntryCounts,
+      },
+    });
   }
 }

@@ -43,7 +43,7 @@ suite("GIVEN Dendron plugin activation", function () {
 
   async function afterHook() {
     mockHomeDirStub.restore();
-    sinon.restore();
+    //sinon.restore();
   }
 
   describe("AND WHEN not first install", () => {
@@ -108,6 +108,7 @@ suite("GIVEN Dendron plugin activation", function () {
         },
         noSetInstallStatus: true,
         timeout: 1e5,
+        afterHook,
       },
       () => {
         test("THEN set initial install called", () => {
@@ -122,8 +123,6 @@ suite("GIVEN Dendron plugin activation", function () {
         test("THEN show telemetry notice", () => {
           expect(showTelemetryNoticeSpy.called).toBeTruthy();
         });
-
-        this.afterAll(afterHook);
       }
     );
   });
@@ -191,6 +190,7 @@ suite("GIVEN keybindings conflict", function () {
 
       after(() => {
         promptSpy.restore();
+        installStatusStub.restore();
       });
 
       test("THEN maybePromptKeybindingConflict is called", async () => {

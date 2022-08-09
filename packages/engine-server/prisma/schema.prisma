@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["darwin-arm64"]
+  binaryTargets = ["darwin-arm64", "darwin"]
   // output = "./generated"
   output = "./../src/generated-prisma-client"
 }

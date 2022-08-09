@@ -1,10 +1,11 @@
 import {
   asyncLoopOneAtATime,
   DVault,
-  NotePropsByIdDict,
+  NotePropsByIdDict
 } from "@dendronhq/common-all";
-import { PrismaClient } from "../generated-prisma-client";
 import _ from "lodash";
+import { PrismaClient } from "../generated-prisma-client";
+:
 
 let _prisma: PrismaClient | undefined;
 
@@ -108,13 +109,23 @@ export class SQLiteMetadataStore {
       })
       .join(",");
     const fullQuery = sqlBegin + sqlEnd;
-    await prisma.$queryRawUnsafe(fullQuery);
-    await prisma.vaultMetadata.create({
-      data: {
-        relativePath: vault.fsPath,
-        schemaVersion: 0,
-      },
-    });
+    try {
+      await prisma.$queryRawUnsafe(fullQuery);
+      await prisma.vaultMetadata.create({
+        data: {
+          relativePath: vault.fsPath,
+          schemaVersion: 0,
+        },
+      });
+    } catch (error) {
+      // uncomment to log
+      // console.log("---> ERROR START");
+      // console.log(fullQuery);
+      // fs.writeFileSync("/tmp/query.txt", fullQuery);
+      // console.log("---> ERROR END");
+      // process.exit();
+      throw error;
+    }
     return { query: fullQuery };
   }
 

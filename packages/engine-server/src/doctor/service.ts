@@ -239,10 +239,8 @@ export class DoctorService implements Disposable {
     const seenFromFiles = new Set<string>();
     const dupFromFiles = [];
     allFiles.map((ent) => {
-      const { error: _error, data } = file2Note(
-        path.join(vpath, ent),
-        opts.vault
-      );
+      const fpath = path.join(vpath, ent);
+      const { error: _error, data } = file2Note(fpath, opts.vault);
       if (_error) {
         throw _error;
       }
@@ -257,6 +255,15 @@ export class DoctorService implements Disposable {
         NoteUtils.validateFname(fname) && _.isNull(fname.match(/[(),]/));
       if (!validFname) {
         console.log({ msg: "FOUND BAD FNAME", id, fname });
+        const quaratineDirPath = path.join(opts.wsRoot, "bad-notes");
+        fs.ensureDirSync(quaratineDirPath);
+        fs.moveSync(
+          fpath,
+          path.join(
+            quaratineDirPath,
+            `${VaultUtils.getName(opts.vault)}-${ent}`
+          )
+        );
       }
     });
     if (dupFromFiles.length === 0) {

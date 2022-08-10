@@ -11,11 +11,16 @@ import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer
  */
 export async function activate(context: vscode.ExtensionContext) {
   // Use the web extension injection container:
-  await setupWebExtContainer();
+  try {
+    await setupWebExtContainer();
+    await setupCommands(context);
+    vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Something went wrong during initialization.`
+    );
+  }
 
-  setupCommands(context);
-
-  vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
   vscode.window.showInformationMessage("Dendron is active");
 }
 

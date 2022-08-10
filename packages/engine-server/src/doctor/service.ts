@@ -219,7 +219,11 @@ export class DoctorService implements Disposable {
     ).filter(isNotUndefined);
   }
 
-  async fixDuplicateIds(opts: { vault: DVault; wsRoot: string }) {
+  async fixDuplicateIds(opts: {
+    vault: DVault;
+    wsRoot: string;
+    seenIds: Set<string>;
+  }) {
     console.log("fixing", JSON.stringify(opts));
     const vpath = vault2Path({ vault: opts.vault, wsRoot: opts.wsRoot });
     const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
@@ -236,7 +240,6 @@ export class DoctorService implements Disposable {
       throw error;
     }
     // --- check notes
-    const seenFromFiles = new Set<string>();
     const dupFromFiles = [];
     allFiles.map((ent) => {
       const fpath = path.join(vpath, ent);
@@ -245,11 +248,11 @@ export class DoctorService implements Disposable {
         throw _error;
       }
       const { id, fname } = data;
-      if (seenFromFiles.has(id)) {
+      if (opts.seenIds.has(id)) {
         dupFromFiles.push(id);
-        console.log({ msg: "FOUND DUP", id, fname });
+        console.log({ msg: "FOUND DUP ID", id, fname });
       }
-      seenFromFiles.add(id);
+      opts.seenIds.add(id);
 
       const validFname =
         NoteUtils.validateFname(fname) && _.isNull(fname.match(/[(),]/));
@@ -269,6 +272,7 @@ export class DoctorService implements Disposable {
     if (dupFromFiles.length === 0) {
       console.log({ msg: "NO DUPS FOUND", size: allFiles.length });
     }
+    return { seenIds: opts.seenIds };
 
     // ---- check cache
     // const allNotesFromCache = notesCache.getAllValues();
@@ -296,12 +300,17 @@ export class DoctorService implements Disposable {
         if (error) {
           throw error;
         }
-        asyncLoopOneAtATime(ConfigUtils.getVaults(data), (vault) => {
-          return this.fixDuplicateIds({
-            vault,
-            wsRoot: opts.wsRoot!,
-          });
-        });
+        let seenIds = new Set<string>();
+        asyncLoopOneAtATime(
+          ConfigUtils.getVaults(data),
+          async (vault: DVault) => {
+            ({ seenIds } = await this.fixDuplicateIds({
+              vault,
+              wsRoot: opts.wsRoot!,
+              seenIds,
+            }));
+          }
+        );
         break;
       }
       default:

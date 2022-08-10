@@ -3,7 +3,10 @@ import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
+import fs from "fs";
 import { describe } from "mocha";
+import path from "path";
+import vscode from "vscode";
 import { GoToSiblingCommand } from "../../commands/GoToSiblingCommand";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -179,6 +182,27 @@ suite("GoToSibling", () => {
           direction: "next",
         });
         expect(resp).toEqual({ msg: "no_editor" });
+      });
+    });
+
+    describeSingleWS("no active dendron note", {}, () => {
+      test("Warning message should appear", async () => {
+        await VSCodeUtils.closeAllEditors();
+        // Create a file that is not a Dendron note and show it on editor
+        const workspaceRootPath =
+          vscode.workspace.workspaceFolders![0].uri.fsPath;
+        const filePath = path.join(workspaceRootPath, "test.txt");
+        fs.writeFileSync(filePath, "sample file content", "utf8");
+        const fileUri = vscode.Uri.file(filePath);
+        const doc = await vscode.workspace.openTextDocument(fileUri);
+        await vscode.window.showTextDocument(doc);
+
+        const resp = await new GoToSiblingCommand().execute({
+          direction: "next",
+        });
+
+        expect(resp).toEqual({ msg: "other_error" });
+        expect(getActiveDocumentFname()?.endsWith("test.txt")).toBeTruthy();
       });
     });
 

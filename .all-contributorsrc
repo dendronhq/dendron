@@ -2039,6 +2039,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "eshoberg",
+      "name": "Virile",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20173856?v=4",
+      "profile": "https://github.com/eshoberg",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

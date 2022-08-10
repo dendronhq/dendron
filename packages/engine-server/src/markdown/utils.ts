@@ -1,15 +1,11 @@
 /* eslint-disable no-plusplus */
 import {
   ConfigUtils,
-  DendronError,
-  DEngineClient,
-  DVault,
   FIFOQueue,
   getSlugger,
   getStage,
   IntermediateDendronConfig,
   NoteProps,
-  VaultUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
 // @ts-ignore
@@ -21,64 +17,12 @@ import path from "path";
 // @ts-ignore
 // @ts-ignore
 // eslint-disable-next-line import/no-named-default
-import { default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { normalizev2 } from "../utils";
 import { RemarkUtils } from "./remark";
-import { BlockAnchorOpts } from "./remark/blockAnchors";
-import { DendronPubOpts } from "./remark/dendronPub";
-import { NoteRefsOptsV2 } from "./remark/noteRefsV2";
-import { WikiLinksOpts } from "./remark/wikiLinks";
-import {
-  DendronASTData,
-  DendronASTDest,
-  DendronASTNode,
-  DendronASTTypes,
-  VaultMissingBehavior,
-} from "./types";
+import { DendronASTNode, DendronASTTypes } from "./types";
 
 const toString = require("mdast-util-to-string");
-
-type ProcOpts = {
-  engine: DEngineClient;
-};
-
-type ProcParseOpts = {
-  dest: DendronASTDest;
-  fname: string;
-} & ProcOpts;
-
-type ProcOptsFull = ProcOpts & {
-  dest: DendronASTDest;
-  shouldApplyPublishRules?: boolean;
-  vault: DVault;
-  fname: string;
-  config?: IntermediateDendronConfig;
-  mathOpts?: {
-    katex?: boolean;
-  };
-  mermaid?: boolean;
-  noteRefLvl?: number;
-  usePrettyRefs?: boolean;
-  // shouldn't need to be used
-  wikiLinksOpts?: WikiLinksOpts;
-  publishOpts?: DendronPubOpts;
-  blockAnchorsOpts?: BlockAnchorOpts;
-  noteRefOpts?: NoteRefsOptsV2;
-};
-
-type ProcDendron = ProcOpts & {
-  dest: DendronASTDest;
-  vault: DVault;
-  fname: string;
-  configOverride?: IntermediateDendronConfig;
-};
-
-enum DendronProcDataKeys {
-  PROC_OPTS = "procOpts",
-  NOTE_REF_LVL = "noteRefLvl",
-  ENGINE = "engine",
-}
 
 export const renderFromNote = (opts: { note: NoteProps }) => {
   const { note } = opts;
@@ -107,81 +51,6 @@ export type FindHeaderAnchor = {
   node?: Heading;
   anchorType?: "header";
 };
-
-/** @deprecated Please use {@link MDUtilsV5} instead. */
-export class MDUtilsV4 {
-  static getDendronData(proc: Processor) {
-    return proc.data("dendron") as DendronASTData;
-  }
-
-  /**
-   * Get the vault name, either from processor or passed in vaultName
-   * @param opts.vaultMissingBehavior how to respond if no vault is found. See {@link VaultMissingBehavior}
-   */
-  static getVault(
-    proc: Processor,
-    vaultName?: string,
-    opts?: { vaultMissingBehavior?: VaultMissingBehavior }
-  ) {
-    const copts = _.defaults(opts || {}, {
-      vaultMissingBehavior: VaultMissingBehavior.THROW_ERROR,
-    });
-    let { vault } = MDUtilsV4.getDendronData(proc);
-    const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    if (vaultName) {
-      try {
-        vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: engine.vaults,
-          vname: vaultName,
-        });
-      } catch (err) {
-        if (copts.vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR) {
-          throw err;
-        }
-      }
-    }
-    return vault;
-  }
-
-  static getFM(proc: Processor) {
-    return proc.data("fm") as any;
-  }
-
-  static setDendronData(proc: Processor, data: Partial<DendronASTData>) {
-    const _data = proc.data("dendron") as DendronASTData;
-    return proc.data("dendron", { ..._data, ...data });
-  }
-
-  static getEngineFromProc(proc: Unified.Processor) {
-    const engine = proc.data("engine") as DEngineClient;
-    let error: DendronError | undefined;
-    if (_.isUndefined(engine) || _.isNull(engine)) {
-      error = new DendronError({ message: "engine not defined" });
-    }
-    return {
-      error,
-      engine,
-    };
-  }
-
-  static getNoteRefLvl(proc: Unified.Processor): number {
-    return this.getProcOpts(proc).noteRefLvl || 0;
-  }
-
-  static getProcOpts(proc: Unified.Processor) {
-    const procOpts = proc.data(DendronProcDataKeys.PROC_OPTS) as ProcOptsFull;
-    return procOpts;
-  }
-
-  static setEngine(proc: Unified.Processor, engine: DEngineClient) {
-    proc.data(DendronProcDataKeys.ENGINE, engine);
-  }
-
-  static setProcOpts(proc: Unified.Processor, data: Partial<ProcOptsFull>) {
-    const procOpts = proc.data(DendronProcDataKeys.PROC_OPTS) as ProcOptsFull;
-    return proc.data(DendronProcDataKeys.PROC_OPTS, { ...procOpts, ...data });
-  }
-}
 
 /** Contains functions that help dealing with MarkDown Abstract Syntax Trees. */
 export class MdastUtils {

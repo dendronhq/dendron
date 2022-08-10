@@ -376,7 +376,6 @@ export function convertNoteRefASTV2(
   const { link, proc, compilerOpts, procOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl } = procData;
-  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
   const engine = procData.engine;
 
   // prevent infinite nesting.
@@ -389,7 +388,6 @@ export function convertNoteRefASTV2(
 
   // figure out configs that change how we process the note reference
   const { dest, config, vault: vaultFromProc } = procData;
-  // Needed for backwards compatibility until all MDUtilsV4 proc usages are removed
   const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   const { wikiLinkOpts } = compilerOpts;
 
@@ -728,7 +726,6 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
-  // Workaround until all usages of MDUtilsV4 are removed
   const { engine, config } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.

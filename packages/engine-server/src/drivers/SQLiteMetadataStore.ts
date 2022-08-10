@@ -1,11 +1,11 @@
 import {
   asyncLoopOneAtATime,
   DVault,
-  NotePropsByIdDict
+  NotePropsByIdDict,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { PrismaClient } from "../generated-prisma-client";
-:
 
 let _prisma: PrismaClient | undefined;
 
@@ -102,13 +102,14 @@ export class SQLiteMetadataStore {
   }) {
     const prisma = getPrismaClient();
     // bulk insert
-    const sqlBegin = "INSERT INTO 'notes' ('fname', 'id') VALUES ";
+    const sqlBegin = "INSERT INTO 'notes' ('fname', 'id', 'vault') VALUES ";
     const sqlEnd = _.values(notesIdDict)
-      .map(({ fname, id }) => {
-        return `('${fname}', '${id}')`;
+      .map(({ fname, id, vault }) => {
+        return `('${fname}', '${id}', '${VaultUtils.getName(vault)}')`;
       })
       .join(",");
     const fullQuery = sqlBegin + sqlEnd;
+    // eslint-disable-next-line no-useless-catch
     try {
       await prisma.$queryRawUnsafe(fullQuery);
       await prisma.vaultMetadata.create({

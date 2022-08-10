@@ -9,7 +9,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
-  ProcFlavor,
+  ProcFlavor
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";

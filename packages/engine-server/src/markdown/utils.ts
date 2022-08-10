@@ -1,11 +1,10 @@
 /* eslint-disable no-plusplus */
 import {
-  ConfigUtils,
-  FIFOQueue,
+  ConfigUtils, FIFOQueue,
   getSlugger,
   getStage,
   IntermediateDendronConfig,
-  NoteProps,
+  NoteProps
 } from "@dendronhq/common-all";
 // @ts-ignore
 // @ts-ignore
@@ -20,7 +19,10 @@ import path from "path";
 import { Node, Parent } from "unist";
 import { normalizev2 } from "../utils";
 import { RemarkUtils } from "./remark";
-import { DendronASTNode, DendronASTTypes } from "./types";
+import {
+  DendronASTNode,
+  DendronASTTypes
+} from "./types";
 
 const toString = require("mdast-util-to-string");
 

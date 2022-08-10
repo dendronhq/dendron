@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.107.0 (2022-08-09)
+
+
+### Bug Fixes
+
+* **views:** resolve issues with preview lock button ([#3353](https://github.com/dendronhq/dendron/issues/3353)) ([3e270dc](https://github.com/dendronhq/dendron/commit/3e270dcce338cc2c986d86902061d8a162d3f80e))
+
+
+
+
+
 # 0.106.0 (2022-08-02)
 
 **Note:** Version bump only for package @dendronhq/engine-test-utils

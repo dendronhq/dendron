@@ -1817,10 +1817,10 @@
   resolved "https://registry.npmjs.org/@ctrl/tinycolor/-/tinycolor-3.4.0.tgz#c3c5ae543c897caa9c2a68630bed355be5f9990f"
   integrity sha512-JZButFdZ1+/xAfpguQHoabIXkcqRRKpMrWKBkpEZZyxfY9C1DpADFB8PEqGSTeFr135SaTRfKqGKx5xSCLI7ZQ==
 
-"@dendronhq/common-all@^0.102.1":
-  version "0.102.1"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.102.1.tgz#2206ebc2a8be0d2fd8f5fd24d66019bdc5c0feb6"
-  integrity sha512-j5eYgC7LWzu1gCoooqz6a9caCji+3ihANvhYYLmmCQFKHoo5t+zwtm2covUNgu1MeaZBHO5v8IUiEOtPQv4CPw==
+"@dendronhq/common-all@^0.107.0":
+  version "0.107.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.107.0.tgz#b284fd6630a388fd21a5355aca5d9fa645b21add"
+  integrity sha512-6P1trG1CsSCukkbBVsm9N5L0rnrqGWbFfEfv8wWMQLP85Bu6p5hYvcE3F5B6mptHAjrhhp09Lm3ei8+X025MZQ==
   dependencies:
     axios "^0.21.4"
     dropbox "^4.0.30"
@@ -1839,13 +1839,13 @@
     title "^3.4.4"
     vscode-uri "^2.1.2"
 
-"@dendronhq/common-frontend@^0.102.1":
-  version "0.102.1"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.102.1.tgz#5a140de209cd2ca24c7abfdb53a0e11088e58a2f"
-  integrity sha512-raPuZCIJsXe69D0MWBE+rW1M5d5n+1N3hU8++dPZLHSn7QXgwzXF17uCJAuBcrRuY9dWe9FIYkwB3hrIxiKgXA==
+"@dendronhq/common-frontend@^0.107.0":
+  version "0.107.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-frontend/-/common-frontend-0.107.0.tgz#b84939c7fe8f93f5745411ee15735aef624f009e"
+  integrity sha512-juFeSWMHxyI9roCsCUUvIl/DX6OQ9Ykwsro9HKPdPjPoKQM3/eKVl7UG6G94IN5s6s9Gm3NdNuOKscczt5sq3g==
   dependencies:
     "@aws-amplify/core" "^4.0.2"
-    "@dendronhq/common-all" "^0.102.1"
+    "@dendronhq/common-all" "^0.107.0"
     "@reduxjs/toolkit" "^1.5.1"
     antd "^4.15.4"
     lodash "^4.17.20"
@@ -1855,12 +1855,12 @@
     react-redux "^7.2.3"
     redux-logger "^3.0.6"
 
-"@dendronhq/common-server@^0.102.1":
-  version "0.102.1"
-  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.102.1.tgz#18b6ec521c4c361685141d1e3ce64b4ad2a0eec5"
-  integrity sha512-BV4OVRW8zHFAC7Q6sycLD6ykpVnUOggRkl42eXo609barWWUBiqXkxBXrpVgluoCEwn3hLg1PWfNnprGJI5Oug==
+"@dendronhq/common-server@^0.107.0":
+  version "0.107.0"
+  resolved "https://registry.yarnpkg.com/@dendronhq/common-server/-/common-server-0.107.0.tgz#46043bc364e04df694cae22c70b1064f819ad8ad"
+  integrity sha512-MigXg2wp1rMlJi/gj/N79Fa0t5stt3vvbaUIXoAhfSy7Qlw++xuR2q2KgB/M1N+9+kE/RW5Hi+9k6nhKBqyYbg==
   dependencies:
-    "@dendronhq/common-all" "^0.102.1"
+    "@dendronhq/common-all" "^0.107.0"
     "@sentry/integrations" "^6.13.3"
     "@sentry/node" "^6.13.3"
     ajv "^8.6.0"
@@ -4106,7 +4106,7 @@ bser@2.1.1:
 
 buffer-from@^1.0.0:
   version "1.1.2"
-  resolved "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
+  resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
   integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
 
 buffer-indexof@^1.0.0:
@@ -4567,7 +4567,7 @@ combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
 
 commander@2, commander@^2.20.0:
   version "2.20.3"
-  resolved "https://registry.npmjs.org/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
 commander@7:
@@ -6600,7 +6600,7 @@ events@^3.0.0:
   resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-eventsource@1.1.1, eventsource@^1.0.7:
+eventsource@^1.0.7:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-1.1.1.tgz#4544a35a57d7120fba4fa4c86cb4023b2c09df2f"
   integrity sha512-qV5ZC0h7jYIAOhArFJgSfdyz6rALJyb270714o7ZtNnw2WSJ+eexhKtE0O8LYPRsHZHf2osHKZBxGPvm3kPkCA==
@@ -12921,9 +12921,9 @@ source-map-resolve@^0.6.0:
     decode-uri-component "^0.2.0"
 
 source-map-support@^0.5.6, source-map-support@~0.5.12, source-map-support@~0.5.20:
-  version "0.5.20"
-  resolved "https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.20.tgz#12166089f8f5e5e8c56926b377633392dd2cb6c9"
-  integrity sha512-n1lZZ8Ve4ksRqizaBQgxXDgKwttHDhyfQjA6YZZn8+AroHbsIz+JjwxQDxbp+7y5OYCI8t1Yk7etjD9CRd2hIw==
+  version "0.5.21"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
+  integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
@@ -13476,9 +13476,9 @@ terser-webpack-plugin@^1.4.3:
     worker-farm "^1.7.0"
 
 terser@^4.1.2, terser@^4.6.2, terser@^4.6.3:
-  version "4.8.0"
-  resolved "https://registry.npmjs.org/terser/-/terser-4.8.0.tgz#63056343d7c70bb29f3af665865a46fe03a0df17"
-  integrity sha512-EAPipTNeWsb/3wLPeup1tVPaXfIaU68xMnVdPafIL1TV05OhASArYyIfFvnvJCNrR2NIOvDVNNTFRa+Re2MWyw==
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.1.tgz#a00e5634562de2239fd404c649051bf6fc21144f"
+  integrity sha512-4GnLC0x667eJG0ewJTa6z/yXrbLGv80D9Ru6HIpCQmO+Q4PfEtBFi0ObSckqwL6VyQv/7ENJieXHo2ANmdQwgw==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -13943,15 +13943,7 @@ url-loader@4.1.1:
     mime-types "^2.1.27"
     schema-utils "^3.0.0"
 
-url-parse@^1.4.3:
-  version "1.5.10"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.10.tgz#9d3c2f736c1d75dd3bd2be507dcc111f1e2ea9c1"
-  integrity sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==
-  dependencies:
-    querystringify "^2.1.1"
-    requires-port "^1.0.0"
-
-url-parse@^1.5.3:
+url-parse@^1.4.3, url-parse@^1.5.3:
   version "1.5.10"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.10.tgz#9d3c2f736c1d75dd3bd2be507dcc111f1e2ea9c1"
   integrity sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==

@@ -252,6 +252,12 @@ export class DoctorService implements Disposable {
         console.log({ msg: "FOUND DUP", id, fname });
       }
       seenFromFiles.add(id);
+
+      const validFname =
+        NoteUtils.validateFname(fname) && _.isNull(fname.match(/[(),]/));
+      if (!validFname) {
+        console.log({ msg: "FOUND BAD FNAME", id, fname });
+      }
     });
     if (dupFromFiles.length === 0) {
       console.log({ msg: "NO DUPS FOUND", size: allFiles.length });

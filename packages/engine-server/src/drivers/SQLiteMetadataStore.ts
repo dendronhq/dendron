@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { PrismaClient } from "../generated-prisma-client";
+import fs from "fs-extra";
 
 let _prisma: PrismaClient | undefined;
 
@@ -120,11 +121,10 @@ export class SQLiteMetadataStore {
       });
     } catch (error) {
       // uncomment to log
-      // console.log("---> ERROR START");
-      // console.log(fullQuery);
-      // fs.writeFileSync("/tmp/query.txt", fullQuery);
-      // console.log("---> ERROR END");
-      // process.exit();
+      console.log("---> ERROR START");
+      console.log(fullQuery);
+      fs.writeFileSync("/tmp/query.txt", fullQuery);
+      console.log("---> ERROR END");
       throw error;
     }
     return { query: fullQuery };

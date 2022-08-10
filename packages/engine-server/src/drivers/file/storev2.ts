@@ -71,6 +71,7 @@ import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
+import { URI } from "vscode-uri";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -433,7 +434,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const out = await getAllFiles({
-      root: vpath,
+      root: URI.parse(vpath),
       include: ["*.schema.yml"],
     });
     if (out.error || !out.data) {
@@ -604,7 +605,7 @@ export class FileStorage implements DStore {
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     const out = await getAllFiles({
-      root: vpath,
+      root: URI.parse(vpath),
       include: ["*.md"],
     });
     if (out.error) {
@@ -1055,7 +1056,6 @@ export class FileStorage implements DStore {
           note,
           noteDicts,
           createStubs: true,
-          wsRoot: this.wsRoot,
         });
         changesToParents.forEach((changedEntry) => {
           NoteDictsUtils.add(changedEntry.note, noteDicts);
@@ -1180,7 +1180,6 @@ export class FileStorage implements DStore {
         note,
         noteDicts,
         createStubs: true,
-        wsRoot: this.wsRoot,
       });
       // add one entry for each parent updated
       changed = changed.concat(out);

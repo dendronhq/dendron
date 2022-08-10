@@ -42,11 +42,13 @@ import {
   NoteDicts,
   NoteDictsUtils,
   NoteFnameDictUtils,
+  NoteMetadataStore,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
   NoteQueryResp,
+  NoteStore,
   NoteUtils,
   Optional,
   QueryNotesOpts,
@@ -61,6 +63,7 @@ import {
   stringifyError,
   TAGS_HIERARCHY,
   UpdateNoteResp,
+  URI,
   USERS_HIERARCHY,
   VaultUtils,
   WorkspaceOpts,
@@ -75,10 +78,9 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import { NodeJSFileStore, NoteStore } from "./store";
+import { NodeJSFileStore } from "./store";
 import { DConfig } from "./config";
 import { AnchorUtils, LinkUtils } from "./markdown";
-import { NoteMetadataStore } from "./store/NoteMetadataStore";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import path from "path";
@@ -152,11 +154,11 @@ export class DendronEngineV3 implements DEngine {
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
       forceNew: true,
-      noteStore: new NoteStore({
+      noteStore: new NoteStore(
         fileStore,
-        dataStore: new NoteMetadataStore(),
-        wsRoot,
-      }),
+        new NoteMetadataStore(),
+        URI.parse(wsRoot)
+      ),
       fileStore,
       mode: "fuzzy",
       logger: LOGGER,
@@ -1026,7 +1028,7 @@ export class DendronEngineV3 implements DEngine {
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: vpath,
+          root: URI.parse(vpath),
           include: ["*.md"],
         });
         if (maybeFiles.error) {

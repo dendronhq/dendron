@@ -1,18 +1,16 @@
-import {
-  cleanName,
-  DendronError,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  FindNoteOpts,
-  IDataStore,
-  isNotUndefined,
-  NoteFnameDictUtils,
-  NotePropsByFnameDict,
-  NotePropsMeta,
-  RespV3,
-  VaultUtils,
-} from "@dendronhq/common-all";
 import _ from "lodash";
+import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
+import { DendronError } from "../error";
+import { NoteFnameDictUtils } from "../noteDictsUtils";
+import {
+  NotePropsMeta,
+  NotePropsByFnameDict,
+  RespV3,
+  FindNoteOpts,
+} from "../types";
+import { cleanName, isNotUndefined } from "../utils";
+import { VaultUtils } from "../vault";
+import { IDataStore } from "./IDataStore";
 
 export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
   /**

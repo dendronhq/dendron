@@ -26,6 +26,10 @@ export enum DVaultSync {
   SYNC = "sync",
 }
 
+export type DVaultUriVariant = DVault & {
+  path: URI;
+};
+
 export type DVault = {
   /** Name of vault */
   name?: string;

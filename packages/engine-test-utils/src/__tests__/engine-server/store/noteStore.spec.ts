@@ -1,11 +1,13 @@
-import { ERROR_STATUS, NotePropsMeta } from "@dendronhq/common-all";
+import {
+  ERROR_STATUS,
+  NoteMetadataStore,
+  NotePropsMeta,
+  NoteStore,
+  URI,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import {
-  NodeJSFileStore,
-  NoteMetadataStore,
-  NoteStore,
-} from "@dendronhq/engine-server";
+import { NodeJSFileStore } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -15,11 +17,11 @@ describe("GIVEN NoteStore", () => {
   test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot, engine }) => {
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
 
         _.values(engine.notes).forEach(async (note) => {
           const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
@@ -81,11 +83,12 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
+
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -122,11 +125,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "",
@@ -164,11 +167,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -199,11 +202,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -249,11 +252,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -296,11 +299,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -322,11 +325,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -383,11 +386,11 @@ describe("GIVEN NoteStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar123",
           body: "note body",
@@ -443,11 +446,11 @@ describe("GIVEN NoteStore", () => {
   test("WHEN deleting a root note, THEN error should return and be CANT_DELETE_ROOT", async () => {
     await runEngineTestV5(
       async ({ wsRoot, engine }) => {
-        const noteStore = new NoteStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new NoteMetadataStore(),
-          wsRoot,
-        });
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(),
+          URI.parse(wsRoot)
+        );
 
         _.values(engine.notes).forEach(async (note) => {
           const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);

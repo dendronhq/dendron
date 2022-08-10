@@ -22,18 +22,17 @@ import {
   cleanName,
   BulkResp,
   DendronCompositeError,
-} from "@dendronhq/common-all";
-import {
-  DLogger,
-  globMatch,
   string2Note,
-  vault2Path,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
+import { DLogger, globMatch, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { createCacheEntry, EngineUtils } from "../../utils";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
+
+// NOTE: This file has been forked in plugin-core to enable Dendron Web
+// Extension
 
 export type FileMeta = {
   // fpath: full path, eg: foo.md, fpath: foo.md
@@ -305,7 +304,6 @@ export class NoteParserV2 {
             note,
             noteDicts,
             createStubs: true,
-            wsRoot,
           });
           changeEntries = changeEntries.concat(changed);
         }

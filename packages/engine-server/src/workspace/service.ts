@@ -49,6 +49,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path, { basename } from "path";
+import { URI } from "vscode-uri";
 import { WorkspaceUtils } from ".";
 import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
@@ -521,7 +522,10 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const newFolder = vault2Path({ wsRoot: this.wsRoot, vault: newVault });
     await fs.ensureDir(newFolder);
     // Move all note files
-    const noteFiles = await getAllFiles({ root: oldFolder, include: ["*.md"] });
+    const noteFiles = await getAllFiles({
+      root: URI.parse(oldFolder),
+      include: ["*.md"],
+    });
     if (!noteFiles.data) {
       throw noteFiles.error;
     }

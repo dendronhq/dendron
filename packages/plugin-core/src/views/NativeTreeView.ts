@@ -193,7 +193,7 @@ export class NativeTreeView implements Disposable {
           // eslint-disable-next-line no-await-in-loop
           await TimeUtils.sleep(10);
         }
-        this.treeView.reveal(note);
+        this.treeView.reveal(note, { focus: false });
       }
     }
   }

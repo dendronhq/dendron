@@ -42,7 +42,7 @@
       ],
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js"
       ],
       "env": {
         "STAGE": "dev",
@@ -64,6 +64,41 @@
       "env": {
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
         "LOG_LEVEL": "debug"
+      }
+    },
+    {
+      "name": "Run Web Extension in VS Code",
+      "type": "pwa-extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentKind=web"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/web/**/*.js"
+      ],
+      "preLaunchTask": "npm: watch-web"
+    },
+    {
+      "name": "Plugin Web Extension Tests in VS Code",
+      "type": "extensionHost",
+      "debugWebWorkerHost": true,
+      "request": "launch",
+      "webRoot": "${workspaceFolder}/plugin-core/src",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentKind=web",
+        "--extensionTestsPath=${workspaceFolder}/dist/web/test/suite/index"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/web/**/*.js"
+      ],
+      "preLaunchTask": "npm: watch-web",
+      "sourceMapPathOverrides": {
+        "*": "${webRoot}/*"
       }
     },
     {
@@ -99,7 +134,7 @@
       },
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js"
       ],
       "outFiles": [
         "${workspaceFolder}/out/src/test/**/*.js"
@@ -120,7 +155,7 @@
       },
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js"
       ],
       "outFiles": [
         "${workspaceFolder}/out/src/test/**/*.js"
@@ -132,10 +167,9 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        //"${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index",
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index"
       ],
       "env": {
         "STAGE": "test",
@@ -157,7 +191,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index",
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index"
       ],
       "env": {
         "STAGE": "test",
@@ -165,19 +199,10 @@
       },
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js"
       ],
       "outFiles": [
         "${workspaceFolder}/out/src/test/**/*.js"
-      ]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": [
-        "Run Extension",
-        "Attach to Server"
       ]
     }
   ]

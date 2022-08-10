@@ -1,24 +1,23 @@
+import _ from "lodash";
+import { URI, Utils } from "vscode-uri";
+import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
+import { NoteUtils } from "../dnode";
+import { DendronError } from "../error";
 import {
-  DendronError,
   Disposable,
   DNoteLoc,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
   FindNoteOpts,
-  genHash,
-  IDataStore,
-  IFileStore,
-  INoteStore,
-  isNotUndefined,
   NoteProps,
   NotePropsMeta,
-  NoteUtils,
   RespV3,
   WriteNoteMetaOpts,
   WriteNoteOpts,
-} from "@dendronhq/common-all";
-import { createDisposableLogger, DLogger } from "@dendronhq/common-server";
-import _ from "lodash";
+} from "../types";
+import { genHash, isNotUndefined } from "../utils";
+import { VaultUtils } from "../vault";
+import { IDataStore } from "./IDataStore";
+import { IFileStore } from "./IFileStore";
+import { INoteStore } from "./INoteStore";
 
 /**
  * Responsible for storing NoteProps non-metadata and NoteProps metadata
@@ -26,33 +25,24 @@ import _ from "lodash";
 export class NoteStore implements Disposable, INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
-  private _wsRoot: string;
-  private _logger: DLogger;
-  private _loggerDispose: () => any;
+  private _wsRoot: URI;
 
-  constructor(opts: {
-    fileStore: IFileStore;
-    dataStore: IDataStore<string, NotePropsMeta>;
-    wsRoot: string;
-  }) {
-    this._fileStore = opts.fileStore;
-    this._metadataStore = opts.dataStore;
-    this._wsRoot = opts.wsRoot;
-    const { logger, dispose } = createDisposableLogger();
-    this._logger = logger;
-    this._loggerDispose = dispose;
+  constructor(
+    fileStore: IFileStore,
+    dataStore: IDataStore<string, NotePropsMeta>,
+    wsRoot: URI
+  ) {
+    this._fileStore = fileStore;
+    this._metadataStore = dataStore;
+    this._wsRoot = wsRoot;
   }
 
-  dispose() {
-    this._loggerDispose();
-  }
+  dispose() {}
 
   /**
    * See {@link INoteStore.get}
    */
   async get(key: string): Promise<RespV3<NoteProps>> {
-    const ctx = "NoteStore:get";
-    this._logger.info({ ctx, msg: `Getting NoteProps for ${key}` });
     const metadata = await this.getMetadata(key);
     if (metadata.error) {
       return { error: metadata.error };
@@ -64,7 +54,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
         data: { ...metadata.data, body: "" },
       };
     }
-    const uri = NoteUtils.getURI({ note: metadata.data, wsRoot: this._wsRoot });
+    const uri = Utils.joinPath(
+      this._wsRoot,
+      VaultUtils.getRelPath(metadata.data.vault),
+      metadata.data.fname + ".md"
+    );
     const nonMetadata = await this._fileStore.read(uri);
     if (nonMetadata.error) {
       return { error: nonMetadata.error };
@@ -97,9 +91,6 @@ export class NoteStore implements Disposable, INoteStore<string> {
    * See {@link INoteStore.bulkGet}
    */
   async bulkGet(keys: string[]): Promise<RespV3<NoteProps>[]> {
-    const ctx = "NoteStore:bulkGet";
-    this._logger.info({ ctx, msg: `Bulk getting NoteProps for ${keys}` });
-
     return Promise.all(keys.map((key) => this.get(key)));
   }
 
@@ -147,7 +138,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
 
     // If note is a stub, do not write to file
     if (!noteMeta.stub) {
-      const uri = NoteUtils.getURI({ note, wsRoot: this._wsRoot });
+      const uri = Utils.joinPath(
+        this._wsRoot,
+        VaultUtils.getRelPath(note.vault),
+        note.fname + ".md"
+      );
       const content = NoteUtils.serialize(note, { excludeStub: true });
       const writeResp = await this._fileStore.write(uri, content);
       if (writeResp.error) {
@@ -207,10 +202,11 @@ export class NoteStore implements Disposable, INoteStore<string> {
 
     // If note is a stub, do not delete from file store since it won't exist
     if (!metadata.data.stub) {
-      const uri = NoteUtils.getURI({
-        note: metadata.data,
-        wsRoot: this._wsRoot,
-      });
+      const uri = Utils.joinPath(
+        this._wsRoot,
+        VaultUtils.getRelPath(metadata.data.vault),
+        metadata.data.fname + ".md"
+      );
       const deleteResp = await this._fileStore.delete(uri);
       if (deleteResp.error) {
         return { error: deleteResp.error };

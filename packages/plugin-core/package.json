@@ -1398,6 +1398,7 @@
     "semver": "^7.3.2",
     "string-similarity": "^4.0.4",
     "textextensions": "^5.15.0",
+    "title": "3.4.4",
     "unist-util-visit": "2.0.3",
     "vscode-languageclient": "^6.1.3"
   },

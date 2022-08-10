@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-216-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-217-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -479,6 +479,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
     <td align="center"><a href="https://github.com/Lodrus"><img src="https://avatars.githubusercontent.com/u/28769785?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lodrus</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ALodrus" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/rogue2971"><img src="https://avatars.githubusercontent.com/u/67639784?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rogue2971</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Arogue2971" title="Bug reports">🐛</a> <a href="#content-rogue2971" title="Content">🖋</a></td>
     <td align="center"><a href="https://github.com/doylejg"><img src="https://avatars.githubusercontent.com/u/6617453?v=4?s=100" width="100px;" alt=""/><br /><sub><b>doylejg</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Adoylejg" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/eshoberg"><img src="https://avatars.githubusercontent.com/u/20173856?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Virile</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aeshoberg" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

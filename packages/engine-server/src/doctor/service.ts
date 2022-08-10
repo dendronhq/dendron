@@ -255,7 +255,7 @@ export class DoctorService implements Disposable {
       opts.seenIds.add(id);
 
       const validFname =
-        NoteUtils.validateFname(fname) && _.isNull(fname.match(/[(),]/));
+        NoteUtils.validateFname(fname) && _.isNull(fname.match(/[(),']/));
       if (!validFname) {
         console.log({ msg: "FOUND BAD FNAME", id, fname });
         const quaratineDirPath = path.join(opts.wsRoot, "bad-notes");

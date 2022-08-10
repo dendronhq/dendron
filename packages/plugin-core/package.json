@@ -61,7 +61,7 @@
           "id": "dendron-view",
           "title": "Dendron",
           "icon": "media/icons/dendron-activity-bar-icon.svg",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         }
       ]
     },
@@ -78,18 +78,18 @@
         {
           "id": "dendron.tip-of-the-day",
           "name": "Tip of the Day",
-          "when": "dendron:pluginActive && !virtualWorkspace",
+          "when": "dendron:pluginActive && shellExecutionSupported",
           "type": "webview"
         },
         {
           "id": "dendron.backlinks",
           "name": "Backlinks",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "when": "dendron:pluginActive  && !virtualWorkspace",
+          "when": "dendron:pluginActive  && shellExecutionSupported",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
@@ -102,23 +102,23 @@
           "id": "dendron.calendar-view",
           "name": "Calendar View",
           "type": "webview",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "id": "dendron.recent-workspaces",
           "name": "Recent Dendron Workspaces",
-          "when": "!dendron:pluginActive && !virtualWorkspace"
+          "when": "!dendron:pluginActive && shellExecutionSupported"
         },
         {
           "id": "dendron.help-and-feedback",
           "name": "Help and Feedback",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "id": "dendron.graph-panel",
           "name": "Graph Panel",
           "type": "webview",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         }
       ]
     },
@@ -598,35 +598,35 @@
         },
         {
           "command": "dendron.browseNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.contributeToCause",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.goto",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.gotoNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createSchemaFromHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createDailyJournalNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.copyNoteLink",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.copyNoteRef",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.copyToClipboard",
@@ -634,23 +634,23 @@
         },
         {
           "command": "dendron.delete",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.insertNoteLink",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.insertNoteIndex",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.moveNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.randomNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.renameNoteV2a",
@@ -658,15 +658,15 @@
         },
         {
           "command": "dendron.renameNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.renameHeader",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.moveHeader",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.convertCandidateLink",
@@ -674,7 +674,7 @@
         },
         {
           "command": "dendron.convertLink",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.lookupNote",
@@ -686,63 +686,63 @@
         },
         {
           "command": "dendron.createJournalNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createScratchNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createMeetingNote",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.lookupSchema",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.reloadIndex",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createTask",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.setTaskStatus",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.completeTask",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.applyTemplate",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.archiveHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.refactorHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.goUpHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.goNextHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.goPrevHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.goDownHierarchy",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.gotoBacklink",
@@ -750,75 +750,75 @@
         },
         {
           "command": "dendron.addAndCommit",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.sync",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.vaultAdd",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.vaultRemove",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.vaultConvert",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.initWS",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.changeWS",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.upgradeSettings",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.configurePod",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.importPod",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.importObsidianPod",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.exportPod",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.publishPod",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.snapshotVault",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.restoreVault",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.copyNoteURL",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createHook",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.deleteHook",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.registerNoteTrait",
@@ -826,55 +826,55 @@
         },
         {
           "command": "dendron.configureNoteTraits",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.createNoteWithTraits",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.publishExport",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.publishDev",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.signUp",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.signIn",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.enableTelemetry",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.disableTelemetry",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.openLink",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.pasteLink",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.showHelp",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.showNoteGraphView",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.showSchemaGraphView",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.showLegacyPreview",
@@ -882,7 +882,7 @@
         },
         {
           "command": "dendron.togglePreview",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.togglePreviewLock",
@@ -890,43 +890,43 @@
         },
         {
           "command": "dendron.pasteFile",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.configureRaw",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.configureUI",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.configureGraphStyle",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.configureLocalOverride",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.seedAdd",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.seedRemove",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.seedBrowse",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.dev.doctor",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.dev.dumpState",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.dev.devTrigger",
@@ -934,27 +934,27 @@
         },
         {
           "command": "dendron.dev.resetConfig",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.dev.runMigration",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.dev.migrateSelfContained",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.dev.openLogs",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.diagnosticsReport",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.showWelcomePage",
-          "when": "!virtualWorkspace"
+          "when": "shellExecutionSupported"
         },
         {
           "command": "dendron.launchTutorialWorkspace",
@@ -962,7 +962,7 @@
         },
         {
           "command": "dendron.openBackup",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.instrumentedWrapperCommand",
@@ -970,7 +970,7 @@
         },
         {
           "command": "dendron.dev.validateEngine",
-          "when": "dendron:pluginActive && !virtualWorkspace"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         }
       ],
       "view/title": [
@@ -1049,39 +1049,39 @@
       ],
       "explorer/context": [
         {
-          "when": "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1 && !virtualWorkspace",
+          "when": "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1 && shellExecutionSupported",
           "command": "dendron.vaultAdd",
           "group": "2_workspace"
         },
         {
-          "when": "explorerResourceIsFolder && dendron:pluginActive && !virtualWorkspace",
+          "when": "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.vaultRemove",
           "group": "2_workspace"
         },
         {
-          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.delete",
           "group": "2_workspace"
         },
         {
-          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.delete",
           "group": "2_workspace"
         },
         {
-          "when": "resourceExtname == .md && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.moveNote",
           "group": "2_workspace"
         },
         {
           "command": "dendron.togglePreview",
-          "when": "resourceLangId == markdown && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "when": "resourceExtname == .md && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.copyNoteLink",
           "group": "2_workspace"
         }
@@ -1089,14 +1089,14 @@
       "editor/title": [
         {
           "command": "dendron.togglePreview",
-          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && !virtualWorkspace",
+          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && shellExecutionSupported",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
           "command": "dendron.togglePreview",
-          "when": "resourceLangId == markdown && dendron:pluginActive && !virtualWorkspace",
+          "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
           "group": "1_open"
         }
       ]
@@ -1260,7 +1260,7 @@
         "command": "dendron.createDailyJournalNote",
         "key": "ctrl+shift+i",
         "mac": "cmd+shift+i",
-        "when": "dendron:pluginActive && !virtualWorkspace"
+        "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {
         "command": "dendron.copyNoteLink",
@@ -1278,7 +1278,7 @@
         "command": "dendron.delete",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
-        "when": "dendron:pluginActive && !virtualWorkspace"
+        "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {
         "command": "dendron.lookupNote",
@@ -1298,19 +1298,19 @@
         "args": {
           "noteType": "journal"
         },
-        "when": "dendron:pluginActive && !virtualWorkspace"
+        "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {
         "command": "dendron.createScratchNote",
         "key": "ctrl+shift+s",
         "mac": "cmd+shift+s",
-        "when": "dendron:pluginActive && !virtualWorkspace"
+        "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {
         "command": "dendron.lookupSchema",
         "mac": "cmd+shift+L",
         "key": "ctrl+shift+l",
-        "when": "dendron:pluginActive && !virtualWorkspace"
+        "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {
         "command": "dendron.goUpHierarchy",

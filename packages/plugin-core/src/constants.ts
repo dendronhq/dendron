@@ -74,7 +74,7 @@ export const DENDRON_VIEWS_CONTAINERS = {
       id: "dendron-view",
       title: "Dendron",
       icon: "media/icons/dendron-activity-bar-icon.svg",
-      when: "!virtualWorkspace",
+      when: "shellExecutionSupported",
     },
   ],
 };
@@ -88,19 +88,19 @@ export const DENDRON_VIEWS = [
   {
     id: DendronTreeViewKey.TIP_OF_THE_DAY,
     name: "Tip of the Day",
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     type: "webview",
     where: "dendron-view",
   },
   {
     id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     where: "dendron-view",
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE}  && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE}  && shellExecutionSupported`,
     where: "dendron-view",
     icon: "media/icons/dendron-vscode.svg",
   },
@@ -111,24 +111,24 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.CALENDAR_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     where: "dendron-view",
   },
   {
     id: DendronTreeViewKey.RECENT_WORKSPACES,
     name: "Recent Dendron Workspaces",
     where: "dendron-view",
-    when: `${DendronContext.PLUGIN_NOT_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_NOT_ACTIVE} && shellExecutionSupported`,
   },
   {
     id: DendronTreeViewKey.HELP_AND_FEEDBACK,
     name: "Help and Feedback",
     where: "dendron-view",
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.GRAPH_PANEL),
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     where: "dendron-view",
   },
 ];
@@ -288,42 +288,42 @@ export const DENDRON_MENUS = {
   ],
   "explorer/context": [
     {
-      when: "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1 && !virtualWorkspace",
+      when: "explorerResourceIsFolder && dendron:pluginActive && workspaceFolderCount > 1 && shellExecutionSupported",
       command: "dendron.vaultAdd",
       group: "2_workspace",
     },
     {
-      when: "explorerResourceIsFolder && dendron:pluginActive && !virtualWorkspace",
+      when: "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.vaultRemove",
       group: "2_workspace",
     },
     {
       // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
-      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.delete",
       group: "2_workspace",
     },
     {
       // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
-      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.delete",
       group: "2_workspace",
     },
     {
-      when: "resourceExtname == .md && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.moveNote",
       group: "2_workspace",
     },
     {
       command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
-      when: "resourceLangId == markdown && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
       group: "navigation",
     },
   ],
   "editor/context": [
     {
-      when: "resourceExtname == .md && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.copyNoteLink",
       group: "2_workspace",
     },
@@ -332,14 +332,14 @@ export const DENDRON_MENUS = {
     {
       command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
-      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && !virtualWorkspace",
+      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && shellExecutionSupported",
       group: "navigation",
     },
   ],
   "editor/title/context": [
     {
       command: "dendron.togglePreview",
-      when: "resourceLangId == markdown && dendron:pluginActive && !virtualWorkspace",
+      when: "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
       group: "1_open",
     },
   ],
@@ -424,17 +424,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   BROWSE_NOTE: {
     key: "dendron.browseNote",
     title: `${CMD_PREFIX} Browse Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
     title: `${CMD_PREFIX} Contribute `,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   GOTO: {
     key: "dendron.goto",
     title: `${CMD_PREFIX} Go to`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     keybindings: {
       when: "editorFocus",
     },
@@ -442,7 +442,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     title: `${CMD_PREFIX} Go to Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     keybindings: {
       key: "ctrl+enter",
       when: "editorFocus",
@@ -454,7 +454,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
@@ -462,9 +462,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+i",
       mac: "cmd+shift+i",
-      when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   COPY_NOTE_LINK: {
     key: "dendron.copyNoteLink",
@@ -474,7 +474,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       mac: "cmd+shift+c",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   COPY_NOTE_REF: {
     key: "dendron.copyNoteRef",
@@ -484,7 +484,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       mac: "cmd+shift+r",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   COPY_TO_CLIPBOARD: {
     key: "dendron.copyToClipboard",
@@ -497,29 +497,29 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+d",
       mac: "cmd+shift+d",
-      when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INSERT_NOTE_LINK: {
     key: "dendron.insertNoteLink",
     title: `${CMD_PREFIX} Insert Note Link`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INSERT_NOTE_INDEX: {
     key: "dendron.insertNoteIndex",
     title: `${CMD_PREFIX} Insert Note Index`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RANDOM_NOTE: {
     key: "dendron.randomNote",
     title: `${CMD_PREFIX} Random Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RENAME_NOTE_V2A: {
     key: "dendron.renameNoteV2a",
@@ -529,17 +529,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RENAME_HEADER: {
     key: "dendron.renameHeader",
     title: `${CMD_PREFIX} Rename Header`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   MOVE_HEADER: {
     key: "dendron.moveHeader",
     title: `${CMD_PREFIX} Move Header`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONVERT_CANDIDATE_LINK: {
     key: "dendron.convertCandidateLink",
@@ -549,7 +549,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CONVERT_LINK: {
     key: "dendron.convertLink",
     title: `${CMD_PREFIX} Convert Link`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   LOOKUP_NOTE: {
     key: "dendron.lookupNote",
@@ -597,9 +597,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       args: {
         noteType: "journal",
       },
-      when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CREATE_SCRATCH: {
     key: "dendron.createScratchNote",
@@ -607,14 +607,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+s",
       mac: "cmd+shift+s",
-      when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CREATE_MEETING_NOTE: {
     key: "dendron.createMeetingNote",
     title: `${CMD_PREFIX} Create Meeting Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",
@@ -622,45 +622,45 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+shift+L",
       key: "ctrl+shift+l",
-      when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RELOAD_INDEX: {
     key: "dendron.reloadIndex",
     title: `${CMD_PREFIX} Reload Index`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   TASK_CREATE: {
     key: "dendron.createTask",
     title: `${CMD_PREFIX} Create Task Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   TASK_SET_STATUS: {
     key: "dendron.setTaskStatus",
     title: `${CMD_PREFIX} Set Task Status`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   TASK_COMPLETE: {
     key: "dendron.completeTask",
     title: `${CMD_PREFIX} Complete Task`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   APPLY_TEMPLATE: {
     key: "dendron.applyTemplate",
     title: `${CMD_PREFIX} Apply Template`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Hierarchies
   ARCHIVE_HIERARCHY: {
     key: "dendron.archiveHierarchy",
     title: `${CMD_PREFIX} Archive Hierarchy`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   REFACTOR_HIERARCHY: {
     key: "dendron.refactorHierarchy",
     title: `${CMD_PREFIX} Refactor Hierarchy`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   GO_UP_HIERARCHY: {
     key: "dendron.goUpHierarchy",
@@ -670,7 +670,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+shift+up",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   GO_NEXT_HIERARCHY: {
     key: "dendron.goNextHierarchy",
@@ -679,7 +679,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+shift+]",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   GO_PREV_HIERARCHY: {
     key: "dendron.goPrevHierarchy",
@@ -688,7 +688,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+shift+[",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   GO_DOWN_HIERARCHY: {
     key: "dendron.goDownHierarchy",
@@ -698,7 +698,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+shift+down",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   GOTO_BACKLINK: {
     key: "dendron.gotoBacklink",
@@ -709,48 +709,48 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   ADD_AND_COMMIT: {
     key: "dendron.addAndCommit",
     title: `${CMD_PREFIX} Workspace: Add and Commit`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SYNC: {
     key: "dendron.sync",
     title: `${CMD_PREFIX} Workspace: Sync`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
     title: `${CMD_PREFIX} Vault Add`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   VAULT_REMOVE: {
     key: "dendron.vaultRemove",
     title: `${CMD_PREFIX} Vault Remove`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   VAULT_CONVERT: {
     key: "dendron.vaultConvert",
     title: `${CMD_PREFIX} Vault Convert`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   CHANGE_WS: {
     key: "dendron.changeWS",
     title: `${CMD_PREFIX} Change Workspace`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
     title: `${CMD_PREFIX} Upgrade Settings`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Pods
   CONFIGURE_POD: {
     key: "dendron.configurePod",
     title: `${CMD_PREFIX} Configure Pod`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONFIGURE_SERVICE_CONNECTION: {
     key: "dendron.configureServiceConnection",
@@ -765,17 +765,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   IMPORT_POD: {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   IMPORT_OBSIDIAN_POD: {
     key: "dendron.importObsidianPod",
     title: `${CMD_PREFIX} Import Obsidian Vault`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   EXPORT_POD: {
     key: "dendron.exportPod",
     title: `${CMD_PREFIX} Export Pod`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   EXPORT_POD_V2: {
     key: "dendron.exportPodv2",
@@ -785,17 +785,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   PUBLISH_POD: {
     key: "dendron.publishPod",
     title: `${CMD_PREFIX} Publish Pod`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SNAPSHOT_VAULT: {
     key: "dendron.snapshotVault",
     title: `${CMD_PREFIX} Snapshot Vault`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RESTORE_VAULT: {
     key: "dendron.restoreVault",
     title: `${CMD_PREFIX} Restore Vault`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   COPY_NOTE_URL: {
     key: "dendron.copyNoteURL",
@@ -805,18 +805,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       windows: "ctrl+shift+u",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Hooks
   CREATE_HOOK: {
     key: "dendron.createHook",
     title: `${CMD_PREFIX} Hook Create`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   DELETE_HOOK: {
     key: "dendron.deleteHook",
     title: `${CMD_PREFIX} Hook Delete`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   REGISTER_NOTE_TRAIT: {
     key: "dendron.registerNoteTrait",
@@ -826,70 +826,70 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   CONFIGURE_NOTE_TRAITS: {
     key: "dendron.configureNoteTraits",
     title: `${CMD_PREFIX} Configure Note Traits`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CREATE_USER_DEFINED_NOTE: {
     key: "dendron.createNoteWithTraits",
     title: `${CMD_PREFIX} Create Note with Custom Traits`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Publishing
   PUBLISH_EXPORT: {
     key: "dendron.publishExport",
     title: `${CMD_PREFIX} Publish Export`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   PUBLISH_DEV: {
     key: "dendron.publishDev",
     title: `${CMD_PREFIX} Publish Dev`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Accounts
   SIGNUP: {
     key: "dendron.signUp",
     title: `${CMD_PREFIX} Sign Up`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   SIGNIN: {
     key: "dendron.signIn",
     title: `${CMD_PREFIX} Sign In`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   // --- Misc
   ENABLE_TELEMETRY: {
     key: "dendron.enableTelemetry",
     title: `${CMD_PREFIX} Enable Telemetry`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   DISABLE_TELEMETRY: {
     key: "dendron.disableTelemetry",
     title: `${CMD_PREFIX} Disable Telemetry`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   OPEN_LINK: {
     key: "dendron.openLink",
     title: `${CMD_PREFIX} Open Link`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   PASTE_LINK: {
     key: "dendron.pasteLink",
     title: `${CMD_PREFIX} Paste Link`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SHOW_HELP: {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   SHOW_NOTE_GRAPH: {
     key: "dendron.showNoteGraphView",
     title: `${CMD_PREFIX} Show Note Graph`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SHOW_SCHEMA_GRAPH: {
     key: "dendron.showSchemaGraphView",
     title: `${CMD_PREFIX} Show Schema Graph`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SHOW_LEGACY_PREVIEW: {
     key: "dendron.showLegacyPreview",
@@ -910,7 +910,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       mac: "cmd+ctrl+p",
       when: "dendron:pluginActive",
     },
-    when: "dendron:pluginActive && !virtualWorkspace",
+    when: "dendron:pluginActive && shellExecutionSupported",
   },
   TOGGLE_PREVIEW_LOCK: {
     key: "dendron.togglePreviewLock",
@@ -921,56 +921,56 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // -- Workbench
   CONFIGURE_RAW: {
     key: "dendron.configureRaw",
     title: `${CMD_PREFIX} Configure (yaml)`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
 
   CONFIGURE_UI: {
     key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONFIGURE_GRAPH_STYLES: {
     key: "dendron.configureGraphStyle",
     title: `${CMD_PREFIX} Configure Graph Style (css)`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONFIGURE_LOCAL_OVERRIDE: {
     key: "dendron.configureLocalOverride",
     title: `${CMD_PREFIX} Configure Local Override`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   //-- Seeds
   SEED_ADD: {
     key: "dendron.seedAdd",
     title: `${CMD_PREFIX} Add Seed to Workspace`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SEED_REMOVE: {
     key: "dendron.seedRemove",
     title: `${CMD_PREFIX} Remove Seed from Workspace`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   SEED_BROWSE: {
     key: "dendron.seedBrowse",
     title: `${CMD_PREFIX} Browse the Seed Registry`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   // --- Dev
   DOCTOR: {
     key: "dendron.dev.doctor",
     title: `${CMD_PREFIX} Doctor`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   DUMP_STATE: {
     key: "dendron.dev.dumpState",
     title: `${CMD_PREFIX} Dump State`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   DEV_TRIGGER: {
     key: "dendron.dev.devTrigger",
@@ -980,27 +980,27 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   RUN_MIGRATION: {
     key: "dendron.dev.runMigration",
     title: `${CMD_PREFIX}Dev: Run Migration`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   MIGRATE_SELF_CONTAINED: {
     key: "dendron.dev.migrateSelfContained",
     title: `${CMD_PREFIX} Migrate to Self Contained Vault`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   OPEN_LOGS: {
     key: "dendron.dev.openLogs",
     title: `${CMD_PREFIX}Dev: Open Logs`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   DEV_DIAGNOSTICS_REPORT: {
     key: "dendron.diagnosticsReport",
     title: `${CMD_PREFIX}Dev: Diagnostics Report`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   /**
    * This launches the welcome screen, which has a button that will launch the
@@ -1009,7 +1009,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   SHOW_WELCOME_PAGE: {
     key: "dendron.showWelcomePage",
     title: `${CMD_PREFIX} Launch Tutorial`,
-    when: "!virtualWorkspace",
+    when: "shellExecutionSupported",
   },
   /**
    * This command actually launches the tutorial workspace
@@ -1022,7 +1022,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   OPEN_BACKUP: {
     key: "dendron.openBackup",
     title: `${CMD_PREFIX} Open Backup`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INSTRUMENTED_WRAPPER_COMMAND: {
     key: "dendron.instrumentedWrapperCommand",
@@ -1032,7 +1032,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   VALIDATE_ENGINE: {
     key: "dendron.dev.validateEngine",
     title: `${CMD_PREFIX}Dev: Validate Engine`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && !virtualWorkspace`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
 };
 

@@ -1372,7 +1372,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/13951458?v=4",
       "profile": "https://github.com/dweisiger",
       "contributions": [
-        "doc"
+        "doc",
+        "bug"
       ]
     },
     {
@@ -1924,7 +1925,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/72400253?v=4",
       "profile": "https://github.com/cquick01",
       "contributions": [
-        "bug"
+        "bug",
+        "code"
       ]
     },
     {
@@ -2034,6 +2036,15 @@
       "name": "doylejg",
       "avatar_url": "https://avatars.githubusercontent.com/u/6617453?v=4",
       "profile": "https://github.com/doylejg",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "eshoberg",
+      "name": "Virile",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20173856?v=4",
+      "profile": "https://github.com/eshoberg",
       "contributions": [
         "bug"
       ]

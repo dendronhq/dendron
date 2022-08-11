@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.106.0",
+  "version": "0.107.0",
   "sponsor": {
     "url": "https://accounts.dendron.so/account/subscribe"
   },
@@ -89,7 +89,7 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "when": "dendron:pluginActive",
+          "when": "dendron:pluginActive  && shellExecutionSupported",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
@@ -1394,8 +1394,8 @@
     "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.106.0",
-    "@dendronhq/engine-test-utils": "^0.106.0",
+    "@dendronhq/common-test-utils": "^0.107.0",
+    "@dendronhq/engine-test-utils": "^0.107.0",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1420,7 +1420,7 @@
     "ignore-loader": "^0.1.2",
     "mocha": "^7.1.2",
     "node-loader": "^2.0.0",
-    "ovsx": "^0.2.1",
+    "ovsx": "^0.5.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "source-map-loader": "^3.0.0",
@@ -1429,7 +1429,7 @@
     "ts-node": "^8.10.2",
     "ts-sinon": "^2.0.2",
     "tsyringe": "^4.7.0",
-    "vsce": "^1.100.0",
+    "vsce": "^2.10.0",
     "vscode-test": "^1.3.0",
     "webpack": "^5.56.0",
     "webpack-bundle-analyzer": "^4.4.2",
@@ -1437,11 +1437,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.106.0",
-    "@dendronhq/common-all": "^0.106.0",
-    "@dendronhq/common-server": "^0.106.0",
-    "@dendronhq/engine-server": "^0.106.0",
-    "@dendronhq/pods-core": "^0.106.0",
+    "@dendronhq/api-server": "^0.107.0",
+    "@dendronhq/common-all": "^0.107.0",
+    "@dendronhq/common-server": "^0.107.0",
+    "@dendronhq/engine-server": "^0.107.0",
+    "@dendronhq/pods-core": "^0.107.0",
     "@sentry/integrations": "^6.13.1",
     "@sentry/node": "^6.13.1",
     "@types/vscode": "1.62.0",

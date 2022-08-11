@@ -7,9 +7,11 @@ import {
   DVault,
   DVaultUriVariant,
   EngineDeleteNoteResp,
+  EngineEventEmitter,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  Event,
   FindNoteOpts,
   FuseEngine,
   IDendronError,
@@ -35,15 +37,19 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, singleton } from "tsyringe";
+import { EventEmitter } from "vscode";
 import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
 
 @singleton()
-export class DendronEngineV3Web implements IReducedEngineAPIService {
+export class DendronEngineV3Web
+  implements IReducedEngineAPIService, EngineEventEmitter
+{
   private fuseEngine: FuseEngine;
   private _vaults: DVaultUriVariant[];
   private _noteStore: INoteStore<string>;
   private _fileStore: IFileStore;
+  private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
   constructor(
     @inject("vaults") vaults: DVaultUriVariant[],
@@ -56,6 +62,14 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     this._vaults = vaults;
     this._noteStore = noteStore;
     this._fileStore = fileStore;
+  }
+
+  get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
+    return this._onNoteChangedEmitter.event;
+  }
+
+  dispose() {
+    this._onNoteChangedEmitter.dispose();
   }
 
   /**
@@ -137,6 +151,9 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
    */
   async getNote(id: string): Promise<NoteProps | undefined> {
     const resp = await this._noteStore.get(id);
+    console.log(
+      `getNote called on ${id}; resp error is ${resp.error?.message}`
+    );
     return resp.data;
   }
 
@@ -417,6 +434,7 @@ export class DendronEngineV3Web implements IReducedEngineAPIService {
     await this.fuseEngine.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
+    this._onNoteChangedEmitter.fire(changes);
     // this.logger.info({
     //   ctx,
     //   msg: "exit",

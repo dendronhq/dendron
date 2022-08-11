@@ -1,4 +1,5 @@
 import {
+  EngineEventEmitter,
   IDataStore,
   IFileStore,
   INoteStore,
@@ -12,6 +13,8 @@ import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
 import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
+import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
+import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getVaults } from "./getVaults";
 import { getWSRoot } from "./getWSRoot";
 
@@ -28,6 +31,13 @@ export async function setupWebExtContainer() {
     throw new Error("Unable to find wsRoot!");
   }
   const vaults = await getVaults(wsRoot);
+
+  // The EngineEventEmitter is also DendronEngineV3Web, so reuse the same token
+  // to supply any emitter consumers. This ensures the same engine singleton
+  // gets used everywhere.
+  container.register<EngineEventEmitter>("EngineEventEmitter", {
+    useToken: "IReducedEngineAPIService",
+  });
 
   container.register<IReducedEngineAPIService>(
     "IReducedEngineAPIService",
@@ -80,4 +90,8 @@ export async function setupWebExtContainer() {
     },
     { frequency: "Once" }
   );
+
+  container.register<ITreeViewConfig>("ITreeViewConfig", {
+    useClass: TreeViewDummyConfig,
+  });
 }

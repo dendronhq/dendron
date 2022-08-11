@@ -1,5 +1,8 @@
-import { Event, NoteChangeEntry } from "@dendronhq/common-all";
-import { EngineEventEmitter } from "@dendronhq/engine-server";
+import {
+  EngineEventEmitter,
+  Event,
+  NoteChangeEntry,
+} from "@dendronhq/common-all";
 import { EventEmitter } from "vscode";
 
 /**

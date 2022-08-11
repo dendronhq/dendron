@@ -2,14 +2,13 @@ import {
   assertUnreachable,
   DateFormatUtil,
   DendronASTDest,
+  EngineEventEmitter,
   NoteUtils,
   ProcFlavor,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
   BacklinkPanelSortOrder,
-  EngineEventEmitter,
-  MDUtilsV5,
   MetadataService,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";

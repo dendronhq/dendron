@@ -85,7 +85,7 @@ export class TreeUtils {
   }): TreeMenuNode | undefined {
     const note = noteDict[noteId];
 
-    // return children of the curren tnote
+    // return children of the current note
     const getChildren = () => {
       if (fm.nav_exclude_children || fm.has_collection) {
         return [];

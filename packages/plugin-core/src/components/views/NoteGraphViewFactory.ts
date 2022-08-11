@@ -4,6 +4,7 @@ import {
   DendronError,
   DMessageEnum,
   DMessageSource,
+  EngineEventEmitter,
   getWebEditorViewEntry,
   GraphEvents,
   GraphThemeEnum,
@@ -13,11 +14,7 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
 } from "@dendronhq/common-all";
-import {
-  EngineEventEmitter,
-  MetadataService,
-  WorkspaceUtils,
-} from "@dendronhq/engine-server";
+import { MetadataService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";

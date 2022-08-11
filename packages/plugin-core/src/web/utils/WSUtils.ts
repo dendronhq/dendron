@@ -24,7 +24,7 @@ export class WSUtilsWeb {
     return vault;
   }
 
-  private getNoteFromDocument(document: vscode.TextDocument) {
+  public getNoteFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
     const fname = path.basename(txtPath, ".md");
     let vault: DVault;
@@ -41,7 +41,7 @@ export class WSUtilsWeb {
     });
   }
 
-  async getActiveNote(): Promise<NoteProps | undefined> {
+  public async getActiveNote(): Promise<NoteProps | undefined> {
     const editor = vscode.window.activeTextEditor;
 
     if (!editor) {

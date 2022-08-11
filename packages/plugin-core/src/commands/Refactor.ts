@@ -69,7 +69,7 @@ export abstract class RefactorBaseCommand<
     const out = await getAllFilesWithTypes({
       include: opts.include,
       exclude: opts.exclude,
-      root: Uri.parse(opts.root),
+      root: Uri.file(opts.root),
     });
     if (out.data === undefined) throw out.error;
     return out.data;

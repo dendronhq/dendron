@@ -3,9 +3,9 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   GetAllFilesOpts,
+  globMatch,
   IFileStore,
   isNotNull,
-  minimatch,
   RespV2,
   RespV3,
   URI,
@@ -133,13 +133,13 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
           if (
             _.some([
               fileType === vscode.FileType.Directory,
-              globMatch({ patterns: opts.exclude || [], fname }),
+              globMatch(opts.exclude || [], fname),
             ])
           ) {
             return null;
           }
           // match inclusion
-          if (opts.include && !globMatch({ patterns: opts.include, fname })) {
+          if (opts.include && !globMatch(opts.include, fname)) {
             return null;
           }
           return values;
@@ -158,21 +158,4 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
       }),
     };
   }
-}
-
-/**
- * Implemented this function again here from common-server.
- *  This uses minimatch of latest version which is independent of path module
- */
-function globMatch({
-  patterns,
-  fname,
-}: {
-  patterns: string[] | string;
-  fname: string;
-}): boolean {
-  if (_.isString(patterns)) {
-    return minimatch(fname, patterns);
-  }
-  return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }

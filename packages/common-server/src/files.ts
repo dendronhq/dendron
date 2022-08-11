@@ -2,7 +2,6 @@ import fs, { Dirent } from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
 import _ from "lodash";
-import minimatch from "minimatch";
 import os from "os";
 import path from "path";
 import {
@@ -10,6 +9,7 @@ import {
   DendronError,
   ERROR_SEVERITY,
   GetAllFilesOpts,
+  globMatch,
   isNotNull,
   RespV2,
 } from "@dendronhq/common-all";
@@ -90,13 +90,6 @@ export function writeYAMLAsync(fpath: string, data: any) {
 
 export function deleteFile(fpath: string) {
   return fs.unlinkSync(fpath);
-}
-
-export function globMatch(patterns: string[] | string, fname: string): boolean {
-  if (_.isString(patterns)) {
-    return minimatch(fname, patterns);
-  }
-  return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }
 
 /** Gets all files in `root`, with include and exclude lists (glob matched)

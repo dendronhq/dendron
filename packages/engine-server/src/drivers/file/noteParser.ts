@@ -24,8 +24,9 @@ import {
   NoteChangeEntry,
   genHash,
   string2Note,
+  globMatch,
 } from "@dendronhq/common-all";
-import { DLogger, globMatch, vault2Path } from "@dendronhq/common-server";
+import { DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";

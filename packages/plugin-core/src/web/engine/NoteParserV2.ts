@@ -11,8 +11,8 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   genHash,
+  globMatch,
   IDendronError,
-  minimatch,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -55,13 +55,6 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
     metaDict[lvl].push({ fpath });
   });
   return metaDict;
-}
-
-function globMatch(patterns: string[] | string, fname: string): boolean {
-  if (_.isString(patterns)) {
-    return minimatch(fname, patterns);
-  }
-  return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }
 
 export class NoteParserV2 {

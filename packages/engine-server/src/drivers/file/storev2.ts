@@ -434,7 +434,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const out = await getAllFiles({
-      root: URI.parse(vpath),
+      root: URI.file(vpath),
       include: ["*.schema.yml"],
     });
     if (out.error || !out.data) {
@@ -605,7 +605,7 @@ export class FileStorage implements DStore {
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     const out = await getAllFiles({
-      root: URI.parse(vpath),
+      root: URI.file(vpath),
       include: ["*.md"],
     });
     if (out.error) {

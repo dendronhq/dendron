@@ -38,7 +38,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = "GoToSiblingCommand";
-    // validate editor and note exists
+    // check if editor exists
     const textEditor = VSCodeUtils.getActiveTextEditor();
     if (!textEditor) {
       window.showErrorMessage("You need to be in a note to use this command");
@@ -51,7 +51,14 @@ export class GoToSiblingCommand extends BasicCommand<
     const ext = ExtensionProvider.getExtension();
     const workspace = ext.getDWorkspace();
     const note = await this.getActiveNote(workspace.engine, fname);
-    if (!note) throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
+
+    // check if a Dendron note is active
+    if (!note) {
+      window.showErrorMessage("Please open a Dendron note to use this command");
+      return {
+        msg: "other_error" as const,
+      };
+    }
 
     let siblingNote: NoteProps;
     // If the active note is a journal note, get the sibling note based on the chronological order

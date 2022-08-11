@@ -189,8 +189,7 @@ suite("GoToSibling", () => {
       test("Warning message should appear", async () => {
         await VSCodeUtils.closeAllEditors();
         // Create a file that is not a Dendron note and show it on editor
-        const workspaceRootPath =
-          vscode.workspace.workspaceFolders![0].uri.fsPath;
+        const workspaceRootPath = ExtensionProvider.getEngine().wsRoot;
         const filePath = path.join(workspaceRootPath, "test.txt");
         fs.writeFileSync(filePath, "sample file content", "utf8");
         const fileUri = vscode.Uri.file(filePath);

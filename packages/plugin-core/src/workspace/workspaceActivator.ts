@@ -604,7 +604,7 @@ export class WorkspaceActivator {
       const initializer = WorkspaceInitFactory.create();
       if (initializer && initializer.onWorkspaceActivate) {
         initializer.onWorkspaceActivate({
-          skipOpts: { opts },
+          skipOpts: opts,
         });
       }
     }

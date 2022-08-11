@@ -1,6 +1,7 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
 import matter from "gray-matter";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -1796,6 +1797,22 @@ export class SchemaUtils {
 
   static isSchemaUri(uri: URI) {
     return uri.fsPath.endsWith(".schema.yml");
+  }
+
+  static serializeModuleProps(moduleProps: SchemaModuleProps) {
+    const { version, imports, schemas } = moduleProps;
+    // TODO: filter out imported schemas
+    const out: any = {
+      version,
+      imports: [],
+      schemas: _.values(schemas).map((ent) =>
+        SchemaUtils.serializeSchemaProps(ent)
+      ),
+    };
+    if (imports) {
+      out.imports = imports;
+    }
+    return YAML.dump(out, { schema: JSON_SCHEMA });
   }
 
   // /**

@@ -1,12 +1,8 @@
-import {
-  DendronError,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  IDataStore,
-  RespV3,
-  SchemaModuleProps,
-} from "@dendronhq/common-all";
 import _ from "lodash";
+import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
+import { DendronError } from "../error";
+import { RespV3, SchemaModuleProps } from "../types";
+import { IDataStore } from "./IDataStore";
 
 export class SchemaMetadataStore
   implements IDataStore<string, SchemaModuleProps>

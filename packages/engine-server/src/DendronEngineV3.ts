@@ -59,13 +59,16 @@ import {
   RenderNotePayload,
   RespV2,
   RespV3,
+  SchemaMetadataStore,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaQueryResp,
+  SchemaStore,
   SchemaUtils,
   stringifyError,
   TAGS_HIERARCHY,
   UpdateNoteResp,
+  URI,
   USERS_HIERARCHY,
   VaultUtils,
   WorkspaceOpts,
@@ -165,11 +168,11 @@ export class DendronEngineV3 implements DEngine {
         new NoteMetadataStore(),
         URI.file(wsRoot)
       ),
-      schemaStore: new SchemaStore({
+      schemaStore: new SchemaStore(
         fileStore,
-        dataStore: new SchemaMetadataStore(),
-        wsRoot,
-      }),
+        new SchemaMetadataStore(),
+        URI.parse(wsRoot)
+      ),
       fileStore,
       mode: "fuzzy",
       logger: LOGGER,
@@ -1135,7 +1138,7 @@ export class DendronEngineV3 implements DEngine {
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: vpath,
+          root: URI.parse(vpath),
           include: ["*.schema.yml"],
         });
         if (maybeFiles.error || maybeFiles.data.length === 0) {

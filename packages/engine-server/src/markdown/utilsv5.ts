@@ -9,7 +9,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
-  ProcFlavor,
+  ProcFlavor
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -44,7 +44,6 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
-import { MDUtilsV4 } from "./utils";
 
 export { ProcFlavor };
 
@@ -172,28 +171,15 @@ export class MDUtilsV5 {
 
   static getProcData(proc: Processor): ProcDataFullV5 {
     let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-
-    // backwards compatibility
-    _data = _.defaults(MDUtilsV4.getDendronData(proc), _data);
-    try {
-      _data.noteRefLvl = MDUtilsV4.getNoteRefLvl(proc);
-    } catch {
-      _data.noteRefLvl = 0;
-    }
     return _data || {};
   }
 
   static setNoteRefLvl(proc: Processor, lvl: number) {
-    // backwards compatibility
-    MDUtilsV4.setNoteRefLvl(proc, lvl);
     return this.setProcData(proc, { noteRefLvl: lvl });
   }
 
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-    // TODO: for backwards compatibility
-    MDUtilsV4.setProcOpts(proc, opts);
-    MDUtilsV4.setDendronData(proc, opts);
     const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
     return proc.data("dendronProcDatav5", { ..._data, ...opts, notes });
   }
@@ -295,10 +281,7 @@ export class MDUtilsV5 {
             proc = proc.data("fm", this.getFM({ note }));
           }
 
-          // backwards compatibility, default to v4 values
-          data = _.defaults(MDUtilsV4.getDendronData(proc), data);
           this.setProcData(proc, data as ProcDataFullV5);
-          MDUtilsV4.setEngine(proc, data.engine!);
 
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {
@@ -387,9 +370,7 @@ export class MDUtilsV5 {
         }
 
         // backwards compatibility, default to v4 values
-        data = _.defaults(MDUtilsV4.getDendronData(proc), data);
         this.setProcData(proc, data as ProcDataFullV5);
-        MDUtilsV4.setEngine(proc, data.engine!);
 
         // add additional plugins
         const config = data.config as IntermediateDendronConfig;

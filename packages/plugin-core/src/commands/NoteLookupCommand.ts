@@ -61,6 +61,7 @@ import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelecti
 import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { JournalNote } from "../traits/journal";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
 import { AutoCompletable } from "../utils/AutoCompletable";
@@ -492,6 +493,33 @@ export class NoteLookupCommand
     return { uri, node: item };
   }
 
+  /**
+   * Given a selected note item that is a stub note,
+   * Prepare it for accepting as a new item.
+   * This removes the `stub` frontmatter
+   * and applies schema if there is one that matches
+   */
+  prepareStubItem(opts: {
+    item: NoteQuickInput;
+    engine: IEngineAPIService;
+  }): NoteProps {
+    const { item, engine } = opts;
+
+    const noteFromItem: NoteProps = _.omit(
+      item,
+      "label",
+      "detail",
+      "alwaysShow",
+      "stub"
+    );
+
+    const preparedNote = NoteUtils.updateStubWithSchema({
+      stubNote: noteFromItem,
+      engine,
+    });
+    return preparedNote;
+  }
+
   async acceptNewItem(
     item: NoteQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
@@ -503,9 +531,10 @@ export class NoteLookupCommand
     let nodeNew: NoteProps;
     if (item.stub) {
       Logger.info({ ctx, msg: "create stub" });
-      nodeNew = engine.notes[item.id];
-      // when we are accepting a new item that is a stub, it no longer is a stub
-      nodeNew = _.omit(nodeNew, "stub");
+      nodeNew = this.prepareStubItem({
+        item,
+        engine,
+      });
     } else {
       const vault = await this.getVaultForNewNote({ fname, picker });
       if (vault === undefined) {

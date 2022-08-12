@@ -440,6 +440,27 @@ export class NoteUtils {
     return note;
   }
 
+  /**
+   * Given a stub note, update it so that it has a schema applied to it
+   * This is done before the stub note is accepted as a new item
+   * and saved to the store
+   */
+  static updateStubWithSchema(opts: {
+    stubNote: NoteProps;
+    engine: DEngineClient;
+  }): NoteProps {
+    const { stubNote, engine } = opts;
+    const schemaMatch = SchemaUtils.matchPath({
+      notePath: stubNote.fname,
+      schemaModDict: engine.schemas,
+    });
+    if (schemaMatch) {
+      const { schema, schemaModule } = schemaMatch;
+      NoteUtils.addSchema({ note: stubNote, schemaModule, schema });
+    }
+    return stubNote;
+  }
+
   static createRoot(opts: Partial<NoteOpts> & { vault: DVault }): NoteProps {
     return DNodeUtils.create({
       ...opts,
@@ -1671,7 +1692,6 @@ export class SchemaUtils {
     };
 
     const nextNotePath = getChildOfPath(notePath, matched);
-
     const match = SchemaUtils.matchNotePathWithSchemaAtLevel({
       notePath: nextNotePath,
       schemas: schemaCandidates,
@@ -1724,8 +1744,10 @@ export class SchemaUtils {
     const match = _.find(schemas, (sc) => {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
+        // if we are matching a namespace node,
+        // match on the level of the node itself and its immediate children.
         namespace = true;
-        return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
+        return minimatch(notePathClean, pattern.slice(0, -2));
       } else {
         return minimatch(notePathClean, pattern);
       }

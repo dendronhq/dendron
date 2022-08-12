@@ -600,6 +600,13 @@ export class WorkspaceActivator {
       workspaceInitializer.onWorkspaceActivate({
         skipOpts: opts,
       });
+    } else {
+      const initializer = WorkspaceInitFactory.create();
+      if (initializer && initializer.onWorkspaceActivate) {
+        initializer.onWorkspaceActivate({
+          skipOpts: opts,
+        });
+      }
     }
     return { data: true };
   }

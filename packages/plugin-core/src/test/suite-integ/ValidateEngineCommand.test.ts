@@ -34,7 +34,7 @@ suite("ValidateEngineCommand tests", function () {
         const { engine } = ExtensionProvider.getDWorkspace();
 
         // Purposely remove children from foo note
-        const foo = (await engine.getNote("foo"))!;
+        const foo = (await engine.getNote("foo")).data!;
         foo.children = [];
         await engine.updateNote(foo);
         await new ValidateEngineCommand().execute();

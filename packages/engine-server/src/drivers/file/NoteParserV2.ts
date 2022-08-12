@@ -22,6 +22,8 @@ import {
   cleanName,
   BulkResp,
   DendronCompositeError,
+  SchemaUtils,
+  SchemaModuleDict,
   string2Note,
 } from "@dendronhq/common-all";
 import { DLogger, globMatch, vault2Path } from "@dendronhq/common-server";
@@ -86,7 +88,8 @@ export class NoteParserV2 {
    */
   async parseFiles(
     allPaths: string[],
-    vault: DVault
+    vault: DVault,
+    schemas: SchemaModuleDict
   ): Promise<BulkResp<NoteDicts>> {
     const ctx = "parseFiles";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
@@ -243,6 +246,16 @@ export class NoteParserV2 {
       lvl += 1;
     }
     this.logger.info({ ctx, msg: "post:parseAllNotes" });
+
+    // Add schemas
+    const domains = notesById[rootNote.id].children.map(
+      (ent) => notesById[ent]
+    );
+    await Promise.all(
+      domains.map(async (domain) => {
+        return SchemaUtils.matchDomain(domain, notesById, schemas);
+      })
+    );
 
     // Remove stale entries from cache
     unseenKeys.forEach((unseenKey) => {

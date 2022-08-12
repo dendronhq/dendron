@@ -155,7 +155,7 @@ export class FuseEngine {
     });
   }
 
-  async querySchema({ qs }: { qs: string }): Promise<SchemaProps[]> {
+  querySchema({ qs }: { qs: string }): SchemaProps[] {
     let items: SchemaProps[];
     if (qs === "") {
       const results = this.schemaIndex.search("root");
@@ -244,7 +244,7 @@ export class FuseEngine {
     return results.filter((r) => r.score! <= this.threshold);
   }
 
-  async updateSchemaIndex(schemas: SchemaModuleDict) {
+  async replaceSchemaIndex(schemas: SchemaModuleDict) {
     this.schemaIndex.setCollection(
       _.map(_.values(schemas), (ent) => SchemaUtils.getModuleRoot(ent))
     );
@@ -307,6 +307,10 @@ export class FuseEngine {
     ]);
 
     this.notesIndex.add(indexProps);
+  }
+
+  async addSchemaToIndex(schema: SchemaModuleProps) {
+    this.schemaIndex.add(SchemaUtils.getModuleRoot(schema));
   }
 
   async removeSchemaFromIndex(smod: SchemaModuleProps) {

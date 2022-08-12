@@ -343,6 +343,13 @@ export type EngineWriteOptsV2 = {
   metaOnly?: boolean;
 };
 
+export type EngineSchemaWriteOpts = {
+  /**
+   * If true, write only to metadata store. Otherwise, write to metadata store and filesystem.
+   */
+  metaOnly?: boolean;
+};
+
 export type DEngineInitPayload = {
   notes: NotePropsByIdDict;
   schemas: SchemaModuleDict;
@@ -400,15 +407,22 @@ export type GetDecorationsOpts = {
 
 export type DCommonProps = {
   /**
-   * Dictionary where key is the note id.
+   * @deprecated
    * For access, see {@link DEngine.getNote}
+   * Dictionary where key is the note id.
    */
   notes: NotePropsByIdDict;
   /**
-   * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
+   * @deprecated
    * For access, see {@link DEngine.findNotes}
+   * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
    */
   noteFnames: NotePropsByFnameDict;
+  /**
+   * @deprecated
+   * For access, see {@link DEngine.getSchema}
+   * Dictionary where key is the root id.
+   */
   schemas: SchemaModuleDict;
   wsRoot: string;
   /**
@@ -482,7 +496,10 @@ export type DCommonMethods = {
     opts?: EngineWriteOptsV2
   ) => Promise<WriteNoteResp>;
 
-  writeSchema: (schema: SchemaModuleProps) => Promise<void>;
+  writeSchema: (
+    schema: SchemaModuleProps,
+    opts?: EngineSchemaWriteOpts
+  ) => Promise<void>;
 };
 
 // --- Engine
@@ -595,9 +612,9 @@ export type DEngine = DCommonProps &
 
     init: () => Promise<DEngineInitResp>;
     /**
-     * Get NoteProps by id. If note doesn't exist, return undefined
+     * Get NoteProps by id. If note doesn't exist, return error
      */
-    getNote: (id: string) => Promise<NoteProps | undefined>;
+    getNote: (id: string) => Promise<RespV3<NoteProps>>;
     /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */
@@ -620,7 +637,7 @@ export type DEngine = DCommonProps &
     info: () => Promise<RespV2<EngineInfoResp>>;
     sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-    getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
+    getSchema: (id: string) => Promise<RespV3<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     /**
      * Query for NoteProps from fuse engine
@@ -678,9 +695,9 @@ export type DStore = DCommonProps &
   DCommonMethods & {
     init: () => Promise<DEngineInitResp>;
     /**
-     * Get NoteProps by id. If note doesn't exist, return undefined
+     * Get NoteProps by id. If note doesn't exist, return error
      */
-    getNote: (id: string) => Promise<NoteProps | undefined>;
+    getNote: (id: string) => Promise<RespV3<NoteProps>>;
     /**
      * Find NoteProps by note properties. If no notes match, return empty list
      */
@@ -718,7 +735,7 @@ export type DEngineV4Methods = {
   ) => Promise<DEngineDeleteSchemaResp>;
   sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-  getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
+  getSchema: (qs: string) => Promise<RespV3<SchemaModuleProps>>;
   querySchema: (qs: string) => Promise<SchemaQueryResp>;
   queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
   queryNotesSync({ qs }: { qs: string }): NoteQueryResp;

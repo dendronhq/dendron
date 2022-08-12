@@ -328,22 +328,6 @@ export async function note2File({
   return genHash(payload);
 }
 
-export function serializeModuleProps(moduleProps: SchemaModuleProps) {
-  const { version, imports, schemas } = moduleProps;
-  // TODO: filter out imported schemas
-  const out: any = {
-    version,
-    imports: [],
-    schemas: _.values(schemas).map((ent) =>
-      SchemaUtils.serializeSchemaProps(ent)
-    ),
-  };
-  if (imports) {
-    out.imports = imports;
-  }
-  return YAML.dump(out, { schema: JSON_SCHEMA });
-}
-
 function serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
   const { version, imports, schemas } = _.defaults(moduleOpts, {
     imports: [],
@@ -378,7 +362,7 @@ export function schemaModuleProps2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vpath, fname + ext),
-    serializeModuleProps(schemaMProps)
+    SchemaUtils.serializeModuleProps(schemaMProps)
   );
 }
 

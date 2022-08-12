@@ -1,11 +1,12 @@
-import { ERROR_STATUS } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
-  NodeJSFileStore,
+  ERROR_STATUS,
   SchemaMetadataStore,
   SchemaStore,
-} from "@dendronhq/engine-server";
+  URI,
+} from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { NodeJSFileStore } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import fs from "fs-extra";
@@ -15,11 +16,11 @@ describe("GIVEN SchemaStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const schemaStore = new SchemaStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new SchemaMetadataStore(),
-          wsRoot,
-        });
+        const schemaStore = new SchemaStore(
+          new NodeJSFileStore(),
+          new SchemaMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newSchema = await NoteTestUtilsV4.createSchema({
           fname: "fname1",
           vault,
@@ -52,11 +53,11 @@ describe("GIVEN SchemaStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const schemaStore = new SchemaStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new SchemaMetadataStore(),
-          wsRoot,
-        });
+        const schemaStore = new SchemaStore(
+          new NodeJSFileStore(),
+          new SchemaMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newSchema = await NoteTestUtilsV4.createSchema({
           fname: "fname1",
           vault,
@@ -87,11 +88,11 @@ describe("GIVEN SchemaStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const schemaStore = new SchemaStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new SchemaMetadataStore(),
-          wsRoot,
-        });
+        const schemaStore = new SchemaStore(
+          new NodeJSFileStore(),
+          new SchemaMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newSchema = await NoteTestUtilsV4.createSchema({
           fname: "fname1",
           vault,
@@ -116,11 +117,11 @@ describe("GIVEN SchemaStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        const schemaStore = new SchemaStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new SchemaMetadataStore(),
-          wsRoot,
-        });
+        const schemaStore = new SchemaStore(
+          new NodeJSFileStore(),
+          new SchemaMetadataStore(),
+          URI.parse(wsRoot)
+        );
         const newSchema = await NoteTestUtilsV4.createSchema({
           fname: "fname1",
           vault,
@@ -164,11 +165,11 @@ describe("GIVEN SchemaStore", () => {
   test("WHEN deleting a root schema, THEN error should return and be CANT_DELETE_ROOT", async () => {
     await runEngineTestV5(
       async ({ wsRoot, engine }) => {
-        const schemaStore = new SchemaStore({
-          fileStore: new NodeJSFileStore(),
-          dataStore: new SchemaMetadataStore(),
-          wsRoot,
-        });
+        const schemaStore = new SchemaStore(
+          new NodeJSFileStore(),
+          new SchemaMetadataStore(),
+          URI.parse(wsRoot)
+        );
 
         _.values(engine.schemas).forEach(async (schema) => {
           await schemaStore.writeMetadata({ key: schema.root.id, schema });

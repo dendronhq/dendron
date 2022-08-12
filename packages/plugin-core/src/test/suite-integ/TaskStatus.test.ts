@@ -153,9 +153,9 @@ suite("GIVEN TaskStatus", function () {
     });
     test("THEN updates the task status for the right task", async () => {
       const { engine } = ExtensionProvider.getDWorkspace();
-      const task = await engine.getNote(taskNote.id);
+      const task = (await engine.getNote(taskNote.id)).data;
       expect(task?.custom.status === "y");
-      const otherTask = await engine.getNote(otherTaskNote.id);
+      const otherTask = (await engine.getNote(otherTaskNote.id)).data;
       expect(_.isEmpty(otherTask?.custom?.status)).toBeTruthy();
     });
   });
@@ -193,7 +193,7 @@ suite("GIVEN TaskStatus", function () {
       });
       test("THEN sets the status for the current note", async () => {
         const { engine } = ExtensionProvider.getDWorkspace();
-        const task = await engine.getNote(taskNote.id);
+        const task = (await engine.getNote(taskNote.id)).data;
         expect(task?.custom.status === "y");
       });
     });
@@ -226,7 +226,7 @@ suite("GIVEN TaskStatus", function () {
       });
       test("THEN doesn't set a status for the current note", async () => {
         const { engine } = ExtensionProvider.getDWorkspace();
-        const note = await engine.getNote(otherNote.id);
+        const note = (await engine.getNote(otherNote.id)).data;
         expect(note?.custom?.status === undefined).toBeTruthy();
       });
     });

@@ -232,9 +232,10 @@ export class UserQueries {
         msgGoToSchema
       );
       if (action === msgGoToSchema) {
-        const schema = PluginSchemaUtils.getSchema(hierarchy.topId());
-
-        await VSCodeUtils.openFileInEditor(getUriFromSchema(schema));
+        const schema = await PluginSchemaUtils.getSchema(hierarchy.topId());
+        if (schema.data) {
+          await VSCodeUtils.openFileInEditor(getUriFromSchema(schema.data));
+        }
       }
 
       return { stopReason: StopReason.SCHEMA_WITH_TOP_ID_ALREADY_EXISTS };

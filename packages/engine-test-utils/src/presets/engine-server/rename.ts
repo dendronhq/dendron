@@ -1618,7 +1618,7 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: (await engine.getNote("foo"))!.fname,
+          actual: (await engine.getNote("foo")).data!.fname,
           expected: "foo1",
         },
         {

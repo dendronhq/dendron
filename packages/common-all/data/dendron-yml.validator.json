@@ -647,8 +647,18 @@
             }
           },
           "additionalProperties": false
+        },
+        "aliasMode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "alias"
+          ]
         }
       },
+      "required": [
+        "aliasMode"
+      ],
       "additionalProperties": false,
       "description": "Namespace for configuring  {@link  CopyNoteLinkCommand }"
     },

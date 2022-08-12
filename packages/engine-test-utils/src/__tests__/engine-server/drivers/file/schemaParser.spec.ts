@@ -32,7 +32,7 @@ async function parseSchemas(
       const vault = vaults[0];
       const vpath = vault2Path({ vault, wsRoot });
       const schemaFiles = await getAllFiles({
-        root: URI.parse(vpath),
+        root: URI.file(vpath),
         include: ["*.schema.yml"],
       });
       expect(schemaFiles.data).toBeTruthy();

@@ -523,7 +523,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     await fs.ensureDir(newFolder);
     // Move all note files
     const noteFiles = await getAllFiles({
-      root: URI.parse(oldFolder),
+      root: URI.file(oldFolder),
       include: ["*.md"],
     });
     if (!noteFiles.data) {

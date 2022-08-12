@@ -20,7 +20,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
 
         _.values(engine.notes).forEach(async (note) => {
@@ -86,7 +86,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
 
         const newNote = await NoteTestUtilsV4.createNote({
@@ -128,7 +128,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -170,7 +170,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -205,7 +205,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -255,7 +255,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -302,7 +302,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -328,7 +328,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -389,7 +389,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar123",
@@ -449,7 +449,7 @@ describe("GIVEN NoteStore", () => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
           new NoteMetadataStore(),
-          URI.parse(wsRoot)
+          URI.file(wsRoot)
         );
 
         _.values(engine.notes).forEach(async (note) => {

@@ -29,7 +29,7 @@ export class StateValidator {
 
             const vpath = vault2Path({ vault, wsRoot: engine.wsRoot });
             const out = await getAllFiles({
-              root: URI.parse(vpath),
+              root: URI.file(vpath),
               include: ["*.md"],
             });
 

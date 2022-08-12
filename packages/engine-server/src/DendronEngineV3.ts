@@ -157,7 +157,7 @@ export class DendronEngineV3 implements DEngine {
       noteStore: new NoteStore(
         fileStore,
         new NoteMetadataStore(),
-        URI.parse(wsRoot)
+        URI.file(wsRoot)
       ),
       fileStore,
       mode: "fuzzy",
@@ -1028,7 +1028,7 @@ export class DendronEngineV3 implements DEngine {
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: URI.parse(vpath),
+          root: URI.file(vpath),
           include: ["*.md"],
         });
         if (maybeFiles.error) {

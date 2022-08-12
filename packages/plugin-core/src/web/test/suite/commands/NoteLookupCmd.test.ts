@@ -15,7 +15,7 @@ require("mocha/mocha");
 
 suite("GIVEN a NoteLookupCmd", () => {
   test("WHEN the user selects nothing THEN nothing is written to the engine", async () => {
-    const wsRoot = vscode.Uri.parse("tmp");
+    const wsRoot = vscode.Uri.file("tmp");
 
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
@@ -50,7 +50,7 @@ suite("GIVEN a NoteLookupCmd", () => {
   });
 
   test("WHEN the user selects a note THEN that note is opened", async () => {
-    const wsRoot = vscode.Uri.parse("tmp");
+    const wsRoot = vscode.Uri.file("tmp");
 
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
@@ -97,7 +97,7 @@ suite("GIVEN a NoteLookupCmd", () => {
   });
 
   test("WHEN Create New is selected THEN a new note is written", async () => {
-    const wsRoot = vscode.Uri.parse("tmp");
+    const wsRoot = vscode.Uri.file("tmp");
 
     const mockNoteProvider = stubInterface<ILookupProvider>();
 

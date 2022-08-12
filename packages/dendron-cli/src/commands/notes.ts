@@ -2,7 +2,6 @@ import {
   assertUnreachable,
   DendronError,
   DEngineClient,
-  DVault,
   ErrorFactory,
   NoteLookupUtils,
   NoteProps,

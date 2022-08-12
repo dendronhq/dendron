@@ -8,7 +8,7 @@ export type CopyNoteLinkConfig = {
   nonNoteFile?: {
     anchorType?: NonNoteFileLinkAnchorType;
   };
-  aliasMode?: "none" | "alias";
+  aliasMode: "none" | "alias";
 };
 
 export function genDefaultCopyNoteLinkConfig(): CopyNoteLinkConfig {

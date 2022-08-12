@@ -156,6 +156,9 @@ export class CopyNoteLinkCommand
       doEndAnchor: false,
     });
 
+    const { config } = engine;
+    const aliasMode = ConfigUtils.getAliasMode(config);
+
     return {
       link: NoteUtils.createWikiLink({
         note,
@@ -166,7 +169,7 @@ export class CopyNoteLinkCommand
               type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
             },
         useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(engine),
-        alias: { mode: "title" },
+        alias: { mode: aliasMode === "alias" ? "title" : "none" },
       }),
       anchor,
     };

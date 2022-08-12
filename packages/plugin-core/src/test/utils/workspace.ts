@@ -34,7 +34,7 @@ export class WorkspaceTestUtils {
           },
         },
         randomNote: {},
-        copyNoteLink: {},
+        copyNoteLink: { aliasMode: "alias" },
         insertNoteLink: {
           aliasMode: InsertNoteLinkAliasModeEnum.none,
           enableMultiSelect: false,

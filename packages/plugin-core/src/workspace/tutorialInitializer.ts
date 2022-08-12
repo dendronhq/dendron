@@ -192,8 +192,8 @@ export class TutorialInitializer
       skipTreeView: boolean;
     }>;
   }) {
-    const { skipOpts } = opts;
-    if (!skipOpts.skipTreeView) {
+    const skipOpts = opts.skipOpts;
+    if (!skipOpts?.skipTreeView) {
       // for tutorial workspaces,
       // we want the tree view to be focused
       // so that new users can discover the tree view feature.

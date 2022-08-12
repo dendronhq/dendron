@@ -23,7 +23,7 @@ type CommandCLIOpts = {
   query?: string;
   cmd: NoteCommands;
   output?: NoteCLIOutput;
-  fName?: string;
+  fname?: string;
   destFname?: string;
   destVaultName?: string;
   newEngine?: boolean;
@@ -90,17 +90,20 @@ function checkQuery(opts: CommandOpts) {
 }
 
 function checkQueryAndVault(opts: CommandOpts) {
-  const vaults = opts.engine.vaults;
-  let vault: DVault;
   const { query } = checkQuery(opts);
-  if (_.size(opts.engine.vaults) > 1 && !opts.vault) {
+  const vault = checkVault(opts);
+  return { query, vault };
+}
+
+function checkVault(opts: CommandOpts) {
+  const vaults = opts.engine.vaults;
+  if (_.size(vaults) > 1 && !opts.vault) {
     throw Error("need to specify vault");
   } else {
-    vault = opts.vault
+    return opts.vault
       ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
       : vaults[0];
   }
-  return { query, vault };
 }
 
 async function formatNotes({
@@ -190,6 +193,14 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       choices: Object.values(NoteCLIOutput),
       default: NoteCLIOutput.JSON,
     });
+    args.option("fname", {
+      describe: "name of file to find/write",
+      type: "string",
+    });
+    args.option("body", {
+      describe: "body of file to write",
+      type: "string",
+    });
     args.option("destFname", {
       describe: "name to change to (for move)",
       type: "string",
@@ -268,7 +279,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
               })
             : undefined;
           const notes = await engine.findNotes({
-            fname: opts.fName,
+            fname: opts.fname,
             vault: maybeVault,
           });
           const resp = await formatNotes({
@@ -353,13 +364,21 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           };
         }
         case NoteCommands.WRITE: {
-          const { query, vault } = checkQueryAndVault(opts);
-          const notes = await engine.findNotes({ fname: query, vault });
+          if (!opts.fname) {
+            return {
+              error: ErrorFactory.createInvalidStateError({
+                message: `Please specify an fname to write to`,
+              }),
+              data: undefined,
+            };
+          }
+          const vault = checkVault(opts);
+          const notes = await engine.findNotes({ fname: opts.fname, vault });
           let note: NoteProps;
 
           // If note doesn't exist, create new note
           if (notes.length === 0) {
-            note = NoteUtils.create({ fname: query, vault, body });
+            note = NoteUtils.create({ fname: opts.fname, vault, body });
           } else {
             // If note exists, update note body
             const newBody = body || "";

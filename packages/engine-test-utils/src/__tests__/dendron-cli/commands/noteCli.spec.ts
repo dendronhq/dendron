@@ -242,7 +242,7 @@ describe("WHEN run 'dendron note find'", () => {
             wsRoot,
             engine,
             cmd,
-            fName: "gamma",
+            fname: "gamma",
             output: NoteCLIOutput.JSON,
           })) as { data: NoteCommandData };
           expect(data.notesOutput).toEqual([]);
@@ -266,7 +266,7 @@ describe("WHEN run 'dendron note find'", () => {
             wsRoot,
             engine,
             cmd,
-            fName: "foo.ch1",
+            fname: "foo.ch1",
             output: NoteCLIOutput.JSON,
           })) as { data: NoteCommandData };
           expect(_.map(data.notesOutput, (n) => n.fname)).toEqual(["foo.ch1"]);
@@ -288,7 +288,7 @@ describe("WHEN run 'dendron note find'", () => {
             wsRoot,
             engine,
             cmd,
-            fName: "root",
+            fname: "root",
             output: NoteCLIOutput.JSON,
           })) as { data: NoteCommandData };
           expect(_.map(data.notesOutput, (n) => n.fname)).toEqual([
@@ -314,7 +314,7 @@ describe("WHEN run 'dendron note find'", () => {
             wsRoot,
             engine,
             cmd,
-            fName: "root",
+            fname: "root",
             vault: vaults[1].fsPath,
             output: NoteCLIOutput.JSON,
           })) as { data: NoteCommandData };
@@ -551,7 +551,7 @@ describe("WHEN run 'dendron note write", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "newbar",
+            fname: "newbar",
             body: "this is body of newbar",
           });
           const after = await engine.findNotes({ fname: "newbar", vault });
@@ -578,13 +578,38 @@ describe("WHEN run 'dendron note write", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "bar",
+            fname: "bar",
             body: "updateBody",
           });
           const after = (await engine.findNotes({ fname: "bar", vault }))[0];
           expect(after.body).toEqual("updateBody");
           expect(before.fname).toEqual(after.fname);
           expect(before.vault).toEqual(after.vault);
+        },
+        {
+          createEngine: createEngineV3FromEngine,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+
+  describe("WHEN fname is not provided", () => {
+    test("THEN error is returned", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[1];
+          const resp = await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            body: "updateBody",
+          });
+          expect(resp.error?.message).toEqual(
+            "Please specify an fname to write to"
+          );
         },
         {
           createEngine: createEngineV3FromEngine,

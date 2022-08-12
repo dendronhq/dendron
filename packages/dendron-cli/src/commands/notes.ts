@@ -27,6 +27,7 @@ type CommandCLIOpts = {
   destFname?: string;
   destVaultName?: string;
   newEngine?: boolean;
+  body?: string;
 };
 
 export enum NoteCLIOutput {
@@ -73,6 +74,10 @@ export enum NoteCommands {
    * Move a note to another vault, or rename a note within a workspace.
    */
   MOVE = "move",
+  /**
+   * Create or update a note by fname and vault.
+   */
+  WRITE = "write",
 }
 
 export { CommandOpts as NoteCLICommandOpts };
@@ -207,9 +212,12 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine, output, destFname, destVaultName } = _.defaults(opts, {
-      output: NoteCLIOutput.JSON,
-    });
+    const { cmd, engine, output, destFname, destVaultName, body } = _.defaults(
+      opts,
+      {
+        output: NoteCLIOutput.JSON,
+      }
+    );
 
     try {
       switch (cmd) {
@@ -344,6 +352,32 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             } as NoteCommandData,
           };
         }
+        case NoteCommands.WRITE: {
+          const { query, vault } = checkQueryAndVault(opts);
+          const notes = await engine.findNotes({ fname: query, vault });
+          let note: NoteProps;
+
+          // If note doesn't exist, create new note
+          if (notes.length === 0) {
+            note = NoteUtils.create({ fname: query, vault, body });
+          } else {
+            // If note exists, update note body
+            const newBody = body || "";
+            note = { ...notes[0], body: newBody };
+          }
+          const resp = await engine.writeNote(note);
+          if (resp.error) {
+            return {
+              error: ErrorFactory.createInvalidStateError({
+                message: `write failed: ${resp.error.message}`,
+              }),
+              data: undefined,
+            };
+          } else {
+            this.print(`wrote ${note.fname}`);
+            return { data: { payload: note.fname, rawData: resp } };
+          }
+        }
         case NoteCommands.DELETE: {
           const { query, vault } = checkQueryAndVault(opts);
           const note = (
@@ -354,10 +388,24 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           )[0];
           if (note) {
             const resp = await engine.deleteNote(note.id);
-            this.print(`deleted ${note.fname}`);
-            return { data: { payload: note.fname, rawData: resp } };
+            if (resp.error) {
+              return {
+                error: ErrorFactory.createInvalidStateError({
+                  message: `delete failed: ${resp.error.message}`,
+                }),
+                data: undefined,
+              };
+            } else {
+              this.print(`deleted ${note.fname}`);
+              return { data: { payload: note.fname, rawData: resp } };
+            }
           } else {
-            throw new DendronError({ message: `note ${query} not found` });
+            return {
+              error: ErrorFactory.createInvalidStateError({
+                message: `note ${query} not found`,
+              }),
+              data: undefined,
+            };
           }
         }
         case NoteCommands.MOVE: {

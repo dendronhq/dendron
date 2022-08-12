@@ -485,35 +485,6 @@ describe("WHEN run 'dendron note lookup_legacy'", () => {
 
 describe("WHEN run 'dendron note delete", () => {
   const cmd = NoteCommands.DELETE;
-  describe("WHEN lookup note with no vault specified", () => {
-    test("THEN delete note in first available vault", async () => {
-      await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const vault = vaults[0];
-          const before = (
-            await engine.findNotesMeta({ fname: "foo.ch1", vault })
-          )[0];
-          expect(before.fname).toEqual("foo.ch1");
-
-          await runCmd({
-            wsRoot,
-            vault: VaultUtils.getName(vault),
-            engine,
-            cmd,
-            query: "foo.ch1",
-          });
-
-          const after = await engine.findNotesMeta({ fname: "foo.ch1", vault });
-          expect(after.length).toEqual(0);
-        },
-        {
-          createEngine: createEngineV3FromEngine,
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
 
   describe("WHEN specify vault", () => {
     test("delete note in specific vault", async () => {
@@ -533,6 +504,87 @@ describe("WHEN run 'dendron note delete", () => {
           });
           const after = await engine.findNotesMeta({ fname: "bar", vault });
           expect(after.length).toEqual(0);
+        },
+        {
+          createEngine: createEngineV3FromEngine,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+
+  describe("WHEN note doesn't exist", () => {
+    test("THEN error is returned", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[1];
+          const resp = await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "blahblah",
+          });
+          expect(resp.error?.message).toEqual("note blahblah not found");
+        },
+        {
+          createEngine: createEngineV3FromEngine,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+});
+
+describe("WHEN run 'dendron note write", () => {
+  const cmd = NoteCommands.WRITE;
+
+  describe("WHEN specify vault", () => {
+    test("write note in specific vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[1];
+          await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "newbar",
+            body: "this is body of newbar",
+          });
+          const after = await engine.findNotes({ fname: "newbar", vault });
+          expect(after.length).toEqual(1);
+          expect(after[0].body).toEqual("this is body of newbar");
+        },
+        {
+          createEngine: createEngineV3FromEngine,
+          expect,
+          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        }
+      );
+    });
+  });
+
+  describe("WHEN note already exist", () => {
+    test("THEN update note", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const vault = vaults[1];
+          const before = (await engine.findNotes({ fname: "bar", vault }))[0];
+          await runCmd({
+            wsRoot,
+            vault: VaultUtils.getName(vault),
+            engine,
+            cmd,
+            query: "bar",
+            body: "updateBody",
+          });
+          const after = (await engine.findNotes({ fname: "bar", vault }))[0];
+          expect(after.body).toEqual("updateBody");
+          expect(before.fname).toEqual(after.fname);
+          expect(before.vault).toEqual(after.vault);
         },
         {
           createEngine: createEngineV3FromEngine,

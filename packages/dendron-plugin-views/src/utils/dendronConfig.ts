@@ -24,10 +24,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "commands",
   },
-  "commands.lookup.note.fuzzThreshold": {
-    type: "number",
-    group: "commands",
-  },
   "commands.randomNote.include": {
     type: "array",
     group: "commands",
@@ -57,10 +53,6 @@ export const dendronConfig: { [key: string]: Config } = {
   "commands.templateHierarchy": {
     type: "string",
     group: "commands",
-  },
-  "workspace.dendronVersion": {
-    type: "string",
-    group: "workspace",
   },
   "workspace.journal.dailyDomain": {
     type: "string",
@@ -153,23 +145,11 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "object",
     group: "workspace",
   },
-  "workspace.seeds": {
-    type: "object",
-    group: "workspace",
-  },
-  "workspace.workspaces": {
-    type: "object",
-    group: "workspace",
-  },
   "workspace.graph.zoomSpeed": {
     type: "number",
     group: "workspace",
   },
   "workspace.graph.createStub": {
-    type: "boolean",
-    group: "workspace",
-  },
-  "workspace.disableTelemetry": {
     type: "boolean",
     group: "workspace",
   },
@@ -193,22 +173,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "workspace",
   },
-  "workspace.maxPreviewsCached": {
-    type: "number",
-    group: "workspace",
-  },
-  "workspace.maxNoteLength": {
-    type: "number",
-    group: "workspace",
-  },
-  "workspace.feedback": {
-    type: "boolean",
-    group: "workspace",
-  },
-  "workspace.apiEndpoint": {
-    type: "string",
-    group: "workspace",
-  },
   "workspace.enableUserTags": {
     type: "boolean",
     group: "workspace",
@@ -220,11 +184,6 @@ export const dendronConfig: { [key: string]: Config } = {
   "workspace.enableFullHierarchyNoteTitle": {
     type: "boolean",
     group: "workspace",
-  },
-  "workspace.workspaceVaultSyncMode": {
-    group: "workspace",
-    type: "select",
-    enum: ["skip", "noPush", "noCommit", "sync"],
   },
   "workspace.enableSmartRefs": {
     type: "boolean",
@@ -359,10 +318,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "publishing",
   },
-  "publishing.writeStubs": {
-    type: "boolean",
-    group: "publishing",
-  },
   "publishing.seo.title": {
     type: "string",
     group: "publishing",
@@ -412,18 +367,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "string",
     group: "publishing",
   },
-  "publishing.segmentKey": {
-    type: "string",
-    group: "publishing",
-  },
-  "publishing.cognitoUserPoolId": {
-    type: "string",
-    group: "publishing",
-  },
-  "publishing.cognitoClientId": {
-    type: "string",
-    group: "publishing",
-  },
   "publishing.enablePrettyLinks": {
     type: "boolean",
     group: "publishing",
@@ -437,42 +380,13 @@ export const dendronConfig: { [key: string]: Config } = {
     enum: ["dark", "light", "custom"],
     group: "publishing",
   },
-  "publishing.siteBanner": {
-    type: "string",
-    group: "publishing",
-  },
-  "publishing.duplicateNoteBehavior": {
-    type: "object",
-    group: "publishing",
-  },
   "publishing.hierarchy": {
     type: "object",
     group: "publishing",
   },
-  "dev.enablePreviewV2": {
-    type: "boolean",
-    group: "dev",
-  },
-  "dev.nextServerUrl": {
-    type: "string",
-    group: "dev",
-  },
-  "dev.nextStaticRoot": {
-    type: "string",
-    group: "dev",
-  },
-  "dev.engineServerPort": {
-    type: "number",
-    group: "dev",
-  },
   "dev.enableLinkCandidates": {
     type: "boolean",
     group: "dev",
-  },
-  "dev.forceWatcherType": {
-    type: "select",
-    group: "dev",
-    enum: ["plugin", "engine"],
   },
   "dev.enableExportPodV2": {
     type: "boolean",

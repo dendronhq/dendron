@@ -932,7 +932,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
 
   CONFIGURE_UI: {
     key: "dendron.configureUI",
-    title: `${CMD_PREFIX} Configure`,
+    title: `${CMD_PREFIX} Configure (UI)`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONFIGURE_GRAPH_STYLES: {

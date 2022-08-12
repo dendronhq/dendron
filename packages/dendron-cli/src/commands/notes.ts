@@ -86,13 +86,7 @@ function checkQuery(opts: CommandOpts) {
   if (_.isUndefined(opts.query)) {
     throw Error("no query found");
   }
-  return { query: opts.query };
-}
-
-function checkQueryAndVault(opts: CommandOpts) {
-  const { query } = checkQuery(opts);
-  const vault = checkVault(opts);
-  return { query, vault };
+  return opts.query;
 }
 
 function checkVault(opts: CommandOpts) {
@@ -104,6 +98,13 @@ function checkVault(opts: CommandOpts) {
       ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
       : vaults[0];
   }
+}
+
+function checkFname(opts: CommandOpts) {
+  if (_.isUndefined(opts.fname)) {
+    throw Error("no fname found");
+  }
+  return opts.fname;
 }
 
 async function formatNotes({
@@ -233,7 +234,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     try {
       switch (cmd) {
         case NoteCommands.LOOKUP: {
-          const { query } = checkQuery(opts);
+          const query = checkQuery(opts);
           const notes = await NoteLookupUtils.lookup({ qsRaw: query, engine });
           const resp = await formatNotes({
             output,
@@ -248,7 +249,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { data };
         }
         case NoteCommands.GET: {
-          const { query } = checkQuery(opts);
+          const query = checkQuery(opts);
           const note = await engine.getNote(query);
           if (note.data) {
             const resp = await formatNotes({
@@ -295,7 +296,8 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           return { data };
         }
         case NoteCommands.LOOKUP_LEGACY: {
-          const { query, vault } = checkQueryAndVault(opts);
+          const query = checkQuery(opts);
+          const vault = checkVault(opts);
           const notes = await engine.findNotes({ fname: query, vault });
           let note: NoteProps;
 
@@ -364,21 +366,14 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           };
         }
         case NoteCommands.WRITE: {
-          if (!opts.fname) {
-            return {
-              error: ErrorFactory.createInvalidStateError({
-                message: `Please specify an fname to write to`,
-              }),
-              data: undefined,
-            };
-          }
+          const fname = checkFname(opts);
           const vault = checkVault(opts);
-          const notes = await engine.findNotes({ fname: opts.fname, vault });
+          const notes = await engine.findNotes({ fname, vault });
           let note: NoteProps;
 
           // If note doesn't exist, create new note
           if (notes.length === 0) {
-            note = NoteUtils.create({ fname: opts.fname, vault, body });
+            note = NoteUtils.create({ fname, vault, body });
           } else {
             // If note exists, update note body
             const newBody = body || "";
@@ -398,13 +393,9 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
         }
         case NoteCommands.DELETE: {
-          const { query, vault } = checkQueryAndVault(opts);
-          const note = (
-            await engine.findNotes({
-              fname: query,
-              vault,
-            })
-          )[0];
+          const fname = checkFname(opts);
+          const vault = checkVault(opts);
+          const note = (await engine.findNotes({ fname, vault }))[0];
           if (note) {
             const resp = await engine.deleteNote(note.id);
             if (resp.error) {
@@ -421,17 +412,18 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           } else {
             return {
               error: ErrorFactory.createInvalidStateError({
-                message: `note ${query} not found`,
+                message: `note ${fname} not found`,
               }),
               data: undefined,
             };
           }
         }
         case NoteCommands.MOVE: {
-          const { query, vault } = checkQueryAndVault(opts);
+          const fname = checkFname(opts);
+          const vault = checkVault(opts);
           const note = (
             await engine.findNotes({
-              fname: query,
+              fname,
               vault,
             })
           )[0];
@@ -447,20 +439,20 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             });
             const noteExists = (
               await engine.findNotes({
-                fname: destFname || query,
+                fname: destFname || fname,
                 vault: destVault || vault,
               })
             )[0];
             const isStub = noteExists?.stub;
             if (noteExists && !isStub) {
               const vaultName = VaultUtils.getName(noteExists.vault);
-              const errMsg = `${vaultName}/${query} exists`;
+              const errMsg = `${vaultName}/${fname} exists`;
               throw Error(errMsg);
             }
             const resp = await engine.renameNote({ oldLoc, newLoc });
             return { data: { payload: note.fname, rawData: resp } };
           } else {
-            throw new DendronError({ message: `note ${query} not found` });
+            throw new DendronError({ message: `note ${fname} not found` });
           }
         }
         default: {

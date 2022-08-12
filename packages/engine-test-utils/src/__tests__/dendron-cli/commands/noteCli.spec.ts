@@ -500,7 +500,7 @@ describe("WHEN run 'dendron note delete", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "bar",
+            fname: "bar",
           });
           const after = await engine.findNotesMeta({ fname: "bar", vault });
           expect(after.length).toEqual(0);
@@ -524,7 +524,7 @@ describe("WHEN run 'dendron note delete", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "blahblah",
+            fname: "blahblah",
           });
           expect(resp.error?.message).toEqual("note blahblah not found");
         },
@@ -594,31 +594,6 @@ describe("WHEN run 'dendron note write", () => {
       );
     });
   });
-
-  describe("WHEN fname is not provided", () => {
-    test("THEN error is returned", async () => {
-      await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const vault = vaults[1];
-          const resp = await runCmd({
-            wsRoot,
-            vault: VaultUtils.getName(vault),
-            engine,
-            cmd,
-            body: "updateBody",
-          });
-          expect(resp.error?.message).toEqual(
-            "Please specify an fname to write to"
-          );
-        },
-        {
-          createEngine: createEngineV3FromEngine,
-          expect,
-          preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        }
-      );
-    });
-  });
 });
 
 describe("WHEN run 'dendron note move'", () => {
@@ -634,7 +609,7 @@ describe("WHEN run 'dendron note move'", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "foo",
+            fname: "foo",
             destFname: "moved-note",
           });
           expect(
@@ -665,7 +640,7 @@ describe("WHEN run 'dendron note move'", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "bar",
+            fname: "bar",
             destFname: "moved-note",
           });
           expect(
@@ -697,7 +672,7 @@ describe("WHEN run 'dendron note move'", () => {
             vault: VaultUtils.getName(vault),
             engine,
             cmd,
-            query: "bar",
+            fname: "bar",
             destFname: "car",
             destVaultName: VaultUtils.getName(otherVault),
           });

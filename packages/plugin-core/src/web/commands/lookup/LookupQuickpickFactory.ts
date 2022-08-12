@@ -55,9 +55,13 @@ export class LookupQuickpickFactory {
       initialValue,
     });
 
-    const outerPromise = new Promise<LookupAcceptPayload | undefined>(
+    // lookupPromise resolves when ALL input has been accepted or closed (file
+    // name + vault picker prompts for example)
+    const lookupPromise = new Promise<LookupAcceptPayload | undefined>(
       (outerResolve) => {
-        const foo = new Promise<LookupAcceptPayload | undefined>((resolve) => {
+        const onInitialPromptResponse = new Promise<
+          LookupAcceptPayload | undefined
+        >((resolve) => {
           qp.onDidAccept(() => {
             resolve({
               items: qp.selectedItems,
@@ -71,7 +75,7 @@ export class LookupQuickpickFactory {
           });
         });
 
-        foo.then(async (value) => {
+        onInitialPromptResponse.then(async (value) => {
           if (
             value?.items.length === 1 &&
             value.items[0].label === CREATE_NEW_LABEL
@@ -99,7 +103,7 @@ export class LookupQuickpickFactory {
 
     qp.show();
 
-    return outerPromise;
+    return lookupPromise;
   }
 
   create(opts: LookupQuickpickFactoryCreateOpts): QuickPick<NoteQuickInputV2> {

@@ -59,7 +59,9 @@ export class NoteLookupCmd {
           const res = await this.engine.writeNote(newNote);
 
           if (res.error) {
-            vscode.window.showErrorMessage("Failed to write note to engine!");
+            vscode.window.showErrorMessage(
+              `Failed to write note to engine! Error: ${res.error}`
+            );
           }
         }
 

@@ -57,7 +57,6 @@ export class NoteLookupCmd {
           // });
           // note = _.merge(newNote, overrides || {});
           const res = await this.engine.writeNote(newNote);
-          console.log("NoteLookupCmd - Finished Writing Note to Engine");
 
           if (res.error) {
             vscode.window.showErrorMessage("Failed to write note to engine!");
@@ -72,11 +71,7 @@ export class NoteLookupCmd {
           )
         );
 
-        console.log(
-          "NoteLookupCmd - About to issue command to open text document"
-        );
         await vscode.window.showTextDocument(doc);
-        console.log("NoteLookupCmd - Show Text Document Done");
       })
     );
   }

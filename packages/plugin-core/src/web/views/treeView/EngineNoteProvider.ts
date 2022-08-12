@@ -110,8 +110,6 @@ export class EngineNoteProvider
   }
 
   getParent(noteId: string): ProviderResult<string> {
-    console.log(`getParent called on ${noteId}`);
-
     if (this._tree[noteId]) {
       const parentId = this._tree[noteId].note.parent;
 
@@ -129,8 +127,6 @@ export class EngineNoteProvider
   }
 
   getChildren(noteId?: string): ProviderResult<string[]> {
-    console.log(`getChildren called on ${noteId}`);
-
     return new Promise<string[]>((resolve) => {
       if (noteId) {
         // Need to pre-fetch so it's available in the cache immediately upon render request.
@@ -143,9 +139,10 @@ export class EngineNoteProvider
                 labelType: this._treeViewConfig.LabelTypeSetting,
               }).map((metaProps) => metaProps.id);
 
-              return resolve(sortedChildren);
+              resolve(sortedChildren);
             }
           );
+          return;
         }
 
         this.createTreeNote(noteId).then((treeNote) => {
@@ -155,9 +152,11 @@ export class EngineNoteProvider
               labelType: this._treeViewConfig.LabelTypeSetting,
             }).map((metaProps) => metaProps.id);
 
-            return resolve(sortedChildren);
+            resolve(sortedChildren);
           });
         });
+
+        return;
       } else {
         // TODO: Change to findNotesMeta
         this.engine.findNotes({ fname: "root" }).then((values) => {
@@ -179,7 +178,6 @@ export class EngineNoteProvider
   }
 
   getTreeItem(noteProps: string): TreeItem {
-    console.log(`getTreeItem called on ${noteProps}`);
     if (this._tree[noteProps]) {
       return this._tree[noteProps];
     } else {
@@ -200,16 +198,9 @@ export class EngineNoteProvider
     return this._engineEvents.onEngineNoteStateChanged((e) => {
       e.forEach(async (noteChangeEntry) => {
         // TODO: Add Special logic to handle deletes
-        console.log(
-          `NativeTreeView - _onDidChangeTreeDataEmitter firing to update tree for ${noteChangeEntry.note.id} | ${noteChangeEntry.note.fname}`
-        );
 
         this._tree[noteChangeEntry.note.id] =
           await this.createTreeNoteFromProps(noteChangeEntry.note);
-
-        console.log(
-          `onEngineNoteStateChanged firing for ${noteChangeEntry.note.fname}`
-        );
 
         this._onDidChangeTreeDataEmitter.fire(noteChangeEntry.note.id);
       });

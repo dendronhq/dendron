@@ -9,6 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   BacklinkPanelSortOrder,
+  MDUtilsV5,
   MetadataService,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";

@@ -76,7 +76,6 @@ export class DendronEngineV3Web
    * Does not throw error but returns it
    */
   async init(): Promise<RespV2<any>> {
-    // async init(): Promise<DEngineInitResp> {
     try {
       const { data: notes, error: storeError } = await this.initNotesNew(
         this._vaults
@@ -151,9 +150,6 @@ export class DendronEngineV3Web
    */
   async getNote(id: string): Promise<NoteProps | undefined> {
     const resp = await this._noteStore.get(id);
-    console.log(
-      `getNote called on ${id}; resp error is ${resp.error?.message}`
-    );
     return resp.data;
   }
 

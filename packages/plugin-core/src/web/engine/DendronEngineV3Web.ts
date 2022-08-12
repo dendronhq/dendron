@@ -5,7 +5,6 @@ import {
   DEngineDeleteSchemaResp,
   DNodeUtils,
   DVault,
-  DVaultUriVariant,
   EngineDeleteNoteResp,
   EngineEventEmitter,
   EngineWriteOptsV2,
@@ -40,19 +39,21 @@ import { inject, singleton } from "tsyringe";
 import { EventEmitter } from "vscode";
 import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
+import { Utils, URI } from "vscode-uri";
 
 @singleton()
 export class DendronEngineV3Web
   implements IReducedEngineAPIService, EngineEventEmitter
 {
   private fuseEngine: FuseEngine;
-  private _vaults: DVaultUriVariant[];
+  private _vaults: DVault[];
   private _noteStore: INoteStore<string>;
   private _fileStore: IFileStore;
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
 
   constructor(
-    @inject("vaults") vaults: DVaultUriVariant[],
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("vaults") vaults: DVault[],
     @inject("IFileStore") fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
@@ -447,7 +448,7 @@ export class DendronEngineV3Web
   }
 
   private async initNotesNew(
-    vaults: DVaultUriVariant[]
+    vaults: DVault[]
   ): Promise<BulkResp<NotePropsByIdDict>> {
     // const ctx = "DendronEngineV3:initNotes";
     // this.logger.info({ ctx, msg: "enter" });
@@ -459,7 +460,7 @@ export class DendronEngineV3Web
       vaults.map(async (vault) => {
         // Get list of files from filesystem
         const maybeFiles = await this._fileStore.readDir({
-          root: VaultUtils.getRelPathUriVariant(vault),
+          root: Utils.joinPath(this.wsRoot, VaultUtils.getRelPath(vault)),
           include: ["*.md"],
         });
 
@@ -494,10 +495,9 @@ export class DendronEngineV3Web
         //   notesByFname: {},
         // };
 
-        const { data: notesDict, error } = await new NoteParserV2().parseFiles(
-          filteredFiles,
-          vault
-        );
+        const { data: notesDict, error } = await new NoteParserV2(
+          this.wsRoot
+        ).parseFiles(filteredFiles, vault);
         if (error) {
           errors = errors.concat(error?.errors);
         }

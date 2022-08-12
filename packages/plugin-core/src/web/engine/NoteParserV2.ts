@@ -5,7 +5,7 @@ import {
   DendronError,
   DNodeUtils,
   DuplicateNoteError,
-  DVaultUriVariant,
+  DVault,
   ErrorFactory,
   ErrorUtils,
   ERROR_SEVERITY,
@@ -28,7 +28,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode"; // NOTE: This version contains vscode.workspace.fs API references. Need to refactor that out somehow.
-import { Utils, URI } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
 
 // NOTE: THIS FILE IS DUPLICATED IN ENGINE-SERVER. TODO: Refactor and
 // consolidate the two NoteParserV2 versions
@@ -65,6 +65,7 @@ function globMatch(patterns: string[] | string, fname: string): boolean {
 }
 
 export class NoteParserV2 {
+  constructor(private wsRoot: URI) {}
   /**
    * Construct in-memory
    *
@@ -74,7 +75,7 @@ export class NoteParserV2 {
    */
   async parseFiles(
     allPaths: string[],
-    vault: DVaultUriVariant
+    vault: DVault
   ): Promise<BulkResp<NoteDicts>> {
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -237,7 +238,7 @@ export class NoteParserV2 {
     fpath: string;
     noteDicts?: NoteDicts;
     addParent: boolean;
-    vault: DVaultUriVariant;
+    vault: DVault;
   }): Promise<RespV2<NoteChangeEntry[]>> {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
@@ -252,7 +253,7 @@ export class NoteParserV2 {
     try {
       // Get note props from file and propagate any errors
       const { data: note, error } = await this.file2NoteWithCache({
-        uri: Utils.joinPath(VaultUtils.getRelPathUriVariant(vault), fpath),
+        uri: Utils.joinPath(this.wsRoot, VaultUtils.getRelPath(vault), fpath),
         vault,
       });
 
@@ -297,7 +298,7 @@ export class NoteParserV2 {
     vault,
   }: {
     uri: URI;
-    vault: DVaultUriVariant;
+    vault: DVault;
   }): Promise<RespV2<NoteProps>> {
     const raw = await vscode.workspace.fs.readFile(uri);
 

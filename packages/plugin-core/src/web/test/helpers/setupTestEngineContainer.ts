@@ -1,6 +1,5 @@
 import {
   DVault,
-  DVaultUriVariant,
   EngineEventEmitter,
   genUUID,
   IDataStore,
@@ -22,7 +21,7 @@ import { ITreeViewConfig } from "../../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../../views/treeView/TreeViewDummyConfig";
 
 import _ from "lodash";
-import { URI, Utils } from "vscode-uri";
+import { URI } from "vscode-uri";
 import { note2File } from "../../utils/note2File";
 import { WorkspaceHelpers } from "./WorkspaceHelpers";
 
@@ -34,7 +33,7 @@ import { WorkspaceHelpers } from "./WorkspaceHelpers";
 export async function setupTestEngineContainer() {
   const wsRoot = await setupTestFiles();
 
-  const vaults = await getVaults(wsRoot);
+  const vaults = await getVaults();
 
   await setupHierarchyForLookupTests(vaults, wsRoot);
 
@@ -95,9 +94,9 @@ async function setupTestFiles(): Promise<URI> {
   return wsRoot;
 }
 
-async function getVaults(wsRoot: URI): Promise<DVaultUriVariant[]> {
-  const vaults: DVaultUriVariant[] = [
-    { fsPath: "vault1", path: Utils.joinPath(wsRoot, "vault1") },
+async function getVaults(): Promise<DVault[]> {
+  const vaults: DVault[] = [
+    { fsPath: "vault1" },
     // { fsPath: "vault2", path: Utils.joinPath(wsRoot, "vault2") },
     // {
     //   fsPath: "vault3",

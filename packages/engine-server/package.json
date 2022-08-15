@@ -26,10 +26,11 @@
     "clean": "rimraf lib && rimraf coverage",
     "format": "echo nop",
     "lint": "echo stub",
+    "buildPrismaClient": "yarn prisma generate && node copyPrismaClient.js",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
-    "buildCI": "yarn compile",
+    "buildCI": "yarn compile && yarn buildPrismaClient",
     "compile": "tsc -p tsconfig.build.json ",
     "watch": "yarn compile --watch"
   },

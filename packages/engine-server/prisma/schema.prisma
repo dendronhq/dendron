@@ -1,13 +1,14 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["darwin-arm64", "darwin"]
-  // output = "./generated"
   output = "./../src/generated-prisma-client"
 }
 
 datasource db {
   provider = "sqlite"
+  // this value is filled in dynamically when starting a workspace
   url      = ""
+  // uncomment the below when testing
   // url      = "file:./dev.db"
 }
 

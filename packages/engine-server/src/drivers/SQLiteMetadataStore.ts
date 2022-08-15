@@ -29,7 +29,7 @@ export class SQLiteMetadataStore {
         "SQLiteMetadataStore constructor should only be called once"
       );
     }
-    // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db"""
+    // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
     _prisma = new PrismaClient({
       datasources: {
         db: {
@@ -47,6 +47,9 @@ export class SQLiteMetadataStore {
     return resp.length === 1;
   }
 
+  /**
+   * Check if this vault is initialized in sqlite
+   */
   static async isVaultInitialized(vault: DVault): Promise<boolean> {
     // valid result: [ { name: "notes", }, ]
     const resp = await getPrismaClient().vaultMetadata.findFirst({
@@ -144,6 +147,10 @@ export class SQLiteMetadataStore {
   }
 }
 
+/**
+ * Transform queries for sqlite syntax. All queries become prefix queries.
+ * So "foo bar" becomes "foo* bar*"
+ */
 function transformQuery(query: string): string[] {
   return query.split(" ").map((ent) => `"${ent}"*`);
 }

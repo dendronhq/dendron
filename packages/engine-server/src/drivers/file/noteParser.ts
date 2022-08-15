@@ -277,11 +277,11 @@ export class NoteParser extends ParserBase {
     this.logger.info({ ctx, msg: "post:matchSchemas" });
     if (
       opts?.useSQLiteMetadataStore &&
-      // TODO
       !(await SQLiteMetadataStore.isVaultInitialized(vault))
     ) {
       this.logger.info({ ctx, msg: "initialize metadata" });
       try {
+        // if vault is not initialized, bulk insert all note metadata into sqlite
         await SQLiteMetadataStore.bulkInsertAllNotesAndUpdateVaultMetadata({
           notesIdDict: notesById,
           vault,

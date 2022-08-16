@@ -1155,7 +1155,7 @@ export class ConfigUtils {
 
   static setAliasMode(
     config: IntermediateDendronConfig,
-    aliasMode: "alias" | "non"
+    aliasMode: "title" | "non"
   ) {
     _.set(config, "commands.copyNoteLink.aliasMode", aliasMode);
   }

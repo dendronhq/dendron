@@ -169,7 +169,7 @@ export class CopyNoteLinkCommand
               type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
             },
         useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(engine),
-        alias: { mode: aliasMode === "alias" ? "title" : "none" },
+        alias: { mode: aliasMode },
       }),
       anchor,
     };

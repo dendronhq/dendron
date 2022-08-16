@@ -1744,11 +1744,15 @@ export class SchemaUtils {
     const match = _.find(schemas, (sc) => {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
-        // if we are matching a namespace node,
-        // match on the level of the node itself and its immediate children.
         namespace = true;
+        // current note is at the level of the namespace node.
+        // the glob pattern accounts for its immediate children (/*/*),
+        // so in order to match the current note, we should slice off
+        // the last bit of the glob pattern (/*)
         return minimatch(notePathClean, pattern.slice(0, -2));
       } else {
+        // we are either trying to match the immediate child of a namespace node,
+        // or match a non-namespace regular schema. use the pattern as-is
         return minimatch(notePathClean, pattern);
       }
     });

@@ -2,6 +2,7 @@ import {
   ConfirmStatus,
   DendronError,
   DNodeUtils,
+  EngineEventEmitter,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
@@ -9,7 +10,7 @@ import {
   TreeViewEvents,
   TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter, MetadataService } from "@dendronhq/engine-server";
+import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import * as vscode from "vscode";

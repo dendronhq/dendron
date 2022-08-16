@@ -56,13 +56,13 @@ import {
   UpdateNoteResp,
   RespV3,
   ERROR_STATUS,
+  EngineEventEmitter,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { EngineEventEmitter } from "./EngineEventEmitter";
 import { HistoryService } from "./history";
 import { EngineUtils } from "./utils";
 

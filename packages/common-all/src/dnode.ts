@@ -279,7 +279,7 @@ export class DNodeUtils {
     return children;
   }
 
-  static isRoot(note: DNodeProps) {
+  static isRoot(note: NotePropsMeta) {
     return note.fname === "root";
   }
 

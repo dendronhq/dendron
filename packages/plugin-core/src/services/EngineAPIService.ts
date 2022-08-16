@@ -12,6 +12,7 @@ import {
   EngagementEvents,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
+  EngineEventEmitter,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -45,11 +46,7 @@ import {
   SchemaModuleProps,
   UpdateNoteResp,
 } from "@dendronhq/common-all";
-import {
-  DendronEngineClient,
-  EngineEventEmitter,
-  HistoryService,
-} from "@dendronhq/engine-server";
+import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";

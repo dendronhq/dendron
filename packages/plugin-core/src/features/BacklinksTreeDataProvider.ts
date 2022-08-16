@@ -1,18 +1,16 @@
 import {
   assertUnreachable,
+  BacklinkPanelSortOrder,
   DateFormatUtil,
   DendronASTDest,
+  EngineEventEmitter,
   NoteUtils,
   ProcFlavor,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import {
-  BacklinkPanelSortOrder,
-  EngineEventEmitter,
-  MDUtilsV5,
-  MetadataService,
-} from "@dendronhq/engine-server";
+import { MDUtilsV5, MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
+import fs from "fs";
 import _, { Dictionary } from "lodash";
 import path from "path";
 import {
@@ -36,7 +34,6 @@ import { findReferencesById, FoundRefT, sortPaths } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { Backlink, BacklinkTreeItemType } from "./Backlink";
-import fs from "fs";
 
 /**
  * Provides the data to support the backlinks tree view panel

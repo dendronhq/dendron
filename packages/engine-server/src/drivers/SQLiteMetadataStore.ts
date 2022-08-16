@@ -1,12 +1,13 @@
 import {
   asyncLoopOneAtATime,
   DVault,
+  NoteProps,
   NotePropsByIdDict,
   VaultUtils,
 } from "@dendronhq/common-all";
+import fs from "fs-extra";
 import _ from "lodash";
 import { PrismaClient } from "../generated-prisma-client";
-import fs from "fs-extra";
 
 let _prisma: PrismaClient | undefined;
 
@@ -20,14 +21,19 @@ function getPrismaClient(): PrismaClient {
 export type NoteIndexLightProps = {
   fname: string;
   id: string;
+  foo: string;
 };
 
 export class SQLiteMetadataStore {
-  constructor({ wsRoot }: { wsRoot: string }) {
+  constructor({ wsRoot, client }: { wsRoot: string; client?: PrismaClient }) {
     if (_prisma) {
       throw new Error(
         "SQLiteMetadataStore constructor should only be called once"
       );
+    }
+    if (client) {
+      _prisma = client;
+      return;
     }
     // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
     _prisma = new PrismaClient({
@@ -37,6 +43,10 @@ export class SQLiteMetadataStore {
         },
       },
     });
+  }
+
+  static prisma() {
+    return getPrismaClient();
   }
 
   static async isDBInitialized() {
@@ -95,6 +105,11 @@ export class SQLiteMetadataStore {
     return asyncLoopOneAtATime<string>(queries, async (_query) => {
       return getPrismaClient().$queryRawUnsafe(_query);
     });
+  }
+
+  static async upsertNote(_note: NoteProps) {
+    // TODO: will be used to fill cache misses
+    throw Error("not impelmented");
   }
 
   static async bulkInsertAllNotesAndUpdateVaultMetadata({

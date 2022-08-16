@@ -264,7 +264,7 @@ suite("CopyNoteLink", function () {
     {
       postSetupHook: ENGINE_HOOKS.setupBasic,
       modConfigCb: (config) => {
-        ConfigUtils.setAliasMode(config, "non");
+        ConfigUtils.setAliasMode(config, "none");
         return config;
       },
     },

@@ -1,5 +1,5 @@
 import {
-  asyncLoopOneAtATime,
+  asyncLoop,
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
@@ -24,6 +24,7 @@ import { BasicCommand, SanityCheckResults } from "./base";
 import * as vscode from "vscode";
 import _ from "lodash";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { VSCodeUtils } from "../vsCodeUtils";
 
 type CommandInput = {
   source?: string;
@@ -203,7 +204,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // append to end
     const destBody = destNote.body;
-    const newBody = `${destBody}\n\n${appendPayload}`;
+    const newBody = `${destBody}\n---\n\n# ${sourceNote.title}\n\n${appendPayload}`;
     destNote.body = newBody;
     const writeResp = await this.extension.getEngine().writeNote(destNote);
     if (!writeResp.error) {
@@ -233,7 +234,6 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const linksToUpdate = noteToUpdate.links.filter(
         (link) => link.value === sourceNote.fname
       );
-      const noteToUpdateDeepCopy = _.cloneDeep(noteToUpdate);
       const modifiedNote = await _.reduce<
         typeof linksToUpdate[0],
         Promise<NoteProps>
@@ -271,7 +271,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           acc.body = newBody;
           return acc;
         },
-        Promise.resolve(noteToUpdateDeepCopy)
+        Promise.resolve(noteToUpdate)
       );
 
       noteToUpdate.body = modifiedNote.body;
@@ -327,7 +327,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // find all links that need to be updated from end to front.
     // then update them.
     let noteChangeEntries: NoteChangeEntry[] = [];
-    await asyncLoopOneAtATime(noteIDsToUpdate, async (id) => {
+    await asyncLoop(noteIDsToUpdate, async (id) => {
       try {
         const changed = await this.updateLinkInNote({
           sourceNote,
@@ -399,6 +399,9 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       ...updateBacklinksChanges,
       ...deleteSourceChanges,
     ];
+
+    // close the source note
+    await VSCodeUtils.closeCurrentFileEditor();
 
     // open the destination note
     await this.extension.wsUtils.openNote(destNote);

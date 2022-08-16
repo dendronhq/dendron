@@ -48,7 +48,9 @@ suite("MergeNote", function () {
           const postRunDest = await engine.getNote("dest");
           expect(postRunSource).toBeFalsy();
           expect(postRunDest).toBeTruthy();
-          expect(postRunDest?.body).toEqual("Dest body\n\n\nSource body\n");
+          expect(postRunDest?.body).toEqual(
+            "Dest body\n\n---\n\n# Source\n\nSource body\n"
+          );
 
           expect(runOut?.changed.length).toEqual(3);
           expect(runOut?.changed.map((change) => change.status)).toEqual([
@@ -110,7 +112,9 @@ suite("MergeNote", function () {
           const postRunRef = await engine.getNote("ref");
           expect(postRunSource).toBeFalsy();
           expect(postRunDest).toBeTruthy();
-          expect(postRunDest?.body).toEqual("Dest body\n\n\nSource body\n");
+          expect(postRunDest?.body).toEqual(
+            "Dest body\n\n---\n\n# Source\n\nSource body\n"
+          );
           expect(postRunRef?.body).toEqual(
             "[[dest]]\n[[dendron://vault1/dest]]\n![[dest]]\n![[dendron://vault1/dest]]"
           );

@@ -12,8 +12,6 @@ commands:
             bubbleUpCreateNew: true
             vaultSelectionModeOnCreate: smart
             fuzzThreshold: 0.2
-    insertNote:
-        initialValue: templates
     insertNoteLink:
         aliasMode: none
         enableMultiSelect: false
@@ -84,6 +82,7 @@ workspace:
     enableEditorDecorations: true
     enableFullHierarchyNoteTitle: false
     enableSmartRefs: false
+    enableHandlebarTemplates: true
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true

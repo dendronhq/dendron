@@ -42,9 +42,10 @@ export const EDITOR_VIEWS: Record<DendronEditorViewKey, DendronViewEntry> = {
     type: "webview",
   },
   [DendronEditorViewKey.CONFIGURE]: {
-    desc: "TODO",
-    label: "TODO",
-    type: "nativeview",
+    desc: "Dendron Configuration",
+    label: "Dendron Configuration",
+    bundleName: "DendronConfigure",
+    type: "webview",
   },
   [DendronEditorViewKey.NOTE_GRAPH]: {
     desc: "Note Graph",

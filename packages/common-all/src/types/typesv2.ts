@@ -895,6 +895,11 @@ export enum SeedBrowserMessageType {
   "onSeedStateChange" = "onSeedStateChange",
 }
 
+export enum ConfigureUIMessageEnum {
+  "onUpdateConfig" = "onUpdateConfig",
+  "openDendronConfigYaml" = "openDendronConfigYaml",
+}
+
 export enum GraphThemeEnum {
   Block = "Block",
   Classic = "Classic",
@@ -929,6 +934,8 @@ export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
 
 export type GraphViewMessageType = DMessageEnum | GraphViewMessageEnum;
 
+export type ConfigureUIMessageType = DMessageEnum | ConfigureUIMessageEnum;
+
 /** @deprecated: Tree view v2 is deprecated */
 export type TreeViewMessageType = DMessageEnum | TreeViewMessageEnum;
 
@@ -946,6 +953,13 @@ export type GraphViewMessage = DMessage<
     graphTheme?: GraphThemeEnum;
     graphType?: GraphTypeEnum;
     graphDepth?: number;
+  }
+>;
+
+export type ConfigureUIMessage = DMessage<
+  ConfigureUIMessageType,
+  {
+    config: IntermediateDendronConfig;
   }
 >;
 

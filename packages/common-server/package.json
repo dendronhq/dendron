@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.107.0",
+  "version": "0.108.0",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {
@@ -35,7 +35,7 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.107.0",
+    "@dendronhq/common-all": "^0.108.0",
     "@sentry/integrations": "^6.13.3",
     "@sentry/node": "^6.13.3",
     "ajv": "^8.6.0",

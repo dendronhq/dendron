@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.108.0 (2022-08-16)
+
+
+### Bug Fixes
+
+* **views:** remove semicolon from preview ([#3383](https://github.com/dendronhq/dendron/issues/3383)) ([cd010cf](https://github.com/dendronhq/dendron/commit/cd010cf506613ec254c49383460be23e252f7842))
+
+
+
+
+
 # 0.107.0 (2022-08-09)
 
 

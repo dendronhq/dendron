@@ -369,14 +369,17 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           const vault = checkVault(opts);
           const notes = await engine.findNotes({ fname, vault });
           let note: NoteProps;
+          let status: string;
 
           // If note doesn't exist, create new note
           if (notes.length === 0) {
             note = NoteUtils.create({ fname, vault, body });
+            status = "CREATE";
           } else {
             // If note exists, update note body
             const newBody = body || "";
             note = { ...notes[0], body: newBody };
+            status = "UPDATE";
           }
           const resp = await engine.writeNote(note);
           if (resp.error) {
@@ -388,7 +391,9 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             };
           } else {
             this.print(`wrote ${note.fname}`);
-            return { data: { payload: note.fname, rawData: resp } };
+            return {
+              data: { payload: note.fname, rawData: resp, status },
+            };
           }
         }
         case NoteCommands.DELETE: {

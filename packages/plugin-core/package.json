@@ -297,6 +297,10 @@
         "title": "Dendron: Create Scratch Note"
       },
       {
+        "command": "dendron.createNote",
+        "title": "Dendron: Create Note"
+      },
+      {
         "command": "dendron.createMeetingNote",
         "title": "Dendron: Create Meeting Note"
       },
@@ -698,6 +702,10 @@
         },
         {
           "command": "dendron.createScratchNote",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.createNote",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

@@ -6,7 +6,7 @@ import { ApplyTemplateCommand } from "../../commands/ApplyTemplateCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
-import { describeMultiWS } from "../testUtilsV3";
+import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 
 // these tests can run longer than the default 2s timeout;
 const timeout = 5e3;
@@ -139,6 +139,44 @@ suite("ApplyTemplate", function () {
           await AssertUtils.assertInString({
             body,
             match: ["hello john"],
+          })
+        ).toBeTruthy();
+      });
+    }
+  );
+
+  describeSingleWS(
+    "WHEN the target note already contains a template variable in the frontmatter",
+    {},
+    () => {
+      test("THEN the existing variable value in the target note should be used", async () => {
+        const ext = ExtensionProvider.getExtension();
+        const engine = ext.getEngine();
+        const vault = engine.vaults[0];
+        const wsRoot = engine.wsRoot;
+
+        const targetNote = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault,
+          fname: "target-note",
+          custom: { foo: "original value" },
+        });
+
+        const templateNote = await createTemplateNote({
+          body: "{{ fm.foo }}",
+          custom: { foo: "template value" },
+        });
+
+        const { body, updatedTargetNote } = await runTemplateTest({
+          targetNote,
+          templateNote,
+        });
+
+        expect(updatedTargetNote.custom?.foo).toEqual("original value");
+        expect(
+          await AssertUtils.assertInString({
+            body,
+            match: ["original value"],
           })
         ).toBeTruthy();
       });

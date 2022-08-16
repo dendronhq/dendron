@@ -29,8 +29,7 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink:
-        aliasMode: alias
+    copyNoteLink: {}
     templateHierarchy: template
 workspace:
     vaults:
@@ -184,8 +183,7 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink:
-        aliasMode: alias
+    copyNoteLink: {}
     templateHierarchy: template
 workspace:
     vaults:
@@ -340,8 +338,7 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink:
-        aliasMode: alias
+    copyNoteLink: {}
     templateHierarchy: template
 workspace:
     vaults: []
@@ -450,8 +447,7 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink:
-        aliasMode: alias
+    copyNoteLink: {}
     templateHierarchy: template
 workspace:
     vaults:
@@ -579,8 +575,7 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink:
-        aliasMode: alias
+    copyNoteLink: {}
     templateHierarchy: template
 workspace:
     vaults:

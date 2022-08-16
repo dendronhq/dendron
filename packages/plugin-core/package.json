@@ -515,7 +515,7 @@
       },
       {
         "command": "dendron.configureUI",
-        "title": "Dendron: Configure"
+        "title": "Dendron: Configure (UI)"
       },
       {
         "command": "dendron.configureGraphStyle",

@@ -10,10 +10,10 @@ import {
   VSCodeEvents,
   WorkspaceSettings,
   WorkspaceType,
+  BacklinkPanelSortOrder,
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
-  BacklinkPanelSortOrder,
   HistoryService,
   WorkspaceService,
   WorkspaceUtils,

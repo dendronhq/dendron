@@ -1,4 +1,4 @@
-import { Disposable, Event, NoteChangeEntry } from "@dendronhq/common-all";
+import { Disposable, Event, NoteChangeEntry } from "../types";
 
 /**
  * Interface providing events signaling changes that have been made to engine

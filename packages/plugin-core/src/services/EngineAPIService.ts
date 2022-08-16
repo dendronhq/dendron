@@ -12,6 +12,7 @@ import {
   EngagementEvents,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
+  EngineEventEmitter,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -40,15 +41,12 @@ import {
   RenderNoteOpts,
   RenderNotePayload,
   RespV2,
+  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   UpdateNoteResp,
 } from "@dendronhq/common-all";
-import {
-  DendronEngineClient,
-  EngineEventEmitter,
-  HistoryService,
-} from "@dendronhq/engine-server";
+import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { AnalyticsUtils } from "../utils/analytics";
 import { IEngineAPIService } from "./EngineAPIServiceInterface";
@@ -202,7 +200,7 @@ export class EngineAPIService
   /**
    * See {@link IEngineAPIService.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
     return this._internalEngine.getNote(id);
   }
 
@@ -284,7 +282,7 @@ export class EngineAPIService
     return this._internalEngine.sync(opts);
   }
 
-  getSchema(qs: string): Promise<RespV2<SchemaModuleProps>> {
+  getSchema(qs: string): Promise<RespV3<SchemaModuleProps>> {
     return this._internalEngine.getSchema(qs);
   }
 

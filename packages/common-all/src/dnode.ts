@@ -1,6 +1,7 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
 import matter from "gray-matter";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -278,7 +279,7 @@ export class DNodeUtils {
     return children;
   }
 
-  static isRoot(note: DNodeProps) {
+  static isRoot(note: NotePropsMeta) {
     return note.fname === "root";
   }
 
@@ -1485,71 +1486,6 @@ export class SchemaUtils {
     return path.join(root, fname + ".schema.yml");
   }
 
-  static getFullPath({
-    schema,
-    wsRoot,
-  }: {
-    schema: SchemaModuleProps;
-    wsRoot: string;
-  }): string {
-    try {
-      const fpath = DNodeUtils.getFullPath({
-        wsRoot,
-        vault: schema.vault,
-        basename: schema.fname + ".schema.yml",
-      });
-      return fpath;
-    } catch (err) {
-      throw new DendronError({
-        message: "bad path",
-        payload: { schema, wsRoot },
-      });
-    }
-  }
-
-  static getURI({
-    schema,
-    wsRoot,
-  }: {
-    schema: SchemaModuleProps;
-    wsRoot: string;
-  }): URI {
-    return URI.file(this.getFullPath({ schema, wsRoot }));
-  }
-
-  /**
-   @deprecated
-   */
-  static getSchemaModuleByFnameV4({
-    fname,
-    schemas,
-    wsRoot,
-    vault,
-  }: {
-    fname: string;
-    schemas: SchemaModuleDict | SchemaModuleProps[];
-    wsRoot: string;
-    vault: DVault;
-  }): SchemaModuleProps | undefined {
-    if (!_.isArray(schemas)) {
-      schemas = _.values(schemas);
-    }
-    const out = _.find(schemas, (ent) => {
-      if (ent.fname.toLowerCase() !== fname.toLowerCase()) {
-        return false;
-      }
-      if (vault) {
-        return VaultUtils.isEqual(vault, ent.vault, wsRoot);
-      }
-      return true;
-    });
-    return out;
-  }
-
-  static getSchema({ engine, id }: { engine: DEngineClient; id: string }) {
-    return engine.schemas[id];
-  }
-
   static doesSchemaExist({
     id,
     engine,
@@ -1682,6 +1618,32 @@ export class SchemaUtils {
   }
 
   /**
+   * Find proper schema from schema module that can be applied to note
+   */
+  static findSchemaFromModule(opts: {
+    notePath: string;
+    schemaModule: SchemaModuleProps;
+  }): SchemaMatchResult | undefined {
+    const { notePath, schemaModule } = opts;
+    const domainName = DNodeUtils.domainName(notePath);
+    const domainSchema = schemaModule.schemas[schemaModule.root.id];
+    if (domainName.length === notePath.length) {
+      return {
+        schema: domainSchema,
+        notePath,
+        namespace: domainSchema.data.namespace || false,
+        schemaModule,
+      };
+    }
+    return SchemaUtils.matchPathWithSchema({
+      notePath,
+      matched: "",
+      schemaCandidates: [domainSchema],
+      schemaModule,
+    });
+  }
+
+  /**
    *
    * @param param0
    * @return
@@ -1803,6 +1765,22 @@ export class SchemaUtils {
 
   static isSchemaUri(uri: URI) {
     return uri.fsPath.endsWith(".schema.yml");
+  }
+
+  static serializeModuleProps(moduleProps: SchemaModuleProps) {
+    const { version, imports, schemas } = moduleProps;
+    // TODO: filter out imported schemas
+    const out: any = {
+      version,
+      imports: [],
+      schemas: _.values(schemas).map((ent) =>
+        SchemaUtils.serializeSchemaProps(ent)
+      ),
+    };
+    if (imports) {
+      out.imports = imports;
+    }
+    return YAML.dump(out, { schema: JSON_SCHEMA });
   }
 
   // /**

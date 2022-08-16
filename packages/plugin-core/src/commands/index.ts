@@ -9,7 +9,6 @@ import { ConfigureLocalOverride } from "./ConfigureLocalOverride";
 import { ConfigureGraphStylesCommand } from "./ConfigureGraphStyles";
 import { ConfigureNoteTraitsCommand } from "./ConfigureNoteTraitsCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
-import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { ContributeCommand } from "./Contribute";
 import { ConvertCandidateLinkCommand } from "./ConvertCandidateLink";
 import { ConvertLinkCommand } from "./ConvertLink";
@@ -156,7 +155,6 @@ const ALL_COMMANDS = [
   SnapshotVaultCommand,
   SyncCommand,
   ApplyTemplateCommand,
-  ConfigureWithUICommand,
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,

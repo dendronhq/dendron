@@ -26,10 +26,12 @@ const SCHEMAS = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const schemaId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
+      const beforeSchema = (await engine.getSchema(schemaId)).data!;
       await engine.deleteSchema(schemaId);
+      const afterSchema = (await engine.getSchema(schemaId)).data!;
       return [
-        { actual: _.size(engine.schemas), expected: 1 },
-        { actual: engine.schemas[schemaId], expected: undefined },
+        { actual: _.size(beforeSchema.schemas), expected: 2 },
+        { actual: afterSchema, expected: undefined },
         {
           actual: await FileTestUtils.assertInVault({
             vault,

@@ -29,6 +29,7 @@ export * from "./abTests";
 export * from "./noteDictsUtils";
 export * from "./StatisticsUtils";
 export * from "./store";
+export * from "./engine";
 export * from "./drivers";
 export { axios, AxiosError };
 export { DateTime };

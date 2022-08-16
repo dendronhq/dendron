@@ -3,13 +3,13 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   GetAllFilesOpts,
+  globMatch,
   IFileStore,
   isNotNull,
   RespV2,
   RespV3,
   URI,
 } from "@dendronhq/common-all";
-//import { globMatch } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
 
@@ -127,23 +127,21 @@ export async function getAllFilesWithTypes(opts: GetAllFilesOpts) {
     return {
       data: allFiles
         .map((values) => {
-          // TODO: Finish the exclude/include filters implementation:
-
           // match exclusions
-          //const fname = values[0];
-          //const fileType = values[1];
-          // if (
-          //   _.some([
-          //     fileType === vscode.FileType.Directory,
-          //     globMatch(opts.exclude || [], fname),
-          //   ])
-          // ) {
-          //   return null;
-          // }
-          // // match inclusion
-          // if (opts.include && !globMatch(opts.include, fname)) {
-          //   return null;
-          // }
+          const fname = values[0];
+          const fileType = values[1];
+          if (
+            _.some([
+              fileType === vscode.FileType.Directory,
+              globMatch(opts.exclude || [], fname),
+            ])
+          ) {
+            return null;
+          }
+          // match inclusion
+          if (opts.include && !globMatch(opts.include, fname)) {
+            return null;
+          }
           return values;
         })
         .filter(isNotNull),

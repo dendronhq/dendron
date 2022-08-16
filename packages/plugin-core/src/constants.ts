@@ -1,11 +1,11 @@
 import {
+  BacklinkPanelSortOrder,
   DendronTreeViewKey,
   DENDRON_VSCODE_CONFIG_KEYS,
   isWebViewEntry,
   TreeViewItemLabelTypeEnum,
   TREE_VIEWS,
 } from "@dendronhq/common-all";
-import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
 import { CodeConfigKeys } from "./types";
 
 export const extensionQualifiedId = `dendron.dendron`;
@@ -932,7 +932,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
 
   CONFIGURE_UI: {
     key: "dendron.configureUI",
-    title: `${CMD_PREFIX} Configure`,
+    title: `${CMD_PREFIX} Configure (UI)`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CONFIGURE_GRAPH_STYLES: {

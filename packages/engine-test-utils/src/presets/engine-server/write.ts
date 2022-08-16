@@ -26,20 +26,17 @@ const SCHEMAS = {
   ADD_NEW_SCHEMA: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const schemaModId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
-      const module = engine.schemas[schemaModId];
+      const module = (await engine.getSchema(schemaModId)).data!;
       const vault = vaults[0];
       const schema = SchemaUtils.createFromSchemaRaw({ id: "ch2", vault });
       DNodeUtils.addChild(module.root, schema);
       module.schemas[schema.id] = schema;
-      await engine.updateSchema(module);
+      await engine.writeSchema(module, { metaOnly: true });
       const resp = await engine.querySchema("*");
+      const fooSchema = (await engine.getSchema("foo")).data!;
       return [
         {
-          actual: _.values(engine.schemas).length,
-          expected: 2,
-        },
-        {
-          actual: _.values(engine.schemas["foo"].schemas).length,
+          actual: _.values(fooSchema.schemas).length,
           expected: 3,
         },
         {
@@ -63,14 +60,11 @@ const SCHEMAS = {
           noWrite: true,
         });
       await engine.writeSchema(schemaModNew);
+      const schema = (await engine.getSchema("bar")).data!;
 
       return [
         {
-          actual: _.values(engine.schemas).length,
-          expected: 3,
-        },
-        {
-          actual: _.values(engine.schemas["bar"].schemas).length,
+          actual: _.values(schema.schemas).length,
           expected: 1,
         },
       ];
@@ -88,18 +82,16 @@ const SCHEMAS = {
         noWrite: true,
       });
       await engine.writeSchema(schemaModNew);
+      const fooSchema = (await engine.getSchema("bar")).data!;
+      const barSchema = (await engine.getSchema("bar")).data!;
 
       return [
         {
-          actual: _.values(engine.schemas).length,
-          expected: 3,
-        },
-        {
-          actual: _.values(engine.schemas["foo"].schemas).length,
+          actual: _.values(fooSchema.schemas).length,
           expected: 2,
         },
         {
-          actual: _.values(engine.schemas["bar"].schemas).length,
+          actual: _.values(barSchema.schemas).length,
           expected: 2,
         },
       ];
@@ -318,12 +310,12 @@ const NOTES = {
     return [
       {
         actual: note,
-        expected: await engine.getNote(note.id),
+        expected: (await engine.getNote(note.id)).data,
         msg: "bar should be written in engine",
       },
       {
         actual: DNodeUtils.isRoot(
-          (await engine.getNote(note.parent as string))!
+          (await engine.getNote(note.parent as string)).data!
         ),
         expected: true,
       },
@@ -369,6 +361,66 @@ const NOTES = {
             DNodeUtils.addChild(schema.root, schema.schemas["ch1"]);
             return schema;
           },
+        });
+      },
+    }
+  ),
+  MATCH_SCHEMA_UPDATE_NOTE: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const updatedNote = (
+        await engine.findNotes({
+          fname: "foo.ch1",
+          vault,
+        })
+      )[0];
+      updatedNote.body = "new body";
+      // Note already exists, make sure schema is the same
+      await engine.writeNote(updatedNote);
+
+      return [
+        {
+          actual: (
+            await engine.findNotes({
+              fname: "foo.ch1",
+              vault,
+            })
+          )[0].schema,
+          expected: {
+            moduleId: "foo",
+            schemaId: "ch1",
+          },
+        },
+        {
+          actual: (
+            await engine.findNotes({
+              fname: "foo.ch1",
+              vault,
+            })
+          )[0].body,
+          expected: "new body",
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createSchema({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+          modifier: (schema) => {
+            schema.schemas["ch1"] = SchemaUtils.createFromSchemaRaw({
+              id: "ch1",
+              vault: vaults[0],
+            });
+            DNodeUtils.addChild(schema.root, schema.schemas["ch1"]);
+            return schema;
+          },
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo.ch1",
+          vault: vaults[0],
+          wsRoot,
         });
       },
     }
@@ -611,12 +663,12 @@ const NOTES_MULTI = {
     return [
       {
         actual: note,
-        expected: await engine.getNote(note.id),
+        expected: (await engine.getNote(note.id)).data,
         msg: "bar should be written in engine",
       },
       {
         actual: DNodeUtils.isRoot(
-          (await engine.getNote(note.parent as string))!
+          (await engine.getNote(note.parent as string)).data!
         ),
         expected: true,
       },
@@ -645,12 +697,12 @@ const NOTES_MULTI = {
       return [
         {
           actual: note,
-          expected: await engine.getNote(note.id),
+          expected: (await engine.getNote(note.id)).data,
           msg: "bar should be written in engine",
         },
         {
           actual: DNodeUtils.isRoot(
-            (await engine.getNote(note.parent as string))!
+            (await engine.getNote(note.parent as string)).data!
           ),
           expected: true,
         },
@@ -659,15 +711,15 @@ const NOTES_MULTI = {
   ),
   ID_UPDATED: new TestPresetEntryV4(
     async ({ engine }) => {
-      const fooNote = await engine.getNote("foo");
+      const fooNote = (await engine.getNote("foo")).data;
       const fooUpdated = { ...fooNote! };
       fooUpdated.id = "updatedID";
       const changes = await engine.writeNote(fooUpdated, {
         overrideExisting: true,
       });
 
-      const deletedFooNote = await engine.getNote("foo");
-      const newFooNote = await engine.getNote("updatedID");
+      const deletedFooNote = (await engine.getNote("foo")).data;
+      const newFooNote = (await engine.getNote("updatedID")).data;
       const createEntries = extractNoteChangeEntriesByType(
         changes.data!,
         "create"
@@ -753,7 +805,7 @@ const NOTES_MULTI = {
   ),
   BODY_UPDATED: new TestPresetEntryV4(
     async ({ engine }) => {
-      const fooNote = await engine.getNote("foo");
+      const fooNote = (await engine.getNote("foo")).data;
       const fooUpdated = { ...fooNote! };
       fooUpdated.body = "updatedBody";
       const changes = await engine.writeNote(fooUpdated);

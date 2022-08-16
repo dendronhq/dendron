@@ -9,6 +9,7 @@ import {
   DVault,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
+  EngineEventEmitter,
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -35,11 +36,11 @@ import {
   RenderNoteOpts,
   RenderNotePayload,
   RespV2,
+  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   UpdateNoteResp,
 } from "@dendronhq/common-all";
-import { EngineEventEmitter } from "@dendronhq/engine-server";
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
@@ -65,7 +66,7 @@ export interface IEngineAPIService {
   /**
    * Get NoteProps by id. If note doesn't exist, return undefined
    */
-  getNote: (id: string) => Promise<NoteProps | undefined>;
+  getNote: (id: string) => Promise<RespV3<NoteProps>>;
   /**
    * Find NoteProps by note properties. If no notes match, return empty list
    */
@@ -111,7 +112,7 @@ export interface IEngineAPIService {
 
   sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp>;
 
-  getSchema(qs: string): Promise<RespV2<SchemaModuleProps>>;
+  getSchema(qs: string): Promise<RespV3<SchemaModuleProps>>;
 
   querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>>;
 

@@ -4,6 +4,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  BacklinkPanelSortOrder,
 } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
@@ -26,7 +27,6 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
-import { BacklinkPanelSortOrder } from "@dendronhq/engine-server";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 

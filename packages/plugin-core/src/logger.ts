@@ -5,8 +5,11 @@ import {
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
+
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
+import * as vscode from "vscode";
 import {
   ExtensionContext,
   OutputChannel,
@@ -15,9 +18,7 @@ import {
   workspace,
 } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
-import * as vscode from "vscode";
 import { FileItem } from "./external/fileutils/FileItem";
-import _ from "lodash";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -166,7 +167,7 @@ export class Logger {
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),
-      level: Sentry.Severity.Info,
+      level: "info",
     });
   }
 

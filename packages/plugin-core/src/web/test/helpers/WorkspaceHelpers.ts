@@ -15,7 +15,7 @@ export class WorkspaceHelpers {
 
     const randomUUID = require("crypto-randomuuid");
 
-    const tmpDirectory = Utils.joinPath(URI.parse(tmp), randomUUID());
+    const tmpDirectory = Utils.joinPath(URI.file(tmp), randomUUID());
     await vscode.workspace.fs.createDirectory(tmpDirectory);
 
     return tmpDirectory;

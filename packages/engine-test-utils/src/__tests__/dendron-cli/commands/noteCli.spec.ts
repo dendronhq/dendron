@@ -195,7 +195,7 @@ describe("WHEN run 'dendron note get'", () => {
           });
           expect(resp.data).toBeUndefined();
           expect(resp.error?.message).toContain("gamma does not exist");
-          const note = await engine.getNote("gamma");
+          const note = (await engine.getNote("gamma")).data;
           // note not created
           expect(note).toBeUndefined();
         },
@@ -246,7 +246,7 @@ describe("WHEN run 'dendron note find'", () => {
             output: NoteCLIOutput.JSON,
           })) as { data: NoteCommandData };
           expect(data.notesOutput).toEqual([]);
-          const note = await engine.getNote("gamma");
+          const note = (await engine.getNote("gamma")).data;
           // note not created
           expect(note).toBeUndefined();
         },

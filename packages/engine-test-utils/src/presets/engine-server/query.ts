@@ -1,4 +1,4 @@
-import { DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
+import { DNodeUtils } from "@dendronhq/common-all";
 import {
   TestPresetEntryV4,
   SCHEMA_PRESETS_V4,
@@ -47,17 +47,10 @@ const SCHEMAS = {
     }
   ),
   SIMPLE: new TestPresetEntryV4(
-    async ({ engine, vaults, wsRoot }) => {
-      const schemas = engine.schemas;
-      const vault = vaults[0];
+    async ({ engine }) => {
       const sid = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
       const { data } = await engine.querySchema(sid);
-      const expectedSchema = SchemaUtils.getSchemaModuleByFnameV4({
-        fname: sid,
-        wsRoot,
-        schemas,
-        vault,
-      });
+      const expectedSchema = (await engine.getSchema(sid)).data!;
       const fooSchema = _.find(data, { fname: sid });
       return [
         {

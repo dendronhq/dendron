@@ -287,6 +287,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
             wsRoot: rootDir,
             engine: resp.data.engine,
             wsService: resp.data.wsService,
+            workspaceInitializer: opts.workspaceInitializer,
           });
         } else {
           // For native workspaces, we just need to reload the existing workspace because we want to keep the same workspace.

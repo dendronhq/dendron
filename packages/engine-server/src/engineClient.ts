@@ -54,7 +54,8 @@ import {
   FindNoteOpts,
   NotePropsMeta,
   UpdateNoteResp,
-  EngineEventEmitter,
+  RespV3,
+  ERROR_STATUS,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -188,7 +189,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
     await this.fuseEngine.replaceNotesIndex(notes);
-    await this.fuseEngine.updateSchemaIndex(schemas);
+    await this.fuseEngine.replaceSchemaIndex(schemas);
     this.store.notes = notes;
     this.store.schemas = schemas;
     return {
@@ -205,12 +206,19 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   /**
    * See {@link DStore.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
     const maybeNote = this.notes[id];
+
     if (maybeNote) {
-      return _.cloneDeep(maybeNote);
+      return { data: _.cloneDeep(maybeNote) };
     } else {
-      return undefined;
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `NoteProps not found for key ${id}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
     }
   }
 
@@ -297,7 +305,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
     this.fuseEngine.replaceNotesIndex(notes);
-    this.fuseEngine.updateSchemaIndex(schemas);
+    this.fuseEngine.replaceSchemaIndex(schemas);
     return {
       error: null,
       data: resp.data,
@@ -449,7 +457,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
     await this.fuseEngine.replaceNotesIndex(notes);
-    await this.fuseEngine.updateSchemaIndex(schemas);
+    await this.fuseEngine.replaceSchemaIndex(schemas);
     return {
       error: resp.error,
       data: {
@@ -501,8 +509,20 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   // ~~~ schemas
-  async getSchema(_qs: string): Promise<RespV2<SchemaModuleProps>> {
-    throw Error("not implemetned");
+  async getSchema(id: string): Promise<RespV3<SchemaModuleProps>> {
+    const maybeSchema = this.schemas[id];
+
+    if (maybeSchema) {
+      return { data: _.cloneDeep(maybeSchema) };
+    } else {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `SchemaModuleProps not found for key ${id}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
+    }
   }
 
   async querySchema(qs: string): Promise<SchemaQueryResp> {

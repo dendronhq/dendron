@@ -1,53 +1,47 @@
+import { URI, Utils } from "vscode-uri";
+import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
+import { SchemaUtils } from "../dnode";
+import { DendronError } from "../error";
 import {
-  DendronError,
   Disposable,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  IDataStore,
-  IFileStore,
-  ISchemaStore,
   RespV3,
   SchemaModuleProps,
-  SchemaUtils,
   WriteSchemaOpts,
-} from "@dendronhq/common-all";
-import {
-  createDisposableLogger,
-  DLogger,
-  serializeModuleProps,
-} from "@dendronhq/common-server";
+} from "../types";
+import { VaultUtils } from "../vault";
+import { IDataStore } from "./IDataStore";
+import { IFileStore } from "./IFileStore";
+import { ISchemaStore } from "./ISchemaStore";
 
 export class SchemaStore implements Disposable, ISchemaStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, SchemaModuleProps>;
-  private _wsRoot: string;
-  private _logger: DLogger;
-  private _loggerDispose: () => any;
+  private _wsRoot: URI;
 
-  constructor(opts: {
-    fileStore: IFileStore;
-    dataStore: IDataStore<string, SchemaModuleProps>;
-    wsRoot: string;
-  }) {
-    this._fileStore = opts.fileStore;
-    this._metadataStore = opts.dataStore;
-    this._wsRoot = opts.wsRoot;
-    const { logger, dispose } = createDisposableLogger();
-    this._logger = logger;
-    this._loggerDispose = dispose;
+  constructor(
+    fileStore: IFileStore,
+    dataStore: IDataStore<string, SchemaModuleProps>,
+    wsRoot: URI
+  ) {
+    this._fileStore = fileStore;
+    this._metadataStore = dataStore;
+    this._wsRoot = wsRoot;
   }
 
-  dispose() {
-    this._loggerDispose();
-  }
+  dispose() {}
 
   /**
    * See {@link ISchemaStore.getMetadata}
    */
   async getMetadata(key: string): Promise<RespV3<SchemaModuleProps>> {
-    const ctx = "SchemaStore:getMetadata";
-    this._logger.info({ ctx, msg: `Getting SchemaModuleProps for ${key}` });
     return this._metadataStore.get(key);
+  }
+
+  /**
+   * See {@link ISchemaStore.bulkGetMetadata}
+   */
+  async bulkGetMetadata(keys: string[]): Promise<RespV3<SchemaModuleProps>[]> {
+    return Promise.all(keys.map((key) => this.getMetadata(key)));
   }
 
   /**
@@ -61,10 +55,14 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
       return { error: metaResp.error };
     }
 
-    const uri = SchemaUtils.getURI({ schema, wsRoot: this._wsRoot });
+    const uri = Utils.joinPath(
+      this._wsRoot,
+      VaultUtils.getRelPath(schema.vault),
+      schema.fname + ".schema.yml"
+    );
     const writeResp = await this._fileStore.write(
       uri,
-      serializeModuleProps(schema)
+      SchemaUtils.serializeModuleProps(schema)
     );
     if (writeResp.error) {
       return { error: writeResp.error };
@@ -118,10 +116,11 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
       return { error: resp.error };
     }
 
-    const uri = SchemaUtils.getURI({
-      schema: metadata.data,
-      wsRoot: this._wsRoot,
-    });
+    const uri = Utils.joinPath(
+      this._wsRoot,
+      VaultUtils.getRelPath(metadata.data.vault),
+      metadata.data.fname + ".schema.yml"
+    );
     const deleteResp = await this._fileStore.delete(uri);
     if (deleteResp.error) {
       return { error: deleteResp.error };

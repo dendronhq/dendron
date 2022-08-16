@@ -15,6 +15,15 @@ export interface ISchemaStore<K> {
   getMetadata(key: K): Promise<RespV3<SchemaModuleProps>>;
 
   /**
+   * Bulk get SchemaModuleProps by list of key
+   * If no schemas are found, return empty list.
+   *
+   * @param key: keys of SchemaModuleProps
+   * @return list of SchemaModuleProps
+   */
+  bulkGetMetadata(keys: K[]): Promise<RespV3<SchemaModuleProps>[]>;
+
+  /**
    * Write SchemaModuleProps to storage layer for given key, overriding existing SchemaModuleProps if it already exists
    *
    * @param opts: SchemaModuleProps write criteria

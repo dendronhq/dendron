@@ -1,9 +1,4 @@
-import {
-  ConfigUtils,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
-  Position,
-} from "@dendronhq/common-all";
+import { ConfigUtils, ERROR_STATUS, Position } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -22,8 +17,9 @@ import { ENGINE_HOOKS, setupBasic } from "./utils";
 const SCHEMAS = {
   BASICS: new TestPresetEntryV4(
     async ({ engine }) => {
-      const fname = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
-      const schema = engine.schemas[fname];
+      const schema = (
+        await engine.getSchema(SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname)
+      ).data!;
       return [
         {
           actual: _.size(schema.schemas),
@@ -36,16 +32,12 @@ const SCHEMAS = {
     }
   ),
   BAD_SCHEMA: new TestPresetEntryV4(
-    async ({ engine, initResp }) => {
-      const schemas = _.keys(engine.schemas);
+    async ({ initResp }) => {
       return [
-        // Should have caught the bad schema
         {
-          actual: schemas.sort(),
-          expected: ["foo", "root"],
-          msg: "bad schema not included",
+          actual: initResp.error?.message.includes("no_root_schema_found"),
+          expected: true,
         },
-        { actual: initResp.error?.severity, expected: ERROR_SEVERITY.MINOR },
         // Should have still finished initializing
         { actual: _.size(initResp.data?.notes), expected: 6 },
       ];
@@ -155,7 +147,10 @@ const NOTES = {
     async ({ engine }) => {
       return [
         {
-          actual: _.omit((await engine.getNote("one"))!, ["body", "parent"]),
+          actual: _.omit((await engine.getNote("one")).data!, [
+            "body",
+            "parent",
+          ]),
           expected: {
             children: [],
             created: 1,
@@ -177,7 +172,10 @@ const NOTES = {
           },
         },
         {
-          actual: _.omit((await engine.getNote("three"))!, ["body", "parent"]),
+          actual: _.omit((await engine.getNote("three")).data!, [
+            "body",
+            "parent",
+          ]),
           expected: {
             children: [],
             created: 1,
@@ -260,8 +258,8 @@ const NOTES = {
   ),
   NOTE_TOO_LONG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = (await engine.getNote("one"))!;
-      const two = (await engine.getNote("two"))!;
+      const one = (await engine.getNote("one")).data!;
+      const two = (await engine.getNote("two")).data!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },
@@ -294,8 +292,8 @@ const NOTES = {
   ),
   NOTE_TOO_LONG_CONFIG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = (await engine.getNote("one"))!;
-      const two = (await engine.getNote("two"))!;
+      const one = (await engine.getNote("one")).data!;
+      const two = (await engine.getNote("two")).data!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },

@@ -44,7 +44,7 @@ export class DoctorUtils {
     const currentNote = resp.data;
 
     // find the potentially-duplicate note that's currently in our store.
-    const noteById = await engine.getNote(currentNote.id);
+    const noteById = (await engine.getNote(currentNote.id)).data;
 
     let hasDuplicate = false;
 

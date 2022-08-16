@@ -52,6 +52,7 @@ import {
   FindNoteOpts,
   isNotNull,
   ErrorUtils,
+  RespV3,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -193,12 +194,19 @@ export class FileStorage implements DStore {
   /**
    * See {@link DStore.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
     const maybeNote = this.notes[id];
+
     if (maybeNote) {
-      return _.cloneDeep(maybeNote);
+      return { data: _.cloneDeep(maybeNote) };
     } else {
-      return undefined;
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `NoteProps not found for key ${id}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
     }
   }
 
@@ -434,7 +442,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const out = await getAllFiles({
-      root: URI.parse(vpath),
+      root: URI.file(vpath),
       include: ["*.schema.yml"],
     });
     if (out.error || !out.data) {
@@ -605,7 +613,7 @@ export class FileStorage implements DStore {
     const wsRoot = this.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
     const out = await getAllFiles({
-      root: URI.parse(vpath),
+      root: URI.file(vpath),
       include: ["*.md"],
     });
     if (out.error) {
@@ -1224,11 +1232,6 @@ export class FileStorage implements DStore {
       opts,
     });
 
-    // add schema if applicable
-    const schemaMatch = SchemaUtils.matchPath({
-      notePath: note.fname,
-      schemaModDict: this.schemas,
-    });
     this.logger.info({
       ctx,
       msg: "pre:note2File",
@@ -1290,15 +1293,24 @@ export class FileStorage implements DStore {
       note.contentHash = hash;
     }
 
+    // Try to attach schema if this is a new note
     // schema metadata is only applicable at runtime
     // we therefore write it after we persist note to store
-    if (schemaMatch) {
-      this.logger.info({
-        ctx,
-        msg: "pre:addSchema",
+    if (maybeNote) {
+      note.schema = maybeNote.schema;
+    } else {
+      const schemaMatch = SchemaUtils.matchPath({
+        notePath: note.fname,
+        schemaModDict: this.schemas,
       });
-      const { schema, schemaModule } = schemaMatch;
-      NoteUtils.addSchema({ note, schema, schemaModule });
+      if (schemaMatch) {
+        this.logger.info({
+          ctx,
+          msg: "pre:addSchema",
+        });
+        const { schema, schemaModule } = schemaMatch;
+        NoteUtils.addSchema({ note, schema, schemaModule });
+      }
     }
     // if we added a new note and it overwrote an existing note
     // we now need to update the metadata of existing notes ^change

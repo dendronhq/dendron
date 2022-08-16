@@ -206,7 +206,7 @@ export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayload>;
 export type SchemaReadPayload = APIPayload<SchemaModuleProps>;
 export type SchemaQueryPayload = APIPayload<SchemaModuleProps[]>;
-export type SchemaWritePayload = APIPayload<void>;
+export type SchemaWritePayload = APIPayload<string>;
 export type SchemaUpdatePayload = APIPayload<void>;
 
 export class APIUtils {

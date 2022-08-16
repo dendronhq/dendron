@@ -151,3 +151,10 @@ export const getWebEditorViewEntry = (
     message: `${key} is not valid webview key`,
   });
 };
+
+export enum BacklinkPanelSortOrder {
+  /** Using path sorted so order with shallow first = true */
+  PathNames = "PathNames",
+
+  LastUpdated = "LastUpdated",
+}

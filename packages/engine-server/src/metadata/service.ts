@@ -1,4 +1,5 @@
 import {
+  BacklinkPanelSortOrder,
   FOLDERS,
   GraphThemeEnum,
   Time,
@@ -40,13 +41,6 @@ export enum PriorTools {
   GoogleKeep = "Google Keep",
   Confluence = "Confluence",
   Other = "Other",
-}
-
-export enum BacklinkPanelSortOrder {
-  /** Using path sorted so order with shallow first = true */
-  PathNames = "PathNames",
-
-  LastUpdated = "LastUpdated",
 }
 
 type Metadata = Partial<{

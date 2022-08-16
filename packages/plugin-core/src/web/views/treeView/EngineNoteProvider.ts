@@ -5,6 +5,8 @@ import {
   TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { inject, injectable } from "tsyringe";
+import * as vscode from "vscode";
 import {
   Disposable,
   Event,
@@ -15,12 +17,11 @@ import {
   TreeItem,
   TreeItemCollapsibleState,
 } from "vscode";
-import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
-import { inject, injectable } from "tsyringe";
 import { URI } from "vscode-uri";
+import { ICONS } from "../../../constants";
+import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { type ITreeViewConfig } from "./ITreeViewConfig";
 import { TreeNote } from "./TreeNote";
-import * as vscode from "vscode";
 
 /**
  * Provides engine event data to generate the views for the native Tree View
@@ -256,9 +257,9 @@ export class EngineNoteProvider
       labelType: this._treeViewConfig.LabelTypeSetting,
     });
     if (note.stub) {
-      tn.iconPath = new ThemeIcon("gist-new"); // TODO: Replace with ICONS.STUB constant
+      tn.iconPath = new ThemeIcon(ICONS.STUB);
     } else if (note.schema) {
-      tn.iconPath = new ThemeIcon("reop"); // TODO: Replace with ICONS.SCHEMA constant
+      tn.iconPath = new ThemeIcon(ICONS.SCHEMA);
     }
 
     this._tree[note.id] = tn;

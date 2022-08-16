@@ -1346,3 +1346,10 @@ export function extractNoteChangeEntryCounts(entries: NoteChangeEntry[]): {
     updatedCount: extractNoteChangeEntryCountByType(entries, "update"),
   };
 }
+
+export function globMatch(patterns: string[] | string, fname: string): boolean {
+  if (_.isString(patterns)) {
+    return minimatch(fname, patterns);
+  }
+  return _.some(patterns, (pattern) => minimatch(fname, pattern));
+}

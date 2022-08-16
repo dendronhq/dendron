@@ -167,7 +167,7 @@ const COPY_NOTE_LINK: DendronConfigEntryCollection<CopyNoteLinkConfig> = {
   },
   aliasMode: {
     label: "Include a note link",
-    desc: "Whether or not to include alias when copying a ntoe link",
+    desc: "Whether or not to include alias when copying a note link",
   },
 };
 

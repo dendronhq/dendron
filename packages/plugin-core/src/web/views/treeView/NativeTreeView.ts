@@ -105,6 +105,7 @@ export class NativeTreeView implements Disposable {
       _.isUndefined(editor) ||
       _.isUndefined(this.treeView) ||
       _.isUndefined(this._provider) ||
+      !this.treeView ||
       !this.treeView.visible
     ) {
       return;
@@ -120,7 +121,7 @@ export class NativeTreeView implements Disposable {
 
     if (note && note.length > 0) {
       await this._provider.prepNodeForReveal(note[0].id);
-      this.treeView!.reveal(note[0].id, { focus: false, expand: 3 });
+      this.treeView.reveal(note[0].id, { focus: false, expand: 3 });
     }
   }
 }

@@ -12,12 +12,18 @@ import { NativeTreeView } from "./views/treeView/NativeTreeView";
  * @param context
  */
 export async function activate(context: vscode.ExtensionContext) {
-  // Use the web extension injection container:
-  await setupWebExtContainer();
+  try {
+    // Use the web extension injection container:
+    await setupWebExtContainer();
 
-  setupCommands(context);
+    setupCommands(context);
 
-  setupViews(context);
+    setupViews(context);
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Something went wrong during initialization.`
+    );
+  }
 
   vscode.commands.executeCommand("setContext", "dendron:pluginActive", true);
   vscode.window.showInformationMessage("Dendron is active");

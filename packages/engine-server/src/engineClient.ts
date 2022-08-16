@@ -56,6 +56,7 @@ import {
   UpdateNoteResp,
   RespV3,
   ERROR_STATUS,
+  EngineEventEmitter,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";

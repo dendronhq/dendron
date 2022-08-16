@@ -32,6 +32,7 @@ function copyTemplateProps({
   const tempNoteProps = _.pick(templateNote, TemplateUtils.TEMPLATE_COPY_PROPS);
   _.forEach(tempNoteProps, (v, k) => {
     if (k === "custom") {
+      if (targetNote.custom === undefined) targetNote.custom = {};
       Object.keys(v).forEach((key) => {
         // @ts-ignore
         targetNote[k][key] = targetNote[k][key] || v[key];

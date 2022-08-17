@@ -2608,7 +2608,7 @@ suite("NoteLookupCommand", function () {
           expect(createdNote.schema).toBeTruthy();
 
           // created note has template that was specified by the schema applied
-          const templateNote = await engine.getNote("template.test");
+          const templateNote = (await engine.getNote("template.test")).data;
           expect(createdNote.body).toEqual(templateNote?.body);
         });
       }

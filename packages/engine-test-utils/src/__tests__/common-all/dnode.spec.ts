@@ -267,6 +267,38 @@ schemas:
         })
       );
     });
+
+    describe("GIVEN a schema with namespace node", () => {
+      runAllTests(
+        makeSchemaTests({
+          schema: `version: 1
+imports: []
+schemas:
+  - id: test
+    children: 
+      - testing
+    title: test
+    parent: root
+  - id: testing
+    pattern: "*"
+    title: "testing"
+    namespace: true
+    template:
+      id: template.test
+      type: note`,
+          checks: {
+            test: true,
+            "test.test1": true,
+            "test.foo": true,
+            "test.test1.test2": true,
+            "test.test1.foo": true,
+            "test.test1.test2.test3": false,
+            "test.foo.bar.baz": false,
+          },
+          expect,
+        })
+      );
+    });
   });
 });
 

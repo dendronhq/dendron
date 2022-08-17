@@ -440,6 +440,27 @@ export class NoteUtils {
     return note;
   }
 
+  /**
+   * Given a stub note, update it so that it has a schema applied to it
+   * This is done before the stub note is accepted as a new item
+   * and saved to the store
+   */
+  static updateStubWithSchema(opts: {
+    stubNote: NoteProps;
+    engine: DEngineClient;
+  }): NoteProps {
+    const { stubNote, engine } = opts;
+    const schemaMatch = SchemaUtils.matchPath({
+      notePath: stubNote.fname,
+      schemaModDict: engine.schemas,
+    });
+    if (schemaMatch) {
+      const { schema, schemaModule } = schemaMatch;
+      NoteUtils.addSchema({ note: stubNote, schemaModule, schema });
+    }
+    return stubNote;
+  }
+
   static createRoot(opts: Partial<NoteOpts> & { vault: DVault }): NoteProps {
     return DNodeUtils.create({
       ...opts,
@@ -1671,7 +1692,6 @@ export class SchemaUtils {
     };
 
     const nextNotePath = getChildOfPath(notePath, matched);
-
     const match = SchemaUtils.matchNotePathWithSchemaAtLevel({
       notePath: nextNotePath,
       schemas: schemaCandidates,
@@ -1725,8 +1745,14 @@ export class SchemaUtils {
       const pattern = SchemaUtils.getPatternRecursive(sc, schemaModule.schemas);
       if (sc?.data?.namespace && matchNamespace) {
         namespace = true;
-        return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
+        // current note is at the level of the namespace node.
+        // the glob pattern accounts for its immediate children (/*/*),
+        // so in order to match the current note, we should slice off
+        // the last bit of the glob pattern (/*)
+        return minimatch(notePathClean, pattern.slice(0, -2));
       } else {
+        // we are either trying to match the immediate child of a namespace node,
+        // or match a non-namespace regular schema. use the pattern as-is
         return minimatch(notePathClean, pattern);
       }
     });

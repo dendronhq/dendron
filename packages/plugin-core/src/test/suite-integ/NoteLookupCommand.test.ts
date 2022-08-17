@@ -10,6 +10,7 @@ import {
   NoteQuickInput,
   NoteUtils,
   SchemaTemplate,
+  SchemaUtils,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -2534,6 +2535,84 @@ suite("NoteLookupCommand", function () {
         });
       });
     });
+  });
+
+  describe("GIVEN a stub note that should match some schema", () => {
+    describeMultiWS(
+      "WHEN it is accepted as a new item",
+      {
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createSchema({
+            fname: "test",
+            wsRoot,
+            vault: vaults[0],
+            modifier: (schema) => {
+              const schemas = [
+                SchemaUtils.createFromSchemaOpts({
+                  fname: "test",
+                  id: "test",
+                  children: ["testing"],
+                  title: "test",
+                  parent: "root",
+                  vault: vaults[0],
+                }),
+                SchemaUtils.createFromSchemaRaw({
+                  id: "testing",
+                  pattern: "*",
+                  title: "testing",
+                  namespace: true,
+                  template: {
+                    id: "template.test",
+                    type: "note",
+                  },
+                  vault: vaults[0],
+                }),
+              ];
+              schemas.map((s) => {
+                schema.schemas[s.id] = s;
+              });
+              return schema;
+            },
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "template.test",
+            wsRoot,
+            vault: vaults[0],
+            body: "template body",
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "test.one.two.three",
+            wsRoot,
+            vault: vaults[0],
+          });
+        },
+      },
+      () => {
+        test("stub note that was accepted is created with the schema applied", async () => {
+          VSCodeUtils.closeAllEditors();
+          const cmd = new NoteLookupCommand();
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          stubVaultPick(vaults);
+          const engine = ExtensionProvider.getEngine();
+          await cmd.run({
+            noConfirm: true,
+            initialValue: "test.one.two",
+          });
+          const findResp = await engine.findNotes({
+            fname: "test.one.two",
+          });
+          expect(findResp.length).toEqual(1);
+          const createdNote = findResp[0];
+
+          // created note has schema applied
+          expect(createdNote.schema).toBeTruthy();
+
+          // created note has template that was specified by the schema applied
+          const templateNote = (await engine.getNote("template.test")).data;
+          expect(createdNote.body).toEqual(templateNote?.body);
+        });
+      }
+    );
   });
 });
 

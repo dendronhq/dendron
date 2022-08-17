@@ -2057,6 +2057,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "samuelxyz",
+      "name": "Tanamr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41557313?v=4",
+      "profile": "https://github.com/samuelxyz",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

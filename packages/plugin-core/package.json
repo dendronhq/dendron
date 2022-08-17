@@ -249,6 +249,10 @@
         "title": "Dendron: Move Note"
       },
       {
+        "command": "dendron.mergeNote",
+        "title": "Dendron: Merge Note"
+      },
+      {
         "command": "dendron.randomNote",
         "title": "Dendron: Random Note"
       },
@@ -647,6 +651,10 @@
         {
           "command": "dendron.moveNote",
           "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.mergeNote",
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.randomNote",

@@ -16,6 +16,7 @@ import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
 import { type ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getVaults } from "./getVaults";
+import { getWorkspaceConfig } from "./getWorkspaceConfig";
 import { getWSRoot } from "./getWSRoot";
 
 /**
@@ -31,6 +32,7 @@ export async function setupWebExtContainer() {
     throw new Error("Unable to find wsRoot!");
   }
   const vaults = await getVaults(wsRoot);
+  const config = await getWorkspaceConfig(wsRoot);
 
   // The EngineEventEmitter is also DendronEngineV3Web, so reuse the same token
   // to supply any emitter consumers. This ensures the same engine singleton
@@ -61,6 +63,7 @@ export async function setupWebExtContainer() {
 
   container.register("wsRoot", { useValue: wsRoot });
   container.register("vaults", { useValue: vaults });
+  container.register("config", { useValue: config });
 
   // TODO: Get rid of this in favor or using DI in Note Store / common-all package.
   const fs = container.resolve<IFileStore>("IFileStore");

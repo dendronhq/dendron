@@ -1,13 +1,17 @@
 import {
+  DendronError,
   DVault,
-  type ReducedDEngine,
+  IntermediateDendronConfig,
+  normalizeUnixPath,
   NoteProps,
   VaultUtils,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
-import path from "path";
+import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
-import { URI } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
+import { SiteUtilsWeb } from "./site";
 
 @injectable()
 export class WSUtilsWeb {
@@ -18,12 +22,12 @@ export class WSUtilsWeb {
     @inject("vaults") private vaults: DVault[]
   ) {}
 
-  private getVaultFromDocument(document: vscode.TextDocument) {
+  getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
     const vault = VaultUtils.getVaultByFilePath({
-      wsRoot: this.wsRoot.fsPath,
+      wsRoot: normalizeUnixPath(this.wsRoot.fsPath),
       vaults: this.vaults,
-      fsPath: txtPath,
+      fsPath: normalizeUnixPath(txtPath),
     });
     return vault;
   }
@@ -59,5 +63,45 @@ export class WSUtilsWeb {
     }
 
     return notes[0];
+  }
+
+  /**
+   * Generate url for given note or return `undefined` if no url is specified
+   * @param opts
+   *
+   */
+  getNoteUrl(opts: {
+    config: IntermediateDendronConfig;
+    note: NoteProps;
+    vault: DVault;
+    urlRoot?: string;
+  }) {
+    const { config, note, vault } = opts;
+    /**
+     * set to true if index node, don't append id at the end
+     */
+    const { url: root, index } = SiteUtilsWeb.getSiteUrlRootForVault({
+      vault,
+      config,
+    });
+    if (!root) {
+      throw new DendronError({ message: "no urlRoot set" });
+    }
+    // if we have a note, see if we are at index
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtilsWeb.isIndexNote({
+          indexNote: index,
+          note,
+        });
+    const pathValue = note.id;
+    const siteUrlPath = SiteUtilsWeb.getSiteUrlPathForNote({
+      addPrefix: true,
+      pathValue,
+      config,
+    });
+
+    const link = isIndex ? root : [root, siteUrlPath].join("");
+    return link;
   }
 }

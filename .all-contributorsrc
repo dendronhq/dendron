@@ -2048,6 +2048,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "cbenz",
+      "name": "Christophe Benz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12686?v=4",
+      "profile": "https://github.com/cbenz",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

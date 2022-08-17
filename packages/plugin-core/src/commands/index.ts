@@ -83,6 +83,7 @@ import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
+import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
 
 /**
@@ -175,6 +176,7 @@ const ALL_COMMANDS = [
   InstrumentedWrapperCommand,
   ValidateEngineCommand,
   MergeNoteCommand,
+  CreateNoteCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

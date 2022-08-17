@@ -610,6 +610,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
+  CREATE_NOTE: {
+    key: "dendron.createNote",
+    title: `${CMD_PREFIX} Create Note`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
   CREATE_MEETING_NOTE: {
     key: "dendron.createMeetingNote",
     title: `${CMD_PREFIX} Create Meeting Note`,

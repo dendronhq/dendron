@@ -9,26 +9,33 @@ import {
   NoteViewMessage,
   TutorialEvents,
 } from "@dendronhq/common-all";
-import { FileExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
+// import {
+//   FileExtensionUtils,
+//   findNonNoteFile,
+//   Logger,
+// } from "@dendronhq/common-server";
 import path from "path";
 import * as vscode from "vscode";
-import { IDendronExtension } from "../../dendronExtensionInterface";
-import { Logger } from "../../logger";
-import { QuickPickUtil } from "../../utils/quickPick";
-import { VSCodeUtils } from "../../vsCodeUtils";
-import { AnchorUtils } from "@dendronhq/unified";
+// import { AnchorUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { PluginFileUtils } from "../../utils/files";
-import { GotoNoteCommand } from "../../commands/GotoNote";
-import { AnalyticsUtils } from "../../utils/analytics";
-import { ExtensionUtils } from "../../utils/ExtensionUtils";
-import { IPreviewLinkHandler } from "./IPreviewLinkHandler";
+// import { GotoNoteCommand } from "../../../commands/GotoNote";
+import {
+  IPreviewLinkHandler,
+  LinkType,
+} from "../../../components/views/IPreviewLinkHandler";
+import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
+// import { IDendronExtension } from "../../../dendronExtensionInterface";
+// import { AnalyticsUtils } from "../../../utils/analytics";
+// import { ExtensionUtils } from "../../../utils/ExtensionUtils";
+// import { PluginFileUtils } from "../../../utils/files";
+// import { QuickPickUtil } from "../../../utils/quickPick";
+// import { VSCodeUtils } from "../../../vsCodeUtils";
 
 /**
  * Default implementation for handling link clicks in preview
  */
 export class PreviewLinkHandler implements IPreviewLinkHandler {
-  private _ext: IDendronExtension;
+  // private _ext: IDendronExtension;
   /**
    * set of tutorial note ids that we will allow tracking of link clicked events.
    * TODO: consolidate tracking of tutorial ids to a central place
@@ -37,8 +44,8 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
    */
   private _trackAllowedIds = ExtensionUtils.getTutorialIds();
 
-  constructor(ext: IDendronExtension) {
-    this._ext = ext;
+  constructor(private _ext: IReducedEngineAPIService) {
+    // this._ext = ext;
   }
 
   public async onLinkClicked({

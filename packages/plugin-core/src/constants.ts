@@ -304,12 +304,6 @@ export const DENDRON_MENUS = {
       group: "2_workspace",
     },
     {
-      // [[Command Enablement / When Clause Gotchas|dendron://dendron.docs/pkg.plugin-core.t.commands.ops#command-enablement--when-clause-gotchas]]
-      when: "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
-      command: "dendron.delete",
-      group: "2_workspace",
-    },
-    {
       when: "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported",
       command: "dendron.moveNote",
       group: "2_workspace",

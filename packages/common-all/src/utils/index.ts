@@ -953,6 +953,9 @@ export class ConfigUtils {
       this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"
     );
   }
+  static getAliasMode(config: IntermediateDendronConfig) {
+    return this.getCommands(config).copyNoteLink.aliasMode;
+  }
 
   // set
   static setProp<K extends keyof StrictConfigV4>(
@@ -1149,6 +1152,13 @@ export class ConfigUtils {
     value: NonNoteFileLinkAnchorType
   ) {
     _.set(config, "commands.copyNoteLink.nonNoteFile.anchorType", value);
+  }
+
+  static setAliasMode(
+    config: IntermediateDendronConfig,
+    aliasMode: "title" | "none"
+  ) {
+    _.set(config, "commands.copyNoteLink.aliasMode", aliasMode);
   }
 
   static configIsValid(opts: {

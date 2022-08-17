@@ -8,9 +8,10 @@ export type CopyNoteLinkConfig = {
   nonNoteFile?: {
     anchorType?: NonNoteFileLinkAnchorType;
   };
+  aliasMode: "none" | "title";
 };
 
 export function genDefaultCopyNoteLinkConfig(): CopyNoteLinkConfig {
   // don't set a default for `nonNoteFiles`, we want to prompt the user whether they want lines or block anchors
-  return {};
+  return { aliasMode: "title" };
 }

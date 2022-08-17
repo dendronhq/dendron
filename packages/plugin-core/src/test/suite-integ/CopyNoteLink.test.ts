@@ -259,6 +259,29 @@ suite("CopyNoteLink", function () {
     }
   );
 
+  describeSingleWS(
+    "WHEN the alias mode is none, THEN CopyNoteLink should only return a link without a note alias",
+    {
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      modConfigCb: (config) => {
+        ConfigUtils.setAliasMode(config, "none");
+        return config;
+      },
+    },
+    () => {
+      test("THEN CopyNoteLink should only return a link without a note alias", async () => {
+        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const notePath = path.join(
+          vault2Path({ vault: vaults[0], wsRoot }),
+          "foo.md"
+        );
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const link = (await copyNoteLinkCommand.run())?.link;
+        expect(link).toEqual("[[foo]]");
+      });
+    }
+  );
+
   describeMultiWS(
     "GIVEN a basic setup on a multivault workspace with enableXVaultWikiLink enabled",
     {

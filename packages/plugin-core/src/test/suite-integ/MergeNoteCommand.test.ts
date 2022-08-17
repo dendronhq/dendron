@@ -31,8 +31,8 @@ suite("MergeNote", function () {
           const extension = ExtensionProvider.getExtension();
           const cmd = new MergeNoteCommand(extension);
           const engine = extension.getEngine();
-          const preRunSource = await engine.getNote("source");
-          const preRunDest = await engine.getNote("dest");
+          const preRunSource = (await engine.getNote("source")).data;
+          const preRunDest = (await engine.getNote("dest")).data;
           if (preRunSource && preRunDest) {
             await extension.wsUtils.openNote(preRunSource);
           } else {
@@ -44,8 +44,8 @@ suite("MergeNote", function () {
             noConfirm: true,
           });
 
-          const postRunSource = await engine.getNote("source");
-          const postRunDest = await engine.getNote("dest");
+          const postRunSource = (await engine.getNote("source")).data;
+          const postRunDest = (await engine.getNote("dest")).data;
           expect(postRunSource).toBeFalsy();
           expect(postRunDest).toBeTruthy();
           expect(postRunDest?.body).toEqual(
@@ -93,9 +93,9 @@ suite("MergeNote", function () {
           const extension = ExtensionProvider.getExtension();
           const cmd = new MergeNoteCommand(extension);
           const engine = extension.getEngine();
-          const preRunSource = await engine.getNote("source");
-          const preRunDest = await engine.getNote("dest");
-          const preRunRef = await engine.getNote("ref");
+          const preRunSource = (await engine.getNote("source")).data;
+          const preRunDest = (await engine.getNote("dest")).data;
+          const preRunRef = (await engine.getNote("ref")).data;
           if (preRunSource && preRunDest && preRunRef) {
             await extension.wsUtils.openNote(preRunSource);
           } else {
@@ -107,9 +107,9 @@ suite("MergeNote", function () {
             noConfirm: true,
           });
 
-          const postRunSource = await engine.getNote("source");
-          const postRunDest = await engine.getNote("dest");
-          const postRunRef = await engine.getNote("ref");
+          const postRunSource = (await engine.getNote("source")).data;
+          const postRunDest = (await engine.getNote("dest")).data;
+          const postRunRef = (await engine.getNote("ref")).data;
           expect(postRunSource).toBeFalsy();
           expect(postRunDest).toBeTruthy();
           expect(postRunDest?.body).toEqual(

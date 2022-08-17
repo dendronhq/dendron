@@ -229,7 +229,11 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }) {
     const ctx = `${this.key}:updateLinkInNote`;
     const { id, sourceNote, destNote } = opts;
-    const noteToUpdate = await this.extension.getEngine().getNote(id);
+    const getNoteResp = await this.extension.getEngine().getNote(id);
+    if (getNoteResp.error) {
+      throw getNoteResp.error;
+    }
+    const noteToUpdate = getNoteResp.data;
     if (noteToUpdate !== undefined) {
       const linksToUpdate = noteToUpdate.links.filter(
         (link) => link.value === sourceNote.fname

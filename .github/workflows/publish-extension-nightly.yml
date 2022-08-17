@@ -86,9 +86,7 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: |
-          vsce --version
-          yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
+        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
 
       - name: Publish to Open VSX Marketplace
         env:

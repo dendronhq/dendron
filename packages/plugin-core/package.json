@@ -1388,7 +1388,7 @@
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",
     "deploy:vscode": "vsce publish --yarn",
-    "deploy:vscode:vsix": "vsce publish --packagePath",
+    "deploy:vscode:vsix": "vsce --version && vsce publish --packagePath",
     "deploy:ovsx": "ovsx publish --yarn",
     "deploy:ovsx:vsix": "ovsx publish ",
     "clean": "yarn rimraf out dist node_modules && yarn clean:assets",

@@ -8,10 +8,12 @@ import {
   EngineEventEmitter,
   EngineV3Base,
   EngineWriteOptsV2,
+  error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   Event,
   EventEmitter,
+  FuseEngine,
   IDendronError,
   IFileStore,
   INoteStore,
@@ -42,18 +44,19 @@ export class DendronEngineV3Web
   implements ReducedDEngine, EngineEventEmitter
 {
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
+  protected fuseEngine: FuseEngine;
 
   constructor(
-    @inject("wsRoot") wsRoot: URI,
-    @inject("vaults") vaults: DVault[],
-    @inject("IFileStore") fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("vaults") private vaults: DVault[],
+    @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
-    super(wsRoot, vaults, fileStore, noteStore, new ConsoleLogger());
+    super(noteStore, new ConsoleLogger());
 
-    // this.fuseEngine = new FuseEngine({
-    //   fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
-    // });
+    this.fuseEngine = new FuseEngine({
+      fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+    });
   }
 
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
@@ -146,12 +149,13 @@ export class DendronEngineV3Web
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
+    const ctx = "DendronEngineV3Web:writeNewNote";
     const error: DendronError | null = null;
-    // this.logger.info({
-    //   ctx,
-    //   msg: `enter with ${opts}`,
-    //   note: NoteUtils.toLogObj(note),
-    // });
+    this.logger.info({
+      ctx,
+      msg: `enter with ${opts}`,
+      note: NoteUtils.toLogObj(note),
+    });
 
     // // Apply hooks
     // if (opts?.runHooks === false) {
@@ -302,10 +306,10 @@ export class DendronEngineV3Web
             note: ancestor,
           });
         } else {
-          // this.logger.error({
-          //   ctx,
-          //   msg: `Unable to find ancestor for note ${note.fname}`,
-          // });
+          this.logger.error({
+            ctx,
+            msg: `Unable to find ancestor for note ${note.fname}`,
+          });
           return { error: ancestorResp.error };
         }
       }
@@ -332,11 +336,11 @@ export class DendronEngineV3Web
     await this.updateNoteMetadataStore(changes);
 
     this._onNoteChangedEmitter.fire(changes);
-    // this.logger.info({
-    //   ctx,
-    //   msg: "exit",
-    //   changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
-    // });
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
+    });
     return {
       error,
       data: changes,
@@ -350,8 +354,8 @@ export class DendronEngineV3Web
   private async initNotesNew(
     vaults: DVault[]
   ): Promise<BulkResp<NotePropsByIdDict>> {
-    // const ctx = "DendronEngineV3:initNotes";
-    // this.logger.info({ ctx, msg: "enter" });
+    const ctx = "DendronEngineV3Web:initNotes";
+    this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
     let notesFname: NotePropsByFnameDict = {};
     // const start = process.hrtime();
@@ -456,8 +460,8 @@ export class DendronEngineV3Web
           }
         });
       } catch (err: any) {
-        // const error = error2PlainObject(err);
-        // this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
     });
   }

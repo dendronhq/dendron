@@ -1,15 +1,15 @@
+/* eslint-disable no-useless-constructor */
+/* eslint-disable no-empty-function */
 import _ from "lodash";
-import { URI } from "vscode-uri";
 import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
 import { FuseEngine } from "../fuse";
-import { IFileStore, INoteStore } from "../store";
+import { INoteStore } from "../store";
 import {
   BulkResp,
   BulkWriteNotesOpts,
-  DVault,
   EngineDeleteNoteResp,
   EngineDeleteOpts,
   EngineWriteOptsV2,
@@ -33,28 +33,21 @@ import { VaultUtils } from "../vault";
  * DendronEngineV3Web
  */
 export abstract class EngineV3Base implements ReducedDEngine {
-  protected fuseEngine: FuseEngine;
+  protected abstract fuseEngine: FuseEngine;
 
   constructor(
-    protected wsRoot: URI,
-    protected vaults: DVault[],
-    protected fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     protected noteStore: INoteStore<string>,
     protected logger: DLogger
-  ) {
-    this.fuseEngine = new FuseEngine({
-      fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
-    });
-  }
+  ) {}
 
-  /**good
+  /**
    * See {@link DEngine.getNote}
    */
   async getNote(id: string): Promise<RespV3<NoteProps>> {
     return this.noteStore.get(id);
   }
 
-  /**good
+  /**
    * See {@link DEngine.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
@@ -62,7 +55,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
     return resp.data ? resp.data : [];
   }
 
-  /**good
+  /**
    * See {@link DEngine.findNotesMeta}
    */
   async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
@@ -70,7 +63,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
     return resp.data ? resp.data : [];
   }
 
-  /**good
+  /**
    * See {@link DEngine.bulkWriteNotes}
    */
   async bulkWriteNotes(
@@ -281,6 +274,9 @@ export abstract class EngineV3Base implements ReducedDEngine {
    */
   abstract renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
 
+  /**
+   * See {@link DEngine.writeNote}
+   */
   abstract writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2

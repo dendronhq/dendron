@@ -1,24 +1,25 @@
 import {
-  NoteProps,
-  FindNoteOpts,
-  NotePropsMeta,
-  BulkWriteNotesOpts,
   BulkResp,
-  NoteChangeEntry,
-  EngineWriteOptsV2,
-  RespV2,
-  EngineDeleteOpts,
+  BulkWriteNotesOpts,
   EngineDeleteNotePayload,
+  EngineDeleteOpts,
+  EngineWriteOptsV2,
+  FindNoteOpts,
+  genUUID,
+  NoteChangeEntry,
+  NoteMetadataStore,
+  NoteProps,
+  NotePropsMeta,
+  NoteUtils,
+  QueryNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
-  QueryNotesOpts,
-  NoteUtils,
-  genUUID,
-  NoteMetadataStore,
+  RespV2,
+  RespV3,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
-import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 
-export class MockEngineAPIService implements IReducedEngineAPIService {
+export class MockEngineAPIService implements ReducedDEngine {
   // private noteProps: NoteProps[];
 
   private store: NoteMetadataStore;
@@ -68,13 +69,8 @@ export class MockEngineAPIService implements IReducedEngineAPIService {
     this.store.write(note.id, note);
   }
 
-  async getNote(id: string): Promise<NoteProps | undefined> {
-    const resp = await this.store.get(id);
-
-    if (resp.data) {
-      return resp.data as NoteProps;
-    }
-    return undefined;
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
+    return this.store.get(id) as Promise<RespV3<NoteProps>>;
   }
 
   findNotes(_opts: FindNoteOpts): Promise<NoteProps[]> {

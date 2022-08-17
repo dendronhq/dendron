@@ -1,15 +1,19 @@
-import { DVault, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  type ReducedDEngine,
+  NoteProps,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import path from "path";
 import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
 import { URI } from "vscode-uri";
-import { type IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 
 @injectable()
 export class WSUtilsWeb {
   constructor(
-    @inject("IReducedEngineAPIService")
-    private engine: IReducedEngineAPIService,
+    @inject("ReducedDEngine")
+    private engine: ReducedDEngine,
     @inject("wsRoot") private wsRoot: URI,
     @inject("vaults") private vaults: DVault[]
   ) {}

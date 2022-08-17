@@ -2,6 +2,7 @@ import {
   DNodeUtils,
   DVault,
   FuseEngine,
+  type ReducedDEngine,
   NoteLookupUtils,
   NoteQuickInputV2,
 } from "@dendronhq/common-all";
@@ -10,7 +11,6 @@ import path from "path";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickOptions } from "vscode";
-import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
@@ -30,10 +30,10 @@ export type LookupAcceptPayload = {
 
 @injectable()
 export class LookupQuickpickFactory {
-  private _engine: IReducedEngineAPIService;
+  private _engine: ReducedDEngine;
 
   constructor(
-    @inject("IReducedEngineAPIService") engine: IReducedEngineAPIService,
+    @inject("ReducedDEngine") engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[],
     private wsUtils: WSUtilsWeb
   ) {

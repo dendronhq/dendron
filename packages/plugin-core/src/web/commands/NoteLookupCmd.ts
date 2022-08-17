@@ -1,8 +1,11 @@
-import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  type ReducedDEngine,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
-import { type IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
@@ -11,8 +14,8 @@ export class NoteLookupCmd {
   constructor(
     private factory: LookupQuickpickFactory,
     @inject("wsRoot") private wsRoot: URI,
-    @inject("IReducedEngineAPIService")
-    private engine: IReducedEngineAPIService,
+    @inject("ReducedDEngine")
+    private engine: ReducedDEngine,
     @inject("NoteProvider") private noteProvider: ILookupProvider
   ) {}
 

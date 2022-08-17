@@ -6,14 +6,14 @@ import {
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
-import { ILookupProvider } from "../commands/lookup/ILookupProvider";
+import { type ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
-import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
-import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
+import { type ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getVaults } from "./getVaults";
 import { getWSRoot } from "./getWSRoot";
@@ -36,11 +36,11 @@ export async function setupWebExtContainer() {
   // to supply any emitter consumers. This ensures the same engine singleton
   // gets used everywhere.
   container.register<EngineEventEmitter>("EngineEventEmitter", {
-    useToken: "IReducedEngineAPIService",
+    useToken: "ReducedDEngine",
   });
 
-  container.register<IReducedEngineAPIService>(
-    "IReducedEngineAPIService",
+  container.register<ReducedDEngine>(
+    "ReducedDEngine",
     {
       useClass: DendronEngineV3Web,
     },
@@ -77,7 +77,7 @@ export async function setupWebExtContainer() {
   });
 
   container.afterResolution<DendronEngineV3Web>(
-    "IReducedEngineAPIService",
+    "ReducedDEngine",
     (_t, result) => {
       if ("init" in result) {
         result.init().then(

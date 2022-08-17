@@ -1,4 +1,8 @@
-import { DVault, NoteQuickInput } from "@dendronhq/common-all";
+import {
+  DVault,
+  NoteQuickInput,
+  type ReducedDEngine,
+} from "@dendronhq/common-all";
 import assert from "assert";
 import sinon from "sinon";
 import { stubInterface } from "ts-sinon";
@@ -9,7 +13,6 @@ import {
   LookupQuickpickFactory,
 } from "../../../commands/lookup/LookupQuickpickFactory";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
-import { IReducedEngineAPIService } from "../../../engine/IReducedEngineApiService";
 
 require("mocha/mocha");
 
@@ -31,7 +34,7 @@ suite("GIVEN a NoteLookupCmd", () => {
     const showTextDocumentFake = sinon.fake.resolves(undefined);
     sinon.replace(vscode.window, "showTextDocument", showTextDocumentFake);
 
-    const mockEngine = stubInterface<IReducedEngineAPIService>();
+    const mockEngine = stubInterface<ReducedDEngine>();
 
     const cmd = new NoteLookupCmd(
       factory,
@@ -77,7 +80,7 @@ suite("GIVEN a NoteLookupCmd", () => {
     const showTextDocumentFake = sinon.fake.resolves(undefined);
     sinon.replace(vscode.window, "showTextDocument", showTextDocumentFake);
 
-    const mockEngine = stubInterface<IReducedEngineAPIService>();
+    const mockEngine = stubInterface<ReducedDEngine>();
 
     const cmd = new NoteLookupCmd(
       factory,
@@ -124,7 +127,7 @@ suite("GIVEN a NoteLookupCmd", () => {
     const showTextDocumentFake = sinon.fake.resolves(undefined);
     sinon.replace(vscode.window, "showTextDocument", showTextDocumentFake);
 
-    const mockEngine = stubInterface<IReducedEngineAPIService>();
+    const mockEngine = stubInterface<ReducedDEngine>();
 
     mockEngine.writeNote.resolves({ error: null });
 

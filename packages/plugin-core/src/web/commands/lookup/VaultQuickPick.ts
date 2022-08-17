@@ -1,17 +1,16 @@
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import { DVault, type ReducedDEngine, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { VaultSelectionMode } from "../../../components/lookup/types";
 import { VaultPickerItem } from "../../../components/lookup/utils";
 import * as vscode from "vscode";
-import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 
 export class VaultQuickPick {
   private CONTEXT_DETAIL = "current note context";
   private HIERARCHY_MATCH_DETAIL = "hierarchy match";
   private FULL_MATCH_DETAIL = "hierarchy match and current note context";
 
-  private _engine: IReducedEngineAPIService;
-  constructor(engine: IReducedEngineAPIService) {
+  private _engine: ReducedDEngine;
+  constructor(engine: ReducedDEngine) {
     this._engine = engine;
   }
 

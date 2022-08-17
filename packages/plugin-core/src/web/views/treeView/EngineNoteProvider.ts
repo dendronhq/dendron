@@ -1,5 +1,6 @@
 import {
   EngineEventEmitter,
+  type ReducedDEngine,
   NotePropsMeta,
   TAGS_HIERARCHY_BASE,
   TreeViewItemLabelTypeEnum,
@@ -19,7 +20,6 @@ import {
 } from "vscode";
 import { URI } from "vscode-uri";
 import { ICONS } from "../../../constants";
-import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { type ITreeViewConfig } from "./ITreeViewConfig";
 import { TreeNote } from "./TreeNote";
 
@@ -52,8 +52,8 @@ export class EngineNoteProvider
    */
   constructor(
     @inject("wsRoot") private wsRoot: URI,
-    @inject("IReducedEngineAPIService")
-    private engine: IReducedEngineAPIService,
+    @inject("ReducedDEngine")
+    private engine: ReducedDEngine,
     @inject("EngineEventEmitter") private _engineEvents: EngineEventEmitter,
     @inject("ITreeViewConfig") private _treeViewConfig: ITreeViewConfig
   ) {
@@ -239,11 +239,11 @@ export class EngineNoteProvider
   private async createTreeNote(noteId: string) {
     const note = await this.engine.getNote(noteId);
 
-    if (!note) {
+    if (!note || !note.data) {
       throw new Error(`Unable to find note ${note} for tree view!`);
     }
 
-    return this.createTreeNoteFromProps(note);
+    return this.createTreeNoteFromProps(note.data);
   }
 
   private async createTreeNoteFromProps(note: NotePropsMeta) {

@@ -16,6 +16,7 @@ import {
   IDendronError,
   IFileStore,
   INoteStore,
+  ReducedDEngine,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -37,14 +38,11 @@ import {
 import _ from "lodash";
 import { inject, singleton } from "tsyringe";
 import { EventEmitter } from "vscode";
-import { IReducedEngineAPIService } from "./IReducedEngineApiService";
 import { NoteParserV2 } from "./NoteParserV2";
 import { Utils, URI } from "vscode-uri";
 
 @singleton()
-export class DendronEngineV3Web
-  implements IReducedEngineAPIService, EngineEventEmitter
-{
+export class DendronEngineV3Web implements ReducedDEngine, EngineEventEmitter {
   private fuseEngine: FuseEngine;
   private _vaults: DVault[];
   private _noteStore: INoteStore<string>;
@@ -149,9 +147,8 @@ export class DendronEngineV3Web
   /**
    * See {@link DEngine.getNote}
    */
-  async getNote(id: string): Promise<NoteProps | undefined> {
-    const resp = await this._noteStore.get(id);
-    return resp.data;
+  async getNote(id: string): Promise<RespV3<NoteProps>> {
+    return this._noteStore.get(id);
   }
 
   /**

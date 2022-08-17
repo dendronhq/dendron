@@ -1,5 +1,6 @@
 import {
   DNodeUtils,
+  type ReducedDEngine,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInputV2,
@@ -12,7 +13,6 @@ import _ from "lodash";
 import stringSimilarity from "string-similarity";
 import { inject, injectable } from "tsyringe";
 import { window } from "vscode";
-import { type IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import {
   ILookupProvider,
   provideItemsProps,
@@ -24,9 +24,7 @@ import {
  */
 @injectable()
 export class NoteLookupProvider implements ILookupProvider {
-  constructor(
-    @inject("IReducedEngineAPIService") private engine: IReducedEngineAPIService
-  ) {}
+  constructor(@inject("ReducedDEngine") private engine: ReducedDEngine) {}
 
   async provideItems(opts: provideItemsProps): Promise<NoteQuickInputV2[]> {
     const { token, showDirectChildrenOnly, workspaceState } = opts;
@@ -176,7 +174,9 @@ export class NoteLookupProvider implements ILookupProvider {
     const childrenOfRootNotes = await Promise.all(
       _.map(childrenOfRoot, (ent) => this.engine.getNote(ent))
     );
-    return roots.concat(_.compact(childrenOfRootNotes));
+    return roots.concat(
+      _.compact(childrenOfRootNotes.map((resp) => resp.data))
+    );
   };
 
   private async fetchPickerResults(opts: {

@@ -39,7 +39,7 @@ function copyTemplateProps({
       });
     } else {
       // @ts-ignore
-      targetNote["custom"] = v;
+      targetNote[k] = v;
     }
   });
   return targetNote;

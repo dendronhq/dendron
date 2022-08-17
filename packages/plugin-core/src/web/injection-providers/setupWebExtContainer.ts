@@ -1,4 +1,5 @@
 import {
+  DLogger,
   EngineEventEmitter,
   IDataStore,
   IFileStore,
@@ -8,15 +9,29 @@ import {
   NoteStore,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
+import { PreviewProxy } from "../../components/views/PreviewProxy";
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
 import { IReducedEngineAPIService } from "../engine/IReducedEngineApiService";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
+import { PreviewPanel } from "../views/preview/PreviewPanel";
 import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getVaults } from "./getVaults";
 import { getWSRoot } from "./getWSRoot";
+import * as vscode from "vscode";
+import { URI } from "vscode-uri";
+import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
+import { DummyPreviewLinkHandler } from "../views/preview/DummyPreviewLinkHandler";
+import { ITextDocumentService } from "../../services/ITextDocumentService";
+import { ConsoleLogger } from "../utils/ConsoleLogger";
+import { DummyTextDocumentService } from "../views/preview/DummyTextDocumentService";
+import { getPort } from "./getPort";
+import {
+  DummyPreviewPanelConfig,
+  IPreviewPanelConfig,
+} from "../views/preview/IPreviewPanelConfig";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension
@@ -24,7 +39,7 @@ import { getWSRoot } from "./getWSRoot";
  *
  * It uses a VSCodeFileStore and includes a reduced engine that runs in-memory.
  */
-export async function setupWebExtContainer() {
+export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   const wsRoot = await getWSRoot();
 
   if (!wsRoot) {
@@ -93,5 +108,33 @@ export async function setupWebExtContainer() {
 
   container.register<ITreeViewConfig>("ITreeViewConfig", {
     useClass: TreeViewDummyConfig,
+  });
+
+  container.register<PreviewProxy>("PreviewProxy", {
+    useClass: PreviewPanel,
+  });
+
+  container.register<URI>("extensionUri", {
+    useValue: context.extensionUri,
+  });
+
+  container.register<IPreviewLinkHandler>("IPreviewLinkHandler", {
+    useClass: DummyPreviewLinkHandler, // TODO: Add a real one
+  });
+
+  container.register<IPreviewPanelConfig>("IPreviewPanelConfig", {
+    useClass: DummyPreviewPanelConfig, // TODO: Add a real one
+  });
+
+  container.register<ITextDocumentService>("ITextDocumentService", {
+    useClass: DummyTextDocumentService, // TODO: Add a real one
+  });
+
+  container.register<DLogger>("logger", {
+    useClass: ConsoleLogger,
+  });
+
+  container.register<number>("port", {
+    useValue: await getPort(wsRoot),
   });
 }

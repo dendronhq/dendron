@@ -3,7 +3,9 @@ import "reflect-metadata"; // This needs to be the topmost import for tsyringe t
 
 import { container } from "tsyringe";
 import * as vscode from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
+import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 import { NativeTreeView } from "./views/treeView/NativeTreeView";
 
@@ -14,7 +16,7 @@ import { NativeTreeView } from "./views/treeView/NativeTreeView";
 export async function activate(context: vscode.ExtensionContext) {
   try {
     // Use the web extension injection container:
-    await setupWebExtContainer();
+    await setupWebExtContainer(context);
 
     setupCommands(context);
 
@@ -34,14 +36,27 @@ export function deactivate() {}
 async function setupCommands(context: vscode.ExtensionContext) {
   const existingCommands = await vscode.commands.getCommands();
 
-  const key = "dendron.lookupNote";
-  const cmd = container.resolve(NoteLookupCmd);
+  const noteLookupCmd = container.resolve(NoteLookupCmd);
+  const key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
 
   if (!existingCommands.includes(key))
     context.subscriptions.push(
       vscode.commands.registerCommand(key, async (_args: any) => {
-        await cmd.run();
+        await noteLookupCmd.run();
       })
+    );
+
+  const togglePreviewCmd = container.resolve(TogglePreviewCmd);
+  const togglePreviewCmdKey = DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
+
+  if (!existingCommands.includes(togglePreviewCmdKey))
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        togglePreviewCmdKey,
+        async (_args: any) => {
+          await togglePreviewCmd.run();
+        }
+      )
     );
 }
 

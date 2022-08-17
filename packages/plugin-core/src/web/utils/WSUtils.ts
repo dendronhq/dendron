@@ -33,8 +33,8 @@ export class WSUtilsWeb {
   }
 
   public getNoteFromDocument(document: vscode.TextDocument) {
-    const txtPath = document.uri.fsPath;
-    const fname = path.basename(txtPath, ".md");
+    const txtPath = document.uri;
+    const fname = Utils.basename(txtPath).slice(0, -3); //remove .md;
     let vault: DVault;
     try {
       vault = this.getVaultFromDocument(document);

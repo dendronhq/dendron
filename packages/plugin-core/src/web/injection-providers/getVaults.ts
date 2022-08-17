@@ -1,8 +1,6 @@
 import { DVault } from "@dendronhq/common-all";
-import YAML from "js-yaml";
 import "reflect-metadata";
 import { Uri } from "vscode";
-import { Utils } from "vscode-uri";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
 
 /**

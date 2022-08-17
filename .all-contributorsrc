@@ -2075,6 +2075,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "HenryC-3",
+      "name": "Henry",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41246463?v=4",
+      "profile": "https://github.com/HenryC-3",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

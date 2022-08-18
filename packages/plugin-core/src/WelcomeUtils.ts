@@ -1,4 +1,6 @@
-import { TutorialEvents } from "@dendronhq/common-all";
+import {
+  TutorialEvents
+} from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";

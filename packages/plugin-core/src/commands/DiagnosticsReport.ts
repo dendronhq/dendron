@@ -36,7 +36,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const serverLastLines = serverLogFile.slice(-3000);
 
     const ext = ExtensionProvider.getExtension();
-    const config = ext.getDWorkspace().config;
+    const config = ext.getDWorkspace().config.toString();
     const port = ext.port;
 
     let wsFile: string;

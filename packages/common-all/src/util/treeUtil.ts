@@ -170,10 +170,10 @@ export class TreeUtils {
       (noteId) => {
         if (labelType) {
           return labelType === TreeViewItemLabelTypeEnum.filename
-            ? _.last(noteDict[noteId]?.fname.split("."))
-            : noteDict[noteId]?.title;
+            ? _.last(noteDict[noteId]?.fname.split("."))?.toLowerCase()
+            : noteDict[noteId]?.title.toLowerCase();
         } else {
-          return noteDict[noteId]?.title;
+          return noteDict[noteId]?.title.toLowerCase();
         }
       },
       // If titles are identical, sort by last updated date

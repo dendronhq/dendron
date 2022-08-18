@@ -14,6 +14,8 @@ import {
   shouldBubbleUpCreateNew,
   sortBySimilarity,
 } from "../../components/lookup/utils";
+import { ExtensionProvider } from "../../ExtensionProvider";
+import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
@@ -333,6 +335,73 @@ suite("onAccept", () => {
         });
         cmd.cleanUp();
         validateFnameSpy.restore();
+      });
+    }
+  );
+  describeMultiWS(
+    "GIVEN a note with invalid name that already exists",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "foo. bar.baz",
+          body: "note with invalid name",
+          genRandomId: true,
+        });
+      },
+      timeout: 5e3,
+    },
+    () => {
+      test("THEN accept lookup", async () => {
+        await VSCodeUtils.closeAllEditors();
+        const cmd = new NoteLookupCommand();
+        const { provider } = await cmd.gatherInputs();
+        const note = (
+          await ExtensionProvider.getEngine().findNotes({
+            fname: "foo. bar.baz",
+          })
+        )[0];
+        const item = {
+          ...note,
+          label: "foo. bar.baz",
+          detail: "",
+          alwaysShow: true,
+        };
+        const out = provider.shouldRejectItem!({ item });
+        expect(out).toBeFalsy();
+        cmd.cleanUp();
+      });
+    }
+  );
+  describeMultiWS(
+    "GIVEN a new item with invalid name",
+    {
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      timeout: 5e3,
+    },
+    () => {
+      test("THEN reject lookup", async () => {
+        await VSCodeUtils.closeAllEditors();
+        const cmd = new NoteLookupCommand();
+        const { provider } = await cmd.gatherInputs();
+        const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const note = await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "foo. bar.baz",
+          body: "note with invalid name",
+          genRandomId: true,
+        });
+        const item = {
+          ...note,
+          label: "Create New",
+          detail: "Note does not exist. Create?",
+          alwaysShow: true,
+        };
+        const out = provider.shouldRejectItem!({ item });
+        expect(out).toBeTruthy();
+        cmd.cleanUp();
       });
     }
   );

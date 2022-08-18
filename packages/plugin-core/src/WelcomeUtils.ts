@@ -1,7 +1,4 @@
-import {
-  QuickstartTutorialTestGroups,
-  TutorialEvents,
-} from "@dendronhq/common-all";
+import { TutorialEvents } from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -9,7 +6,6 @@ import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspa
 import { LaunchTutorialCommandInvocationPoint } from "./constants";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 async function initWorkspace() {
   // ^z5hpzc3fdkxs

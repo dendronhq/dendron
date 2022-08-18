@@ -35,7 +35,7 @@ import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
 } from "./workspaceInitializer";
-import { TogglePreviewLock } from "../commands/TogglePreviewLock";
+import { TogglePreviewLockCommand } from "../commands/TogglePreviewLock";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -162,7 +162,7 @@ export class TutorialInitializer
               SegmentClient.instance().anonymousId
             ) === QuickstartTutorialTestGroups["quickstart-with-lock"]
           ) {
-            await new TogglePreviewLock(preview).execute();
+            await new TogglePreviewLockCommand(preview).execute();
           }
         }, 1000);
       }

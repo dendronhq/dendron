@@ -1,13 +1,16 @@
 import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
-import { describe, beforeEach } from "mocha";
+import { describe, beforeEach, afterEach } from "mocha";
 import { ConfigureLocalOverride } from "../../commands/ConfigureLocalOverride";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
+import { SinonStub } from "sinon";
 
 suite("ConfigureLocalOverrideCommand", function () {
+  let homeDirStub: SinonStub;
+
   describeSingleWS("WHEN run", {}, () => {
     let cmd: ConfigureLocalOverride;
 
@@ -34,7 +37,10 @@ suite("ConfigureLocalOverrideCommand", function () {
 
     describe("AND scope is LOCAL", () => {
       beforeEach(() => {
-        TestEngineUtils.mockHomeDir();
+        homeDirStub = TestEngineUtils.mockHomeDir();
+      });
+      afterEach(() => {
+        homeDirStub.restore();
       });
 
       test("THEN the configuration file for the workspace should open", async () => {

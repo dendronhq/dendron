@@ -30,12 +30,6 @@ export function showWelcome(assetUri: vscode.Uri) {
       "vault",
       "welcome.html"
     );
-    const group = TutorialInitializer.getTutorialType();
-
-    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcome"]) {
-      return initWorkspace();
-    }
-
     const { content } = readMD(uri.fsPath);
     const title = "Welcome to Dendron";
 

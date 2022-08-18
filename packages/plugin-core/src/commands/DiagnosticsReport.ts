@@ -56,7 +56,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       "---",
       "# Server Logs",
       serverLastLines,
-      "# Dendron Confg",
+      "# Dendron Config",
       config,
       "# Port",
       port,

@@ -45,8 +45,10 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
+import { Parent } from "mdast";
 // @ts-ignore
 import position from "unist-util-position";
+import { MdastUtils } from "./utils";
 
 export { ProcFlavor };
 
@@ -406,6 +408,7 @@ export class MDUtilsV5 {
     // add additional plugin for publishing
     let pRehype = pRemarkParse
       .use(remark2rehype, {
+        // @ts-ignore
         allowDangerousHtml: true,
         handlers: {
           table: HastUtils.table,
@@ -512,6 +515,19 @@ export class MDUtilsV5 {
 }
 
 var own = {}.hasOwnProperty;
+MdastUtils;
+
+type HNode = Partial<Parent> & {
+  start?: number;
+  end?: number;
+};
+
+type HFunction = (
+  node: HNode,
+  tagName: string,
+  props: any,
+  children?: any
+) => any;
 
 class HastUtils {
   // Transform an unknown node.
@@ -608,7 +624,7 @@ class HastUtils {
     return result;
   }
 
-  static table(h: any, node: any) {
+  static table(h: HFunction, node: any) {
     var rows = node.children;
     var index = rows.length;
     var align = node.align;
@@ -639,6 +655,8 @@ class HastUtils {
       result[index] = h(rows[index], "tr", HastUtils.wrap(out, true));
     }
 
+    // EXAMPLE OF UPDATING CLASSNAME
+    _.set(node, "data.hProperties.className", ["responsive"]);
     return h(
       node,
       "table",

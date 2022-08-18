@@ -128,7 +128,8 @@ export class DoctorUtils {
   static async validateFilenameFromDocumentAndPromptIfNecessary(
     document: vscode.TextDocument
   ) {
-    const wsUtils = ExtensionProvider.getExtension().wsUtils;
+    const extension = ExtensionProvider.getExtension();
+    const wsUtils = extension.wsUtils;
     const filename = path.basename(document.fileName, ".md");
     const note = wsUtils.getNoteFromDocument(document);
 
@@ -149,7 +150,7 @@ export class DoctorUtils {
     ).then(async (resp) => {
       if (resp && resp.title === "Rename note") {
         await wsUtils.openNote(note);
-        const cmd = new RenameNoteCommand();
+        const cmd = new RenameNoteCommand(extension);
         await cmd.run();
       }
     });

@@ -60,8 +60,7 @@
         {
           "id": "dendron-view",
           "title": "Dendron",
-          "icon": "media/icons/dendron-activity-bar-icon.svg",
-          "when": "shellExecutionSupported"
+          "icon": "media/icons/dendron-activity-bar-icon.svg"
         }
       ]
     },
@@ -89,7 +88,7 @@
         {
           "id": "dendron.treeView",
           "name": "Tree View",
-          "when": "dendron:pluginActive  && shellExecutionSupported",
+          "when": "dendron:pluginActive",
           "icon": "media/icons/dendron-vscode.svg"
         },
         {
@@ -658,7 +657,7 @@
         },
         {
           "command": "dendron.mergeNote",
-          "when": "dendron:pluginActive"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.randomNote",
@@ -902,7 +901,7 @@
         },
         {
           "command": "dendron.togglePreviewLock",
-          "when": "dendron:pluginActive"
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.pasteFile",

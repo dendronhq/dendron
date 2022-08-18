@@ -25674,7 +25674,7 @@ unist-util-map@^1.0.3:
   dependencies:
     object-assign "^4.0.1"
 
-unist-util-position@^3.0.0:
+unist-util-position@3.1.0, unist-util-position@^3.0.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/unist-util-position/-/unist-util-position-3.1.0.tgz#1c42ee6301f8d52f47d14f62bbdb796571fa2d47"
   integrity sha512-w+PkwCbYSFw8vpgWD0v7zRCl1FpY3fjDSQ3/N/wNd9Ffa4gPi8+4keqt99N3XW6F99t/mUzp2xAhNmfKWp95QA==

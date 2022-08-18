@@ -9,7 +9,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
-  ProcFlavor
+  ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
@@ -32,6 +32,7 @@ import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
+import u from "unist-builder";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { BacklinkOpts, backlinksHover } from "./remark/backlinksHover";
@@ -44,6 +45,8 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
+// @ts-ignore
+import position from "unist-util-position";
 
 export { ProcFlavor };
 
@@ -402,7 +405,12 @@ export class MDUtilsV5 {
 
     // add additional plugin for publishing
     let pRehype = pRemarkParse
-      .use(remark2rehype, { allowDangerousHtml: true })
+      .use(remark2rehype, {
+        allowDangerousHtml: true,
+        handlers: {
+          table: HastUtils.table,
+        },
+      })
       .use(rehypePrism, { ignoreMissing: true })
       .use(raw)
       .use(slug);
@@ -500,5 +508,154 @@ export class MDUtilsV5 {
       data
     );
     return proc.use(rehypeStringify);
+  }
+}
+
+var own = {}.hasOwnProperty;
+
+class HastUtils {
+  // Transform an unknown node.
+  static unknown(h: any, node: any) {
+    if (HastUtils.text(node)) {
+      return h.augment(node, u("text", node.value));
+    }
+
+    return h(node, "div", HastUtils.all(h, node));
+  }
+
+  // Visit a node.
+  static one(h: any, node: any, parent: any) {
+    var type = node && node.type;
+    var fn = own.call(h.handlers, type) ? h.handlers[type] : null;
+
+    // Fail on non-nodes.
+    if (!type) {
+      throw new Error("Expected node, got `" + node + "`");
+    }
+
+    return (typeof fn === "function" ? fn : HastUtils.unknown)(h, node, parent);
+  }
+
+  // Check if the node should be renderered as a text node.
+  static text(node: any) {
+    var data = node.data || {};
+
+    if (
+      own.call(data, "hName") ||
+      own.call(data, "hProperties") ||
+      own.call(data, "hChildren")
+    ) {
+      return false;
+    }
+
+    return "value" in node;
+  }
+
+  static all(h: any, parent: any) {
+    var nodes = parent.children || [];
+    var length = nodes.length;
+    var values: any[] = [];
+    var index = -1;
+    var result;
+    var head;
+
+    while (++index < length) {
+      result = HastUtils.one(h, nodes[index], parent);
+
+      if (result) {
+        if (index && nodes[index - 1].type === "break") {
+          if (result.value) {
+            result.value = result.value.replace(/^\s+/, "");
+          }
+
+          head = result.children && result.children[0];
+
+          if (head && head.value) {
+            head.value = head.value.replace(/^\s+/, "");
+          }
+        }
+
+        values = values.concat(result);
+      }
+    }
+
+    return values;
+  }
+
+  // Wrap `nodes` with line feeds between each entry.
+  // Optionally adds line feeds at the start and end.
+  static wrap(nodes: any, loose: any) {
+    var result = [];
+    var index = -1;
+    var length = nodes.length;
+
+    if (loose) {
+      result.push(u("text", "\n"));
+    }
+
+    while (++index < length) {
+      if (index) {
+        result.push(u("text", "\n"));
+      }
+
+      result.push(nodes[index]);
+    }
+
+    if (loose && nodes.length !== 0) {
+      result.push(u("text", "\n"));
+    }
+
+    return result;
+  }
+
+  static table(h: any, node: any) {
+    var rows = node.children;
+    var index = rows.length;
+    var align = node.align;
+    var alignLength = align.length;
+    var result = [];
+    var pos;
+    var row;
+    var out;
+    var name;
+    var cell;
+
+    while (index--) {
+      row = rows[index].children;
+      name = index === 0 ? "th" : "td";
+      pos = alignLength;
+      out = [];
+
+      while (pos--) {
+        cell = row[pos];
+        out[pos] = h(
+          cell,
+          name,
+          { align: align[pos] },
+          cell ? HastUtils.all(h, cell) : []
+        );
+      }
+
+      result[index] = h(rows[index], "tr", HastUtils.wrap(out, true));
+    }
+
+    return h(
+      node,
+      "table",
+      HastUtils.wrap(
+        [
+          h(result[0].position, "thead", HastUtils.wrap([result[0]], true)),
+          h(
+            {
+              start: position.start(result[1]),
+              end: position.end(result[result.length - 1]),
+            },
+            "tbody",
+            HastUtils.wrap(result.slice(1), true)
+          ),
+        ],
+        true
+      )
+    );
   }
 }

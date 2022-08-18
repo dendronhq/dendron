@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN remark WHEN table is present "HTML: table is present: PREVIEW" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Software Name</th><th>Comparison w/ Dendron</th><th>Flexible Hierarchy</th><th>Open source</th><th>Local-first</th><th>Fast and performant</th><th>Bi-directional links</th><th>Outlining</th></tr></thead><tbody><tr><td>Dendron</td><td>How?</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr></tbody></table>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN remark WHEN table is present "HTML: table is present: PUBLISHING" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Software Name</th><th>Comparison w/ Dendron</th><th>Flexible Hierarchy</th><th>Open source</th><th>Local-first</th><th>Fast and performant</th><th>Bi-directional links</th><th>Outlining</th></tr></thead><tbody><tr><td>Dendron</td><td>How?</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr></tbody></table>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN remark WHEN table is present "HTML: table is present: REGULAR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Software Name</th><th>Comparison w/ Dendron</th><th>Flexible Hierarchy</th><th>Open source</th><th>Local-first</th><th>Fast and performant</th><th>Bi-directional links</th><th>Outlining</th></tr></thead><tbody><tr><td>Dendron</td><td>How?</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr></tbody></table>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

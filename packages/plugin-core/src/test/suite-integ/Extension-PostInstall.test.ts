@@ -110,6 +110,7 @@ suite("GIVEN Dendron plugin activation", function () {
         timeout: 1e5,
       },
       () => {
+        after(() => afterHook());
         test("THEN set initial install called", () => {
           expect(setInitialInstallSpy.called).toBeTruthy();
         });
@@ -122,8 +123,6 @@ suite("GIVEN Dendron plugin activation", function () {
         test("THEN show telemetry notice", () => {
           expect(showTelemetryNoticeSpy.called).toBeTruthy();
         });
-
-        this.afterAll(afterHook);
       }
     );
   });

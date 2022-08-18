@@ -289,10 +289,10 @@ export class EngineNoteProvider
       (noteProps) => {
         if (labelType) {
           return labelType === TreeViewItemLabelTypeEnum.filename
-            ? _.last(noteProps.fname.split("."))
-            : noteProps.title;
+            ? _.last(noteProps.fname.split("."))?.toLowerCase()
+            : noteProps.title.toLowerCase();
         } else {
-          return noteProps.title;
+          return noteProps.title.toLowerCase();
         }
       },
       // If titles are identical, sort by last updated date

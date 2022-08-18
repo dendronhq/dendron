@@ -211,4 +211,9 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Add a custom banner to the site",
       desc: "EXPERIMENTAL: do not use",
     },
+    privateNoteBehavior: {
+      label:
+        "Set how wikilinks and note references are converted when publishing",
+      desc: "When the note that a wikilink points to is private and when privateNoteBehavior is set to `aliasFallback`, it's replaced with a paragraph that contains an the link's alias",
+    },
   };

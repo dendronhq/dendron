@@ -49,6 +49,7 @@ export type DendronPublishingConfig = {
   cognitoClientId?: string;
   enablePrettyLinks: boolean;
   siteBanner?: string;
+  privateNoteBehavior: "privateLink" | "aliasFallback";
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &
@@ -108,5 +109,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableRandomlyColoredTags: true,
     enableTaskNotes: true,
     enablePrettyLinks: true,
+    privateNoteBehavior: "privateLink",
   };
 }

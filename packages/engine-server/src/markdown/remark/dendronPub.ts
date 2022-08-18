@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DendronError,
+  DendronPublishingConfig,
   DEngineClient,
   DVault,
   ERROR_SEVERITY,
@@ -394,23 +395,40 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           ],
         } as RehypeLinkData;
 
+        const privateBehavior = (
+          ConfigUtils.getPublishingConfig(config) as DendronPublishingConfig
+        ).privateNoteBehavior;
+
         if (value === "403") {
-          _node.data = {
-            alias,
-            hName: "a",
-            hProperties: {
-              title: "Private",
-              href: "https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html",
-              target: "_blank",
-              class: "private",
-            },
-            hChildren: [
-              {
-                type: "text",
-                value: `${alias} (Private)`,
+          if (privateBehavior === "aliasFallback" && data.alias) {
+            _node.data = {
+              alias,
+              type: "paragraph",
+              children: [
+                {
+                  type: "text",
+                  value: alias,
+                },
+              ],
+            };
+          } else {
+            _node.data = {
+              alias,
+              hName: "a",
+              hProperties: {
+                title: "Private",
+                href: "https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html",
+                target: "_blank",
+                class: "private",
               },
-            ],
-          } as RehypeLinkData;
+              hChildren: [
+                {
+                  type: "text",
+                  value: `${alias} (Private)`,
+                },
+              ],
+            } as RehypeLinkData;
+          }
         }
       }
       if (node.type === DendronASTTypes.REF_LINK_V2) {

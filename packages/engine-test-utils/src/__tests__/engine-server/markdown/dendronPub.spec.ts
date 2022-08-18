@@ -3,6 +3,7 @@ import {
   DEngineClient,
   DVault,
   IntermediateDendronConfig,
+  StrictConfigV5,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -54,6 +55,13 @@ const verifyPrivateLink = async (
   capitalize = true
 ) => {
   return TestUnifiedUtils.verifyPrivateLink({
+    contents: vfile.contents as string,
+    value: capitalize ? _.capitalize(value) : value,
+  });
+};
+
+const verifyAlias = async (vfile: VFile, value: string, capitalize = true) => {
+  return TestUnifiedUtils.verifyAlias({
     contents: vfile.contents as string,
     value: capitalize ? _.capitalize(value) : value,
   });
@@ -202,70 +210,23 @@ describe("GIVEN dendronPub", () => {
   });
 
   describe("WHEN publish and private hierarchies", () => {
-    const fname = fnameBeta;
-    const config = genPublishConfigWithPublicPrivateHierarchies();
+    let config: StrictConfigV5;
 
-    describe("AND WHEN noteRef", () => {
-      describe("AND WHEN noteref of published note", () => {
-        let resp: VFile;
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname,
-                linkText: `![[beta]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
-        test("THEN published note is rendered", async () => {
-          await verifyPublicNoteRef(resp, fnameBeta);
-        });
-        test("THEN private link in published note is hidden", async () => {
-          await verifyPrivateLink(resp, fnameAlpha);
-        });
-      });
-
-      describe("AND WHEN noteref of private note", () => {
-        let resp: VFile;
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname,
-                linkText: `![[alpha]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
-        test("THEN private note is not rendered", async () => {
-          await verifyPrivateNoteRef(resp);
-        });
-      });
+    beforeEach(() => {
+      config = genPublishConfigWithPublicPrivateHierarchies();
     });
 
-    describe("AND WHEN wikilink", () => {
+    describe("AND WHEN noteref of published note", () => {
       let resp: VFile;
+
       beforeAll(async () => {
         await runEngineTestV5(
           async (opts) => {
             resp = await createProc({
               ...opts,
               config,
-              fname,
-              linkText: `[[beta]] [[alpha]]`,
+              fname: fnameBeta,
+              linkText: `![[beta]]`,
             });
           },
           {
@@ -274,11 +235,123 @@ describe("GIVEN dendronPub", () => {
           }
         );
       });
+
+      test("THEN published note is rendered", async () => {
+        await verifyPublicNoteRef(resp, fnameBeta);
+      });
+      test("THEN private link in published note is hidden", async () => {
+        await verifyPrivateLink(resp, fnameAlpha);
+      });
+    });
+
+    describe("AND WHEN noteref of private note", () => {
+      let resp: VFile;
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname: fnameBeta,
+              linkText: `![[alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+      test("THEN private note is not rendered", async () => {
+        await verifyPrivateNoteRef(resp);
+      });
+    });
+
+    describe("AND WHEN wikilink", () => {
+      let resp: VFile;
+
       test("THEN public link is rendered", async () => {
+        resp = await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname: fnameBeta,
+              linkText: `[[beta]] [[alpha]]`,
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
         await verifyPublicLink(resp, fnameBeta);
       });
-      test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+
+      describe("AND WHEN wikilink has an alias", () => {
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname: fnameBeta,
+                linkText: `[[Alpha|alpha]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        describe("AND WHEN privateNoteBehavior config is aliasFallback", () => {
+          beforeAll(() => {
+            ConfigUtils.setPublishProp(
+              config,
+              "privateNoteBehavior",
+              "aliasFallback"
+            );
+          });
+          test("THEN a wikilink should be converted to a paragraph with the note alias as its text", async () => {
+            await verifyAlias(resp!, "Alpha");
+          });
+        });
+
+        describe("AND WHEN privateNoteBehavior config is privateLink", () => {
+          beforeAll(() => {
+            ConfigUtils.setPublishProp(
+              config,
+              "privateNoteBehavior",
+              "privateLink"
+            );
+          });
+          test("THEN private link in published note is hidden", async () => {
+            await verifyPrivateLink(resp!, "Alpha");
+          });
+        });
+      });
+
+      describe("AND WHNEN wikilink has no alias", () => {
+        beforeAll(async () => {
+          await runEngineTestV5(
+            async (opts) => {
+              resp = await createProc({
+                ...opts,
+                config,
+                fname: fnameBeta,
+                linkText: `[[alpha]]`,
+              });
+            },
+            {
+              preSetupHook: ENGINE_HOOKS.setupLinks,
+              expect,
+            }
+          );
+        });
+        test("THEN private link in published note is hidden", async () => {
+          await verifyPrivateLink(resp!, "Alpha");
+        });
       });
     });
 
@@ -291,7 +364,7 @@ describe("GIVEN dendronPub", () => {
             resp = await createProc({
               ...opts,
               config,
-              fname,
+              fname: fnameBeta,
               linkText: `[[dendron://${vaultName}/beta]] [[dendron://${vaultName}/alpha]]`,
             });
           },

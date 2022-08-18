@@ -134,6 +134,7 @@ export class WorkspaceTestUtils {
         enableRandomlyColoredTags: true,
         enableTaskNotes: true,
         enablePrettyLinks: true,
+        privateNoteBehavior: "privateLink",
       },
     };
     if (duplicateNoteBehavior) {

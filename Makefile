@@ -16,3 +16,8 @@ cleanBuild:
 	echo "Clean building..."
 	make clean
 	make install
+
+db-gen:
+	cd packages/engine-server && yarn prisma generate 
+	cd packages/engine-server && rm -rf lib/generated-prisma-client
+	cd packages/engine-server && cp -R src/generated-prisma-client lib/generated-prisma-client

@@ -493,6 +493,7 @@ export class FileStorage implements DStore {
       new SQLiteMetadataStore({ wsRoot: this.wsRoot });
       if (!(await SQLiteMetadataStore.isDBInitialized())) {
         await SQLiteMetadataStore.createAllTables();
+        await SQLiteMetadataStore.createWorkspace(this.wsRoot);
       }
     }
 

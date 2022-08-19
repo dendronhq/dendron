@@ -10,7 +10,7 @@ describe("GIVEN sqlite store", () => {
         const dirList = fs.readdirSync(wsRoot);
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
-        const notes = await SQLiteMetadataStore.prisma().notes.findMany();
+        const notes = await SQLiteMetadataStore.prisma().note.findMany();
         expect(_.size(engine.notes)).toEqual(notes.length);
       },
       {

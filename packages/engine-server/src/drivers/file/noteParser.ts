@@ -98,6 +98,7 @@ export class NoteParser extends ParserBase {
       notesById,
       notesByFname,
     };
+    const wsRoot = this.engine.wsRoot;
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
     // Keep track of which notes in cache no longer exist
@@ -281,10 +282,13 @@ export class NoteParser extends ParserBase {
     ) {
       this.logger.info({ ctx, msg: "initialize metadata" });
       try {
+        // create the vault
+        await SQLiteMetadataStore.prisma().dVault.create({
+          data: { fsPath: vault.fsPath, wsRoot },
+        });
         // if vault is not initialized, bulk insert all note metadata into sqlite
-        await SQLiteMetadataStore.bulkInsertAllNotesAndUpdateVaultMetadata({
+        await SQLiteMetadataStore.bulkInsertAllNotes({
           notesIdDict: notesById,
-          vault,
         });
       } catch (err) {
         this.logger.error({ ctx, msg: "issue doing bulk insert", vault });

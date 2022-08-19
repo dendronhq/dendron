@@ -1,30 +1,46 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["darwin-arm64", "darwin"]
-  output = "./../src/generated-prisma-client"
+  output        = "./../src/generated-prisma-client"
 }
 
 datasource db {
   provider = "sqlite"
   // this value is filled in dynamically when starting a workspace
-  url      = ""
+  // url      = ""
   // uncomment the below when testing
-  // url      = "file:./dev.db"
+  url      = "file:./dev.db"
 }
 
-model notes {
-  fname   String?
-  id      String  @id
-  title   String?
-  vault   String?
-  updated Int?
-  stub    Boolean?
+model Note {
+  id           String               @id
+  fname        String?
+  title        String?
+  vault        DVault               @relation(fields: [dVaultId], references: [id])
+  updated      Int?
+  created      Int?
+  stub         Boolean?
+  // anchors      Unsupported("json")?
+  // desc         String?
+  // links        Unsupported("json")?
+  dVaultId  Int
 
   @@index([id], map: "idx_notes_id")
 }
 
-model VaultMetadata {
-    id        Int      @id @default(autoincrement())
-    relativePath String
-    schemaVersion Int
+model DVault {
+  id        Int @id @default(autoincrement())
+  name      String?   @unique
+  fsPath    String
+  wsRoot    String
+  workspace Workspace @relation(fields: [wsRoot], references: [wsRoot], onDelete: Cascade)
+  Note      Note[]
+
+  @@unique([wsRoot, fsPath])
+}
+
+model Workspace {
+  wsRoot              String   @id @unique
+  prismaSchemaVersion Int
+  vaults              DVault[]
 }

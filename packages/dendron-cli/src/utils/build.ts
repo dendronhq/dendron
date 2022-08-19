@@ -1,5 +1,9 @@
 /* eslint-disable no-console */
-import { DendronError, error2PlainObject } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DendronError,
+  error2PlainObject,
+} from "@dendronhq/common-all";
 import { createLogger, findUpTo } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
@@ -16,6 +20,7 @@ type PkgJson = {
   repository: PkgRepository;
   devDependencies: { [key: string]: string };
   icon: string;
+  license: string;
 };
 
 type PkgRepository = {
@@ -39,6 +44,7 @@ export enum PublishEndpoint {
 export enum ExtensionTarget {
   DENDRON = "dendron",
   NIGHTLY = "nightly",
+  ENTERPRISE = "enterprise",
 }
 
 const LOCAL_NPM_ENDPOINT = "http://localhost:4873";
@@ -193,18 +199,39 @@ export class BuildUtils {
     let version;
     let description;
     let icon;
-
-    if (target === ExtensionTarget.NIGHTLY) {
-      version = await this.getIncrementedVerForNightly();
-      description =
-        "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
-      icon = "media/logo-bw.png";
+    let license: string = "GPLv3";
+    let name: string;
+    switch (target) {
+      case ExtensionTarget.DENDRON: {
+        name = target.toString();
+        break;
+      }
+      case ExtensionTarget.NIGHTLY: {
+        name = target.toString();
+        version = await this.getIncrementedVerForNightly();
+        description =
+          "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
+        icon = "media/logo-bw.png";
+        break;
+      }
+      case ExtensionTarget.ENTERPRISE: {
+        name = `dendron-enterprise`;
+        version = await this.getIncrementedVerForNightly();
+        description = "Dendron - Enterprise Version";
+        license =
+          "see license in https://github.com/dendronhq/dendron/wiki/Enterprise-EULA";
+        break;
+      }
+      default: {
+        assertUnreachable(target);
+      }
     }
 
     this.updatePkgMeta({
       pkgPath,
-      name: target.toString(),
-      displayName: target.toString(),
+      name,
+      license,
+      displayName: name,
       description,
       main: "./dist/extension.js",
       repository: {
@@ -430,11 +457,13 @@ export class BuildUtils {
     main,
     repository,
     version,
+    license,
     icon,
   }: {
     pkgPath: string;
     name: string;
     displayName: string;
+    license: string;
   } & Partial<PkgJson>) {
     const pkg = fs.readJSONSync(pkgPath) as PkgJson;
     pkg.name = name;
@@ -457,6 +486,7 @@ export class BuildUtils {
       pkg.icon = icon;
     }
     pkg.main = "dist/extension.js";
+    pkg.license = license;
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });
   }
 

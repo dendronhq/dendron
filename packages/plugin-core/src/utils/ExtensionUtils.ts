@@ -159,6 +159,23 @@ export class ExtensionUtils {
     return ext as vscode.Extension<any>;
   }
 
+  static isEnterprise(context: vscode.ExtensionContext) {
+    // return context.extension.id === "dendron.@dendronhq/plugin-core";
+    return context.extension.id === "dendron.dendron-enterprise";
+  }
+
+  static hasValidLicense() {
+    // @ts-ignore
+    const enterpriseLicense = MetadataService.instance().getMeta()[
+      "enterpriseLicense"
+    ] as string;
+    // TODO
+    if (!enterpriseLicense) {
+      return false;
+    }
+    return true;
+  }
+
   static _TUTORIAL_IDS: Set<string> | undefined;
   static getTutorialIds(): Set<string> {
     if (_.isUndefined(ExtensionUtils._TUTORIAL_IDS)) {
@@ -398,6 +415,7 @@ export class ExtensionUtils {
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
     const trackProps = {
+      extensionId: ext.context.extension.id,
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
       numNotes,

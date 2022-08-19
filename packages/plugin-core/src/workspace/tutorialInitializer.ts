@@ -35,7 +35,7 @@ import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
 } from "./workspaceInitializer";
-import { TogglePreviewLockCommand} from "../commands/TogglePreviewLock";
+import { TogglePreviewLockCommand } from "../commands/TogglePreviewLock";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -47,6 +47,9 @@ export class TutorialInitializer
 {
   static getTutorialType() {
     if (isABTest(CURRENT_TUTORIAL_TEST)) {
+      // NOTE: to force a tutorial group, uncomment the below code
+      // return QuickstartTutorialTestGroups.
+
       return CURRENT_TUTORIAL_TEST.getUserGroup(
         SegmentClient.instance().anonymousId
       );

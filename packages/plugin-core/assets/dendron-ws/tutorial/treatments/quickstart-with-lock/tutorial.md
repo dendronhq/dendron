@@ -1,8 +1,8 @@
 ---
 id: wv8pjhxjjrp5bnwlz2kznsg
-title: Quickstart with Lock
+title: Tutorial
 desc: ""
-updated: 1659722874353
+updated: 1660931467392
 created: 1659721741451
 currentStep: 0
 totalSteps: 0
@@ -14,66 +14,54 @@ You are currently in the tutorial vault (a vault is the folder where your notes 
 
 ## Create a Note
 
-1. Use `Ctrl+L` / `Cmd+L` to bring up the lookup prompt
+1. Use `Ctrl+L` / `Cmd+L` to bring up the **lookup prompt**
 1. Type `dendron` and select `Create New`
 
-- > NOTE: After you press enter, Dendron will create and open the `dendron` note. Use `<CTRL>-<TAB>` to come back to this note
+Congrats, you just **created your first note**! Notes in Dendron are plain text markdown with [frontmatter](https://wiki.dendron.so/notes/ffec2853-c0e0-4165-a368-339db12c8e4b) on top. You can edit them in Dendron or using ~~vim~~ your favourite text editor.
 
-You just created your first note! Notes in Dendron are just plain text markdown with some [frontmatter](https://wiki.dendron.so/notes/ffec2853-c0e0-4165-a368-339db12c8e4b) on the top. You can edit them in Dendron or using ~~vim~~ your favourite text editor.
-
-- > NOTE: You might have noticed that the tutorial has not changed - this is because it is currently `locked`. This keeps the preview from changing as you change notes. Well teach you at the end how to unlock the tutorial
+> NOTE: You might have noticed that the tutorial preview has not changed - this is because it is currently `locked`. This keeps the preview from changing as you edit notes. We will teach you at the end how to unlock the preview.
 
 ## Find a Note
 
-1. Use `Ctrl+L` / `Cmd+L` to bring up the lookup prompt again
+1. Use `Ctrl+L` / `Cmd+L` to bring up the **lookup prompt** again
 1. Type `tutorial` and press `<ENTER>`
+   > TIP: you don't have to type out the entire query, press `<TAB>` to autocomplete
 
-- > TIP: you don't have to type out the entire query, press `<TAB>` to autocomplete
-
-You just `looked up` a note!
-
-- > NOTE: in Dendron, you can find or create notes using the lookup prompt
+You just **found a note**. We refer to both finding and creating of notes using the **lookup prompt** as performing a **lookup**.
 
 ## Organize your Notes
 
-1. Bring up the lookup prompt again
-1. Type `tutorial.one`
+1. Dendron has a custom [Tree View](https://wiki.dendron.so/notes/hur7r6gr3kqa56s2vme986j) to view your notes. If it's not currently in focus, you can use `CTRL+SHIFT+P`/`CMD+SHIFT+P` to open the command prompt and type in [`Dendron: focus on tree view`](command:dendron.treeView.focus) to make it appear
+1. **Lookup** `tutorial.one`. Notice that the Dendron Tree View will correctly nest the `one` note under the `tutorial` note.
 
-You just created your first hierarchy!
-
-- > NOTE: hierarchies in Dendron are just `.` delimited files. This makes each note both a file and a folder and makes it easy to keep your notes organized
-
-- > TIP: You can use the [Dendron Tree View](https://wiki.dendron.so/notes/hur7r6gr3kqa56s2vme986j) to view your hierarchy. If it's not currently in focus, you can use `CTRL+SHIFT+P`/`CMD+SHIFT+P` to open the command prompt and type in [`Dendron: focus on tree view`](command:dendron.treeView.focus) to make it appear
+You just **created your first hierarchy**!
+Hierarchies in Dendron are just `.` delimited files. This makes each note both a file and a folder and makes it easy to keep your notes organized
 
 ## Create a link
 
-1. In the current note, type `[[` - this should trigger the autocomplete. You can type `den` to narrow it down to `dendron` and hit enter
-<!-- Enter '[[' below-->
+1. In `tutorial.one`, type `[[` - this should trigger the autocomplete. You can type `den` to narrow it down to `dendron` and hit enter
 
-<!-- End space-->
+<div style="position: relative; padding-bottom: 64.5933014354067%; height: 0;"><iframe src="https://www.loom.com/embed/ef1cedcbf5394f14ae4b13afd1b6418a" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
 
-You just created your first link!
+You just **created a link**! If you hover your mouse over the link, you can get a preview of the contents inside the note!
 
-- > NOTE: the links with the `[[` are called wikilinks (because they were first popularized by Wikipedia)
-- > TIP: If you hover your mouse over the link, you can get a preview of the contents inside the note!
+> NOTE: the links with the `[[` are called wikilinks (because they were first popularized by Wikipedia)
 
 ## Navigate a link
 
 1. Move your text cursor over the link you just created. Hold down `<CTRL>+<ENTER>`/`<CMD>+<ENTER>`
 
-- > TIP: You can also use `CTRL+CLICK` or `CMD+CLICK` to navigate links via mouse
+You just **navigated the link**! You can also use `CTRL+CLICK` or `CMD+CLICK` to navigate links via mouse.
 
-You just navigated the link!
+## Rename a Note
 
-## Refactor a Note
+1. Inside [[dendron]], bring up the command prompt (`CTRL+SHIFT+P`/`CMD+SHIFT+P`) and type `Dendron: Rename Note`
+1. Replace [[dendron]] with `my-note` and then press `<ENTER>`
+1. Go back to [[tutorial.one]] - you should see the updated link!
 
-1. Inside [[my-note]], bring up the command prompt (`CTRL+SHIFT+P`/`CMD+SHIFT+P`) and type `Dendron: Rename Note`
-1. Replace `dendron` with `my-note` and then press `<ENTER>`
-1. Go back to [[tutorial one|tutorial.one]] - you should see the updated link!
-1. You just refactored the note!
+You just **renamed a note**! When you rename a note, Dendron updates all links and references of the original note.
 
-- > NOTE: when you rename a note, Dendron updates all links and references of the original note being renamed. Try switching back to [[tutorial]] to see the updated link!
-- > TIP: in addition to renaming one note at a time, dendron has [an entire collection](https://wiki.dendron.so/notes/srajljj10V2dl19nCSFiC) of refactoring commands that let you change headers, move around sections, and refactor entire hierarchies!
+Renaming is just one of the many ways you can [refactor](https://wiki.dendron.so/notes/srajljj10V2dl19nCSFiC) your knowledge base - some other common use cases include [renaming headings](https://wiki.dendron.so/notes/58rjapuyn1yjjcrf9sh6fby), [merging notes](https://wiki.dendron.so/notes/nxarb351z0kfbl5mkw3arw6), and [renaming entire hierarchies using regex](https://wiki.dendron.so/notes/9zwkp44wnlaa8p8dpt4w8tq).
 
 ## Unlock the Preview
 

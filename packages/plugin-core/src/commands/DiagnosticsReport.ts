@@ -5,6 +5,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { clipboard } from "../utils";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -32,8 +33,15 @@ export class DiagnosticsReportCommand extends BasicCommand<
       path.dirname(logPath),
       "dendron.server.log"
     );
-    const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
-    const serverLastLines = serverLogFile.slice(-3000);
+
+    const isDevMode = VSCodeUtils.isDevMode();
+    let serverLastLines: string = "";
+    if (isDevMode) {
+      const serverLogFile = fs.readFileSync(serverLogPath, {
+        encoding: "utf8",
+      });
+      serverLastLines = serverLogFile.slice(-3000);
+    }
 
     const ext = ExtensionProvider.getExtension();
     const config = ext.getDWorkspace().config.toString();

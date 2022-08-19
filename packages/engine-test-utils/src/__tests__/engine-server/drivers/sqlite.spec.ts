@@ -37,7 +37,6 @@ describe("GIVEN sqlite store", () => {
         const { error } = await engine.init();
         expect(error).toBeFalsy();
         const createAllSpy = sinon.spy(SQLiteMetadataStore, "createAllTables");
-        debugger;
         expect(createAllSpy.calledOnce).toBeFalsy();
       },
       {

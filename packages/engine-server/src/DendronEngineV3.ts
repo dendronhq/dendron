@@ -1,6 +1,5 @@
 import {
   BulkResp,
-  BulkWriteNotesOpts,
   ConfigUtils,
   CONSTANTS,
   DendronCompositeError,
@@ -17,15 +16,14 @@ import {
   DNoteLoc,
   DStore,
   DVault,
-  EngineDeleteNoteResp,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineSchemaWriteOpts,
+  EngineV3Base,
   EngineWriteOptsV2,
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  FindNoteOpts,
   FuseEngine,
   GetAnchorsRequest,
   GetDecorationsPayload,
@@ -83,16 +81,16 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
-import { NodeJSFileStore } from "./store";
-import { DConfig } from "./config";
-import { AnchorUtils, LinkUtils } from "./markdown";
-import { HookUtils, RequireHookResp } from "./topics/hooks";
-import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-import { FileStorage } from "./drivers/file/storev2";
-import { EngineUtils } from "./utils/engineUtils";
+import { DConfig } from "./config";
+import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
+import { FileStorage } from "./drivers/file/storev2";
+import { AnchorUtils, LinkUtils } from "./markdown";
+import { NodeJSFileStore } from "./store";
+import { HookUtils, RequireHookResp } from "./topics/hooks";
+import { EngineUtils } from "./utils/engineUtils";
 
 type DendronEngineOptsV3 = {
   wsRoot: string;
@@ -107,11 +105,10 @@ type DendronEngineOptsV3 = {
 };
 type DendronEnginePropsV3 = Required<DendronEngineOptsV3>;
 
-export class DendronEngineV3 implements DEngine {
+export class DendronEngineV3 extends EngineV3Base implements DEngine {
   public wsRoot: string;
   public store: DStore;
   protected props: DendronEnginePropsV3;
-  public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
   public configRoot: string;
@@ -125,9 +122,9 @@ export class DendronEngineV3 implements DEngine {
   static _instance: DendronEngineV3 | undefined;
 
   constructor(props: DendronEnginePropsV3) {
+    super(props.noteStore, props.logger);
     this.wsRoot = props.wsRoot;
     this.configRoot = props.wsRoot;
-    this.logger = props.logger;
     this.props = props;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
@@ -323,29 +320,6 @@ export class DendronEngineV3 implements DEngine {
         }),
       };
     }
-  }
-
-  /**
-   * See {@link DEngine.getNote}
-   */
-  async getNote(id: string): Promise<RespV3<NoteProps>> {
-    return this._noteStore.get(id);
-  }
-
-  /**
-   * See {@link DEngine.findNotes}
-   */
-  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
-    const resp = await this._noteStore.find(opts);
-    return resp.data ? resp.data : [];
-  }
-
-  /**
-   * See {@link DEngine.findNotesMeta}
-   */
-  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
-    const resp = await this._noteStore.findMetaData(opts);
-    return resp.data ? resp.data : [];
   }
 
   /**
@@ -574,169 +548,6 @@ export class DendronEngineV3 implements DEngine {
     });
     return {
       error,
-      data: changes,
-    };
-  }
-
-  /**
-   * See {@link DEngine.bulkWriteNotes}
-   */
-  async bulkWriteNotes(
-    opts: BulkWriteNotesOpts
-  ): Promise<Required<BulkResp<NoteChangeEntry[]>>> {
-    const writeResponses = await Promise.all(
-      opts.notes.map((note) => this.writeNote(note, opts.opts))
-    );
-    const errors = writeResponses
-      .flatMap((response) => response.error)
-      .filter(isNotNull);
-
-    return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
-      data: writeResponses
-        .flatMap((response) => response.data)
-        .filter(isNotUndefined),
-    };
-  }
-
-  /**
-   * See {@link DEngine.deleteNote}
-   */
-  async deleteNote(
-    id: string,
-    opts?: EngineDeleteOpts
-  ): Promise<EngineDeleteNoteResp> {
-    const ctx = "DEngine:deleteNote";
-    if (id === "root") {
-      throw new DendronError({
-        message: "",
-        status: ERROR_STATUS.CANT_DELETE_ROOT,
-      });
-    }
-    let changes: NoteChangeEntry[] = [];
-
-    const resp = await this._noteStore.getMetadata(id);
-    if (resp.error) {
-      return {
-        error: new DendronError({
-          status: ERROR_STATUS.DOES_NOT_EXIST,
-          message: `Unable to delete ${id}: Note does not exist`,
-        }),
-      };
-    }
-    // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
-    const noteToDelete = _.merge(resp.data, {
-      body: "",
-    });
-    this.logger.info({ ctx, noteToDelete, opts, id });
-    const noteAsLog = NoteUtils.toLogObj(noteToDelete);
-
-    if (!noteToDelete.parent) {
-      return {
-        error: new DendronError({
-          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-          message: `No parent found for ${noteToDelete.fname}`,
-        }),
-      };
-    }
-    const parentResp = await this._noteStore.get(noteToDelete.parent);
-    if (parentResp.error) {
-      return {
-        error: new DendronError({
-          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-          message: `Unable to delete ${noteToDelete.fname}: Note's parent does not exist in engine: ${noteToDelete.parent}`,
-          innerError: parentResp.error,
-        }),
-      };
-    }
-
-    let parentNote = parentResp.data;
-
-    let prevNote = { ...noteToDelete };
-    // If deleted note has children, create stub note with a new id in metadata store
-    if (!_.isEmpty(noteToDelete.children)) {
-      this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
-      const replacingStub = NoteUtils.create({
-        // the replacing stub should not keep the old note's body, id, and links.
-        // otherwise, it will be captured while processing links and will
-        // fail because this note is not actually in the file system.
-        ..._.omit(noteToDelete, ["id", "links", "body"]),
-        stub: true,
-      });
-
-      DNodeUtils.addChild(parentNote, replacingStub);
-
-      // Move children to new note
-      changes = changes.concat(
-        await this.updateChildrenWithNewParent(noteToDelete, replacingStub)
-      );
-
-      changes.push({ note: replacingStub, status: "create" });
-    } else {
-      // If parent is a stub, go upwards up the tree and delete rest of stubs
-      while (parentNote.stub) {
-        changes.push({ note: parentNote, status: "delete" });
-        if (!parentNote.parent) {
-          return {
-            error: new DendronError({
-              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-              message: `No parent found for ${parentNote.fname}`,
-            }),
-          };
-        }
-        // eslint-disable-next-line no-await-in-loop
-        const parentResp = await this._noteStore.get(parentNote.parent);
-        if (parentResp.data) {
-          prevNote = { ...parentNote };
-          parentNote = parentResp.data;
-        } else {
-          return {
-            error: new DendronError({
-              status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
-              message: `Unable to delete ${noteToDelete.fname}: Note ${parentNote?.fname}'s parent does not exist in engine: ${parentNote.parent}`,
-            }),
-          };
-        }
-      }
-    }
-
-    // Delete note reference from parent's child
-    const parentNotePrev = { ...parentNote };
-    this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
-    DNodeUtils.removeChild(parentNote, prevNote);
-
-    // Add an entry for the updated parent
-    changes.push({
-      prevNote: parentNotePrev,
-      note: parentNote,
-      status: "update",
-    });
-
-    const deleteResp = opts?.metaOnly
-      ? await this._noteStore.deleteMetadata(id)
-      : await this._noteStore.delete(id);
-    if (deleteResp.error) {
-      return {
-        error: new DendronError({
-          message: `Unable to delete note ${id}`,
-          severity: ERROR_SEVERITY.MINOR,
-          payload: deleteResp.error,
-        }),
-      };
-    }
-
-    changes.push({ note: noteToDelete, status: "delete" });
-    // Update metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
-    await this.updateNoteMetadataStore(changes);
-
-    this.logger.info({
-      ctx,
-      msg: "exit",
-      changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
-    });
-    return {
-      error: null,
       data: changes,
     };
   }
@@ -1296,62 +1107,6 @@ export class DendronEngineV3 implements DEngine {
         this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
     });
-  }
-
-  /**
-   * Move children of old parent note to new parent
-   * @return note change entries of modified children
-   */
-  private async updateChildrenWithNewParent(
-    oldParent: NotePropsMeta,
-    newParent: NotePropsMeta
-  ) {
-    const changes: NoteChangeEntry[] = [];
-    // Move existing note's children to new note
-    const childrenResp = await this._noteStore.bulkGet(oldParent.children);
-    childrenResp.forEach((child) => {
-      if (child.data) {
-        const childNote = child.data;
-        const prevChildNoteState = { ...childNote };
-        DNodeUtils.addChild(newParent, childNote);
-
-        // Add one entry for each child updated
-        changes.push({
-          prevNote: prevChildNoteState,
-          note: childNote,
-          status: "update",
-        });
-      }
-    });
-    return changes;
-  }
-
-  /**
-   * Update note metadata store based on note change entries
-   * @param changes entries to update
-   * @returns
-   */
-  private async updateNoteMetadataStore(
-    changes: NoteChangeEntry[]
-  ): Promise<RespV3<string>[]> {
-    return Promise.all(
-      changes.map((change) => {
-        switch (change.status) {
-          case "delete": {
-            return this._noteStore.deleteMetadata(change.note.id);
-          }
-          case "create":
-          case "update": {
-            return this._noteStore.writeMetadata({
-              key: change.note.id,
-              noteMeta: change.note,
-            });
-          }
-          default:
-            return { data: "" };
-        }
-      })
-    );
   }
 
   /**

@@ -5,6 +5,7 @@ import {
   IDataStore,
   IFileStore,
   INoteStore,
+  ReducedDEngine,
   NoteMetadataStore,
   NoteProps,
   NotePropsMeta,
@@ -15,7 +16,6 @@ import { container, Lifecycle } from "tsyringe";
 import { ILookupProvider } from "../../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../../engine/DendronEngineV3Web";
-import { IReducedEngineAPIService } from "../../engine/IReducedEngineApiService";
 import { VSCodeFileStore } from "../../engine/store/VSCodeFileStore";
 import { ITreeViewConfig } from "../../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../../views/treeView/TreeViewDummyConfig";
@@ -38,17 +38,17 @@ export async function setupTestEngineContainer() {
   await setupHierarchyForLookupTests(vaults, wsRoot);
 
   container.register<EngineEventEmitter>("EngineEventEmitter", {
-    useToken: "IReducedEngineAPIService",
+    useToken: "ReducedDEngine",
   });
 
   // Getting a DendronEngineV3Web instance is necessary for testing so that you
   // can call init() on it prior to running the test
   container.register<EngineEventEmitter>(DendronEngineV3Web, {
-    useToken: "IReducedEngineAPIService",
+    useToken: "ReducedDEngine",
   });
 
-  container.register<IReducedEngineAPIService>(
-    "IReducedEngineAPIService",
+  container.register<ReducedDEngine>(
+    "ReducedDEngine",
     {
       useClass: DendronEngineV3Web,
     },

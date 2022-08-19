@@ -31,6 +31,8 @@ export * from "./StatisticsUtils";
 export * from "./store";
 export * from "./engine";
 export * from "./drivers";
+export * from "./DLogger";
+
 export { axios, AxiosError };
 export { DateTime };
 

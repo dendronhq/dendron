@@ -20,6 +20,7 @@ export * from "./events";
 export * from "./cacheData";
 export * from "./errorTypes";
 export * from "./store";
+export * from "./ReducedDEngine";
 
 export type Stage = "dev" | "prod" | "test";
 export type DEngineQuery = {

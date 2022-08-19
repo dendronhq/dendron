@@ -1,17 +1,18 @@
 import {
   BulkResp,
+  ConsoleLogger,
   DendronCompositeError,
   DendronError,
-  DEngineDeleteSchemaResp,
   DNodeUtils,
   DVault,
-  EngineDeleteNoteResp,
   EngineEventEmitter,
+  EngineV3Base,
   EngineWriteOptsV2,
+  error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
   Event,
-  FindNoteOpts,
+  EventEmitter,
   FuseEngine,
   IDendronError,
   IFileStore,
@@ -25,44 +26,37 @@ import {
   NotePropsByIdDict,
   NotePropsMeta,
   NoteUtils,
-  QueryNotesOpts,
+  ReducedDEngine,
   RenameNotePayload,
   RespV2,
   RespV3,
-  SchemaModuleProps,
-  SchemaQueryResp,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, singleton } from "tsyringe";
-import { EventEmitter } from "vscode";
-import { IReducedEngineAPIService } from "./IReducedEngineApiService";
+import { URI, Utils } from "vscode-uri";
 import { NoteParserV2 } from "./NoteParserV2";
-import { Utils, URI } from "vscode-uri";
 
 @singleton()
 export class DendronEngineV3Web
-  implements IReducedEngineAPIService, EngineEventEmitter
+  extends EngineV3Base
+  implements ReducedDEngine, EngineEventEmitter
 {
-  private fuseEngine: FuseEngine;
-  private _vaults: DVault[];
-  private _noteStore: INoteStore<string>;
-  private _fileStore: IFileStore;
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
+  protected fuseEngine: FuseEngine;
 
   constructor(
     @inject("wsRoot") private wsRoot: URI,
-    @inject("vaults") vaults: DVault[],
-    @inject("IFileStore") fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
+    @inject("vaults") private vaults: DVault[],
+    @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
+    super(noteStore, new ConsoleLogger());
+
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
-    this._vaults = vaults;
-    this._noteStore = noteStore;
-    this._fileStore = fileStore;
   }
 
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
@@ -79,7 +73,7 @@ export class DendronEngineV3Web
   async init(): Promise<RespV2<any>> {
     try {
       const { data: notes, error: storeError } = await this.initNotesNew(
-        this._vaults
+        this.vaults
       );
 
       // TODO: add schemas to notes
@@ -98,7 +92,7 @@ export class DendronEngineV3Web
 
         return { key: note.id, noteMeta };
       });
-      this._noteStore.bulkWriteMetadata(bulkWriteOpts);
+      this.noteStore.bulkWriteMetadata(bulkWriteOpts);
 
       // TODO: update schema index
       //this.updateIndex("schema");
@@ -146,99 +140,8 @@ export class DendronEngineV3Web
     }
   }
 
-  /**
-   * See {@link DEngine.getNote}
-   */
-  async getNote(id: string): Promise<NoteProps | undefined> {
-    const resp = await this._noteStore.get(id);
-    return resp.data;
-  }
-
-  /**
-   * See {@link DEngine.findNotes}
-   */
-  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
-    const resp = await this._noteStore.find(opts);
-    return resp.data ? resp.data : [];
-  }
-
-  /**
-   * See {@link DEngine.findNotesMeta}
-   */
-  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
-    const resp = await this._noteStore.findMetaData(opts);
-    return resp.data ? resp.data : [];
-  }
-
-  async bulkWriteNotes(): Promise<Required<BulkResp<NoteChangeEntry[]>>> {
-    throw new Error("bulkWriteNotes not implemented");
-  }
-
-  async deleteNote(): Promise<EngineDeleteNoteResp> {
-    throw Error("deleteNote not implemented");
-  }
-
-  async deleteSchema(): Promise<DEngineDeleteSchemaResp> {
-    throw Error("deleteSchema not implemented");
-  }
-
-  async getSchema(): Promise<RespV2<SchemaModuleProps>> {
-    throw Error("getSchema not implemented");
-  }
-
-  async querySchema(): Promise<SchemaQueryResp> {
-    throw Error("querySchema not implemented");
-  }
-
-  async queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
-    // const ctx = "Engine:queryNotes";
-    const { qs, vault, onlyDirectChildren, originalQS } = opts;
-
-    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
-    // @ts-ignore
-    if (vault?.selfContained === "true" || vault?.selfContained === "false")
-      vault.selfContained = vault.selfContained === "true";
-
-    const items = await this.fuseEngine.queryNote({
-      qs,
-      onlyDirectChildren,
-      originalQS,
-    });
-
-    if (items.length === 0) {
-      return { error: null, data: [] };
-    }
-
-    const notes = await Promise.all(
-      items.map((ent) => this._noteStore.get(ent.id)) // TODO: Should be using metadata instead
-    );
-
-    let modifiedNotes;
-    // let notes = items.map((ent) => this.notes[ent.id]);
-    // if (!_.isUndefined(vault)) {
-    modifiedNotes = notes
-      .filter((ent) => _.isUndefined(ent.error))
-      .map((resp) => resp.data!);
-
-    if (!_.isUndefined(vault)) {
-      modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqualV2(vault, ent.data!.vault)
-      );
-    }
-
-    return {
-      error: null,
-      // data: items,
-      data: modifiedNotes,
-    };
-  }
-
   async renameNote(): Promise<RespV2<RenameNotePayload>> {
     throw Error("renameNote not implemented");
-  }
-
-  async updateSchema() {
-    throw Error("updateSchema not implemented");
   }
 
   async writeNote(
@@ -246,12 +149,13 @@ export class DendronEngineV3Web
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
+    const ctx = "DendronEngineV3Web:writeNewNote";
     const error: DendronError | null = null;
-    // this.logger.info({
-    //   ctx,
-    //   msg: `enter with ${opts}`,
-    //   note: NoteUtils.toLogObj(note),
-    // });
+    this.logger.info({
+      ctx,
+      msg: `enter with ${opts}`,
+      note: NoteUtils.toLogObj(note),
+    });
 
     // // Apply hooks
     // if (opts?.runHooks === false) {
@@ -302,7 +206,7 @@ export class DendronEngineV3Web
     // }
 
     // Check if another note with same fname and vault exists
-    const resp = await this._noteStore.find({
+    const resp = await this.noteStore.find({
       fname: note.fname,
       vault: note.vault,
     });
@@ -324,7 +228,7 @@ export class DendronEngineV3Web
             }),
           };
         }
-        const parentResp = await this._noteStore.get(existingNote.parent);
+        const parentResp = await this.noteStore.get(existingNote.parent);
         if (parentResp.error) {
           return {
             error: new DendronError({
@@ -402,10 +306,10 @@ export class DendronEngineV3Web
             note: ancestor,
           });
         } else {
-          // this.logger.error({
-          //   ctx,
-          //   msg: `Unable to find ancestor for note ${note.fname}`,
-          // });
+          this.logger.error({
+            ctx,
+            msg: `Unable to find ancestor for note ${note.fname}`,
+          });
           return { error: ancestorResp.error };
         }
       }
@@ -413,8 +317,8 @@ export class DendronEngineV3Web
 
     // Write to metadata store and/or filesystem
     const writeResp = opts?.metaOnly
-      ? await this._noteStore.writeMetadata({ key: note.id, noteMeta: note })
-      : await this._noteStore.write({ key: note.id, note });
+      ? await this.noteStore.writeMetadata({ key: note.id, noteMeta: note })
+      : await this.noteStore.write({ key: note.id, note });
     if (writeResp.error) {
       return {
         error: new DendronError({
@@ -432,11 +336,11 @@ export class DendronEngineV3Web
     await this.updateNoteMetadataStore(changes);
 
     this._onNoteChangedEmitter.fire(changes);
-    // this.logger.info({
-    //   ctx,
-    //   msg: "exit",
-    //   changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
-    // });
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
+    });
     return {
       error,
       data: changes,
@@ -450,8 +354,8 @@ export class DendronEngineV3Web
   private async initNotesNew(
     vaults: DVault[]
   ): Promise<BulkResp<NotePropsByIdDict>> {
-    // const ctx = "DendronEngineV3:initNotes";
-    // this.logger.info({ ctx, msg: "enter" });
+    const ctx = "DendronEngineV3Web:initNotes";
+    this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
     let notesFname: NotePropsByFnameDict = {};
     // const start = process.hrtime();
@@ -459,7 +363,7 @@ export class DendronEngineV3Web
     const allNotesList = await Promise.all(
       vaults.map(async (vault) => {
         // Get list of files from filesystem
-        const maybeFiles = await this._fileStore.readDir({
+        const maybeFiles = await this.fileStore.readDir({
           root: Utils.joinPath(this.wsRoot, VaultUtils.getRelPath(vault)),
           include: ["*.md"],
         });
@@ -556,66 +460,10 @@ export class DendronEngineV3Web
           }
         });
       } catch (err: any) {
-        // const error = error2PlainObject(err);
-        // this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        const error = error2PlainObject(err);
+        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
       }
     });
-  }
-
-  /**
-   * Move children of old parent note to new parent
-   * @return note change entries of modified children
-   */
-  private async updateChildrenWithNewParent(
-    oldParent: NotePropsMeta,
-    newParent: NotePropsMeta
-  ) {
-    const changes: NoteChangeEntry[] = [];
-    // Move existing note's children to new note
-    const childrenResp = await this._noteStore.bulkGet(oldParent.children);
-    childrenResp.forEach((child) => {
-      if (child.data) {
-        const childNote = child.data;
-        const prevChildNoteState = { ...childNote };
-        DNodeUtils.addChild(newParent, childNote);
-
-        // Add one entry for each child updated
-        changes.push({
-          prevNote: prevChildNoteState,
-          note: childNote,
-          status: "update",
-        });
-      }
-    });
-    return changes;
-  }
-
-  /**
-   * Update note metadata store based on note change entries
-   * @param changes entries to update
-   * @returns
-   */
-  private async updateNoteMetadataStore(
-    changes: NoteChangeEntry[]
-  ): Promise<RespV3<string>[]> {
-    return Promise.all(
-      changes.map((change) => {
-        switch (change.status) {
-          case "delete": {
-            return this._noteStore.deleteMetadata(change.note.id);
-          }
-          case "create":
-          case "update": {
-            return this._noteStore.writeMetadata({
-              key: change.note.id,
-              noteMeta: change.note,
-            });
-          }
-          default:
-            return { data: "" };
-        }
-      })
-    );
   }
 
   /**
@@ -633,7 +481,7 @@ export class DendronEngineV3Web
     const dirname = DNodeUtils.dirName(fpath);
     // Reached the end, must be root note
     if (dirname === "") {
-      const rootResp = await this._noteStore.find({ fname: "root", vault });
+      const rootResp = await this.noteStore.find({ fname: "root", vault });
       if (rootResp.error || rootResp.data.length === 0) {
         return {
           error: DendronError.createFromStatus({
@@ -646,7 +494,7 @@ export class DendronEngineV3Web
       }
       return { data: rootResp.data[0] };
     }
-    const parentResp = await this._noteStore.find({ fname: dirname, vault });
+    const parentResp = await this.noteStore.find({ fname: dirname, vault });
     if (parentResp.data && parentResp.data.length > 0) {
       return { data: parentResp.data[0] };
     } else {

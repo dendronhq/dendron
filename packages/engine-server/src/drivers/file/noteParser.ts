@@ -276,23 +276,35 @@ export class NoteParser extends ParserBase {
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    if (
-      opts?.useSQLiteMetadataStore &&
-      !(await SQLiteMetadataStore.isVaultInitialized(vault))
-    ) {
+    if (opts?.useSQLiteMetadataStore) {
       this.logger.info({ ctx, msg: "initialize metadata" });
-      try {
-        // create the vault
-        await SQLiteMetadataStore.prisma().dVault.create({
-          data: { fsPath: vault.fsPath, wsRoot },
+      if (await SQLiteMetadataStore.isVaultInitialized(vault)) {
+        this.logger.info({ ctx, msg: "adding update entries" });
+        // initialized, update based on cache
+        const updateDict: NotePropsByIdDict = {};
+        _.map(cacheUpdates, (v, _k) => {
+          // TODO: we need to figure out the right data type to insert into metadata store
+          updateDict[v.data.id] = v.data as NoteProps;
         });
-        // if vault is not initialized, bulk insert all note metadata into sqlite
         await SQLiteMetadataStore.bulkInsertAllNotes({
-          notesIdDict: notesById,
+          notesIdDict: updateDict,
         });
-      } catch (err) {
-        this.logger.error({ ctx, msg: "issue doing bulk insert", vault });
-        throw err;
+      } else {
+        this.logger.info({ ctx, msg: "updating all entries" });
+        // we never initialized this vault, initialize it now
+        try {
+          // create the vault
+          await SQLiteMetadataStore.prisma().dVault.create({
+            data: { fsPath: vault.fsPath, wsRoot },
+          });
+          // if vault is not initialized, bulk insert all note metadata into sqlite
+          await SQLiteMetadataStore.bulkInsertAllNotes({
+            notesIdDict: notesById,
+          });
+        } catch (err) {
+          this.logger.error({ ctx, msg: "issue doing bulk insert", vault });
+          throw err;
+        }
       }
     }
     return { notesById, cacheUpdates, errors };

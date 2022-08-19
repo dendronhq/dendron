@@ -27,12 +27,20 @@ export type NoteIndexLightProps = {
 };
 
 export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
-  constructor({ wsRoot, client }: { wsRoot: string; client?: PrismaClient }) {
-    if (_prisma) {
+  constructor({
+    wsRoot,
+    client,
+    force,
+  }: {
+    wsRoot: string;
+    client?: PrismaClient;
+    force?: boolean;
+  }) {
+    if (_prisma && (!force || client)) {
       // TODO: throw an error
       return;
     }
-    if (client) {
+    if (client && !force) {
       _prisma = client;
       return;
     }
@@ -182,16 +190,15 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
   }: {
     notesIdDict: NotePropsByIdDict;
   }) {
+    if (_.isEmpty(notesIdDict)) {
+      return;
+    }
     const prisma = getPrismaClient();
-
     const allVaultsMap = _.keyBy(
       await prisma.dVault.findMany(),
       (ent) => ent.fsPath
     );
 
-    // prisma.dVault.findUnique({where:{wsRoot_fsPath:{fsPath: }}})
-
-    // bulk insert
     const sqlBegin = "INSERT INTO 'Note' ('fname', 'id', 'dVaultId') VALUES ";
     const sqlEnd = _.values(notesIdDict)
       .map(({ fname, id, vault }) => {

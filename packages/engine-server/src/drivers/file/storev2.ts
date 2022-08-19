@@ -490,7 +490,7 @@ export class FileStorage implements DStore {
     // instantiate so we can use singleton later
     if (this.config.workspace.metadataStore === "sqlite") {
       // eslint-disable-next-line no-new
-      new SQLiteMetadataStore({ wsRoot: this.wsRoot });
+      new SQLiteMetadataStore({ wsRoot: this.wsRoot, force: true });
       if (!(await SQLiteMetadataStore.isDBInitialized())) {
         await SQLiteMetadataStore.createAllTables();
         await SQLiteMetadataStore.createWorkspace(this.wsRoot);

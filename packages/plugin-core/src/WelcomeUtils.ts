@@ -1,6 +1,5 @@
 import {
-  QuickstartTutorialTestGroups,
-  TutorialEvents,
+  TutorialEvents
 } from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -9,7 +8,6 @@ import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspa
 import { LaunchTutorialCommandInvocationPoint } from "./constants";
 import { AnalyticsUtils } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { TutorialInitializer } from "./workspace/tutorialInitializer";
 
 async function initWorkspace() {
   // ^z5hpzc3fdkxs
@@ -30,12 +28,6 @@ export function showWelcome(assetUri: vscode.Uri) {
       "vault",
       "welcome.html"
     );
-    const group = TutorialInitializer.getTutorialType();
-
-    if (group === QuickstartTutorialTestGroups["quickstart-skip-welcome"]) {
-      return initWorkspace();
-    }
-
     const { content } = readMD(uri.fsPath);
     const title = "Welcome to Dendron";
 

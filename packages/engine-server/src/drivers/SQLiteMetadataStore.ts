@@ -29,9 +29,8 @@ export type NoteIndexLightProps = {
 export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
   constructor({ wsRoot, client }: { wsRoot: string; client?: PrismaClient }) {
     if (_prisma) {
-      throw new Error(
-        "SQLiteMetadataStore constructor should only be called once"
-      );
+      // TODO: throw an error
+      return;
     }
     if (client) {
       _prisma = client;

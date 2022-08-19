@@ -6,6 +6,7 @@ import {
   getStage,
   isABTest,
   MAIN_TUTORIAL_TYPE_NAME,
+  QuickstartTutorialTestGroups,
   TutorialEvents,
   TutorialNoteViewedPayload,
   VaultUtils,
@@ -34,6 +35,7 @@ import {
   OnWorkspaceCreationOpts,
   WorkspaceInitializer,
 } from "./workspaceInitializer";
+import { TogglePreviewLockCommand } from "../commands/TogglePreviewLock";
 
 /**
  * Workspace Initializer for the Tutorial Experience. Copies tutorial notes and
@@ -45,6 +47,9 @@ export class TutorialInitializer
 {
   static getTutorialType() {
     if (isABTest(CURRENT_TUTORIAL_TEST)) {
+      // NOTE: to force a tutorial group, uncomment the below code
+      // return QuickstartTutorialTestGroups.
+
       return CURRENT_TUTORIAL_TEST.getUserGroup(
         SegmentClient.instance().anonymousId
       );
@@ -149,11 +154,19 @@ export class TutorialInitializer
       await vscode.window.showTextDocument(rootUri);
 
       if (getStage() !== "test") {
+        const preview = PreviewPanelFactory.create(
+          ExtensionProvider.getExtension()
+        );
         // TODO: HACK to wait for existing preview to be ready
-        setTimeout(() => {
-          new TogglePreviewCommand(
-            PreviewPanelFactory.create(ExtensionProvider.getExtension())
-          ).execute();
+        setTimeout(async () => {
+          await new TogglePreviewCommand(preview).execute();
+          if (
+            CURRENT_TUTORIAL_TEST?.getUserGroup(
+              SegmentClient.instance().anonymousId
+            ) === QuickstartTutorialTestGroups["quickstart-with-lock"]
+          ) {
+            await new TogglePreviewLockCommand(preview).execute();
+          }
         }, 1000);
       }
     } else {

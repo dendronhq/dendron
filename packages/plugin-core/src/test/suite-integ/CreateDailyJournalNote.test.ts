@@ -1,10 +1,4 @@
-import {
-  ConfigUtils,
-  DailyJournalTestGroups,
-  DVault,
-  Time,
-  _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
-} from "@dendronhq/common-all";
+import { ConfigUtils, DVault, Time } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
@@ -41,9 +35,6 @@ suite("Create Daily Journal Suite", function () {
     MetadataService.instance().setInitialInstall(
       Time.DateTime.fromISO("2022-06-30").toSeconds()
     );
-    sinon
-      .stub(_2022_05_DAILY_JOURNAL_TEMPLATE_TEST, "getUserGroup")
-      .returns(DailyJournalTestGroups.withTemplate!);
   });
 
   describeMultiWS(

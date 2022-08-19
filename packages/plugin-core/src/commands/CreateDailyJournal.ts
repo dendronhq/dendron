@@ -1,6 +1,5 @@
 import {
   ConfigUtils,
-  DailyJournalTestGroups,
   genUUID,
   JournalConfig,
   NoteUtils,
@@ -9,9 +8,8 @@ import {
   SchemaUtils,
   Time,
   VaultUtils,
-  _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
 } from "@dendronhq/common-all";
-import { SegmentClient, vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as fs from "fs-extra";
 import _ from "lodash";
@@ -36,7 +34,7 @@ export type CreateDailyJournalData = {
 
 export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   static requireActiveWorkspace: boolean = true;
-  public static DENDRON_TEMPLATES_FNAME: string = "dendron.templates";
+  public static DENDRON_TEMPLATES_FNAME: string = "templates";
 
   constructor(ext: IDendronExtension) {
     const initTrait = () => {
@@ -71,19 +69,12 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
         !_.isUndefined(metaData.firstInstall) &&
         metaData.firstInstall > Time.DateTime.fromISO("2022-06-06").toSeconds()
       ) {
-        const ABUserGroup = _2022_05_DAILY_JOURNAL_TEMPLATE_TEST.getUserGroup(
-          SegmentClient.instance().anonymousId
+        // Check if a schema file exists, and if it doesn't, then create it first.
+        isSchemaCreated = await this.makeSchemaFileIfNotExisting(journalConfig);
+        // same with template file:
+        isTemplateCreated = await this.createTemplateFileIfNotExisting(
+          journalConfig
         );
-        if (ABUserGroup === DailyJournalTestGroups.withTemplate) {
-          // Check if a schema file exists, and if it doesn't, then create it first.
-          isSchemaCreated = await this.makeSchemaFileIfNotExisting(
-            journalConfig
-          );
-          // same with template file:
-          isTemplateCreated = await this.createTemplateFileIfNotExisting(
-            journalConfig
-          );
-        }
       }
     }
 

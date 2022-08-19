@@ -40,7 +40,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       const serverLogFile = fs.readFileSync(serverLogPath, {
         encoding: "utf8",
       });
-      serverLastLines = serverLogFile.slice(-3000);
+      serverLastLines = serverLogFile.slice(-5000);
     }
 
     const ext = ExtensionProvider.getExtension();

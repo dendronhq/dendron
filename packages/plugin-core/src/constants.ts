@@ -74,7 +74,6 @@ export const DENDRON_VIEWS_CONTAINERS = {
       id: "dendron-view",
       title: "Dendron",
       icon: "media/icons/dendron-activity-bar-icon.svg",
-      when: "shellExecutionSupported",
     },
   ],
 };
@@ -100,7 +99,7 @@ export const DENDRON_VIEWS = [
   },
   {
     ...treeViewConfig2VSCodeEntry(DendronTreeViewKey.TREE_VIEW),
-    when: `${DendronContext.PLUGIN_ACTIVE}  && shellExecutionSupported`,
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
     where: "dendron-view",
     icon: "media/icons/dendron-vscode.svg",
   },
@@ -513,7 +512,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   MERGE_NOTE: {
     key: "dendron.mergeNote",
     title: `${CMD_PREFIX} Merge Note`,
-    when: DendronContext.PLUGIN_ACTIVE,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   RANDOM_NOTE: {
     key: "dendron.randomNote",
@@ -920,7 +919,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.togglePreviewLock",
     title: `${CMD_PREFIX} Toggle Preview Lock`,
     icon: `$(lock)`,
-    when: "dendron:pluginActive",
+    when: "dendron:pluginActive && shellExecutionSupported",
   },
   PASTE_FILE: {
     key: "dendron.pasteFile",

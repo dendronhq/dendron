@@ -15,9 +15,23 @@ import _ from "lodash";
 let PrismaClient, Prisma;
 try {
   ({ PrismaClient, Prisma } = require("../generated-prisma-client"));
+  fs.appendFileSync("/tmp/out.log", "INFO: load prisma client\n", {
+    encoding: "utf8",
+  });
 } catch (err) {
-  const req = require(`./webpack-require-hack.js`);
-  ({ PrismaClient, Prisma } = req("./generated-prisma-client"));
+  try {
+    const req = require(`./webpack-require-hack.js`);
+    ({ PrismaClient, Prisma } = req("./generated-prisma-client"));
+    fs.appendFileSync("/tmp/out.log", "INFO: webpack require prisma client", {
+      encoding: "utf8",
+    });
+  } catch (err) {
+    fs.appendFileSync(
+      "/tmp/out.log",
+      "ERROR: unable to webpack require prisma client",
+      { encoding: "utf8" }
+    );
+  }
 }
 // const { PrismaClient, Prisma } = req("../generated-prisma-client");
 

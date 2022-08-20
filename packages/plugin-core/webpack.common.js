@@ -39,7 +39,6 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
-    // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
     }),
@@ -57,7 +56,6 @@ const config = {
         },
       ],
     }),
-    // @ts-ignore
     new CopyPlugin({
       patterns: [
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
@@ -89,6 +87,8 @@ const config = {
             ignore: ["node_modules", "webpack.*.js"],
           }),
         ]),
+    // bundle analysis only done when enabled
+    // see [[dendron://dendron.dendron-site/dendron.topic.dev.cli.package-plugin]] for usage
     ...(process.env.ANALYZE_BUNDLE
       ? [
           new BundleAnalyzerPlugin({
@@ -123,6 +123,7 @@ const config = {
         test: /\.mjs$/,
         type: "javascript/auto",
       },
+      // don't handle the following files - causes errors
       { test: /\.node$/, loader: "ignore-loader" },
       { test: /\.d\.ts$/, loader: "ignore-loader" },
       { test: /\.js\.map$/, loader: "ignore-loader" },

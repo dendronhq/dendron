@@ -33,5 +33,3 @@ publish-local:
 build-plugin:
 	dendron dev prep_plugin && rm package.json
 	dendron dev package_plugin
-
-

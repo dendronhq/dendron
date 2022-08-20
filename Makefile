@@ -25,7 +25,7 @@ db-gen:
 start-local-registry:
 	yarn config set registry http://localhost:4873
 	npm set registry http://localhost:4873/
-	npx verdaccio -c ./bootstrap/data/verdaccio/config.yaml &
+	npx verdaccio -c ./bootstrap/data/verdaccio/config.yaml 
 
 publish-local:
 	lerna publish from-package --ignore-scripts

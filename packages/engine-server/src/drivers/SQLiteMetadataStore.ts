@@ -13,9 +13,13 @@ import _ from "lodash";
 // import { Prisma, PrismaClient } from "../generated-prisma-client";
 
 // @ts-ignore
-const req = require(`./webpack-require-hack.js`);
-// @ts-ignore
-const { PrismaClient, Prisma } = req("./generated-prisma-client");
+let PrismaClient, Prisma;
+try {
+  ({ PrismaClient, Prisma } = require("../generated-prisma-client"));
+} catch (err) {
+  const req = require(`./webpack-require-hack.js`);
+  ({ PrismaClient, Prisma } = req("./generated-prisma-client"));
+}
 
 let _prisma: PrismaClient | undefined;
 

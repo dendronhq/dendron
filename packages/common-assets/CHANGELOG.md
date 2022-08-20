@@ -3,6 +3,127 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.108.2](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.108.2) (2022-08-20)
+
+
+### Bug Fixes
+
+* **views:** show whitespace for links in headers ([#3403](https://github.com/dendronhq/dendron/issues/3403)) ([5b37aaa](https://github.com/dendronhq/dendron/commit/5b37aaa3c6c6346e87fb86dac606eb0e37a7e740))
+
+
+### Features Dendron
+
+* **views:** UI to configure `dendron.yml` ([#3211](https://github.com/dendronhq/dendron/issues/3211)) ([0d9b606](https://github.com/dendronhq/dendron/commit/0d9b606be8fcc04679dfbbe2f0054f74e6a626d7))
+
+
+
+# 0.106.0 (2022-08-02)
+
+
+
+## 0.105.2 (2022-07-28)
+
+
+
+## 0.104.1 (2022-07-21)
+
+
+
+# 0.104.0 (2022-07-19)
+
+
+
+# 0.101.0 (2022-06-28)
+
+
+
+## 0.100.1 (2022-06-23)
+
+
+
+# 0.100.0 (2022-06-21)
+
+
+
+# 0.99.0 (2022-06-14)
+
+
+### Bug Fixes
+
+* address PR comment ([8ce91e9](https://github.com/dendronhq/dendron/commit/8ce91e90acd34139d5a69bd0a994c1f5bd04af73))
+
+
+
+# 0.98.0 (2022-06-07)
+
+
+### Bug Fixes
+
+* fix ci build error ([b8684ce](https://github.com/dendronhq/dendron/commit/b8684ce52598c9717f711ee7c8b204fa4dd53bef))
+* removed public from common assets ([923d6ad](https://github.com/dendronhq/dendron/commit/923d6ad5d4852f08ef7d4505c7c54fc11df35ff4))
+
+
+
+# 0.96.0 (2022-05-24)
+
+
+
+## 0.95.1 (2022-05-18)
+
+
+
+# 0.95.0 (2022-05-17)
+
+
+
+# 0.94.0 (2022-05-10)
+
+
+
+# 0.93.0 (2022-05-03)
+
+
+
+## 0.92.1 (2022-04-28)
+
+
+
+# 0.91.0 (2022-04-19)
+
+
+
+# 0.88.0 (2022-03-29)
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **publish:** enable katex on published site ([7189cd8](https://github.com/dendronhq/dendron/commit/7189cd840e12d7aadf6f78b9e3281180bca903af))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+
+
+
+
+
 ## [0.108.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.108.1) (2022-08-20)
 
 

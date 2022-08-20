@@ -27,8 +27,10 @@ start-local-registry:
 	npm set registry http://localhost:4873/
 	npx verdaccio -c ./bootstrap/data/verdaccio/config.yaml &
 
-build-plugin:
+publish-local:
 	lerna publish from-package --ignore-scripts
+
+build-plugin:
 	dendron dev prep_plugin && rm package.json
 	dendron dev package_plugin
 

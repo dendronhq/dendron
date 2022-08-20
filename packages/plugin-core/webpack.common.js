@@ -15,6 +15,8 @@ const config = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[name].js",
+    // commonjs2 is like commonjs but also includes the module.exports 
+    // see https://github.com/webpack/webpack/issues/1114
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
@@ -27,6 +29,7 @@ const config = {
       vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded
       "pino-pretty": "pino-pretty",
     },
+    // see [[../packages/plugin-core/webpack-require-hack.js]] for more details
     /\.\/webpack-require-hack/,
   ],
   resolve: {

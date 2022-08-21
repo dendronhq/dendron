@@ -450,7 +450,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     await this.syncAssets(opts);
 
     this.print("prep repo...");
-    await BuildUtils.prepPluginPkg(ExtensionTarget.NIGHTLY);
+    await BuildUtils.prepPluginPkg(opts.extensionTarget);
 
     if (!shouldPublishLocal) {
       this.print(

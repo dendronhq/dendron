@@ -10,11 +10,12 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
-import { Prisma, PrismaClient } from "./generated-prisma-client";
 
-// @ts-ignore
-// let PrismaClient, Prisma;
-// ({ PrismaClient, Prisma } = require("./generated-prisma-client"));
+// NOTE:  the following import statement will be replaced during packaging of the plugin
+// see [[dendron://dendron.docs/pkg.plugin-core.dev.deploy#modify-engine-server]] for details
+import { Prisma, PrismaClient } from "./generated-prisma-client"; // AWK_COMMENT
+// DO NOT DELETE, the following will be replaced during the package step
+// const ({ PrismaClient, Prisma } = require("./generated-prisma-client")); // AWK_UNCOMMENT
 
 let _prisma: PrismaClient | undefined;
 

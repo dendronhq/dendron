@@ -10,11 +10,11 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
-// import { Prisma, PrismaClient } from "../generated-prisma-client";
+import { Prisma, PrismaClient } from "./generated-prisma-client";
 
 // @ts-ignore
-let PrismaClient, Prisma;
-({ PrismaClient, Prisma } = require("./generated-prisma-client"));
+// let PrismaClient, Prisma;
+// ({ PrismaClient, Prisma } = require("./generated-prisma-client"));
 
 let _prisma: PrismaClient | undefined;
 

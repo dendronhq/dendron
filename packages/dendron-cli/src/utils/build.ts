@@ -226,12 +226,16 @@ export class BuildUtils {
       ],
     });
 
-    // sync prismaa
-    await $$(
-      `cp -R ../engine-server/src/drivers/generated-prisma-client dist/`,
-      {
-        cwd: this.getPluginRootPath(),
-      }
+    await fs.copy(
+      path.join(
+        this.getPluginRootPath(),
+        "..",
+        "engine-server",
+        "src",
+        "drivers",
+        "generated-prisma-client"
+      ),
+      path.join(this.getPluginRootPath(), "dist")
     );
   }
 

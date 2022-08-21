@@ -3,6 +3,199 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.108.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.108.1) (2022-08-21)
+
+
+### Bug Fixes
+
+* **views:** remove semicolon from preview ([#3383](https://github.com/dendronhq/dendron/issues/3383)) ([8156279](https://github.com/dendronhq/dendron/commit/8156279594d8652286db3dc38ce75b390f09cbdd))
+* **views:** resolve issues with preview lock button ([#3353](https://github.com/dendronhq/dendron/issues/3353)) ([5847284](https://github.com/dendronhq/dendron/commit/5847284cc1b38fa788d38c16410ef319d94747a0))
+
+
+### Features Dendron
+
+* **views:** UI to configure `dendron.yml` ([#3211](https://github.com/dendronhq/dendron/issues/3211)) ([0d9b606](https://github.com/dendronhq/dendron/commit/0d9b606be8fcc04679dfbbe2f0054f74e6a626d7))
+
+
+### Reverts
+
+* Revert "chore: publish patch" ([028d3bd](https://github.com/dendronhq/dendron/commit/028d3bd6b2ab6a5c10e635188ac50768d7ddc292))
+* Revert "chore: publish patch" ([b57f7eb](https://github.com/dendronhq/dendron/commit/b57f7ebcc6d70611c625bba2bee693c33c496583))
+
+
+
+# 0.106.0 (2022-08-02)
+
+
+### Features Dendron
+
+* **view:** add "Toggle PreviewLock"  command ([#3293](https://github.com/dendronhq/dendron/issues/3293)) ([368c938](https://github.com/dendronhq/dendron/commit/368c9389b23d5200b84928121a7157fe764df9b6)), closes [#2437](https://github.com/dendronhq/dendron/issues/2437)
+
+
+
+## 0.105.2 (2022-07-28)
+
+
+
+## 0.104.1 (2022-07-21)
+
+
+
+# 0.104.0 (2022-07-19)
+
+
+
+# 0.101.0 (2022-06-28)
+
+
+
+## 0.100.1 (2022-06-23)
+
+
+
+# 0.100.0 (2022-06-21)
+
+
+### Bug Fixes
+
+* address PR comments ([c4ba612](https://github.com/dendronhq/dendron/commit/c4ba612a07fcdef1a98a86d245edab00e31ffc76))
+* separate hierarchichal and linked notes ([8b25a72](https://github.com/dendronhq/dendron/commit/8b25a7277f4c580c638fa11f1d625f8a40d0ab02))
+
+
+### Features Dendron
+
+* **views:** depth for local graph ([494b648](https://github.com/dendronhq/dendron/commit/494b648dee70cc92caf7f490781e2a14bda3c297))
+
+
+
+# 0.99.0 (2022-06-14)
+
+
+### Bug Fixes
+
+* address PR comment ([8ce91e9](https://github.com/dendronhq/dendron/commit/8ce91e90acd34139d5a69bd0a994c1f5bd04af73))
+* address PR comment and performance improvements ([62c2514](https://github.com/dendronhq/dendron/commit/62c25145bac45ed1954a45b22ed0e5cea1acd913))
+
+
+
+# 0.98.0 (2022-06-07)
+
+
+
+# 0.96.0 (2022-05-24)
+
+
+### Features Dendron
+
+* local graph view in the Dendron Side Panel ([#2901](https://github.com/dendronhq/dendron/issues/2901)) ([195a61a](https://github.com/dendronhq/dendron/commit/195a61ae7ed7158d97c1161aacc5d08a08d660e9))
+
+
+
+## 0.95.1 (2022-05-18)
+
+
+
+# 0.95.0 (2022-05-17)
+
+
+
+# 0.94.0 (2022-05-10)
+
+
+
+# 0.93.0 (2022-05-03)
+
+
+
+## 0.92.1 (2022-04-28)
+
+
+### Bug Fixes
+
+* **view:** views don't update for new notes with self contained vaults ([#2790](https://github.com/dendronhq/dendron/issues/2790)) ([eac9b53](https://github.com/dendronhq/dendron/commit/eac9b53b5da3c9336b09c317caf56d800aacf4cc))
+
+
+
+# 0.91.0 (2022-04-19)
+
+
+### Bug Fixes
+
+* **view:** support custom styles for Note Graph ([#2760](https://github.com/dendronhq/dendron/issues/2760)) ([6d99e62](https://github.com/dendronhq/dendron/commit/6d99e6265078119239c461c0fa78be90d44039af))
+
+
+
+# 0.88.0 (2022-03-29)
+
+
+### Bug Fixes
+
+* **retrieve:** issue with angle brackets syntax in mermaid  ([#2637](https://github.com/dendronhq/dendron/issues/2637)) ([0457f75](https://github.com/dendronhq/dendron/commit/0457f7521da53844cb1019c0a517f1ef959c04fa))
+* **views:** Pass in a port-forwarded URL to preview for remote workspaces ([#2624](https://github.com/dendronhq/dendron/issues/2624)) ([d2f460b](https://github.com/dendronhq/dendron/commit/d2f460b36d836ed187e9da9a67d9ca2d48102b87)), closes [#2606](https://github.com/dendronhq/dendron/issues/2606)
+
+
+### Reverts
+
+* Revert "Pass in a port-forwarded URL to preview for remote workspaces" ([64f0cf6](https://github.com/dendronhq/dendron/commit/64f0cf678e0db7ac4e5533e24cfad8a6153ee9bf))
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+### Bug Fixes
+
+* **views:** fix race condition in tree view v2 initialization logic ([#2528](https://github.com/dendronhq/dendron/issues/2528)) ([c85a821](https://github.com/dendronhq/dendron/commit/c85a821a02bbe2669b6c0d7df10a6475a7526654))
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+### Bug Fixes
+
+* faster webviews by reducing engine sync operations ([#2472](https://github.com/dendronhq/dendron/issues/2472)) ([a34a3b0](https://github.com/dendronhq/dendron/commit/a34a3b024411b1c2097b330938ceb9c3fe8c401e))
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+### Bug Fixes
+
+* **views:** update tree order when a note changes order ([#2014](https://github.com/dendronhq/dendron/issues/2014)) ([b66032f](https://github.com/dendronhq/dendron/commit/b66032fef1b8cb5f7a6fa522a5e0ad14ac4d8388))
+
+
+### Features Dendron
+
+* lookup view ([#1977](https://github.com/dendronhq/dendron/issues/1977)) ([dad85f6](https://github.com/dendronhq/dendron/commit/dad85f6e1964b5cf21bc0a1007c229c504e17eb5))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **publish:** make mermaid work consistently on published sites ([2f648e0](https://github.com/dendronhq/dendron/commit/2f648e0a34c95095e86e8535a1fa8ec9ac4de39c))
+* **publish:** syntax highlighting for code blocks ([8ece4e2](https://github.com/dendronhq/dendron/commit/8ece4e28ae0c60d314498f6ed11a7974086f8f80))
+* **views:** tree view not initializing on load ([5590a3c](https://github.com/dendronhq/dendron/commit/5590a3c0aa7476e8984a1e9193697d9984ab00ee))
+* **viwes:** `nav_order` property not respected in tree view ([fd328a1](https://github.com/dendronhq/dendron/commit/fd328a17478a063c2ea3d51e00fbc26c7e7e1b26))
+
+
+### Features Dendron
+
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+
+
+
+
+
 # 0.108.0 (2022-08-16)
 
 

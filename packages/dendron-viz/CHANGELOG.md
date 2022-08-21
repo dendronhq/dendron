@@ -3,55 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.108.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.108.1) (2022-08-21)
-
-
-### Reverts
-
-* Revert "chore: publish patch" ([028d3bd](https://github.com/dendronhq/dendron/commit/028d3bd6b2ab6a5c10e635188ac50768d7ddc292))
-* Revert "chore: publish patch" ([b57f7eb](https://github.com/dendronhq/dendron/commit/b57f7ebcc6d70611c625bba2bee693c33c496583))
-
-
-
-# 0.106.0 (2022-08-02)
-
-
-
-## 0.105.2 (2022-07-28)
-
-
-
-## 0.104.1 (2022-07-21)
-
-
-
-# 0.104.0 (2022-07-19)
-
-
-
-# 0.101.0 (2022-06-28)
-
-
-### Features Dendron
-
-* **cli:** add a cli command that generates a packed-circles visualization of workspace ([#3057](https://github.com/dendronhq/dendron/issues/3057)) ([fe2b98b](https://github.com/dendronhq/dendron/commit/fe2b98b93594635fa7650b9daa9082bf63b0cd66))
-
-
-
-## 0.100.1 (2022-06-23)
-
-
-
-# 0.100.0 (2022-06-21)
-
-
-
-# 0.99.0 (2022-06-14)
-
-
-
-
-
 # 0.108.0 (2022-08-16)
 
 

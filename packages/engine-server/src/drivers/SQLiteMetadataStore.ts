@@ -14,12 +14,7 @@ import _ from "lodash";
 
 // @ts-ignore
 let PrismaClient, Prisma;
-try {
-  ({ PrismaClient, Prisma } = require("../generated-prisma-client"));
-} catch (err) {
-  const req = require(`./webpack-require-hack.js`);
-  ({ PrismaClient, Prisma } = req("./generated-prisma-client"));
-}
+({ PrismaClient, Prisma } = require("./generated-prisma-client"));
 
 let _prisma: PrismaClient | undefined;
 

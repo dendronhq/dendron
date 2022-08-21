@@ -225,6 +225,14 @@ export class BuildUtils {
         "@dendronhq/engine-test-utils",
       ],
     });
+
+    // sync prismaa
+    await $$(
+      `cp -R ../engine-server/src/drivers/generated-prisma-client dist/`,
+      {
+        cwd: this.getPluginRootPath(),
+      }
+    );
   }
 
   /**

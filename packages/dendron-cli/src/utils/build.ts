@@ -70,7 +70,11 @@ export class LernaUtils {
       endpoint === PublishEndpoint.LOCAL
         ? LOCAL_NPM_ENDPOINT
         : REMOTE_NPM_ENDPOINT;
+    // modify engine for publishing
+    await $(`./scripts/build-modify-engine.sh`);
     await $$(`lerna publish from-package --ignore-scripts --registry ${url}`);
+    // odify-engine makes a commit that needs to be reverted
+    await $(`git reset --hard HEAD^`);
     $(`node bootstrap/scripts/genMeta.js`);
   }
 }

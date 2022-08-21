@@ -235,7 +235,7 @@ export class BuildUtils {
         "drivers",
         "generated-prisma-client"
       ),
-      path.join(this.getPluginRootPath(), "dist")
+      path.join(this.getPluginRootPath(), "dist", "generated-prisma-client")
     );
   }
 

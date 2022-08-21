@@ -15,7 +15,7 @@ import _ from "lodash";
 // see [[dendron://dendron.docs/pkg.plugin-core.dev.deploy#modify-engine-server]] for details
 import { Prisma, PrismaClient } from "./generated-prisma-client"; // AWK_COMMENT
 // DO NOT DELETE, the following will be replaced during the package step
-// const ({ PrismaClient, Prisma } = require("./generated-prisma-client")); // AWK_UNCOMMENT
+//const { PrismaClient, Prisma } = require("./generated-prisma-client"); // AWK_UNCOMMENT
 
 let _prisma: PrismaClient | undefined;
 

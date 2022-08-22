@@ -180,16 +180,16 @@ export async function linkedNoteType({
   // It's hard to check the anchors for non-note files because we don't parse
   // them ahead of time. If we can find the file, just say the link is good
   // without checking anchors.
-  if (fname && matchingNotes.length === 0) {
-    // TODO: Re-enable check once we can refactor out common-server dependency:
-    // const nonNoteFile = await findNonNoteFile({
-    //   fpath: fname,
-    //   vaults: engine.vaults,
-    //   wsRoot: engine.wsRoot,
-    // });
-    // if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
-    return { type: DECORATION_TYPES.wikiLink, errors: [] };
-  }
+  // TODO: Re-enable check once we can refactor out common-server dependency:
+  // if (fname && matchingNotes.length === 0) {
+  // const nonNoteFile = await findNonNoteFile({
+  //   fpath: fname,
+  //   vaults: engine.vaults,
+  //   wsRoot: engine.wsRoot,
+  // });
+  // if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  // return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  // }
 
   // For regular notes, we can efficiently check the anchors.
   if (anchorStart || anchorEnd) {

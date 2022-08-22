@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { Uri } from "vscode";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
@@ -12,5 +11,5 @@ export async function getAssetsPrefix(
   wsRoot: Uri
 ): Promise<string | undefined> {
   const config = await getWorkspaceConfig(wsRoot);
-  return ConfigUtils.getAssetsPrefix(config);
+  return ConfigUtils.getAssetsPrefix(config) || "";
 }

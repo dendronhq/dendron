@@ -1,14 +1,12 @@
 import _ from "lodash";
-import { env, window, workspace } from "vscode";
-import { injectable, inject } from "tsyringe";
+import { env, window } from "vscode";
 import { WSUtilsWeb } from "../utils/WSUtils";
+import { SiteUtilsWeb } from "../utils/site";
+import { injectable } from "tsyringe";
 
 @injectable()
 export class CopyNoteURLCmd {
-  constructor(
-    private wsUtils: WSUtilsWeb,
-    @inject("siteUrl") private siteUrl?: string
-  ) {}
+  constructor(private wsUtils: WSUtilsWeb, private siteUtils?: SiteUtilsWeb) {}
 
   static key = "dendron.copyNoteURL";
 
@@ -17,9 +15,6 @@ export class CopyNoteURLCmd {
   }
 
   async run() {
-    const urlRoot =
-      this.siteUrl ||
-      workspace.getConfiguration().get("dendron.copyNoteUrlRoot");
     const maybeTextEditor = window.activeTextEditor;
 
     if (_.isUndefined(maybeTextEditor)) {
@@ -34,14 +29,14 @@ export class CopyNoteURLCmd {
       window.showErrorMessage("You need to be in a note to use this command");
       return;
     }
-    const link = this.wsUtils.getNoteUrl({
+    const link = this.siteUtils?.getNoteUrl({
       note: notes[0],
       vault,
-      urlRoot,
     });
-
-    this.showFeedback(link);
-    env.clipboard.writeText(link);
+    if (link) {
+      this.showFeedback(link);
+      env.clipboard.writeText(link);
+    }
     return link;
   }
 }

@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { Uri } from "vscode";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
@@ -12,5 +11,5 @@ export async function getEnablePrettlyLinks(
   wsRoot: Uri
 ): Promise<boolean | undefined> {
   const config = await getWorkspaceConfig(wsRoot);
-  return ConfigUtils.getEnablePrettlyLinks(config);
+  return ConfigUtils.getEnablePrettlyLinks(config) || true;
 }

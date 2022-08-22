@@ -1,4 +1,9 @@
-import { DNodeUtils, DVault, NoteProps } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DNodeUtils,
+  DVault,
+  NoteProps,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 
@@ -73,5 +78,41 @@ export class SiteUtilsWeb {
     return `${pathPrefix || ""}${pathValue}${pathExtension}${
       pathAnchor ? "#" + pathAnchor : ""
     }`;
+  }
+
+  /**
+   * Generate url for given note
+   * @param opts
+   *
+   */
+  getNoteUrl(opts: { note: NoteProps; vault: DVault }) {
+    const { note, vault } = opts;
+    /**
+     * set to true if index node, don't append id at the end
+     */
+    const { url: root, index } = this.getSiteUrlRootForVault({
+      vault,
+    });
+    if (!root) {
+      throw new DendronError({
+        message:
+          "no siteUrl set. Docs link: https://wiki.dendron.so/notes/ZDAEEzEeSW0xQsMBWLQp0",
+      });
+    }
+    // if we have a note, see if we are at index
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : this.isIndexNote({
+          indexNote: index,
+          note,
+        });
+    const pathValue = note.id;
+    const siteUrlPath = this.getSiteUrlPathForNote({
+      addPrefix: true,
+      pathValue,
+    });
+
+    const link = isIndex ? root : [root, siteUrlPath].join("");
+    return link;
   }
 }

@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { Uri } from "vscode";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
@@ -10,5 +9,5 @@ import { getWorkspaceConfig } from "./getWorkspaceConfig";
  */
 export async function getSiteUrl(wsRoot: Uri): Promise<string | undefined> {
   const config = await getWorkspaceConfig(wsRoot);
-  return ConfigUtils.getPublishingConfig(config).siteUrl;
+  return ConfigUtils.getPublishingConfig(config).siteUrl || "";
 }

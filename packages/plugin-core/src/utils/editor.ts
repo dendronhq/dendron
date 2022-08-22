@@ -6,13 +6,13 @@ import {
   genUUIDInsecure,
   NoteProps,
 } from "@dendronhq/common-all";
+import { Heading } from "@dendronhq/engine-server";
 import {
   AnchorUtils,
   BlockAnchor,
   DendronASTDest,
   DendronASTTypes,
   HashTag,
-  Heading,
   linkedNoteType,
   MdastUtils,
   MDUtilsV5,
@@ -20,7 +20,7 @@ import {
   select,
   UserTag,
   WikiLinkNoteV4,
-} from "@dendronhq/engine-server";
+} from "@dendronhq/unified";
 import _ from "lodash";
 import vscode, {
   Position,

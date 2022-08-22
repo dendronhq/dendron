@@ -13,7 +13,7 @@ import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
-import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
 import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
@@ -30,6 +30,7 @@ import {
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { LinkUtils } from "@dendronhq/unified";
 
 const md = _md();
 

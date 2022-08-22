@@ -3,7 +3,7 @@ import {
   CreateNoteOptsV4,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
-import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/engine-server";
+import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/unified";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
 import sinon from "sinon";

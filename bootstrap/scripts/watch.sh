@@ -5,6 +5,7 @@
 echo "watching..."
 npx lerna run watch --parallel 
     \ --scope @dendronhq/common-all 
+    \ --scope @dendronhq/unified
     \ --scope @dendronhq/common-server 
     \ --scope @dendronhq/dendron-viz
     \ --scope @dendronhq/engine-server 

@@ -56,16 +56,20 @@ export function backlinksHover(
     let documentEndLine = 0;
 
     // In the first visit, set the beginning and end markers of the document.
-    visit(tree, [DendronASTTypes.ROOT], (node, _index, _parent) => {
-      if (RemarkUtils.isRoot(node)) {
-        documentEndLine = node.position?.end.line ?? 0;
+    visit(
+      tree,
+      [DendronASTTypes.ROOT],
+      (node: Node, _index: any, _parent: any) => {
+        if (RemarkUtils.isRoot(node)) {
+          documentEndLine = node.position?.end.line ?? 0;
 
-        // Count the last line of YAML as the 0 indexed start of the body of the document
-        if (RemarkUtils.isYAML(node.children[0])) {
-          documentBodyStartLine = node.children[0].position?.end.line ?? 0;
+          // Count the last line of YAML as the 0 indexed start of the body of the document
+          if (RemarkUtils.isYAML(node.children[0])) {
+            documentBodyStartLine = node.children[0].position?.end.line ?? 0;
+          }
         }
       }
-    });
+    );
 
     // In the second visit, modify the wikilink/ref/candidate that is the
     // backlink to highlight it and to change its node type so that it appears
@@ -192,45 +196,49 @@ export function backlinksHover(
     });
 
     // In the third visit, add the contextual line marker information
-    visit(tree, [DendronASTTypes.ROOT], (node, _index, _parent) => {
-      if (!RemarkUtils.isRoot(node) || !node.position) {
-        return;
+    visit(
+      tree,
+      [DendronASTTypes.ROOT],
+      (node: Node, _index: any, _parent: any) => {
+        if (!RemarkUtils.isRoot(node) || !node.position) {
+          return;
+        }
+
+        const lowerBoundText =
+          lowerLineLimit <= documentBodyStartLine
+            ? "Start of Note"
+            : `Line ${lowerLineLimit - 1}`;
+
+        const lowerBoundParagraph: Paragraph = {
+          type: DendronASTTypes.PARAGRAPH,
+          children: [
+            {
+              type: DendronASTTypes.HTML,
+              value: `--- <i>${lowerBoundText}</i> ---`,
+            },
+          ],
+        };
+
+        node.children.unshift(lowerBoundParagraph);
+
+        const upperBoundText =
+          upperLineLimit >= documentEndLine
+            ? "End of Note"
+            : `Line ${upperLineLimit + 1}`;
+
+        const upperBoundParagraph: Paragraph = {
+          type: DendronASTTypes.PARAGRAPH,
+          children: [
+            {
+              type: DendronASTTypes.HTML,
+              value: `--- <i>${upperBoundText}</i> ---`,
+            },
+          ],
+        };
+
+        node.children.push(upperBoundParagraph);
       }
-
-      const lowerBoundText =
-        lowerLineLimit <= documentBodyStartLine
-          ? "Start of Note"
-          : `Line ${lowerLineLimit - 1}`;
-
-      const lowerBoundParagraph: Paragraph = {
-        type: DendronASTTypes.PARAGRAPH,
-        children: [
-          {
-            type: DendronASTTypes.HTML,
-            value: `--- <i>${lowerBoundText}</i> ---`,
-          },
-        ],
-      };
-
-      node.children.unshift(lowerBoundParagraph);
-
-      const upperBoundText =
-        upperLineLimit >= documentEndLine
-          ? "End of Note"
-          : `Line ${upperLineLimit + 1}`;
-
-      const upperBoundParagraph: Paragraph = {
-        type: DendronASTTypes.PARAGRAPH,
-        children: [
-          {
-            type: DendronASTTypes.HTML,
-            value: `--- <i>${upperBoundText}</i> ---`,
-          },
-        ],
-      };
-
-      node.children.push(upperBoundParagraph);
-    });
+    );
   }
   return transformer;
 }

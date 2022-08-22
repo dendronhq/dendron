@@ -58,6 +58,9 @@
       "path": "packages/dendron-plugin-views"
     },
     {
+      "path": "packages/unified"
+    },
+    {
       "path": "bootstrap"
     },
     {
@@ -103,6 +106,8 @@
     "editor.tabCompletion": "on"
   },
   "extensions": {
-    "recommendations": ["esbenp.prettier-vscode"]
+    "recommendations": [
+      "esbenp.prettier-vscode"
+    ]
   }
 }

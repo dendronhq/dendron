@@ -23,7 +23,7 @@ import { Node, Parent } from "unist";
 import u from "unist-builder";
 import visitParents from "unist-util-visit-parents";
 import { VFile } from "vfile";
-import { SiteUtils } from "../../topics/site";
+import { SiteUtils } from "../SiteUtils";
 import {
   BlockAnchor,
   DendronASTDest,

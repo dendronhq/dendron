@@ -29,8 +29,8 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { MdastUtils } from "..";
-import { SiteUtils } from "../../topics/site";
 import { RemarkUtils } from "../remark";
+import { SiteUtils } from "../SiteUtils";
 import {
   DendronASTDest,
   DendronASTNode,

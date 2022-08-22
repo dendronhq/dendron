@@ -70,7 +70,7 @@ import { Node, Parent } from "unist";
 import { selectAll } from "unist-util-select";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { WorkspaceUtils } from "../../workspace";
+import { SiteUtils } from "../SiteUtils";
 import {
   Anchor,
   BlockAnchor,
@@ -1249,7 +1249,7 @@ export class RemarkUtils {
               ConfigUtils.getPublishingConfig(dendronConfig);
             const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
-            linkNode.value = WorkspaceUtils.getNoteUrl({
+            linkNode.value = RemarkUtils.getNoteUrl({
               config: dendronConfig,
               note: existingNote,
               vault,
@@ -1535,5 +1535,43 @@ export class RemarkUtils {
     } else {
       return [];
     }
+  }
+
+  // Copied from WorkspaceUtils:
+  static getNoteUrl(opts: {
+    config: IntermediateDendronConfig;
+    note: NoteProps;
+    vault: DVault;
+    urlRoot?: string;
+    anchor?: string;
+  }) {
+    const { config, note, anchor, vault } = opts;
+    /**
+     * set to true if index node, don't append id at the end
+     */
+    const { url: root, index } = SiteUtils.getSiteUrlRootForVault({
+      vault,
+      config,
+    });
+    if (!root) {
+      throw new DendronError({ message: "no urlRoot set" });
+    }
+    // if we have a note, see if we are at index
+    const isIndex: boolean = _.isUndefined(note)
+      ? false
+      : SiteUtils.isIndexNote({
+          indexNote: index,
+          note,
+        });
+    const pathValue = note.id;
+    const siteUrlPath = SiteUtils.getSiteUrlPathForNote({
+      addPrefix: true,
+      pathValue,
+      config,
+      pathAnchor: anchor,
+    });
+
+    const link = isIndex ? root : [root, siteUrlPath].join("");
+    return link;
   }
 }

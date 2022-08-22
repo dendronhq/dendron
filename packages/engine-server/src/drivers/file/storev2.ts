@@ -66,7 +66,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { LinkUtils } from "../../markdown/remark/utils";
+import { LinkUtils } from "@dendronhq/unified";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";

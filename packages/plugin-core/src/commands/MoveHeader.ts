@@ -1,5 +1,6 @@
 import {
   asyncLoopOneAtATime,
+  DendronASTDest,
   DendronError,
   DLink,
   DNodeUtils,
@@ -17,24 +18,21 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
 import {
-  Anchor,
-  AnchorUtils,
-  DendronASTDest,
+  MDUtilsV5,
+  Processor,
   DendronASTNode,
   DendronASTTypes,
-  Heading,
-  HistoryEvent,
-  LinkUtils,
   MdastUtils,
-  MDUtilsV5,
-  Node,
-  Processor,
   RemarkUtils,
-  visit,
-} from "@dendronhq/engine-server";
+  Anchor,
+  AnchorUtils,
+  LinkUtils,
+} from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
+import visit from "unist-util-visit";
 import { Location } from "vscode";
 import {
   ILookupControllerV3,

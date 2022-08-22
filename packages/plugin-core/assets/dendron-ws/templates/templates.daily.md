@@ -1,4 +1,4 @@
-This template was applied using the daily journal schema. Edit the [[dendron.templates.daily]] note to change this template.
+This template was applied using the daily journal schema. Edit the [[templates.daily]] note to change this template.
 To create your own schemas to auto-apply templates when they match a hierarchy, follow the [schema tutorial](https://blog.dendron.so/notes/P1DL2uXHpKUCa7hLiFbFA/) to get started.
 
 <!--

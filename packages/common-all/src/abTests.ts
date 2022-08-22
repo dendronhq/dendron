@@ -15,11 +15,6 @@ export const isABTest = (value: any): value is ABTest<any> => {
  * See [[A/B Testing|dendron://dendron.docs/ref.ab-testing]] for more details.
  */
 
-export enum MeetingNoteTestGroups {
-  show = "show",
-  noShow = "noShow",
-}
-
 export enum GraphThemeTestGroups {
   /**
    * New user will get Monokai graph theme by default
@@ -50,11 +45,6 @@ export const GRAPH_THEME_TEST = new ABTest("GraphThemeTest", [
   },
 ]);
 
-export enum DailyJournalTestGroups {
-  withTemplate = "withTemplate",
-  withoutTemplate = "withoutTemplate",
-}
-
 export enum QuickstartTutorialTestGroups {
   "quickstart-v1" = "quickstart-v1",
   "quickstart-with-lock" = "quickstart-with-lock",
@@ -75,26 +65,6 @@ const _2022_06_QUICKSTART_TUTORIAL_TEST = new ABTest(
     },
     {
       name: QuickstartTutorialTestGroups["quickstart-with-lock"],
-      weight: 1,
-    },
-  ]
-);
-
-/**
- * Experiment to test whether users running `Daily Journal` for the first time should get an auto-generated template/schema or not.
- *
- * withTemplate = auto-generate a template and a schema for them that will apply the template to the journal note
- * withoutTemplate = no template/schema gets generated
- */
-export const _2022_05_DAILY_JOURNAL_TEMPLATE_TEST = new ABTest(
-  "2022-05-DailyJournalTemplateTest",
-  [
-    {
-      name: DailyJournalTestGroups.withTemplate,
-      weight: 1,
-    },
-    {
-      name: DailyJournalTestGroups.withoutTemplate,
       weight: 1,
     },
   ]
@@ -124,6 +94,5 @@ export const CURRENT_TUTORIAL_TEST: ABTest<any> | undefined =
  */
 export const CURRENT_AB_TESTS = [
   GRAPH_THEME_TEST,
-  _2022_05_DAILY_JOURNAL_TEMPLATE_TEST,
   CURRENT_TUTORIAL_TEST,
 ].filter((entry): entry is ABTest<any> => !!entry);

@@ -9,6 +9,7 @@ import {
   NotePropsMeta,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { URI } from "vscode-uri";
 
 import { Prisma, PrismaClient } from "./generated-prisma-client";
 
@@ -46,10 +47,14 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
       return;
     }
     // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
+    const dbUrl = URI.file(`${wsRoot}/metadata.db`);
+    // // eslint-disable-next-line global-require
+    // const fs = require("fs-extra");
+    // fs.appendFileSync("/tmp/bond.txt", dbUrl.toString(), { encoding: "uft8" });
     _prisma = new PrismaClient({
       datasources: {
         db: {
-          url: `file://${wsRoot}/metadata.db`,
+          url: dbUrl.toString(),
         },
       },
     });

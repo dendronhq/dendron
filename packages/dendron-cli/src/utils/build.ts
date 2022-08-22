@@ -73,8 +73,8 @@ export class LernaUtils {
     // modify engine for publishing
     await $(`./bootstrap/scripts/build-modify-engine.sh`);
     await $$(`lerna publish from-package --ignore-scripts --registry ${url}`);
-    // odify-engine makes a commit that needs to be reverted
-    await $(`git reset --hard HEAD^`);
+    // modify-engine makes a commit that needs to be reverted
+    // await $(`git reset --hard HEAD^`);
     $(`node bootstrap/scripts/genMeta.js`);
   }
 }

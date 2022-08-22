@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["darwin-arm64", "darwin"]
+  binaryTargets = ["native", "darwin-arm64", "darwin", "windows", "debian-openssl-1.1.x"]
   output        = "./../src/drivers/generated-prisma-client"
 }
 

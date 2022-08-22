@@ -378,7 +378,6 @@ suite("onAccept", () => {
     "GIVEN a new item with invalid name",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
-      timeout: 5e3,
     },
     () => {
       test("THEN reject lookup", async () => {

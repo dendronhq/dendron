@@ -73,6 +73,7 @@ import { SchemaParser } from "./schemaParser";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
 import { URI } from "vscode-uri";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -486,6 +487,16 @@ export class FileStorage implements DStore {
     let notesWithLinks: NoteProps[] = [];
     let errors: IDendronError<any>[] = [];
     const start = process.hrtime();
+    // instantiate so we can use singleton later
+    if (this.config.workspace.metadataStore === "sqlite") {
+      // eslint-disable-next-line no-new
+      new SQLiteMetadataStore({ wsRoot: this.wsRoot, force: true });
+      if (!(await SQLiteMetadataStore.isDBInitialized())) {
+        await SQLiteMetadataStore.createAllTables();
+        await SQLiteMetadataStore.createWorkspace(this.wsRoot);
+      }
+    }
+
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
         const {
@@ -652,7 +663,9 @@ export class FileStorage implements DStore {
       cache: notesCache,
       engine: this.engine,
       logger: this.logger,
-    }).parseFiles(noteFiles, vault);
+    }).parseFiles(noteFiles, vault, {
+      useSQLiteMetadataStore: this.config.workspace.metadataStore === "sqlite",
+    });
 
     errors = errors.concat(parseErrors);
     this.logger.info({ ctx, msg: "parseNotes:fin" });

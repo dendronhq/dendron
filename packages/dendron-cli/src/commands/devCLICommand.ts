@@ -450,7 +450,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     await this.syncAssets(opts);
 
     this.print("prep repo...");
-    await BuildUtils.prepPluginPkg();
+    await BuildUtils.prepPluginPkg(opts.extensionTarget);
 
     if (!shouldPublishLocal) {
       this.print(
@@ -467,11 +467,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     this.print("compiling plugin...");
     await BuildUtils.compilePlugin(opts);
-
-    if (opts.extensionTarget === ExtensionTarget.NIGHTLY) {
-      this.print("modifying plugin manifest for nightly target...");
-      await BuildUtils.prepPluginPkg(ExtensionTarget.NIGHTLY);
-    }
 
     this.print("package deps...");
     await BuildUtils.packagePluginDependencies(opts);

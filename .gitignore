@@ -33,3 +33,6 @@ packages/nextjs-template/public
 .npmrc
 .env.production
 packages/dendron-viz/lib
+generated-prisma-client
+packages/engine-server/prisma/dev.db
+dev.db-journal

@@ -3,6 +3,493 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.108.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.108.1) (2022-08-22)
+
+
+### Bug Fixes
+
+* **workspace:** correctly decorate begin and end anchors ([#3339](https://github.com/dendronhq/dendron/issues/3339)) ([fb1425c](https://github.com/dendronhq/dendron/commit/fb1425c62888f778733323c86a4a120dcb78224e))
+
+
+### Features Dendron
+
+* **refactor:** merge note command ([#3349](https://github.com/dendronhq/dendron/issues/3349)) ([41d6189](https://github.com/dendronhq/dendron/commit/41d6189371aa7e40bd3faff55623787802a9aa8b))
+* **workspace:** code workspaces support ([#3343](https://github.com/dendronhq/dendron/issues/3343)) ([ac62ab7](https://github.com/dendronhq/dendron/commit/ac62ab71be81b61bcb14281b0c24c222c22f7232))
+* **workspace:** tree view in web ext ([#3386](https://github.com/dendronhq/dendron/issues/3386)) ([b75a448](https://github.com/dendronhq/dendron/commit/b75a448aabc6918cead8ae14779ace83aa2a6ae5))
+
+
+### Reverts
+
+* Revert "chore: publish patch" ([9b4b15d](https://github.com/dendronhq/dendron/commit/9b4b15d92b4b6d69c14a98edac1af9f8a38c599f))
+* Revert "chore: publish patch" ([028d3bd](https://github.com/dendronhq/dendron/commit/028d3bd6b2ab6a5c10e635188ac50768d7ddc292))
+* Revert "chore: publish patch" ([b57f7eb](https://github.com/dendronhq/dendron/commit/b57f7ebcc6d70611c625bba2bee693c33c496583))
+
+
+
+# 0.106.0 (2022-08-02)
+
+
+
+## 0.105.2 (2022-07-28)
+
+
+### Bug Fixes
+
+* **workspace:** List dendron.dendron-markdown-preview-enhanced as unwanted ([#3281](https://github.com/dendronhq/dendron/issues/3281)) ([182e835](https://github.com/dendronhq/dendron/commit/182e83510574230e3c7a72650c388b3ce6058557))
+
+
+
+## 0.104.1 (2022-07-21)
+
+
+
+# 0.104.0 (2022-07-19)
+
+
+### Bug Fixes
+
+* **workspace:** workspace sync will maintain proper engine state ([#3233](https://github.com/dendronhq/dendron/issues/3233)) ([13f788c](https://github.com/dendronhq/dendron/commit/13f788cb9a46800edffe66dcac88062e33830a5c))
+* update bad frontmatter waning range ([f339803](https://github.com/dendronhq/dendron/commit/f3398035ab5ebecf870f57c48547c61c34fca4f3))
+* **retrieve:** bad parsing of xvault wikilink with space ([#3180](https://github.com/dendronhq/dendron/issues/3180)) ([8fa340c](https://github.com/dendronhq/dendron/commit/8fa340c6eb11a3d21b61e5ac349db358aa48318c))
+* **workspace:** proper handling of invalid data for write note ops ([#3137](https://github.com/dendronhq/dendron/issues/3137)) ([c6c7588](https://github.com/dendronhq/dendron/commit/c6c75881bec46bf701647b9d6b799e4de566edb7))
+* regression where publishing fails if note doesn't exist ([#3178](https://github.com/dendronhq/dendron/issues/3178)) ([36c894f](https://github.com/dendronhq/dendron/commit/36c894f3ea691ec08a9cabe4df24b1c67239b511))
+* **workspace:** removing vault with a name different than their `fsPath` doesn't remove them from `duplicateNoteBehavior` ([d0cb52f](https://github.com/dendronhq/dendron/commit/d0cb52f00f318f6dd1f30d0533a55115e42d8a71))
+
+
+### Features Dendron
+
+* **edit): support note references on beginning of a doc && fix(edit:** template gets applied twice if user undoes initial template  ([#3186](https://github.com/dendronhq/dendron/issues/3186)) ([88c7c5c](https://github.com/dendronhq/dendron/commit/88c7c5c85e470bdefaeaf371c60e2e950f25d16e))
+* **workspace:** smart note refs ([#3174](https://github.com/dendronhq/dendron/issues/3174)) ([c0a6c60](https://github.com/dendronhq/dendron/commit/c0a6c6064193b3730fc0320d3c6d310434952561))
+
+
+
+# 0.101.0 (2022-06-28)
+
+
+### Bug Fixes
+
+* **structure:** hot reload in note traits + no template by default ([3904655](https://github.com/dendronhq/dendron/commit/390465552a6744495387aea6f49fa5392fb69b03))
+* **structure:** hot reload in note traits + no template by default ([#3154](https://github.com/dendronhq/dendron/issues/3154)) ([bcadd48](https://github.com/dendronhq/dendron/commit/bcadd487c706379f0384a6f3a8c728d606a2bba8))
+* **workspace:** duplicate note behavior is not updated when self contained vault is removed ([d69f02c](https://github.com/dendronhq/dendron/commit/d69f02c0857b4fc594ee8e3f494bd1e5465be2e8))
+* **workspace:** Sync fails in shared workspaces if users update workspace config first before syncing migrated vaults ([969b83c](https://github.com/dendronhq/dendron/commit/969b83c598401251fa7ff69e62586a6b7627d0c1))
+
+
+
+## 0.100.1 (2022-06-23)
+
+
+
+# 0.100.0 (2022-06-21)
+
+
+### Bug Fixes
+
+* **edit:** autocomplete issues with tags and mentions ([#3107](https://github.com/dendronhq/dendron/issues/3107)) ([01be85f](https://github.com/dendronhq/dendron/commit/01be85f84ae6cdf182f2d43b9561decac44369e6))
+* **edit:** autocomplete issues with tags and mentions ([#3107](https://github.com/dendronhq/dendron/issues/3107)) ([decaccd](https://github.com/dendronhq/dendron/commit/decaccdc0af6072197405273e82750d8702d2262))
+* **publish:** issue publishing note with ref without a `code-worksapce` file ([#3114](https://github.com/dendronhq/dendron/issues/3114)) ([5a03d8f](https://github.com/dendronhq/dendron/commit/5a03d8fdaa289d7b5a7a79f85cad1da5de58c2ba))
+* address PR comments ([c4ba612](https://github.com/dendronhq/dendron/commit/c4ba612a07fcdef1a98a86d245edab00e31ffc76))
+* **workspace:** try to patch `EPERM` issues for windows ([17dd870](https://github.com/dendronhq/dendron/commit/17dd870cf6aa85bc01e97998de4be15c44d182f3))
+* adding existing remote vault creates workspace files in the vault ([6d43936](https://github.com/dendronhq/dendron/commit/6d439369d8e75150cc1ba582f337a6fded402a7b))
+
+
+### Features Dendron
+
+* **views:** depth for local graph ([494b648](https://github.com/dendronhq/dendron/commit/494b648dee70cc92caf7f490781e2a14bda3c297))
+
+
+
+# 0.99.0 (2022-06-14)
+
+
+### Bug Fixes
+
+* **edit:** email addresses and hash symbols inside words are parsed as tags ([5579820](https://github.com/dendronhq/dendron/commit/5579820701816095cc5bb882373cef2f69898927))
+* **workspace:** Migrate to Self Contained Vault causes EBUSY errors on Windows ([8ed95f3](https://github.com/dendronhq/dendron/commit/8ed95f3e1597204860b0a0789e733eda76838df7))
+* email addresses are parsed as tags ([e85fb83](https://github.com/dendronhq/dendron/commit/e85fb83bf1ae07ae89eaf1e464fb5ccef4cb5cb9))
+
+
+### Features Dendron
+
+* **views:** Recent Workspaces Panel ([#3052](https://github.com/dendronhq/dendron/issues/3052)) ([5e52529](https://github.com/dendronhq/dendron/commit/5e525295ca0d1118782affdfb68c34e939b479c9))
+
+
+
+# 0.98.0 (2022-06-07)
+
+
+### Bug Fixes
+
+* **views:** Backlinks Panel Tweaks ([#3031](https://github.com/dendronhq/dendron/issues/3031)) ([1bc7493](https://github.com/dendronhq/dendron/commit/1bc7493a76c8c2fcb58ef4ba5ef569675fca2a1d))
+* **views:** Backlinks Panel Tweaks ([#3031](https://github.com/dendronhq/dendron/issues/3031)) ([4fa37a1](https://github.com/dendronhq/dendron/commit/4fa37a12423ae93215c765b27f5cd6f6c4ce698d))
+* Images with encoded URI are not rendered in the Preview ([#3006](https://github.com/dendronhq/dendron/issues/3006)) ([e2172be](https://github.com/dendronhq/dendron/commit/e2172be363e2a3311c238c5fc841f5e498f66851))
+* **publish:** assetsPrefix breaks images ([bc611d2](https://github.com/dendronhq/dendron/commit/bc611d2d42b46eef80a945bbd2360b82e7e52af5))
+
+
+### Features Dendron
+
+* **edit:** introduce apply template command ([#2982](https://github.com/dendronhq/dendron/issues/2982)) ([c57ab3d](https://github.com/dendronhq/dendron/commit/c57ab3dda91082f544e53e12aa201aa72f6b30e4))
+* **navigate:** Backlink Panel with Hover ([#2904](https://github.com/dendronhq/dendron/issues/2904)) ([55c7fcd](https://github.com/dendronhq/dendron/commit/55c7fcdcd1135145b5385176e9bbdd18951f6d00))
+* **notes:** Auto generate template/schema for daily journal ([37a2484](https://github.com/dendronhq/dendron/commit/37a24842a41a4bc134f612cef503a6901547b981))
+* **sync:** Obsidian Import Flow ([#3014](https://github.com/dendronhq/dendron/issues/3014)) ([669b200](https://github.com/dendronhq/dendron/commit/669b200509c7a3d1f339da62ecbca769974fb3fd))
+* **views:** Preview uses your VSCode theme colors, and supports custom themes ([c14c6f0](https://github.com/dendronhq/dendron/commit/c14c6f0703eab185de280c4a7bc3f4cecd2bdb4c))
+
+
+
+# 0.96.0 (2022-05-24)
+
+
+### Bug Fixes
+
+* **publish:** assetsPrefix breaks images ([e1e3000](https://github.com/dendronhq/dendron/commit/e1e300090cb734acea1f963722d3056a0fa18812))
+* block anchor after table crashes preview ([c3eb688](https://github.com/dendronhq/dendron/commit/c3eb68811f63be909ca89fcfa87ff4f27d2a9db6))
+* configure enableHierarchyDisplay and hierarchyDisplayTitle ([bd11d92](https://github.com/dendronhq/dendron/commit/bd11d9259132f29184099a2cad6e745477c91783))
+* doctor removeStubs resulting in 'no data' prompt ([#2944](https://github.com/dendronhq/dendron/issues/2944)) ([5d1c7b3](https://github.com/dendronhq/dendron/commit/5d1c7b33728a7af8739446a3e024b6d8f08eaf3e))
+
+
+### Features Dendron
+
+* **views:** display task note status when linking to task notes in publishing and in preview ([dbc16ff](https://github.com/dendronhq/dendron/commit/dbc16ffdd1a66cff9252b3d88e2e2d44bf59a060))
+* **workspace:** Add a command to migrate regular vaults into self contained vaults ([9710511](https://github.com/dendronhq/dendron/commit/9710511a2f2a040be3f10d820da8cc562a54d738))
+* local graph view in the Dendron Side Panel ([#2901](https://github.com/dendronhq/dendron/issues/2901)) ([195a61a](https://github.com/dendronhq/dendron/commit/195a61ae7ed7158d97c1161aacc5d08a08d660e9))
+
+
+
+## 0.95.1 (2022-05-18)
+
+
+### Bug Fixes
+
+* block anchor after table crashes preview ([92812c3](https://github.com/dendronhq/dendron/commit/92812c3b946a2e881792d69d36932a782b2208d4))
+
+
+
+# 0.95.0 (2022-05-17)
+
+
+### Features Dendron
+
+* allow customization of tree view label / sorting to preserve old tree view behavior ([#2858](https://github.com/dendronhq/dendron/issues/2858)) ([987c802](https://github.com/dendronhq/dendron/commit/987c8021970de6c75f96a6d94e0df500b23eca0d))
+* **publish:** Custom theme support ([#2887](https://github.com/dendronhq/dendron/issues/2887)) ([8dd5023](https://github.com/dendronhq/dendron/commit/8dd50239347fae84b65622f204bf3add38fc20d6))
+
+
+
+# 0.94.0 (2022-05-10)
+
+
+### Bug Fixes
+
+* highlighting misidentified capitalized header anchors on links as missing ([#2872](https://github.com/dendronhq/dendron/issues/2872)) ([92ded23](https://github.com/dendronhq/dendron/commit/92ded230eccec02947cb33221288591f2064866c)), closes [#2862](https://github.com/dendronhq/dendron/issues/2862)
+* self contained vaults get cloned into the wrong directory ([#2873](https://github.com/dendronhq/dendron/issues/2873)) ([9c7ac1c](https://github.com/dendronhq/dendron/commit/9c7ac1cfff4fb07bc689b42ea04677df5d2a927b))
+
+
+### Features Dendron
+
+* **chore:** germ stage implementation of config overrides ([#2794](https://github.com/dendronhq/dendron/issues/2794)) ([c3692ef](https://github.com/dendronhq/dendron/commit/c3692ef5073ab2454ee117d3ad72cb2af257e4be))
+* Add doctor command to remove deprecated config and prompt on upgrade ([#2841](https://github.com/dendronhq/dendron/issues/2841)) ([2cc71e0](https://github.com/dendronhq/dendron/commit/2cc71e0796c4cebc32817b2b930cf7b0a324485f))
+
+
+
+# 0.93.0 (2022-05-03)
+
+
+### Features Dendron
+
+* **views:** Dendron Side Panel ([#2832](https://github.com/dendronhq/dendron/issues/2832)) ([158ed1d](https://github.com/dendronhq/dendron/commit/158ed1d748448c611146900915c6299a0730bbf9))
+* **views:** Dendron Side Panel ([#2832](https://github.com/dendronhq/dendron/issues/2832)) ([0f89993](https://github.com/dendronhq/dendron/commit/0f899934e5e5eeacb7b2dd5643dbdb4e4caff267))
+
+
+
+## 0.92.1 (2022-04-28)
+
+
+### Bug Fixes
+
+* **view:** views don't update for new notes with self contained vaults ([#2790](https://github.com/dendronhq/dendron/issues/2790)) ([eac9b53](https://github.com/dendronhq/dendron/commit/eac9b53b5da3c9336b09c317caf56d800aacf4cc))
+* **views:** second pass of treeview v1 sync issue ([#2805](https://github.com/dendronhq/dendron/issues/2805)) ([64e0970](https://github.com/dendronhq/dendron/commit/64e0970382d11694bb52f65a50f4c7de8fdd0a0c))
+
+
+
+# 0.91.0 (2022-04-19)
+
+
+### Bug Fixes
+
+* first pass of treeview v1 sync issue ([#2757](https://github.com/dendronhq/dendron/issues/2757)) ([f8f80ca](https://github.com/dendronhq/dendron/commit/f8f80cacb8b661b06df0d57b955b7e4529272a66))
+* self contained vaults sync ([#2758](https://github.com/dendronhq/dendron/issues/2758)) ([ebb4658](https://github.com/dendronhq/dendron/commit/ebb46587ca0728e25bf69b5d94058d3cc3c2446c))
+* **internal:** Clean up copynotelink and BacklinksTreeDataProvider tests ([88aea8a](https://github.com/dendronhq/dendron/commit/88aea8a829af91671be93a7d266fc098d2ca5951))
+* error when adding a self contained vault inside a native workspace ([#2660](https://github.com/dendronhq/dendron/issues/2660)) ([f2a9449](https://github.com/dendronhq/dendron/commit/f2a94491463396d0cce30dc7376898644622b908))
+* typo "hierarchy", "should" ([#2699](https://github.com/dendronhq/dendron/issues/2699)) ([a3b2eff](https://github.com/dendronhq/dendron/commit/a3b2eff276892ea344c7bc0552af9ab5030aaed5))
+
+
+### Features Dendron
+
+* **workspace:** Meeting Notes ([#2727](https://github.com/dendronhq/dendron/issues/2727)) ([8ea1d1b](https://github.com/dendronhq/dendron/commit/8ea1d1b8e6247fec3e636c26da3f98e047026a6b))
+* **workspace:** Meeting Notes ([#2727](https://github.com/dendronhq/dendron/issues/2727)) ([f87ca99](https://github.com/dendronhq/dendron/commit/f87ca996dc31588b42e35fa8613d95c2aaf49b2a))
+* detect and fill missing default configs to reliably introduce newly added configurations on extension upgrade ([#2602](https://github.com/dendronhq/dendron/issues/2602)) ([4f31fce](https://github.com/dendronhq/dendron/commit/4f31fce3da8d04d981e05a151040ddd28edfba29))
+
+
+
+# 0.88.0 (2022-03-29)
+
+
+### Bug Fixes
+
+* Backlinks will no longer disappear in preview upon editing ([#2608](https://github.com/dendronhq/dendron/issues/2608)) ([1ee16f9](https://github.com/dendronhq/dendron/commit/1ee16f9540173b2ec7558d0d120428e2d093d649))
+* **internal:** Engine updateNote not properly firing update events ([#2622](https://github.com/dendronhq/dendron/issues/2622)) ([97f0911](https://github.com/dendronhq/dendron/commit/97f091136c0d7606150631ab3be4d9eeb99aa4aa))
+* **markdown:** support parenthesis in the image URL ([#2634](https://github.com/dendronhq/dendron/issues/2634)) ([b05907d](https://github.com/dendronhq/dendron/commit/b05907d94aa1fecf0edcac61ad119d5ecd820736))
+* **views:** unblock preview rendering when backlink is invalid ([#2586](https://github.com/dendronhq/dendron/issues/2586)) ([fe893b9](https://github.com/dendronhq/dendron/commit/fe893b9b3d827811b743cfb93afef6363470760b))
+* block anchors showing up in the preview ([#2548](https://github.com/dendronhq/dendron/issues/2548)) ([44802b8](https://github.com/dendronhq/dendron/commit/44802b8a37ed38b94fbc22692a4c1f21ee83963f)), closes [#2531](https://github.com/dendronhq/dendron/issues/2531)
+* Re-enable inactive user survey and store prompt status in filesystem for prompt reliability. ([#2555](https://github.com/dendronhq/dendron/issues/2555)) ([3a4269f](https://github.com/dendronhq/dendron/commit/3a4269f4b5669f45eb257377abfcde7aad9e7bf4))
+* resolve PR comments ([cadea31](https://github.com/dendronhq/dendron/commit/cadea31039b8bdf973e52662c9438d734a64fcc5))
+* **workspace:** race condition when backing up configuration  ([#2581](https://github.com/dendronhq/dendron/issues/2581)) ([efd3bb8](https://github.com/dendronhq/dendron/commit/efd3bb8880b963b912fbcc6bcd0c0595b4083273))
+
+
+
+# 0.85.0 (2022-03-08)
+
+
+### Bug Fixes
+
+* add omitted migration entries ([#2519](https://github.com/dendronhq/dendron/issues/2519)) ([ae6ef64](https://github.com/dendronhq/dendron/commit/ae6ef64cb61b3aa4c229c77da5b94362e09d363d))
+* **views:** md parsing and preview perf improvements ([#2505](https://github.com/dendronhq/dendron/issues/2505)) ([282951f](https://github.com/dendronhq/dendron/commit/282951fbee192e97064595659fa31773249b6aa6))
+* remove comment ([00edd5a](https://github.com/dendronhq/dendron/commit/00edd5aa7a9d50776299f3db9fa0563f7823579c))
+
+
+
+# 0.84.0 (2022-03-01)
+
+
+### Bug Fixes
+
+* **pods:** md export v2 to acknowledge wikiLinkToURL for links inside noteRefs ([32f5ae6](https://github.com/dendronhq/dendron/commit/32f5ae61eccd80195eb8e32700c4f48dc516b54b))
+* **publish:** properly render mermaid and katex when published ([#2480](https://github.com/dendronhq/dendron/issues/2480)) ([2524589](https://github.com/dendronhq/dendron/commit/2524589cbf016dff694bcc308dbf1ec1b7390570))
+* **publish:** Table of Contents is missing user tags, inline code, dashes and underline ([#2465](https://github.com/dendronhq/dendron/issues/2465)) ([79c6d9e](https://github.com/dendronhq/dendron/commit/79c6d9e801e5cec78acf0212fc8e4c1134e6f5d2)), closes [#2456](https://github.com/dendronhq/dendron/issues/2456)
+* properly set siteIndex when it's not explicitly set by config ([#2443](https://github.com/dendronhq/dendron/issues/2443)) ([43b4c3b](https://github.com/dendronhq/dendron/commit/43b4c3b8634f311ff14dc05b7dab9bc65c605b57))
+
+
+
+# 0.82.0 (2022-02-15)
+
+
+### Bug Fixes
+
+* **publish:** skip adding asset prefix to images with web url ([#2362](https://github.com/dendronhq/dendron/issues/2362)) ([11cf84c](https://github.com/dendronhq/dendron/commit/11cf84c61db4b83934048c7f8a46fbb969132816))
+* **views:** engine events; update DendronTreeView reliably ([#2269](https://github.com/dendronhq/dendron/issues/2269)) ([147cce8](https://github.com/dendronhq/dendron/commit/147cce8ba31576cccb2f98c3c355ef2fdb2cb683))
+* **workspace:** avoid workspace watcher crashing if folder is deleted ([#2359](https://github.com/dendronhq/dendron/issues/2359)) ([9d0325f](https://github.com/dendronhq/dendron/commit/9d0325fc9d220a95d48a04716a5678dae0bebe79))
+* **workspace:** Dendron will try to parse non-dendron files in `onFirstOpen` ([#2405](https://github.com/dendronhq/dendron/issues/2405)) ([d913a7f](https://github.com/dendronhq/dendron/commit/d913a7fe6e251f5e45925c591310ddd6e1031274))
+* re-apply windows hover preview image fix & improve hover preview performance ([#2312](https://github.com/dendronhq/dendron/issues/2312)) ([103655e](https://github.com/dendronhq/dendron/commit/103655ece34b67f5c86d254aded9200435fe5166)), closes [#2047](https://github.com/dendronhq/dendron/issues/2047)
+
+
+
+# 0.79.0 (2022-01-25)
+
+
+### Bug Fixes
+
+* **markdown:** Exclude parenthesis from tags ([#2182](https://github.com/dendronhq/dendron/issues/2182)) ([04fe9f8](https://github.com/dendronhq/dendron/commit/04fe9f896000e1254403d1ead49d209a9fda7b95))
+* **workspace:** stop link candidate logic when disabled ([#2136](https://github.com/dendronhq/dendron/issues/2136)) ([110941c](https://github.com/dendronhq/dendron/commit/110941cd268aaca43bc99a07d5670c52271aa95c))
+* add sort by levenshtein distance prior to sorting by update date to lookup results of the same match score. ([3192d77](https://github.com/dendronhq/dendron/commit/3192d773588e9f1817eabbbb78e68042c201d213))
+* correctly offset frontmatter line count in doctor preview for `findBrokenLinks` ([#1959](https://github.com/dendronhq/dendron/issues/1959)) ([21255b3](https://github.com/dendronhq/dendron/commit/21255b30f3310e2cd897cfafc4764d04d553bd22))
+* rename operations modify unnecessary files ([83d0469](https://github.com/dendronhq/dendron/commit/83d04699656160f01634375782c1f26f9a8b67be)), closes [#2015](https://github.com/dendronhq/dendron/issues/2015)
+* test updates ([fb066b2](https://github.com/dendronhq/dendron/commit/fb066b2277a8620b62385281235359ad5ccde874))
+* **workspace:** don't show calendar view unless dendron tree view is active ([#2017](https://github.com/dendronhq/dendron/issues/2017)) ([5132e83](https://github.com/dendronhq/dendron/commit/5132e8309d2b66585aed50983bf431b221c16c0d))
+* rename operations modify unnecessary files ([1330785](https://github.com/dendronhq/dendron/commit/1330785011d57150d18728fa7a14f7a58a6ca7fb))
+* warn for frontmatter issues even if the frontmatter is not visible ([bfe027e](https://github.com/dendronhq/dendron/commit/bfe027eb40ef1cdc7b214a6ff8ab3b1e6b32d453))
+* **markdown:** lag in the editor when there's a x-vault link to a non-existent vault ([#1941](https://github.com/dendronhq/dendron/issues/1941)) ([0ae4325](https://github.com/dendronhq/dendron/commit/0ae43256c0d81683ec8c92bff66f69ed97e04102))
+* **note:** frontmatter tags are not highlighted ([#2001](https://github.com/dendronhq/dendron/issues/2001)) ([5eae3b7](https://github.com/dendronhq/dendron/commit/5eae3b7ae1efa8f4c0c790c6d30bf8f55617d7a7))
+* **workspace:** simplify InitializeWorkspace command ([#1886](https://github.com/dendronhq/dendron/issues/1886)) ([27f4c53](https://github.com/dendronhq/dendron/commit/27f4c53f34ee89700df3d53b31b016f393cdf282))
+
+
+### Features Dendron
+
+* open preview buttons for context menus ([#1906](https://github.com/dendronhq/dendron/issues/1906)) ([8b9160c](https://github.com/dendronhq/dendron/commit/8b9160c250cad2465dbfb77c785ab022b31cd88b))
+* **commands:** find broken links ([#1847](https://github.com/dendronhq/dendron/issues/1847)) ([0f23a79](https://github.com/dendronhq/dendron/commit/0f23a79e5473afa2afb1c5c0e274e2bd3f134554))
+* **navigation:** Goto Note can open links to non-note files ([#1844](https://github.com/dendronhq/dendron/issues/1844)) ([4223303](https://github.com/dendronhq/dendron/commit/4223303213731b341a45a73d9e2e55d53392630a))
+* **navigation:** non-note file enhancements ([#1895](https://github.com/dendronhq/dendron/issues/1895)) ([90e083b](https://github.com/dendronhq/dendron/commit/90e083b5e10073acbc8967ad9649c0008aae381c))
+* **notes:** Note Trait System Prototype (Phase 1) ([#1658](https://github.com/dendronhq/dendron/issues/1658)) ([0d5d187](https://github.com/dendronhq/dendron/commit/0d5d187a9aaaaebfc32fa9c7c5b5faa5c3b38eb3))
+* **refactor:** convert link command ([#1933](https://github.com/dendronhq/dendron/issues/1933)) ([e4cba18](https://github.com/dendronhq/dendron/commit/e4cba184382f7d8c1d2a6820e85305e1191a54c2))
+* **refactoring:** add rename provider ([#1879](https://github.com/dendronhq/dendron/issues/1879)) ([988e18b](https://github.com/dendronhq/dendron/commit/988e18b8e03cb952898cb1cba9caf998b2e994f5))
+
+
+
+# 0.72.0 (2021-12-07)
+
+
+### Bug Fixes
+
+* decorator lag problems ([#1822](https://github.com/dendronhq/dendron/issues/1822)) ([239bbdc](https://github.com/dendronhq/dendron/commit/239bbdc074e7bfde065a4210084002a0685471e5))
+* **lookup:** hierarchy look up when inside parts of the hierarchy are omitted ([#1522](https://github.com/dendronhq/dendron/issues/1522)) ([6c30af5](https://github.com/dendronhq/dendron/commit/6c30af5e5b76297334f15a435fd1f9ad09941e06))
+* **markdown:** email parsed as user tag & option to disable user tags and hashtags ([#1562](https://github.com/dendronhq/dendron/issues/1562)) ([fd56f7e](https://github.com/dendronhq/dendron/commit/fd56f7ece1651ea6433ebf481f2c54386ab6fb16))
+* **markdown:** footnote definitions including links are rendered incorrectly ([#1704](https://github.com/dendronhq/dendron/issues/1704)) ([f500583](https://github.com/dendronhq/dendron/commit/f500583ab5d274d8120cbbab0a786e1c115e7bb7)), closes [#1001](https://github.com/dendronhq/dendron/issues/1001)
+* **markdown:** footnote links move view in publishing & preview ([#1568](https://github.com/dendronhq/dendron/issues/1568)) ([fbe659d](https://github.com/dendronhq/dendron/commit/fbe659d2be3d1f2534d7437d585e9fa38f1684da))
+* **markdown:** footnote rendering in note references ([#1520](https://github.com/dendronhq/dendron/issues/1520)) ([c4056f5](https://github.com/dendronhq/dendron/commit/c4056f5c4fc4c02dbc14cd4564032caa3619eae5))
+* **pods:** invalid configuration error ([398a599](https://github.com/dendronhq/dendron/commit/398a5995fc594566131eb283ff989a877ca9c995))
+* **pods:** resolve same level dir wikilinks in markdown import([#1615](https://github.com/dendronhq/dendron/issues/1615)) ([3c82e14](https://github.com/dendronhq/dendron/commit/3c82e147a33ed5d6cff3c2508aec1f66eca2d20c))
+* **publish:** verbose logging when building notes ([136cbec](https://github.com/dendronhq/dendron/commit/136cbec7c10d6c42b79ecce0f21955d546ba1f9e))
+* **publish:** wikilinks inside note references don't have right link ([59468c3](https://github.com/dendronhq/dendron/commit/59468c3e4d691dba3d5e5e486524ed779c0620aa))
+* **viwes:** `nav_order` property not respected in tree view ([fd328a1](https://github.com/dendronhq/dendron/commit/fd328a17478a063c2ea3d51e00fbc26c7e7e1b26))
+* **workspace:** apply enableUser/HashTags to broken wikilinks code action ([#1712](https://github.com/dendronhq/dendron/issues/1712)) ([1ea4f9d](https://github.com/dendronhq/dendron/commit/1ea4f9dbb24074519e90e2f5fc2d96bfdda65be5))
+* **workspace:** checks against fnames with all lowercase ([#1739](https://github.com/dendronhq/dendron/issues/1739)) ([8e3f8ec](https://github.com/dendronhq/dendron/commit/8e3f8ec061e0ce7d249a7e92902bb48e7c520793))
+* **workspace:** remove trailing whitespace in note ([#1736](https://github.com/dendronhq/dendron/issues/1736)) ([d1f0117](https://github.com/dendronhq/dendron/commit/d1f01177390e206fe75f235caa7ef10eebe43732))
+* frontmatter variable substitution not rendering in preview V2 ([#1567](https://github.com/dendronhq/dendron/issues/1567)) ([0282c17](https://github.com/dendronhq/dendron/commit/0282c1703643995b6675ee6ee64ca7c7b7500fd2))
+* handle undefined and null properties of old command configs in migration ([#1508](https://github.com/dendronhq/dendron/issues/1508)) ([6782b54](https://github.com/dendronhq/dendron/commit/6782b54231e30c6fc6298f1c3a826469dd6548ec))
+* hover & goto note should respect enableUser/HashTags ([#1620](https://github.com/dendronhq/dendron/issues/1620)) ([1943171](https://github.com/dendronhq/dendron/commit/1943171f6cf614250cc157d13e210c83fa985348)), closes [#1503](https://github.com/dendronhq/dendron/issues/1503)
+* markdown publish to hide block reference anchors ([#1577](https://github.com/dendronhq/dendron/issues/1577)) ([43fe1a7](https://github.com/dendronhq/dendron/commit/43fe1a7d4437136ebe6ba3cb91ca835b93c7a831))
+* recursive null value cleanup not properly working during migration ([#1564](https://github.com/dendronhq/dendron/issues/1564)) ([660c86e](https://github.com/dendronhq/dendron/commit/660c86e9ef0ea702eb20fa754378e5de6dbf84b6))
+* workaround for user tags & hashtags inside links ([ef8c859](https://github.com/dendronhq/dendron/commit/ef8c8590e2f7238129ee7c3ac5d7719cfee09d41))
+
+
+### Features Dendron
+
+* decorator improvements ([#1770](https://github.com/dendronhq/dendron/issues/1770)) ([a7227fd](https://github.com/dendronhq/dendron/commit/a7227fd4d8991e44729989c821a22560dcb8348b))
+* **workspace:** Initialize Workspace command can create native workspaces ([#1701](https://github.com/dendronhq/dendron/issues/1701)) ([5b59038](https://github.com/dendronhq/dendron/commit/5b590388c57e92b3e801bbe8463fe8ba052e79ed))
+* Native workspace enhancements ([#1670](https://github.com/dendronhq/dendron/issues/1670)) ([7a392bb](https://github.com/dendronhq/dendron/commit/7a392bb47c69b562d54fa15479a184f1441e129e))
+* **workspace:** better note previews ([#1666](https://github.com/dendronhq/dendron/issues/1666)) ([5cf7067](https://github.com/dendronhq/dendron/commit/5cf70672a24a62d528440f38b44813bfa627fb88))
+* **workspace:** convert vault command ([#1542](https://github.com/dendronhq/dendron/issues/1542)) ([c265e9d](https://github.com/dendronhq/dendron/commit/c265e9d2c238b5a6b3761f4c073140b1a0debe3a))
+* **workspace:** native workspaces ([#1482](https://github.com/dendronhq/dendron/issues/1482)) ([c2febc9](https://github.com/dendronhq/dendron/commit/c2febc9ec328d723b933177fc2659326638ac059))
+
+
+### Reverts
+
+* Revert "fix: add workspace root to workspace folders for Code Workspaces" ([09b3ad5](https://github.com/dendronhq/dendron/commit/09b3ad58fb3c872acfa7a71c64e7e9c9b27a8ded))
+
+
+
+## 0.62.3 (2021-10-09)
+
+
+### Bug Fixes
+
+* **lookup:** move header command shouldn't update note references that don't match the moved header's anchor ([#1480](https://github.com/dendronhq/dendron/issues/1480)) ([f3bb62e](https://github.com/dendronhq/dendron/commit/f3bb62e284dd26aee5d531a4d7f0d12231fd1750))
+* **preview:** multiple ref notes back to back rendering. ([#1471](https://github.com/dendronhq/dendron/issues/1471)) ([382a7b1](https://github.com/dendronhq/dendron/commit/382a7b15c655e5cee29321259924695ef136d2e7))
+* initialization for native workspaces ([#1449](https://github.com/dendronhq/dendron/issues/1449)) ([d9eafde](https://github.com/dendronhq/dendron/commit/d9eafdeb3e7db4af847aba6628d9e69c0b3c624a))
+* preview caching invalidation when notes with ![[ref]] links change ([#1385](https://github.com/dendronhq/dendron/issues/1385)) ([efeef86](https://github.com/dendronhq/dendron/commit/efeef8662ec52e64ba33cae9b1196bba6cc82f95))
+
+
+### Features Dendron
+
+* **command:** move header command ([#1349](https://github.com/dendronhq/dendron/issues/1349)) ([71c20f0](https://github.com/dendronhq/dendron/commit/71c20f07eef155775cab3b5bdff59a854170cb02))
+* **publish:** add table of contents ([#1428](https://github.com/dendronhq/dendron/issues/1428)) ([df4b05b](https://github.com/dendronhq/dendron/commit/df4b05ba8526dc32362d6a59543d880f253f02fc))
+
+
+
+# 0.61.0 (2021-09-28)
+
+
+### Bug Fixes
+
+* **workspace:** use correct keybinding when using vim+dendron in same workspace ([e1180e6](https://github.com/dendronhq/dendron/commit/e1180e66e8ac29c82f34cf1e6797f1ab473ef510))
+
+
+
+## 0.60.2 (2021-09-25)
+
+
+
+## 0.60.2-alpha.0 (2021-09-24)
+
+
+### Bug Fixes
+
+* **publish:** fix links in note reference --no-verify ([319d59b](https://github.com/dendronhq/dendron/commit/319d59b6930eaf44b7533b6fcc0939f2550d475d))
+
+
+
+## 0.60.1 (2021-09-24)
+
+
+### Bug Fixes
+
+* **workspace:** regression with hover preview ([5e8079a](https://github.com/dendronhq/dendron/commit/5e8079a9532d0dbc395ea9a7aaab640b6212b368))
+* hashtags not at the start of line don't autocomplete ([#1370](https://github.com/dendronhq/dendron/issues/1370)) ([83f7a56](https://github.com/dendronhq/dendron/commit/83f7a56bb76336c3192c29dc03619e9ea2bcff85)), closes [#1352](https://github.com/dendronhq/dendron/issues/1352)
+* resolve relative links on import ([#1371](https://github.com/dendronhq/dendron/issues/1371)) ([d4cee4c](https://github.com/dendronhq/dendron/commit/d4cee4c978ddcc56ad13a17ec0988be1420f789c))
+
+
+### Features Dendron
+
+* **cli:** initialize workspace from CLI ([31a734d](https://github.com/dendronhq/dendron/commit/31a734dbd48c2a75bdb85a1e2e299d4b77311d65))
+
+
+
+# 0.60.0 (2021-09-21)
+
+
+### Bug Fixes
+
+* **publish:** versioning issues with next 11 ([76d7042](https://github.com/dendronhq/dendron/commit/76d7042a444dabc98069aaac1e40d692ee18f5a1))
+* wrong assetPrefix in 11ty ([e5cb251](https://github.com/dendronhq/dendron/commit/e5cb251afbd6b76cbb52ab5046e7ca4ac816e06c))
+* **commands:** rename note leaves incorrect metadata if parent is a stub ([#1348](https://github.com/dendronhq/dendron/issues/1348)) ([d432cc9](https://github.com/dendronhq/dendron/commit/d432cc9e20ff8b9f6cefd7cc4c3a42b567ed9bc5))
+* block anchor in list with single top level element ([#1242](https://github.com/dendronhq/dendron/issues/1242)) ([1ce3a21](https://github.com/dendronhq/dendron/commit/1ce3a216047d5a1a1638509cdc92e36e7ec86a1c)), closes [#1235](https://github.com/dendronhq/dendron/issues/1235)
+* block anchors attached to code blocks in publishing ([#1267](https://github.com/dendronhq/dendron/issues/1267)) ([6b3c71c](https://github.com/dendronhq/dendron/commit/6b3c71cd6728dfee7eaa74db9f9b8168ad7a2e39))
+* correctly render cross-vault note references in preview v2 ([#1310](https://github.com/dendronhq/dendron/issues/1310)) ([1198449](https://github.com/dendronhq/dendron/commit/11984494ca7c889790a0c0288fe97b8687398e4f))
+* direct children query ([#1303](https://github.com/dendronhq/dendron/issues/1303)) ([bcf0dea](https://github.com/dendronhq/dendron/commit/bcf0deae422406564cd9a56c1765f90dd2e66215))
+* exclude private vault backlinks ([#1301](https://github.com/dendronhq/dendron/issues/1301)) ([837c50e](https://github.com/dendronhq/dendron/commit/837c50efad4d80d4a41d73a39287053b7ff7e365))
+* Frontmatter tags display similar to Children ([#1285](https://github.com/dendronhq/dendron/issues/1285)) ([a0ce014](https://github.com/dendronhq/dendron/commit/a0ce01469bd0de17768d1aff2711807425027d87))
+* handle single domain hierarchies gracefully ([10dc5ec](https://github.com/dendronhq/dendron/commit/10dc5ec2ab3ebf767ae7e913cb90ba48e9651447))
+* workspace fix ([4f4bfab](https://github.com/dendronhq/dendron/commit/4f4bfab336862b43da226aa75db9f446e60ba1a2))
+
+
+### Features Dendron
+
+* enable usePrettyRefs for nextJS publishing and preview ([#1239](https://github.com/dendronhq/dendron/issues/1239)) ([8a456a9](https://github.com/dendronhq/dendron/commit/8a456a910c45e927c8413d881324bd28401e2aca))
+* extended images for custom CSS properties ([#1315](https://github.com/dendronhq/dendron/issues/1315)) ([f9ed88f](https://github.com/dendronhq/dendron/commit/f9ed88ff91916c444607d7842027c79085d077ae)), closes [#1273](https://github.com/dendronhq/dendron/issues/1273)
+* seed browser initial revision ([#1166](https://github.com/dendronhq/dendron/issues/1166)) ([588fba0](https://github.com/dendronhq/dendron/commit/588fba05bbd9e3dabadd5e02d9fde72d80ed8148))
+* user tag autocomplete & user tags updated on rename ([#1278](https://github.com/dendronhq/dendron/issues/1278)) ([9719f99](https://github.com/dendronhq/dendron/commit/9719f99550a2c51c1a22f6fb21ff750bb4115f89))
+* user tags ([#1228](https://github.com/dendronhq/dendron/issues/1228)) ([98c0106](https://github.com/dendronhq/dendron/commit/98c0106367e384c130a927484b9ea294eb6f84fa))
+
+
+
+## 0.55.2 (2021-08-21)
+
+
+### Bug Fixes
+
+* don't insert title when rendering note refs in preview ([#1157](https://github.com/dendronhq/dendron/issues/1157)) ([9d447af](https://github.com/dendronhq/dendron/commit/9d447af8ad7381bb8d3078fc44d4a188618acdfd))
+* wrong internal links in nextjs publishing ([#1165](https://github.com/dendronhq/dendron/issues/1165)) ([59a949d](https://github.com/dendronhq/dendron/commit/59a949d2b5b541efb283e851060636b108eb5a98))
+
+
+
+## 0.55.1 (2021-08-17)
+
+
+### Bug Fixes
+
+* hiding quickpick doesn't dispose of picker ([781923a](https://github.com/dendronhq/dendron/commit/781923a679426ec4f29bd4600e29437ce1902d6f))
+
+
+### Features Dendron
+
+* **pubv3:** add more features to new publishing ([28a8a4f](https://github.com/dendronhq/dendron/commit/28a8a4f0ec8a02e6d6946833dec11c0117a3f783))
+
+
+
+## 0.54.1 (2021-08-13)
+
+
+### Bug Fixes
+
+* add new vaults from CLI to code workspace ([#1094](https://github.com/dendronhq/dendron/issues/1094)) ([2cde108](https://github.com/dendronhq/dendron/commit/2cde108b4c88a5c9d13b8eb6370f69879d6c9a62))
+* leading slash in markdown export pod ([#1136](https://github.com/dendronhq/dendron/issues/1136)) ([0f8ebbf](https://github.com/dendronhq/dendron/commit/0f8ebbf228f7af1bbbf677c9fea38989f87c635e))
+* patch `getOrCreate` to inherit from default values ([#1126](https://github.com/dendronhq/dendron/issues/1126)) ([512b476](https://github.com/dendronhq/dendron/commit/512b476e8ac986887f25bc9a21bf7b189ea19ce9))
+* renaming frontmatter tags adds # ([223d9f5](https://github.com/dendronhq/dendron/commit/223d9f50430569b440e45567ffc71a7fff81f96f))
+
+
+### Features Dendron
+
+* basic frontmatter tag support ([2fe8ea5](https://github.com/dendronhq/dendron/commit/2fe8ea5733cdf6c047c39b8b9865cb7e5fdb541b))
+* custom tag coloring ([#1069](https://github.com/dendronhq/dendron/issues/1069)) ([5fe0a3c](https://github.com/dendronhq/dendron/commit/5fe0a3c7c62608f3796c58e4b807061498199168))
+* option to disable frontmatter tag rendering ([7985e23](https://github.com/dendronhq/dendron/commit/7985e2323950f16f2c5afa55c115a1af52e82b07))
+* provide YAML validator & suggest YAML extension ([#1116](https://github.com/dendronhq/dendron/issues/1116)) ([b46f091](https://github.com/dendronhq/dendron/commit/b46f0916f9f01fdd7b71b6b5120c38a71d58b113))
+* remove frontmatter tags if tag is moved outside `tags.` ([1bce9af](https://github.com/dendronhq/dendron/commit/1bce9af293a60fd453389a907fc3043fe173330c))
+* rename header updates default link aliases ([1f0e405](https://github.com/dendronhq/dendron/commit/1f0e405d2c67a547fdecc41d76f062251a7cae01))
+* render frontmatter tags in HTML ([86f798a](https://github.com/dendronhq/dendron/commit/86f798a3c72ca405922945b835119aa0e0b1c3d9))
+* seed cmds in plugin ([#1080](https://github.com/dendronhq/dendron/issues/1080)) ([e07a092](https://github.com/dendronhq/dendron/commit/e07a092b1a75548574f2ea45f1b465490b2091f3))
+* tag colors in parents cascade to children ([3c77c06](https://github.com/dendronhq/dendron/commit/3c77c06daad5e32d3d72a4b329632100f7345460))
+
+
+
+
+
 # 0.108.0 (2022-08-16)
 
 

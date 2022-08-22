@@ -17,7 +17,6 @@ import {
   DNoteRefLink,
   DNoteRefLinkRaw,
   DVault,
-  ERROR_STATUS,
   GetAnchorsResp,
   getSlugger,
   IntermediateDendronConfig,
@@ -39,11 +38,6 @@ import {
   USERS_HIERARCHY_BASE,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  createDisposableLogger,
-  getFrontmatterTags,
-  parseFrontmatter,
-} from "@dendronhq/common-server";
 import _ from "lodash";
 import type {
   Code,
@@ -86,6 +80,7 @@ import {
   WikiLinkProps,
 } from "../types";
 import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
+import { getFrontmatterTags, parseFrontmatter } from "../yaml";
 
 const toString = require("mdast-util-to-string");
 
@@ -287,15 +282,15 @@ const getLinks = ({
       return ent.value.toLowerCase() === filter?.loc?.fname?.toLowerCase();
     });
   }
-  const { logger, dispose } = createDisposableLogger("LinkUtils.getLinks");
-  logger.info({
-    ctx: "getLinks",
-    dlinksLength: dlinks.length,
-    noteRefsLength: noteRefs.length,
-    wikiLinksLength: wikiLinks.length,
-    filterLocFname: filter?.loc?.fname,
-  });
-  dispose();
+  // const { logger, dispose } = createDisposableLogger("LinkUtils.getLinks");
+  // logger.info({
+  //   ctx: "getLinks",
+  //   dlinksLength: dlinks.length,
+  //   noteRefsLength: noteRefs.length,
+  //   wikiLinksLength: wikiLinks.length,
+  //   filterLocFname: filter?.loc?.fname,
+  // });
+  // dispose();
   return dlinks;
 };
 
@@ -945,14 +940,15 @@ export class AnchorUtils {
 
       return Object.fromEntries(anchors);
     } catch (err) {
-      const error = DendronError.createFromStatus({
-        status: ERROR_STATUS.UNKNOWN,
-        payload: { note: NoteUtils.toLogObj(opts.note) },
-        innerError: err as Error,
-      });
-      const { logger, dispose } = createDisposableLogger("AnchorUtils");
-      logger.error(error);
-      dispose();
+      // TODO: re-enable logging
+      // const error = DendronError.createFromStatus({
+      //   status: ERROR_STATUS.UNKNOWN,
+      //   payload: { note: NoteUtils.toLogObj(opts.note) },
+      //   innerError: err as Error,
+      // });
+      // const { logger, dispose } = createDisposableLogger("AnchorUtils");
+      // logger.error(error);
+      // dispose();
       return {};
     }
   }

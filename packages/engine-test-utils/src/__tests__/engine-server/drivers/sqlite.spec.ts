@@ -4,8 +4,13 @@ import fs from "fs-extra";
 import _ from "lodash";
 import sinon from "sinon";
 import { ENGINE_HOOKS, runEngineTestV5 } from "../../..";
+import os from "os";
 
-describe("GIVEN sqlite store", () => {
+// currently not made for windows
+const describeSkipWindows =
+  os.platform() === "win32" ? describe.skip : describe;
+
+describeSkipWindows("GIVEN sqlite store", () => {
   afterEach(async () => {
     await SQLiteMetadataStore.prisma().$disconnect();
   });

@@ -4,7 +4,7 @@ _Edit the [[templates.meet]] note to change this template generated for Dendron 
 
 <!-- Meeting attendees. If you prefix users with an '@', you can then optionally click Ctrl+Enter to create a note for that user. -->
 
-- @johndoe
+- @john-doe
 
 ## Goals
 

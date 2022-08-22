@@ -217,10 +217,10 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
       await prisma.$queryRawUnsafe(fullQuery);
     } catch (error) {
       // uncomment to log
-      console.log("---> ERROR START");
-      console.log(fullQuery);
-      fs.writeFileSync("/tmp/query.txt", fullQuery);
-      console.log("---> ERROR END");
+      // console.log("---> ERROR START");
+      // console.log(fullQuery);
+      // fs.writeFileSync("/tmp/query.txt", fullQuery);
+      // console.log("---> ERROR END");
       throw error;
     }
     return { query: fullQuery };

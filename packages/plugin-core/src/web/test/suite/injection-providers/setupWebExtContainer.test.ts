@@ -51,6 +51,7 @@ suite(
       } catch (error) {
         assert.fail(error as Error);
       }
+      sinon.restore();
     });
   }
 );

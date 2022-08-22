@@ -3,12 +3,13 @@ import { env, window } from "vscode";
 import { WSUtilsWeb } from "../utils/WSUtils";
 import { SiteUtilsWeb } from "../utils/site";
 import { injectable } from "tsyringe";
+import { DENDRON_COMMANDS } from "../../constants";
 
 @injectable()
 export class CopyNoteURLCmd {
   constructor(private wsUtils: WSUtilsWeb, private siteUtils?: SiteUtilsWeb) {}
 
-  static key = "dendron.copyNoteURL";
+  static key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
 
   async showFeedback(link: string) {
     window.showInformationMessage(`${link} copied`);

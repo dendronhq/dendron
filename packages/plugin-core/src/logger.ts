@@ -167,7 +167,7 @@ export class Logger {
     Sentry.addBreadcrumb({
       category: "plugin",
       message: customStringify(payload),
-      level: "info",
+      level: Sentry.Severity.Info,
     });
   }
 

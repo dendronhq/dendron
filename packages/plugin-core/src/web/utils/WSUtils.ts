@@ -1,7 +1,6 @@
 import {
   DendronError,
   DVault,
-  IntermediateDendronConfig,
   normalizeUnixPath,
   NoteProps,
   VaultUtils,
@@ -19,7 +18,8 @@ export class WSUtilsWeb {
     @inject("ReducedDEngine")
     private engine: ReducedDEngine,
     @inject("wsRoot") private wsRoot: URI,
-    @inject("vaults") private vaults: DVault[]
+    @inject("vaults") private vaults: DVault[],
+    private siteUtils: SiteUtilsWeb
   ) {}
 
   getVaultFromDocument(document: vscode.TextDocument) {
@@ -70,19 +70,13 @@ export class WSUtilsWeb {
    * @param opts
    *
    */
-  getNoteUrl(opts: {
-    config: IntermediateDendronConfig;
-    note: NoteProps;
-    vault: DVault;
-    urlRoot?: string;
-  }) {
-    const { config, note, vault } = opts;
+  getNoteUrl(opts: { note: NoteProps; vault: DVault; urlRoot?: string }) {
+    const { note, vault } = opts;
     /**
      * set to true if index node, don't append id at the end
      */
-    const { url: root, index } = SiteUtilsWeb.getSiteUrlRootForVault({
+    const { url: root, index } = this.siteUtils.getSiteUrlRootForVault({
       vault,
-      config,
     });
     if (!root) {
       throw new DendronError({ message: "no urlRoot set" });
@@ -90,15 +84,14 @@ export class WSUtilsWeb {
     // if we have a note, see if we are at index
     const isIndex: boolean = _.isUndefined(note)
       ? false
-      : SiteUtilsWeb.isIndexNote({
+      : this.siteUtils.isIndexNote({
           indexNote: index,
           note,
         });
     const pathValue = note.id;
-    const siteUrlPath = SiteUtilsWeb.getSiteUrlPathForNote({
+    const siteUrlPath = this.siteUtils.getSiteUrlPathForNote({
       addPrefix: true,
       pathValue,
-      config,
     });
 
     const link = isIndex ? root : [root, siteUrlPath].join("");

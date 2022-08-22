@@ -4,6 +4,7 @@ import sinon from "sinon";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { Utils } from "vscode-uri";
+import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
@@ -38,7 +39,14 @@ suite(
 
       try {
         const cmd = container.resolve(NoteLookupCmd);
-
+        assert(!_.isUndefined(cmd));
+      } catch (error) {
+        assert.fail(error as Error);
+      }
+    });
+    test("WHEN CopyNoteURLCmd is constructed THEN valid objects are returned without exceptions", async () => {
+      try {
+        const cmd = container.resolve(CopyNoteURLCmd);
         assert(!_.isUndefined(cmd));
       } catch (error) {
         assert.fail(error as Error);

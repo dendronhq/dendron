@@ -1,46 +1,31 @@
-import {
-  ConfigUtils,
-  DNodeUtils,
-  DVault,
-  IntermediateDendronConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { DNodeUtils, DVault, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class SiteUtilsWeb {
-  static getSiteUrlRootForVault({
-    vault,
-    config,
-  }: {
-    vault: DVault;
-    config: IntermediateDendronConfig;
-  }): { url?: string; index?: string } {
-    if (vault.seed) {
-      const seeds = ConfigUtils.getWorkspace(config).seeds;
-      if (seeds && seeds[vault.seed]) {
-        const maybeSite = seeds[vault.seed]?.site;
-        if (maybeSite) {
-          return { url: maybeSite.url, index: maybeSite.index };
-        }
-      }
-    }
+  constructor(
+    @inject("siteUrl") private siteUrl?: string,
+    @inject("siteIndex") private siteIndex?: string,
+    @inject("assetsPrefix") private assetsPrefix?: string,
+    @inject("enablePrettyLinks") private enablePrettyLinks?: boolean
+  ) {}
+
+  getSiteUrlRootForVault({ vault }: { vault: DVault }): {
+    url?: string;
+    index?: string;
+  } {
     if (vault.siteUrl) {
       return { url: vault.siteUrl, index: vault.siteIndex };
     }
-    const { siteUrl, siteIndex } = ConfigUtils.getPublishingConfig(config);
-    return { url: siteUrl, index: siteIndex };
-  }
-
-  static getSitePrefixForNote(config: IntermediateDendronConfig) {
-    const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
-    return assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
+    return { url: this.siteUrl, index: this.siteIndex };
   }
 
   /**
    * Is the current note equivalent ot the index of the published site?
    * @returns
    */
-  static isIndexNote({
+  isIndexNote({
     indexNote,
     note,
   }: {
@@ -50,37 +35,37 @@ export class SiteUtilsWeb {
     return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }
 
-  static getSiteUrlPathForNote({
+  getSiteUrlPathForNote({
     pathValue,
     pathAnchor,
-    config,
     addPrefix,
     note,
   }: {
     pathValue?: string;
     pathAnchor?: string;
-    config: IntermediateDendronConfig;
     addPrefix?: boolean;
     note?: NoteProps;
   }): string {
     // add path prefix if valid
     let pathPrefix: string = "";
     if (addPrefix) {
-      pathPrefix = this.getSitePrefixForNote(config);
+      pathPrefix = this.assetsPrefix
+        ? this.assetsPrefix + "/notes/"
+        : "/notes/";
     }
 
     // no prefix if we are at the index note
     const isIndex: boolean = _.isUndefined(note)
       ? false
       : this.isIndexNote({
-          indexNote: config.publishing?.siteIndex,
+          indexNote: this.siteIndex,
           note,
         });
     if (isIndex) {
       return `/`;
     }
     // remove extension for pretty links
-    const usePrettyLinks = ConfigUtils.getEnablePrettlyLinks(config);
+    const usePrettyLinks = this.enablePrettyLinks;
     const pathExtension =
       _.isBoolean(usePrettyLinks) && usePrettyLinks ? "" : ".html";
 

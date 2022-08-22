@@ -1,4 +1,3 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
 import _ from "lodash";
 import { env, window, workspace } from "vscode";
 import { injectable, inject } from "tsyringe";
@@ -7,8 +6,8 @@ import { WSUtilsWeb } from "../utils/WSUtils";
 @injectable()
 export class CopyNoteURLCmd {
   constructor(
-    @inject("config") private config: IntermediateDendronConfig,
-    private wsUtils: WSUtilsWeb
+    private wsUtils: WSUtilsWeb,
+    @inject("siteUrl") private siteUrl?: string
   ) {}
 
   static key = "dendron.copyNoteURL";
@@ -18,9 +17,8 @@ export class CopyNoteURLCmd {
   }
 
   async run() {
-    const publishingConfig = ConfigUtils.getPublishingConfig(this.config);
     const urlRoot =
-      publishingConfig.siteUrl ||
+      this.siteUrl ||
       workspace.getConfiguration().get("dendron.copyNoteUrlRoot");
     const maybeTextEditor = window.activeTextEditor;
 
@@ -37,7 +35,6 @@ export class CopyNoteURLCmd {
       return;
     }
     const link = this.wsUtils.getNoteUrl({
-      config: this.config,
       note: notes[0],
       vault,
       urlRoot,

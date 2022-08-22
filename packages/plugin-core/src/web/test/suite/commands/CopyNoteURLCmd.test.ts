@@ -33,6 +33,9 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   ];
   const foo = NoteUtils.create({ fname: "foo", vault: vault[0] });
   const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
+  const vaultStub = sinon
+    .stub(wsUtils, "getVaultFromDocument")
+    .returns(vault[0]);
   test("WHEN assetPrefix is provided, THEN link must have assetsPrefix", async () => {
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
@@ -42,12 +45,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       assetsPrefix,
       enablePrettyLinks
     );
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert(link?.startsWith("https://foo.com/testing/notes/"));
-    sinon.restore();
+    NoteStub.restore();
   });
 
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
@@ -59,12 +61,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       assetsPrefix,
       enablePrettyLinks
     );
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert(link?.startsWith("https://foo.com/notes/"));
-    sinon.restore();
+    NoteStub.restore();
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
@@ -76,12 +77,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       assetsPrefix,
       enablePrettyLinks
     );
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert(link?.includes(".html"));
-    sinon.restore();
+    NoteStub.restore();
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
@@ -93,12 +93,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       assetsPrefix,
       enablePrettyLinks
     );
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert(link?.includes(".html"));
-    sinon.restore();
+    NoteStub.restore();
   });
   test("WHEN enablePrettylinks is set to true, THEN link must not have .html", async () => {
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
@@ -109,12 +108,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       assetsPrefix,
       enablePrettyLinks
     );
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert.strictEqual(link?.indexOf(".html"), -1);
-    sinon.restore();
+    NoteStub.restore();
   });
   test("WHEN command is called on root note THEN note id should not be present", async () => {
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
@@ -126,11 +124,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       enablePrettyLinks
     );
     foo.fname = "root";
-    sinon.stub(wsUtils, "getVaultFromDocument").returns(vault[0]);
-    sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
     assert.strictEqual(link, "https://foo.com");
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
   });
 });

@@ -8,7 +8,6 @@ import {
   NotePropsByIdDict,
   NotePropsMeta,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import _ from "lodash";
 
 import { Prisma, PrismaClient } from "./generated-prisma-client";

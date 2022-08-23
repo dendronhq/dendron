@@ -96,7 +96,7 @@ export class SiteUtilsWeb {
     if (!root) {
       throw new DendronError({
         message:
-          "no siteUrl set. Docs link: https://wiki.dendron.so/notes/ZDAEEzEeSW0xQsMBWLQp0",
+          "No siteUrl set. Please set a url root and reload workspace. Docs link: https://wiki.dendron.so/notes/ZDAEEzEeSW0xQsMBWLQp0",
       });
     }
     // if we have a note, see if we are at index

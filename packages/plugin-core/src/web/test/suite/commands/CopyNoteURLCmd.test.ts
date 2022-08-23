@@ -1,6 +1,6 @@
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import * as vscode from "vscode";
-import { SiteUtilsWeb } from "../../../utils/site";
+import { SiteUtilsWeb } from "../../../utils/SiteUtilsWeb";
 import { WSUtilsWeb } from "../../../utils/WSUtils";
 import { DVault, NoteUtils, ReducedDEngine } from "@dendronhq/common-all";
 import sinon, { stubInterface } from "ts-sinon";
@@ -48,8 +48,8 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    assert(link?.startsWith("https://foo.com/testing/notes/"));
     NoteStub.restore();
+    assert(link?.startsWith("https://foo.com/testing/notes/"));
   });
 
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
@@ -64,24 +64,9 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    assert(link?.startsWith("https://foo.com/notes/"));
     NoteStub.restore();
-  });
 
-  test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
-    const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
-      getTestPublishingConfig({ enablePrettyLinks: false });
-    const siteUtils = new SiteUtilsWeb(
-      siteUrl,
-      siteIndex,
-      assetsPrefix,
-      enablePrettyLinks
-    );
-    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
-    const link = await cmd.run();
-    assert(link?.includes(".html"));
-    NoteStub.restore();
+    assert(link?.startsWith("https://foo.com/notes/"));
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {

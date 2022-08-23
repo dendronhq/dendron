@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { env, window } from "vscode";
 import { WSUtilsWeb } from "../utils/WSUtils";
-import { SiteUtilsWeb } from "../utils/site";
+import { SiteUtilsWeb } from "../utils/SiteUtilsWeb";
 import { injectable } from "tsyringe";
 import { DENDRON_COMMANDS } from "../../constants";
 

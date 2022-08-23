@@ -30,7 +30,7 @@ import {
   SimpleGitResetMode,
 } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
-import { MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
+import { getRefId, MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -280,18 +280,18 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   async _renderNote({
     engine,
     note,
-    notes,
     engineConfig,
   }: {
     engine: DEngineClient;
     note: NoteProps;
-    notes: NotePropsByIdDict;
     engineConfig: IntermediateDendronConfig;
   }) {
-    const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
+    const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
+      engine.notes
+    );
 
     const noteCacheForRenderDict = {
-      notesById: notes,
+      notesById: engine.notes,
       notesByFname,
     };
 
@@ -470,7 +470,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engine,
     note,
     notesDir,
-    notes,
     engineConfig,
   }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
     notesDir: string;
@@ -478,7 +477,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
-    const out = await this._renderNote({ engine, note, notes, engineConfig });
+    const out = await this._renderNote({ engine, note, engineConfig });
     const dst = path.join(notesDir, note.id + ".html");
     this.L.debug({ ctx, dst, msg: "writeNote" });
     return fs.writeFile(dst, out);
@@ -500,6 +499,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }
 
   async plant(opts: NextjsExportPlantOpts) {
+    MDUtilsV5.clearRefCache();
     const ctx = `${ID}:plant`;
     const { dest, engine, wsRoot, config: podConfig } = opts;
     const podDstDir = path.join(dest.fsPath, "data");
@@ -572,6 +572,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
+    const notesRefsDir = path.join(podDstDir, "refs");
+
     this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
     fs.ensureDirSync(notesBodyDir);
     fs.ensureDirSync(notesMetaDir);
@@ -583,7 +585,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             engine,
             note,
             notesDir: notesBodyDir,
-            notes: publishedNotes,
             engineConfig,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
@@ -592,8 +593,71 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       })
     );
 
+    // render refs
+    // const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
+    // fs.ensureDirSync(refsRoot);
+
+    const noteRefs = MDUtilsV5.getRefCache();
+    //
+    // const contents = fs.readdirSync(refsRoot);
+    const refIds: string[] = await Promise.all(
+      Object.keys(noteRefs!).map(async (ent: string) => {
+        // Temporarily added a '!' to bypass compiler errors
+        // const { refId } = fs.readJSONSync(
+        //   path.join(refsRoot, ent)
+        // ) as SerializedNoteRef;
+        const { refId, prettyHAST } = noteRefs![ent];
+        const noteId = refId.id;
+        const noteForRef = _.get(engine.notes, noteId);
+
+        // shouldn't happen
+        if (!noteForRef) {
+          throw Error(`no note found for ${JSON.stringify(refId)}`);
+        }
+
+        const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
+          engine.notes
+        );
+
+        const noteCacheForRenderDict = {
+          notesById: engine.notes,
+          notesByFname,
+        };
+
+        const proc = MDUtilsV5.procRehypeFull(
+          {
+            // engine,
+            noteCacheForRenderDict,
+            noteToRender: noteForRef,
+            fname: noteForRef.fname,
+            vault: noteForRef.vault,
+            vaults: engine.vaults,
+            wsRoot: engine.wsRoot,
+            config,
+            insideNoteRef: true,
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        );
+
+        // const out = data
+        //   .map((ent) => proc.stringify(proc.runSync(ent)))
+        //   .join("\n");
+
+        const out = proc.runSync(prettyHAST);
+
+        const out2 = proc.stringify(out);
+        const refIdString = getRefId(refId);
+        const dst = path.join(notesRefsDir, refIdString + ".html");
+        this.L.debug({ ctx, dst, msg: "writeNote" });
+        fs.ensureFileSync(dst);
+        fs.writeFileSync(dst, out2);
+        return refIdString;
+      })
+    );
+
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
+    const refDstPath = path.join(podDstDir, "refs.json");
 
     const treeDstPath = path.join(podDstDir, "tree.json");
 
@@ -613,6 +677,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         },
         { encoding: "utf8", spaces: 2 }
       ),
+      fs.writeJSONSync(refDstPath, refIds, {
+        encoding: "utf8",
+        spaces: 2,
+      }),
       fs.writeJSON(podConfigDstPath, engineConfig, {
         encoding: "utf8",
         spaces: 2,

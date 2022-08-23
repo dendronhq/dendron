@@ -469,6 +469,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         msg: "exit",
         queryOrig,
         profile,
+        numItems: picker.items.length,
         cancelled: token?.isCancellationRequested,
       });
       AnalyticsUtils.track(VSCodeEvents.NoteLookup_Update, {

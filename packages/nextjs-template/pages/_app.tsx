@@ -15,13 +15,16 @@ import {
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
+import { DendronRef } from "../components/DendronRef";
 import DendronProvider from "../context/DendronProvider";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
+import { useIFrameHeightAdjuster } from "../hooks/useIFrameHeightAdjuster";
 import "../public/assets-dendron/css/light.css";
 import "../styles/scss/main.scss";
 import { getLogLevel } from "../utils/etc";
@@ -39,6 +42,7 @@ const themes: { [key in Theme]: string } = {
 type PageProps = {
   noteIndex: NoteProps;
   config: IntermediateDendronConfig;
+  body?: string;
 };
 
 function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
@@ -48,8 +52,22 @@ function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
     const logLevel = getLogLevel();
     setLogLevel(logLevel);
   }, []);
+
+  const router = useRouter();
+
   const defaultTheme = ConfigUtils.getPublishing(config).theme || Theme.LIGHT;
   logger.info({ ctx: "enter", defaultTheme });
+  const body = appProps.pageProps.body ?? "";
+  if (router.pathname === "/refs/[id]") {
+    return (
+      <Provider store={combinedStore}>
+        <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
+          <DendronRef body={body} />
+        </ThemeSwitcherProvider>
+      </Provider>
+    );
+  }
+
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
@@ -68,6 +86,7 @@ function DendronApp({
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
   useDendronGATracking();
+  useIFrameHeightAdjuster();
 
   useEffect(() => {
     (async () => {

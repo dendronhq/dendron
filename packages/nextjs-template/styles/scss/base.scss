@@ -23,6 +23,8 @@ body {
   line-height: $body-line-height;
   color: $body-text-color;
   background-color: $body-background-color;
+  // fix height for content loaded in iframes and ensures no scrollbar for content at a lower height than the screen
+  height: fit-content !important;
 }
 
 ol,

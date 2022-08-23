@@ -16,6 +16,7 @@ cleanBuild:
 	echo "Clean building..."
 	make clean
 	make install
+	make setup-nextjs-public-assets
 
 db-gen:
 	cd packages/engine-server && yarn prisma generate
@@ -46,3 +47,7 @@ docs-build:
 
 setup-nextjs-test:
 	cd test-workspace && npx dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"
+
+setup-nextjs-public-assets:
+	cd packages/nextjs-template && curl -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip && unzip dendron-site.zip
+	cd packages/nextjs-template && yarn copy:robotstxt

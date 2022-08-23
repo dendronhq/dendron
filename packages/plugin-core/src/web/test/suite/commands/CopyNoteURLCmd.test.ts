@@ -1,5 +1,6 @@
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import * as vscode from "vscode";
+import { window } from "vscode";
 import { SiteUtilsWeb } from "../../../utils/SiteUtilsWeb";
 import { WSUtilsWeb } from "../../../utils/WSUtils";
 import { DVault, NoteUtils, ReducedDEngine } from "@dendronhq/common-all";
@@ -35,8 +36,8 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   test("WHEN assetPrefix is provided, THEN link must have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
     const activeTextEditorStub = sinon
-      .stub(vscode.window, "activeTextEditor")
-      .resolves("");
+      .stub(window, "activeTextEditor")
+      .returns("fakeEditor");
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
     const siteUtils = new SiteUtilsWeb(
@@ -60,8 +61,8 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
     const activeTextEditorStub = sinon
-      .stub(vscode.window, "activeTextEditor")
-      .resolves("");
+      .stub(window, "activeTextEditor")
+      .returns("fakeEditor");
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ assetsPrefix: "" });
     const siteUtils = new SiteUtilsWeb(

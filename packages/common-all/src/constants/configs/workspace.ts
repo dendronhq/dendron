@@ -224,4 +224,8 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Enable smart references",
     desc: "When enabled, note references that include a header will transclude said header and all sub headers",
   },
+  metadataStore: {
+    label: "Storage engine for metadata",
+    desc: "values: sqlite|json",
+  },
 };

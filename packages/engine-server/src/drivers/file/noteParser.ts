@@ -9,20 +9,20 @@ import {
   ErrorUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  genHash,
   IDendronError,
   isNotUndefined,
+  NoteChangeEntry,
+  NoteDicts,
   NoteDictsUtils,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
-  NoteDicts,
   NotesCacheEntry,
   NotesCacheEntryMap,
   NoteUtils,
   SchemaUtils,
   stringifyError,
-  NoteChangeEntry,
-  genHash,
   string2Note,
   globMatch,
 } from "@dendronhq/common-all";
@@ -33,6 +33,7 @@ import path from "path";
 import { createCacheEntry, EngineUtils } from "../../utils";
 import { ParserBase } from "./parseBase";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -79,7 +80,10 @@ export class NoteParser extends ParserBase {
 
   async parseFiles(
     allPaths: string[],
-    vault: DVault
+    vault: DVault,
+    opts?: {
+      useSQLiteMetadataStore?: boolean;
+    }
   ): Promise<{
     notesById: NotePropsByIdDict;
     cacheUpdates: NotesCacheEntryMap;
@@ -94,6 +98,7 @@ export class NoteParser extends ParserBase {
       notesById,
       notesByFname,
     };
+    const wsRoot = this.engine.wsRoot;
     this.logger.info({ ctx, msg: "enter", vault });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
     // Keep track of which notes in cache no longer exist
@@ -271,6 +276,37 @@ export class NoteParser extends ParserBase {
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
+    if (opts?.useSQLiteMetadataStore) {
+      this.logger.info({ ctx, msg: "initialize metadata" });
+      if (await SQLiteMetadataStore.isVaultInitialized(vault)) {
+        this.logger.info({ ctx, msg: "adding update entries" });
+        // initialized, update based on cache
+        const updateDict: NotePropsByIdDict = {};
+        _.map(cacheUpdates, (v, _k) => {
+          // TODO: we need to figure out the right data type to insert into metadata store
+          updateDict[v.data.id] = v.data as NoteProps;
+        });
+        await SQLiteMetadataStore.bulkInsertAllNotes({
+          notesIdDict: updateDict,
+        });
+      } else {
+        this.logger.info({ ctx, msg: "updating all entries" });
+        // we never initialized this vault, initialize it now
+        try {
+          // create the vault
+          await SQLiteMetadataStore.prisma().dVault.create({
+            data: { fsPath: vault.fsPath, wsRoot },
+          });
+          // if vault is not initialized, bulk insert all note metadata into sqlite
+          await SQLiteMetadataStore.bulkInsertAllNotes({
+            notesIdDict: notesById,
+          });
+        } catch (err) {
+          this.logger.error({ ctx, msg: "issue doing bulk insert", vault });
+          throw err;
+        }
+      }
+    }
     return { notesById, cacheUpdates, errors };
   }
 

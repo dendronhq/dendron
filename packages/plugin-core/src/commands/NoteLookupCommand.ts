@@ -156,7 +156,7 @@ export class NoteLookupCommand
     this._controller = controller;
   }
 
-  protected get provider(): ILookupProviderV3 {
+  public get provider(): ILookupProviderV3 {
     if (_.isUndefined(this._provider)) {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_STATE,
@@ -164,6 +164,10 @@ export class NoteLookupCommand
       });
     }
     return this._provider;
+  }
+
+  public set provider(provider: ILookupProviderV3 | undefined) {
+    this._provider = provider;
   }
 
   //  ^1h1dr08geo6c
@@ -235,9 +239,10 @@ export class NoteLookupCommand
           DirectChildFilterBtn.create(
             copts.filterMiddleware?.includes("directChildOnly")
           ),
-          SelectionExtractBtn.create(
-            copts.selectionType === LookupSelectionTypeEnum.selectionExtract
-          ),
+          SelectionExtractBtn.create({
+            pressed:
+              copts.selectionType === LookupSelectionTypeEnum.selectionExtract,
+          }),
           Selection2LinkBtn.create(
             copts.selectionType === LookupSelectionTypeEnum.selection2link
           ),
@@ -489,7 +494,22 @@ export class NoteLookupCommand
   async acceptExistingItem(
     item: NoteQuickInput
   ): Promise<OnDidAcceptReturn | undefined> {
+    const picker = this.controller.quickPick;
     const uri = node2Uri(item);
+    const originalNoteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
+
+    if (picker.selectionProcessFunc !== undefined) {
+      const processedNode = await picker.selectionProcessFunc(
+        originalNoteFromItem
+      );
+      if (processedNode !== undefined) {
+        if (!_.isEqual(originalNoteFromItem, processedNode)) {
+          const engine = ExtensionProvider.getEngine();
+          await engine.writeNote(processedNode);
+        }
+        return { uri, node: processedNode };
+      }
+    }
     return { uri, node: item };
   }
 
@@ -505,14 +525,7 @@ export class NoteLookupCommand
   }): NoteProps {
     const { item, engine } = opts;
 
-    const noteFromItem: NoteProps = _.omit(
-      item,
-      "label",
-      "detail",
-      "alwaysShow",
-      "stub"
-    );
-
+    const noteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
     const preparedNote = NoteUtils.updateStubWithSchema({
       stubNote: noteFromItem,
       engine,

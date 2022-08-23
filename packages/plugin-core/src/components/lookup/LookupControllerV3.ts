@@ -698,7 +698,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
           const noteLookupConfig = lookupConfig.note;
           const leaveTrace = noteLookupConfig.leaveTrace || false;
-          const body = "\n" + document.getText(range).trim();
+          const body = note.body + "\n\n" + document.getText(range).trim();
           note.body = body;
           const { wsRoot, vaults } = ext.getDWorkspace();
           // don't delete if original file is not in workspace

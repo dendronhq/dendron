@@ -45,12 +45,12 @@ describe("MDUtils.proc", () => {
             extra: { resp },
           } = cleanVerifyOpts(opts);
           await checkString(
-            resp.contents,
+            resp.contents.toLowerCase(), // Do a case-invariant comparison here because of windows c:// vs C://
             `![foo alt txt](${path.join(
               opts.wsRoot,
               opts.vaults[0].fsPath,
               "/assets/foo.jpg"
-            )})`
+            )})`.toLowerCase()
           );
         },
       },
@@ -87,12 +87,12 @@ describe("MDUtils.proc", () => {
             extra: { resp },
           } = cleanVerifyOpts(opts);
           await checkString(
-            resp.contents,
+            resp.contents.toLowerCase(),
             `![foo alt txt](${path.join(
               opts.wsRoot,
               opts.vaults[0].fsPath,
               "/assets/foo.jpg"
-            )})`
+            )})`.toLowerCase()
           );
         },
       },

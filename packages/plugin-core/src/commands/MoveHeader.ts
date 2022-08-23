@@ -56,7 +56,6 @@ import { BasicCommand } from "./base";
 
 type CommandInput =
   | {
-      initialValue?: string;
       nonInteractive?: boolean;
       useSameVault?: boolean;
     }

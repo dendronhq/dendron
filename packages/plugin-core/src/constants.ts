@@ -523,6 +523,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Move Note`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
+  MOVE_TO: {
+    key: "dendron.moveTo",
+    title: `${CMD_PREFIX} Move To`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
   MERGE_NOTE: {
     key: "dendron.mergeNote",
     title: `${CMD_PREFIX} Merge Note`,

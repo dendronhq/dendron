@@ -34,7 +34,9 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   const foo = NoteUtils.create({ fname: "foo", vault: vault[0] });
   test("WHEN assetPrefix is provided, THEN link must have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .resolves("");
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
     const siteUtils = new SiteUtilsWeb(
@@ -52,11 +54,14 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert(link?.startsWith("https://foo.com/testing/notes/"));
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
 
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .resolves("");
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ assetsPrefix: "" });
     const siteUtils = new SiteUtilsWeb(
@@ -75,6 +80,7 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert(link?.startsWith("https://foo.com/notes/"));
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {

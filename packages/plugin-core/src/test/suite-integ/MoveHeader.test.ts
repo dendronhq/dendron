@@ -10,13 +10,15 @@ import {
 } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { describe, beforeEach } from "mocha";
+import { describe, beforeEach, afterEach } from "mocha";
 import vscode from "vscode";
 import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
 import { WSUtils } from "../../WSUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
+import sinon from "sinon";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -60,6 +62,10 @@ suite("MoveHeader", function () {
       };
     });
 
+    afterEach(() => {
+      sinon.restore();
+    });
+
     describe("WHEN header is selected", () => {
       let onInitFunc: Function;
       beforeEach(() => {
@@ -78,9 +84,11 @@ suite("MoveHeader", function () {
             ctx,
             preSetupHook,
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("dest");
               const cmd = new MoveHeaderCommand();
               const gatherOut = await cmd.gatherInputs({
-                initialValue: "dest",
                 nonInteractive: true,
               });
 
@@ -97,10 +105,12 @@ suite("MoveHeader", function () {
             ctx,
             preSetupHook,
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("new-note");
               const cmd = new MoveHeaderCommand();
               const out = await cmd.run({
                 useSameVault: true,
-                initialValue: "new-note",
                 nonInteractive: true,
               });
               const { engine, vaults } = ExtensionProvider.getDWorkspace();
@@ -152,9 +162,11 @@ suite("MoveHeader", function () {
               });
             },
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("dest");
               const cmd = new MoveHeaderCommand();
               const out = await cmd.run({
-                initialValue: "dest",
                 useSameVault: true,
                 nonInteractive: true,
               });
@@ -171,9 +183,12 @@ suite("MoveHeader", function () {
           ctx,
           preSetupHook,
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
+
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -189,9 +204,11 @@ suite("MoveHeader", function () {
           ctx,
           preSetupHook,
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -232,9 +249,11 @@ suite("MoveHeader", function () {
             });
           },
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -277,7 +296,6 @@ suite("MoveHeader", function () {
             let wasThrown = false;
             try {
               out = await cmd.gatherInputs({
-                initialValue: "dest",
                 useSameVault: true,
                 nonInteractive: true,
               });

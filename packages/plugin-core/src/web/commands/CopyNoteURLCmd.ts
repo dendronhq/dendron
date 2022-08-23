@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { env, window } from "vscode";
 import { WSUtilsWeb } from "../utils/WSUtils";
-import { SiteUtilsWeb } from "../utils/site";
+import { SiteUtilsWeb } from "../utils/SiteUtilsWeb";
 import { injectable } from "tsyringe";
 import { DENDRON_COMMANDS } from "../../constants";
 
@@ -16,7 +16,7 @@ export class CopyNoteURLCmd {
   }
 
   async run() {
-    const maybeTextEditor = window.activeTextEditor;
+    const maybeTextEditor = this.getActiveTextEditor();
 
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
@@ -39,5 +39,9 @@ export class CopyNoteURLCmd {
       env.clipboard.writeText(link);
     }
     return link;
+  }
+
+  getActiveTextEditor(): any {
+    return window.activeTextEditor;
   }
 }

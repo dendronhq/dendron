@@ -39,6 +39,7 @@ export type DendronWorkspaceConfig = {
   //
   feedback?: boolean;
   apiEndpoint?: string;
+  metadataStore?: "sqlite" | "json";
 };
 
 export type DendronWorkspace = {

@@ -27,11 +27,11 @@ import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { ProceedCancel, QuickPickUtil } from "../utils/quickPick";
-import { getDWorkspace, getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandInput = any;
 
@@ -82,6 +82,7 @@ function isMoveNecessary(move: RenameNoteOpts) {
 
 export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.MOVE_NOTE.key;
+  private extension: IDendronExtension;
   _proxyMetricPayload:
     | (RefactoringCommandUsedPayload & {
         extra: {
@@ -89,6 +90,11 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         };
       })
     | undefined;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
 
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
@@ -263,11 +269,10 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       allowMultiselect: true,
     });
 
-    const { engine } = getDWorkspace();
-    const ext = getExtension();
+    const { engine, wsRoot } = this.extension.getDWorkspace();
 
-    if (ext.fileWatcher && !opts.noPauseWatcher) {
-      ext.fileWatcher.pause = true;
+    if (this.extension.fileWatcher && !opts.noPauseWatcher) {
+      this.extension.fileWatcher.pause = true;
     }
     try {
       this.L.info({ ctx, opts });
@@ -297,14 +302,14 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (opts.closeAndOpenFile) {
         // During bulk move we will only open a single file that was moved to avoid
         // cluttering user tabs with all moved files.
-        await closeCurrentFileOpenMovedFile(engine, opts.moves[0]);
+        await closeCurrentFileOpenMovedFile(engine, opts.moves[0], wsRoot);
       }
       return { changed };
     } finally {
-      if (ext.fileWatcher && !opts.noPauseWatcher) {
+      if (this.extension.fileWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
-          if (ext.fileWatcher) {
-            ext.fileWatcher.pause = false;
+          if (this.extension.fileWatcher) {
+            this.extension.fileWatcher.pause = false;
           }
           this.L.info({ ctx, msg: "exit" });
         }, 3000);
@@ -433,10 +438,9 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
 async function closeCurrentFileOpenMovedFile(
   engine: DEngineClient,
-  moveOpts: RenameNoteOpts
+  moveOpts: RenameNoteOpts,
+  wsRoot: string
 ) {
-  const wsRoot = getDWorkspace().wsRoot;
-
   const vault = VaultUtils.getVaultByName({
     vaults: engine.vaults,
     vname: moveOpts.newLoc.vaultName!,

@@ -23,13 +23,14 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "clean": "rimraf lib && rimraf coverage",
+    "clean": "rimraf lib && rimraf coverage && rimraf src/drivers/generated-prisma-client",
     "format": "echo nop",
     "lint": "echo stub",
+    "buildPrismaClient": "yarn prisma generate && node copyPrismaClient.js",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
-    "build": "yarn compile",
-    "buildCI": "yarn compile",
+    "build": "yarn buildPrismaClient && yarn compile",
+    "buildCI": "yarn compile && yarn buildPrismaClient",
     "compile": "tsc -p tsconfig.build.json ",
     "watch": "yarn compile --watch"
   },
@@ -39,6 +40,7 @@
     "@dendronhq/remark-mermaid": "^0.3.0",
     "@jcoreio/async-throttle": "^1.4.3",
     "@mapbox/rehype-prism": "^0.5.0",
+    "@prisma/client": "^4.1.1",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "cross-path-sort": "^1.0.0",
@@ -53,6 +55,7 @@
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",
     "mdast-util-inject": "^1.1.0",
+    "prisma": "^4.1.1",
     "qs": "^6.10.1",
     "rehype-autolink-headings": "^5.0.1",
     "rehype-katex": "5",
@@ -78,7 +81,7 @@
     "unified-engine": "^8.0.0",
     "unist-util-select": "^3.0.1",
     "unist-util-visit": "^2.0.3",
-    "vscode-uri": "^2.1.2"
+    "vscode-uri": "3.0.3"
   },
   "devDependencies": {
     "@types/execa": "^2.0.0",

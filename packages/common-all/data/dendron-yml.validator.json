@@ -768,6 +768,13 @@
         },
         "apiEndpoint": {
           "type": "string"
+        },
+        "metadataStore": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "json"
+          ]
         }
       },
       "required": [

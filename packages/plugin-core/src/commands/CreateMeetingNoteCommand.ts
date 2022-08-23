@@ -29,7 +29,7 @@ type ExecuteData = {
 export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
   private _ext: IDendronExtension;
   public static requireActiveWorkspace: boolean = true;
-  public static MEETING_TEMPLATE_FNAME: string = "dendron.templates.meet";
+  public static MEETING_TEMPLATE_FNAME: string = "templates.meet";
 
   /**
    *

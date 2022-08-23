@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Utility functions for installing lerna packages
 
 function run() {

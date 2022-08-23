@@ -16,6 +16,7 @@ export type ILookupProviderV3 = {
     quickpick: DendronQuickPickerV2;
     cancellationToken: CancellationTokenSource;
   }): any;
+  shouldRejectItem?: (opts: { item: NoteQuickInput }) => boolean;
 };
 
 export interface INoteLookupProviderFactory {

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Used locally with `source ./bootstrap/scripts/helpers.sh`
 

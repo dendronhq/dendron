@@ -3,6 +3,7 @@ import "reflect-metadata"; // This needs to be the topmost import for tsyringe t
 
 import { container } from "tsyringe";
 import * as vscode from "vscode";
+import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 import { NativeTreeView } from "./views/treeView/NativeTreeView";
@@ -43,6 +44,17 @@ async function setupCommands(context: vscode.ExtensionContext) {
         await cmd.run();
       })
     );
+
+  if (!existingCommands.includes(CopyNoteURLCmd.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        CopyNoteURLCmd.key,
+        async (_args: any) => {
+          await container.resolve(CopyNoteURLCmd).run();
+        }
+      )
+    );
+  }
 }
 
 async function setupViews(context: vscode.ExtensionContext) {

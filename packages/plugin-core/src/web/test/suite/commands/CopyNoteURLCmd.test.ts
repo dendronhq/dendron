@@ -1,11 +1,11 @@
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import * as vscode from "vscode";
-import { window } from "vscode";
 import { SiteUtilsWeb } from "../../../utils/SiteUtilsWeb";
 import { WSUtilsWeb } from "../../../utils/WSUtils";
 import { DVault, NoteUtils, ReducedDEngine } from "@dendronhq/common-all";
 import sinon, { stubInterface } from "ts-sinon";
 import assert from "assert";
+import { Utils } from "vscode-uri";
 
 require("mocha/mocha");
 
@@ -35,9 +35,15 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   const foo = NoteUtils.create({ fname: "foo", vault: vault[0] });
   test("WHEN assetPrefix is provided, THEN link must have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
     const activeTextEditorStub = sinon
-      .stub(window, "activeTextEditor")
-      .returns("fakeEditor");
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
     const siteUtils = new SiteUtilsWeb(
@@ -60,9 +66,15 @@ suite("GIVEN a CopyNoteURLCmd", () => {
 
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
     const activeTextEditorStub = sinon
-      .stub(window, "activeTextEditor")
-      .returns("fakeEditor");
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ assetsPrefix: "" });
     const siteUtils = new SiteUtilsWeb(
@@ -86,7 +98,15 @@ suite("GIVEN a CopyNoteURLCmd", () => {
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ enablePrettyLinks: false });
     const siteUtils = new SiteUtilsWeb(
@@ -106,11 +126,20 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert(link?.includes(".html"));
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ enablePrettyLinks: false });
     const siteUtils = new SiteUtilsWeb(
@@ -130,10 +159,19 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert(link?.includes(".html"));
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
   test("WHEN enablePrettylinks is set to true, THEN link must not have .html", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ enablePrettyLinks: true });
     const siteUtils = new SiteUtilsWeb(
@@ -153,10 +191,19 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert.strictEqual(link?.indexOf(".html"), -1);
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
   test("WHEN command is called on root note THEN note id should not be present", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-
+    const fileUri = Utils.joinPath(wsRoot, "foo.md");
+    await vscode.workspace.fs.writeFile(
+      fileUri,
+      new Uint8Array(Buffer.from("foo body", "utf-8"))
+    );
+    const editor = await vscode.window.showTextDocument(fileUri);
+    const activeTextEditorStub = sinon
+      .stub(vscode.window, "activeTextEditor")
+      .returns(editor);
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
     const siteUtils = new SiteUtilsWeb(
@@ -178,5 +225,6 @@ suite("GIVEN a CopyNoteURLCmd", () => {
     assert.strictEqual(link, "https://foo.com");
     vaultStub.restore();
     NoteStub.restore();
+    activeTextEditorStub.restore();
   });
 });

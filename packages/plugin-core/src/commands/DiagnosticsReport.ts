@@ -36,7 +36,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
 
     const isDevMode = VSCodeUtils.isDevMode();
     let serverLastLines: string = "";
-    if (isDevMode) {
+    if (!isDevMode) {
       const serverLogFile = fs.readFileSync(serverLogPath, {
         encoding: "utf8",
       });

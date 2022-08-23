@@ -97,6 +97,14 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return;
   }
 
+  shouldRejectItem(opts: { item: NoteQuickInput }) {
+    const { item } = opts;
+    return (
+      !NoteUtils.validateFname(item.fname) &&
+      PickerUtilsV2.isCreateNewNotePick(item)
+    );
+  }
+
   /**
    * Takes selection and runs accept, followed by hooks.
    * @param opts
@@ -141,7 +149,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // validates fname.
       if (selectedItems.length === 1) {
         const item = selectedItems[0];
-        if (!NoteUtils.validateFname(item.fname)) {
+        if (this.shouldRejectItem({ item })) {
           window.showErrorMessage(
             "Hierarchies cannot have leading / trailing whitespace or be empty."
           );

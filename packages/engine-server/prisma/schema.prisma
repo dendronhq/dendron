@@ -1,0 +1,43 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin-arm64", "darwin", "windows", "debian-openssl-1.1.x"]
+  output        = "./../src/drivers/generated-prisma-client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Note {
+  id           String               @id
+  fname        String?
+  title        String?
+  vault        DVault               @relation(fields: [dVaultId], references: [id])
+  updated      Int?
+  created      Int?
+  stub         Boolean?
+  // anchors      Unsupported("json")?
+  // desc         String?
+  // links        Unsupported("json")?
+  dVaultId  Int
+
+  @@index([id], map: "idx_notes_id")
+}
+
+model DVault {
+  id        Int @id @default(autoincrement())
+  name      String?   @unique
+  fsPath    String
+  wsRoot    String
+  workspace Workspace @relation(fields: [wsRoot], references: [wsRoot], onDelete: Cascade)
+  Note      Note[]
+
+  @@unique([wsRoot, fsPath])
+}
+
+model Workspace {
+  wsRoot              String   @id @unique
+  prismaSchemaVersion Int
+  vaults              DVault[]
+}

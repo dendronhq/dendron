@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN sqlite store WHEN initialize mult times and notes have changed, THEN metadata is updated 1`] = `
+Array [
+  "dendron.code-workspace",
+  "dendron.yml",
+  "hooks",
+  "metadata.db",
+  "vault1",
+  "vault2",
+  "vault3",
+]
+`;
+
+exports[`GIVEN sqlite store WHEN initialize mult times, THEN metadata has all notes 1`] = `
+Array [
+  "dendron.code-workspace",
+  "dendron.yml",
+  "hooks",
+  "metadata.db",
+  "vault1",
+  "vault2",
+  "vault3",
+]
+`;
+
+exports[`GIVEN sqlite store WHEN initialize, THEN metadata has all notes 1`] = `
+Array [
+  "dendron.code-workspace",
+  "dendron.yml",
+  "hooks",
+  "metadata.db",
+  "vault1",
+  "vault2",
+  "vault3",
+]
+`;

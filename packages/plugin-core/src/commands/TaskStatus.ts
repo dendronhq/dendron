@@ -10,7 +10,7 @@ import { BasicCommand } from "./base";
 import { VSCodeUtils, MessageSeverity } from "../vsCodeUtils";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { QuickPickItem } from "vscode";
-import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
+import { EditorUtils } from "../utils/editor";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 
 type CommandInput = {
@@ -37,7 +37,7 @@ export class TaskStatusCommand extends BasicCommand<
   }
 
   async gatherInputs(opts?: CommandInput): Promise<CommandOpts | undefined> {
-    const selection = await getLinkFromSelectionWithWorkspace();
+    const selection = await EditorUtils.getLinkFromSelectionWithWorkspace();
     let selectedNote: NoteProps | undefined;
 
     if (!selection) {

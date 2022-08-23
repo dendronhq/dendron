@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import vscode from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { getHeaderAt } from "../utils/editor";
+import { EditorUtils } from "../utils/editor";
 import { findReferences, getReferenceAtPosition } from "../utils/md";
 import { WSUtilsV2 } from "../WSUtilsV2";
 
@@ -22,7 +22,7 @@ export default class ReferenceProvider implements vscode.ReferenceProvider {
 
       const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
       // provide reference to header if selection is header.
-      const header = getHeaderAt({ document, position });
+      const header = EditorUtils.getHeaderAt({ document, position });
       if (!_.isUndefined(header)) {
         const note = new WSUtilsV2(
           ExtensionProvider.getExtension()

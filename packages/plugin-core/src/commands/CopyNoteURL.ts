@@ -4,7 +4,7 @@ import _ from "lodash";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
-import { getAnchorAt } from "../utils/editor";
+import { EditorUtils } from "../utils/editor";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";
@@ -58,7 +58,7 @@ export class CopyNoteURLCommand extends BasicCommand<
     const { selection, editor } = VSCodeUtils.getSelection();
     let anchor;
     if (selection) {
-      anchor = getAnchorAt({
+      anchor = EditorUtils.getAnchorAt({
         editor: editor!,
         position: selection.start,
         engine,

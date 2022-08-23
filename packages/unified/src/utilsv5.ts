@@ -3,8 +3,10 @@ import {
   ConfigUtils,
   DendronError,
   DEngineClient,
+  DNoteRefLink,
   DVault,
   ERROR_STATUS,
+  getSlugger,
   IntermediateDendronConfig,
   NoteProps,
   NotePropsByIdDict,
@@ -46,7 +48,10 @@ import { hashtags } from "./remark/hashtag";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { DendronASTDest } from "./types";
+import { DendronASTDest, UnistNode } from "./types";
+import path from "path";
+import fs from "fs-extra";
+import { Parent } from "unist";
 
 export { ProcFlavor };
 
@@ -172,7 +177,31 @@ function checkProps({
   return { valid: true };
 }
 
+export type NoteRefId = { id: string; link: DNoteRefLink };
+export type SerializedNoteRef = { node: UnistNode; refId: NoteRefId };
+
 export class MDUtilsV5 {
+  static getRefsRoot = (wsRoot: string) => {
+    return path.join(wsRoot, "build", "refs");
+  };
+
+  /**
+   * Write ref
+   * @param proc
+   * @param param1
+   */
+  static serializeRefId(
+    proc: Processor,
+    { refId, content }: { refId: NoteRefId; content: Parent }
+  ) {
+    const data = this.getProcData(proc);
+    const tmpDir = this.getRefsRoot(data.wsRoot);
+    fs.ensureDirSync(tmpDir);
+    const idString = getRefId(refId);
+    const payload: SerializedNoteRef = { node: content, refId };
+    fs.writeJSONSync(path.join(tmpDir, idString + ".json"), payload);
+  }
+
   static getProcOpts(proc: Processor): ProcOptsV5 {
     const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
     return _data || {};
@@ -504,3 +533,11 @@ export class MDUtilsV5 {
     return proc.use(rehypeStringify);
   }
 }
+
+export const getRefId = ({ link, id }: { link: DNoteRefLink; id: string }) => {
+  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+    anchorStartOffset: 0,
+  });
+  const slug = getSlugger();
+  return slug.slug([id, anchorStart, anchorEnd, anchorStartOffset].join("-"));
+};

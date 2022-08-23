@@ -126,8 +126,8 @@ function createProc({
 }
 
 describe("GIVEN dendronPub", () => {
-  const fnameAlpha = "alpha";
-  const fnameBeta = "beta";
+  const FNAME_ALPHA = "alpha";
+  const FNAME_BETA = "beta";
 
   describe("WHEN note contains markdown link to a non-web uri (asset path)", () => {
     let resp: VFile;
@@ -140,7 +140,7 @@ describe("GIVEN dendronPub", () => {
             resp = await createProc({
               ...opts,
               config,
-              fname: fnameAlpha,
+              fname: FNAME_ALPHA,
               linkText: [
                 "[some pdf](assets/dummy-pdf.pdf)",
                 "[some pdf](/assets/dummy-pdf2.pdf)",
@@ -173,7 +173,7 @@ describe("GIVEN dendronPub", () => {
             resp = await createProc({
               ...opts,
               config,
-              fname: fnameAlpha,
+              fname: FNAME_ALPHA,
               linkText: [
                 "[some pdf](assets/dummy-pdf.pdf)",
                 "[some pdf](/assets/dummy-pdf2.pdf)",
@@ -201,7 +201,7 @@ describe("GIVEN dendronPub", () => {
 
   describe("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
 
     describe("AND WHEN wikilink", () => {
       let resp: VFile;
@@ -222,8 +222,8 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN all links are rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
-        await verifyPublicLink(resp, fnameAlpha);
+        await verifyPublicLink(resp, FNAME_BETA);
+        await verifyPublicLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -273,59 +273,8 @@ describe("GIVEN dendronPub", () => {
   });
 
   describe("WHEN publish and private hierarchies", () => {
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
     const config = genPublishConfigWithPublicPrivateHierarchies();
-
-    describe("AND WHEN noteRef", () => {
-      describe("AND WHEN noteref of published note", () => {
-        let resp: VFile;
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname,
-                linkText: `![[beta]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
-        test("THEN published note is rendered", async () => {
-          await verifyPublicNoteRef(resp, fnameBeta);
-        });
-        test("THEN private link in published note is hidden", async () => {
-          await verifyPrivateLink(resp, fnameAlpha);
-        });
-      });
-
-      describe("AND WHEN noteref of private note", () => {
-        let resp: VFile;
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname,
-                linkText: `![[alpha]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
-        test("THEN private note is not rendered", async () => {
-          await verifyPrivateNoteRef(resp);
-        });
-      });
-    });
 
     describe("AND WHEN wikilink", () => {
       let resp: VFile;
@@ -346,10 +295,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -373,10 +322,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
   });
@@ -1062,7 +1011,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: ["portal-container"],
+            match: ["iframe"],
           })
         ).toBeTruthy();
       },
@@ -1187,7 +1136,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         expect(
           await AssertUtils.assertInString({
             body: publishResp.contents as string,
-            match: ["portal-container"],
+            match: [
+              `<iframe src="/refs/bar---0" title="Reference to the note called Bar">Your browser does not support iframes.</iframe>`,
+            ],
           })
         ).toBeTruthy();
       },
@@ -1269,7 +1220,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             expect(
               await AssertUtils.assertInString({
                 body: resp.contents as string,
-                match: ["portal-container"],
+                match: [`iframe src="/refs/bar---0"`],
               })
             ).toBeTruthy();
           },

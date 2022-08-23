@@ -165,8 +165,8 @@ class NodeUrlHandler extends DendronNodeHander {
     const NodeToHandle = node;
 
     if (!isWebUri(NodeToHandle.url)) {
-      const url = _.trim(NodeToHandle.url, "/");
-      NodeToHandle.url = (assetsPrefix ? assetsPrefix + "/" : "/") + url;
+      const imageUrl = _.trim(NodeToHandle.url, "/");
+      NodeToHandle.url = (assetsPrefix ? assetsPrefix + "/" : "/") + imageUrl;
     }
     return { node: NodeToHandle };
   }

@@ -40,10 +40,27 @@ export function getNotes(): NoteData {
   if (_.isUndefined(_NOTES_CACHE)) {
     const dataDir = getDataDir();
     _NOTES_CACHE = fs.readJSONSync(
-      path.join(dataDir, "notes.json"),
+      path.join(dataDir, "notes.json")
     ) as NoteData;
   }
   return _NOTES_CACHE;
+}
+
+const NOTE_REF_DIR = "refs";
+let _REFS_CACHE: string[] | undefined;
+export function getRefBody(id: string) {
+  const dataDir = getDataDir();
+  const body = fs.readFile(path.join(dataDir, NOTE_REF_DIR, `${id}.html`), {
+    encoding: "utf8",
+  });
+  return body;
+}
+export function getNoteRefs() {
+  if (_.isUndefined(_REFS_CACHE)) {
+    const dataDir = getDataDir();
+    _REFS_CACHE = fs.readJSONSync(path.join(dataDir, "refs.json")) as string[];
+  }
+  return _REFS_CACHE;
 }
 
 export interface DendronNotePageParams extends ParsedUrlQuery {
@@ -60,11 +77,9 @@ export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
   // filter out the index node
   const paths = Object.keys(notes)
     .filter((id) => id !== noteIndex.id)
-    .map(
-      (id) => {
-        return { params: { id } };
-      },
-    );
+    .map((id) => {
+      return { params: { id } };
+    });
   return {
     paths,
     fallback: false,
@@ -76,9 +91,7 @@ export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
  */
 export function getNoteMeta(id: string): Promise<NoteProps> {
   const dataDir = getDataDir();
-  return fs.readJSON(
-    path.join(dataDir, NOTE_META_DIR, `${id}.json`),
-  );
+  return fs.readJSON(path.join(dataDir, NOTE_META_DIR, `${id}.json`));
 }
 
 let _CONFIG_CACHE: IntermediateDendronConfig | undefined;

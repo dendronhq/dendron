@@ -78,6 +78,22 @@ suite("MoveHeader", function () {
         };
       });
 
+      test("THEN the initial value is filled in with the current hierarchy", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: onInitFunc(async () => {
+            const cmd = new MoveHeaderCommand();
+            const gatherOut = await cmd.gatherInputs({
+              nonInteractive: true,
+            });
+
+            expect(gatherOut?.dest?.fname).toEqual(originNote.fname);
+            done();
+          }),
+        });
+      });
+
       describe("AND WHEN existing item is selected for destination", () => {
         test("THEN selected item is used for destination", (done) => {
           runLegacyMultiWorkspaceTest({

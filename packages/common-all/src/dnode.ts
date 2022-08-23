@@ -450,15 +450,16 @@ export class NoteUtils {
     engine: DEngineClient;
   }): NoteProps {
     const { stubNote, engine } = opts;
+    const cleanStubNote = _.omit(stubNote, "stub");
     const schemaMatch = SchemaUtils.matchPath({
-      notePath: stubNote.fname,
+      notePath: cleanStubNote.fname,
       schemaModDict: engine.schemas,
     });
     if (schemaMatch) {
       const { schema, schemaModule } = schemaMatch;
-      NoteUtils.addSchema({ note: stubNote, schemaModule, schema });
+      NoteUtils.addSchema({ note: cleanStubNote, schemaModule, schema });
     }
-    return stubNote;
+    return cleanStubNote;
   }
 
   static createRoot(opts: Partial<NoteOpts> & { vault: DVault }): NoteProps {

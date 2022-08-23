@@ -46,6 +46,23 @@ export function getNotes(): NoteData {
   return _NOTES_CACHE;
 }
 
+const NOTE_REF_DIR = "refs";
+let _REFS_CACHE: string[] | undefined;
+export function getRefBody(id: string) {
+  const dataDir = getDataDir();
+  const body = fs.readFile(path.join(dataDir, NOTE_REF_DIR, `${id}.html`), {
+    encoding: "utf8",
+  });
+  return body;
+}
+export function getNoteRefs() {
+  if (_.isUndefined(_REFS_CACHE)) {
+    const dataDir = getDataDir();
+    _REFS_CACHE = fs.readJSONSync(path.join(dataDir, "refs.json")) as string[];
+  }
+  return _REFS_CACHE;
+}
+
 export interface DendronNotePageParams extends ParsedUrlQuery {
   id: string;
 }

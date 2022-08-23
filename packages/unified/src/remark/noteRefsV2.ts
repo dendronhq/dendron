@@ -4,7 +4,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
-  DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
@@ -17,6 +16,7 @@ import {
   NoteDictsUtils,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -25,7 +25,7 @@ import { Heading } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
-import { Node, Parent } from "unist";
+import { Data, Node, Parent } from "unist";
 import { MdastUtils } from "..";
 import { RemarkUtils } from "../remark";
 import { SiteUtils } from "../SiteUtils";
@@ -37,7 +37,7 @@ import {
   NoteRefNoteV4,
 } from "../types";
 import { ParentWithIndex } from "../utils";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import { getRefId, MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -55,19 +55,12 @@ type ConvertNoteRefOpts = {
   proc: Unified.Processor;
   compilerOpts: CompilerOpts;
 };
+
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
   note: NoteProps;
 };
-
-// const createMissingNoteErrorMsg = (opts: { fname: string; vname?: string }) => {
-//   const out = [`No note with name ${opts.fname} found`];
-//   if (opts.vname) {
-//     out.push(`in vault ${opts.vname}`);
-//   }
-//   return out.join(" ");
-// };
 
 function gatherNoteRefs({
   link,
@@ -77,7 +70,7 @@ function gatherNoteRefs({
   link: DNoteRefLink;
   vault: DVault;
   noteDicts?: NoteDicts;
-}) {
+}): DNoteLoc[] {
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     // We must have note dicts to process wildcard references.
@@ -98,6 +91,7 @@ function gatherNoteRefs({
   } else {
     noteRefs.push(link.from);
   }
+
   return noteRefs;
 }
 
@@ -172,8 +166,9 @@ function attachParser(proc: Unified.Processor) {
       } else {
         const link = LinkUtils.parseNoteRef(linkMatch);
         // If the link is same file [[#header]], it's implicitly to the same file it's located in
-        if (link.from?.fname === "")
+        if (link.from?.fname === "") {
           link.from.fname = MDUtilsV5.getProcData(proc).fname;
+        }
         const { value } = LinkUtils.parseLink(linkMatch);
         const refNote: NoteRefNoteV4 = {
           type: DendronASTTypes.REF_LINK_V2,
@@ -204,7 +199,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
   const { dest } = MDUtilsV5.getProcData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function refLinkV2(node: NoteRefNoteV4) {
+    visitors.refLinkV2 = (node: NoteRefNoteV4) => {
       const ndata = node.data;
 
       // converting to itself (used for doctor commands. preserve existing format)
@@ -241,17 +236,25 @@ const MAX_REF_LVL = 3;
 /**
  * This exists because {@link dendronPub} converts note refs using the AST
  */
-export function convertNoteRefASTV2(
+export function convertNoteRefToHAST(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
+  const errors: IDendronError[] = [];
+  const { link, proc, compilerOpts, procOpts } = opts;
+  const procData = MDUtilsV5.getProcData(proc);
+  const { noteRefLvl: refLvl } = procData;
   /**
-   * Takes a note ref and processes it
+   * Takes a note ref and processes it into HAST
    * @param ref DNoteLoc (note reference) to process
    * @param note actual note at the reference
    * @param fname fname (either from the actual note ref, or inferred.)
    * @returns process note references
    */
-  function processRef(ref: DNoteLoc, note: NoteProps, fname: string) {
+  function processRef(
+    ref: DNoteLoc,
+    note: NoteProps,
+    fname: string
+  ): Parent<Node<any>, any> {
     try {
       if (
         shouldApplyPublishRules &&
@@ -267,10 +270,10 @@ export function convertNoteRefASTV2(
       }
 
       const body = note.body;
-      const { error, data } = convertNoteRefHelperAST({
+      const { error, data: noteRefMDAST } = convertNoteRefToMDAST({
         body,
         link,
-        refLvl: refLvl + 1,
+        refLvl: refLvl ? refLvl + 1 : 1,
         proc,
         compilerOpts,
         procOpts,
@@ -297,6 +300,8 @@ export function convertNoteRefASTV2(
           loc: ref,
           shouldApplyPublishRules,
         });
+
+        let isPublished = true;
         if (dest === DendronASTDest.HTML) {
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
@@ -305,9 +310,6 @@ export function convertNoteRefASTV2(
             href = "";
             suffix = "";
           }
-        }
-        let isPublished = true;
-        if (dest === DendronASTDest.HTML) {
           // check if we need to check publishign rules
           if (
             MDUtilsV5.isV5Active(proc) &&
@@ -323,27 +325,41 @@ export function convertNoteRefASTV2(
             });
           }
         }
-        const link = isPublished
+        const linkString = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
           : undefined;
-        return renderPrettyAST({
-          content: data,
+
+        const prettyHAST = renderPrettyHAST({
+          content: noteRefMDAST,
           title,
-          link,
+          link: linkString,
         });
+
+        // publishing
+
+        if (
+          MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
+          !procData.insideNoteRef
+        ) {
+          return genRefAsIFrame({
+            link,
+            noteId: note.id,
+            content: noteRefMDAST,
+            title,
+            config,
+            prettyHAST,
+          });
+        }
+
+        return prettyHAST;
       } else {
-        return paragraph(data);
+        return paragraph(noteRefMDAST);
       }
     } catch (err) {
       const msg = `Error rendering note reference for ${note?.fname}`;
       return MdastUtils.genMDErrorMsg(msg);
     }
   }
-
-  const errors: IDendronError[] = [];
-  const { link, proc, compilerOpts, procOpts } = opts;
-  const procData = MDUtilsV5.getProcData(proc);
-  const { noteRefLvl: refLvl } = procData;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -372,11 +388,13 @@ export function convertNoteRefASTV2(
   // process note references.
   // let noteRefs: DNoteLoc[] = [];
   const vault = procData.vault;
+
   const noteRefs: DNoteLoc[] = gatherNoteRefs({
     link,
     vault,
     noteDicts: noteCacheForRenderDict,
   });
+
   if (link.from.fname.endsWith("*")) {
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
@@ -385,14 +403,8 @@ export function convertNoteRefASTV2(
 
     const processedRefs = noteRefs.map((ref) => {
       const fname = ref.fname;
-      const npath = DNodeUtils.getFullPath({
-        wsRoot,
-        vault: vault as DVault,
-        basename: fname + ".md",
-      });
       let note: NoteProps;
       try {
-        // TODO: Get rid of these legacy engine.noteFnames, engine.notes references
         const noteIds = noteCacheForRenderDict?.notesByFname[fname];
 
         if (!noteIds) {
@@ -412,9 +424,10 @@ export function convertNoteRefASTV2(
         }
         note = noteCandidates[0];
       } catch (err) {
-        const msg = `error reading file, ${npath}`;
+        const msg = `error getting note..}`;
         return MdastUtils.genMDMsg(msg);
       }
+
       return processRef(ref, note, fname);
     });
     return { error: undefined, data: processedRefs };
@@ -440,8 +453,9 @@ export function convertNoteRefASTV2(
       };
     }
 
-    // multiple results
-    if (data.length > 1) {
+    if (data.length === 1) {
+      note = data[0];
+    } else if (data.length > 1) {
       // applying publish rules but no behavior defined for duplicate notes
       if (shouldApplyPublishRules && _.isUndefined(duplicateNoteConfig)) {
         return {
@@ -489,13 +503,16 @@ export function convertNoteRefASTV2(
         }
       }
     } else {
-      note = data[0];
+      throw new Error("Expected 1 or more notes");
     }
 
+    // why iterate?  won't there be only one note?
     const processedRefs = noteRefs.map((ref) => {
       const fname = note.fname;
+
       return processRef(ref, note, fname);
     });
+
     return { error: undefined, data: processedRefs };
   }
 }
@@ -574,7 +591,7 @@ function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
   }
 }
 
-function prepareNoteRefIndices<T>({
+export function prepareNoteRefIndices<T>({
   anchorStart,
   anchorEnd,
   bodyAST,
@@ -713,7 +730,7 @@ function prepareNoteRefIndices<T>({
   return { start, end, data: null, error: null };
 }
 
-function convertNoteRefHelperAST(
+function convertNoteRefToMDAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
@@ -949,12 +966,62 @@ function getTitle(opts: {
   return enableNoteTitleForLink ? note.title : alias || fname || "no title";
 }
 
-function renderPrettyAST(opts: {
+const genRefAsIFrame = ({
+  link,
+  noteId,
+  content,
+  title,
+  config,
+  prettyHAST,
+}: {
+  link: DNoteRefLink;
+  noteId: string;
+  content: Parent;
+  title: string;
+  config: IntermediateDendronConfig;
+  prettyHAST: Parent<Node<Data>, Data>;
+}) => {
+  const refId = getRefId({ id: noteId, link });
+  // cache it for later generation?
+  MDUtilsV5.cacheRefId({
+    refId: { id: noteId, link },
+    mdast: content,
+    prettyHAST,
+  });
+
+  const assetsPrefix =
+    ConfigUtils.getPublishingConfig(config).assetsPrefix ?? "";
+  return paragraph(
+    html(
+      `<iframe class="noteref-iframe" src="${assetsPrefix}/refs/${refId}" title="Reference to the note called ${title}">Your browser does not support iframes.</iframe>`
+    )
+  );
+};
+
+/**
+ *  Replace /notes/ with /
+ * ... unless /notes/notes
+ */
+function fixLinkIfRoot(link?: string): string | undefined {
+  if (!link) {
+    return link;
+  }
+  const indexOfNotes = link.indexOf("/notes/");
+  const lastIndexOfNotes = link.lastIndexOf("/notes/");
+  if (indexOfNotes === lastIndexOfNotes && indexOfNotes !== -1) {
+    return link.substring(0, indexOfNotes) + `/"`;
+  }
+  return link;
+}
+
+function renderPrettyHAST(opts: {
   content: Parent;
   title: string;
   link?: string;
-}) {
-  const { content, title, link } = opts;
+}): Parent<Node<Data>, Data> {
+  const { content, title } = opts;
+  let { link } = opts;
+  link = fixLinkIfRoot(link);
   const linkLine = _.isUndefined(link)
     ? ""
     : `<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`;

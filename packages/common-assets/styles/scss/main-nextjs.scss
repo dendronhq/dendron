@@ -123,3 +123,9 @@ hr {
     }
   }
 }
+
+// note references are loaded in an iframe and should be full width, else width is 300px by default;
+// more info: https://stackoverflow.com/questions/5871668/default-width-height-of-an-iframe
+iframe.noteref-iframe {
+  width: 100%;
+}

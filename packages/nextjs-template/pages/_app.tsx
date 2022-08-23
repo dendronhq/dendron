@@ -14,13 +14,16 @@ import {
 import "antd/dist/antd.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { useDendronGATracking } from "../components/DendronGATracking";
 import DendronLayout from "../components/DendronLayout";
+import { DendronRef } from "../components/DendronRef";
 import DendronProvider from "../context/DendronProvider";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
+import { useIFrameHeightAdjuster } from "../hooks/useIFrameHeightAdjusterr";
 import "../public/assets-dendron/css/light.css";
 import "../styles/scss/main.scss";
 import { getLogLevel } from "../utils/etc";
@@ -39,13 +42,34 @@ function AppContainer(appProps: AppProps) {
   const { config } = appProps.pageProps as {
     config: IntermediateDendronConfig;
   };
+
   const logger = createLogger("AppContainer");
   useEffect(() => {
     const logLevel = getLogLevel();
     setLogLevel(logLevel);
   }, []);
+
+  const router = useRouter();
+
   const defaultTheme = ConfigUtils.getPublishing(config).theme || Theme.LIGHT;
   logger.info({ ctx: "enter", defaultTheme });
+  logger.info({ debug: router.pathname });
+  logger.info({ json: JSON.stringify(appProps, null, 2) });
+  if (router.pathname === "/refs/[id]") {
+    logger.info({ appProps });
+    return (
+      <Provider store={combinedStore}>
+        <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
+          <DendronRef
+            body={appProps.pageProps.body}
+            noteUrl={appProps.pageProps.noteUrl}
+            noteTitle={appProps.pageProps.noteTitle}
+          />
+        </ThemeSwitcherProvider>
+      </Provider>
+    );
+  }
+
   return (
     <Provider store={combinedStore}>
       <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme}>
@@ -61,6 +85,7 @@ function DendronApp({ Component, pageProps }: AppProps) {
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
   useDendronGATracking();
+  // useIFrameHeightAdjuster();
 
   useEffect(() => {
     (async () => {

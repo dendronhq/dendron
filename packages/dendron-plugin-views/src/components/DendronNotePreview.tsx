@@ -123,6 +123,7 @@ const DendronNotePreview: DendronComponent = (props) => {
       source: DMessageSource.webClient,
     });
   };
+  debugger;
 
   return (
     <>

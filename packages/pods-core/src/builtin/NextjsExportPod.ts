@@ -18,6 +18,7 @@ import {
   RespV3,
   Theme,
   TreeUtils,
+  DendronASTDest,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -25,7 +26,13 @@ import {
   SimpleGitResetMode,
 } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
-import { MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
+import {
+  MDUtilsV5,
+  ProcFlavor,
+  SerializedNoteRef,
+  getRefId,
+  UnistNode,
+} from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -277,6 +284,44 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     return payload.toString();
   }
 
+  async _renderRef({
+    engine,
+    note,
+    notes,
+    engineConfig,
+    node,
+  }: {
+    engine: DEngineClient;
+    note: NoteProps;
+    notes: NotePropsByIdDict;
+    node: UnistNode;
+    engineConfig: IntermediateDendronConfig;
+  }) {
+    const proc = MDUtilsV5.procRemarkFull({
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+      fname: note.fname,
+      vault: note.vault,
+      config: engineConfig,
+      notes,
+    });
+    const out = proc.stringify(node);
+    const proc2 = MDUtilsV5.procRehypeFull(
+      {
+        engine,
+        fname: note.fname,
+        vault: note.vault,
+        config: engineConfig,
+        notes,
+        insideNoteRef: true,
+      },
+      { flavor: ProcFlavor.REGULAR }
+    );
+    const resp = await proc2.process(out);
+    // TODO: add custom iframe code here
+    return resp.contents;
+  }
+
   private async _writeEnvFile({
     siteConfig,
     dest,
@@ -510,6 +555,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
+    const notesRefsDir = path.join(podDstDir, "refs");
+
     this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
     fs.ensureDirSync(notesBodyDir);
     fs.ensureDirSync(notesMetaDir);
@@ -530,8 +577,39 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       })
     );
 
+    // render refs
+    const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
+    const refIds: string[] = await Promise.all(
+      fs.readdirSync(refsRoot).map(async (ent) => {
+        const { node, refId } = fs.readJSONSync(
+          path.join(refsRoot, ent)
+        ) as SerializedNoteRef;
+        const noteId = refId.id;
+        const noteForRef = _.get(engine.notes, noteId);
+
+        // shouldn't happen
+        if (!noteForRef) {
+          throw Error(`no note found for ${JSON.stringify(refId)}`);
+        }
+        const out = await this._renderRef({
+          engine,
+          note: noteForRef,
+          node,
+          engineConfig,
+          notes: publishedNotes,
+        });
+        const refIdString = getRefId(refId);
+        const dst = path.join(notesRefsDir, refIdString + ".html");
+        this.L.debug({ ctx, dst, msg: "writeNote" });
+        fs.ensureFileSync(dst);
+        fs.writeFileSync(dst, out);
+        return refIdString;
+      })
+    );
+
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
+    const refDstPath = path.join(podDstDir, "refs.json");
 
     const treeDstPath = path.join(podDstDir, "tree.json");
     const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
@@ -549,6 +627,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         },
         { encoding: "utf8", spaces: 2 }
       ),
+      fs.writeJSONSync(refDstPath, refIds, {
+        encoding: "utf8",
+        spaces: 2,
+      }),
       fs.writeJSON(podConfigDstPath, engineConfig, {
         encoding: "utf8",
         spaces: 2,

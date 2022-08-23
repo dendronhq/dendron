@@ -19,7 +19,11 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
+  ErrorUtils,
+  ProcFlavor,
 } from "@dendronhq/common-all";
+import { file2Note } from "@dendronhq/common-server";
+import { error } from "console";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
@@ -37,7 +41,7 @@ import {
   NoteRefNoteV4,
 } from "../types";
 import { ParentWithIndex } from "../utils";
-import { MDUtilsV5, ProcMode } from "../utilsv5";
+import { getRefId, MDUtilsV5, ProcMode } from "../utilsv5";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -55,6 +59,7 @@ type ConvertNoteRefOpts = {
   proc: Unified.Processor;
   compilerOpts: CompilerOpts;
 };
+
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
@@ -236,7 +241,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
   const { dest } = MDUtilsV5.getProcData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function refLinkV2(node: NoteRefNoteV4) {
+    visitors.refLinkV2 = (node: NoteRefNoteV4) => {
       const ndata = node.data;
 
       // converting to itself (used for doctor commands. preserve existing format)
@@ -276,6 +281,11 @@ const MAX_REF_LVL = 3;
 export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
+  const errors: IDendronError[] = [];
+  const { link, proc, compilerOpts, procOpts } = opts;
+  const procData = MDUtilsV5.getProcData(proc);
+  const { noteRefLvl: refLvl } = procData;
+  const engine = procData.engine;
   /**
    * Takes a note ref and processes it
    * @param ref DNoteLoc (note reference) to process
@@ -283,7 +293,11 @@ export function convertNoteRefASTV2(
    * @param fname fname (either from the actual note ref, or inferred.)
    * @returns process note references
    */
-  function processRef(ref: DNoteLoc, note: NoteProps, fname: string) {
+  function processRef(
+    ref: DNoteLoc,
+    note: NoteProps,
+    fname: string
+  ): Parent<Node<any>, any> {
     try {
       if (
         shouldApplyPublishRules &&
@@ -328,6 +342,8 @@ export function convertNoteRefASTV2(
           loc: ref,
           shouldApplyPublishRules,
         });
+
+        let isPublished = true;
         if (dest === DendronASTDest.HTML) {
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
@@ -336,9 +352,6 @@ export function convertNoteRefASTV2(
             href = "";
             suffix = "";
           }
-        }
-        let isPublished = true;
-        if (dest === DendronASTDest.HTML) {
           // check if we need to check publishign rules
           if (
             MDUtilsV5.isV5Active(proc) &&
@@ -353,13 +366,28 @@ export function convertNoteRefASTV2(
             });
           }
         }
-        const link = isPublished
+        const linkString = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
           : undefined;
+
+        // publishing
+        if (
+          MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
+          !_.isUndefined(linkString)
+        ) {
+          return genRefAsIFrame({
+            proc,
+            link,
+            noteId: note.id,
+            content: data,
+            title,
+          });
+        }
+
         return renderPrettyAST({
           content: data,
           title,
-          link,
+          link: linkString,
         });
       } else {
         return paragraph(data);
@@ -369,12 +397,6 @@ export function convertNoteRefASTV2(
       return MdastUtils.genMDErrorMsg(msg);
     }
   }
-
-  const errors: IDendronError[] = [];
-  const { link, proc, compilerOpts, procOpts } = opts;
-  const procData = MDUtilsV5.getProcData(proc);
-  const { noteRefLvl: refLvl } = procData;
-  const engine = procData.engine;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -452,8 +474,9 @@ export function convertNoteRefASTV2(
       };
     }
 
-    // multiple results
-    if (resp.data.length > 1) {
+    if (resp.data.length === 1) {
+      note = resp.data[0];
+    } else if (resp.data.length > 1) {
       // applying publish rules but no behavior defined for duplicate notes
       if (shouldApplyPublishRules && _.isUndefined(duplicateNoteConfig)) {
         return {
@@ -501,9 +524,10 @@ export function convertNoteRefASTV2(
         }
       }
     } else {
-      note = resp.data[0];
+      throw error("Expected 1 or more notes");
     }
 
+    // why iterate?  won't there be only one note?
     const processedRefs = noteRefs.map((ref) => {
       const fname = note.fname;
       return processRef(ref, note, fname);
@@ -959,6 +983,28 @@ function getTitle(opts: {
 
   return enableNoteTitleForLink ? note.title : alias || fname || "no title";
 }
+
+const genRefAsIFrame = ({
+  proc,
+  link,
+  noteId,
+  content,
+  title,
+}: {
+  proc: Unified.Processor;
+  link: DNoteRefLink;
+  noteId: string;
+  content: Parent;
+  title: string;
+}) => {
+  const refId = getRefId({ id: noteId, link });
+  MDUtilsV5.serializeRefId(proc, { refId: { id: noteId, link }, content });
+  return paragraph(
+    html(
+      `<iframe src="/refs/${refId}" title="Reference to the note called ${title}">Your browser does not support iframes.</iframe>`
+    )
+  );
+};
 
 function renderPrettyAST(opts: {
   content: Parent;

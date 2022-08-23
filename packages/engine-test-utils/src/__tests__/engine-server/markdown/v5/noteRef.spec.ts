@@ -50,7 +50,10 @@ describe("GIVEN noteRef plugin", () => {
             [ProcFlavor.PUBLISHING]: async ({ extra }) => {
               const { resp } = extra;
               expect(resp).toMatchSnapshot();
-              await checkString(resp.contents, "/some-prefix/notes/bar");
+              await checkString(
+                resp.contents,
+                '<iframe src="/data/refs/bar---0.html"></iframe>'
+              );
             },
           },
         },
@@ -104,12 +107,23 @@ describe("GIVEN noteRef plugin", () => {
             [ProcFlavor.PUBLISHING]: async ({ extra }) => {
               const { resp } = extra;
               expect(resp).toMatchSnapshot();
+              // maybe check the refs html?
               await checkString(
                 resp.contents,
                 // should have id for link
-                `<a href="/notes/alpha-id"`,
-                `<a href="/notes/bar">Bar</a>`
+                `<iframe src="/data/refs/alpha-id---0.html"></iframe>`
               );
+              await checkString(
+                resp.contents,
+                `<iframe src="/refs/alpha-id---0">`
+              );
+              /**
+               *           const refsDir = MDUtilsV5.getRefsRoot(wsRoot);
+          await checkDir({ fpath: refsDir, snapshot: true });
+          const refFile = path.join(refsDir, "alpha-id---0.json");
+          await checkFile({ fpath: refFile, snapshot: true });
+          await checkString(resp.contents, `<iframe src="/refs/alpha-id---0">`);
+               */
             },
           },
         },

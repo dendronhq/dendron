@@ -1,6 +1,7 @@
 import { extractNoteChangeEntryCounts } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { BasicCommand } from "./base";
 import {
@@ -26,7 +27,14 @@ export class RenameNoteCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.RENAME_NOTE.key;
-  private _moveNoteCommand = new MoveNoteCommand();
+  private extension: IDendronExtension;
+  private _moveNoteCommand;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+    this._moveNoteCommand = new MoveNoteCommand(this.extension);
+  }
 
   async sanityCheck() {
     return this._moveNoteCommand.sanityCheck();

@@ -241,6 +241,7 @@ export class WorkspaceWatcher {
         document,
         "onDidOpenTextDocument"
       );
+      DoctorUtils.validateFilenameFromDocumentAndPromptIfNecessary(document);
     } catch (error) {
       Sentry.captureException(error);
       throw error;

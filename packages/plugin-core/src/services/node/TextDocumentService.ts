@@ -1,5 +1,4 @@
 import {
-  DendronASTDest,
   DVault,
   NoteProps,
   NoteUtils,
@@ -8,11 +7,8 @@ import {
 } from "@dendronhq/common-all";
 import { DConfig, DLogger } from "@dendronhq/common-server";
 import { EngineUtils, WorkspaceUtils } from "@dendronhq/engine-server";
-import { MDUtilsV5 } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
-import visit from "unist-util-visit";
-import * as vscode from "vscode";
 import {
   Disposable,
   Event,
@@ -21,8 +17,8 @@ import {
 } from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
-import { VSCodeUtils } from "../../vsCodeUtils";
 import { ITextDocumentService } from "../ITextDocumentService";
+import { EditorUtils } from "../../utils/editor";
 
 /**
  * This service keeps client state note state synchronized with the engine
@@ -178,7 +174,7 @@ export class TextDocumentService implements ITextDocumentService {
       return;
     }
 
-    const maybePos = await this.getFrontmatterPosition(document);
+    const maybePos = await EditorUtils.getFrontmatterPosition({ document });
     let fmChangeOnly = false;
     if (!maybePos) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "no frontmatter found" });
@@ -278,25 +274,6 @@ export class TextDocumentService implements ITextDocumentService {
     }
     return true;
   }
-
-  private getFrontmatterPosition = (
-    document: vscode.TextDocument
-  ): Promise<vscode.Position | false> => {
-    return new Promise((resolve) => {
-      const proc = MDUtilsV5.procRemarkParseNoData(
-        {},
-        { dest: DendronASTDest.MD_DENDRON }
-      );
-      const parsed = proc.parse(document.getText());
-      visit(parsed, ["yaml"], (node) => {
-        if (_.isUndefined(node.position)) return resolve(false); // Should never happen
-        const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
-          line: 1,
-        });
-        resolve(position);
-      });
-    });
-  };
 
   // eslint-disable-next-line camelcase
   __DO_NOT_USE_IN_PROD_exposePropsForTesting() {

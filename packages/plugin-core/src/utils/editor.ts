@@ -1,5 +1,6 @@
 import {
   DECORATION_TYPES,
+  DendronError,
   DEngineClient,
   DNoteAnchorBasic,
   DVault,
@@ -22,6 +23,7 @@ import {
   UserTag,
   WikiLinkNoteV4,
 } from "@dendronhq/unified";
+import visit from "unist-util-visit";
 import _ from "lodash";
 import vscode, {
   Position,
@@ -279,6 +281,59 @@ export class EditorUtils {
       vaultName: reference.vaultName,
       anchorHeader: reference.anchorStart,
     };
+  }
+
+  /**
+   * Given a document, get the end position of the frontmatter
+   * if zeroIndex is true, the document's first line is 0
+   * otherwise, it is 1 (default)
+   */
+  static getFrontmatterPosition(opts: {
+    document: vscode.TextDocument;
+    zeroIndex?: boolean;
+  }): Promise<vscode.Position | false> {
+    const { document, zeroIndex } = opts;
+    return new Promise((resolve) => {
+      const proc = MDUtilsV5.procRemarkParseNoData(
+        {},
+        { dest: DendronASTDest.MD_DENDRON }
+      );
+      const parsed = proc.parse(document.getText());
+      visit(parsed, ["yaml"], (node) => {
+        if (_.isUndefined(node.position)) return resolve(false); // Should never happen
+        const offset = zeroIndex ? undefined : { line: 1 };
+        const position = VSCodeUtils.point2VSCodePosition(
+          node.position.end,
+          offset
+        );
+        resolve(position);
+      });
+    });
+  }
+
+  /**
+   * Given a text editor, determine if any of the selection
+   * contains part of the frontmatter.
+   * if given editor holds a document that doesn't have frontmatter,
+   * it will throw an error
+   */
+  static async selectionContainsFrontmatter(opts: {
+    editor: vscode.TextEditor;
+  }): Promise<boolean> {
+    const { editor } = opts;
+    const { document, selections } = editor;
+    const frontmatterEndPosition = await EditorUtils.getFrontmatterPosition({
+      document,
+      zeroIndex: true,
+    });
+    if (frontmatterEndPosition) {
+      return selections.some((selection) => {
+        const out = selection.start.compareTo(frontmatterEndPosition);
+        return out < 1;
+      });
+    } else {
+      throw new DendronError({ message: "Note a note." });
+    }
   }
 }
 

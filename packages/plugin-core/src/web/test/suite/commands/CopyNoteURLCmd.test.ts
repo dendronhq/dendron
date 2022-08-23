@@ -33,120 +33,143 @@ suite("GIVEN a CopyNoteURLCmd", () => {
   ];
   const foo = NoteUtils.create({ fname: "foo", vault: vault[0] });
   test("WHEN assetPrefix is provided, THEN link must have assetsPrefix", async () => {
-    sinon.stub(vscode.window, "activeTextEditor").returns("");
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
+
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
-    const fakeVault = sinon.fake.resolves(vault[0]);
-    sinon.replace(wsUtils, "getVaultFromDocument", fakeVault);
-    const fakeNote = sinon.fake.resolves([foo]);
-    sinon.replace(wsUtils, "getNoteFromDocument", fakeNote);
-
     const siteUtils = new SiteUtilsWeb(
       siteUrl,
       siteIndex,
       assetsPrefix,
       enablePrettyLinks
     );
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    console.log("link@@@@@@@@@@@@@@@1", link);
     assert(link?.startsWith("https://foo.com/testing/notes/"));
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
   });
 
   test("WHEN assetPrefix is not provided, THEN link must not have assetsPrefix", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-    sinon.stub(vscode.window, "activeTextEditor").returns("");
 
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ assetsPrefix: "" });
-    const fakeVault = sinon.fake.resolves(vault[0]);
-    sinon.replace(wsUtils, "getVaultFromDocument", fakeVault);
-    const fakeNote = sinon.fake.resolves([foo]);
-    sinon.replace(wsUtils, "getNoteFromDocument", fakeNote);
     const siteUtils = new SiteUtilsWeb(
       siteUrl,
       siteIndex,
       assetsPrefix,
       enablePrettyLinks
     );
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    console.log("link@@@@@@@@@@@@@@@2", link);
-
+    console.log("****************link************", link);
     assert(link?.startsWith("https://foo.com/notes/"));
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
   });
 
   test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-    sinon.stub(vscode.window, "activeTextEditor").returns("");
 
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ enablePrettyLinks: false });
-    const fakeVault = sinon.fake.resolves(vault[0]);
-    sinon.replace(wsUtils, "getVaultFromDocument", fakeVault);
-    const fakeNote = sinon.fake.resolves([foo]);
-    sinon.replace(wsUtils, "getNoteFromDocument", fakeNote);
     const siteUtils = new SiteUtilsWeb(
       siteUrl,
       siteIndex,
       assetsPrefix,
       enablePrettyLinks
     );
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    console.log("link@@@@@@@@@@@@@@@3", link);
+    console.log("****************link************", link);
 
     assert(link?.includes(".html"));
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
+  });
+
+  test("WHEN enablePrettylinks is set to false, THEN link must have .html", async () => {
+    const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
+
+    const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
+      getTestPublishingConfig({ enablePrettyLinks: false });
+    const siteUtils = new SiteUtilsWeb(
+      siteUrl,
+      siteIndex,
+      assetsPrefix,
+      enablePrettyLinks
+    );
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
+    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const link = await cmd.run();
+    console.log("****************link************", link);
+
+    assert(link?.includes(".html"));
+    vaultStub.restore();
+    NoteStub.restore();
   });
   test("WHEN enablePrettylinks is set to true, THEN link must not have .html", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-    sinon.stub(vscode.window, "activeTextEditor").returns("");
 
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({ enablePrettyLinks: true });
-    const fakeVault = sinon.fake.resolves(vault[0]);
-    sinon.replace(wsUtils, "getVaultFromDocument", fakeVault);
-    const fakeNote = sinon.fake.resolves([foo]);
-    sinon.replace(wsUtils, "getNoteFromDocument", fakeNote);
     const siteUtils = new SiteUtilsWeb(
       siteUrl,
       siteIndex,
       assetsPrefix,
       enablePrettyLinks
     );
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
     const link = await cmd.run();
-    console.log("link@@@@@@@@@@@@@@@4", link);
+    console.log("****************link************", link);
 
     assert.strictEqual(link?.indexOf(".html"), -1);
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
   });
   test("WHEN command is called on root note THEN note id should not be present", async () => {
     const wsUtils = new WSUtilsWeb(mockEngine, wsRoot, vault);
-    sinon.stub(vscode.window, "activeTextEditor").returns("");
 
     const { siteUrl, assetsPrefix, siteIndex, enablePrettyLinks } =
       getTestPublishingConfig({});
-    foo.fname = "root";
-
-    const fakeVault = sinon.fake.resolves(vault[0]);
-    sinon.replace(wsUtils, "getVaultFromDocument", fakeVault);
-    const fakeNote = sinon.fake.resolves([foo]);
-    sinon.replace(wsUtils, "getNoteFromDocument", fakeNote);
     const siteUtils = new SiteUtilsWeb(
       siteUrl,
       siteIndex,
       assetsPrefix,
       enablePrettyLinks
     );
+    foo.fname = "root";
+    const vaultStub = sinon
+      .stub(wsUtils, "getVaultFromDocument")
+      .returns(vault[0]);
+    const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
     const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+
     const link = await cmd.run();
+    console.log("****************link************", link);
+
     assert.strictEqual(link, "https://foo.com");
-    console.log("link@@@@@@@@@@@@@@@5", link);
-    sinon.restore();
+    vaultStub.restore();
+    NoteStub.restore();
   });
 });

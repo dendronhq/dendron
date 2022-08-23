@@ -20,6 +20,8 @@ export class CopyNoteURLCmd {
 
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
+      console.log("****************here************");
+
       return;
     }
     const vault = this.wsUtils.getVaultFromDocument(maybeTextEditor.document);

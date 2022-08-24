@@ -8,11 +8,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { findNonNoteFile, vault2Path } from "@dendronhq/common-server";
-import {
-  AnchorUtils,
-  DendronASTDest,
-  ProcFlavor,
-} from "@dendronhq/engine-server";
+import { AnchorUtils, DendronASTDest, ProcFlavor } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
 import _ from "lodash";

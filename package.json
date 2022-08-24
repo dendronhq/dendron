@@ -19,7 +19,8 @@
       "packages/nextjs-template",
       "packages/plugin-core",
       "packages/common-frontend",
-      "packages/dendron-plugin-views"
+      "packages/dendron-plugin-views",
+      "packages/unified"
     ],
     "nohoist": [
       "**/@types/mocha",

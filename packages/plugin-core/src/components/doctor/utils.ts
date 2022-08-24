@@ -1,13 +1,17 @@
 import {
+  DendronError,
   DuplicateNoteError,
   ErrorUtils,
+  NoteUtils,
   VaultUtils,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { DoctorActionsEnum } from "@dendronhq/engine-server";
+import path from "path";
 import * as vscode from "vscode";
 import { DoctorCommand } from "../../commands/Doctor";
+import { RenameNoteCommand } from "../../commands/RenameNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
@@ -119,5 +123,38 @@ export class DoctorUtils {
         });
       }
     }
+  }
+
+  static async validateFilenameFromDocumentAndPromptIfNecessary(
+    document: vscode.TextDocument
+  ) {
+    const extension = ExtensionProvider.getExtension();
+    const wsUtils = extension.wsUtils;
+    const filename = path.basename(document.fileName, ".md");
+    const note = wsUtils.getNoteFromDocument(document);
+
+    if (!note) return true;
+
+    const isValid = NoteUtils.validateFname(filename);
+
+    if (isValid) return true;
+
+    const error = new DendronError({
+      message: `"${filename}" is not a valid hierarchy. Please rename the note so that every hierarchy is non-empty and doesn't contain leading or trailing whitespaces`,
+    });
+    VSCodeUtils.showMessage(
+      MessageSeverity.WARN,
+      error.message,
+      {},
+      { title: "Rename note" }
+    ).then(async (resp) => {
+      if (resp && resp.title === "Rename note") {
+        await wsUtils.openNote(note);
+        const cmd = new RenameNoteCommand(extension);
+        await cmd.run();
+      }
+    });
+
+    return false;
   }
 }

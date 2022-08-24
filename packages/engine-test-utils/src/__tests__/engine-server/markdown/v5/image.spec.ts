@@ -1,5 +1,5 @@
 import { ConfigUtils } from "@dendronhq/common-all";
-import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
+import { DendronASTDest, ProcFlavor } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../..";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { checkNotInString, checkString } from "../../../../utils";

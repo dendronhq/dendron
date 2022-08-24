@@ -76,9 +76,14 @@ import _ from "lodash";
 import { EngineUtils } from ".";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
-import { AnchorUtils, LinkUtils, MDUtilsV5, ProcFlavor } from "./markdown";
-import { runAllDecorators } from "./markdown/decorations";
-import { RemarkUtils } from "./markdown/remark/utils";
+import {
+  AnchorUtils,
+  LinkUtils,
+  MDUtilsV5,
+  ProcFlavor,
+  runAllDecorators,
+  RemarkUtils,
+} from "@dendronhq/unified";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;

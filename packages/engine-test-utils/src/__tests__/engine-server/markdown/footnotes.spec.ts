@@ -3,7 +3,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTDest } from "@dendronhq/engine-server";
+import { DendronASTDest } from "@dendronhq/unified";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import { createProcForTest, createProcTests } from "./utils";

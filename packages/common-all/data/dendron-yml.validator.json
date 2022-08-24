@@ -652,7 +652,7 @@
           "type": "string",
           "enum": [
             "none",
-            "alias"
+            "title"
           ]
         }
       },

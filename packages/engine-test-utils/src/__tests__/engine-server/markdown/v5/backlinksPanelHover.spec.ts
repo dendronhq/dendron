@@ -1,6 +1,6 @@
 import { ProcFlavor } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { BacklinkOpts, DendronASTDest } from "@dendronhq/engine-server";
+import { BacklinkOpts, DendronASTDest } from "@dendronhq/unified";
 import { runEngineTestV5 } from "../../../../engine";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { createProcCompileTests, ProcTests } from "../utils";

@@ -1,7 +1,6 @@
-import { vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Link, Text } from "mdast";
-import path from "path";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import visit from "unist-util-visit";
@@ -9,6 +8,7 @@ import { VFile } from "vfile";
 import { AnchorUtils, RemarkUtils } from ".";
 import { DendronASTTypes, HashTag, UserTag, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
+import { URI, Utils } from "vscode-uri";
 
 type PluginOpts = {};
 
@@ -26,8 +26,11 @@ export function makeImageUrlFullPath({
   }
   // assume that the path is relative to vault
   const { wsRoot, vault } = MDUtilsV5.getProcData(proc);
-  const fpath = path.join(vault2Path({ wsRoot, vault }), decodeURI(node.url));
-  node.url = fpath;
+  const uri = Utils.joinPath(
+    vault2Path({ wsRoot: URI.file(wsRoot), vault }),
+    decodeURI(node.url)
+  );
+  node.url = uri.fsPath;
 }
 
 /**

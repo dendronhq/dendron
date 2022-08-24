@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/engine-test-utils",
   "private": true,
-  "version": "0.108.0",
+  "version": "0.109.0",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -47,14 +47,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.108.0",
-    "@dendronhq/common-all": "^0.108.0",
-    "@dendronhq/common-frontend": "^0.108.0",
-    "@dendronhq/common-server": "^0.108.0",
-    "@dendronhq/common-test-utils": "^0.108.0",
-    "@dendronhq/dendron-cli": "^0.108.0",
-    "@dendronhq/engine-server": "^0.108.0",
-    "@dendronhq/pods-core": "^0.108.0",
+    "@dendronhq/api-server": "^0.109.0",
+    "@dendronhq/common-all": "^0.109.0",
+    "@dendronhq/unified": "^0.109.0",
+    "@dendronhq/common-frontend": "^0.109.0",
+    "@dendronhq/common-server": "^0.109.0",
+    "@dendronhq/common-test-utils": "^0.109.0",
+    "@dendronhq/dendron-cli": "^0.109.0",
+    "@dendronhq/engine-server": "^0.109.0",
+    "@dendronhq/pods-core": "^0.109.0",
     "@reduxjs/toolkit": "^1.6.0",
     "@types/sinon": "^9.0.9",
     "cross-env": "^7.0.3",

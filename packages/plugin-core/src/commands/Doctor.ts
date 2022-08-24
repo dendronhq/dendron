@@ -14,7 +14,6 @@ import {
   DoctorService,
   DoctorActionsEnum,
   BackfillService,
-  RemarkUtils,
   DConfig,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -41,6 +40,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { KeybindingUtils } from "../KeybindingUtils";
 import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
 import { PodUIControls } from "../components/pods/PodControls";
+import { RemarkUtils } from "@dendronhq/unified";
 
 const md = _md();
 type Finding = {

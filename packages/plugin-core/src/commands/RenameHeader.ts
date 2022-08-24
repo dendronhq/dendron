@@ -12,10 +12,9 @@ import {
   AnchorUtils,
   DendronASTDest,
   DendronASTTypes,
-  Heading,
   MDUtilsV5,
   visit,
-} from "@dendronhq/engine-server";
+} from "@dendronhq/unified";
 import _ from "lodash";
 import { Range, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -27,6 +26,7 @@ import { BasicCommand } from "./base";
 import { WSUtils } from "../WSUtils";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { Heading } from "@dendronhq/engine-server";
 
 type CommandOpts =
   | {

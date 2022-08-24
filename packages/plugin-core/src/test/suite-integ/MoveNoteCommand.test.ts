@@ -37,7 +37,8 @@ const createEngine = createEngineFactory({
       oldLoc,
       newLoc,
     }) => {
-      const cmd = new MoveNoteCommand();
+      const extension = ExtensionProvider.getExtension();
+      const cmd = new MoveNoteCommand(extension);
       const vpathOld = vault2Path({
         vault: VaultUtils.getVaultByName({
           vaults: opts.vaults,
@@ -153,7 +154,8 @@ suite("MoveNoteCommand", function () {
           });
           await active.document.save();
 
-          const cmd = new MoveNoteCommand();
+          const extension = ExtensionProvider.getExtension();
+          const cmd = new MoveNoteCommand(extension);
           const resp = await cmd.execute({
             moves: [
               {
@@ -200,9 +202,9 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN update hashtags correctly", async () => {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
-        await WSUtils.openNote(tagNote);
-
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(tagNote);
+        const cmd = new MoveNoteCommand(extension);
         await cmd.execute({
           moves: [
             {
@@ -250,9 +252,9 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN  turns links to hashtags", async () => {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
-        await WSUtils.openNote(tagNote);
-
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(tagNote);
+        const cmd = new MoveNoteCommand(extension);
         await cmd.execute({
           moves: [
             {
@@ -300,9 +302,9 @@ suite("MoveNoteCommand", function () {
     () => {
       test("THEN turns hashtags into regular links", async () => {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
-        await WSUtils.openNote(tagNote);
-
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(tagNote);
+        const cmd = new MoveNoteCommand(extension);
         await cmd.execute({
           moves: [
             {
@@ -347,8 +349,9 @@ suite("MoveNoteCommand", function () {
           vault: vaultFrom,
           engine,
         }) as NoteProps;
-        await WSUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand(extension);
         await cmd.execute({
           moves: [
             {
@@ -420,7 +423,7 @@ suite("MoveNoteCommand", function () {
         });
 
         await ext.wsUtils.openNote(scratchNote);
-        const cmd = new MoveNoteCommand();
+        const cmd = new MoveNoteCommand(ext);
         await cmd.execute({
           moves: [
             {
@@ -465,8 +468,9 @@ suite("MoveNoteCommand", function () {
         const fooNote = (
           await engine.findNotes({ fname: "foo", vault: vault1 })
         )[0];
-        await WSUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand(extension);
         await cmd.execute({
           moves: [
             {
@@ -540,8 +544,9 @@ suite("MoveNoteCommand", function () {
           await engine.findNotes({ fname: "foo", vault: vault1 })
         )[0];
 
-        await WSUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand(extension);
 
         sinon
           .stub(VSCodeUtils, "showQuickPick")
@@ -630,8 +635,9 @@ suite("MoveNoteCommand", function () {
           await engine.findNotes({ fname: "foo", vault: vault1 })
         )[0];
 
-        await WSUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
+        const extension = ExtensionProvider.getExtension();
+        await extension.wsUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand(extension);
 
         sinon
           .stub(VSCodeUtils, "showQuickPick")

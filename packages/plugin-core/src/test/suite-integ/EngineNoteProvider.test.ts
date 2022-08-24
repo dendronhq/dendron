@@ -215,8 +215,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const children = await provider.getChildren(vault1RootProps);
             expect(children?.map((child) => child.title)).toEqual([
               "Zebra", // nav_order: 1
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
+              "_underscore", // underscore comes first
+              "Aardvark",
               "aaron",
             ]);
           });
@@ -248,8 +248,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const children = await provider.getChildren(vault1RootProps);
             expect(children?.map((child) => child.title)).toEqual([
               "Zebra", // nav_order: 1
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
+              "_underscore", // underscore comes before alphabets
+              "Aardvark",
               "aaron",
             ]);
           });
@@ -378,8 +378,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const children = await provider.getChildren(vault1RootProps);
             expect(children?.map((child) => child.title)).toEqual([
               "Zebra", // nav_order: 1
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
+              "_underscore", // underscore comes before alphabets
+              "Aardvark",
               "aaron",
               "Tags", // tags come last.
             ]);
@@ -422,8 +422,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             expect(children?.map((child) => child.title)).toEqual([
               "Zebra", // nav_order: 1
               "Tags", // nav_order respected
-              "Aardvark", // uppercase alphabets comes before underscore alphabets
-              "_underscore", // underscore comes before lowercase alphabets
+              "_underscore", // underscore comes before alphabets
+              "Aardvark",
               "aaron",
             ]);
           });

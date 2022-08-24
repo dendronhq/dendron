@@ -16,7 +16,6 @@ import { AnchorUtils } from "../remark";
 import _ from "lodash";
 import { WikiLinkNoteV4 } from "../types";
 import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
-import { findNonNoteFile } from "@dendronhq/common-server";
 import { isBeginBlockAnchorId, isEndBlockAnchorId } from "../remark/noteRefsV2";
 
 export type DecorationWikilink = Decoration & {
@@ -181,14 +180,16 @@ export async function linkedNoteType({
   // It's hard to check the anchors for non-note files because we don't parse
   // them ahead of time. If we can find the file, just say the link is good
   // without checking anchors.
-  if (fname && matchingNotes.length === 0) {
-    const nonNoteFile = await findNonNoteFile({
-      fpath: fname,
-      vaults: engine.vaults,
-      wsRoot: engine.wsRoot,
-    });
-    if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
-  }
+  // TODO: Re-enable check once we can refactor out common-server dependency:
+  // if (fname && matchingNotes.length === 0) {
+  // const nonNoteFile = await findNonNoteFile({
+  //   fpath: fname,
+  //   vaults: engine.vaults,
+  //   wsRoot: engine.wsRoot,
+  // });
+  // if (nonNoteFile) return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  // return { type: DECORATION_TYPES.wikiLink, errors: [] };
+  // }
 
   // For regular notes, we can efficiently check the anchors.
   if (anchorStart || anchorEnd) {

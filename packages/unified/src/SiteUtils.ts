@@ -535,6 +535,7 @@ export class SiteUtils {
           vname,
           vaults: engine.vaults,
         });
+        debugger;
         const maybeNote = NoteUtils.getNoteByFnameFromEngine({
           fname,
           engine,

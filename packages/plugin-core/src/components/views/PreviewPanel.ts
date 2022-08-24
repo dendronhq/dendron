@@ -27,12 +27,12 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
-import { ITextDocumentService } from "../../services/TextDocumentService";
+import { ITextDocumentService } from "../../services/ITextDocumentService";
 import { sentryReportingCallback } from "../../utils/analytics";
 import { WebViewUtils } from "../../views/utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtilsV2 } from "../../WSUtilsV2";
-import { IPreviewLinkHandler } from "./PreviewLinkHandler";
+import { IPreviewLinkHandler } from "./IPreviewLinkHandler";
 import { PreviewProxy } from "./PreviewProxy";
 
 /**

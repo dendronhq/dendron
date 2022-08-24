@@ -3,7 +3,7 @@ import _ from "lodash";
 import sinon from "sinon";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
-import { Utils } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
@@ -35,7 +35,9 @@ suite(
   () => {
     test("WHEN command(s) are constructed THEN valid objects are returned without exceptions", async () => {
       await setupEnvironment();
-      await setupWebExtContainer();
+      await setupWebExtContainer({
+        extensionUri: URI.parse("dummy"), // TODO: Fix
+      } as vscode.ExtensionContext);
 
       try {
         const cmd = container.resolve(NoteLookupCmd);

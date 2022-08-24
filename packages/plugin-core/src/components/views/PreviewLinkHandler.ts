@@ -22,7 +22,7 @@ import { PluginFileUtils } from "../../utils/files";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ExtensionUtils } from "../../utils/ExtensionUtils";
-import { IPreviewLinkHandler } from "./IPreviewLinkHandler";
+import { IPreviewLinkHandler, LinkType } from "./IPreviewLinkHandler";
 
 /**
  * Default implementation for handling link clicks in preview

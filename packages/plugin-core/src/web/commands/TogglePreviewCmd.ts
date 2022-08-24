@@ -25,6 +25,7 @@ export class TogglePreviewCmd {
     @inject("wsRoot") private wsRoot: URI, // This will be needed later for openFile functionality, don't remove yet.
     private wsUtils: WSUtilsWeb
   ) {
+    console.log(this.wsRoot); // TODO: Remove
     this._panel = previewPanel;
   }
 

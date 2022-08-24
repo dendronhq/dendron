@@ -118,6 +118,7 @@ function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
   }
 
   // The note that contains this reference might override the pretty refs option for references inside it.
+  debugger;
   const containingNote = NoteUtils.getNoteByFnameFromEngine({
     fname,
     vault,

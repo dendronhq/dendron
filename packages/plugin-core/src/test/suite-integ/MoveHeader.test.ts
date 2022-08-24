@@ -15,10 +15,10 @@ import vscode from "vscode";
 import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
-import { WSUtils } from "../../WSUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
 import sinon from "sinon";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -71,7 +71,8 @@ suite("MoveHeader", function () {
       beforeEach(() => {
         onInitFunc = (nextFunc: Function) => {
           return async () => {
-            const editor = await WSUtils.openNote(originNote);
+            const ext = ExtensionProvider.getExtension();
+            const editor = await new WSUtilsV2(ext).openNote(originNote);
             editor.selection = new vscode.Selection(7, 0, 7, 0);
             nextFunc();
           };
@@ -297,7 +298,8 @@ suite("MoveHeader", function () {
     describe("WHEN header is not select", () => {
       const onInitFunc = (nextFunc: Function) => {
         return async () => {
-          const editor = await WSUtils.openNote(originNote);
+          const ext = ExtensionProvider.getExtension();
+          const editor = await new WSUtilsV2(ext).openNote(originNote);
           editor.selection = new vscode.Selection(8, 0, 8, 0);
           nextFunc();
         };

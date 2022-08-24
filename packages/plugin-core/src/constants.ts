@@ -336,6 +336,12 @@ export const DENDRON_MENUS = {
       group: "1_open",
     },
   ],
+  "view/item/context": [
+    {
+      command: "dendron.delete",
+      when: "view == dendron.treeView && viewItem == note",
+    },
+  ],
 };
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {

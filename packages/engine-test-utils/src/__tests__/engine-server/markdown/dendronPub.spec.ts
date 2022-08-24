@@ -15,7 +15,7 @@ import {
   ProcFlavor,
   ProcMode,
   VFile,
-} from "@dendronhq/engine-server";
+} from "@dendronhq/unified";
 import _ from "lodash";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5, testWithEngine } from "../../../engine";

@@ -9,7 +9,7 @@ import {
   TransformedQueryString,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { LinkUtils } from "@dendronhq/engine-server";
+import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
 import { ExtensionProvider } from "../../ExtensionProvider";

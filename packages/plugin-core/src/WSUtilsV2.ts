@@ -16,7 +16,8 @@ import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { isInsidePath, vault2Path } from "@dendronhq/common-server";
-import { AnchorUtils, WorkspaceUtils } from "@dendronhq/engine-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { AnchorUtils } from "@dendronhq/unified";
 
 let WS_UTILS: IWSUtilsV2 | undefined;
 

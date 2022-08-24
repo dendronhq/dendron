@@ -8,8 +8,8 @@ import {
 import { FrontmatterContent } from "mdast";
 import { decorateTag, DecorationHashTag } from "./hashTags";
 import { Decoration, DECORATION_TYPES, Decorator } from "./utils";
-import { getFrontmatterTags, parseFrontmatter } from "@dendronhq/common-server";
 import _ from "lodash";
+import { getFrontmatterTags, parseFrontmatter } from "../yaml";
 
 export type DecorationTimestamp = Decoration & {
   type: DECORATION_TYPES.timestamp;

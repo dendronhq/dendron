@@ -1,6 +1,6 @@
 import { NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, ProcFlavor } from "@dendronhq/engine-server";
+import { DendronASTDest, ProcFlavor } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../../config";
 import { ENGINE_HOOKS } from "../../../../presets";
 import { checkNotInVFile, checkVFile, createProcCompileTests } from "../utils";

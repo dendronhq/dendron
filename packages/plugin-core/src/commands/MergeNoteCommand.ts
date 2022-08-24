@@ -7,7 +7,7 @@ import {
   StatisticsUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { HistoryEvent, LinkUtils } from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
 import {
   CreateQuickPickOpts,
   ILookupControllerV3,
@@ -25,6 +25,7 @@ import * as vscode from "vscode";
 import _ from "lodash";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { LinkUtils } from "@dendronhq/unified";
 
 type CommandInput = {
   source?: string;

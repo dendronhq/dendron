@@ -12,6 +12,9 @@
       "@dendronhq/common-all": [
         "packages/common-all/src"
       ],
+      "@dendronhq/unified": [
+        "packages/unified/src"
+      ],
       "@dendronhq/common-server": [
         "packages/common-server/src"
       ],

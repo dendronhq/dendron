@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.109.0",
+    "@dendronhq/unified": "^0.109.0",
     "@dendronhq/common-server": "^0.109.0",
     "@dendronhq/remark-mermaid": "^0.3.0",
     "@jcoreio/async-throttle": "^1.4.3",

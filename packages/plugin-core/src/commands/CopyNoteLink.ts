@@ -10,7 +10,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { isInsidePath } from "@dendronhq/common-server";
-import { AnchorUtils } from "@dendronhq/engine-server";
+import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
 import { Disposable, TextEditor, window } from "vscode";

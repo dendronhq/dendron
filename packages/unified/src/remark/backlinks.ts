@@ -5,7 +5,7 @@ import { list, listItem, paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
-import { SiteUtils } from "../../topics/site";
+import { SiteUtils } from "../SiteUtils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 

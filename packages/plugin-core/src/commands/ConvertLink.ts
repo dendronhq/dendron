@@ -5,11 +5,8 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  HistoryEvent,
-  LinkUtils,
-  ParseLinkV2Resp,
-} from "@dendronhq/engine-server";
+import { HistoryEvent } from "@dendronhq/engine-server";
+import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/unified";
 import _ from "lodash";
 import { QuickPickItem, Range, TextEditor } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";

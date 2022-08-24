@@ -6,9 +6,9 @@ import {
 import { Element } from "hast";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { MDUtilsV5 } from "../../markdown";
-import { SiteUtils } from "../../topics/site";
+import { SiteUtils } from "../SiteUtils";
 import { DendronASTDest, DendronASTTypes, HashTag } from "../types";
+import { MDUtilsV5 } from "../utilsv5";
 import { PUNCTUATION_MARKS } from "./hashtag";
 
 /** Can have period in the middle */

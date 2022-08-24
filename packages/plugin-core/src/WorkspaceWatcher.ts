@@ -10,7 +10,8 @@ import {
   Wrap,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
-import { RemarkUtils, WorkspaceUtils } from "@dendronhq/engine-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
+import { RemarkUtils } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import path from "path";

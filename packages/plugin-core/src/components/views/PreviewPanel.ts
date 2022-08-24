@@ -14,14 +14,14 @@ import {
   DendronError,
   ConfigUtils,
 } from "@dendronhq/common-all";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import {
   DendronASTTypes,
-  makeImageUrlFullPath,
   Image,
+  makeImageUrlFullPath,
   MDUtilsV5,
   visit,
-  WorkspaceUtils,
-} from "@dendronhq/engine-server";
+} from "@dendronhq/unified";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";

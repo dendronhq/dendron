@@ -16,7 +16,7 @@ import {
   isDecorationHashTag,
   DecorationWikilink,
   DecorationTaskNote,
-} from "@dendronhq/engine-server";
+} from "@dendronhq/unified";
 import _ from "lodash";
 import {
   DecorationOptions,

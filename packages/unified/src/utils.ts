@@ -1,10 +1,11 @@
 /* eslint-disable no-plusplus */
 import {
-  ConfigUtils, FIFOQueue,
+  ConfigUtils,
+  FIFOQueue,
   getSlugger,
   getStage,
   IntermediateDendronConfig,
-  NoteProps
+  NoteProps,
 } from "@dendronhq/common-all";
 // @ts-ignore
 // @ts-ignore
@@ -17,12 +18,9 @@ import path from "path";
 // @ts-ignore
 // eslint-disable-next-line import/no-named-default
 import { Node, Parent } from "unist";
-import { normalizev2 } from "../utils";
+// import { normalizev2 } from "../utils";
 import { RemarkUtils } from "./remark";
-import {
-  DendronASTNode,
-  DendronASTTypes
-} from "./types";
+import { DendronASTNode, DendronASTTypes } from "./types";
 
 const toString = require("mdast-util-to-string");
 
@@ -53,6 +51,19 @@ export type FindHeaderAnchor = {
   node?: Heading;
   anchorType?: "header";
 };
+
+/**
+ * Borrowed from engine-server utils.ts
+ * Details:
+ * - trim white space, remove `#`, handle `*` and slug
+ */
+function normalizev2(text: string, slugger: ReturnType<typeof getSlugger>) {
+  const u = _.trim(text, " #");
+  if (u === "*") {
+    return u;
+  }
+  return slugger.slug(u);
+}
 
 /** Contains functions that help dealing with MarkDown Abstract Syntax Trees. */
 export class MdastUtils {

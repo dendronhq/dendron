@@ -19,9 +19,7 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
-  ErrorUtils,
 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
@@ -29,8 +27,8 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { MdastUtils } from "..";
-import { SiteUtils } from "../../topics/site";
 import { RemarkUtils } from "../remark";
+import { SiteUtils } from "../SiteUtils";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -414,11 +412,19 @@ export function convertNoteRefASTV2(
       });
       let note: NoteProps;
       try {
-        const resp = file2Note(npath, vault as DVault);
-        if (ErrorUtils.isErrorResp(resp)) {
-          throw resp.error;
+        // TODO: Get rid of these legacy engine.noteFnames, engine.notes references
+        const noteIds = engine.noteFnames[fname];
+
+        const noteCandidates = noteIds
+          .map((id) => engine.notes[id])
+          .filter((props) => VaultUtils.isEqualV2(props.vault, vault));
+
+        if (noteCandidates.length !== 1) {
+          throw new DendronError({
+            message: `Unable to find note with fname ${fname} and vault ${vault.fsPath} for note reference`,
+          });
         }
-        note = resp.data;
+        note = noteCandidates[0];
       } catch (err) {
         const msg = `error reading file, ${npath}`;
         return MdastUtils.genMDMsg(msg);

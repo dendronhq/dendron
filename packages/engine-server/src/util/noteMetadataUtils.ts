@@ -9,7 +9,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
-import { LinkUtils } from "../markdown";
+import { LinkUtils } from "@dendronhq/unified";
 
 export type NoteMetadataValidationProps = {
   /**

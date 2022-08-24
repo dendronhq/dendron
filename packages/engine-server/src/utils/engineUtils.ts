@@ -13,7 +13,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { AnchorUtils, LinkUtils } from "../markdown";
+import { AnchorUtils, LinkUtils } from "@dendronhq/unified";
 
 export function openPortFile({ fpath }: { fpath: string }): number {
   return _.toInteger(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));

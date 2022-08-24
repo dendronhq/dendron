@@ -553,6 +553,7 @@ export class LinkUtils {
         : undefined;
 
       if (vault) {
+        debugger;
         const note = NoteUtils.getNoteByFnameFromEngine({
           fname,
           engine,

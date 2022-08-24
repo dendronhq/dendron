@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
+  NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -141,12 +142,18 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       addFootnotes();
       return;
     }
-    const { engine } = MDUtilsV5.getProcData(proc);
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      engine,
-      vault: vault!,
-    });
+    const { engine, noteToRender } = MDUtilsV5.getProcData(proc);
+    // debugger;
+    let note: NoteProps | undefined;
+    if (engine) {
+      note = NoteUtils.getNoteByFnameFromEngine({
+        fname,
+        engine,
+        vault: vault!,
+      });
+    } else {
+      note = noteToRender;
+    }
 
     // check if v5 is active
     if (MDUtilsV5.isV5Active(proc)) {

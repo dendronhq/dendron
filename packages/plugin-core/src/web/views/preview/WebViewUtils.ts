@@ -1,8 +1,8 @@
 import {
   APIUtils,
-  CONSTANTS,
+  // CONSTANTS,
   DendronEditorViewKey,
-  DendronError,
+  // DendronError,
   DendronTreeViewKey,
   DUtils,
   getStage,
@@ -15,7 +15,7 @@ import {
 //   WebViewCommonUtils,
 //   WebViewThemeMap,
 // } from "@dendronhq/common-server";
-import path from "path";
+// import path from "path";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
@@ -131,10 +131,10 @@ export class WebViewUtils {
     const themes = ["light", "dark"];
     const themeMap: { [key: string]: string } = {};
 
-    const customThemePath = Utils.joinPath(
-      this.wsRoot,
-      CONSTANTS.CUSTOM_THEME_CSS
-    );
+    // const customThemePath = Utils.joinPath(
+    //   this.wsRoot,
+    //   CONSTANTS.CUSTOM_THEME_CSS
+    // );
     // TODO: Add back functionality
     // if (await fs.pathExists(customThemePath)) {
     //   themeMap["custom"] = panel.webview

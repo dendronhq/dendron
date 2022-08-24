@@ -207,6 +207,7 @@ function attachParser(proc: Unified.Processor) {
       out.alias === out.value &&
       vault
     ) {
+      debugger;
       const note = NoteUtils.getNoteByFnameFromEngine({
         fname: out.value,
         engine,

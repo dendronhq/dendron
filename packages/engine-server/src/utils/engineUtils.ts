@@ -14,6 +14,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { AnchorUtils, LinkUtils } from "@dendronhq/unified";
+import { DConfig } from "../config";
 
 export function openPortFile({ fpath }: { fpath: string }): number {
   return _.toInteger(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));
@@ -101,8 +102,9 @@ export class EngineUtils {
     fmChangeOnly?: boolean;
     silent?: boolean;
   }): void {
+    const config = DConfig.readConfigSync(engine.wsRoot);
     const maxNoteLength = Math.min(
-      ConfigUtils.getWorkspace(engine.config).maxNoteLength,
+      ConfigUtils.getWorkspace(config).maxNoteLength,
       CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
     );
     if (note.body.length > maxNoteLength) {
@@ -133,7 +135,7 @@ export class EngineUtils {
 
       note.anchors = anchors;
 
-      const devConfig = ConfigUtils.getProp(engine.config, "dev");
+      const devConfig = ConfigUtils.getProp(config, "dev");
       const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
       if (linkCandidatesEnabled) {
         const linkCandidates = LinkUtils.findLinks({

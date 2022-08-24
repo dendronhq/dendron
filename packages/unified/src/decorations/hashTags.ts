@@ -4,6 +4,7 @@ import {
   Position,
   position2VSCodeRange,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import { HashTag } from "../types";
 import { Decorator } from "./utils";
 import { DecorationWikilink, linkedNoteType } from "./wikilinks";
@@ -46,7 +47,10 @@ export async function decorateTag({
     fname,
     engine,
   });
-  if (colorType === "configured" || !engine.config.noRandomlyColoredTags) {
+  if (
+    colorType === "configured" ||
+    !DConfig.readConfigSync(engine.wsRoot).noRandomlyColoredTags
+  ) {
     color = foundColor;
   }
 

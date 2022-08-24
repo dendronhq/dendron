@@ -44,6 +44,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
+import { DConfig } from "@dendronhq/engine-server";
 
 export { ProcFlavor };
 
@@ -170,7 +171,7 @@ export class MDUtilsV5 {
   }
 
   static getProcData(proc: Processor): ProcDataFullV5 {
-    let _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
+    const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
     return _data || {};
   }
 
@@ -265,7 +266,7 @@ export class MDUtilsV5 {
             });
           }
           if (!data.config) {
-            data.config = data.engine!.config;
+            data.config = DConfig.readConfigSync(data.engine!.wsRoot);
           }
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
@@ -363,7 +364,7 @@ export class MDUtilsV5 {
           });
         }
         if (!data.config) {
-          data.config = data.engine!.config;
+          data.config = DConfig.readConfigSync(data.engine!.wsRoot);
         }
         if (!data.wsRoot) {
           data.wsRoot = data.engine!.wsRoot;
@@ -408,7 +409,7 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = data?.engine?.config as IntermediateDendronConfig;
+    const config = DConfig.readConfigSync(data?.engine?.wsRoot as string);
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
     if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {

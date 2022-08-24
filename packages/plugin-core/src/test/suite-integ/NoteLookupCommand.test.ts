@@ -21,7 +21,11 @@ import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
-import { HistoryService, MetadataService } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  HistoryService,
+  MetadataService,
+} from "@dendronhq/engine-server";
 import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
@@ -1452,7 +1456,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, wsRoot, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1462,7 +1466,9 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+          const dateFormat = ConfigUtils.getJournal(
+            DConfig.readConfigSync(wsRoot)
+          ).dateFormat;
           expect(dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(dateFormat);
@@ -1584,7 +1590,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, wsRoot, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1595,7 +1601,9 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+          const dateFormat = ConfigUtils.getJournal(
+            DConfig.readConfigSync(wsRoot)
+          ).dateFormat;
           expect(dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(dateFormat);
@@ -2171,7 +2179,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, wsRoot, engine }) => {
           const { controller, cmd } = await prepareCommandFunc({
             vaults,
             engine,
@@ -2188,7 +2196,9 @@ suite("NoteLookupCommand", function () {
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
-          const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+          const dateFormat = ConfigUtils.getJournal(
+            DConfig.readConfigSync(wsRoot)
+          ).dateFormat;
           const today = Time.now().toFormat(dateFormat);
           expect(controller.quickPick.value).toEqual(
             `foo.journal.${today}.foo-body`
@@ -2335,14 +2345,16 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ vaults, engine }) => {
+          onInit: async ({ vaults, wsRoot, engine }) => {
             const { selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
               noteType: LookupNoteTypeEnum.journal,
             });
 
-            const dateFormat = ConfigUtils.getJournal(engine.config).dateFormat;
+            const dateFormat = ConfigUtils.getJournal(
+              DConfig.readConfigSync(wsRoot)
+            ).dateFormat;
             const today = Time.now().toFormat(dateFormat);
             const newNote = (
               await engine.findNotes({

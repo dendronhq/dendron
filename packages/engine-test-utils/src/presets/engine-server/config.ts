@@ -1,6 +1,7 @@
 import { CONSTANTS, ConfigUtils } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import path from "path";
 
 function genDefaultConfig() {
@@ -8,17 +9,13 @@ function genDefaultConfig() {
 }
 
 const WRITE = {
-  NEW_CONFIG: new TestPresetEntryV4(async ({ engine }) => {
+  NEW_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
     const config = genDefaultConfig();
     ConfigUtils.setPublishProp(config, "copyAssets", false);
-    const resp = await engine.writeConfig({ config });
-    const cpath = path.join(engine.configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+    await DConfig.writeConfig({ wsRoot, config });
+    const cpath = path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
     const configOnFile = readYAML(cpath);
     return [
-      {
-        actual: resp.error,
-        expected: null,
-      },
       {
         actual: configOnFile,
         expected: config,
@@ -28,17 +25,13 @@ const WRITE = {
 };
 
 const GET = {
-  DEFAULT_CONFIG: new TestPresetEntryV4(async ({ engine }) => {
-    const cpath = path.join(engine.configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  DEFAULT_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
+    const cpath = path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
     writeYAML(cpath, genDefaultConfig());
-    const resp = await engine.getConfig();
+    const config = DConfig.readConfigSync(wsRoot);
     return [
       {
-        actual: resp.error,
-        expected: null,
-      },
-      {
-        actual: resp.data,
+        actual: config,
         expected: genDefaultConfig(),
       },
     ];

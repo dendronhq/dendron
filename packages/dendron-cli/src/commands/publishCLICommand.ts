@@ -7,7 +7,7 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { DConfig, SiteUtils } from "@dendronhq/engine-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,
@@ -265,7 +265,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     opts.config.overrides = overrides || {};
 
     // if no siteUrl set, override with localhost
-    const config = opts.engine.config;
+    const config = DConfig.readConfigSync(opts.engine.wsRoot);
     const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (stage !== "prod") {
       if (!publishingConfig.siteUrl && !overrides?.siteUrl) {

@@ -1,4 +1,5 @@
 import { ConfigUtils } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
@@ -58,8 +59,8 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       convertUserNotesToLinks = false,
       enablePrettyRefs = true,
     } = config;
-    const { data: econfig } = await engine.getConfig();
-    const overrideConfig = { ...econfig! };
+    const econfig = DConfig.readConfigSync(engine.wsRoot);
+    const overrideConfig = { ...econfig };
 
     const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;

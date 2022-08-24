@@ -177,7 +177,7 @@ describe("WorkspaceService", () => {
 
     test("remote self contained vaults present", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           // Create a self contained vault that we can add to this workspace
           const tmp = tmpDir().name;
           const vaultName = "test";
@@ -197,7 +197,7 @@ describe("WorkspaceService", () => {
           );
           await GitTestUtils.addRepoToWorkspace(tmp);
           // Add the created self contained vault into the workspace config without actually cloning the folder
-          const config = engine.config;
+          const config = DConfig.readConfigSync(wsRoot);
           config.workspace.vaults?.push({
             fsPath: vaultFsPath,
             name: vaultName,
@@ -206,7 +206,7 @@ describe("WorkspaceService", () => {
               url: tmp,
             },
           });
-          await engine.writeConfig({ config });
+          await DConfig.writeConfig({ wsRoot, config });
 
           // Run the workspace initialization, workspace service should discover the missing vault and clone it
           const wsService = new WorkspaceService({ wsRoot });
@@ -257,11 +257,12 @@ describe("WorkspaceService", () => {
 
     testWithEngine(
       "remoteVaults present, no enableRemoteVaultInit",
-      async ({ wsRoot, engine }) => {
+      async ({ wsRoot }) => {
         const root = tmpDir().name;
         await GitTestUtils.createRepoWithReadme(root);
+        const config = DConfig.readConfigSync(wsRoot);
 
-        const vaultsConfig = ConfigUtils.getVaults(engine.config);
+        const vaultsConfig = ConfigUtils.getVaults(config);
 
         vaultsConfig.push({
           fsPath: "remoteVault",
@@ -270,13 +271,9 @@ describe("WorkspaceService", () => {
             url: root,
           },
         });
-        ConfigUtils.setVaults(engine.config, vaultsConfig);
-        ConfigUtils.setWorkspaceProp(
-          engine.config,
-          "enableRemoteVaultInit",
-          false
-        );
-        DConfig.writeConfig({ wsRoot, config: engine.config });
+        ConfigUtils.setVaults(config, vaultsConfig);
+        ConfigUtils.setWorkspaceProp(config, "enableRemoteVaultInit", false);
+        DConfig.writeConfig({ wsRoot, config });
         const ws = new WorkspaceService({ wsRoot });
         const didClone = await ws.initialize({
           onSyncVaultsProgress: () => {},

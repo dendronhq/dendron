@@ -379,17 +379,9 @@ export type RenderNoteOpts = {
   flavor?: ProcFlavor;
 };
 
-export type RefreshNotesOpts = {
-  notes: NoteChangeEntry[];
-};
-
 export type GetNoteBlocksOpts = {
   id: string;
   filterByAnchorType?: "header" | "block";
-};
-
-export type ConfigWriteOpts = {
-  config: IntermediateDendronConfig;
 };
 
 export type GetDecorationsOpts = {
@@ -425,13 +417,7 @@ export type DCommonProps = {
    */
   schemas: SchemaModuleDict;
   wsRoot: string;
-  /**
-   * NOTE: currently same as wsRoot. in the future, the two will be decoupled
-   */
-  configRoot: string;
   vaults: DVault[];
-  links: DLink[];
-  config: IntermediateDendronConfig;
 };
 
 export type NoteChangeUpdateEntry = {
@@ -467,14 +453,10 @@ export type BulkWriteNoteResp = BulkResp<NoteChangeEntry[]>;
 export type UpdateNoteResp = RespV2<NoteChangeEntry[]>;
 
 // --- Common
-export type ConfigGetPayload = IntermediateDendronConfig;
-
 export type DCommonMethods = {
   bulkWriteNotes: (
     opts: BulkWriteNotesOpts
   ) => Promise<BulkResp<NoteChangeEntry[]>>;
-  // TODO
-  // configGet(): RespV2<ConfigGetPayload>
   /**
    * @deprecated: Use {@link DEngine.writeNote}
    * @param note
@@ -593,10 +575,6 @@ export type QueryNotesOpts = {
 
 export type DEngineInitSchemaResp = Required<RespV2<SchemaModuleProps[]>>;
 
-export type DEngineSyncOpts = {
-  metaOnly?: boolean;
-};
-
 export type BulkWriteNotesOpts = {
   notes: NoteProps[];
   // If true, skips updating metadata
@@ -635,7 +613,6 @@ export type DEngine = DCommonProps &
       opts?: EngineDeleteOpts
     ) => Promise<DEngineDeleteSchemaResp>;
     info: () => Promise<RespV2<EngineInfoResp>>;
-    sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
     getSchema: (id: string) => Promise<RespV3<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
@@ -656,17 +633,7 @@ export type DEngine = DCommonProps &
      */
     renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
     renderNote: (opts: RenderNoteOpts) => Promise<RespV2<RenderNotePayload>>;
-    /**
-     * Update note metadata.
-     * Use cases:
-     * - update notes if they've been changed outside of Dendron
-     */
-    refreshNotes: (opts: RefreshNotesOpts) => Promise<RespV2<void>>;
     getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
-
-    // config
-    writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
-    getConfig: () => Promise<RespV2<ConfigGetPayload>>;
 
     // ui offloading
     /** Make sure to call this with plain VSRange and not vscode.Range objects, which can't make it across to the API */
@@ -733,7 +700,6 @@ export type DEngineV4Methods = {
     id: string,
     opts?: EngineDeleteOpts
   ) => Promise<DEngineDeleteSchemaResp>;
-  sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
   getSchema: (qs: string) => Promise<RespV3<SchemaModuleProps>>;
   querySchema: (qs: string) => Promise<SchemaQueryResp>;
@@ -741,10 +707,6 @@ export type DEngineV4Methods = {
   queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
   renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
   getNoteBlocks: (opts: GetNoteBlocksOpts) => Promise<GetNoteBlocksPayload>;
-
-  // config
-  writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
-  getConfig: () => Promise<RespV2<ConfigGetPayload>>;
 
   // ui offloading
   getDecorations: (opts: GetDecorationsOpts) => Promise<GetDecorationsPayload>;

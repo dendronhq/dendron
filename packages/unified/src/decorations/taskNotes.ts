@@ -6,6 +6,7 @@ import {
   VSRange,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { DConfig } from "@dendronhq/engine-server";
 import { Decoration, DECORATION_TYPES } from "./utils";
 
 export type DecorationTaskNote = Decoration & {
@@ -26,7 +27,8 @@ export async function decorateTaskNote({
   fname: string;
   vaultName?: string;
 }) {
-  const { vaults, config } = engine;
+  const { vaults, wsRoot } = engine;
+  const config = DConfig.readConfigSync(wsRoot);
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })

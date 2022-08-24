@@ -5,6 +5,7 @@ import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import {
   MarkdownExportPod,
   MarkdownImportPod,
@@ -262,8 +263,8 @@ describe("markdown publish pod", () => {
           },
         });
         const seedId = TestSeedUtils.defaultSeedId();
-        engine.config = TestConfigUtils.getConfig({ wsRoot });
-        const vaultsConfig = ConfigUtils.getVaults(engine.config);
+        const config = DConfig.readConfigSync(wsRoot);
+        const vaultsConfig = ConfigUtils.getVaults(config);
         engine.vaults = vaultsConfig;
         const vault = VaultUtils.getVaultByName({
           vaults: engine.vaults,
@@ -287,7 +288,7 @@ describe("markdown publish pod", () => {
           engine,
           vaults,
           wsRoot,
-          dendronConfig: engine.config,
+          dendronConfig: config,
           config: {
             fname: "parent",
             vaultName: seedId,
@@ -706,7 +707,6 @@ describe("markdown export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,
@@ -754,7 +754,6 @@ describe("markdown export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,
@@ -806,7 +805,6 @@ describe("markdown export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,

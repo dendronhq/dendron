@@ -20,7 +20,7 @@ import {
   TreeUtils,
 } from "@dendronhq/common-all";
 import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
-import { execa, SiteUtils } from "@dendronhq/engine-server";
+import { DConfig, execa, SiteUtils } from "@dendronhq/engine-server";
 import { MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -471,6 +471,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const config = resp.data!;
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
+    const config = DConfig.readConfigSync(wsRoot);
 
     const siteConfig = getSiteConfig({
       config,

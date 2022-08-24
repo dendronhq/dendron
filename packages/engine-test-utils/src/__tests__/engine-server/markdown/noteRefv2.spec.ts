@@ -12,6 +12,7 @@ import {
   PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
@@ -511,9 +512,9 @@ describe("noteRefV2", () => {
     const WITH_FM_TITLE = createProcTests({
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, wsRoot, vaults } = opts;
         const configOverride: IntermediateDendronConfig = {
-          ...opts.engine.config,
+          ...DConfig.readConfigSync(wsRoot),
           useFMTitle: true,
         };
         return processTextV2({
@@ -532,9 +533,9 @@ describe("noteRefV2", () => {
     const WITH_NOTE_LINK_TITLE = createProcTests({
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, wsRoot, vaults } = opts;
         const configOverride: IntermediateDendronConfig = {
-          ...opts.engine.config,
+          ...DConfig.readConfigSync(wsRoot),
           useNoteTitleForLink: true,
         };
         return processTextV2({

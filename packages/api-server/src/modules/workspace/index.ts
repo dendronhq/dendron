@@ -6,7 +6,7 @@ import {
   WorkspaceSyncPayload,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { DConfig, DendronEngineV2 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
@@ -46,7 +46,7 @@ export class WorkspaceController {
       data: {
         notes: engine.notes,
         schemas: engine.schemas,
-        config: engine.config,
+        config: DConfig.readConfigSync(engine.wsRoot),
         vaults: engine.vaults,
         wsRoot: engine.wsRoot,
       },
@@ -62,7 +62,7 @@ export class WorkspaceController {
       data: {
         notes,
         schemas,
-        config: engine.config,
+        config: DConfig.readConfigSync(engine.wsRoot),
         vaults: engine.vaults,
         wsRoot: engine.wsRoot,
       },

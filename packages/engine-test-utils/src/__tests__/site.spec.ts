@@ -14,7 +14,7 @@ import {
   NoteTestUtilsV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { DConfig, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { TestConfigUtils } from "../config";
@@ -720,10 +720,10 @@ describe("SiteUtils", () => {
 
     test("blacklist vault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           });
           const root = (
             await engine.findNotes({

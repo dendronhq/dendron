@@ -4,6 +4,7 @@ import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { DConfig } from "../config";
 import { SiteUtils } from "../topics/site";
 
 type Commits = {
@@ -30,17 +31,13 @@ export class ChangelogGenerator {
 
 async function getLastCommit(wsRoot: string) {
   // get last commit hash
-  try {
-    const { stdout } = await execa(
-      "git",
-      [`log`, `--pretty=format:'%h'`, `-n`, `1`],
-      { cwd: wsRoot }
-    );
-    // use slice as there are quotes around the commit hash
-    return stdout.slice(1, -1);
-  } catch (error) {
-    throw error;
-  }
+  const { stdout } = await execa(
+    "git",
+    [`log`, `--pretty=format:'%h'`, `-n`, `1`],
+    { cwd: wsRoot }
+  );
+  // use slice as there are quotes around the commit hash
+  return stdout.slice(1, -1);
 }
 
 function canShowDiff(opts: {
@@ -48,7 +45,8 @@ function canShowDiff(opts: {
   filePath: string;
 }): boolean {
   const { engine, filePath } = opts;
-  const { vaults } = engine;
+  const { vaults, wsRoot } = engine;
+  const config = DConfig.readConfigSync(wsRoot);
   return vaults.some((vault) => {
     if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
       const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
@@ -60,7 +58,11 @@ function canShowDiff(opts: {
       if (!note) {
         return false;
       }
-      return SiteUtils.canPublish({ note, config: engine.config, engine });
+      return SiteUtils.canPublish({
+        note,
+        config,
+        engine,
+      });
     } else {
       return false;
     }

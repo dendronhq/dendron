@@ -3,6 +3,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import {
   DendronASTDest,
   MDUtilsV5,
@@ -70,7 +71,7 @@ describe("hierarchies", () => {
     name: "NO_HIERARCHY",
     setupFunc: async ({ engine, vaults, extra }) => {
       const configOverride: IntermediateDendronConfig = {
-        ...engine.config,
+        ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplay: false,
       };
       if (extra.dest !== DendronASTDest.HTML) {
@@ -157,7 +158,7 @@ describe("hierarchies", () => {
     name: "DIFF_HIERARCHY_TITLE",
     setupFunc: async ({ engine, vaults, extra }) => {
       const configOverride: IntermediateDendronConfig = {
-        ...engine.config,
+        ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplayTitle: "Better Children",
       };
       if (extra.dest !== DendronASTDest.HTML) {

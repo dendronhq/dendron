@@ -37,6 +37,7 @@ import {
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
+import { DConfig } from "@dendronhq/engine-server";
 
 const ID = "dendron.markdown";
 
@@ -543,7 +544,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
-        ...engine.config,
+        ...DConfig.readConfigSync(engine.wsRoot),
         usePrettyRefs: false,
       },
       engine,

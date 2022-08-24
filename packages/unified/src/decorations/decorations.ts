@@ -9,6 +9,7 @@ import {
   NoteProps,
   offsetRange,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import { decorateUserTag } from "./userTags";
 import {
   DendronASTDest,
@@ -81,18 +82,17 @@ export async function runAllDecorators(
       fname: note.fname,
     }
   );
+  const maxNoteLength = ConfigUtils.getWorkspace(
+    DConfig.readConfigSync(engine.wsRoot)
+  ).maxNoteLength;
 
   for (const { range, text } of ranges) {
-    if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
+    if (text.length > maxNoteLength) {
       return {
         errors: [
           new DendronError({
             message: `Stopping decorations because visible range is too large. Unless you have a massive screen or really long lines of text, this may be a bug.`,
-            payload: {
-              maxNoteLength: ConfigUtils.getWorkspace(engine.config)
-                .maxNoteLength,
-              textLength: text.length,
-            },
+            payload: { maxNoteLength, textLength: text.length },
           }),
         ],
       };

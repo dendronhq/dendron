@@ -10,6 +10,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import { isInsidePath } from "@dendronhq/common-server";
+import { DConfig } from "@dendronhq/engine-server";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
@@ -156,7 +157,7 @@ export class CopyNoteLinkCommand
       doEndAnchor: false,
     });
 
-    const { config } = engine;
+    const config = DConfig.readConfigSync(engine.wsRoot);
     const aliasMode = ConfigUtils.getAliasMode(config);
 
     return {

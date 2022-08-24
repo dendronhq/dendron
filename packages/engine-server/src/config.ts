@@ -247,7 +247,10 @@ export class DConfig {
   static readConfigSync(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
     // TODO: validate
-    const config = readYAML(configPath, true) as IntermediateDendronConfig;
+    const config: IntermediateDendronConfig = _.defaultsDeep(
+      readYAML(configPath, true) as IntermediateDendronConfig,
+      ConfigUtils.genDefaultConfig()
+    );
     return config;
   }
 

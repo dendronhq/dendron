@@ -1,4 +1,5 @@
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -219,12 +220,12 @@ describe("user tags", () => {
   describe("WHEN disabled in config", () => {
     test("THEN user tags don't get parsed or processed", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const proc = MDUtilsV5.procRehypeFull(
             {
               engine,
               vault: vaults[0],
-              config: engine.config,
+              config: DConfig.readConfigSync(wsRoot),
               fname: "root",
             },
             {}

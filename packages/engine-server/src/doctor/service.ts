@@ -233,8 +233,9 @@ export class DoctorService implements Disposable {
     let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
       case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
-        const { wsRoot, config } = engine;
+        const { wsRoot } = engine;
         const rawConfig = DConfig.getRaw(wsRoot);
+        const config = DConfig.readConfigSync(wsRoot);
         const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
           config: rawConfig,
           deprecatedPaths: DEPRECATED_PATHS,

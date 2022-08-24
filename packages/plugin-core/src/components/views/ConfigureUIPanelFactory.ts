@@ -4,6 +4,7 @@ import {
   DendronEditorViewKey,
   getWebEditorViewEntry,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { ConfigureCommand } from "../../commands/ConfigureCommand";
 import { WebViewUtils } from "../../views/utils";
@@ -34,13 +35,15 @@ export class ConfigureUIPanelFactory {
       );
       this.panel.webview.onDidReceiveMessage(
         async (msg: ConfigureUIMessage) => {
-          const engine = ext.getEngine();
           // eslint-disable-next-line default-case
           switch (msg.type) {
             case ConfigureUIMessageEnum.onUpdateConfig:
               {
                 const { config } = msg.data;
-                engine.writeConfig({ config });
+                await DConfig.writeConfig({
+                  wsRoot: ext.getDWorkspace().wsRoot,
+                  config,
+                });
               }
               break;
             case ConfigureUIMessageEnum.openDendronConfigYaml: {

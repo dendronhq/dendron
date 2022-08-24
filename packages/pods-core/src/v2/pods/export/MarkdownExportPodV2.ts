@@ -25,6 +25,7 @@ import {
 } from "../../..";
 import { PodExportScope } from "../..";
 import { createDisposableLogger } from "@dendronhq/common-server";
+import { DConfig } from "@dendronhq/engine-server";
 
 /**
  * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).
@@ -155,7 +156,7 @@ export class MarkdownExportPodV2
       addFrontmatterTitle,
     } = this._config;
     const engine = this._engine;
-    const overrideConfig = { ...this._engine.config };
+    const overrideConfig = { ...DConfig.readConfigSync(engine.wsRoot) };
 
     const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;

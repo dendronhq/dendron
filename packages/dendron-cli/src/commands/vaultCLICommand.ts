@@ -1,4 +1,4 @@
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
 import {
   DendronError,
   DVault,
@@ -70,7 +70,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, wsRoot, vaultPath, noAddToConfig, engine } = opts;
+    const { cmd, wsRoot, vaultPath, noAddToConfig } = opts;
 
     try {
       switch (cmd) {
@@ -79,7 +79,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
 
           const wsService = new WorkspaceService({ wsRoot });
           let resp: DVault;
-          if (engine.config.dev?.enableSelfContainedVaults) {
+          if (DConfig.readConfigSync(wsRoot).dev?.enableSelfContainedVaults) {
             const vault: SelfContainedVault = {
               fsPath: vaultPath,
               selfContained: true,

@@ -9,6 +9,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/engine-server";
 import {
   DendronASTDest,
   MDUtilsV5,
@@ -55,13 +56,13 @@ async function createProc(
   opts: Parameters<TestPresetEntryV4["testFunc"]>[0],
   procOverride?: Partial<Parameters<typeof MDUtilsV5.procRemarkFull>[0]>
 ) {
-  const { engine, vaults, extra } = opts;
+  const { engine, vaults, wsRoot, extra } = opts;
   const procData = _.defaults(procOverride, {
     engine,
     dest: extra.dest,
     fname: "foo",
     vault: vaults[0],
-    config: engine.config,
+    config: DConfig.readConfigSync(wsRoot),
   });
   if (procData.dest === DendronASTDest.HTML) {
     return MDUtilsV5.procRehypeFull(procData);

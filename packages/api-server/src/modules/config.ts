@@ -1,10 +1,10 @@
 import {
-  ConfigGetPayload,
-  ConfigWriteOpts,
   DendronError,
+  IntermediateDendronConfig,
   RespV2,
   WorkspaceRequest,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/engine-server";
 import { MemoryStore } from "../store/memoryStore";
 import { getWSEngine } from "../utils";
 
@@ -18,13 +18,15 @@ export class ConfigController {
     return ConfigController.singleton;
   }
 
-  async get({ ws }: WorkspaceRequest): Promise<RespV2<ConfigGetPayload>> {
+  async get({
+    ws,
+  }: WorkspaceRequest): Promise<RespV2<IntermediateDendronConfig>> {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
-      const resp = await engine.getConfig();
-      return resp;
+      const config = DConfig.readConfigSync(engine.wsRoot);
+      return { data: config, error: null };
     } catch (err) {
       return {
         error: new DendronError({ message: JSON.stringify(err) }),
@@ -36,18 +38,11 @@ export class ConfigController {
   async write({
     ws,
     ...opts
-  }: WorkspaceRequest & ConfigWriteOpts): Promise<RespV2<void>> {
+  }: WorkspaceRequest & IntermediateDendronConfig): Promise<RespV2<void>> {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
-    try {
-      const resp = await engine.writeConfig(opts);
-      return resp;
-    } catch (err) {
-      return {
-        error: new DendronError({ message: JSON.stringify(err) }),
-        data: undefined,
-      };
-    }
+    await DConfig.writeConfig({ wsRoot: engine.wsRoot, config: opts });
+    return { error: null };
   }
 }

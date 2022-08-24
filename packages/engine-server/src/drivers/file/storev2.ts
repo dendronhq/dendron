@@ -86,28 +86,29 @@ export class FileStorage implements DStore {
   public noteFnames: NotePropsByFnameDict;
   public schemas: SchemaModuleDict;
   public logger: DLogger;
-  public links: DLink[];
   public anchors: DNoteAnchorPositioned[];
   public wsRoot: string;
-  public configRoot: string;
   public config: IntermediateDendronConfig;
+
   private engine: DEngineClient;
 
-  constructor(props: { engine: DEngineClient; logger: DLogger }) {
-    const { vaults, wsRoot, config } = props.engine;
-    const { logger } = props;
+  constructor(props: {
+    engine: DEngineClient;
+    logger: DLogger;
+    config: IntermediateDendronConfig;
+  }) {
+    const { vaults, wsRoot } = props.engine;
+    const { logger, config } = props;
     this.wsRoot = wsRoot;
-    this.configRoot = wsRoot;
     this.vaults = vaults;
     this.notes = {};
     this.noteFnames = {};
     this.schemas = {};
-    this.links = [];
     this.anchors = [];
     this.logger = logger;
+    this.config = config;
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, wsRoot, vaults, level: this.logger.level });
-    this.config = config;
     this.engine = props.engine;
   }
 
@@ -125,7 +126,7 @@ export class FileStorage implements DStore {
       errors = errors.concat(initErrors);
 
       // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
-      if (this.engine.config.dev?.enableLinkCandidates) {
+      if (this.config.dev?.enableLinkCandidates) {
         const ctx = "_addLinkCandidates";
         const start = process.hrtime();
         // this mutates existing note objects so we don't need to reset the notes
@@ -134,7 +135,7 @@ export class FileStorage implements DStore {
         this.logger.info({ ctx, duration });
       }
 
-      const { notes, schemas } = this;
+      const { notes, schemas, config } = this;
       let error: IDendronError | null = errors[0] || null;
       if (errors.length > 1) {
         error = new DendronCompositeError(errors);
@@ -143,8 +144,8 @@ export class FileStorage implements DStore {
         data: {
           notes,
           schemas,
+          config,
           wsRoot: this.wsRoot,
-          config: this.config,
           vaults: this.vaults,
         },
         error,
@@ -651,7 +652,7 @@ export class FileStorage implements DStore {
     const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
-      noCaching: this.engine.config.noCaching,
+      noCaching: this.config.noCaching,
       logger: this.logger,
     });
     if (!out.data) {

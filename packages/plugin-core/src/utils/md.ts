@@ -671,3 +671,37 @@ function getOneIndexedFrontmatterEndingLineNumber(
 
   return _.countBy(input.slice(0, offset))["\n"] + 1;
 }
+
+/**
+ * Given a {@link FoundRefT} and a list of anchor names,
+ * check if ref contains an anchor name to update.
+ * @param ref
+ * @param anchorNamesToUpdate
+ * @returns
+ */
+export function hasAnchorsToUpdate(
+  ref: FoundRefT,
+  anchorNamesToUpdate: string[]
+) {
+  const matchText = ref.matchText;
+  const wikiLinkRegEx = /\[\[(?<text>.+?)\]\]/;
+
+  const wikiLinkMatch = wikiLinkRegEx.exec(matchText);
+
+  if (wikiLinkMatch && wikiLinkMatch.groups?.text) {
+    let processed = wikiLinkMatch.groups.text;
+    if (processed.includes("|")) {
+      const [_alias, link] = processed.split("|");
+      processed = link;
+    }
+
+    if (processed.includes("#")) {
+      const [_fname, anchor] = processed.split("#");
+      return anchorNamesToUpdate.includes(anchor);
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}

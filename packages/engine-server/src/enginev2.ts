@@ -791,7 +791,7 @@ export class DendronEngineV2 implements DEngine {
           ),
         };
       });
-      const config = DConfig.readConfigSync(this.wsRoot);
+      const config = DConfig.readConfigSync(this.wsRoot, true);
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,

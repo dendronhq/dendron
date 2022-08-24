@@ -1,13 +1,14 @@
 import {
   DVault,
-  type ReducedDEngine,
+  normalizeUnixPath,
   NoteProps,
   VaultUtils,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
-import path from "path";
+import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
-import { URI } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
 
 @injectable()
 export class WSUtilsWeb {
@@ -18,19 +19,19 @@ export class WSUtilsWeb {
     @inject("vaults") private vaults: DVault[]
   ) {}
 
-  private getVaultFromDocument(document: vscode.TextDocument) {
+  getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
     const vault = VaultUtils.getVaultByFilePath({
-      wsRoot: this.wsRoot.fsPath,
+      wsRoot: normalizeUnixPath(this.wsRoot.fsPath),
       vaults: this.vaults,
-      fsPath: txtPath,
+      fsPath: normalizeUnixPath(txtPath),
     });
     return vault;
   }
 
   public getNoteFromDocument(document: vscode.TextDocument) {
-    const txtPath = document.uri.fsPath;
-    const fname = path.basename(txtPath, ".md");
+    const txtPath = document.uri;
+    const fname = Utils.basename(txtPath).slice(0, -3); //remove .md;
     let vault: DVault;
     try {
       vault = this.getVaultFromDocument(document);

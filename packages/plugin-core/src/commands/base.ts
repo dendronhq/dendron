@@ -2,10 +2,10 @@ import { DendronError, getStage, isTSError } from "@dendronhq/common-all";
 import { DLogger, getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
-import { Logger } from "../logger";
-import { AnalyticsUtils } from "../utils/analytics";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { Logger } from "../logger";
 import { IBaseCommand } from "../types";
+import { AnalyticsUtils } from "../utils/analytics";
 
 export type CodeCommandConstructor = {
   new (extension: IDendronExtension): CodeCommandInstance;
@@ -57,6 +57,7 @@ export abstract class BaseCommand<
   static requireActiveWorkspace = false;
 
   abstract key: string;
+  skipAnalytics?: boolean;
 
   async gatherInputs(_opts?: TRunOpts): Promise<TGatherOutput | undefined> {
     return {} as any;
@@ -148,12 +149,13 @@ export abstract class BaseCommand<
       const sanityCheckResults = sanityCheckResp
         ? { sanityCheck: sanityCheckResp }
         : {};
-      AnalyticsUtils.track(this.key, {
-        duration: getDurationMilliseconds(start),
-        error: isError,
-        ...payload,
-        ...sanityCheckResults,
-      });
+      if (!this.skipAnalytics)
+        AnalyticsUtils.track(this.key, {
+          duration: getDurationMilliseconds(start),
+          error: isError,
+          ...payload,
+          ...sanityCheckResults,
+        });
     }
   }
 }

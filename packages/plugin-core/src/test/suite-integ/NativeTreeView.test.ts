@@ -58,10 +58,10 @@ async function runDeleteNote(opts: { noteId: string }) {
   const { wsRoot } = engine;
   const { noteId } = opts;
   const noteToDelete = engine.notes[noteId];
-  const _fsPath = getNoteUri({ note: noteToDelete, wsRoot }).fsPath;
+  const fsPath = getNoteUri({ note: noteToDelete, wsRoot }).fsPath;
   const deleteCmd = new DeleteCommand();
   const deleteOpts = {
-    _fsPath,
+    fsPath,
     noConfirm: true,
   };
   await deleteCmd.execute(deleteOpts);
@@ -102,7 +102,7 @@ async function getFullTree(opts: {
 }
 
 suite("NativeTreeView tests", function () {
-  this.timeout(2000);
+  this.timeout(4000);
 
   describe("Rename Note Command interactions", function () {
     describeMultiWS(
@@ -117,6 +117,7 @@ suite("NativeTreeView tests", function () {
             genRandomId: true,
           });
         },
+        timeout: 1e6,
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {

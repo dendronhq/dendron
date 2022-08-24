@@ -19,13 +19,11 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
+import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { BasicCommand } from "./base";
+import { InputArgCommand } from "./base";
 
-type CommandOpts = {
-  _fsPath?: string;
-  noConfirm?: boolean;
-};
+type CommandOpts = any;
 
 type CommandOutput = EngineDeletePayload | void;
 export type { CommandOutput as DeleteNodeCommandOutput };
@@ -40,11 +38,8 @@ function formatDeletedMsg({
   return `${path.basename(fsPath)} (${VaultUtils.getName(vault)}) deleted`;
 }
 
-export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
+export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.DELETE.key;
-  async gatherInputs(): Promise<any> {
-    return {};
-  }
 
   private getBacklinkFrontmatterLineOffset(opts: {
     link: DLink;
@@ -71,6 +66,54 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     ) as Position;
 
     return nodePosition?.end.line;
+  }
+
+  private isNotePropsArgs(opts: CommandOpts) {
+    return !_.isEmpty(opts) && opts.id;
+  }
+
+  private isUriArgs(opts: CommandOpts) {
+    return !_.isEmpty(opts) && opts.fsPath;
+  }
+
+  private async deleteNote(params: {
+    note: NoteProps;
+    opts: CommandOpts;
+    engine: IEngineAPIService;
+    ctx: string;
+  }) {
+    const { note, opts, engine, ctx } = params;
+    const backlinks = note.links.filter((link) => link.type === "backlink");
+    let title;
+    if (backlinks.length === 0) {
+      // no need to show preview a simple
+      title = `Delete note ${note.fname}?`;
+    } else {
+      await this.showNoteDeletePreview(note, backlinks);
+      title = `${note.fname} has backlinks. Delete note?`;
+    }
+
+    const shouldProceed = await this.promptConfirmation(title, opts?.noConfirm);
+    if (!shouldProceed) {
+      window.showInformationMessage("Cancelled");
+      return;
+    }
+
+    // If Delete note preview is open, close it first
+    if (backlinks.length !== 0) {
+      await VSCodeUtils.closeCurrentFileEditor();
+    }
+
+    const out = (await engine.deleteNote(note.id)) as EngineDeletePayload;
+    if (out.error) {
+      Logger.error({ ctx, msg: "error deleting node", error: out.error });
+      return;
+    }
+    window.showInformationMessage(
+      formatDeletedMsg({ fsPath: note.fname, vault: note.vault })
+    );
+    await VSCodeUtils.closeCurrentFileEditor();
+    return out;
   }
 
   async showNoteDeletePreview(note: NoteProps, backlinks: DLink[]) {
@@ -128,59 +171,32 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return resp === "Proceed";
   }
 
+  async sanityCheck(opts?: CommandOpts) {
+    if (_.isUndefined(VSCodeUtils.getActiveTextEditor()) && _.isEmpty(opts)) {
+      return "No note currently open, and no note selected to open.";
+    }
+    return;
+  }
+
   async execute(opts?: CommandOpts): Promise<CommandOutput> {
-    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+    const engine = ExtensionProvider.getEngine();
     const ctx = "DeleteNoteCommand";
-    if ((opts && opts._fsPath) || editor) {
-      const fsPath =
-        opts && opts._fsPath
-          ? opts._fsPath
-          : VSCodeUtils.getFsPathFromTextEditor(editor);
+
+    if (this.isNotePropsArgs(opts)) {
+      const out = this.deleteNote({ note: opts, opts, engine, ctx });
+      return out;
+    } else {
+      const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+      const fsPath = this.isUriArgs(opts)
+        ? opts.fsPath
+        : VSCodeUtils.getFsPathFromTextEditor(editor);
       const mode = fsPath.endsWith(".md") ? "note" : "schema";
       const trimEnd = mode === "note" ? ".md" : ".schema.yml";
       const fname = path.basename(fsPath, trimEnd);
-      const engine = ExtensionProvider.getEngine();
       if (mode === "note") {
-        const vault = PickerUtilsV2.getVaultForOpenEditor();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          vault,
-          engine,
-        }) as NoteProps;
-
-        const backlinks = note.links.filter((link) => link.type === "backlink");
-        let title;
-        if (backlinks.length === 0) {
-          // no need to show preview a simple
-          title = `Delete note ${note.fname}?`;
-        } else {
-          await this.showNoteDeletePreview(note, backlinks);
-          title = `${note.fname} has backlinks. Delete note?`;
-        }
-
-        const shouldProceed = await this.promptConfirmation(
-          title,
-          opts?.noConfirm
-        );
-        if (!shouldProceed) {
-          window.showInformationMessage("Cancelled");
-          return;
-        }
-
-        // If Delete note preview is open, close it first
-        if (backlinks.length !== 0) {
-          await VSCodeUtils.closeCurrentFileEditor();
-        }
-
-        const out = (await engine.deleteNote(note.id)) as EngineDeletePayload;
-        if (out.error) {
-          Logger.error({ ctx, msg: "error deleting node", error: out.error });
-          return;
-        }
-        window.showInformationMessage(
-          formatDeletedMsg({ fsPath, vault: note.vault })
-        );
-        await VSCodeUtils.closeCurrentFileEditor();
+        const vault = PickerUtilsV2.getVaultForOpenEditor(fsPath);
+        const note = (await engine.findNotes({ fname, vault }))[0];
+        const out = await this.deleteNote({ note, opts, engine, ctx });
         return out;
       } else {
         const smod = await DendronClientUtilsV2.getSchemaModByFname({
@@ -194,9 +210,6 @@ export class DeleteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         await VSCodeUtils.closeCurrentFileEditor();
         return;
       }
-    } else {
-      window.showErrorMessage("no active text editor");
-      return;
     }
   }
 }

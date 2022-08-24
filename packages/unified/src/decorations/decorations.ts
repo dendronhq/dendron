@@ -10,7 +10,6 @@ import {
   NoteProps,
   offsetRange,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
 import { decorateUserTag } from "./userTags";
 import {
   DendronASTDest,

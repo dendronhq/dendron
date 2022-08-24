@@ -497,10 +497,11 @@ export class NoteLookupCommand
     const picker = this.controller.quickPick;
     const uri = node2Uri(item);
     const originalNoteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
+    const originalNoteDeepCopy = _.cloneDeep(originalNoteFromItem);
 
     if (picker.selectionProcessFunc !== undefined) {
       const processedNode = await picker.selectionProcessFunc(
-        originalNoteFromItem
+        originalNoteDeepCopy
       );
       if (processedNode !== undefined) {
         if (!_.isEqual(originalNoteFromItem, processedNode)) {

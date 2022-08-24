@@ -1,25 +1,31 @@
 import {
   assertUnreachable,
+  asyncLoop,
   ConfigUtils,
   DendronError,
   DNodeType,
+  DNoteAnchorPositioned,
   ERROR_STATUS,
   getSlugger,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
+  NoteChangeEntry,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
 } from "@dendronhq/common-all";
 import { HistoryService, WorkspaceUtils } from "@dendronhq/engine-server";
+import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode";
+import { Utils } from "vscode-uri";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { clipboard } from "../../utils";
+import { findReferences, hasAnchorsToUpdate } from "../../utils/md";
 import { VersionProvider } from "../../versionProvider";
 import { LookupPanelView } from "../../views/LookupPanelView";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -681,23 +687,120 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
+  /**
+   * Helper for {@link LookupControllerV3.selectionToNoteProps}
+   * given a selection, find backlinks that point to
+   * any anchors in the selection and update them to point to the
+   * given destination note instead
+   */
+  private async updateBacklinksToAnchorsInSelection(opts: {
+    selection: vscode.Selection | undefined;
+    destNote: NoteProps;
+  }): Promise<NoteChangeEntry[]> {
+    const { selection, destNote } = opts;
+    if (selection === undefined) {
+      return [];
+    }
+    const wsUtils = ExtensionProvider.getWSUtils();
+    const engine = ExtensionProvider.getEngine();
+    // parse text in range, update potential backlinks to it
+    // so that it points to the destination instead of the source.
+    const sourceNote = wsUtils.getActiveNote();
+    if (sourceNote) {
+      const { anchors: sourceAnchors } = sourceNote;
+      if (sourceAnchors) {
+        // find all anchors in source note that is part of the selection
+        const anchorsInSelection = _.toArray(sourceAnchors)
+          .filter((anchor): anchor is DNoteAnchorPositioned => {
+            // help ts a little to infer the type correctly
+            return anchor !== undefined;
+          })
+          .filter((anchor) => {
+            const anchorPosition: vscode.Position = new vscode.Position(
+              anchor.line,
+              anchor.column
+            );
+            return selection?.contains(anchorPosition);
+          });
+
+        // find all references to update
+        const foundReferences = await findReferences(sourceNote.fname);
+        const anchorNamesToUpdate = anchorsInSelection.map((anchor) => {
+          return anchor.value;
+        });
+        const refsToUpdate = foundReferences.filter((ref) =>
+          hasAnchorsToUpdate(ref, anchorNamesToUpdate)
+        );
+        let changes: NoteChangeEntry[] = [];
+
+        // update references
+        await asyncLoop(refsToUpdate, async (ref) => {
+          const { location } = ref;
+          const fsPath = location.uri;
+          const fname = NoteUtils.normalizeFname(Utils.basename(fsPath));
+
+          const vault = wsUtils.getVaultFromUri(location.uri);
+          const noteToUpdate = (
+            await ExtensionProvider.getEngine().findNotes({
+              fname,
+              vault,
+            })
+          )[0];
+          const linksToUpdate = LinkUtils.findLinksFromBody({
+            note: noteToUpdate,
+            engine: ExtensionProvider.getEngine(),
+          })
+            .filter((link) => {
+              return (
+                link.to?.fname?.toLowerCase() ===
+                  sourceNote.fname.toLowerCase() &&
+                link.to?.anchorHeader &&
+                anchorNamesToUpdate.includes(link.to.anchorHeader)
+              );
+            })
+            .map((link) => LinkUtils.dlink2DNoteLink(link));
+
+          const resp = await LinkUtils.updateLinksInNote({
+            linksToUpdate,
+            note: noteToUpdate,
+            destNote,
+            engine,
+          });
+          if (resp.data) {
+            changes = changes.concat(resp.data);
+          }
+        });
+        return changes;
+      }
+    }
+    return [];
+  }
+
   private async selectionToNoteProps(opts: {
     selectionType: string;
     note: NoteProps;
   }) {
     const ext = ExtensionProvider.getExtension();
-    const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-    const { document, range } = resp || {};
+    const ws = ext.getDWorkspace();
+
+    const extractRangeResp = await VSCodeUtils.extractRangeFromActiveEditor();
+    const { document, range } = extractRangeResp || {};
     const { selectionType, note } = opts;
     const { selection, text } = VSCodeUtils.getSelection();
 
     switch (selectionType) {
       case "selectionExtract": {
         if (!_.isUndefined(document)) {
-          const ws = ExtensionProvider.getDWorkspace();
           const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
           const noteLookupConfig = lookupConfig.note;
           const leaveTrace = noteLookupConfig.leaveTrace || false;
+
+          // find anchors in selection and update backlinks to them
+          await this.updateBacklinksToAnchorsInSelection({
+            selection,
+            destNote: note,
+          });
+
           const body = note.body + "\n\n" + document.getText(range).trim();
           note.body = body;
           const { wsRoot, vaults } = ext.getDWorkspace();

@@ -84,8 +84,6 @@ import {
   runAllDecorators,
   RemarkUtils,
 } from "@dendronhq/unified";
-// import { runAllDecorators } from "./markdown/decorations";
-// import { RemarkUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;

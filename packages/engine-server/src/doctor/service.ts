@@ -36,8 +36,6 @@ import {
   RemarkUtils,
   DendronASTDest,
 } from "@dendronhq/unified";
-// import { LinkUtils, RemarkUtils } from "@dendronhq/unified";
-// import { DendronASTDest } from "@dendronhq/unified";
 
 export enum DoctorActionsEnum {
   FIX_FRONTMATTER = "fixFrontmatter",

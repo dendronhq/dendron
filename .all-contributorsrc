@@ -2084,6 +2084,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "bj0",
+      "name": "Brian Parma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1139347?v=4",
+      "profile": "https://github.com/bj0",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

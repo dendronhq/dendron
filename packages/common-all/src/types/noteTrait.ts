@@ -79,6 +79,11 @@ export type onCreateProps = {
 
   //TODO: needs to return a prop array of some sort
   setFrontmatter?(): string;
+
+  /**
+   * Returns the name of the vault that the note will be created in
+   */
+  setVault?(): string;
 };
 
 export type onDescendantLifecycleEvent = {};

@@ -1,9 +1,5 @@
 import { launchv2 } from "@dendronhq/api-server";
-import {
-  ConfigUtils,
-  EngagementEvents,
-  extractNoteChangeEntriesByType,
-} from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import { LogLvl, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
@@ -13,7 +9,6 @@ import {
 import _ from "lodash";
 import { Socket } from "net";
 import yargs from "yargs";
-import { CLIAnalyticsUtils } from "../utils/analytics";
 import { CLIUtils } from "../utils/cli";
 import { CLICommand, CommandCommonProps } from "./base";
 
@@ -114,28 +109,28 @@ export class LaunchEngineServerCommand extends CLICommand<
 
       // These events will only upload if the upload action completes before the
       // CLI command completes. They are uploaded on a best effort basis.
-      engine.onEngineNoteStateChanged((entries) => {
-        const createCount = extractNoteChangeEntriesByType(
-          entries,
-          "create"
-        ).length;
+      // engine.onEngineNoteStateChanged((entries) => {
+      //   const createCount = extractNoteChangeEntriesByType(
+      //     entries,
+      //     "create"
+      //   ).length;
 
-        const updateCount = extractNoteChangeEntriesByType(
-          entries,
-          "update"
-        ).length;
+      //   const updateCount = extractNoteChangeEntriesByType(
+      //     entries,
+      //     "update"
+      //   ).length;
 
-        const deleteCount = extractNoteChangeEntriesByType(
-          entries,
-          "delete"
-        ).length;
+      //   const deleteCount = extractNoteChangeEntriesByType(
+      //     entries,
+      //     "delete"
+      //   ).length;
 
-        CLIAnalyticsUtils.track(EngagementEvents.EngineStateChanged, {
-          created: createCount,
-          updated: updateCount,
-          deleted: deleteCount,
-        });
-      });
+      //   CLIAnalyticsUtils.track(EngagementEvents.EngineStateChanged, {
+      //     created: createCount,
+      //     updated: updateCount,
+      //     deleted: deleteCount,
+      //   });
+      // });
 
       if (out.error) {
         this.printError(out.error);

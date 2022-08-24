@@ -51,10 +51,10 @@
   },
   "dependencies": {
     "@dendronhq/airtable": "^0.11.1",
-    "@dendronhq/common-all": "^0.108.0",
+    "@dendronhq/common-all": "^0.109.0",
     "@dendronhq/unified": "^0.109.0",
-    "@dendronhq/common-server": "^0.108.0",
-    "@dendronhq/engine-server": "^0.108.0",
+    "@dendronhq/common-server": "^0.109.0",
+    "@dendronhq/engine-server": "^0.109.0",
     "@instantish/martian": "1.0.3",
     "@notionhq/client": "^0.1.9",
     "@octokit/graphql": "^4.6.4",

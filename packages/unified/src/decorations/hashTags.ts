@@ -1,10 +1,10 @@
 import {
   DEngine,
+  IntermediateDendronConfig,
   NoteUtils,
   Position,
   position2VSCodeRange,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
 import { HashTag } from "../types";
 import { Decorator } from "./utils";
 import { DecorationWikilink, linkedNoteType } from "./wikilinks";
@@ -22,12 +22,13 @@ export function isDecorationHashTag(
 export const decorateHashTag: Decorator<HashTag, DecorationHashTag> = (
   opts
 ) => {
-  const { node: hashtag, engine } = opts;
+  const { node: hashtag, engine, config } = opts;
   const { position } = hashtag;
   return decorateTag({
     fname: hashtag.fname,
     engine,
     position,
+    config,
   });
 };
 
@@ -36,21 +37,20 @@ export async function decorateTag({
   engine,
   position,
   lineOffset,
+  config,
 }: {
   fname: string;
   engine: DEngine;
   position: Position;
   lineOffset?: number;
+  config: IntermediateDendronConfig;
 }) {
   let color: string | undefined;
   const { color: foundColor, type: colorType } = NoteUtils.color({
     fname,
     engine,
   });
-  if (
-    colorType === "configured" ||
-    !DConfig.readConfigSync(engine.wsRoot).noRandomlyColoredTags
-  ) {
+  if (colorType === "configured" || !config.noRandomlyColoredTags) {
     color = foundColor;
   }
 

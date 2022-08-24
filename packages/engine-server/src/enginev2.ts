@@ -791,11 +791,12 @@ export class DendronEngineV2 implements DEngine {
           ),
         };
       });
+      const config = DConfig.readConfigSync(this.wsRoot);
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
         allErrors: errors,
-      } = await runAllDecorators({ ...opts, note, engine: this });
+      } = await runAllDecorators({ ...opts, note, engine: this, config });
       let error: IDendronError | null = null;
       if (errors && errors.length > 1)
         error = new DendronCompositeError(errors);

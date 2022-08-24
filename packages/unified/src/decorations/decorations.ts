@@ -5,6 +5,7 @@ import {
   Diagnostic,
   GetDecorationsOpts,
   IDendronError,
+  IntermediateDendronConfig,
   NonOptional,
   NoteProps,
   offsetRange,
@@ -62,9 +63,13 @@ function runDecorator(
 
 /** Get all decorations within the visible ranges for given note. */
 export async function runAllDecorators(
-  opts: Omit<GetDecorationsOpts, "id"> & { note: NoteProps; engine: DEngine }
+  opts: Omit<GetDecorationsOpts, "id"> & {
+    note: NoteProps;
+    engine: DEngine;
+    config: IntermediateDendronConfig;
+  }
 ) {
-  const { note, ranges, engine } = opts;
+  const { note, ranges, engine, config } = opts;
 
   const allDecorations: Decoration[] = [];
   const allDiagnostics: Diagnostic[] = [];
@@ -82,9 +87,7 @@ export async function runAllDecorators(
       fname: note.fname,
     }
   );
-  const maxNoteLength = ConfigUtils.getWorkspace(
-    DConfig.readConfigSync(engine.wsRoot)
-  ).maxNoteLength;
+  const maxNoteLength = ConfigUtils.getWorkspace(config).maxNoteLength;
 
   for (const { range, text } of ranges) {
     if (text.length > maxNoteLength) {

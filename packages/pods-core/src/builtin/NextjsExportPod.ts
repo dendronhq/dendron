@@ -495,9 +495,16 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       noExpandSingleDomain: true,
     });
 
-    const sidebarConfigResult = await loadSidebars(
-      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined
-    );
+    const sidebarPath =
+      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
+
+    const sidebarConfigResult = await loadSidebars(sidebarPath, {
+      notes: publishedNotes,
+      duplicateNoteBehavior:
+        "duplicateNoteBehavior" in siteConfig
+          ? siteConfig.duplicateNoteBehavior
+          : undefined,
+    });
 
     if (sidebarConfigResult.isErr()) {
       throw sidebarConfigResult.error;

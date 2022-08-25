@@ -122,7 +122,7 @@ export async function updateDecorations(editor: TextEditor): Promise<{
   try {
     const ctx = "updateDecorations";
     const engine = ExtensionProvider.getEngine();
-    const config = DConfig.readConfigSync(engine.wsRoot);
+    const config = DConfig.readConfigSync(engine.wsRoot, true);
     if (ConfigUtils.getWorkspace(config).enableEditorDecorations === false) {
       // Explicitly disabled, stop here.
       return {};

@@ -266,7 +266,7 @@ export class MDUtilsV5 {
             });
           }
           if (!data.config) {
-            data.config = DConfig.readConfigSync(data.engine!.wsRoot);
+            data.config = DConfig.readConfigSync(data.engine!.wsRoot, true);
           }
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
@@ -364,7 +364,7 @@ export class MDUtilsV5 {
           });
         }
         if (!data.config) {
-          data.config = DConfig.readConfigSync(data.engine!.wsRoot);
+          data.config = DConfig.readConfigSync(data.engine!.wsRoot, true);
         }
         if (!data.wsRoot) {
           data.wsRoot = data.engine!.wsRoot;
@@ -409,7 +409,7 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = DConfig.readConfigSync(data?.engine?.wsRoot as string);
+    const config = DConfig.readConfigSync(data?.engine?.wsRoot as string, true);
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
     if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {

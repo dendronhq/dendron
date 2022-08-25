@@ -33,6 +33,7 @@ export * from "./store";
 export * from "./engine";
 export * from "./drivers";
 export * from "./DLogger";
+export * from "./sidebars";
 
 export { axios, AxiosError };
 export { DateTime };

@@ -18,6 +18,7 @@ import {
   RespV3,
   Theme,
   TreeUtils,
+  loadSidebars,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -493,6 +494,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       config: engineConfig,
       noExpandSingleDomain: true,
     });
+
+    const sidebarConfig = await loadSidebars(
+      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined
+    );
+    console.log("sidebarConfig:", sidebarConfig);
     const siteNotes = SiteUtils.createSiteOnlyNotes({
       engine,
     });

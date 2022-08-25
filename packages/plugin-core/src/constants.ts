@@ -341,6 +341,10 @@ export const DENDRON_MENUS = {
       command: "dendron.delete",
       when: "view == dendron.treeView && viewItem == note",
     },
+    {
+      command: "dendron.createNote",
+      when: "view == dendron.treeView",
+    },
   ],
 };
 

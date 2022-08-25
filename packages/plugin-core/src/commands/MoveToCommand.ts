@@ -20,7 +20,7 @@ import { RemarkUtils } from "@dendronhq/unified";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 
 type CommandInput = {
-  dest?: string;
+  initialValue?: string;
   noConfirm?: boolean;
 };
 
@@ -182,7 +182,11 @@ export class MoveToCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const provider = this.createLookupProvider({ activeNote });
     lookupCmd.controller = controller;
     lookupCmd.provider = provider;
-    await lookupCmd.run();
+    const runOpts = {
+      initialValue: opts?.initialValue,
+      noConfirm: opts?.noConfirm,
+    };
+    await lookupCmd.run(runOpts);
 
     return opts;
   }

@@ -828,6 +828,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
                 builder.replace(selection, `!${link}`);
               }
             });
+            await editor?.document.save();
           } else {
             await VSCodeUtils.deleteRange(document, range as vscode.Range);
           }

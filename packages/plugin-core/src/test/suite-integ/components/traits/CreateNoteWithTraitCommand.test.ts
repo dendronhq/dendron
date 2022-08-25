@@ -29,6 +29,7 @@ suite("CreateNoteWithTraitCommand tests", () => {
 
         test(`THEN expect the title to have been modified AND have the foo template applied`, async () => {
           const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
           const testTrait = new TestTrait("foo");
 
           const mockExtension = new MockDendronExtension({
@@ -103,6 +104,36 @@ suite("CreateNoteWithTraitCommand tests", () => {
 
           expect(props?.title).toEqual(testTrait.TEST_TITLE_MODIFIER);
           expect(props?.body).toEqual("bar body");
+        });
+
+        test(`WHEN setVault is implemented, a new note should be created in the specified vault`, async () => {
+          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const testTrait = new TestTrait("dendron://vault1/bar");
+          testTrait.OnCreate.setVault = () => VaultUtils.getName(vaults[2]);
+          const mockExtension = new MockDendronExtension({
+            engine,
+            wsRoot,
+            context: ctx,
+            vaults,
+          });
+
+          const cmd = new CreateNoteWithTraitCommand(
+            mockExtension,
+            "test-create-note-with-trait",
+            testTrait
+          );
+
+          await cmd.execute({ fname: "xvault", vaultOverride: vaults[1] });
+
+          const expectedFName = path.join(
+            wsRoot,
+            VaultUtils.getRelPath(vaults[2]),
+            "xvault.md"
+          );
+
+          expect(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath
+          ).toEqual(expectedFName);
         });
       });
     }

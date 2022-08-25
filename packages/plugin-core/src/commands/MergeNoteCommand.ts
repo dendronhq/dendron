@@ -5,7 +5,6 @@ import {
   NoteProps,
   RefactoringCommandUsedPayload,
   StatisticsUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import {

@@ -1839,6 +1839,11 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
+"@badrap/valita@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.npmjs.org/@badrap/valita/-/valita-0.1.6.tgz#08a38e620215f148cced871fa94265fe5b11bcc4"
+  integrity sha512-LgyswD5zXVywj5Acnhk17gRkLJ8Fzs+lZYmhmxJFMvSNGSnvllYnMp7qMVrfJZedKy3AcgYQUOqgGxFEUUp2CQ==
+
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
@@ -18458,6 +18463,11 @@ neo-async@^2.5.0, neo-async@^2.6.0, neo-async@^2.6.1, neo-async@^2.6.2:
   version "2.6.2"
   resolved "https://registry.npmjs.org/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
+
+neverthrow@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/neverthrow/-/neverthrow-5.0.0.tgz#b2f10c71b4da93cf310e02418d8d19ffc4b64ef2"
+  integrity sha512-JQAB+oyPwbqBRwRZCcH5Yi4ejb24Ul1vIQwwtWTveIZADQTmIpcnh9uQttW45wPnt8sVBxOuh73hCAMmUhXBiQ==
 
 next-seo@^4.27.0:
   version "4.29.0"

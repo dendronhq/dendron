@@ -946,7 +946,8 @@ export type CalendarViewMessage = DMessage<
 
 export type NoteViewMessage = DMessage<
   NoteViewMessageType,
-  { id?: string; href?: string }
+  // TODO use id instead of fName and use engine.findNotes({ vault, fname }) to find note from fileName
+  { id?: string; href?: string, fName?: string }
 >;
 
 /** @deprecated: Tree view v2 is deprecated */

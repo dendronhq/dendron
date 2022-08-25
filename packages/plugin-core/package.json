@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.109.0",
+  "version": "0.109.1",
   "sponsor": {
     "url": "https://accounts.dendron.so/account/subscribe"
   },
@@ -1404,8 +1404,8 @@
     "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.109.0",
-    "@dendronhq/engine-test-utils": "^0.109.0",
+    "@dendronhq/common-test-utils": "^0.109.1",
+    "@dendronhq/engine-test-utils": "^0.109.1",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1447,11 +1447,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.109.0",
-    "@dendronhq/common-all": "^0.109.0",
-    "@dendronhq/common-server": "^0.109.0",
-    "@dendronhq/engine-server": "^0.109.0",
-    "@dendronhq/pods-core": "^0.109.0",
+    "@dendronhq/api-server": "^0.109.1",
+    "@dendronhq/common-all": "^0.109.1",
+    "@dendronhq/common-server": "^0.109.1",
+    "@dendronhq/engine-server": "^0.109.1",
+    "@dendronhq/pods-core": "^0.109.1",
     "@sentry/integrations": "7.9.0",
     "@sentry/node": "7.9.0",
     "@types/vscode": "1.62.0",

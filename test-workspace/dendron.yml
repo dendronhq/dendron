@@ -4,80 +4,85 @@ dev:
   enableExportPodV2: true
   enableSelfContainedVaults: true
 commands:
-  lookup:
-    note:
-      selectionMode: extract
-      confirmVaultOnCreate: true
-      leaveTrace: false
-      bubbleUpCreateNew: true
-      vaultSelectionModeOnCreate: smart
-      fuzzThreshold: 0.2
-  insertNoteLink:
-    aliasMode: none
-    enableMultiSelect: false
-  insertNoteIndex:
-    enableMarker: false
-  randomNote: {}
-  copyNoteLink: {}
-  templateHierarchy: template
+    lookup:
+        note:
+            selectionMode: extract
+            confirmVaultOnCreate: true
+            leaveTrace: false
+            bubbleUpCreateNew: true
+            vaultSelectionModeOnCreate: smart
+            fuzzThreshold: 0.2
+    insertNoteLink:
+        aliasMode: none
+        enableMultiSelect: false
+    insertNoteIndex:
+        enableMarker: false
+    randomNote: {}
+    copyNoteLink:
+        aliasMode: title
+    templateHierarchy: template
 workspace:
-  dendronVersion: 0.83.0
-  vaults:
-    - fsPath: dependencies/localhost/vault3
-      selfContained: true
-      name: vault3
-    - fsPath: vault2
-      visibility: private
-      siteUrl: https://vault2.com
-    - fsPath: vault
-    - fsPath: assets
-  journal:
-    dailyDomain: daily
-    name: journal
-    dateFormat: y.MM.dd
-    addBehavior: childOfCurrent
-  scratch:
-    name: scratch
-    dateFormat: y.MM.dd.HHmmss
-    addBehavior: asOwnDomain
-  graph:
-    zoomSpeed: 1
-    createStub: false
-  enableAutoCreateOnDefinition: false
-  enableXVaultWikiLink: false
-  enableRemoteVaultInit: true
-  workspaceVaultSyncMode: noCommit
-  enableAutoFoldFrontmatter: false
-  maxPreviewsCached: 10
-  maxNoteLength: 204800
-  task:
-    name: ""
-    dateFormat: ""
-    addBehavior: childOfCurrent
-    statusSymbols:
-      "": " "
-      wip: w
-      done: x
-      assigned: a
-      moved: m
-      blocked: b
-      delegated: l
-      dropped: d
-      pending: "y"
-    prioritySymbols:
-      H: high
-      M: medium
-      L: low
-    todoIntegration: false
-    createTaskSelectionType: selection2link
-    taskCompleteStatus:
-      - x
-      - done
-  enableUserTags: true
-  enableHashTags: true
-  enableEditorDecorations: true
-  enableFullHierarchyNoteTitle: false
-  enableSmartRefs: false
+    dendronVersion: 0.83.0
+    vaults:
+        -
+            fsPath: dependencies/localhost/vault3
+            selfContained: true
+            name: vault3
+        -
+            fsPath: vault2
+            visibility: private
+            siteUrl: https://vault2.com
+        -
+            fsPath: vault
+        -
+            fsPath: assets
+    journal:
+        dailyDomain: daily
+        name: journal
+        dateFormat: y.MM.dd
+        addBehavior: childOfCurrent
+    scratch:
+        name: scratch
+        dateFormat: y.MM.dd.HHmmss
+        addBehavior: asOwnDomain
+    graph:
+        zoomSpeed: 1
+        createStub: false
+    enableAutoCreateOnDefinition: false
+    enableXVaultWikiLink: false
+    enableRemoteVaultInit: true
+    workspaceVaultSyncMode: noCommit
+    enableAutoFoldFrontmatter: false
+    maxPreviewsCached: 10
+    maxNoteLength: 204800
+    task:
+        name: ''
+        dateFormat: ''
+        addBehavior: childOfCurrent
+        statusSymbols:
+            '': ' '
+            wip: w
+            done: x
+            assigned: a
+            moved: m
+            blocked: b
+            delegated: l
+            dropped: d
+            pending: 'y'
+        prioritySymbols:
+            H: high
+            M: medium
+            L: low
+        todoIntegration: false
+        createTaskSelectionType: selection2link
+        taskCompleteStatus:
+            - x
+            - done
+    enableUserTags: true
+    enableHashTags: true
+    enableEditorDecorations: true
+    enableFullHierarchyNoteTitle: false
+    enableSmartRefs: false
 preview:
   enableFMTitle: true
   enableNoteTitleForLink: true

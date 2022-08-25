@@ -54,6 +54,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   ) {
     super();
     this.key = commandId;
+    this.skipAnalytics = true;
 
     if (_.isFunction(trait)) {
       this.initTrait = trait;

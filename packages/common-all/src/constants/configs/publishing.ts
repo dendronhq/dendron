@@ -276,4 +276,9 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       desc: "EXPERIMENTAL: do not use",
     },
     giscus: GISCUS,
+    sidebarPath: {
+      label: "Path to sidebar config file",
+      desc: "Define custom sidebar",
+      value: undefined,
+    },
   };

@@ -256,7 +256,7 @@ export class EngineAPIService
     return this._internalEngine.writeSchema(schema);
   }
   init(): Promise<DEngineInitResp> {
-    this.setupEngineAnalyticsTracking();
+    // this.setupEngineAnalyticsTracking();
     return this._internalEngine.init();
   }
 
@@ -344,6 +344,7 @@ export class EngineAPIService
    * Setup telemetry tracking on engine events to understand user engagement
    * levels
    */
+  // @ts-ignore
   private setupEngineAnalyticsTracking() {
     this._engineEventEmitter.onEngineNoteStateChanged((entries) => {
       const createCount = extractNoteChangeEntriesByType(

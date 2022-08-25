@@ -153,7 +153,6 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   hide(): void {
     this.dispose();
   }
-<<<<<<< Updated upstream
   async lock(noteId?: string) {
     if (noteId) {
       this._lockedEditorNoteId = noteId;
@@ -163,16 +162,6 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         ctx: "lock preview",
         msg: "Did not find note to lock.",
       });
-=======
-  lock(fileName?: string) {
-    const activeTextEditor = VSCodeUtils.getActiveTextEditor();
-    const lockedEditorFileName = fileName ?? activeTextEditor?.document.fileName
-    if (lockedEditorFileName) {
-      this._lockedEditorFileName = lockedEditorFileName
-      this.sendLockMessage(this._panel, this.isLocked());
-    } else {
-      Logger.error({ ctx: "lock preview", msg: activeTextEditor ? "Did not find note to lock." : "No active texteditor found." });
->>>>>>> Stashed changes
     }
   }
   unlock() {
@@ -265,12 +254,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         case NoteViewMessageEnum.onLock: {
           const { data } = msg;
           Logger.debug({ ctx, "msg.type": "onLock" });
-<<<<<<< Updated upstream
           this.lock(data.id);
-=======
-          // TODO data.fName points only to the fileName but not the whole filePath. use note id instead and use engine.findNotes({ vault, fname }) to find note from fileName
-          this.lock(data.fName);
->>>>>>> Stashed changes
           break;
         }
         case NoteViewMessageEnum.onUnlock: {

@@ -105,6 +105,7 @@ export enum DNodeImplicitPropsEnum {
   schemaStub = "schemaStub",
   type = "type",
   custom = "custom",
+  links = "links",
 }
 
 /**

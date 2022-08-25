@@ -562,6 +562,7 @@ export class FileStorage implements DStore {
     const noteCache = new InMemoryNoteCache(allNotes);
 
     notesWithLinks.forEach((noteFrom) => {
+      let _noteToForErrorLog: NoteProps | undefined;
       try {
         noteFrom.links.forEach((link) => {
           const fname = link.to?.fname;
@@ -570,6 +571,7 @@ export class FileStorage implements DStore {
             const notes = noteCache.getNotesByFileNameIgnoreCase(fname);
 
             notes.forEach((noteTo: NoteProps) => {
+              _noteToForErrorLog = noteTo;
               NoteUtils.addBacklink({
                 from: noteFrom,
                 to: noteTo,
@@ -580,7 +582,14 @@ export class FileStorage implements DStore {
         });
       } catch (err: any) {
         const error = error2PlainObject(err);
-        this.logger.error({ error, noteFrom, message: "issue with backlinks" });
+        this.logger.error({
+          error,
+          noteFrom: NoteUtils.toLogObj(noteFrom),
+          noteTo: _noteToForErrorLog
+            ? NoteUtils.toLogObj(_noteToForErrorLog)
+            : null,
+          message: "issue with backlinks",
+        });
       }
     });
   }

@@ -808,7 +808,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       windows: "ctrl+shift+u",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
   },
   // --- Hooks
   CREATE_HOOK: {

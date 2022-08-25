@@ -7,6 +7,7 @@ import {
 } from "./NoteLookupCommand";
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import _ from "lodash";
+import { window } from "vscode";
 
 type CommandOpts = any;
 
@@ -28,8 +29,15 @@ export class CreateNoteCommand extends InputArgCommand<
 
     Logger.info({ ctx, msg: "enter", opts });
     const args: NoteLookupRunOpts = {};
+    /**
+     * If the command is ran from Tree View, update the initial value in lookup to
+     * selected tree item's fname
+     */
     if (this.isNotePropsArgs(opts)) {
       args.initialValue = opts.fname;
+      window.showInformationMessage(
+        "💡 Tip: Enter `Ctrl+L` / `Cmd+L` to open the lookup bar!"
+      );
     }
     return {
       lookup: AutoCompletableRegistrar.getNoteLookupCmd().run(args),

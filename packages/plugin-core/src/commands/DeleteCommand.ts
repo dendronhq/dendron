@@ -68,10 +68,16 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     return nodePosition?.end.line;
   }
 
+  /**
+   * When Delete Command is ran from Tree view, it gets Noteprops as args
+   */
   private isNotePropsArgs(opts: CommandOpts) {
     return !_.isEmpty(opts) && opts.id;
   }
 
+  /**
+   * When Delete Command is ran from explorer menu, it gets Uri as args
+   */
   private isUriArgs(opts: CommandOpts) {
     return !_.isEmpty(opts) && opts.fsPath;
   }

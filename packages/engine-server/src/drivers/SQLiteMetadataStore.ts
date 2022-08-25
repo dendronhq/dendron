@@ -205,7 +205,8 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
       (ent) => ent.fsPath
     );
 
-    const sqlBegin = "INSERT INTO 'Note' ('fname', 'id', 'dVaultId') VALUES ";
+    const sqlBegin =
+      "INSERT OR REPLACE INTO 'Note' ('fname', 'id', 'dVaultId') VALUES ";
     const sqlEnd = _.values(notesIdDict)
       .map(({ fname, id, vault }) => {
         const maybeVault = allVaultsMap[vault.fsPath];
@@ -223,6 +224,8 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
       // uncomment to log
       // console.log("---> ERROR START");
       // console.log(fullQuery);
+      // // eslint-disable-next-line global-require
+      // const fs = require("fs-extra");
       // fs.writeFileSync("/tmp/query.txt", fullQuery);
       // console.log("---> ERROR END");
       throw error;

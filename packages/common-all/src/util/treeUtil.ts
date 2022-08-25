@@ -85,6 +85,7 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict;
   }): TreeMenuNode | undefined {
     const note = noteDict[noteId];
+    const fm = PublishUtils.getPublishFM(note);
 
     // return children of the current note
     const getChildren = () => {
@@ -120,7 +121,6 @@ export class TreeUtils {
     } else if (note.stub) {
       icon = TreeMenuNodeIcon.plusOutlined;
     }
-    const fm = PublishUtils.getPublishFM(note);
 
     return {
       key: note.id,

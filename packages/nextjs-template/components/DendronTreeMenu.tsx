@@ -64,7 +64,7 @@ export default function DendronTreeMenu(
     return null;
   }
 
-  const roots: DataNode[] = TreeViewUtils.treeMenuNode2DataNode({
+  const roots = TreeViewUtils.treeMenuNode2DataNode({
     roots: tree.roots,
     showVaultName: false,
     applyNavExclude: true,

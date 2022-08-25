@@ -34,7 +34,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
     );
 
     let serverLastLines: string = "";
-    if (!(await fs.pathExists(serverLogPath))) {
+    if (fs.pathExistsSync(serverLogPath)) {
       const serverLogFile = fs.readFileSync(serverLogPath, {
         encoding: "utf8",
       });

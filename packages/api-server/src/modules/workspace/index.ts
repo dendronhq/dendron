@@ -6,10 +6,10 @@ import {
   WorkspaceSyncPayload,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
-import { DConfig, DendronEngineV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
 
 export class WorkspaceController {
   static singleton?: WorkspaceController;

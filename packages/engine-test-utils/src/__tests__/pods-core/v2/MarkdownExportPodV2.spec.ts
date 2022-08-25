@@ -13,7 +13,7 @@ import {
   NOTE_PRESETS_V4,
   RunEngineTestFunctionOpts,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import {
   MarkdownExportPodV2,
   MarkdownExportReturnType,

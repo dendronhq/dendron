@@ -5,10 +5,9 @@ import {
   FOLDERS,
   NoteProps,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { DConfig, tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
-  DConfig,
   SeedService,
   SyncActionStatus,
   WorkspaceService,

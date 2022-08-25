@@ -1,4 +1,4 @@
-import { vault2Path } from "@dendronhq/common-server";
+import { DConfig, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -11,7 +11,6 @@ import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { test, before } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
 import { MessageItem, window } from "vscode";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";

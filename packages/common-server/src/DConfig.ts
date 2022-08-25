@@ -19,12 +19,12 @@ import {
   RespV3,
   StrictConfigV5,
 } from "@dendronhq/common-all";
-import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
+import { readYAML, writeYAML, writeYAMLAsync } from "./files";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",

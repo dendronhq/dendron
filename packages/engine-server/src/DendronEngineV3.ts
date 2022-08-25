@@ -73,6 +73,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  DConfig,
   DLogger,
   getDurationMilliseconds,
   NodeJSUtils,
@@ -81,7 +82,6 @@ import {
 import _ from "lodash";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-import { DConfig } from "./config";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
 import { FileStorage } from "./drivers/file/storev2";

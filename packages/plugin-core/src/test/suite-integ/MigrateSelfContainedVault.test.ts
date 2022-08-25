@@ -20,8 +20,8 @@ import {
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
-import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
-import { pathForVaultRoot } from "@dendronhq/common-server";
+import { WorkspaceService } from "@dendronhq/engine-server";
+import { DConfig, pathForVaultRoot } from "@dendronhq/common-server";
 
 function stubMigrateQuickPick(
   vaultSelect: string,

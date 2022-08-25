@@ -4,7 +4,7 @@ import {
   DendronSiteConfig,
   getStage,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,

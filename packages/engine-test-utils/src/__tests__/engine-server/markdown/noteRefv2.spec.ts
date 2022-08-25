@@ -12,7 +12,7 @@ import {
   PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";

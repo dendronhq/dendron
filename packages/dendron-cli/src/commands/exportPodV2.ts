@@ -30,8 +30,9 @@ import { enrichPodArgs, PodCLIOpts, setupPodArgs } from "./podsV2";
 import { setupEngineArgs, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 import Airtable from "@dendronhq/airtable";
 import _ from "lodash";
-import { DConfig, EngineUtils, openPortFile } from "@dendronhq/engine-server";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import clipboard from "clipboardy";
+import { DConfig } from "@dendronhq/common-server";
 
 export { CommandCLIOpts as ExportPodV2CLIOpts };
 

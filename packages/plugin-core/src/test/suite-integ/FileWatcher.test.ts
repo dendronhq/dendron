@@ -1,5 +1,5 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS_MULTI,
   TestConfigUtils,

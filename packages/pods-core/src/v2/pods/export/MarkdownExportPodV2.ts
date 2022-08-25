@@ -24,8 +24,7 @@ import {
   RunnableMarkdownV2PodConfig,
 } from "../../..";
 import { PodExportScope } from "../..";
-import { createDisposableLogger } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
+import { createDisposableLogger, DConfig } from "@dendronhq/common-server";
 
 /**
  * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).

@@ -32,7 +32,7 @@ import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { delayedFrontmatterWarning } from "../utils/frontmatter";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 
 /** Wait this long in miliseconds before trying to update decorations when a command forces a decoration update. */
 const DECORATION_UPDATE_DELAY = 100;

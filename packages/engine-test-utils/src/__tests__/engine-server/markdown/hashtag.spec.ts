@@ -26,7 +26,7 @@ import {
 import { TestConfigUtils } from "../../..";
 import { TestUnifiedUtils } from "../../../utils";
 import { getOpts, runTestCases } from "./v5/utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 
 const { getDescendantNode } = TestUnifiedUtils;
 

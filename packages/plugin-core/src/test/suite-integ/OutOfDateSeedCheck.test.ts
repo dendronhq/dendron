@@ -1,4 +1,4 @@
-import { tmpDir } from "@dendronhq/common-server";
+import { DConfig, tmpDir } from "@dendronhq/common-server";
 import { before } from "mocha";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
@@ -6,7 +6,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { SinonStubbedFn } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TestSeedUtils } from "@dendronhq/engine-test-utils";
-import { DConfig, SeedService } from "@dendronhq/engine-server";
+import { SeedService } from "@dendronhq/engine-server";
 import sinon from "sinon";
 import {
   detectOutOfDateSeeds,

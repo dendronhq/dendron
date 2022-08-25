@@ -1,4 +1,4 @@
-import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import { WorkspaceService } from "@dendronhq/engine-server";
 import {
   DendronError,
   DVault,
@@ -8,6 +8,7 @@ import {
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
+import { DConfig } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   wsRoot: string;

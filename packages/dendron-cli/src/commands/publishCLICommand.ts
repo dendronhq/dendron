@@ -7,7 +7,7 @@ import {
   getStage,
   Stage,
 } from "@dendronhq/common-all";
-import { DConfig, SiteUtils } from "@dendronhq/engine-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,
@@ -26,7 +26,7 @@ import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
 import ora from "ora";
-import { GitUtils } from "@dendronhq/common-server";
+import { DConfig, GitUtils } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;

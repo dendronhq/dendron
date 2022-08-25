@@ -20,6 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
+  DConfig,
   isSelfContainedVaultFolder,
   pathForVaultRoot,
 } from "@dendronhq/common-server";
@@ -28,7 +29,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DEPRECATED_PATHS, Git, WorkspaceService } from "..";
-import { DConfig } from "../config";
 import {
   ProcMode,
   MDUtilsV5,

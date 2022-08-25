@@ -53,10 +53,9 @@ import {
   EngineEventEmitter,
   NoteIndexProps,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger } from "@dendronhq/common-server";
+import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import {
   NoteIndexLightProps,

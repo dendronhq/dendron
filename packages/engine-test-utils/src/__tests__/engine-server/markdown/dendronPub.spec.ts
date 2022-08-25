@@ -7,7 +7,7 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTData,
   DendronASTDest,

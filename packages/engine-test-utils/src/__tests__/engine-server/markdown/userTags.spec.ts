@@ -1,5 +1,5 @@
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTTypes,

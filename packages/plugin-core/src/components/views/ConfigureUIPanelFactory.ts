@@ -4,7 +4,7 @@ import {
   DendronEditorViewKey,
   getWebEditorViewEntry,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { ConfigureCommand } from "../../commands/ConfigureCommand";
 import { WebViewUtils } from "../../views/utils";

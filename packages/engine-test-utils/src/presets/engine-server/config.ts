@@ -1,7 +1,6 @@
 import { CONSTANTS, ConfigUtils } from "@dendronhq/common-all";
-import { readYAML, writeYAML } from "@dendronhq/common-server";
+import { DConfig, readYAML, writeYAML } from "@dendronhq/common-server";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
 import path from "path";
 
 function genDefaultConfig() {

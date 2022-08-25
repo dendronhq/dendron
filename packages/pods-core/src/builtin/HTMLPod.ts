@@ -1,5 +1,5 @@
 import { ConfigUtils } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";

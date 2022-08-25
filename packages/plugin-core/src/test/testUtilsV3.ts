@@ -18,6 +18,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
+  DConfig,
   note2File,
   readYAML,
   schemaModuleOpts2File,
@@ -32,7 +33,6 @@ import {
   PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import {
-  DConfig,
   DendronEngineClient,
   DendronEngineV2,
   Git,

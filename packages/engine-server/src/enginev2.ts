@@ -62,10 +62,14 @@ import {
   WorkspaceOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger, NodeJSUtils } from "@dendronhq/common-server";
+import {
+  createLogger,
+  DConfig,
+  DLogger,
+  NodeJSUtils,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 import { EngineUtils } from ".";
-import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import {
   AnchorUtils,

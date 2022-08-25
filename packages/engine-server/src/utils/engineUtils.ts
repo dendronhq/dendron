@@ -14,7 +14,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { AnchorUtils, LinkUtils } from "@dendronhq/unified";
-import { DConfig } from "../config";
+import { DConfig } from "@dendronhq/common-server";
 
 export function openPortFile({ fpath }: { fpath: string }): number {
   return _.toInteger(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));

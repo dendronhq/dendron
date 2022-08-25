@@ -9,8 +9,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { isInsidePath } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, isInsidePath } from "@dendronhq/common-server";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";

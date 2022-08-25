@@ -7,7 +7,12 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
+import {
+  cleanFileName,
+  DConfig,
+  readMD,
+  vault2Path,
+} from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -37,7 +42,6 @@ import {
 } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { PodUtils } from "../utils";
-import { DConfig } from "@dendronhq/engine-server";
 
 const ID = "dendron.markdown";
 

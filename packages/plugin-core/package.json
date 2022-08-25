@@ -825,7 +825,7 @@
         },
         {
           "command": "dendron.copyNoteURL",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.createHook",

@@ -469,7 +469,7 @@ export class ExtensionUtils {
     try {
       // infer install path from non-built-in extension paths
       const installPaths = allNonBuiltInExtensions.map((ext) => {
-        // some-dir/extensions/extension-basename
+        // vscode-dot-dir-path/extensions/extension-basename
         // stripping out last two levels
         return Utils.dirname(Utils.dirname(URI.file(ext.extensionPath))).fsPath;
       });
@@ -482,6 +482,7 @@ export class ExtensionUtils {
         installPath = installPaths[0];
       } else {
         // fail-safe case using current extension context
+        // NOTE: this will not be accurate in dev mode
         installPath = Utils.dirname(
           Utils.dirname(URI.file(ext.context.extensionPath))
         ).fsPath;

@@ -7179,6 +7179,11 @@ batch@0.6.1:
   resolved "https://registry.npmjs.org/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha1-3DQxT05nkxgJP8dgJyUl+UvyXBY=
 
+bcp-47-match@^1.0.0:
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/bcp-47-match/-/bcp-47-match-1.0.3.tgz#cb8d03071389a10aff2062b862d6575ffd7cd7ef"
+  integrity sha512-LggQ4YTdjWQSKELZF5JwchnBa1u0pIQSZf5lSdOHEdbVP55h0qICA/FUp3+W99q0xqxYa1ZQizTUH87gecII5w==
+
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.2.tgz#a4301d389b6a43f9b67ff3ca11a3f6637e360e9e"
@@ -10695,6 +10700,11 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
+direction@^1.0.0:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/direction/-/direction-1.0.4.tgz#2b86fb686967e987088caf8b89059370d4837442"
+  integrity sha512-GYqKi1aH7PJXxdhTeZBFrg8vUBeKXi+cNprXsC1kpJcbcVnV9wBsrOu1cQEdG0WeQwlfHiy3XvnKfIrJ2R0NzQ==
+
 dns-equal@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/dns-equal/-/dns-equal-1.0.0.tgz#b39e7f1da6eb0a75ba9c17324b34753c47e0654d"
@@ -13687,7 +13697,7 @@ hast-util-is-element@^1.0.0:
   resolved "https://registry.npmjs.org/hast-util-is-element/-/hast-util-is-element-1.1.0.tgz#3b3ed5159a2707c6137b48637fbfe068e175a425"
   integrity sha512-oUmNua0bFbdrD/ELDSSEadRVtWZOf3iF6Lbv81naqsIV99RnSCieTbWuWCY8BAeEfKJTKl0gRdokv+dELutHGQ==
 
-hast-util-parse-selector@^2.0.0:
+hast-util-parse-selector@^2.0.0, hast-util-parse-selector@^2.2.4:
   version "2.2.5"
   resolved "https://registry.npmjs.org/hast-util-parse-selector/-/hast-util-parse-selector-2.2.5.tgz#d57c23f4da16ae3c63b3b6ca4616683313499c3a"
   integrity sha512-7j6mrk/qqkSehsM92wQjdIgWM2/BW61u/53G6xmC8i1OmEdKLHbk419QKQUjz6LglWsfqoiHmyMRkP1BGjecNQ==
@@ -13707,6 +13717,26 @@ hast-util-raw@^6.1.0:
     vfile "^4.0.0"
     web-namespaces "^1.0.0"
     xtend "^4.0.0"
+    zwitch "^1.0.0"
+
+hast-util-select@^4.0.0:
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/hast-util-select/-/hast-util-select-4.0.2.tgz#ae3ef2860e02cda2ad3a2e72b47c1f5e8f44e9e7"
+  integrity sha512-8EEG2//bN5rrzboPWD2HdS3ugLijNioS1pqOTIolXNf67xxShYw4SQEmVXd3imiBG+U2bC2nVTySr/iRAA7Cjg==
+  dependencies:
+    bcp-47-match "^1.0.0"
+    comma-separated-tokens "^1.0.0"
+    css-selector-parser "^1.0.0"
+    direction "^1.0.0"
+    hast-util-has-property "^1.0.0"
+    hast-util-is-element "^1.0.0"
+    hast-util-to-string "^1.0.0"
+    hast-util-whitespace "^1.0.0"
+    not "^0.1.0"
+    nth-check "^2.0.0"
+    property-information "^5.0.0"
+    space-separated-tokens "^1.0.0"
+    unist-util-visit "^2.0.0"
     zwitch "^1.0.0"
 
 hast-util-to-html@^7.1.1:
@@ -22460,6 +22490,15 @@ rehype-stringify@^8.0.0:
   integrity sha512-VkIs18G0pj2xklyllrPSvdShAV36Ff3yE5PUO9u36f6+2qJFnn22Z5gKwBOwgXviux4UC7K+/j13AnZfPICi/g==
   dependencies:
     hast-util-to-html "^7.1.1"
+
+rehype-wrap@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.npmjs.org/rehype-wrap/-/rehype-wrap-1.0.10.tgz#cefb113a4687a5be13ee4d036497ebb8f842577b"
+  integrity sha512-gI4/T6TmIHxEu+z+2QaGVJJ+4vD26Q9sXxYHZzIG3byv1GsAz37nmp6fdCVzrRE9YcnsVeA/THJwlJcCu5fUDQ==
+  dependencies:
+    hast-util-parse-selector "^2.2.4"
+    hast-util-select "^4.0.0"
+    unist-util-visit "^2.0.3"
 
 relateurl@^0.2.7:
   version "0.2.7"

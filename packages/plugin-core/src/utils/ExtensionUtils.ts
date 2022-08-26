@@ -498,7 +498,7 @@ export class ExtensionUtils {
       if (birthTimeMap && birthTimeMap.size > 0) {
         _.set(
           trackProps,
-          "codeFolderCreated",
+          "codeFoldersCreated",
           JSON.stringify(Object.fromEntries(birthTimeMap))
         );
       }

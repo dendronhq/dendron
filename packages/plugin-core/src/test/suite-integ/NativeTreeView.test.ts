@@ -117,7 +117,6 @@ suite("NativeTreeView tests", function () {
             genRandomId: true,
           });
         },
-        timeout: 1e6,
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {

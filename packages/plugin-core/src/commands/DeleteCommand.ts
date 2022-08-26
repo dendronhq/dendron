@@ -20,6 +20,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { InputArgCommand } from "./base";
 
@@ -67,14 +68,6 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
 
     return nodePosition?.end.line;
   }
-
-  /**
-   * When Delete Command is ran from Tree view, it gets Noteprops as args
-   */
-  private isNotePropsArgs(opts: CommandOpts) {
-    return !_.isEmpty(opts) && opts.id;
-  }
-
   /**
    * When Delete Command is ran from explorer menu, it gets Uri as args
    */
@@ -188,7 +181,8 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     const engine = ExtensionProvider.getEngine();
     const ctx = "DeleteNoteCommand";
 
-    if (this.isNotePropsArgs(opts)) {
+    if (NoteUtils.isNoteProps(opts)) {
+      AnalyticsUtils.track(this.key, { source: "TreeView" });
       const out = this.deleteNote({ note: opts, opts, engine, ctx });
       return out;
     } else {

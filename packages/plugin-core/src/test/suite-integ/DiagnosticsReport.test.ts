@@ -28,7 +28,7 @@ suite("GIVEN DiagnosticsReport", function () {
         const body = editor?.document.getText() as string;
         const isInString = await AssertUtils.assertInString({
           body,
-          match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
+          match: ["foobar", "Dendron Config", "Plugin Logs", "Workspace File"],
         });
         expect(isInString).toBeTruthy();
       });

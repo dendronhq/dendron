@@ -32,11 +32,17 @@ export class DiagnosticsReportCommand extends BasicCommand<
       path.dirname(logPath),
       "dendron.server.log"
     );
-    const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
-    const serverLastLines = serverLogFile.slice(-3000);
+
+    let serverLastLines: string = "";
+    if (fs.pathExistsSync(serverLogPath)) {
+      const serverLogFile = fs.readFileSync(serverLogPath, {
+        encoding: "utf8",
+      });
+      serverLastLines = serverLogFile.slice(-5000);
+    }
 
     const ext = ExtensionProvider.getExtension();
-    const config = ext.getDWorkspace().config;
+    const config = ext.getDWorkspace().config.toString();
     const port = ext.port;
 
     let wsFile: string;
@@ -56,7 +62,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       "---",
       "# Server Logs",
       serverLastLines,
-      "# Dendron Confg",
+      "# Dendron Config",
       config,
       "# Port",
       port,

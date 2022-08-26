@@ -19,6 +19,7 @@ export type TreeMenuNode = {
   vaultName: string;
   navExclude: boolean;
   children?: TreeMenuNode[];
+  contextValue?: string;
 };
 
 export type TreeMenu = {

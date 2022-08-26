@@ -8,6 +8,9 @@
 .main-content {
   line-height: $content-line-height;
 
+  /* to protect the layout to break from long words */
+  overflow-wrap: break-word;
+
   ol,
   ul,
   dl,
@@ -244,7 +247,7 @@ a.fn {
   margin-left: 1rem;
 }
 
-.table-responsible {
+.table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }

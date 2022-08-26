@@ -26,6 +26,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { homedir } from "os";
 import { CONFIG, DendronContext } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -35,6 +36,7 @@ import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { URI } from "vscode-uri";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -397,6 +399,7 @@ export class ExtensionUtils {
     const previewTheme = dendronConfig?.preview?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
+
     const trackProps = {
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
@@ -439,6 +442,70 @@ export class ExtensionUtils {
     if (previewTheme !== undefined) {
       _.set(trackProps, "previewTheme", previewTheme);
     }
+
+    try {
+      const allExtensions = vscode.extensions.all;
+      const extensionsDetail = allExtensions
+        .filter((extension) => {
+          return !extension.packageJSON.isBuiltin;
+        })
+        .map((extension) => {
+          const { packageJSON } = extension;
+          const { id, version } = packageJSON;
+          return { id, version };
+        });
+      if (extensionsDetail && extensionsDetail.length > 0) {
+        _.set(trackProps, "extensionsDetail", JSON.stringify(extensionsDetail));
+        _.set(trackProps, "numExtensions", extensionsDetail.length);
+      }
+    } catch (error) {
+      // something went wrong don't track extension detail
+    }
+
+    try {
+      const VSCODE_INSTALLATIONS = [
+        ".vscode",
+        ".vscode-insiders",
+        ".vscode-oss",
+        ".vscode-server",
+      ];
+
+      const birthTimes = VSCODE_INSTALLATIONS.map((installation) => {
+        try {
+          const homeDir = homedir();
+          const uri = URI.file(`${homeDir}/${installation}`).fsPath;
+          const fd = fs.openSync(uri, "r");
+          const stat = fs.fstatSync(fd);
+          // some file systems don't track birth times.
+          // in this case the value may be ctime (time of inode change), or 0
+          const { birthtimeMs } = stat;
+          return { installation, birthtimeMs };
+        } catch (error) {
+          // gracefully handle it and move on
+          return undefined;
+        }
+      }).filter(
+        (item): item is { installation: string; birthtimeMs: number } => {
+          return item !== undefined;
+        }
+      );
+
+      const birthTimeMap = new Map(
+        birthTimes.map((item) => {
+          return [item.installation, item.birthtimeMs];
+        })
+      );
+      if (birthTimeMap && birthTimeMap.size > 0) {
+        _.set(
+          trackProps,
+          "codeFolderCreated",
+          JSON.stringify(Object.fromEntries(birthTimeMap))
+        );
+      }
+    } catch (error) {
+      // something went wrong don't track birthtime
+    }
+
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
     if (maybeLocalConfig.data) {
       trackProps.hasLocalConfig = true;

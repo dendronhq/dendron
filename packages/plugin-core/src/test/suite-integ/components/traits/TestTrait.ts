@@ -31,8 +31,5 @@ export class TestTrait implements NoteTrait {
     setTemplate: () => {
       return this.template;
     },
-    // setVault: () => {
-    //   return "";
-    // },
   };
 }

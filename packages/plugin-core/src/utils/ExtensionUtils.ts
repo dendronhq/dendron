@@ -26,7 +26,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { homedir } from "os";
 import { CONFIG, DendronContext } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
@@ -36,7 +35,7 @@ import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { URI } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -443,17 +442,22 @@ export class ExtensionUtils {
       _.set(trackProps, "previewTheme", previewTheme);
     }
 
+    const allExtensions = vscode.extensions.all;
+    let allNonBuiltInExtensions = allExtensions.filter((extension) => {
+      return !extension.packageJSON.isBuiltin;
+    });
+    if (VSCodeUtils.isDevMode()) {
+      // done to make this work during dev mode
+      allNonBuiltInExtensions = allNonBuiltInExtensions.filter((ext) => {
+        return !ext.extensionPath.includes("packages/plugin-core");
+      });
+    }
     try {
-      const allExtensions = vscode.extensions.all;
-      const extensionsDetail = allExtensions
-        .filter((extension) => {
-          return !extension.packageJSON.isBuiltin;
-        })
-        .map((extension) => {
-          const { packageJSON } = extension;
-          const { id, version } = packageJSON;
-          return { id, version };
-        });
+      const extensionsDetail = allNonBuiltInExtensions.map((extension) => {
+        const { packageJSON } = extension;
+        const { id, version } = packageJSON;
+        return { id, version };
+      });
       if (extensionsDetail && extensionsDetail.length > 0) {
         _.set(trackProps, "extensionsDetail", JSON.stringify(extensionsDetail));
         _.set(trackProps, "numExtensions", extensionsDetail.length);
@@ -463,47 +467,35 @@ export class ExtensionUtils {
     }
 
     try {
-      const VSCODE_INSTALLATIONS = [
-        ".vscode",
-        ".vscode-insiders",
-        ".vscode-oss",
-        ".vscode-server",
-      ];
+      // infer install path from non-built-in extension paths
+      const installPaths = allNonBuiltInExtensions.map((ext) => {
+        // some-dir/extensions/extension-basename
+        // stripping out last two levels
+        return Utils.dirname(Utils.dirname(URI.file(ext.extensionPath))).fsPath;
+      });
 
-      const birthTimes = VSCODE_INSTALLATIONS.map((installation) => {
-        try {
-          const homeDir = homedir();
-          const uri = URI.file(`${homeDir}/${installation}`).fsPath;
-          const fd = fs.openSync(uri, "r");
-          const stat = fs.fstatSync(fd);
-          // some file systems don't track birth times.
-          // in this case the value may be ctime (time of inode change), or 0
-          const { birthtimeMs } = stat;
-          return { installation, birthtimeMs };
-        } catch (error) {
-          // gracefully handle it and move on
-          return undefined;
-        }
-      }).filter(
-        (item): item is { installation: string; birthtimeMs: number } => {
-          return item !== undefined;
-        }
-      );
-
-      const birthTimeMap = new Map(
-        birthTimes.map((item) => {
-          return [item.installation, item.birthtimeMs];
-        })
-      );
-      if (birthTimeMap && birthTimeMap.size > 0) {
-        _.set(
-          trackProps,
-          "codeFoldersCreated",
-          JSON.stringify(Object.fromEntries(birthTimeMap))
-        );
+      const pathSet = new Set(installPaths);
+      // make sure every element of install paths are identical.
+      // otherwise the inferred path is not correct
+      let installPath: string;
+      if (pathSet.size === 1) {
+        installPath = installPaths[0];
+      } else {
+        // fail-safe case using current extension context
+        installPath = Utils.dirname(
+          Utils.dirname(URI.file(ext.context.extensionPath))
+        ).fsPath;
+      }
+      const fd = fs.openSync(installPath, "r");
+      const stat = fs.fstatSync(fd);
+      // some file systems don't track birth times.
+      // in this case the value may be ctime (time of inode change), or 0
+      const { birthtimeMs } = stat;
+      if (birthtimeMs) {
+        _.set(trackProps, "codeFolderCreated", birthtimeMs);
       }
     } catch (error) {
-      // something went wrong don't track birthtime
+      // something went wrong. don't track
     }
 
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);

@@ -10,13 +10,15 @@ import {
 } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { describe, beforeEach } from "mocha";
+import { describe, beforeEach, afterEach } from "mocha";
 import vscode from "vscode";
 import { expect } from "../testUtilsv2";
 import { MoveHeaderCommand } from "../../commands/MoveHeader";
 import _ from "lodash";
-import { WSUtils } from "../../WSUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { NotePickerUtils } from "../../components/lookup/NotePickerUtils";
+import sinon from "sinon";
+import { WSUtilsV2 } from "../../WSUtilsV2";
 
 suite("MoveHeader", function () {
   const ctx = setupBeforeAfter(this);
@@ -60,16 +62,37 @@ suite("MoveHeader", function () {
       };
     });
 
+    afterEach(() => {
+      sinon.restore();
+    });
+
     describe("WHEN header is selected", () => {
       let onInitFunc: Function;
       beforeEach(() => {
         onInitFunc = (nextFunc: Function) => {
           return async () => {
-            const editor = await WSUtils.openNote(originNote);
+            const ext = ExtensionProvider.getExtension();
+            const editor = await new WSUtilsV2(ext).openNote(originNote);
             editor.selection = new vscode.Selection(7, 0, 7, 0);
             nextFunc();
           };
         };
+      });
+
+      test("THEN the initial value is filled in with the current hierarchy", (done) => {
+        runLegacyMultiWorkspaceTest({
+          ctx,
+          preSetupHook,
+          onInit: onInitFunc(async () => {
+            const cmd = new MoveHeaderCommand();
+            const gatherOut = await cmd.gatherInputs({
+              nonInteractive: true,
+            });
+
+            expect(gatherOut?.dest?.fname).toEqual(originNote.fname);
+            done();
+          }),
+        });
       });
 
       describe("AND WHEN existing item is selected for destination", () => {
@@ -78,9 +101,11 @@ suite("MoveHeader", function () {
             ctx,
             preSetupHook,
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("dest");
               const cmd = new MoveHeaderCommand();
               const gatherOut = await cmd.gatherInputs({
-                initialValue: "dest",
                 nonInteractive: true,
               });
 
@@ -97,10 +122,12 @@ suite("MoveHeader", function () {
             ctx,
             preSetupHook,
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("new-note");
               const cmd = new MoveHeaderCommand();
               const out = await cmd.run({
                 useSameVault: true,
-                initialValue: "new-note",
                 nonInteractive: true,
               });
               const { engine, vaults } = ExtensionProvider.getDWorkspace();
@@ -152,9 +179,11 @@ suite("MoveHeader", function () {
               });
             },
             onInit: onInitFunc(async () => {
+              sinon
+                .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+                .returns("dest");
               const cmd = new MoveHeaderCommand();
               const out = await cmd.run({
-                initialValue: "dest",
                 useSameVault: true,
                 nonInteractive: true,
               });
@@ -171,9 +200,12 @@ suite("MoveHeader", function () {
           ctx,
           preSetupHook,
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
+
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -189,9 +221,11 @@ suite("MoveHeader", function () {
           ctx,
           preSetupHook,
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -232,9 +266,11 @@ suite("MoveHeader", function () {
             });
           },
           onInit: onInitFunc(async () => {
+            sinon
+              .stub(NotePickerUtils, "getInitialValueFromOpenEditor")
+              .returns("dest");
             const cmd = new MoveHeaderCommand();
             const out = await cmd.run({
-              initialValue: "dest",
               useSameVault: true,
               nonInteractive: true,
             });
@@ -262,7 +298,8 @@ suite("MoveHeader", function () {
     describe("WHEN header is not select", () => {
       const onInitFunc = (nextFunc: Function) => {
         return async () => {
-          const editor = await WSUtils.openNote(originNote);
+          const ext = ExtensionProvider.getExtension();
+          const editor = await new WSUtilsV2(ext).openNote(originNote);
           editor.selection = new vscode.Selection(8, 0, 8, 0);
           nextFunc();
         };
@@ -277,7 +314,6 @@ suite("MoveHeader", function () {
             let wasThrown = false;
             try {
               out = await cmd.gatherInputs({
-                initialValue: "dest",
                 useSameVault: true,
                 nonInteractive: true,
               });

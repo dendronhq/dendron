@@ -40,6 +40,7 @@ import {
 } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
@@ -53,7 +54,6 @@ import { BasicCommand } from "./base";
 
 type CommandInput =
   | {
-      initialValue?: string;
       nonInteractive?: boolean;
       useSameVault?: boolean;
     }
@@ -190,7 +190,7 @@ export class MoveHeaderCommand extends BasicCommand<
       title: "Select note to move header to",
       placeholder: "note",
       provider: lookupProvider,
-      initialValue: opts?.initialValue,
+      initialValue: NotePickerUtils.getInitialValueFromOpenEditor(),
       nonInteractive: opts?.nonInteractive,
     });
     return lookupController;

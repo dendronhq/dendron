@@ -262,6 +262,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           this.unlock();
           break;
         }
+        case DMessageEnum.ON_UPDATE_PREVIEW_HTML:
+          break;
         default:
           assertUnreachable(msg.type);
       }

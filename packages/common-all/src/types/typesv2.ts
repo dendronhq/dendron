@@ -804,6 +804,7 @@ export enum DMessageEnum {
    */
   INIT = "init",
   ON_DID_CHANGE_ACTIVE_TEXT_EDITOR = "onDidChangeActiveTextEditor",
+  ON_UPDATE_PREVIEW_HTML = "onUpdatePreviewHTML",
   MESSAGE_DISPATCHER_READY = "messageDispatcherReady",
 }
 
@@ -895,6 +896,11 @@ export type OnDidChangeActiveTextEditorData = {
   activeNote?: NoteProps;
 };
 
+export type OnUpdatePreviewHTMLData = {
+  note: NoteProps; // TODO: Change to NotePropsMeta
+  html: string;
+};
+
 export type NoteViewMessageType = DMessageEnum | NoteViewMessageEnum;
 
 export type GraphViewMessageType = DMessageEnum | GraphViewMessageEnum;
@@ -908,6 +914,11 @@ export type VSCodeMessage = DMessage;
 export type OnDidChangeActiveTextEditorMsg = DMessage<
   "onDidChangeActiveTextEditor",
   OnDidChangeActiveTextEditorData
+>;
+
+export type OnUpdatePreviewHTMLMsg = DMessage<
+  DMessageEnum.ON_UPDATE_PREVIEW_HTML,
+  OnUpdatePreviewHTMLData
 >;
 
 export type GraphViewMessage = DMessage<

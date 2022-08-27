@@ -1,12 +1,8 @@
 import {
   assertUnreachable,
   DendronError,
-  DendronPublishingConfig,
-  DVault,
   ERROR_STATUS,
-  IntermediateDendronConfig,
   NoteProps,
-  NotePropsByIdDict,
   ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -31,16 +27,15 @@ import remark2rehype from "remark-rehype";
 import { Processor } from "unified";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
-import { BacklinkOpts, backlinksHover } from "./remark/backlinksHover";
+import { backlinksHover } from "./remark/backlinksHover";
 import { blockAnchors } from "./remark/blockAnchors";
 import { dendronHoverPreview } from "./remark/dendronPreview";
-import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
+import { dendronPub } from "./remark/dendronPub";
 import { extendedImage } from "./remark/extendedImage";
 import { hashtags } from "./remark/hashtag";
 // import { noteRefsV2 } from "./remark/noteRefsV2";
-import { URI } from "vscode-uri";
 import { userTags } from "./remark/userTags";
-import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
+import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import {
   MDUtilsV5,
@@ -104,27 +99,27 @@ import {
 //   noteRefLvl: number;
 // };
 
-function checkProps({
-  requiredProps,
-  data,
-}: {
-  requiredProps: string[];
-  data: any;
-}): { valid: true } | { valid: false; missing: string[] } {
-  const hasAllProps = _.map(requiredProps, (prop) => {
-    // @ts-ignore
-    return !_.isUndefined(data[prop]);
-  });
-  if (!_.every(hasAllProps)) {
-    // @ts-ignore
-    const missing = _.filter(requiredProps, (prop) =>
-      // @ts-ignore
-      _.isUndefined(data[prop])
-    );
-    return { valid: false, missing };
-  }
-  return { valid: true };
-}
+// function checkProps({
+//   requiredProps,
+//   data,
+// }: {
+//   requiredProps: string[];
+//   data: any;
+// }): { valid: true } | { valid: false; missing: string[] } {
+//   const hasAllProps = _.map(requiredProps, (prop) => {
+//     // @ts-ignore
+//     return !_.isUndefined(data[prop]);
+//   });
+//   if (!_.every(hasAllProps)) {
+//     // @ts-ignore
+//     const missing = _.filter(requiredProps, (prop) =>
+//       // @ts-ignore
+//       _.isUndefined(data[prop])
+//     );
+//     return { valid: false, missing };
+//   }
+//   return { valid: true };
+// }
 
 export class MDUtilsV5Web {
   private static setProcData(
@@ -179,15 +174,16 @@ export class MDUtilsV5Web {
       .use(footnotes)
       .use(variables)
       .use(backlinksHover, data.backlinkHoverOpts)
+      .use(wikiLinks)
       .data("errors", errors);
-
+    //JYTODO: Is below wikilnk proc being use?
     //do not convert wikilinks if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
-    if (
-      _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
-      data.wikiLinksOpts?.convertLinks
-    ) {
-      proc = proc.use(wikiLinks, data.wikiLinksOpts);
-    }
+    // if (
+    //   _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
+    //   data.wikiLinksOpts?.convertLinks
+    // ) {
+    //   proc = proc.use(wikiLinks, data.wikiLinksOpts);
+    // }
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
@@ -421,4 +417,6 @@ export class MDUtilsV5Web {
     );
     return proc.use(rehypeStringify);
   }
+
+  public static noteCacheHelper() {}
 }

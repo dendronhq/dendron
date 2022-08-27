@@ -1,5 +1,5 @@
 import { IDendronExtension } from "../dendronExtensionInterface";
-import { TextDocumentService } from "./TextDocumentService";
+import { TextDocumentService } from "./node/TextDocumentService";
 import { workspace } from "vscode";
 import { ITextDocumentService } from "./ITextDocumentService";
 

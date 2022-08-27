@@ -7,6 +7,8 @@ import {
   IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   ProcFlavor,
@@ -164,7 +166,6 @@ class ImageNodeHandler extends DendronNodeHander {
 function shouldInsertTitle({ proc }: { proc: Processor }) {
   const data = MDUtilsV5.getProcData(proc);
   const opts = MDUtilsV5.getProcOpts(proc);
-  // debugger;
   const isNoteRef = !_.isNumber(data.noteRefLvl) && data.noteRefLvl > 0;
   let insertTitle;
   if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
@@ -180,11 +181,18 @@ function shouldInsertTitle({ proc }: { proc: Processor }) {
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
   // eslint-disable-next-line prefer-const
-  let { vault, engine, noteToRender } = MDUtilsV5.getProcData(proc);
+  let { vault, engine } = MDUtilsV5.getProcData(proc);
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
   const pData = MDUtilsV5.getProcData(proc);
-  const { dest, fname, config, insideNoteRef } = pData;
+  const {
+    dest,
+    fname,
+    config,
+    insideNoteRef,
+    noteToRender,
+    noteCacheForRender,
+  } = pData;
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -199,12 +207,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         });
       }
       let note;
-      debugger;
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
         note = SiteUtils.create403StaticNote({ engine });
       } else if (engine) {
-        debugger;
         note = NoteUtils.getNoteByFnameFromEngine({
           fname,
           vault,
@@ -279,12 +285,24 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
-          debugger;
-          note = NoteUtils.getNoteByFnameFromEngine({
-            fname: valueOrig,
-            vault,
-            engine,
-          });
+          if (noteCacheForRender) {
+            const notesById =
+              NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+            const notesByFname =
+              NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+
+            // TODO: Add vault filter
+            note = NoteDictsUtils.findByFname(valueOrig, {
+              notesById,
+              notesByFname,
+            })[0];
+          } else if (engine) {
+            note = NoteUtils.getNoteByFnameFromEngine({
+              fname: valueOrig,
+              vault,
+              engine,
+            });
+          }
 
           if (!note) {
             error = new DendronError({ message: `no note found. ${value}` });

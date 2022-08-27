@@ -19,10 +19,10 @@ import {
   TextDocument,
   TextDocumentChangeEvent,
 } from "vscode";
-import { IDendronExtension } from "../dendronExtensionInterface";
-import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
-import { ITextDocumentService } from "./ITextDocumentService";
+import { IDendronExtension } from "../../dendronExtensionInterface";
+import { Logger } from "../../logger";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { ITextDocumentService } from "../ITextDocumentService";
 
 /**
  * This service keeps client state note state synchronized with the engine

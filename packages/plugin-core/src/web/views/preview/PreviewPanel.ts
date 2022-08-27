@@ -8,7 +8,9 @@ import {
   NoteUtils,
   NoteViewMessage,
   NoteViewMessageEnum,
-  OnDidChangeActiveTextEditorMsg,
+  OnUpdatePreviewHTMLData,
+  OnUpdatePreviewHTMLMsg,
+  ResponseUtil,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
@@ -17,6 +19,7 @@ import { URI } from "vscode-uri";
 import { type IPreviewLinkHandler } from "../../../components/views/IPreviewLinkHandler";
 import { type PreviewProxy } from "../../../components/views/PreviewProxy";
 import { type ITextDocumentService } from "../../../services/ITextDocumentService";
+import { type INoteRenderer } from "../../engine/INoteRenderer";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type IPreviewPanelConfig } from "./IPreviewPanelConfig";
 import { WebViewUtils } from "./WebViewUtils";
@@ -50,7 +53,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     @inject("wsRoot") private wsRoot: URI,
     private wsUtils: WSUtilsWeb,
     private webViewUtils: WebViewUtils,
-    @inject("IPreviewPanelConfig") private config: IPreviewPanelConfig
+    @inject("IPreviewPanelConfig") private config: IPreviewPanelConfig,
+    @inject("INoteRenderer") private noteRenderer: INoteRenderer
   ) {
     this._linkHandler = linkHandler;
     this._textDocumentService = textDocumentService;
@@ -237,6 +241,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           this.unlock();
           break;
         }
+        case DMessageEnum.ON_UPDATE_PREVIEW_HTML:
+          break;
         default:
           assertUnreachable(msg.type);
       }
@@ -343,7 +349,6 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   ) {
     if (this.isVisible()) {
       // Engine state has not changed so do not sync. This is for displaying updated text only
-      const syncChangedNote = false;
 
       // If full refresh is required, sync note with contents in active text editor
       const textDocument = vscode.window.activeTextEditor?.document;
@@ -356,15 +361,33 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       // TODO: Add back once mdutils works in web ext.
       // note = this.rewriteImageUrls(note, panel);
 
+      let html = "";
+      const resp = await this.noteRenderer.renderNote({
+        id: note.id,
+        note,
+      });
+
+      if (ResponseUtil.hasError(resp)) {
+        vscode.window.showErrorMessage(
+          `Problem Rendering Note: ${resp.error?.message}`
+        );
+        // TODO: log error
+        html = `Problem Rendering Note: ${resp.error?.message}`;
+      } else {
+        html = resp.data!;
+      }
+
+      const data: OnUpdatePreviewHTMLData = {
+        note,
+        html,
+      };
+
       try {
         return panel.webview.postMessage({
-          type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
-          data: {
-            note,
-            syncChangedNote,
-          },
+          type: DMessageEnum.ON_UPDATE_PREVIEW_HTML,
+          data,
           source: "vscode",
-        } as OnDidChangeActiveTextEditorMsg);
+        } as OnUpdatePreviewHTMLMsg);
       } catch (err) {
         this.logger.info({
           ctx: "sendRefreshMessage",

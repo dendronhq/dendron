@@ -7,7 +7,7 @@ import {
 import {
   createLogger,
   DendronNote,
-  engineHooks,
+  // engineHooks,
 } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import mermaid from "mermaid";
@@ -15,12 +15,7 @@ import { Button } from "antd";
 import LockFilled from "@ant-design/icons/lib/icons/LockFilled";
 import UnlockOutlined from "@ant-design/icons/lib/icons/UnlockOutlined";
 import React from "react";
-import {
-  useCurrentTheme,
-  useMermaid,
-  useRenderedNoteBody,
-  useWorkspaceProps,
-} from "../hooks";
+import { useCurrentTheme, useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
 import type { SyntheticEvent } from "react";
@@ -43,27 +38,15 @@ const useClickHandler = (noteId?: string) => {
   const onClickHandler = React.useCallback(
     (event: Event) => {
       const target = event.target as Element;
-      // Propogate clicks to wikilinks, but not clicks to elements like footnotes
+      // Propagate clicks to wikilinks, but not clicks to elements like footnotes
       if (isHTMLAnchorElement(target)) {
         if (
           _.some(target.classList, (class_) =>
             DEFAULT_ACTION_ANCHOR_CLASSES.has(class_)
           )
         ) {
-          // logger.info({
-          //   ctx: `onClickHandler#${target.nodeName}`,
-          //   event,
-          //   target,
-          //   msg: "skipped click on default action anchor",
-          // });
           return;
         }
-        // logger.info({
-        //   ctx: `onClickHandler#${target.nodeName}`,
-        //   event,
-        //   target,
-        //   msg: "propagating click to VSCode",
-        // });
         event.preventDefault();
         event.stopPropagation();
         if (noteId) {
@@ -92,10 +75,7 @@ const DendronNotePreview: DendronComponent = (props) => {
   const ctx = "DendronNotePreview";
   const logger = createLogger("DendronNotePreview");
   const noteProps = props.ide.noteActive;
-  const config = props.engine.config;
-  const [workspace] = useWorkspaceProps();
-  const { useConfig } = engineHooks;
-  useConfig({ opts: workspace });
+  const config = props.engine.config!;
 
   logger.info({
     ctx,
@@ -104,6 +84,7 @@ const DendronNotePreview: DendronComponent = (props) => {
     config,
   });
 
+  const previewHTML = props.ide.previewHTML;
   const [noteRenderedBody] = useRenderedNoteBody({ ...props, noteProps });
   logger.info({
     ctx,
@@ -122,7 +103,7 @@ const DendronNotePreview: DendronComponent = (props) => {
       </div>
     );
   }
-  if (!noteRenderedBody || !config) {
+  if ((!previewHTML && !noteRenderedBody) || !config) {
     return <div>Loading...</div>;
   }
 
@@ -145,7 +126,10 @@ const DendronNotePreview: DendronComponent = (props) => {
 
   return (
     <>
-      <DendronNote noteContent={noteRenderedBody} config={config} />
+      <DendronNote
+        noteContent={previewHTML ?? noteRenderedBody}
+        config={config}
+      />
       <Button
         shape="circle"
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}

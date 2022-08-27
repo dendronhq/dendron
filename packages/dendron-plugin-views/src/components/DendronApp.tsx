@@ -8,6 +8,7 @@ import {
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   SeedBrowserMessageType,
+  OnUpdatePreviewHTMLMsg,
 } from "@dendronhq/common-all";
 import {
   combinedStore,
@@ -95,6 +96,20 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         const noteToSetActive = activeNote ? activeNote : note;
         ideDispatch(ideSlice.actions.setNoteActive(noteToSetActive));
         logger.info({ ctx, msg: "setNoteActive:post" });
+        break;
+      case DMessageEnum.ON_UPDATE_PREVIEW_HTML:
+        logger.info({ ctx, msg: "onUpdatePreviewHTML:pre" });
+
+        const updatePreviewMsg = msg as OnUpdatePreviewHTMLMsg;
+        const html = updatePreviewMsg.data.html as string;
+        ideDispatch(ideSlice.actions.setPreviewHTML(html));
+        const noteToActivate = updatePreviewMsg.data.note;
+        ideDispatch(ideSlice.actions.setNoteActive(noteToActivate));
+        logger.info({
+          ctx,
+          msg: `onUpdatePreviewHTML:post`,
+        });
+        debugger;
         break;
       case LookupViewMessageEnum.onUpdate:
         logger.info({ ctx, msg: "refreshLookup:pre" });

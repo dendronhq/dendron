@@ -15,6 +15,7 @@ export * from "./utils";
 export * from "./md";
 export * from "./api";
 export * from "./vault";
+export * from "./VaultUtilsV2";
 export * from "./user";
 export * from "./analytics";
 export * from "./types";

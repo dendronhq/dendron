@@ -7,6 +7,7 @@ import {
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
+  StrictConfigV5,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
@@ -30,12 +31,16 @@ import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler"
 import { DummyPreviewLinkHandler } from "../views/preview/DummyPreviewLinkHandler";
 import { ITextDocumentService } from "../../services/ITextDocumentService";
 import { ConsoleLogger } from "../utils/ConsoleLogger";
-import { DummyTextDocumentService } from "../views/preview/DummyTextDocumentService";
 import { getPort } from "./getPort";
 import {
   DummyPreviewPanelConfig,
   IPreviewPanelConfig,
 } from "../views/preview/IPreviewPanelConfig";
+import { INoteRenderer } from "../engine/INoteRenderer";
+import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
+import { getWorkspaceConfig } from "./getWorkspaceConfig";
+import { TextDocumentService } from "../../services/web/TextDocumentService";
+import { Event, TextDocument, workspace } from "vscode";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension
@@ -139,7 +144,11 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   });
 
   container.register<ITextDocumentService>("ITextDocumentService", {
-    useClass: DummyTextDocumentService, // TODO: Add a real one
+    useClass: TextDocumentService,
+  });
+
+  container.register<Event<TextDocument>>("textDocumentEvent", {
+    useValue: workspace.onDidSaveTextDocument,
   });
 
   container.register<DLogger>("logger", {
@@ -148,5 +157,14 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
 
   container.register<number>("port", {
     useValue: await getPort(wsRoot),
+  });
+
+  container.register<INoteRenderer>("INoteRenderer", {
+    useClass: PluginNoteRenderer,
+  });
+
+  const config = await getWorkspaceConfig(wsRoot);
+  container.register<StrictConfigV5>("PublishingConfig", {
+    useValue: config as StrictConfigV5, // TODO: Prob change to intermediate
   });
 }

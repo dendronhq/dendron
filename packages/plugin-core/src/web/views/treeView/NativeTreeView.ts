@@ -10,7 +10,7 @@ import { Disposable, TextEditor, TreeView, window } from "vscode";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 import { TreeNote } from "./TreeNote";
-
+import * as vscode from "vscode";
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
  * the side panel UI that gives a tree view of the Dendron note hierarchy
@@ -53,23 +53,21 @@ export class NativeTreeView implements Disposable {
       this._provider
     );
 
-    const result = this._provider.getChildren() as Promise<
-      NoteProps | undefined | null
-    >;
-
-    result.then(() => {
-      const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
-        treeDataProvider: this._provider,
-        showCollapseAll: true,
-      });
-
-      this.treeView = treeView;
-
-      this._handler = window.onDidChangeActiveTextEditor(
-        this.onOpenTextDocument,
-        this
-      );
+    this.treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
+      treeDataProvider: this._provider,
+      showCollapseAll: true,
     });
+
+    this.treeView.onDidChangeVisibility((e) => {
+      if (e.visible) {
+        this.onOpenTextDocument(vscode.window.activeTextEditor);
+      }
+    });
+
+    this._handler = window.onDidChangeActiveTextEditor(
+      this.onOpenTextDocument,
+      this
+    );
   }
 
   public updateLabelType(opts: { labelType: TreeViewItemLabelTypeEnum }) {

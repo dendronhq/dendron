@@ -8,9 +8,13 @@ interface IDendronRefProps {
   noteTitle: string;
 }
 
+interface Window {
+  testingVariable: any;
+}
+
 export function DendronRef(props: IDendronRefProps) {
-  useIFrameHeightAdjuster();
   const { body, noteUrl, noteTitle } = props;
+  useIFrameHeightAdjuster();
   return (
     <div className="ref-container">
       <Head>

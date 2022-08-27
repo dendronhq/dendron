@@ -85,7 +85,7 @@ function DendronApp({ Component, pageProps }: AppProps) {
   const dendronRouter = useDendronRouter();
   const dispatch = useCombinedDispatch();
   useDendronGATracking();
-  // useIFrameHeightAdjuster();
+  useIFrameHeightAdjuster();
 
   useEffect(() => {
     (async () => {

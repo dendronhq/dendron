@@ -1,7 +1,6 @@
 import {
   asyncLoopOneAtATime,
   DendronTreeViewKey,
-  NoteProps,
   TreeViewItemLabelTypeEnum,
 } from "@dendronhq/common-all";
 import _ from "lodash";

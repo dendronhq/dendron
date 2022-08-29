@@ -66,6 +66,7 @@ suite("CopyNoteRef", function () {
           {
             preSetupHook,
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {
@@ -136,6 +137,7 @@ suite("CopyNoteRef", function () {
               });
             },
             preActivateHook: postSetupHook,
+            timeout: 5e3,
           },
           () => {
             test("THEN generate note ref", async () => {
@@ -216,6 +218,7 @@ suite("CopyNoteRef", function () {
           ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
           return config;
         },
+        timeout: 5e3,
       },
       () => {
         test("THEN create xvault link", async () => {

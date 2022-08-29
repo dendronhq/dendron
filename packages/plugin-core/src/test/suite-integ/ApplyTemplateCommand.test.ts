@@ -93,7 +93,7 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with note with no body",
     {
       preSetupHook: basicPreset,
-      timeout,
+      timeout: 1e3,
     },
     () => {
       test("THEN apply template", async () => {

@@ -485,7 +485,6 @@ export class ExtensionUtils {
       if (birthtimeMs) {
         _.set(trackProps, "codeFolderCreated", birthtimeMs);
       }
-      throw new Error("foo");
     } catch (error: any) {
       // something went wrong. don't track. Send to sentry silently.
       Sentry.captureException(error);

@@ -1,4 +1,3 @@
-import { env, Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 

@@ -33,8 +33,10 @@ import { Logger } from "../logger";
 import { IBaseCommand } from "../types";
 import { GOOGLE_OAUTH_ID, GOOGLE_OAUTH_SECRET } from "../types/global";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
+import * as Sentry from "@sentry/node";
 import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { URI, Utils } from "vscode-uri";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -397,6 +399,7 @@ export class ExtensionUtils {
     const previewTheme = dendronConfig?.preview?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
+
     const trackProps = {
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
@@ -439,6 +442,54 @@ export class ExtensionUtils {
     if (previewTheme !== undefined) {
       _.set(trackProps, "previewTheme", previewTheme);
     }
+
+    const allExtensions = vscode.extensions.all;
+    let allNonBuiltInExtensions = allExtensions.filter((extension) => {
+      return !extension.packageJSON.isBuiltin;
+    });
+    if (VSCodeUtils.isDevMode()) {
+      // done to make this work during dev mode
+      allNonBuiltInExtensions = allNonBuiltInExtensions.filter((ext) => {
+        return !ext.extensionPath.includes("packages/plugin-core");
+      });
+    }
+    try {
+      const extensionsDetail = allNonBuiltInExtensions.map((extension) => {
+        const { packageJSON } = extension;
+        const { id, version } = packageJSON;
+        return { id, version };
+      });
+      if (extensionsDetail && extensionsDetail.length > 0) {
+        _.set(trackProps, "extensionsDetail", extensionsDetail);
+        _.set(trackProps, "numExtensions", extensionsDetail.length);
+      }
+    } catch (error) {
+      // something went wrong don't track extension detail
+      Sentry.captureException(error);
+    }
+
+    // NOTE: this will not be accurate in dev mode
+    try {
+      // infer install path from extension path.
+      // this assumes the user installs all extensions in one place.
+      // that should be the case for almost all cases, but vscode provides a way to
+      // customize install location so this might not be the case in those rare cases.
+      const installPath = Utils.dirname(
+        Utils.dirname(URI.file(ext.context.extensionPath))
+      ).fsPath;
+      const fd = fs.openSync(installPath, "r");
+      const stat = fs.fstatSync(fd);
+      // some file systems don't track birth times.
+      // in this case the value may be ctime (time of inode change), or 0
+      const { birthtimeMs } = stat;
+      if (birthtimeMs) {
+        _.set(trackProps, "codeFolderCreated", birthtimeMs);
+      }
+    } catch (error: any) {
+      // something went wrong. don't track. Send to sentry silently.
+      Sentry.captureException(error);
+    }
+
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
     if (maybeLocalConfig.data) {
       trackProps.hasLocalConfig = true;

@@ -578,7 +578,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
 
     const treeDstPath = path.join(podDstDir, "tree.json");
-    const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
+
+    const sidebarConfig = sidebarConfigResult.value;
+    const tree = TreeUtils.generateTreeDataV2(payload.notes, sidebarConfig);
+    // const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
 
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");

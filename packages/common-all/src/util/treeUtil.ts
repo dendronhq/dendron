@@ -2,8 +2,10 @@ import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
-import { isNotUndefined, PublishUtils } from "../utils";
+import { isNotUndefined, PublishUtils, do_ } from "../utils";
 import { VaultUtils } from "../vault";
+import { assertUnreachable } from "../error";
+import type { SidebarsProcessed, SidebarItemProcessed } from "../sidebars";
 
 export enum TreeMenuNodeIcon {
   bookOutlined = "bookOutlined",
@@ -38,6 +40,99 @@ export type TreeNode = {
 };
 
 export class TreeUtils {
+  static generateTreeDataV2(
+    noteDict: NotePropsByIdDict,
+    sidebars: SidebarsProcessed
+  ): TreeMenu {
+    function itemToTreeMenuNode(
+      sidebarItem: SidebarItemProcessed
+    ): TreeMenuNode | undefined {
+      const note = do_(() => {
+        const noteId = do_(() => {
+          const { type } = sidebarItem;
+          switch (type) {
+            case "category": {
+              const { link } = sidebarItem;
+              return do_(() => {
+                switch (link.type) {
+                  case "note":
+                    return link.id;
+
+                  default:
+                    assertUnreachable(link.type);
+                }
+              });
+            }
+            case "note": {
+              return sidebarItem.id;
+            }
+            default:
+              assertUnreachable(type);
+          }
+        });
+        const maybeNote = noteDict[noteId];
+
+        // TODO check if note could be found by id and if note search for matching `fname`
+        return maybeNote;
+      });
+
+      // explicitly checking since `noUncheckedIndexedAccess` is currently not enabled
+      if (_.isUndefined(note)) {
+        return undefined;
+      }
+
+      const icon = do_(() => {
+        if (note.schema) {
+          return TreeMenuNodeIcon.bookOutlined;
+        } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
+          return TreeMenuNodeIcon.numberOutlined;
+        } else if (note.stub) {
+          return TreeMenuNodeIcon.plusOutlined;
+        }
+        return null;
+      });
+
+      const fm = PublishUtils.getPublishFM(note);
+
+      const treeMenuNode: TreeMenuNode = {
+        key: note.id,
+        title: sidebarItem.label ?? note.title,
+        icon,
+        hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
+        vaultName: VaultUtils.getName(note.vault),
+        navExclude: fm.nav_exclude || false,
+        children: [],
+      };
+
+      if (sidebarItem.type === "category") {
+        treeMenuNode.children = sidebarItem.items
+          .map(itemToTreeMenuNode)
+          .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
+            Boolean(maybeTreeMenuNode)
+          );
+      }
+      return treeMenuNode;
+    }
+
+    const treeMenuMap = _.mapValues(sidebars, (sidebar) => {
+      const child2parent: { [key: string]: string | null } = {};
+
+      const roots = sidebar
+        .map(itemToTreeMenuNode)
+        .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
+          Boolean(maybeTreeMenuNode)
+        );
+
+      return {
+        roots,
+        child2parent,
+      };
+    });
+
+    // for now we only support a single sidebar
+    return Object.values(treeMenuMap).at(0) ?? { roots: [], child2parent: {} };
+  }
+
   static generateTreeData(
     allNotes: NotePropsByIdDict,
     domains: NoteProps[]

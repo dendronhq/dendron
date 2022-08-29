@@ -120,6 +120,14 @@ export function isFalsy(u: any): boolean {
   return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 
+/**
+ * `do` expession
+ * [ECMAScript proposal: `do` expressions](https://github.com/tc39/proposal-do-expressions)
+ */
+export function do_<T>(f: () => T): T {
+  return f();
+}
+
 /** Calculates a basic integer hash for the given string.
  *
  * This is very unsafe, do not rely on this for anything where collisions are bad.
@@ -505,6 +513,12 @@ export class TagUtils {
  * ```
  */
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+/**
+ * simple Option type
+ * See https://en.wikipedia.org/wiki/Option_type
+ */
+export type Option<T> = T | undefined;
 
 /** Makes a single property within a type required. */
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &

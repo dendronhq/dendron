@@ -53,6 +53,10 @@
       {
         "view": "dendron.recent-workspaces",
         "contents": "No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](command:dendron.launchTutorialWorkspace?%7B%22invocationPoint%22%3A%22RecentWorkspacesPanel%22%7D)."
+      },
+      {
+        "view": "dendron.treeView",
+        "contents": "First open a Dendron note to see the tree view."
       }
     ],
     "viewsContainers": {
@@ -595,6 +599,10 @@
       {
         "command": "dendron.dev.validateEngine",
         "title": "Dendron:Dev: Validate Engine"
+      },
+      {
+        "command": "dendron.showInfo",
+        "title": "Dendron:: Show Info"
       }
     ],
     "menus": {
@@ -825,7 +833,7 @@
         },
         {
           "command": "dendron.copyNoteURL",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.createHook",
@@ -1108,6 +1116,16 @@
           "command": "dendron.togglePreview",
           "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
           "group": "1_open"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dendron.delete",
+          "when": "view == dendron.treeView && viewItem == note"
+        },
+        {
+          "command": "dendron.createNote",
+          "when": "view == dendron.treeView"
         }
       ]
     },

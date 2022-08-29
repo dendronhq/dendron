@@ -66,6 +66,10 @@ export const DENDRON_VIEWS_WELCOME = [
     view: DendronTreeViewKey.RECENT_WORKSPACES,
     contents: `No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](${commandUri}).`,
   },
+  {
+    view: DendronTreeViewKey.TREE_VIEW,
+    contents: "First open a Dendron note to see the tree view.",
+  },
 ];
 
 export const DENDRON_VIEWS_CONTAINERS = {

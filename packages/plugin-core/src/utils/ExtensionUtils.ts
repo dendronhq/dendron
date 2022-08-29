@@ -466,27 +466,15 @@ export class ExtensionUtils {
       // something went wrong don't track extension detail
     }
 
+    // NOTE: this will not be accurate in dev mode
     try {
-      // infer install path from non-built-in extension paths
-      const installPaths = allNonBuiltInExtensions.map((ext) => {
-        // vscode-dot-dir-path/extensions/extension-basename
-        // stripping out last two levels
-        return Utils.dirname(Utils.dirname(URI.file(ext.extensionPath))).fsPath;
-      });
-
-      const pathSet = new Set(installPaths);
-      // make sure every element of install paths are identical.
-      // otherwise the inferred path is not correct
-      let installPath: string;
-      if (pathSet.size === 1) {
-        installPath = installPaths[0];
-      } else {
-        // fail-safe case using current extension context
-        // NOTE: this will not be accurate in dev mode
-        installPath = Utils.dirname(
-          Utils.dirname(URI.file(ext.context.extensionPath))
-        ).fsPath;
-      }
+      // infer install path from extension path.
+      // this assumes the user installs all extensions in one place.
+      // that should be the case for almost all cases, but vscode provides a way to
+      // customize install location so this might not be the case in those rare cases.
+      const installPath = Utils.dirname(
+        Utils.dirname(URI.file(ext.context.extensionPath))
+      ).fsPath;
       const fd = fs.openSync(installPath, "r");
       const stat = fs.fstatSync(fd);
       // some file systems don't track birth times.

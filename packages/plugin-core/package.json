@@ -53,6 +53,10 @@
       {
         "view": "dendron.recent-workspaces",
         "contents": "No recent workspaces detected. If this is your first time using Dendron, [try out our tutorial workspace](command:dendron.launchTutorialWorkspace?%7B%22invocationPoint%22%3A%22RecentWorkspacesPanel%22%7D)."
+      },
+      {
+        "view": "dendron.treeView",
+        "contents": "Open a Dendron note to see the tree view."
       }
     ],
     "viewsContainers": {

@@ -94,16 +94,22 @@ export class EngineUtils {
     note,
     engine,
     fmChangeOnly,
+    silent,
   }: {
     note: NoteProps;
     engine: DEngineClient;
     fmChangeOnly?: boolean;
+    silent?: boolean;
   }): void {
     const maxNoteLength = Math.min(
       ConfigUtils.getWorkspace(engine.config).maxNoteLength,
       CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
     );
     if (note.body.length > maxNoteLength) {
+      if (silent) {
+        return;
+      }
+      // this should only show up if a user navigates
       throw new DendronError({
         message:
           `Note "${note.fname}" in vault "${VaultUtils.getName(

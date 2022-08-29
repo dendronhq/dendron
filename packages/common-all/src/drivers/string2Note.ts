@@ -2,7 +2,7 @@ import matter from "gray-matter";
 import YAML from "js-yaml";
 import _ from "lodash";
 import { DNodeUtils } from "../dnode";
-import { DVault } from "../types";
+import { DNodeImplicitPropsEnum, DVault } from "../types";
 import { genHash } from "../utils";
 
 /**
@@ -38,7 +38,7 @@ export function string2Note({
 
   const contentHash = calculateHash ? genHash(content) : undefined;
   const note = DNodeUtils.create({
-    ...data,
+    ..._.omit(data, Object.values(DNodeImplicitPropsEnum)),
     custom,
     fname,
     body,

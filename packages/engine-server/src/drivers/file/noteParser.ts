@@ -439,7 +439,11 @@ export class NoteParser extends ParserBase {
     note.contentHash = sig;
     // Link/anchor errors should be logged but not interfere with rest of parsing
     try {
-      EngineUtils.refreshNoteLinksAndAnchors({ note, engine: this.engine });
+      EngineUtils.refreshNoteLinksAndAnchors({
+        note,
+        engine: this.engine,
+        silent: true,
+      });
     } catch (_err: any) {
       errors.push(ErrorFactory.wrapIfNeeded(_err));
     }

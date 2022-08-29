@@ -57,7 +57,7 @@ export class TextDocumentService implements ITextDocumentService {
     @inject("wsRoot") private wsRoot: URI,
     @inject("vaults") private vaults: DVault[],
     @inject("ReducedDEngine") private engine: ReducedDEngine,
-    @inject("Logger") private L: DLogger
+    @inject("logger") private L: DLogger
   ) {
     // this.L = Logger;
     // this._extension = ext;

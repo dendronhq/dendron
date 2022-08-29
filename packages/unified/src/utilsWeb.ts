@@ -45,91 +45,29 @@ import {
   ProcOptsV5,
 } from "./utilsv5";
 
-// export type ProcDataFullWebV5 = {
-//   // engine: ReducedDEngine;
-//   noteToRender: NoteProps;
-//   vault: DVault;
-//   fname: string;
-//   dest: DendronASTDest;
-//   /**
-//    * Supply alternative dictionary of notes to use when resolving note ids
-//    */
-//   notes?: NotePropsByIdDict;
-//   /**
-//    * Check to see if we are in a note reference.
-//    */
-//   insideNoteRef?: boolean;
-//   /**
-//    * frontmatter variables exposed for substitution
-//    */
-//   fm?: any;
-//   wikiLinksOpts?: WikiLinksOpts;
-//   publishOpts?: DendronPubOpts;
-//   backlinkHoverOpts?: BacklinkOpts;
-
-//   // TODO: Can we use this instead:
-//   // publishingConfig: DendronPublishingConfig;
-
-//   config: IntermediateDendronConfig;
-//   // config?: IntermediateDendronConfig;
-//   wsRoot?: URI;
-// };
-
-// /**
-//  * Data from the processor
-//  */
-// export type ProcDataFullV5 = {
-//   // main properties that are configured when processor is created
-//   engine: DEngineClient;
-//   vault: DVault;
-//   fname: string;
-//   dest: DendronASTDest;
-//   wsRoot: string;
-
-//   // derived: unless passed in, these come from engine or are set by
-//   // other unified plugins
-//   config: IntermediateDendronConfig;
-//   notes?: NotePropsByIdDict;
-//   insideNoteRef?: boolean;
-
-//   fm?: any;
-//   /**
-//    * Keep track of current note ref level
-//    */
-//   noteRefLvl: number;
-// };
-
-// function checkProps({
-//   requiredProps,
-//   data,
-// }: {
-//   requiredProps: string[];
-//   data: any;
-// }): { valid: true } | { valid: false; missing: string[] } {
-//   const hasAllProps = _.map(requiredProps, (prop) => {
-//     // @ts-ignore
-//     return !_.isUndefined(data[prop]);
-//   });
-//   if (!_.every(hasAllProps)) {
-//     // @ts-ignore
-//     const missing = _.filter(requiredProps, (prop) =>
-//       // @ts-ignore
-//       _.isUndefined(data[prop])
-//     );
-//     return { valid: false, missing };
-//   }
-//   return { valid: true };
-// }
-
+/**
+ * Special version of MDUtilsV5 to get preview working in the web extension.
+ * This class should eventually be deleted and converged with utilsV5 once
+ * utilsV5 is compatible with EngineV3.
+ */
 export class MDUtilsV5Web {
+  public static procRehypeWeb(
+    data: Omit<ProcDataFullOptsV5, "dest">,
+    opts?: { flavor?: ProcFlavor }
+  ) {
+    const proc = this._procRehype(
+      { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
+      data
+    );
+    return proc.use(rehypeStringify);
+  }
+
   private static setProcData(
     proc: Processor,
     opts: Partial<ProcDataFullV5>
     // opts: Partial<ProcDataFullWebV5>
   ) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-    // const _data = proc.data("dendronProcDatav5") as ProcDataFullWebV5;
-    // const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
     return proc.data("dendronProcDatav5", { ..._data, ...opts });
   }
 
@@ -176,14 +114,6 @@ export class MDUtilsV5Web {
       .use(backlinksHover, data.backlinkHoverOpts)
       .use(wikiLinks)
       .data("errors", errors);
-    //JYTODO: Is below wikilnk proc being use?
-    //do not convert wikilinks if convertLinks set to false. Used by gdoc export pod. It uses HTMLPublish pod to do the md-->html conversion
-    // if (
-    //   _.isUndefined(data.wikiLinksOpts?.convertLinks) ||
-    //   data.wikiLinksOpts?.convertLinks
-    // ) {
-    //   proc = proc.use(wikiLinks, data.wikiLinksOpts);
-    // }
 
     // set options and do validation
     proc = this.setProcOpts(proc, opts);
@@ -197,31 +127,6 @@ export class MDUtilsV5Web {
               message: `data is required when not using raw proc`,
             });
           }
-          // const requiredProps = ["vault", "engine", "fname", "dest"];
-          // const resp = checkProps({ requiredProps, data });
-          // if (!resp.valid) {
-          //   throw DendronError.createFromStatus({
-          //     status: ERROR_STATUS.INVALID_CONFIG,
-          //     message: `missing required fields in data. ${resp.missing.join(
-          //       " ,"
-          //     )} missing`,
-          //   });
-          // }
-
-          // TODO: Not sure if we need to re-enable these overrides:
-          // if (!data.config) {
-          //   data.config = data.engine!.config;
-          // }
-          // if (!data.wsRoot) {
-          //   data.wsRoot = data.engine!.wsRoot;
-          // }
-
-          // TODO: Need NoteProps here instead.
-          // const debugger; note = NoteUtils.getNoteByFnameFromEngine({
-          //   fname: data.fname!,
-          //   engine: data.engine!,
-          //   vault: data.vault!,
-          // });
 
           const note = data.noteToRender;
 
@@ -291,6 +196,7 @@ export class MDUtilsV5Web {
           // if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
           //   proc = proc.use(mermaid, { simple: true });
           // }
+
           // TODO: Re-enable config checks, for now, just use them:
           proc = proc.use(math);
           // proc = proc.use(mermaid, { simple: true });
@@ -306,41 +212,7 @@ export class MDUtilsV5Web {
           }
         }
         break;
-      case ProcMode.IMPORT: {
-        // const requiredProps = ["vault", "engine", "dest"];
-        // const resp = checkProps({ requiredProps, data });
-        // if (!resp.valid) {
-        //   throw DendronError.createFromStatus({
-        //     status: ERROR_STATUS.INVALID_CONFIG,
-        //     message: `missing required fields in data. ${resp.missing.join(
-        //       " ,"
-        //     )} missing`,
-        //   });
-        // }
-        // if (!data.config) {
-        //   data.config = data.engine!.config;
-        // }
-        // if (!data.wsRoot) {
-        //   data.wsRoot = data.engine!.wsRoot;
-        // }
-
-        // // backwards compatibility, default to v4 values
-        // this.setProcData(proc, data as ProcDataFullV5);
-
-        // // add additional plugins
-        // const config = data.config as IntermediateDendronConfig;
-        // const shouldApplyPublishRules =
-        //   MDUtilsV5.shouldApplyPublishingRules(proc);
-
-        // if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
-        //   proc = proc.use(math);
-        // }
-
-        // if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
-        //   proc = proc.use(mermaid, { simple: true });
-        // }
-        break;
-      }
+      case ProcMode.IMPORT:
       case ProcMode.NO_DATA:
         break;
       default:
@@ -401,22 +273,7 @@ export class MDUtilsV5Web {
   private static procRemarkParse(
     opts: ProcOptsV5,
     data: Partial<ProcDataFullOptsV5>
-    // data: Partial<ProcDataFullWebV5>
   ) {
     return this._procRemarkWeb({ ...opts, parseOnly: true }, data);
   }
-
-  public static procRehypeWeb(
-    data: Omit<ProcDataFullOptsV5, "dest">,
-    // data: Omit<ProcDataFullWebV5, "dest">,
-    opts?: { flavor?: ProcFlavor }
-  ) {
-    const proc = this._procRehype(
-      { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
-      data
-    );
-    return proc.use(rehypeStringify);
-  }
-
-  public static noteCacheHelper() {}
 }

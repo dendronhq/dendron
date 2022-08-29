@@ -210,6 +210,10 @@ export type DNodeProps<T = any, TCustom = any> = DNodeExplicitProps & {
   traits?: string[];
 };
 
+export type DNodeCompositeKey = Pick<DNodeProps, "fname"> & {
+  vaultName?: string;
+};
+
 export type SchemaData = {
   namespace?: boolean;
   pattern?: string;

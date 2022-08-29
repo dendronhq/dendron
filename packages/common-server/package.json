@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.109.1",
-    "@sentry/integrations": "^6.13.3",
-    "@sentry/node": "^6.13.3",
+    "@sentry/integrations": "7.11.1",
+    "@sentry/node": "7.11.1",
     "ajv": "^8.6.0",
     "ajv-errors": "^3.0.0",
     "analytics-node": "^5.1.0",

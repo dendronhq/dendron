@@ -19,11 +19,8 @@ import {
   NoteUtils,
   RespV2,
   VaultUtils,
-  ErrorUtils,
   ProcFlavor,
 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
-import { error } from "console";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
@@ -524,7 +521,7 @@ export function convertNoteRefASTV2(
         }
       }
     } else {
-      throw error("Expected 1 or more notes");
+      throw new Error("Expected 1 or more notes");
     }
 
     // why iterate?  won't there be only one note?

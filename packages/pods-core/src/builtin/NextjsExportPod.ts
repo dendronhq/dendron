@@ -464,12 +464,16 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   async plant(opts: NextjsExportPlantOpts) {
     const ctx = `${ID}:plant`;
     const { dest, engine, wsRoot, config: podConfig } = opts;
-
+    const resp = await engine.getConfig();
+    if (resp.error) {
+      throw resp.error;
+    }
+    const config = resp.data!;
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
 
     const siteConfig = getSiteConfig({
-      config: engine.config,
+      config,
       overrides: podConfig.overrides,
     });
 
@@ -478,11 +482,11 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       throw error;
     }
 
-    await this.copyAssets({ wsRoot, config: engine.config, dest: dest.fsPath });
+    await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
     const engineConfig: IntermediateDendronConfig =
-      ConfigUtils.overridePublishingConfig(engine.config, siteConfig);
+      ConfigUtils.overridePublishingConfig(config, siteConfig);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,

@@ -1051,6 +1051,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX}Dev: Validate Engine`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
+  SHOW_INFO: {
+    key: "dendron.showInfo",
+    title: `${CMD_PREFIX}: Show Info`,
+  },
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

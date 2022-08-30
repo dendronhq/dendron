@@ -44,39 +44,49 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict,
     sidebars: SidebarsProcessed
   ): TreeMenu {
-    function itemToTreeMenuNode(
-      sidebarItem: SidebarItemProcessed
-    ): TreeMenuNode | undefined {
-      const note = do_(() => {
-        const noteId = do_(() => {
-          const { type } = sidebarItem;
-          switch (type) {
-            case "category": {
-              const { link } = sidebarItem;
-              return do_(() => {
-                switch (link.type) {
-                  case "note":
-                    return link.id;
+    console.log(
+      "generateTreeDataV2#sidebars",
+      JSON.stringify(sidebars, null, 2)
+    );
 
-                  default:
-                    assertUnreachable(link.type);
-                }
-              });
-            }
-            case "note": {
-              return sidebarItem.id;
-            }
-            default:
-              assertUnreachable(type);
+    function itemToNote(item: SidebarItemProcessed) {
+      const noteId = do_(() => {
+        const { type } = item;
+        switch (type) {
+          case "category": {
+            const { link } = item;
+            return do_(() => {
+              switch (link.type) {
+                case "note":
+                  return link.id;
+
+                default:
+                  assertUnreachable(link.type);
+              }
+            });
           }
-        });
-        const maybeNote = noteDict[noteId];
-
-        // TODO check if note could be found by id and if note search for matching `fname`
-        return maybeNote;
+          case "note": {
+            return item.id;
+          }
+          default:
+            assertUnreachable(type);
+        }
       });
 
-      // explicitly checking since `noUncheckedIndexedAccess` is currently not enabled
+      // explicitly casting since `noUncheckedIndexedAccess` is currently not enabled
+      const maybeNote = noteDict[noteId] as NoteProps | undefined;
+
+      // TODO check if note could be found by id and if note search for matching `fname`
+      return maybeNote;
+    }
+
+    function itemToTreeMenuNode(
+      sidebarItem: SidebarItemProcessed,
+      child2parent: Record<string, string | null> = {},
+      parent: string | null = null
+    ): TreeMenuNode | undefined {
+      const note = itemToNote(sidebarItem);
+
       if (_.isUndefined(note)) {
         return undefined;
       }
@@ -104,13 +114,18 @@ export class TreeUtils {
         children: [],
       };
 
+      if (child2parent[note.id] === undefined) {
+        child2parent[note.id] = parent;
+      }
+
       if (sidebarItem.type === "category") {
         treeMenuNode.children = sidebarItem.items
-          .map(itemToTreeMenuNode)
+          .map((item) => itemToTreeMenuNode(item, child2parent, note.id))
           .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
             Boolean(maybeTreeMenuNode)
           );
       }
+
       return treeMenuNode;
     }
 
@@ -118,7 +133,7 @@ export class TreeUtils {
       const child2parent: { [key: string]: string | null } = {};
 
       const roots = sidebar
-        .map(itemToTreeMenuNode)
+        .map((sidebarItem) => itemToTreeMenuNode(sidebarItem, child2parent))
         .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
           Boolean(maybeTreeMenuNode)
         );

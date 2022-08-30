@@ -3,6 +3,7 @@ import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   MDUtilsV5,
@@ -15,13 +16,12 @@ import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
 function procDendronForPublish(
   opts: Omit<ProcDataFullOptsV5, "dest"> & {
     noteIndex: NoteProps;
-    configOverride?: IntermediateDendronConfig;
   }
 ) {
-  const { engine, configOverride, fname, vault } = opts;
+  const { engine, config, fname, vault } = opts;
   const proc = MDUtilsV5.procRehypeFull({
     engine,
-    config: configOverride,
+    config,
     fname,
     vault,
   });
@@ -32,13 +32,15 @@ describe("hierarchies", () => {
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
   const BASIC = createProcTests({
     name: "BASIC",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
+      const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -48,6 +50,7 @@ describe("hierarchies", () => {
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -69,15 +72,15 @@ describe("hierarchies", () => {
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const configOverride: IntermediateDendronConfig = {
-        ...engine.config,
+      const config: IntermediateDendronConfig = {
+        ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplay: false,
       };
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
-          config: configOverride,
+          config,
           dest: extra.dest,
           vault: vaults[0],
         });
@@ -86,7 +89,7 @@ describe("hierarchies", () => {
       } else {
         const proc = procDendronForPublish({
           engine,
-          configOverride,
+          config,
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
@@ -110,13 +113,15 @@ describe("hierarchies", () => {
 
   const NO_HIERARCHY_VIA_FM = createProcTests({
     name: "NO_HIERARCHY_VIA_FM",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
+      const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -126,6 +131,7 @@ describe("hierarchies", () => {
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -156,8 +162,8 @@ describe("hierarchies", () => {
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const configOverride: IntermediateDendronConfig = {
-        ...engine.config,
+      const config: IntermediateDendronConfig = {
+        ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplayTitle: "Better Children",
       };
       if (extra.dest !== DendronASTDest.HTML) {
@@ -166,6 +172,7 @@ describe("hierarchies", () => {
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -175,7 +182,7 @@ describe("hierarchies", () => {
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
-          configOverride,
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -192,13 +199,15 @@ describe("hierarchies", () => {
 
   const SKIP_LEVELS = createProcTests({
     name: "SKIP_LEVELS",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
+      const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
           engine,
           fname: "daily",
           dest: extra.dest,
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };
@@ -208,6 +217,7 @@ describe("hierarchies", () => {
           fname: "daily",
           noteIndex: engine.notes["daily"],
           vault: vaults[0],
+          config,
         });
         const resp = await proc.process(BASIC_TEXT);
         return { resp };

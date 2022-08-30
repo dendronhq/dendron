@@ -5,9 +5,8 @@ import {
   ConfigUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { readYAML } from "@dendronhq/common-server";
+import { DConfig, readYAML } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
 import { setupWS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";

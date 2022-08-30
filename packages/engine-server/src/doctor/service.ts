@@ -20,6 +20,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
+  DConfig,
   isSelfContainedVaultFolder,
   pathForVaultRoot,
 } from "@dendronhq/common-server";
@@ -28,7 +29,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DEPRECATED_PATHS, Git, WorkspaceService } from "..";
-import { DConfig } from "../config";
 import {
   ProcMode,
   MDUtilsV5,
@@ -233,8 +233,9 @@ export class DoctorService implements Disposable {
     let doctorAction: ((note: NoteProps) => Promise<any>) | undefined;
     switch (action) {
       case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
-        const { wsRoot, config } = engine;
+        const { wsRoot } = engine;
         const rawConfig = DConfig.getRaw(wsRoot);
+        const config = DConfig.readConfigSync(wsRoot);
         const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
           config: rawConfig,
           deprecatedPaths: DEPRECATED_PATHS,
@@ -322,6 +323,7 @@ export class DoctorService implements Disposable {
               engine,
               fname: note.fname,
               vault: note.vault,
+              config: DConfig.readConfigSync(engine.wsRoot),
             }
           );
           const newBody = await proc()
@@ -352,6 +354,7 @@ export class DoctorService implements Disposable {
               engine,
               fname: note.fname,
               vault: note.vault,
+              config: DConfig.readConfigSync(engine.wsRoot),
             }
           );
           const newBody = await proc()

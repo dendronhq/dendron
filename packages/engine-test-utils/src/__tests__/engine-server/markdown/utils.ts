@@ -4,6 +4,7 @@ import {
   DuplicateNoteActionEnum,
   DVault,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import {
   AssertUtils,
   RunEngineTestFunctionV4,
@@ -80,6 +81,7 @@ export const createProcForTest = (opts: {
         useId: opts.useIdAsLink,
       },
     },
+    config: DConfig.readConfigSync(engine.wsRoot),
   };
   if (dest === DendronASTDest.HTML) {
     return MDUtilsV5.procRehypeFull(data);
@@ -215,13 +217,14 @@ export const createProcCompileTests = (opts: {
             flavor,
             testCase: new TestPresetEntryV4(
               async (presetOpts) => {
-                const { engine, vaults } = presetOpts;
+                const { engine, wsRoot, vaults } = presetOpts;
+                const config = DConfig.readConfigSync(wsRoot);
                 const vault = vaults[0];
                 let proc: Processor;
                 switch (dest) {
                   case DendronASTDest.HTML:
                     proc = MDUtilsV5.procRehypeFull(
-                      { engine, fname, vault },
+                      { engine, fname, vault, config },
                       { flavor: flavor as ProcFlavor }
                     );
                     break;
@@ -232,6 +235,7 @@ export const createProcCompileTests = (opts: {
                         engine,
                         fname,
                         vault,
+                        config,
                         ...opts.procOpts,
                       },
                       { flavor: flavor as ProcFlavor }
@@ -301,10 +305,11 @@ type ProcessTextV2Opts = {
 
 export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const { engine, text, fname, vault, configOverride } = opts;
+  const config = configOverride || DConfig.readConfigSync(engine.wsRoot);
   if (opts.dest !== DendronASTDest.HTML) {
     const proc = MDUtilsV5.procRemarkFull({
       engine,
-      config: configOverride,
+      config,
       fname,
       dest: opts.dest,
       vault,
@@ -314,7 +319,7 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   } else {
     const proc = MDUtilsV5.procRehypeFull({
       engine,
-      config: configOverride,
+      config,
       fname,
       vault,
       // Otherwise links generated in tests use randomly generated IDs which is unstable for snaps

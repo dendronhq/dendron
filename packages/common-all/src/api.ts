@@ -3,8 +3,6 @@ import _ from "lodash";
 import * as querystring from "qs";
 import {
   BulkWriteNotesOpts,
-  ConfigGetPayload,
-  ConfigWriteOpts,
   DEngineDeleteSchemaPayload,
   DEngineQuery,
   DNodeProps,
@@ -30,6 +28,7 @@ import {
   GetNoteAnchorsPayload,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
+  IntermediateDendronConfig,
   NoteQueryResp,
   RenderNoteOpts,
   RenderNotePayload,
@@ -365,7 +364,9 @@ export class DendronAPI extends API {
     });
   }
 
-  configGet(req: WorkspaceRequest): Promise<APIPayload<ConfigGetPayload>> {
+  configGet(
+    req: WorkspaceRequest
+  ): Promise<APIPayload<IntermediateDendronConfig>> {
     return this._makeRequest({
       path: "config/get",
       method: "get",
@@ -373,7 +374,9 @@ export class DendronAPI extends API {
     });
   }
 
-  configWrite(req: ConfigWriteOpts & WorkspaceRequest): Promise<RespV2<void>> {
+  configWrite(
+    req: IntermediateDendronConfig & WorkspaceRequest
+  ): Promise<RespV2<void>> {
     return this._makeRequest({
       path: "config/write",
       method: "post",

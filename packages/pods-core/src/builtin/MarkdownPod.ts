@@ -7,7 +7,12 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
+import {
+  cleanFileName,
+  DConfig,
+  readMD,
+  vault2Path,
+} from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -477,6 +482,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             fname: note.fname,
             vault: note.vault,
             dest: DendronASTDest.MD_DENDRON,
+            config: DConfig.readConfigSync(engine.wsRoot),
           });
 
           const tree = proc.parse(note.body) as DendronASTNode;
@@ -543,7 +549,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
-        ...engine.config,
+        ...DConfig.readConfigSync(engine.wsRoot),
         usePrettyRefs: false,
       },
       engine,

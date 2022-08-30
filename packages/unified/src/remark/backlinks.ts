@@ -71,7 +71,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       const out = SiteUtils.canPublish({
         note,
         engine,
-        config: engine.config,
+        config,
       });
       return out;
     });

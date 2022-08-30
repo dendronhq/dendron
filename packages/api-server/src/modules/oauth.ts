@@ -4,6 +4,7 @@ import {
   RespV2,
   Time,
 } from "@dendronhq/common-all";
+import { readYAML, writeYAML } from "@dendronhq/common-server";
 import axios from "axios";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -76,7 +77,7 @@ export class GoogleAuthController implements TokenMethods {
           expirationTime: Time.now().toSeconds() + data.expires_in - 300,
         },
       };
-      engine.addAccessTokensToPodConfig(opts);
+      this.addAccessTokensToPodConfig(opts);
       resp =
         "Authorization completed. Please return to your workspace and then run the pod again. Please specify vaultName in config.import.yml if you are running the import pod. You can now close this window.";
     } else {
@@ -126,9 +127,36 @@ export class GoogleAuthController implements TokenMethods {
           expirationTime: Time.now().toSeconds() + data.expires_in - 300,
         },
       };
-      engine.addAccessTokensToPodConfig(opts);
+      this.addAccessTokensToPodConfig(opts);
       resp = data.access_token;
     }
     return resp;
+  }
+
+  private async addAccessTokensToPodConfig(opts: {
+    path: string;
+    tokens: {
+      accessToken: string;
+      expirationTime: number;
+      refreshToken?: string;
+    };
+  }) {
+    const { path, tokens } = opts;
+    const { accessToken, refreshToken, expirationTime } = tokens;
+
+    let podConfig = readYAML(path);
+
+    podConfig = {
+      ...podConfig,
+      accessToken,
+      expirationTime,
+    };
+    if (!_.isUndefined(refreshToken)) {
+      podConfig = {
+        ...podConfig,
+        refreshToken,
+      };
+    }
+    writeYAML(path, podConfig);
   }
 }

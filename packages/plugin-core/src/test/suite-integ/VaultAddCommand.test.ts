@@ -11,6 +11,7 @@ import {
   WorkspaceType,
 } from "@dendronhq/common-all";
 import {
+  DConfig,
   note2File,
   readYAMLAsync,
   schemaModuleOpts2File,
@@ -18,7 +19,7 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import { FileTestUtils, SinonStubbedFn } from "@dendronhq/common-test-utils";
-import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
+import { Git, WorkspaceService } from "@dendronhq/engine-server";
 import {
   checkVaults,
   GitTestUtils,

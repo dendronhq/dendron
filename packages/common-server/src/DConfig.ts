@@ -19,17 +19,19 @@ import {
   RespV3,
   StrictConfigV5,
 } from "@dendronhq/common-all";
-import { readYAML, writeYAML, writeYAMLAsync } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
+import { readYAML, writeYAML, writeYAMLAsync } from "./files";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
   GLOBAL = "GLOBAL",
 }
+
+let _dendronConfig: IntermediateDendronConfig | undefined;
 
 export class DConfig {
   static createSync({
@@ -242,24 +244,34 @@ export class DConfig {
   /**
    * Read configuration
    * @param wsRoot
+   * @param useCache: If true, read from cache instead of file system
    * @returns
    */
-  static readConfigSync(wsRoot: string) {
+  static readConfigSync(wsRoot: string, useCache?: boolean) {
+    if (_dendronConfig && useCache) {
+      return _dendronConfig;
+    }
     const configPath = DConfig.configPath(wsRoot);
     // TODO: validate
-    const config = readYAML(configPath, true) as IntermediateDendronConfig;
+    const config: IntermediateDendronConfig = _.defaultsDeep(
+      readYAML(configPath, true) as IntermediateDendronConfig,
+      ConfigUtils.genDefaultConfig()
+    );
+    _dendronConfig = config;
     return config;
   }
 
   /**
    * Read config and merge with local config
    * @param wsRoot
+   * @param useCache: If true, read from cache instead of file system
    * @returns
    */
   static readConfigAndApplyLocalOverrideSync(
-    wsRoot: string
+    wsRoot: string,
+    useCache?: boolean
   ): DataWithOptError<IntermediateDendronConfig> {
-    const config = this.readConfigSync(wsRoot);
+    const config = this.readConfigSync(wsRoot, useCache);
     const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
 
     let localConfigValidOrError: boolean | IDendronError = true;
@@ -301,6 +313,7 @@ export class DConfig {
     wsRoot: string;
     config: IntermediateDendronConfig;
   }): Promise<void> {
+    _dendronConfig = config;
     const configPath = DConfig.configPath(wsRoot);
     return writeYAMLAsync(configPath, config);
   }

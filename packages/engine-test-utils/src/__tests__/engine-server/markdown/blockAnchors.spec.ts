@@ -6,7 +6,6 @@ import {
   DendronASTDest,
   DendronASTTypes,
   MDUtilsV5,
-  ProcMode,
   UnistNode,
 } from "@dendronhq/unified";
 import _ from "lodash";
@@ -19,9 +18,7 @@ import { createProcForTest, createProcTests, ProcTests } from "./utils";
 const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
-  return MDUtilsV5.procRehypeParse({
-    mode: ProcMode.NO_DATA,
-  });
+  return MDUtilsV5.procRemarkParseNoData({}, { dest: DendronASTDest.HTML });
 }
 
 function runAllTests(opts: { name: string; testCases: ProcTests[] }) {

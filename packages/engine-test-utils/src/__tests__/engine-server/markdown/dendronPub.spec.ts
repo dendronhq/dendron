@@ -7,6 +7,7 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTData,
   DendronASTDest,
@@ -313,14 +314,14 @@ describe("GIVEN dendronPub", () => {
 
 describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("prefix", () => {
-    testWithEngine("imagePrefix", async ({ engine, vaults }) => {
+    testWithEngine("imagePrefix", async ({ engine, wsRoot, vaults }) => {
       const out = proc(
         engine,
         {
           fname: "foo",
           dest: DendronASTDest.HTML,
           vault: vaults[0],
-          config: engine.config,
+          config: DConfig.readConfigSync(wsRoot),
         },
         {
           assetsPrefix: "bond/",
@@ -331,14 +332,14 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "imagePrefix with forward slash",
-      async ({ engine, vaults }) => {
+      async ({ engine, wsRoot, vaults }) => {
         const out = proc(
           engine,
           {
             fname: "foo",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           },
           {
             assetsPrefix: "/bond/",
@@ -350,9 +351,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   });
 
   testWithEngine("in IMPORT mode", async ({ engine, vaults, wsRoot }) => {
+    const config = DConfig.readConfigSync(wsRoot);
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.IMPORT },
-      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0] }
+      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0], config }
     );
     const out = await proc.process("Testing publishing in IMPORT mode");
     await checkVFile(out, "Testing publishing in IMPORT mode");
@@ -371,7 +373,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
           fname: "has.fmtags",
           dest: DendronASTDest.HTML,
           vault: vaults[0],
-          config: engine.config,
+          config: DConfig.readConfigSync(engine.wsRoot),
         },
         undefined,
         flavor
@@ -391,7 +393,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
           fname: "no.fmtags",
           dest: DendronASTDest.HTML,
           vault: vaults[0],
-          config: engine.config,
+          config: DConfig.readConfigSync(engine.wsRoot),
         },
         undefined,
         flavor
@@ -571,12 +573,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("note reference", () => {
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[foo]]");
           await checkVFile(out, 'a href="foo"');
         },
@@ -600,12 +602,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("WHEN refs are right on the next line THEN render all", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[foo1]]\n![[foo2]]\n![[foo3]]");
           await checkVFile(out, 'a href="foo1', 'a href="foo2', 'a href="foo3');
         },
@@ -639,12 +641,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("WHEN refs are back to back THEN render all", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[foo1]] ![[foo2]]");
           await checkVFile(out, 'a href="foo1', 'a href="foo2');
         },
@@ -673,12 +675,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("nonexistent", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[bar]]");
           await checkVFile(out, "No note with name bar found");
         },
@@ -702,12 +704,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("assume vault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[foo]]");
           await checkVFile(out, "foo in vault2");
         },
@@ -732,12 +734,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: with vault prefix", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[dendron://vault2/foo]]");
           await checkVFile(out, "foo in vault2");
           await checkNotInVFile(out, "foo in vault1");
@@ -769,12 +771,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: with vault prefix", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[dendron://vault2/bar]]");
           await checkVFile(out, "No note with name bar found in vault vault2");
         },
@@ -805,12 +807,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: wildcard", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[bar.*]]");
           await checkVFile(out, 'a href="bar.one');
           await checkVFile(out, 'a href="bar.two');
@@ -842,12 +844,12 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: wildcard no match", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           }).process("![[baz.*]]");
           await checkVFile(
             out,
@@ -881,16 +883,15 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: ambiguous but duplicateNoteBehavior set", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
+          const config = DConfig.readConfigSync(wsRoot);
           const out = await proc(engine, {
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
-            config: engine.config,
+            config,
           }).process("![[dupe]]");
-          const publishingConfig = ConfigUtils.getPublishingConfig(
-            engine.config
-          );
+          const publishingConfig = ConfigUtils.getPublishingConfig(config);
           const dupNoteVaultPayload = publishingConfig.duplicateNoteBehavior
             ?.payload as string[];
           await checkVFile(out as any, `dupe in ${dupNoteVaultPayload[0]}`);
@@ -924,14 +925,15 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: ambiguous", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          ConfigUtils.unsetPublishProp(engine.config, "duplicateNoteBehavior");
+        async ({ engine, wsRoot, vaults }) => {
+          const config = DConfig.readConfigSync(wsRoot);
+          ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
           const out = await MDUtilsV5.procRehypeFull(
             {
               engine,
               fname: "ref",
               vault: vaults[0],
-              config: engine.config,
+              config,
             },
             { flavor: ProcFlavor.PUBLISHING }
           ).process("![[dupe]]");

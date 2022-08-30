@@ -9,9 +9,9 @@ import {
   WorkspaceType,
   normalizeUnixPath,
 } from "@dendronhq/common-all";
-import { readYAML } from "@dendronhq/common-server";
+import { DConfig, readYAML } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
-import { DConfig, WorkspaceUtils } from "@dendronhq/engine-server";
+import { WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";

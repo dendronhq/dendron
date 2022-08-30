@@ -5,9 +5,9 @@ import {
   NotePropsByIdDict,
   stringifyError,
   NoteUtils,
-  ConfigGetPayload,
   NoteFnameDictUtils,
   NoteDictsUtils,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
@@ -170,7 +170,7 @@ export const engineSlice = createSlice({
       state.config = config;
       state.noteFName = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
     },
-    setConfig: (state, action: PayloadAction<ConfigGetPayload>) => {
+    setConfig: (state, action: PayloadAction<IntermediateDendronConfig>) => {
       state.config = action.payload;
     },
     setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {

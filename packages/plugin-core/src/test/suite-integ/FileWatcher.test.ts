@@ -1,4 +1,5 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS_MULTI,
   TestConfigUtils,
@@ -34,7 +35,7 @@ suite("GIVEN FileWatcher", function () {
               workspaceOpts: {
                 wsRoot,
                 vaults,
-                dendronConfig: engine.config,
+                dendronConfig: DConfig.readConfigSync(wsRoot),
               },
             });
 
@@ -80,7 +81,7 @@ suite("GIVEN FileWatcher", function () {
               workspaceOpts: {
                 wsRoot,
                 vaults,
-                dendronConfig: engine.config,
+                dendronConfig: DConfig.readConfigSync(wsRoot),
               },
             });
 

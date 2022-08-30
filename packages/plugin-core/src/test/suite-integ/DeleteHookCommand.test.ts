@@ -1,5 +1,6 @@
 import { ConfigUtils } from "@dendronhq/common-all";
-import { DConfig, HookUtils } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
+import { HookUtils } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { describe } from "mocha";

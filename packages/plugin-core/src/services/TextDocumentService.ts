@@ -6,7 +6,7 @@ import {
   string2Note,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { DConfig, DLogger } from "@dendronhq/common-server";
 import { EngineUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import _ from "lodash";
@@ -111,6 +111,7 @@ export class TextDocumentService implements ITextDocumentService {
       note,
       fmChangeOnly,
       engine: this._extension.getEngine(),
+      config: DConfig.readConfigSync(this._extension.getDWorkspace().wsRoot),
     });
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });

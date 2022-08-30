@@ -1113,6 +1113,16 @@
           "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
           "group": "1_open"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "dendron.delete",
+          "when": "view == dendron.treeView && viewItem == note"
+        },
+        {
+          "command": "dendron.createNote",
+          "when": "view == dendron.treeView"
+        }
       ]
     },
     "configuration": {

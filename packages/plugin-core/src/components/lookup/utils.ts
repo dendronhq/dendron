@@ -339,25 +339,26 @@ export class PickerUtilsV2 {
    * Defaults to first vault if current note is not part of a vault
    * @returns
    */
-  static getVaultForOpenEditor(): DVault {
+  static getVaultForOpenEditor(fsPath?: string): DVault {
     const ctx = "getVaultForOpenEditor";
     const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
 
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
+    const fpath = fsPath || activeDocument?.uri.fsPath;
     if (
-      activeDocument &&
+      fpath &&
       WorkspaceUtils.isPathInWorkspace({
         wsRoot,
         vaults,
-        fpath: activeDocument.uri.fsPath,
+        fpath,
       })
     ) {
-      Logger.info({ ctx, activeDocument: activeDocument.fileName });
+      Logger.info({ ctx, activeDocument: fpath });
       vault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,
-        fsPath: activeDocument.uri.fsPath,
+        fsPath: fpath,
       });
     } else {
       Logger.info({ ctx, msg: "no active doc" });

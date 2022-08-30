@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.6.7",
+    "@giscus/react": "^2.2.0",
     "@dendronhq/common-all": "^0.110.0",
     "@dendronhq/common-frontend": "^0.110.0",
     "antd": "^4.15.5",

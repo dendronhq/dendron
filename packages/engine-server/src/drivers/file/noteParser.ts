@@ -25,8 +25,9 @@ import {
   stringifyError,
   string2Note,
   globMatch,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
-import { DLogger, vault2Path } from "@dendronhq/common-server";
+import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -104,6 +105,7 @@ export class NoteParser extends ParserBase {
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
     const errors: IDendronError<any>[] = [];
+    const config = DConfig.readConfigSync(wsRoot);
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
@@ -123,6 +125,7 @@ export class NoteParser extends ParserBase {
       fileMeta: rootFile,
       addParent: false,
       vault,
+      config,
       errors,
     });
     const rootNote = rootProps.changeEntries[0].note;
@@ -145,6 +148,7 @@ export class NoteParser extends ParserBase {
             fileMeta: ent,
             addParent: false,
             vault,
+            config,
             errors,
           });
           const parsedNote = out.changeEntries[0].note;
@@ -202,6 +206,7 @@ export class NoteParser extends ParserBase {
               noteDicts: { notesById, notesByFname },
               addParent: true,
               vault,
+              config,
               errors,
             });
             const parsedNote = resp.changeEntries[0].note;
@@ -322,6 +327,7 @@ export class NoteParser extends ParserBase {
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
+    config: IntermediateDendronConfig;
     errors: IDendronError[];
   }): {
     changeEntries: NoteChangeEntry[];
@@ -337,7 +343,7 @@ export class NoteParser extends ParserBase {
       },
       parents: [] as NoteProps[],
     });
-    const { fileMeta, noteDicts, vault, errors } = cleanOpts;
+    const { fileMeta, noteDicts, vault, config, errors } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
@@ -357,6 +363,7 @@ export class NoteParser extends ParserBase {
         fpath: path.join(vpath, fileMeta.fpath),
         vault,
         errors,
+        config,
       }));
     } catch (_err: any) {
       if (!ErrorUtils.isDendronError(_err)) {
@@ -396,11 +403,13 @@ export class NoteParser extends ParserBase {
     fpath,
     vault,
     toLowercase,
+    config,
     errors,
   }: {
     fpath: string;
     vault: DVault;
     toLowercase?: boolean;
+    config: IntermediateDendronConfig;
     errors: IDendronError[];
   }): {
     note: NoteProps;
@@ -443,6 +452,7 @@ export class NoteParser extends ParserBase {
         note,
         engine: this.engine,
         silent: true,
+        config,
       });
     } catch (_err: any) {
       errors.push(ErrorFactory.wrapIfNeeded(_err));

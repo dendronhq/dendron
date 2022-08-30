@@ -4,12 +4,7 @@ import {
   IntermediateDendronConfig,
   Time,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  DEPRECATED_PATHS,
-  LocalConfigScope,
-  MetadataService,
-} from "@dendronhq/engine-server";
+import { DEPRECATED_PATHS, MetadataService } from "@dendronhq/engine-server";
 import { VAULTS } from "@dendronhq/engine-test-utils";
 import * as mocha from "mocha";
 import { describe } from "mocha";
@@ -19,6 +14,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { StartupUtils } from "../../utils/StartupUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
+import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
 
 async function inactiveMessageTest(opts: {
   done: mocha.Done;

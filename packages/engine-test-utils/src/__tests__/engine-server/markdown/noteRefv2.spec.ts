@@ -12,6 +12,7 @@ import {
   PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
@@ -406,13 +407,15 @@ describe("noteRefV2", () => {
 
     const REGULAR_CASE = createProcTests({
       name: "regular",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
+        const config = DConfig.readConfigSync(wsRoot);
         const proc2 = MDUtilsV5.procRemarkFull({
           engine,
           fname: "foo",
           wikiLinksOpts: { useId: true },
           dest: extra.dest,
           vault: vaults[0],
+          config,
         });
         const resp = await proc2.process(linkWithNoExtension);
         return { resp };
@@ -511,9 +514,9 @@ describe("noteRefV2", () => {
     const WITH_FM_TITLE = createProcTests({
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, wsRoot, vaults } = opts;
         const configOverride: IntermediateDendronConfig = {
-          ...opts.engine.config,
+          ...DConfig.readConfigSync(wsRoot),
           useFMTitle: true,
         };
         return processTextV2({
@@ -532,9 +535,9 @@ describe("noteRefV2", () => {
     const WITH_NOTE_LINK_TITLE = createProcTests({
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, wsRoot, vaults } = opts;
         const configOverride: IntermediateDendronConfig = {
-          ...opts.engine.config,
+          ...DConfig.readConfigSync(wsRoot),
           useNoteTitleForLink: true,
         };
         return processTextV2({
@@ -865,12 +868,14 @@ describe("noteRefV2", () => {
 
     const RECURSIVE_TEST_CASES = createProcTests({
       name: "recursive",
-      setupFunc: async ({ engine, extra, vaults }) => {
+      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
+        const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
+          config,
         }).process(linkWithNoExtension);
         return { resp };
       },
@@ -924,10 +929,12 @@ describe("noteRefV2", () => {
 
     const WILDCARD_CASE = createProcTests({
       name: "wildcard",
-      setupFunc: async ({ engine, extra, vaults }) => {
+      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["id.journal"];
+        const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
           engine,
+          config,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -973,13 +980,15 @@ describe("noteRefV2", () => {
     });
     const XVAULT_CASE = createProcTests({
       name: "XVAULT_CASE",
-      setupFunc: async ({ engine, extra, vaults }) => {
+      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["one"];
+        const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
+          config,
         }).process(note.body);
         return { resp };
       },
@@ -1037,13 +1046,15 @@ describe("noteRefV2", () => {
 
     const WITH_PUBLISHING = createProcTests({
       name: "WITH_PUBLISHING",
-      setupFunc: async ({ engine, extra, vaults }) => {
+      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["foo"];
+        const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
           engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
+          config,
         }).process(note.body);
         return { resp };
       },

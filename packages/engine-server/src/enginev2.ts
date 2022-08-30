@@ -2,7 +2,6 @@ import {
   BulkWriteNotesOpts,
   Cache,
   ConfigUtils,
-  ConfigWriteOpts,
   DendronASTDest,
   DendronCompositeError,
   DendronError,
@@ -12,7 +11,6 @@ import {
   DEngineInitResp,
   DEngineMode,
   DHookDict,
-  DLink,
   DNodeType,
   DStore,
   DVault,
@@ -48,7 +46,6 @@ import {
   NullCache,
   Optional,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -67,14 +64,12 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  DConfig,
   DLogger,
   NodeJSUtils,
-  readYAML,
-  writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import { EngineUtils } from ".";
-import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import {
   AnchorUtils,
@@ -147,12 +142,8 @@ function createRenderedCache(
 export class DendronEngineV2 implements DEngine {
   public wsRoot: string;
   public store: DStore;
-  protected props: DendronEnginePropsV2;
   public logger: DLogger;
   public fuseEngine: FuseEngine;
-  public links: DLink[];
-  public configRoot: string;
-  public config: IntermediateDendronConfig;
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
@@ -161,21 +152,17 @@ export class DendronEngineV2 implements DEngine {
 
   constructor(props: DendronEnginePropsV2) {
     this.wsRoot = props.wsRoot;
-    this.configRoot = props.wsRoot;
     this.logger = props.logger;
-    this.props = props;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
-    this.links = [];
-    this.config = props.config;
     this._vaults = props.vaults;
     this.store = props.createStore(this);
     const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
     };
     this.hooks = hooks;
-    this.renderedCache = createRenderedCache(this.config, this.logger);
+    this.renderedCache = createRenderedCache(props.config, this.logger);
   }
 
   /**
@@ -190,6 +177,7 @@ export class DendronEngineV2 implements DEngine {
         note,
         type,
         engine: this,
+        config: DConfig.readConfigSync(this.wsRoot),
       }),
       error: null,
     };
@@ -223,18 +211,12 @@ export class DendronEngineV2 implements DEngine {
         new FileStorage({
           engine,
           logger: LOGGER,
+          config,
         }),
       mode: "fuzzy",
       logger: LOGGER,
       config,
     });
-  }
-
-  static instance({ wsRoot }: { wsRoot: string }) {
-    if (!DendronEngineV2._instance) {
-      DendronEngineV2._instance = DendronEngineV2.create({ wsRoot });
-    }
-    return DendronEngineV2._instance;
   }
 
   /**
@@ -326,7 +308,7 @@ export class DendronEngineV2 implements DEngine {
           schemas,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
-          config: this.config,
+          config: DConfig.readConfigSync(this.wsRoot),
         },
       };
     } catch (error: any) {
@@ -421,19 +403,6 @@ export class DendronEngineV2 implements DEngine {
         error: err,
       };
     }
-  }
-
-  async getConfig() {
-    const cpath = DConfig.configPath(this.configRoot);
-    const config = _.defaultsDeep(
-      readYAML(cpath) as IntermediateDendronConfig,
-      ConfigUtils.genDefaultConfig()
-    );
-
-    return {
-      error: null,
-      data: config,
-    };
   }
 
   async getSchema(id: string): Promise<RespV3<SchemaModuleProps>> {
@@ -653,13 +622,14 @@ export class DendronEngineV2 implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
+    const config = DConfig.readConfigSync(this.wsRoot);
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5.procRehypeFull(
         {
           engine: this,
           fname: note.fname,
           vault: note.vault,
-          config: this.config,
+          config,
         },
         { flavor }
       );
@@ -670,6 +640,7 @@ export class DendronEngineV2 implements DEngine {
           fname: note.fname,
           vault: note.vault,
           dest,
+          config,
         },
         { flavor }
       );
@@ -677,15 +648,6 @@ export class DendronEngineV2 implements DEngine {
     const payload = await proc.process(NoteUtils.serialize(note));
     const renderedNote = payload.toString();
     return renderedNote;
-  }
-
-  async sync(): Promise<never> {
-    throw Error("sync not implemented");
-  }
-
-  async refreshNotes(opts: RefreshNotesOpts) {
-    await this.refreshNotesV2(opts.notes);
-    return { error: null };
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
@@ -700,6 +662,7 @@ export class DendronEngineV2 implements DEngine {
           EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
+            config: DConfig.readConfigSync(this.wsRoot),
           });
           this.store.updateNote(ent.note);
         }
@@ -739,6 +702,7 @@ export class DendronEngineV2 implements DEngine {
       EngineUtils.refreshNoteLinksAndAnchors({
         note,
         engine,
+        config: DConfig.readConfigSync(this.wsRoot),
       });
       this.logger.debug({ ctx, msg: "post:refreshed note links and anchors" });
       const out = this.store.updateNote(note, opts);
@@ -760,46 +724,13 @@ export class DendronEngineV2 implements DEngine {
     }
   }
 
+  /**
+   * @deprecated: Use {@link DEngine.writeSchema}
+   */
   async updateSchema(schemaModule: SchemaModuleProps) {
     const out = await this.store.updateSchema(schemaModule);
     await this.updateIndex("schema");
     return out;
-  }
-
-  async writeConfig(opts: ConfigWriteOpts): ReturnType<DEngine["writeConfig"]> {
-    const { configRoot } = this;
-    const cpath = DConfig.configPath(configRoot);
-    writeYAML(cpath, opts.config);
-    return {
-      error: null,
-    };
-  }
-
-  async addAccessTokensToPodConfig(opts: {
-    path: string;
-    tokens: {
-      accessToken: string;
-      expirationTime: number;
-      refreshToken?: string;
-    };
-  }) {
-    const { path, tokens } = opts;
-    const { accessToken, refreshToken, expirationTime } = tokens;
-
-    let podConfig = readYAML(path);
-
-    podConfig = {
-      ...podConfig,
-      accessToken,
-      expirationTime,
-    };
-    if (!_.isUndefined(refreshToken)) {
-      podConfig = {
-        ...podConfig,
-        refreshToken,
-      };
-    }
-    writeYAML(path, podConfig);
   }
 
   async writeNote(
@@ -809,6 +740,7 @@ export class DendronEngineV2 implements DEngine {
     EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
+      config: DConfig.readConfigSync(this.wsRoot),
     });
     const out = await this.store.writeNote(note, opts);
     this.fuseEngine.replaceNotesIndex(this.notes);
@@ -830,6 +762,7 @@ export class DendronEngineV2 implements DEngine {
       const blocks = await RemarkUtils.extractBlocks({
         note,
         engine: this,
+        config: DConfig.readConfigSync(this.wsRoot, true),
       });
       if (opts.filterByAnchorType) {
         _.remove(
@@ -869,11 +802,12 @@ export class DendronEngineV2 implements DEngine {
           ),
         };
       });
+      const config = DConfig.readConfigSync(this.wsRoot, true);
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
         allErrors: errors,
-      } = await runAllDecorators({ ...opts, note, engine: this });
+      } = await runAllDecorators({ ...opts, note, engine: this, config });
       let error: IDendronError | null = null;
       if (errors && errors.length > 1)
         error = new DendronCompositeError(errors);

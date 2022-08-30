@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DEngine,
+  IntermediateDendronConfig,
   TaskNoteUtils,
   VaultUtils,
   VSRange,
@@ -20,13 +21,15 @@ export async function decorateTaskNote({
   range,
   fname,
   vaultName,
+  config,
 }: {
   engine: DEngine;
   range: VSRange;
   fname: string;
   vaultName?: string;
+  config: IntermediateDendronConfig;
 }) {
-  const { vaults, config } = engine;
+  const { vaults } = engine;
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })

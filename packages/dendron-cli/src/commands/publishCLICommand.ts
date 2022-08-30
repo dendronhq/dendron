@@ -26,7 +26,7 @@ import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
 import ora from "ora";
-import { GitUtils } from "@dendronhq/common-server";
+import { DConfig, GitUtils } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -265,7 +265,7 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     opts.config.overrides = overrides || {};
 
     // if no siteUrl set, override with localhost
-    const config = opts.engine.config;
+    const config = DConfig.readConfigSync(opts.engine.wsRoot);
     const publishingConfig = ConfigUtils.getPublishingConfig(config);
     if (stage !== "prod") {
       if (!publishingConfig.siteUrl && !overrides?.siteUrl) {

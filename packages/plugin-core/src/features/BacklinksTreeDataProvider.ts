@@ -8,6 +8,7 @@ import {
   ProcFlavor,
   VSCodeEvents,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
@@ -546,6 +547,10 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
             },
           },
         },
+        config: DConfig.readConfigSync(
+          ExtensionProvider.getDWorkspace().wsRoot,
+          true
+        ),
       },
       {
         flavor: ProcFlavor.BACKLINKS_PANEL_HOVER,

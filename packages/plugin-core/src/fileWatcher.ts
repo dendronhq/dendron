@@ -8,7 +8,7 @@ import {
   WorkspaceOpts,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
+import { DConfig, file2Note } from "@dendronhq/common-server";
 import {
   EngineFileWatcher,
   EngineUtils,
@@ -139,6 +139,7 @@ export class FileWatcher {
         note,
         fmChangeOnly: false,
         engine,
+        config: DConfig.readConfigSync(engine.wsRoot),
       });
       await engine.updateNote(note, {
         newNode: true,

@@ -1,4 +1,4 @@
-import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
+import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe, beforeEach, afterEach } from "mocha";
 import { ConfigureLocalOverride } from "../../commands/ConfigureLocalOverride";

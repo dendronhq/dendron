@@ -32,6 +32,7 @@ import {
 import {
   assignJSONWithComment,
   createDisposableLogger,
+  DConfig,
   DLogger,
   getAllFiles,
   GitUtils,
@@ -51,7 +52,6 @@ import os from "os";
 import path, { basename } from "path";
 import { URI } from "vscode-uri";
 import { WorkspaceUtils } from ".";
-import { DConfig } from "../config";
 import { MetadataService } from "../metadata";
 import {
   CONFIG_MIGRATIONS,

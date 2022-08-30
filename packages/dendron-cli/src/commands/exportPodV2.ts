@@ -32,6 +32,7 @@ import Airtable from "@dendronhq/airtable";
 import _ from "lodash";
 import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 import clipboard from "clipboardy";
+import { DConfig } from "@dendronhq/common-server";
 
 export { CommandCLIOpts as ExportPodV2CLIOpts };
 
@@ -77,7 +78,7 @@ export class ExportPodV2CLICommand extends CLICommand<
         return new MarkdownExportPodV2({
           podConfig: config,
           engine,
-          dendronConfig: engine.config,
+          dendronConfig: DConfig.readConfigSync(engine.wsRoot),
         });
       case PodV2Types.JSONExportV2:
         return new JSONExportPodV2({

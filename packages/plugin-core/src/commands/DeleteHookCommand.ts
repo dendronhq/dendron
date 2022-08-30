@@ -1,10 +1,11 @@
 import { DHookType, IDendronError } from "@dendronhq/common-all";
-import { DConfig, HookUtils } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
+import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -35,8 +36,7 @@ export class DeleteHookCommand extends BasicCommand<
   }
 
   async execute({ hookName, shouldDeleteScript }: CommandOpts) {
-    const engine = getEngine();
-    const { wsRoot } = engine;
+    const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
     const scriptPath = HookUtils.getHookScriptPath({
       wsRoot,
       basename: hookName + ".js",
@@ -46,7 +46,7 @@ export class DeleteHookCommand extends BasicCommand<
     }
 
     const config = HookUtils.removeFromConfig({
-      config: engine.config,
+      config: DConfig.readConfigSync(wsRoot),
       hookId: hookName,
       hookType: DHookType.onCreate,
     });

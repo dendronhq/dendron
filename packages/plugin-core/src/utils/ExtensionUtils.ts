@@ -13,14 +13,11 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
+  DConfig,
   getDurationMilliseconds,
   SegmentClient,
 } from "@dendronhq/common-server";
-import {
-  DConfig,
-  MetadataService,
-  WorkspaceService,
-} from "@dendronhq/engine-server";
+import { MetadataService, WorkspaceService } from "@dendronhq/engine-server";
 import { ExecaChildProcess } from "execa";
 import fs from "fs-extra";
 import _ from "lodash";

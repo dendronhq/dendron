@@ -1,6 +1,7 @@
 import { ConfigUtils, IDendronError } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
-import { DConfig, HookUtils } from "@dendronhq/engine-server";
+import { HookUtils } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS, TestHookUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";

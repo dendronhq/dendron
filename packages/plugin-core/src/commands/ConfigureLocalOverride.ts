@@ -1,4 +1,4 @@
-import { DConfig, LocalConfigScope } from "@dendronhq/engine-server";
+import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";

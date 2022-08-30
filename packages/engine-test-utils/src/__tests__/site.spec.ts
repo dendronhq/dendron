@@ -8,7 +8,7 @@ import {
   NotePropsByIdDict,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir, vault2Path } from "@dendronhq/common-server";
+import { DConfig, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   NoteTestUtilsV4,
@@ -720,10 +720,10 @@ describe("SiteUtils", () => {
 
     test("blacklist vault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
-            config: engine.config,
+            config: DConfig.readConfigSync(wsRoot),
           });
           const root = (
             await engine.findNotes({

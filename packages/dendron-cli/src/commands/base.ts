@@ -10,15 +10,12 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  DConfig,
   getDurationMilliseconds,
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
-import {
-  DConfig,
-  MIGRATION_ENTRIES,
-  WorkspaceUtils,
-} from "@dendronhq/engine-server";
+import { MIGRATION_ENTRIES, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";

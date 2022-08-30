@@ -8,6 +8,7 @@ import {
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
+import { DConfig } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -70,7 +71,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, wsRoot, vaultPath, noAddToConfig, engine } = opts;
+    const { cmd, wsRoot, vaultPath, noAddToConfig } = opts;
 
     try {
       switch (cmd) {
@@ -79,7 +80,7 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
 
           const wsService = new WorkspaceService({ wsRoot });
           let resp: DVault;
-          if (engine.config.dev?.enableSelfContainedVaults) {
+          if (DConfig.readConfigSync(wsRoot).dev?.enableSelfContainedVaults) {
             const vault: SelfContainedVault = {
               fsPath: vaultPath,
               selfContained: true,

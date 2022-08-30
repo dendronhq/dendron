@@ -1,11 +1,12 @@
 import { DendronError, DHookType, IDendronError } from "@dendronhq/common-all";
-import { DConfig, HookUtils } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/common-server";
+import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = { hookName: string; hookFilter: string };
@@ -51,8 +52,7 @@ export class CreateHookCommand extends BasicCommand<
   }
 
   async execute({ hookName, hookFilter }: CommandOpts) {
-    const engine = getEngine();
-    const { wsRoot } = engine;
+    const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
     const scriptPath = HookUtils.getHookScriptPath({
       wsRoot,
       basename: hookName + ".js",
@@ -67,7 +67,7 @@ export class CreateHookCommand extends BasicCommand<
     }
     fs.writeFileSync(scriptPath, hookTemplate);
     const config = HookUtils.addToConfig({
-      config: engine.config,
+      config: DConfig.readConfigSync(wsRoot),
       hookEntry: {
         id: hookName,
         pattern: hookFilter,

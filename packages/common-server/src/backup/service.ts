@@ -2,17 +2,15 @@ import {
   asyncLoop,
   DendronError,
   Disposable,
+  DLogger,
   ERROR_STATUS,
   RespV3,
   Time,
 } from "@dendronhq/common-all";
-import {
-  createDisposableLogger,
-  DLogger,
-  GitUtils,
-} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
+import { GitUtils } from "../git";
+import { createDisposableLogger } from "../logger";
 import { IBackupService } from "./backupServiceInterface";
 
 export type BackupServiceOpts = {

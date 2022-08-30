@@ -116,7 +116,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       if (copts.useId && dest === DendronASTDest.HTML) {
         let notes;
         const { engine, noteCacheForRender } = MDUtilsV5.getProcData(proc);
-        // debugger;
         // TODO: Consolidate logic.
         if (noteCacheForRender) {
           const notesById =

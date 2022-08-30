@@ -9,21 +9,9 @@ import {
   getWebTreeViewEntry,
   ThemeType,
 } from "@dendronhq/common-all";
-// import {
-//   findUpTo,
-//   getDurationMilliseconds,
-//   WebViewCommonUtils,
-//   WebViewThemeMap,
-// } from "@dendronhq/common-server";
-// import path from "path";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
-// import { IDendronExtension } from "../dendronExtensionInterface";
-// import { ExtensionProvider } from "../ExtensionProvider";
-// import { Logger } from "../logger";
-// import { VSCodeUtils } from "../vsCodeUtils";
-// import fs from "fs-extra";
 
 // Copied from etc.ts:
 type WebViewThemeMap = {
@@ -32,6 +20,10 @@ type WebViewThemeMap = {
   custom?: string;
 };
 
+/**
+ * Forked version of WebViewUtils that works in the web ext.
+ * TODO: Consolidate back
+ */
 @injectable()
 export class WebViewUtils {
   constructor(

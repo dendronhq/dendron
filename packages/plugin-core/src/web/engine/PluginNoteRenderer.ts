@@ -1,6 +1,8 @@
 import {
   DendronASTDest,
   DendronError,
+  DVault,
+  IntermediateDendronConfig,
   NoteProps,
   NoteUtils,
   ProcFlavor,
@@ -9,7 +11,6 @@ import {
   RenderNotePayload,
   ResponseUtil,
   RespV2,
-  StrictConfigV5,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -24,10 +25,14 @@ import { INoteRenderer } from "./INoteRenderer";
 
 @injectable()
 export class PluginNoteRenderer implements INoteRenderer {
+  // TODO: Remove this config from injection in favor of only injecting the
+  // parameters that are needed. Right now, the unified proc's require the
+  // entire config to be passed in.
   constructor(
-    @inject("PublishingConfig")
-    private publishingConfig: StrictConfigV5,
-    @inject("ReducedDEngine") private engine: ReducedDEngine // private publishingConfig: DendronPublishingConfig
+    @inject("IntermediateDendronConfig")
+    private publishingConfig: IntermediateDendronConfig,
+    @inject("ReducedDEngine") private engine: ReducedDEngine,
+    @inject("vaults") private vaults: DVault[]
   ) {}
 
   async renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
@@ -64,12 +69,11 @@ export class PluginNoteRenderer implements INoteRenderer {
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5Web.procRehypeWeb(
         {
-          // engine: this,
           noteToRender: note,
           fname: note.fname,
           vault: note.vault,
           config: this.publishingConfig,
-        } as ProcDataFullOptsV5, // TODO: we need this cast to avoid sending in engine temporarily.
+        } as ProcDataFullOptsV5, // We need this cast to avoid sending in engine.
         { flavor }
       );
     } else {
@@ -84,7 +88,11 @@ export class PluginNoteRenderer implements INoteRenderer {
 
     let allData: NoteProps[] = await Promise.all(
       renderDependencies.map(async (note) => {
-        const notes = await this.engine.findNotes({ fname: note.fname }); // TODO: Add vault information
+        const vault = _.find(
+          this.vaults,
+          (vault) => vault.name === note.vaultName
+        );
+        const notes = await this.engine.findNotes({ fname: note.fname, vault });
         return notes[0];
       })
     );
@@ -92,7 +100,9 @@ export class PluginNoteRenderer implements INoteRenderer {
     // Also include children to render the 'children' hierarchy at the footer of the page:
     await Promise.all(
       note.children.map(async (childId) => {
-        const childNote = await this.engine.getNote(childId); // TODO: use Bulk get API instead
+        // TODO: Can we use a bulk get API instead (if/when it exists) to speed
+        // up fetching time
+        const childNote = await this.engine.getNote(childId);
 
         if (childNote.data) {
           allData.push(childNote.data);
@@ -104,17 +114,6 @@ export class PluginNoteRenderer implements INoteRenderer {
 
     const secondProc = proc();
     MDUtilsV5.setProcData(secondProc, { noteCacheForRender: allData });
-    // const secondProc = MDUtilsV5Web.procRehypeWeb(
-    //   {
-    //     // engine: this,
-    //     noteToRender: note,
-    //     noteCacheForRender: allData,
-    //     fname: note.fname,
-    //     vault: note.vault,
-    //     config: this.publishingConfig,
-    //   } as ProcDataFullOptsV5, // TODO: we need this cast to avoid sending in engine temporarily.
-    //   { flavor }
-    // );
 
     const payload = await secondProc.process(serialized);
 

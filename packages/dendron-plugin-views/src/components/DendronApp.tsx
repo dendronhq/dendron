@@ -101,8 +101,9 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         logger.info({ ctx, msg: "onUpdatePreviewHTML:pre" });
 
         const updatePreviewMsg = msg as OnUpdatePreviewHTMLMsg;
-        const html = updatePreviewMsg.data.html as string;
-        ideDispatch(ideSlice.actions.setPreviewHTML(html));
+        ideDispatch(
+          ideSlice.actions.setPreviewHTML(updatePreviewMsg.data.html)
+        );
         const noteToActivate = updatePreviewMsg.data.note;
         ideDispatch(ideSlice.actions.setNoteActive(noteToActivate));
         logger.info({

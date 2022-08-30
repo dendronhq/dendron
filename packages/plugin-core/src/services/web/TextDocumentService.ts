@@ -41,17 +41,8 @@ import { ITextDocumentService } from "../ITextDocumentService";
  */
 @injectable()
 export class TextDocumentService implements ITextDocumentService {
-  // private L: DLogger;
-
   _textDocumentEventHandle: Disposable;
-  // _extension: IDendronExtension;
 
-  /**
-   *
-   * @param ext Instance of IDendronExtension
-   * @param textDocumentEvent - Event returning TextDocument, such as
-   * vscode.workspace.OnDidSaveTextDocument. This call is not debounced
-   */
   constructor(
     @inject("textDocumentEvent") textDocumentEvent: Event<TextDocument>,
     @inject("wsRoot") private wsRoot: URI,
@@ -59,8 +50,6 @@ export class TextDocumentService implements ITextDocumentService {
     @inject("ReducedDEngine") private engine: ReducedDEngine,
     @inject("logger") private L: DLogger
   ) {
-    // this.L = Logger;
-    // this._extension = ext;
     this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
   }
 
@@ -108,7 +97,8 @@ export class TextDocumentService implements ITextDocumentService {
   }
 
   /**
-   * Callback function for vscode.workspace.OnDidSaveTextDocument. Updates note with contents from document and saves to engine
+   * Callback function for vscode.workspace.OnDidSaveTextDocument. Updates note
+   * with contents from document and saves to engine
    * @param document
    * @returns
    */
@@ -202,12 +192,12 @@ export class TextDocumentService implements ITextDocumentService {
         return endPosition.isBefore(maybePos);
       });
       if (allChangesInFM) {
-        // this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });
+        this.L.debug({ ctx, uri: uri.fsPath, msg: "frontmatter change only" });
         fmChangeOnly = true;
       }
     }
 
-    // this.L.debug({ ctx, uri: uri.fsPath });
+    this.L.debug({ ctx, uri: uri.fsPath });
     const vault = VaultUtilsV2.getVaultByFilePath({
       vaults,
       wsRoot,
@@ -253,7 +243,7 @@ export class TextDocumentService implements ITextDocumentService {
       return note;
     }
 
-    // this.L.debug({ ctx, uri: uri.fsPath });
+    this.L.debug({ ctx, uri: uri.fsPath });
 
     const content = textDocument.getText();
     if (!this.noteContentChanged({ content, note })) {

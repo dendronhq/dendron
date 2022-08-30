@@ -4,10 +4,10 @@ import {
   IDataStore,
   IFileStore,
   INoteStore,
+  IntermediateDendronConfig,
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
-  StrictConfigV5,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
@@ -28,10 +28,9 @@ import { getWSRoot } from "./getWSRoot";
 import * as vscode from "vscode";
 import { URI } from "vscode-uri";
 import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
-import { DummyPreviewLinkHandler } from "../views/preview/DummyPreviewLinkHandler";
+import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
 import { ITextDocumentService } from "../../services/ITextDocumentService";
 import { ConsoleLogger } from "../utils/ConsoleLogger";
-import { getPort } from "./getPort";
 import {
   DummyPreviewPanelConfig,
   IPreviewPanelConfig,
@@ -136,7 +135,7 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   });
 
   container.register<IPreviewLinkHandler>("IPreviewLinkHandler", {
-    useClass: DummyPreviewLinkHandler, // TODO: Add a real one
+    useClass: PreviewLinkHandler,
   });
 
   container.register<IPreviewPanelConfig>("IPreviewPanelConfig", {
@@ -155,8 +154,10 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
     useClass: ConsoleLogger,
   });
 
+  // Just use a dummy number - this isn't actually used by the web logic, but
+  // it's a dependency in some util methods.
   container.register<number>("port", {
-    useValue: await getPort(wsRoot),
+    useValue: 1,
   });
 
   container.register<INoteRenderer>("INoteRenderer", {
@@ -164,7 +165,7 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   });
 
   const config = await getWorkspaceConfig(wsRoot);
-  container.register<StrictConfigV5>("PublishingConfig", {
-    useValue: config as StrictConfigV5, // TODO: Prob change to intermediate
+  container.register<IntermediateDendronConfig>("IntermediateDendronConfig", {
+    useValue: config as IntermediateDendronConfig,
   });
 }

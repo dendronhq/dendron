@@ -41,6 +41,7 @@ import {
   genDefaultCommandConfig,
   genDefaultPreviewConfig,
   genDefaultWorkspaceConfig,
+  GiscusConfig,
   IntermediateDendronConfig,
   JournalConfig,
   LookupConfig,
@@ -773,6 +774,12 @@ export class ConfigUtils {
     } else {
       return ConfigUtils.getPublishing(config).github;
     }
+  }
+
+  static getGiscusConfig(
+    config: IntermediateDendronConfig
+  ): GiscusConfig | undefined {
+    return ConfigUtils.getPublishing(config).giscus;
   }
 
   static getLogo(config: IntermediateDendronConfig): string | undefined {

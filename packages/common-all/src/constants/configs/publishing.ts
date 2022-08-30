@@ -21,6 +21,7 @@ import {
   ENABLE_HASHES_FOR_FM_TAGS,
   ENABLE_BACK_LINKS,
 } from "./global";
+import { GiscusConfig } from "../../types";
 
 const GITHUB_EDIT_VIEW_MODE: Record<
   GithubEditViewModeEnum,
@@ -59,6 +60,69 @@ const GITHUB: DendronConfigEntryCollection<GithubConfig> = {
   editRepository: {
     label: "Edit Repository",
     desc: "URL of the Github repository. This value will be ignored if you are using remote vaults.",
+  },
+};
+
+const GISCUS: DendronConfigEntryCollection<GiscusConfig> = {
+  id: {
+    label: "ID",
+    desc: "ID of Giscus widget",
+  },
+  host: {
+    label: "Host",
+    desc: "Host of the giscus server if you are self-hosting Giscus.",
+  },
+  repo: {
+    label: "Repo",
+    desc: "Repository where the discussion is stored.",
+  },
+  repoId: {
+    label: "Repo ID",
+    desc: "ID of the Repository where the discussion is stored.",
+  },
+  category: {
+    label: "Category",
+    desc: "Category where the discussion will be searched.",
+  },
+  categoryId: {
+    label: "Category ID",
+    desc: "ID of the category where the discussion will be searched.",
+  },
+  mapping: {
+    label: "Mapping",
+    desc: "Mapping between the parent page and the discussion.",
+  },
+  term: {
+    label: "Term",
+    desc: "Search term to use when searching for the discussion.",
+  },
+  strict: {
+    label: "Strict",
+    desc: "Use strict title matching",
+  },
+  reactionsEnabled: {
+    label: "Reactions Enabled",
+    desc: "Enable reactions to the main post of the discussion.",
+  },
+  emitMetadata: {
+    label: "Emit Metadata",
+    desc: "Emit the discussion metadata periodically to the parent page.",
+  },
+  inputPosition: {
+    label: "Input Position",
+    desc: "Placement of the comment box (`top` or `bottom`)",
+  },
+  lang: {
+    label: "Language",
+    desc: "Language that Giscus will be displayed in.",
+  },
+  theme: {
+    label: "Theme",
+    desc: "Theme that Giscus will be displayed in.",
+  },
+  loading: {
+    label: "Loading",
+    desc: "Whether the iframe should be loaded lazily or eagerly.",
   },
 };
 
@@ -211,4 +275,5 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       label: "Add a custom banner to the site",
       desc: "EXPERIMENTAL: do not use",
     },
+    giscus: GISCUS,
   };

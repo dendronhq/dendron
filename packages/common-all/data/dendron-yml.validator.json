@@ -1187,6 +1187,9 @@
         },
         "siteBanner": {
           "type": "string"
+        },
+        "giscus": {
+          "$ref": "#/definitions/GiscusConfig"
         }
       },
       "required": [
@@ -1372,6 +1375,123 @@
         "tree",
         "edit"
       ]
+    },
+    "GiscusConfig": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        },
+        "repoId": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "categoryId": {
+          "type": "string"
+        },
+        "mapping": {
+          "type": "string",
+          "enum": [
+            "url",
+            "title",
+            "og:title",
+            "specific",
+            "number",
+            "pathname"
+          ]
+        },
+        "term": {
+          "type": "string"
+        },
+        "theme": {
+          "type": "string",
+          "enum": [
+            "light",
+            "light_high_contrast",
+            "light_protanopia",
+            "light_tritanopia",
+            "dark",
+            "dark_high_contrast",
+            "dark_protanopia",
+            "dark_tritanopia",
+            "dark_dimmed",
+            "transparent_dark",
+            "preferred_color_scheme"
+          ]
+        },
+        "strict": {
+          "type": "string",
+          "enum": [
+            "0",
+            "1"
+          ]
+        },
+        "reactionsEnabled": {
+          "type": "string",
+          "enum": [
+            "0",
+            "1"
+          ]
+        },
+        "emitMetadata": {
+          "type": "string",
+          "enum": [
+            "0",
+            "1"
+          ]
+        },
+        "inputPosition": {
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom"
+          ]
+        },
+        "lang": {
+          "type": "string",
+          "enum": [
+            "de",
+            "gsw",
+            "en",
+            "es",
+            "fr",
+            "id",
+            "it",
+            "ja",
+            "ko",
+            "nl",
+            "pl",
+            "pt",
+            "ro",
+            "ru",
+            "tr",
+            "vi",
+            "zh-CN",
+            "zh-TW"
+          ]
+        },
+        "loading": {
+          "type": "string",
+          "enum": [
+            "lazy",
+            "eager"
+          ]
+        }
+      },
+      "required": [
+        "repo",
+        "repoId",
+        "mapping"
+      ],
+      "additionalProperties": false
     }
   }
 }

@@ -468,11 +468,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   async plant(opts: NextjsExportPlantOpts) {
     const ctx = `${ID}:plant`;
     const { dest, engine, wsRoot, config: podConfig } = opts;
-    const resp = await engine.getConfig();
-    if (resp.error) {
-      throw resp.error;
-    }
-    const config = resp.data!;
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
     const config = DConfig.readConfigSync(wsRoot);

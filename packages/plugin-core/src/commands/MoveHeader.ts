@@ -11,13 +11,14 @@ import {
   ERROR_SEVERITY,
   extractNoteChangeEntryCounts,
   getSlugger,
+  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { DConfig, file2Note, vault2Path } from "@dendronhq/common-server";
 import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
 import {
   MDUtilsV5,
@@ -101,6 +102,7 @@ export class MoveHeaderCommand extends BasicCommand<
       fname: note.fname,
       vault: note.vault,
       dest: DendronASTDest.MD_DENDRON,
+      config: DConfig.readConfigSync(engine.wsRoot),
     });
   };
 
@@ -410,11 +412,13 @@ export class MoveHeaderCommand extends BasicCommand<
     note: NoteProps,
     engine: IEngineAPIService,
     origin: NoteProps,
-    anchorNamesToUpdate: string[]
+    anchorNamesToUpdate: string[],
+    config: IntermediateDendronConfig
   ) {
     const links = LinkUtils.findLinksFromBody({
       note,
       engine,
+      config,
     }).filter((link) => {
       return (
         link.to?.fname?.toLowerCase() === origin.fname.toLowerCase() &&
@@ -515,6 +519,7 @@ export class MoveHeaderCommand extends BasicCommand<
       .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
       .map((ref) => this.getNoteByLocation(ref.location, engine))
       .filter((note) => note !== undefined);
+    const config = DConfig.readConfigSync(engine.wsRoot);
 
     await asyncLoopOneAtATime(refsToProcess, async (note) => {
       try {
@@ -534,7 +539,8 @@ export class MoveHeaderCommand extends BasicCommand<
           _note,
           engine,
           origin,
-          anchorNamesToUpdate
+          anchorNamesToUpdate,
+          config
         );
         const modifiedNote = this.updateLinksInNote({
           note: _note,

@@ -6,6 +6,7 @@ import {
   genUUIDInsecure,
   NoteProps,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import { Heading } from "@dendronhq/engine-server";
 import {
   AnchorUtils,
@@ -56,8 +57,12 @@ export function getHeaderAt({
 }): undefined | string {
   const line = document.lineAt(position.line);
   const headerLine = _.trim(line.text);
+
   if (headerLine.startsWith("#")) {
-    const proc = MDUtilsV5.procRemarkParse({ mode: ProcMode.NO_DATA }, {});
+    const proc = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.MD_DENDRON }
+    );
     const parsed = proc.parse(headerLine);
     const header = select(DendronASTTypes.HEADING, parsed) as Heading | null;
     if (_.isNull(header)) return undefined;
@@ -223,6 +228,7 @@ export async function isBrokenWikilink({
       engine,
       vault: note.vault,
       fname: note.fname,
+      config: DConfig.readConfigSync(engine.wsRoot),
     }
   );
   const parsedLine = proc.parse(line);

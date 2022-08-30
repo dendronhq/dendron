@@ -396,10 +396,12 @@ export class LinkUtils {
     note,
     engine,
     type,
+    config,
     filter,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
   }): DLink[] {
@@ -410,12 +412,14 @@ export class LinkUtils {
           note,
           engine,
           filter,
+          config,
         });
         break;
       case "candidate":
         links = LinkUtils.findLinkCandidates({
           note,
           engine,
+          config,
         });
         break;
       default:
@@ -437,10 +441,12 @@ export class LinkUtils {
   static findLinksFromBody({
     note,
     engine,
+    config,
     filter,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
@@ -451,6 +457,7 @@ export class LinkUtils {
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
+        config,
       }
     );
     const out = remark.parse(content) as DendronASTNode;
@@ -779,9 +786,11 @@ export class LinkUtils {
   static findLinkCandidates({
     note,
     engine,
+    config,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
   }) {
     const content = note.body;
     const remark = MDUtilsV5.procRemarkParse(
@@ -791,6 +800,7 @@ export class LinkUtils {
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
+        config,
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
@@ -1045,9 +1055,10 @@ export class RemarkUtils {
   }
 
   static findAnchors(content: string): Anchor[] {
-    const parser = MDUtilsV5.procRehypeParse({
-      mode: ProcMode.NO_DATA,
-    });
+    const parser = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.HTML }
+    );
     const parsed = parser.parse(content);
     return [
       ...(selectAll(DendronASTTypes.HEADING, parsed) as Heading[]),
@@ -1401,15 +1412,18 @@ export class RemarkUtils {
   static async extractBlocks({
     note,
     engine,
+    config,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
       engine,
       vault: note.vault,
       fname: note.fname,
       dest: DendronASTDest.MD_DENDRON,
+      config,
     });
     const slugger = getSlugger();
 
@@ -1518,9 +1532,9 @@ export class RemarkUtils {
    */
   static extractFMTags(body: string) {
     let parsed: ReturnType<typeof parseFrontmatter> | undefined;
-    const noteAST = MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.NO_DATA },
-      {}
+    const noteAST = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.MD_DENDRON }
     ).parse(body);
     visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
       parsed = parseFrontmatter(frontmatter);

@@ -177,6 +177,7 @@ export class DendronEngineV2 implements DEngine {
         note,
         type,
         engine: this,
+        config: DConfig.readConfigSync(this.wsRoot),
       }),
       error: null,
     };
@@ -621,13 +622,14 @@ export class DendronEngineV2 implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
+    const config = DConfig.readConfigSync(this.wsRoot);
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5.procRehypeFull(
         {
           engine: this,
           fname: note.fname,
           vault: note.vault,
-          config: DConfig.readConfigSync(this.wsRoot),
+          config,
         },
         { flavor }
       );
@@ -638,6 +640,7 @@ export class DendronEngineV2 implements DEngine {
           fname: note.fname,
           vault: note.vault,
           dest,
+          config,
         },
         { flavor }
       );
@@ -659,6 +662,7 @@ export class DendronEngineV2 implements DEngine {
           EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
+            config: DConfig.readConfigSync(this.wsRoot),
           });
           this.store.updateNote(ent.note);
         }
@@ -698,6 +702,7 @@ export class DendronEngineV2 implements DEngine {
       EngineUtils.refreshNoteLinksAndAnchors({
         note,
         engine,
+        config: DConfig.readConfigSync(this.wsRoot),
       });
       this.logger.debug({ ctx, msg: "post:refreshed note links and anchors" });
       const out = this.store.updateNote(note, opts);
@@ -735,6 +740,7 @@ export class DendronEngineV2 implements DEngine {
     EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
+      config: DConfig.readConfigSync(this.wsRoot),
     });
     const out = await this.store.writeNote(note, opts);
     this.fuseEngine.replaceNotesIndex(this.notes);
@@ -756,6 +762,7 @@ export class DendronEngineV2 implements DEngine {
       const blocks = await RemarkUtils.extractBlocks({
         note,
         engine: this,
+        config: DConfig.readConfigSync(this.wsRoot, true),
       });
       if (opts.filterByAnchorType) {
         _.remove(

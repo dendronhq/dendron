@@ -323,6 +323,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
+      config: DConfig.readConfigSync(this.wsRoot),
     });
 
     // Apply hooks
@@ -598,6 +599,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
+    const config = DConfig.readConfigSync(this.wsRoot);
     const notesToUpdate = linkNotesResp
       .map((resp) => {
         if (resp.error) {
@@ -612,6 +614,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
             note: resp.data,
             oldLoc,
             newLoc,
+            config,
           });
         }
       })
@@ -870,6 +873,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         note,
         type,
         engine: this,
+        config: DConfig.readConfigSync(this.wsRoot),
       }),
       error: null,
     };
@@ -1101,16 +1105,19 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     note,
     oldLoc,
     newLoc,
+    config,
   }: {
     note: NoteProps;
     oldLoc: DNoteLoc;
     newLoc: DNoteLoc;
+    config: IntermediateDendronConfig;
   }): NoteProps | undefined {
     const prevNote = _.cloneDeep(note);
     const foundLinks = LinkUtils.findLinksFromBody({
       note,
       engine: this,
       filter: { loc: oldLoc },
+      config,
     });
 
     // important to order by position since we replace links and this affects

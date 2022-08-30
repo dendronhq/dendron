@@ -84,6 +84,7 @@ export async function runAllDecorators(
       engine,
       vault: note.vault,
       fname: note.fname,
+      config,
     }
   );
   const maxNoteLength = ConfigUtils.getWorkspace(config).maxNoteLength;

@@ -482,6 +482,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             fname: note.fname,
             vault: note.vault,
             dest: DendronASTDest.MD_DENDRON,
+            config: DConfig.readConfigSync(engine.wsRoot),
           });
 
           const tree = proc.parse(note.body) as DendronASTNode;

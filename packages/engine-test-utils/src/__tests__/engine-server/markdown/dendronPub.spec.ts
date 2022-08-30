@@ -351,9 +351,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   });
 
   testWithEngine("in IMPORT mode", async ({ engine, vaults, wsRoot }) => {
+    const config = DConfig.readConfigSync(wsRoot);
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.IMPORT },
-      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0] }
+      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0], config }
     );
     const out = await proc.process("Testing publishing in IMPORT mode");
     await checkVFile(out, "Testing publishing in IMPORT mode");

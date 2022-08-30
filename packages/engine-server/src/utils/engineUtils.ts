@@ -6,6 +6,7 @@ import {
   DEngineClient,
   ErrorFactory,
   ERROR_SEVERITY,
+  IntermediateDendronConfig,
   NoteProps,
   RespV3,
   VaultUtils,
@@ -14,7 +15,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { AnchorUtils, LinkUtils } from "@dendronhq/unified";
-import { DConfig } from "@dendronhq/common-server";
 
 export function openPortFile({ fpath }: { fpath: string }): number {
   return _.toInteger(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));
@@ -94,15 +94,16 @@ export class EngineUtils {
   static refreshNoteLinksAndAnchors({
     note,
     engine,
+    config,
     fmChangeOnly,
     silent,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     fmChangeOnly?: boolean;
     silent?: boolean;
   }): void {
-    const config = DConfig.readConfigSync(engine.wsRoot);
     const maxNoteLength = Math.min(
       ConfigUtils.getWorkspace(config).maxNoteLength,
       CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
@@ -125,6 +126,7 @@ export class EngineUtils {
       note,
       type: "regular",
       engine,
+      config,
     });
     note.links = links;
 
@@ -142,6 +144,7 @@ export class EngineUtils {
           note,
           type: "candidate",
           engine,
+          config,
         });
         note.links = note.links.concat(linkCandidates);
       }

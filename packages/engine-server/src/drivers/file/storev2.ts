@@ -608,6 +608,7 @@ export class FileStorage implements DStore {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
             engine: this.engine,
+            config: this.config,
           });
           noteFrom.links = noteFrom.links.concat(linkCandidates);
         }
@@ -763,6 +764,7 @@ export class FileStorage implements DStore {
       note: _n,
       engine: this.engine,
       filter: { loc: oldLoc },
+      config: this.config,
     });
 
     // important to order by position since we replace links and this affects

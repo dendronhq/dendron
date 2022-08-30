@@ -9,6 +9,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
+  OptionalExceptFor,
   ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -44,7 +45,6 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
-import { DConfig } from "@dendronhq/common-server";
 
 export { ProcFlavor };
 
@@ -98,6 +98,7 @@ export type ProcDataFullOptsV5 = {
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
+  config: IntermediateDendronConfig;
   /**
    * Supply alternative dictionary of notes to use when resolving note ids
    */
@@ -114,7 +115,6 @@ export type ProcDataFullOptsV5 = {
   publishOpts?: DendronPubOpts;
   backlinkHoverOpts?: BacklinkOpts;
 } & {
-  config?: IntermediateDendronConfig;
   wsRoot?: string;
 };
 
@@ -217,7 +217,10 @@ export class MDUtilsV5 {
   /**
    * Used for processing a Dendron markdown note
    */
-  static _procRemark(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
+  static _procRemark(
+    opts: ProcOptsV5,
+    data: OptionalExceptFor<ProcDataFullOptsV5, "config">
+  ) {
     const errors: DendronError[] = [];
     opts = _.defaults(opts, { flavor: ProcFlavor.REGULAR });
     let proc = remark()
@@ -265,9 +268,6 @@ export class MDUtilsV5 {
               )} missing`,
             });
           }
-          if (!data.config) {
-            data.config = DConfig.readConfigSync(data.engine!.wsRoot, true);
-          }
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
           }
@@ -314,15 +314,14 @@ export class MDUtilsV5 {
           if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
             insertTitle = false;
           } else {
-            const config = data.config as IntermediateDendronConfig;
             const shouldApplyPublishRules =
               MDUtilsV5.shouldApplyPublishingRules(proc);
             insertTitle = ConfigUtils.getEnableFMTitle(
-              config,
+              data.config,
               shouldApplyPublishRules
             );
           }
-          const config = data.config as IntermediateDendronConfig;
+          const config = data.config;
           const publishingConfig = ConfigUtils.getPublishingConfig(config);
           const assetsPrefix = publishingConfig.assetsPrefix;
 
@@ -363,9 +362,6 @@ export class MDUtilsV5 {
             )} missing`,
           });
         }
-        if (!data.config) {
-          data.config = DConfig.readConfigSync(data.engine!.wsRoot, true);
-        }
         if (!data.wsRoot) {
           data.wsRoot = data.engine!.wsRoot;
         }
@@ -395,7 +391,7 @@ export class MDUtilsV5 {
     return proc;
   }
 
-  static _procRehype(opts: ProcOptsV5, data?: Partial<ProcDataFullOptsV5>) {
+  static _procRehype(opts: ProcOptsV5, data: Omit<ProcDataFullOptsV5, "dest">) {
     const pRemarkParse = this.procRemarkParse(opts, {
       ...data,
       dest: DendronASTDest.HTML,
@@ -409,10 +405,9 @@ export class MDUtilsV5 {
       .use(slug);
 
     // apply plugins enabled by config
-    const config = DConfig.readConfigSync(data?.engine?.wsRoot as string, true);
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
-    if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
+    if (ConfigUtils.getEnableKatex(data.config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
@@ -451,7 +446,10 @@ export class MDUtilsV5 {
    * @param data
    * @returns
    */
-  static procRemarkParse(opts: ProcOptsV5, data: Partial<ProcDataFullOptsV5>) {
+  static procRemarkParse(
+    opts: ProcOptsV5,
+    data: OptionalExceptFor<ProcDataFullOptsV5, "config">
+  ) {
     return this._procRemark({ ...opts, parseOnly: true }, data);
   }
 
@@ -466,9 +464,11 @@ export class MDUtilsV5 {
     opts: Omit<ProcOptsV5, "mode" | "parseOnly">,
     data: Partial<ProcDataFullOptsV5> & { dest: DendronASTDest }
   ) {
+    // ProcMode.NO_DATA doesn't need config so we generate default to pass compilation
+    const withConfig = { ...data, config: ConfigUtils.genDefaultConfig() };
     return this._procRemark(
       { ...opts, parseOnly: true, mode: ProcMode.NO_DATA },
-      data
+      withConfig
     );
   }
 
@@ -482,13 +482,6 @@ export class MDUtilsV5 {
     return this._procRemark(
       { ...opts, parseOnly: true, mode: ProcMode.FULL },
       data
-    );
-  }
-
-  static procRehypeParse(opts: ProcOptsV5, data?: Partial<ProcDataFullOptsV5>) {
-    return this._procRemark(
-      { ...opts, parseOnly: true },
-      { ...data, dest: DendronASTDest.HTML }
     );
   }
 

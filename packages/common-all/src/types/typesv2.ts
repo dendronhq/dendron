@@ -20,6 +20,9 @@ import type { Optional } from "../utils";
 import { DendronASTDest, ProcFlavor } from "./unified";
 import { GetAnchorsRequest, GetLinksRequest } from "..";
 
+export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
+  Pick<T, TRequired>;
+
 export enum ResponseCode {
   OK = 200,
   // 412

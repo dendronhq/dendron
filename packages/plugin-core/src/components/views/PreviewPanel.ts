@@ -14,6 +14,7 @@ import {
   DendronError,
   ConfigUtils,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import {
   DendronASTTypes,
@@ -329,6 +330,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         engine: this._ext.getEngine(),
         fname: note.fname,
         vault: note.vault,
+        config: DConfig.readConfigSync(this._ext.getDWorkspace().wsRoot, true),
       });
       const tree = parser.parse(note.body);
       // ^preview-rewrites-images

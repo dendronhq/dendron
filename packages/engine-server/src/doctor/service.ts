@@ -323,6 +323,7 @@ export class DoctorService implements Disposable {
               engine,
               fname: note.fname,
               vault: note.vault,
+              config: DConfig.readConfigSync(engine.wsRoot),
             }
           );
           const newBody = await proc()
@@ -353,6 +354,7 @@ export class DoctorService implements Disposable {
               engine,
               fname: note.fname,
               vault: note.vault,
+              config: DConfig.readConfigSync(engine.wsRoot),
             }
           );
           const newBody = await proc()

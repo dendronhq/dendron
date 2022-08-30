@@ -84,8 +84,15 @@ const DendronNotePreview: DendronComponent = (props) => {
     config,
   });
 
-  const previewHTML = props.ide.previewHTML;
-  const [noteRenderedBody] = useRenderedNoteBody({ ...props, noteProps });
+  // const previewHTML = props.ide.previewHTML;
+
+  // if (!previewHTML) {
+  const [noteRenderedBody] = useRenderedNoteBody({
+    ...props,
+    noteProps,
+    previewHTML: props.ide.previewHTML,
+  });
+  // }
   logger.info({
     ctx,
     noteProps: _.isUndefined(noteProps) ? "no active note" : noteProps.id,
@@ -103,7 +110,7 @@ const DendronNotePreview: DendronComponent = (props) => {
       </div>
     );
   }
-  if ((!previewHTML && !noteRenderedBody) || !config) {
+  if (!noteRenderedBody) {
     return <div>Loading...</div>;
   }
 
@@ -126,10 +133,7 @@ const DendronNotePreview: DendronComponent = (props) => {
 
   return (
     <>
-      <DendronNote
-        noteContent={previewHTML ?? noteRenderedBody}
-        config={config}
-      />
+      <DendronNote noteContent={noteRenderedBody} config={config} />
       <Button
         shape="circle"
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}

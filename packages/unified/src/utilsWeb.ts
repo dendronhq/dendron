@@ -62,11 +62,7 @@ export class MDUtilsV5Web {
     return proc.use(rehypeStringify);
   }
 
-  private static setProcData(
-    proc: Processor,
-    opts: Partial<ProcDataFullV5>
-    // opts: Partial<ProcDataFullWebV5>
-  ) {
+  private static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
     return proc.data("dendronProcDatav5", { ..._data, ...opts });
   }
@@ -95,7 +91,6 @@ export class MDUtilsV5Web {
   private static _procRemarkWeb(
     opts: ProcOptsV5,
     data: Partial<ProcDataFullOptsV5>
-    // data: Partial<ProcDataFullWebV5>
   ) {
     const errors: DendronError[] = [];
     opts = _.defaults(opts, { flavor: ProcFlavor.REGULAR });
@@ -104,7 +99,7 @@ export class MDUtilsV5Web {
       .use(frontmatterPlugin, ["yaml"])
       .use(abbrPlugin)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } })
-      // .use(noteRefsV2) Don't do note refs for now.
+      // .use(noteRefsV2) TODO: Add in note ref functionalit
       .use(blockAnchors)
       .use(hashtags)
       .use(userTags)

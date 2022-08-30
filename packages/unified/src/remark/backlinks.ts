@@ -35,7 +35,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-    // debugger;
     let note: NoteProps | undefined;
     if (engine) {
       note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
@@ -67,7 +66,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
         vaults: engine.vaults,
         vname: vaultName,
       })!;
-      debugger;
 
       let note: NoteProps | undefined;
       if (engine) {
@@ -103,7 +101,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
           "unordered",
           backlinksToPublish.map((mdLink) => {
             let alias;
-            // debugger;
 
             let note: NoteProps | undefined;
 

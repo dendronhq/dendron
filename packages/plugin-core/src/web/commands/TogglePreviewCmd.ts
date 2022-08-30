@@ -1,7 +1,6 @@
 import * as _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
-import { URI } from "vscode-uri";
 import { TogglePreviewCommandOpts } from "../../commands/ShowPreviewInterface";
 import { type PreviewProxy } from "../../components/views/PreviewProxy";
 import { DENDRON_COMMANDS } from "../../constants";
@@ -17,15 +16,11 @@ export class TogglePreviewCmd {
   key = DENDRON_COMMANDS.TOGGLE_PREVIEW.key;
   _panel: PreviewProxy;
 
-  // This class is used for both ShowPreview and TogglePreview commands.
-  // Pass true for isShowCommand param to use this class for Show Preview command
-  // By default, this class is used for TogglePreview
   constructor(
     @inject("PreviewProxy") previewPanel: PreviewProxy,
-    @inject("wsRoot") private wsRoot: URI, // This will be needed later for openFile functionality, don't remove yet.
+    // @inject("wsRoot") private wsRoot: URI, // This will be needed later for openFile functionality
     private wsUtils: WSUtilsWeb
   ) {
-    console.log(this.wsRoot); // TODO: Remove
     this._panel = previewPanel;
   }
 
@@ -34,9 +29,7 @@ export class TogglePreviewCmd {
       return;
     }
 
-    // let note: NoteProps | undefined;
-
-    // Hide (dispose) the previwe panel when it's already visible
+    // Hide (dispose) the preview panel when it's already visible
     if (this._panel.isVisible()) {
       this._panel.hide();
       return undefined;
@@ -76,18 +69,6 @@ export class TogglePreviewCmd {
       !this._panel.isVisible()
     );
   }
-
-  // addAnalyticsPayload(opts?: TogglePreviewCommandOpts) {
-  //   return { providedFile: !_.isEmpty(opts) };
-  // }
-
-  /**
-   *
-   * @param opts if a Uri is defined through this parameter, then that Uri will
-   * be shown in preview. If unspecified, then preview will follow default
-   * behavior of showing the contents of the currently in-focus Dendron note.
-   */
-  // async execute() {}
 
   /**
    * Show a file in the preview. Only use this for files that are not notes,

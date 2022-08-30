@@ -277,7 +277,6 @@ export class MDUtilsV5 {
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
           }
-          debugger;
           const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
             engine: data.engine!,

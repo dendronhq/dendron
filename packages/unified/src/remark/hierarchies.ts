@@ -145,7 +145,6 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
     }
     const { engine, noteToRender, noteCacheForRender } =
       MDUtilsV5.getProcData(proc);
-    // debugger;
     let note: NoteProps | undefined;
     if (engine) {
       note = NoteUtils.getNoteByFnameFromEngine({

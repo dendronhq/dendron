@@ -592,7 +592,7 @@ export class ConfigUtils {
         version: 5,
         ...common,
         commands: genDefaultCommandConfig(),
-        workspace: { ...genDefaultWorkspaceConfig(), enableSmartRefs: true },
+        workspace: { ...genDefaultWorkspaceConfig() },
         preview: genDefaultPreviewConfig(),
         publishing: genDefaultPublishingConfig(),
       } as StrictConfigV5,

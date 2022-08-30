@@ -83,13 +83,6 @@ VFile {
 
 body 1.1
 
-## Header 2
-
-body 2.2
-end section
-
-## Header 3
-
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -106,11 +99,6 @@ VFile {
 ## Header 1
 
 body 1.1
-
-## Header 2
-
-body 2.2
-end section
 
 
 ",

@@ -185,10 +185,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "workspace",
   },
-  "workspace.enableSmartRefs": {
-    type: "boolean",
-    group: "workspace",
-  },
   "preview.enableFMTitle": {
     type: "boolean",
     group: "preview",

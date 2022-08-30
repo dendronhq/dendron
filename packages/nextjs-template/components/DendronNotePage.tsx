@@ -23,6 +23,7 @@ import { browserEngineSlice } from "../features/engine";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
 import { MermaidScript } from "./MermaidScript";
+import { DendronNoteGiscusWidget } from "./DendronNoteGiscusWidget";
 
 const { HEADER } = DENDRON_STYLE_CONSTANTS;
 
@@ -120,6 +121,7 @@ export default function Note({
               {BannerAlert && <BannerAlert />}
               <DendronNote noteContent={noteBody} config={config} />
               {maybeCollection}
+              <DendronNoteGiscusWidget note={note} config={config} />
             </Col>
             <Col xs={0} md={6}>
               <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />

@@ -1,6 +1,18 @@
-import { DownOutlined, RightOutlined, UpOutlined } from "@ant-design/icons";
-import { TreeUtils } from "@dendronhq/common-all";
-import { createLogger, TreeViewUtils } from "@dendronhq/common-frontend";
+import {
+  DownOutlined,
+  RightOutlined,
+  UpOutlined,
+  BookOutlined,
+  PlusOutlined,
+  NumberOutlined,
+} from "@ant-design/icons";
+import {
+  isNotUndefined,
+  TreeUtils,
+  TreeMenuNode,
+  TreeMenuNodeIcon,
+} from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-frontend";
 import { Typography } from "antd";
 import _ from "lodash";
 import dynamic from "next/dynamic";
@@ -64,7 +76,7 @@ export default function DendronTreeMenu(
     return null;
   }
 
-  const roots = TreeViewUtils.treeMenuNode2DataNode({
+  const roots = treeMenuNode2DataNode({
     roots: tree.roots,
     showVaultName: false,
     applyNavExclude: true,
@@ -226,4 +238,56 @@ function MenuItemTitle(props: Partial<NoteData> & { menu: DataNode }) {
       </Link>
     </Typography.Text>
   );
+}
+
+function treeMenuNode2DataNode({
+  roots,
+  showVaultName,
+  applyNavExclude = false,
+}: {
+  roots: TreeMenuNode[];
+  showVaultName?: boolean;
+  applyNavExclude: boolean;
+}): DataNode[] {
+  return roots
+    .map((node: TreeMenuNode) => {
+      let icon;
+      if (node.icon === TreeMenuNodeIcon.bookOutlined) {
+        icon = <BookOutlined />;
+      } else if (node.icon === TreeMenuNodeIcon.numberOutlined) {
+        icon = <NumberOutlined />;
+      } else if (node.icon === TreeMenuNodeIcon.plusOutlined) {
+        icon = <PlusOutlined />;
+      }
+
+      if (applyNavExclude && node.navExclude) {
+        return undefined;
+      }
+
+      let title: any = node.title;
+      if (showVaultName) title = `${title} (${node.vaultName})`;
+
+      if (node.hasTitleNumberOutlined) {
+        title = (
+          <span>
+            <NumberOutlined />
+            {title}
+          </span>
+        );
+      }
+
+      return {
+        key: node.key,
+        title,
+        icon,
+        children: node.children
+          ? treeMenuNode2DataNode({
+              roots: node.children,
+              showVaultName,
+              applyNavExclude,
+            })
+          : [],
+      };
+    })
+    .filter(isNotUndefined);
 }

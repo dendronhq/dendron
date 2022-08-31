@@ -85,7 +85,7 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
 import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
-import { CopyCodeSpaceURLCommand } from "./CopyCodeSpaceURLCommand";
+import { CopyCodespaceURLCommand } from "./CopyCodespaceURLCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -178,7 +178,7 @@ const ALL_COMMANDS = [
   ValidateEngineCommand,
   MergeNoteCommand,
   CreateNoteCommand,
-  CopyCodeSpaceURLCommand,
+  CopyCodespaceURLCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

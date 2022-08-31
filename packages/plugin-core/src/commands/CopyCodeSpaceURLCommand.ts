@@ -9,7 +9,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = {};
 type CommandOutput = string | undefined;
 
-export class CopyCodeSpaceURLCommand extends BasicCommand<
+export class CopyCodespaceURLCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {

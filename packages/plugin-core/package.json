@@ -56,7 +56,7 @@
       },
       {
         "view": "dendron.treeView",
-        "contents": "Open a Dendron note to see the tree view."
+        "contents": "First open a Dendron note to see the tree view."
       }
     ],
     "viewsContainers": {
@@ -234,6 +234,10 @@
       {
         "command": "dendron.copyToClipboard",
         "title": "Dendron: Copy To Clipboard"
+      },
+      {
+        "command": "dendron.copyCodeSpacesURL",
+        "title": "Dendron: Copy CodeSpaces URL"
       },
       {
         "command": "dendron.delete",
@@ -642,6 +646,10 @@
         {
           "command": "dendron.copyToClipboard",
           "when": "false"
+        },
+        {
+          "command": "dendron.copyCodeSpacesURL",
+          "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.delete",

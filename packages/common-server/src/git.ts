@@ -543,4 +543,17 @@ export class GitUtils {
       if (err?.code !== "ENOENT") throw err;
     }
   }
+
+  /**
+   *
+   * @param uri
+   * @param file
+   * @returns codespaces url for the note
+   */
+  static async getCodeSpacesURL(uri: string, file: string): Promise<string> {
+    const [owner, repo] = await this.getGitProviderOwnerAndRepository(uri);
+    const branch = await this.getCurrentBranch(uri);
+    const currentFile = file.replace(/^\//, "").replace(/^\\/, "");
+    return `https://github.dev/${owner}/${repo}/blob/${branch}/${currentFile}`;
+  }
 }

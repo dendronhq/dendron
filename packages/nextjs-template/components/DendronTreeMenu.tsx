@@ -90,10 +90,15 @@ export default function DendronTreeMenu(
     // open up
     if (expanded) {
       setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes, noteId }).slice(0, -1)
+        TreeUtils.getAllParents({
+          child2parent: tree.child2parent,
+          noteId,
+        }).slice(0, -1)
       );
     } else {
-      setActiveNoteIds(TreeViewUtils.getAllParents({ notes, noteId }));
+      setActiveNoteIds(
+        TreeUtils.getAllParents({ child2parent: tree.child2parent, noteId })
+      );
     }
   };
 

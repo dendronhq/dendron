@@ -15,28 +15,6 @@ import { DataNode } from "rc-tree/lib/interface";
 import React from "react";
 
 export class TreeViewUtils {
-  /**
-   * Starting from current note, get all parents of note
-   * @param notes: all notes
-   * @param noteId: current note id
-   * @returns
-   */
-  static getAllParents = ({
-    notes,
-    noteId,
-  }: {
-    notes: NotePropsByIdDict;
-    noteId: string;
-  }) => {
-    let pNote: NoteProps = notes[noteId];
-    const activeNoteIds: string[] = [];
-    do {
-      activeNoteIds.unshift(pNote.id);
-      pNote = notes[pNote.parent as string];
-    } while (pNote);
-    return activeNoteIds;
-  };
-
   static note2TreeDatanote({
     noteId,
     noteDict,

@@ -1,12 +1,6 @@
 import { BookOutlined, PlusOutlined, NumberOutlined } from "@ant-design/icons";
 import {
   isNotUndefined,
-  NoteProps,
-  NotePropsByIdDict,
-  TAGS_HIERARCHY,
-  TAGS_HIERARCHY_BASE,
-  VaultUtils,
-  TreeUtils,
   TreeMenuNode,
   TreeMenuNodeIcon,
 } from "@dendronhq/common-all";
@@ -15,70 +9,6 @@ import { DataNode } from "rc-tree/lib/interface";
 import React from "react";
 
 export class TreeViewUtils {
-  static note2TreeDatanote({
-    noteId,
-    noteDict,
-    showVaultName,
-    applyNavExclude = false,
-  }: {
-    noteId: string;
-    noteDict: NotePropsByIdDict;
-    showVaultName?: boolean;
-    applyNavExclude: boolean;
-  }): DataNode | undefined {
-    const note = noteDict[noteId];
-    if (_.isUndefined(note)) {
-      return undefined;
-    }
-    if (applyNavExclude && note.custom?.nav_exclude) {
-      return undefined;
-    }
-
-    const vname = VaultUtils.getName(note.vault);
-    let icon;
-    if (note.schema) {
-      icon = <BookOutlined />;
-    } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-      icon = <NumberOutlined />;
-    } else if (note.stub) {
-      icon = <PlusOutlined />;
-    }
-
-    let title: any = note.title;
-    if (showVaultName) title = `${title} (${vname})`;
-
-    if (note.fname.startsWith(TAGS_HIERARCHY)) {
-      title = (
-        <span>
-          <NumberOutlined />
-          {title}
-        </span>
-      );
-    }
-
-    const { data } = TreeUtils.sortNotesAtLevel({
-      noteIds: note.children,
-      noteDict,
-      reverse: note.custom?.sort_order === "reverse",
-    });
-
-    return {
-      key: note.id,
-      title,
-      icon,
-      children: data
-        .map((noteId) =>
-          TreeViewUtils.note2TreeDatanote({
-            noteId,
-            noteDict,
-            showVaultName,
-            applyNavExclude,
-          })
-        )
-        .filter(isNotUndefined),
-    };
-  }
-
   static treeMenuNode2DataNode({
     roots,
     showVaultName,

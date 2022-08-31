@@ -27,6 +27,11 @@ module.exports = {
   ...commonConfig,
   projects: [
     {
+      testMatch: [
+        "<rootDir>/packages/common-all/**/?(*.)+(spec|test).[jt]s?(x)",
+      ],
+    },
+    {
       displayName: "non-plugin-tests",
       testMatch: [
         "<rootDir>/packages/engine-test-utils/**/?(*.)+(spec|test).[jt]s?(x)",

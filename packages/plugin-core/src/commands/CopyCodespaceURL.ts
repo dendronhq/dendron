@@ -9,10 +9,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = {};
 type CommandOutput = string | undefined;
 
-export class CopyCodeSpaceURLCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class CopyCodespaceURL extends BasicCommand<CommandOpts, CommandOutput> {
   key = DENDRON_COMMANDS.COPY_CODESPACE_URL.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {

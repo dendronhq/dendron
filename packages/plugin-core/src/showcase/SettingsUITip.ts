@@ -22,7 +22,7 @@ export class SettingsUITip implements IFeatureShowcaseMessage {
   }
 
   getDisplayMessage(_displayLocation: DisplayLocation): string {
-    return `Modify Dendron Config using Dendron: Configure(UI) command`;
+    return "You can configure Dendron by using the `Dendron: Configure(UI) command`. You can also optionally edit the config file directly it with the `Dendron: Configure(yaml) command`";
   }
 
   onConfirm() {

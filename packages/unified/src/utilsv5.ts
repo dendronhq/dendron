@@ -15,7 +15,7 @@ import {
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
 // @ts-ignore
-// import mermaid from "@dendronhq/remark-mermaid";
+import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
 import link from "rehype-autolink-headings";
 import math from "remark-math";
@@ -342,9 +342,9 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-          // if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
-          //   proc = proc.use(mermaid, { simple: true });
-          // }
+          if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
+            proc = proc.use(mermaid, { simple: true });
+          }
           // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
             const prefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
@@ -383,9 +383,9 @@ export class MDUtilsV5 {
           proc = proc.use(math);
         }
 
-        // if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
-        //   proc = proc.use(mermaid, { simple: true });
-        // }
+        if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
+          proc = proc.use(mermaid, { simple: true });
+        }
         break;
       }
       case ProcMode.NO_DATA:

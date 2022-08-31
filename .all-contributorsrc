@@ -2102,6 +2102,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "wbpayne22902",
+      "name": "Wilhelm Payne",
+      "avatar_url": "https://avatars.githubusercontent.com/u/107161609?v=4",
+      "profile": "https://github.com/wbpayne22902",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

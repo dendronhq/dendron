@@ -8,7 +8,7 @@ import {
 // @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
 // @ts-ignore
-// import mermaid from "@dendronhq/remark-mermaid";
+import mermaid from "@dendronhq/remark-mermaid";
 import _ from "lodash";
 import link from "rehype-autolink-headings";
 import math from "remark-math";
@@ -194,7 +194,7 @@ export class MDUtilsV5Web {
 
           // TODO: Re-enable config checks, for now, just use them:
           proc = proc.use(math);
-          // proc = proc.use(mermaid, { simple: true });
+          proc = proc.use(mermaid, { simple: true });
 
           // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {

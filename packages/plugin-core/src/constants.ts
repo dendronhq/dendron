@@ -498,9 +498,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy To Clipboard`,
     when: "false",
   },
-  COPY_CODESPACES_URL: {
-    key: "dendron.copyCodeSpacesURL",
-    title: `${CMD_PREFIX} Copy CodeSpaces URL`,
+  COPY_CODESPACE_URL: {
+    key: "dendron.copyCodeSpaceURL",
+    title: `${CMD_PREFIX} Copy CodeSpace URL`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   DELETE: {

@@ -236,8 +236,8 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
-        "command": "dendron.copyCodeSpacesURL",
-        "title": "Dendron: Copy CodeSpaces URL"
+        "command": "dendron.copyCodeSpaceURL",
+        "title": "Dendron: Copy CodeSpace URL"
       },
       {
         "command": "dendron.delete",
@@ -648,7 +648,7 @@
           "when": "false"
         },
         {
-          "command": "dendron.copyCodeSpacesURL",
+          "command": "dendron.copyCodeSpaceURL",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

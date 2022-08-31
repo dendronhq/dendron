@@ -9,11 +9,11 @@ import { BasicCommand } from "./base";
 type CommandOpts = {};
 type CommandOutput = string | undefined;
 
-export class CopyCodeSpacesURLCommand extends BasicCommand<
+export class CopyCodeSpaceURLCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.COPY_CODESPACES_URL.key;
+  key = DENDRON_COMMANDS.COPY_CODESPACE_URL.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -23,9 +23,9 @@ export class CopyCodeSpacesURLCommand extends BasicCommand<
   async showFeedback(link: string) {
     const uri = vscode.Uri.parse(link);
     vscode.window
-      .showInformationMessage(`${link} copied`, ...["Open Codespaces"])
+      .showInformationMessage(`${link} copied`, ...["Open Codespace"])
       .then((resp) => {
-        if (resp === "Open Codespaces") {
+        if (resp === "Open Codespace") {
           vscode.commands.executeCommand("vscode.open", uri);
         }
       });
@@ -33,11 +33,14 @@ export class CopyCodeSpacesURLCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const editor = vscode.window.activeTextEditor;
+
     if (vscode.workspace.workspaceFolders && editor) {
       const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+
       if (!folder) {
         return;
       }
+
       const root = (await GitUtils.getGitRoot(folder.uri.fsPath)) || "";
       // get just the file
       const file = editor.document.fileName.substring(root.length);

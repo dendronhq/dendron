@@ -177,7 +177,7 @@ export class TreeUtils {
     child2parent: { [key: string]: string | null };
     noteId: string;
   }) => {
-    const activeNoteIds: string[] = [noteId];
+    const activeNoteIds: string[] = [];
     let parent = child2parent[noteId];
     while (parent) {
       activeNoteIds.unshift(parent);

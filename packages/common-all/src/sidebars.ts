@@ -7,7 +7,7 @@ import type {
   DNodePointer,
 } from "./types";
 import type { Option } from "./utils";
-import { do_ } from "./utils";
+import { PublishUtils, do_ } from "./utils";
 import { parse } from "./parse";
 
 const noteLiteral = v.literal("note");
@@ -116,6 +116,11 @@ type SidebarOptions = {
   notes: NotePropsByIdDict;
 };
 
+type WithPosition<T> = T & {
+  position?: number;
+  fname?: string;
+};
+
 const ROOT_KEYWORD = "*";
 
 export const DefaultSidebars: Sidebars = {
@@ -183,10 +188,13 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
     return note?.children;
   }
 
-  function generateSidebar(noteIds: DNodePointer[]): SidebarProcessed {
+  function generateSidebar(
+    noteIds: DNodePointer[]
+  ): WithPosition<SidebarItemProcessed>[] {
     return noteIds
       .map((noteId) => {
         const note = notesById[noteId];
+        const fm = PublishUtils.getPublishFM(note);
         const { children } = note;
         const hasChildren = children.length > 0;
         const isCategory = hasChildren;
@@ -196,11 +204,17 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
           return undefined;
         }
 
+        const positionalProps = {
+          position: fm.nav_order,
+          fname: note.fname,
+        };
+
         if (isNote) {
           return {
             type: "note",
             id: note.id,
             label: note.title,
+            ...positionalProps,
           } as SidebarItemNote;
         }
 
@@ -210,6 +224,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
             label: note.title,
             items: generateSidebar(children),
             link: { type: "note", id: note.id },
+            ...positionalProps,
           } as SidebarItemCategory;
         }
 
@@ -220,6 +235,22 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
       );
   }
 
+  function sortItems(
+    sidebarItems: WithPosition<SidebarItemProcessed>[]
+  ): SidebarProcessed {
+    const processedSidebarItems = sidebarItems.map((item) => {
+      if (item.type === "category") {
+        return { ...item, items: sortItems(item.items) };
+      }
+      return item;
+    });
+    const sortedSidebarItems = _.sortBy(processedSidebarItems, [
+      "position",
+      "fname",
+    ]);
+    return sortedSidebarItems.map(({ position, fname, ...item }) => item);
+  }
+
   const hierarchySource = findHierarchySource();
   if (!hierarchySource) {
     // TODO `err` path if `hierarchySource` is undefined. This probably means the user has a typo.
@@ -227,8 +258,9 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
   }
 
   const sidebar = generateSidebar(hierarchySource);
+  const sortedSidebar = sortItems(sidebar);
 
-  return sidebar;
+  return sortedSidebar;
 };
 
 function processSiderbar(

@@ -44,11 +44,6 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict,
     sidebars: SidebarsProcessed
   ): TreeMenu {
-    console.log(
-      "generateTreeDataV2#sidebars",
-      JSON.stringify(sidebars, null, 2)
-    );
-
     function itemToNote(item: SidebarItemProcessed) {
       const noteId = do_(() => {
         const { type } = item;

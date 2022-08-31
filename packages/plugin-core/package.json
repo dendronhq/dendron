@@ -56,7 +56,7 @@
       },
       {
         "view": "dendron.treeView",
-        "contents": "Open a Dendron note to see the tree view."
+        "contents": "First open a Dendron note to see the tree view."
       }
     ],
     "viewsContainers": {
@@ -599,6 +599,10 @@
       {
         "command": "dendron.dev.validateEngine",
         "title": "Dendron:Dev: Validate Engine"
+      },
+      {
+        "command": "dendron.showInfo",
+        "title": "Dendron:: Show Info"
       }
     ],
     "menus": {

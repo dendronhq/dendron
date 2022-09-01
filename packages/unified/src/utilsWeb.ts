@@ -2,7 +2,6 @@ import {
   assertUnreachable,
   DendronError,
   ERROR_STATUS,
-  NoteProps,
   ProcFlavor,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -24,7 +23,6 @@ import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
-import { Processor } from "unified";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { backlinksHover } from "./remark/backlinksHover";
@@ -37,13 +35,7 @@ import { hashtags } from "./remark/hashtag";
 import { userTags } from "./remark/userTags";
 import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
-import {
-  MDUtilsV5,
-  ProcDataFullOptsV5,
-  ProcDataFullV5,
-  ProcMode,
-  ProcOptsV5,
-} from "./utilsv5";
+import { MDUtilsV5, ProcDataFullOptsV5, ProcMode, ProcOptsV5 } from "./utilsv5";
 
 /**
  * Special version of MDUtilsV5 to get preview working in the web extension.
@@ -60,29 +52,6 @@ export class MDUtilsV5Web {
       data
     );
     return proc.use(rehypeStringify);
-  }
-
-  private static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
-    const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-    return proc.data("dendronProcDatav5", { ..._data, ...opts });
-  }
-
-  private static setProcOpts(proc: Processor, opts: ProcOptsV5) {
-    const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
-    return proc.data("dendronProcOptsv5", { ..._data, ...opts });
-  }
-
-  private static getFM(opts: { note: NoteProps }) {
-    const { note } = opts;
-    const custom = note.custom ? note.custom : undefined;
-    return {
-      ...custom,
-      id: note.id,
-      title: note.title,
-      desc: note.desc,
-      created: note.created,
-      updated: note.updated,
-    };
   }
 
   /**
@@ -111,7 +80,7 @@ export class MDUtilsV5Web {
       .data("errors", errors);
 
     // set options and do validation
-    proc = this.setProcOpts(proc, opts);
+    proc = MDUtilsV5.setProcOpts(proc, opts);
 
     switch (opts.mode) {
       case ProcMode.FULL:
@@ -126,10 +95,10 @@ export class MDUtilsV5Web {
           const note = data.noteToRender;
 
           if (!_.isUndefined(note)) {
-            proc = proc.data("fm", this.getFM({ note }));
+            proc = proc.data("fm", MDUtilsV5.getFM({ note }));
           }
 
-          this.setProcData(proc, data);
+          MDUtilsV5.setProcData(proc, data);
 
           // NOTE: order matters. this needs to appear before `dendronPub`
           if (data.dest === DendronASTDest.HTML) {

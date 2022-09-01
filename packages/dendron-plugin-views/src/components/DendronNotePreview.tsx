@@ -1,24 +1,20 @@
+import LockFilled from "@ant-design/icons/lib/icons/LockFilled";
+import UnlockOutlined from "@ant-design/icons/lib/icons/UnlockOutlined";
 import {
   DMessageSource,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
   NoteViewMessageEnum,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  DendronNote,
-  // engineHooks,
-} from "@dendronhq/common-frontend";
+import { createLogger, DendronNote } from "@dendronhq/common-frontend";
+import { Button } from "antd";
 import _ from "lodash";
 import mermaid from "mermaid";
-import { Button } from "antd";
-import LockFilled from "@ant-design/icons/lib/icons/LockFilled";
-import UnlockOutlined from "@ant-design/icons/lib/icons/UnlockOutlined";
+import type { SyntheticEvent } from "react";
 import React from "react";
 import { useCurrentTheme, useMermaid, useRenderedNoteBody } from "../hooks";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage } from "../utils/vscode";
-import type { SyntheticEvent } from "react";
 
 function isHTMLAnchorElement(element: Element): element is HTMLAnchorElement {
   return element.nodeName === "A";
@@ -84,9 +80,6 @@ const DendronNotePreview: DendronComponent = (props) => {
     config,
   });
 
-  // const previewHTML = props.ide.previewHTML;
-
-  // if (!previewHTML) {
   const [noteRenderedBody] = useRenderedNoteBody({
     ...props,
     noteProps,

@@ -110,7 +110,6 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           ctx,
           msg: `onUpdatePreviewHTML:post`,
         });
-        debugger;
         break;
       case LookupViewMessageEnum.onUpdate:
         logger.info({ ctx, msg: "refreshLookup:pre" });

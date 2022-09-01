@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/unified",
-  "version": "0.110.0",
+  "version": "0.110.1",
   "description": "Unified parser utilities for Dendron",
   "license": "GPLv3",
   "repository": {
@@ -31,7 +31,7 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.110.0",
+    "@dendronhq/common-all": "^0.110.1",
     "mdast": "^3.0.0",
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",

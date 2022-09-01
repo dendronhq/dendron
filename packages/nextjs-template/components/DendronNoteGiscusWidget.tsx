@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   IntermediateDendronConfig,
-  NoteProps,
+  NoteProps
 } from "@dendronhq/common-all";
 import Giscus, { GiscusProps, Repo } from "@giscus/react";
 import _ from "lodash";
@@ -19,6 +19,7 @@ export const DendronNoteGiscusWidget = ({
   config: IntermediateDendronConfig;
 }) => {
   const giscusConfig = ConfigUtils.getGiscusConfig(config);
+  const page = note.id;
   if (giscusConfig === undefined) {
     return null;
   }
@@ -32,8 +33,9 @@ export const DendronNoteGiscusWidget = ({
     const cleanGiscusConfig: GiscusProps = {
       ...giscusConfig,
       repo: repoString,
+      term: page,
     };
-    return <Giscus {...cleanGiscusConfig} />;
+    return <Giscus {...cleanGiscusConfig } />;
   } else {
     return null;
   }

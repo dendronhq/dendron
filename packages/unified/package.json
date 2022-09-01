@@ -33,6 +33,8 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.110.1",
     "@dendronhq/remark-mermaid": "^0.4.0",
+    "hast-util-parse-selector": "^2.2.4",
+    "hast-util-select": "^4.0.0",
     "mdast": "^3.0.0",
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",
@@ -42,7 +44,6 @@
     "rehype-raw": "^5.0.0",
     "rehype-slug": "^4.0.1",
     "rehype-stringify": "^8.0.0",
-    "rehype-wrap": "^1.0.10",
     "remark": "^12.0.1",
     "remark-abbr": "^1.4.0",
     "remark-containers": "^1.2.0",

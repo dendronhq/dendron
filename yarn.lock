@@ -22491,15 +22491,6 @@ rehype-stringify@^8.0.0:
   dependencies:
     hast-util-to-html "^7.1.1"
 
-rehype-wrap@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.npmjs.org/rehype-wrap/-/rehype-wrap-1.0.10.tgz#cefb113a4687a5be13ee4d036497ebb8f842577b"
-  integrity sha512-gI4/T6TmIHxEu+z+2QaGVJJ+4vD26Q9sXxYHZzIG3byv1GsAz37nmp6fdCVzrRE9YcnsVeA/THJwlJcCu5fUDQ==
-  dependencies:
-    hast-util-parse-selector "^2.2.4"
-    hast-util-select "^4.0.0"
-    unist-util-visit "^2.0.3"
-
 relateurl@^0.2.7:
   version "0.2.7"
   resolved "https://registry.npmjs.org/relateurl/-/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"

@@ -36,6 +36,7 @@ import { userTags } from "./remark/userTags";
 import { wikiLinks } from "./remark/wikiLinks";
 import { DendronASTDest } from "./types";
 import { MDUtilsV5, ProcDataFullOptsV5, ProcMode, ProcOptsV5 } from "./utilsv5";
+import { Processor } from "unified";
 
 /**
  * Special version of MDUtilsV5 to get preview working in the web extension.
@@ -46,7 +47,7 @@ export class MDUtilsV5Web {
   public static procRehypeWeb(
     data: Omit<ProcDataFullOptsV5, "dest">,
     opts?: { flavor?: ProcFlavor }
-  ) {
+  ): Processor<remark.PartialRemarkOptions> {
     const proc = this._procRehype(
       { mode: ProcMode.FULL, parseOnly: false, flavor: opts?.flavor },
       data

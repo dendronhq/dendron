@@ -2,12 +2,12 @@ import { NoteProps } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describeMultiWS } from "../testUtilsV3";
 import * as vscode from "vscode";
-import { MoveToCommand } from "../../commands/MoveToCommand";
+import { MoveSelectionToCommand } from "../../commands/MoveSelectionToCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { describe } from "mocha";
 import { expect } from "../testUtilsv2";
 
-suite("MoveToCommand", function () {
+suite("MoveSelectionToCommand", function () {
   describe("GIVEN a note and valid selection", () => {
     let activeNote: NoteProps;
     describeMultiWS(
@@ -36,7 +36,7 @@ suite("MoveToCommand", function () {
           const { vaults } = extension.getDWorkspace();
           await extension.wsUtils.openNote(activeNote);
           const editor = vscode.window.activeTextEditor;
-          const cmd = new MoveToCommand(extension);
+          const cmd = new MoveSelectionToCommand(extension);
           editor!.selection = new vscode.Selection(
             new vscode.Position(7, 0),
             new vscode.Position(11, 0)
@@ -100,7 +100,7 @@ suite("MoveToCommand", function () {
           const { vaults } = extension.getDWorkspace();
           await extension.wsUtils.openNote(activeNote);
           const editor = vscode.window.activeTextEditor;
-          const cmd = new MoveToCommand(extension);
+          const cmd = new MoveSelectionToCommand(extension);
           editor!.selection = new vscode.Selection(
             new vscode.Position(7, 0),
             new vscode.Position(11, 0)

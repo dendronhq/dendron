@@ -252,8 +252,8 @@
         "title": "Dendron: Move Note"
       },
       {
-        "command": "dendron.moveTo",
-        "title": "Dendron: Move To"
+        "command": "dendron.moveSelectionTo",
+        "title": "Dendron: Move Selection To"
       },
       {
         "command": "dendron.mergeNote",
@@ -664,7 +664,7 @@
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
-          "command": "dendron.moveTo",
+          "command": "dendron.moveSelectionTo",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

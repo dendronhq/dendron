@@ -28,8 +28,11 @@ type CommandOpts = {} & CommandInput;
 
 type CommandOutput = {} & CommandOpts;
 
-export class MoveToCommand extends BasicCommand<CommandOpts, CommandOutput> {
-  key = DENDRON_COMMANDS.MOVE_TO.key;
+export class MoveSelectionToCommand extends BasicCommand<
+  CommandOpts,
+  CommandOutput
+> {
+  key = DENDRON_COMMANDS.MOVE_SELECTION_TO.key;
   _proxyMetricPayload:
     | (RefactoringCommandUsedPayload & {
         extra: {
@@ -101,7 +104,7 @@ export class MoveToCommand extends BasicCommand<CommandOpts, CommandOutput> {
       extraButtons: [
         SelectionExtractBtn.create({ pressed: true, canToggle: false }),
       ],
-      title: "Move To...",
+      title: "Move Selection To...",
     };
     const controller = this.extension.lookupControllerFactory.create(opts);
     return controller;

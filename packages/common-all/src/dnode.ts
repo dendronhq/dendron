@@ -7,7 +7,12 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { CONSTANTS, ERROR_STATUS, TAGS_HIERARCHY } from "./constants";
+import {
+  CONSTANTS,
+  ERROR_STATUS,
+  InvalidFilenameReason,
+  TAGS_HIERARCHY,
+} from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -1105,13 +1110,54 @@ export class NoteUtils {
     return true;
   }
 
-  static validateFname(fname: string) {
+  /**
+   * Given a filename, return the validity of the filename.
+   * If invalid, a reason string is also returned.
+   * Only the first encountered reason will be reported.
+   * @param fname filename
+   * @returns boolean value representing the validity of the filename, and the reason if invalid
+   */
+  static validateFname(fname: string):
+    | {
+        isValid: false;
+        reason: InvalidFilenameReason;
+      }
+    | {
+        isValid: true;
+        reason?: never;
+      } {
     // Each hierarchy string
     // 1. should not be empty
     // 2. should not have leading trailing whitespace
-    return fname.split(".").every((value) => {
-      return value !== "" && !value.startsWith(" ") && !value.endsWith(" ");
-    });
+    for (const value of fname.split(".")) {
+      const isEmpty = value === "";
+      if (isEmpty) {
+        return {
+          isValid: false,
+          reason: InvalidFilenameReason.EMPTY_HIERARCHY,
+        };
+      }
+      const hasLeadingOrTrailingWhitespace =
+        value.startsWith(" ") || value.endsWith(" ");
+      if (hasLeadingOrTrailingWhitespace) {
+        return {
+          isValid: false,
+          reason: InvalidFilenameReason.LEADING_OR_TRAILING_WHITESPACE,
+        };
+      }
+    }
+
+    // should not contain characters that SQLite doesn't allow
+    const matcher = /[(),']/;
+    const isSQLiteLegal = _.isNull(fname.match(matcher));
+    if (!isSQLiteLegal) {
+      return {
+        isValid: false,
+        reason: InvalidFilenameReason.ILLEGAL_CHARACTER,
+      };
+    }
+
+    return { isValid: true };
   }
 
   /** Generate a random color for `note`, but allow the user to override that color selection.

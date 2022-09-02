@@ -18,3 +18,9 @@ export const MODIFIER_DESCRIPTIONS: {
   multiSelect: "Select multiple notes at once",
   copyNoteLink: "Add selected notes to the clipboard as wikilinks",
 };
+
+export enum InvalidFilenameReason {
+  EMPTY_HIERARCHY = "Hierarchies cannot be empty strings",
+  LEADING_OR_TRAILING_WHITESPACE = "Hierarchies cannot contain leading or trailing whitespaces",
+  ILLEGAL_CHARACTER = `Hierarchy strings cannot contain parentheses, commas, or single quotes`,
+}

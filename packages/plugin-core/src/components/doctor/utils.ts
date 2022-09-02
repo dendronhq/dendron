@@ -135,12 +135,12 @@ export class DoctorUtils {
 
     if (!note) return true;
 
-    const isValid = NoteUtils.validateFname(filename);
+    const result = NoteUtils.validateFname(filename);
 
-    if (isValid) return true;
+    if (result.isValid) return true;
 
     const error = new DendronError({
-      message: `"${filename}" is not a valid hierarchy. Please rename the note so that every hierarchy is non-empty and doesn't contain leading or trailing whitespaces`,
+      message: `"${filename}" is not a valid hierarchy. Please rename it so that it follows the `,
     });
     VSCodeUtils.showMessage(
       MessageSeverity.WARN,

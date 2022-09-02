@@ -106,7 +106,7 @@ jobs:
       - name: Export test-workspace
         if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         working-directory: ./test-workspace
-        run: npx dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"
+        run:  ../node_modules/.bin/dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"
 
       - name: Install Playwright dependencies
         if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'

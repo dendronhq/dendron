@@ -490,16 +490,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       // Also add a gitignore, so files like `.dendron.port` are ignored if the
       // self contained vault is opened on its own
       await WorkspaceService.createGitIgnore(vaultPath);
-    } else {
-      // Update the config and code-workspace for the current workspace
-      if (addToConfig) {
-        await this.addVault({ ...opts, updateWorkspace: false });
-      }
-      if (addToCodeWorkspace) {
-        await this.addVaultToCodeWorkspace(vault);
-      }
     }
 
+    // Update the config and code-workspace for the current workspace
+    if (addToConfig) {
+      await this.addVault({ ...opts, updateWorkspace: false });
+    }
+    if (addToCodeWorkspace) {
+      await this.addVaultToCodeWorkspace(vault);
+    }
     return vault;
   }
 

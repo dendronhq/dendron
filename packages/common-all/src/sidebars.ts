@@ -119,6 +119,7 @@ type SidebarOptions = {
 type WithPosition<T> = T & {
   position?: number;
   fname?: string;
+  reverse?: boolean;
 };
 
 const ROOT_KEYWORD = "*";
@@ -207,6 +208,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
         const positionalProps = {
           position: fm.nav_order,
           fname: note.fname,
+          reverse: fm.sort_order === "reverse",
         };
 
         if (isNote) {
@@ -240,7 +242,11 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
   ): SidebarProcessed {
     const processedSidebarItems = sidebarItems.map((item) => {
       if (item.type === "category") {
-        return { ...item, items: sortItems(item.items) };
+        const sortedItems = sortItems(item.items);
+        if (item.reverse) {
+          sortedItems.reverse();
+        }
+        return { ...item, items: sortedItems };
       }
       return item;
     });
@@ -248,7 +254,9 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
       "position",
       "fname",
     ]);
-    return sortedSidebarItems.map(({ position, fname, ...item }) => item);
+    return sortedSidebarItems.map(
+      ({ position, fname, reverse, ...item }) => item
+    );
   }
 
   const hierarchySource = findHierarchySource();

@@ -69,6 +69,7 @@ export class NoteLookupCmd {
         }
 
         const doc = await vscode.workspace.openTextDocument(
+          // TODO: Replace with getURIForNote utils method
           Utils.joinPath(
             this.wsRoot,
             VaultUtils.getRelPath(value.vault),

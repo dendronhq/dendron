@@ -116,6 +116,9 @@ export type ProcDataFullOptsV5 = {
   backlinkHoverOpts?: BacklinkOpts;
 } & {
   wsRoot?: string;
+} & {
+  noteToRender?: NoteProps;
+  noteCacheForRender?: NoteProps[];
 };
 
 /**
@@ -140,6 +143,9 @@ export type ProcDataFullV5 = {
    * Keep track of current note ref level
    */
   noteRefLvl: number;
+
+  noteToRender?: NoteProps;
+  noteCacheForRender?: NoteProps[];
 };
 
 function checkProps({
@@ -271,7 +277,6 @@ export class MDUtilsV5 {
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
           }
-
           const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
             engine: data.engine!,

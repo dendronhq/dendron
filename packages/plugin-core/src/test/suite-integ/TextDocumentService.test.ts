@@ -16,7 +16,7 @@ import _ from "lodash";
 import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { TextDocumentService } from "../../services/TextDocumentService";
+import { TextDocumentService } from "../../services/node/TextDocumentService";
 import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,

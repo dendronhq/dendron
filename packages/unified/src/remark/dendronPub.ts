@@ -7,6 +7,8 @@ import {
   IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   ProcFlavor,
@@ -183,7 +185,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
   const pData = MDUtilsV5.getProcData(proc);
-  const { dest, fname, config, insideNoteRef } = pData;
+  const {
+    dest,
+    fname,
+    config,
+    insideNoteRef,
+    noteToRender,
+    noteCacheForRender,
+  } = pData;
 
   function transformer(tree: Node, _file: VFile) {
     const root = tree as Root;
@@ -198,16 +207,17 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         });
       }
       let note;
-
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
         note = SiteUtils.create403StaticNote({ engine });
-      } else {
+      } else if (engine) {
         note = NoteUtils.getNoteByFnameFromEngine({
           fname,
           vault,
           engine,
         });
+      } else {
+        note = noteToRender;
       }
 
       if (!note) {
@@ -275,11 +285,24 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
-          note = NoteUtils.getNoteByFnameFromEngine({
-            fname: valueOrig,
-            vault,
-            engine,
-          });
+          if (noteCacheForRender) {
+            const notesById =
+              NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+            const notesByFname =
+              NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+
+            // TODO: Add vault filter
+            note = NoteDictsUtils.findByFname(valueOrig, {
+              notesById,
+              notesByFname,
+            })[0];
+          } else if (engine) {
+            note = NoteUtils.getNoteByFnameFromEngine({
+              fname: valueOrig,
+              vault,
+              engine,
+            });
+          }
 
           if (!note) {
             error = new DendronError({ message: `no note found. ${value}` });

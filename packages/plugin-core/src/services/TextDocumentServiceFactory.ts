@@ -1,9 +1,7 @@
 import { IDendronExtension } from "../dendronExtensionInterface";
-import {
-  ITextDocumentService,
-  TextDocumentService,
-} from "./TextDocumentService";
+import { TextDocumentService } from "./node/TextDocumentService";
 import { workspace } from "vscode";
+import { ITextDocumentService } from "./ITextDocumentService";
 
 export class TextDocumentServiceFactory {
   private static _textDocumentService: ITextDocumentService | undefined;

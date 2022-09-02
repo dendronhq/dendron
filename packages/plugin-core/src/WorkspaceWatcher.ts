@@ -34,7 +34,7 @@ import { DoctorUtils } from "./components/doctor/utils";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
 import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
-import { TextDocumentService } from "./services/TextDocumentService";
+import { TextDocumentService } from "./services/node/TextDocumentService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";

@@ -3,6 +3,8 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteUtils,
   Position,
   VaultUtils,
@@ -77,9 +79,9 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const pOpts = MDUtilsV5.getProcOpts(proc);
       const data = node.data;
       let value = node.value;
+      const { alias, anchorHeader } = data;
 
       if (pOpts.mode === ProcMode.NO_DATA) {
-        const { alias, anchorHeader } = data;
         const link = value;
         const calias = alias !== value ? `${alias}|` : "";
         const anchor = anchorHeader ? `#${anchorHeader}` : "";
@@ -111,18 +113,32 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         });
       }
 
-      const { engine } = MDUtilsV5.getProcData(proc);
-      if (!engine) {
-        return "error with engine";
-      }
-
       if (copts.useId && dest === DendronASTDest.HTML) {
-        // TODO: check for vault
-        const notes = NoteUtils.getNotesByFnameFromEngine({
-          fname: value,
-          vault,
-          engine,
-        });
+        let notes;
+        const { engine, noteCacheForRender } = MDUtilsV5.getProcData(proc);
+        // TODO: Consolidate logic.
+        if (noteCacheForRender) {
+          const notesById =
+            NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+          const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
+            this.notes
+          );
+
+          // TODO: Add vault filter
+          notes = NoteDictsUtils.findByFname(alias, {
+            notesById,
+            notesByFname,
+          });
+        } else if (!engine) {
+          return "error with engine";
+        } else {
+          // TODO: check for vault
+          notes = NoteUtils.getNotesByFnameFromEngine({
+            fname: value,
+            vault,
+            engine,
+          });
+        }
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
           addError(proc, error);
@@ -169,7 +185,7 @@ function attachParser(proc: Unified.Processor) {
     const procData = MDUtilsV5.getProcData(proc);
     let { vault } = procData;
     const engine = procData.engine;
-    const { config, dest, fname } = procData;
+    const { config, dest, fname, noteCacheForRender } = procData;
     if (out.vaultName) {
       const maybeVault = VaultUtils.getVaultByName({
         vaults: engine.vaults,
@@ -201,17 +217,36 @@ function attachParser(proc: Unified.Processor) {
       shouldApplyPublishingRules
     );
 
+    // TODO: We can probably get rid of this if clause. No need to add this data
+    // at parsing time, this information should only get added during compile
+    // time.
     if (
       dest !== DendronASTDest.MD_DENDRON &&
       enableNoteTitleForLink &&
       out.alias === out.value &&
       vault
     ) {
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: out.value,
-        engine,
-        vault,
-      });
+      let note;
+      if (noteCacheForRender) {
+        // TODO: Consolidate logic.
+        const notesById =
+          NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+        const notesByFname =
+          NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+        // TODO: Add vault filter
+        const notes = NoteDictsUtils.findByFname(out.value, {
+          notesById,
+          notesByFname,
+        });
+
+        note = notes[0]; // TODO: get rid of 0.
+      } else if (engine) {
+        note = NoteUtils.getNoteByFnameFromEngine({
+          fname: out.value,
+          engine,
+          vault,
+        });
+      }
       if (note) {
         out.alias = note.title;
       }

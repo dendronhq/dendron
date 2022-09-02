@@ -22,26 +22,7 @@ import { PluginFileUtils } from "../../utils/files";
 import { GotoNoteCommand } from "../../commands/GotoNote";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ExtensionUtils } from "../../utils/ExtensionUtils";
-
-export enum LinkType {
-  WIKI = "WIKI",
-  ASSET = "ASSET",
-  WEBSITE = "WEBSITE",
-  TEXT = "TEXT",
-  COMMAND = "COMMAND",
-  UNKNOWN = "UNKNOWN",
-}
-
-/**
- * Interface for handling preview link click events
- */
-export interface IPreviewLinkHandler {
-  /**
-   * Handle the event of a user clicking on a link in the preview webview pane
-   * @param param0
-   */
-  onLinkClicked({ data }: { data: NoteViewMessage["data"] }): Promise<LinkType>;
-}
+import { IPreviewLinkHandler, LinkType } from "./IPreviewLinkHandler";
 
 /**
  * Default implementation for handling link clicks in preview

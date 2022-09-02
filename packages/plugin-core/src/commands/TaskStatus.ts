@@ -10,7 +10,7 @@ import { BasicCommand } from "./base";
 import { VSCodeUtils, MessageSeverity } from "../vsCodeUtils";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { QuickPickItem } from "vscode";
-import { EditorUtils } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 
 type CommandInput = {

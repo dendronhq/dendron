@@ -4,7 +4,7 @@ import _ from "lodash";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { clipboard } from "../utils";
-import { EditorUtils } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension, getDWorkspace } from "../workspace";
 import { WSUtils } from "../WSUtils";

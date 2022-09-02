@@ -9,7 +9,7 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import * as vscode from "vscode";
-import { EditorUtils } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import {
   ILookupControllerV3,
   LookupControllerV3CreateOpts,

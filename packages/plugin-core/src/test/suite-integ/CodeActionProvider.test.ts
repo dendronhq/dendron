@@ -3,7 +3,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { EditorUtils } from "../../utils/editor";
+import { EditorUtils } from "../../utils/EditorUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import {

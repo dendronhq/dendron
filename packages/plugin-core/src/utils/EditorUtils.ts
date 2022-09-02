@@ -38,6 +38,27 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getReferenceAtPosition } from "./md";
 
+export type ProcessSelectionOpts = {
+  qs?: string;
+  vault?: DVault;
+  anchor?: DNoteAnchorBasic;
+  overrides?: Partial<NoteProps>;
+  kind?: TargetKind;
+  /**
+   * What {@link vscode.ViewColumn} to open note in
+   */
+  column?: ViewColumn;
+  /** added for contextual UI analytics. */
+  source?: string;
+};
+
+/**
+ * Utility methods that take the {@link vscode.editor} and / or its components
+ * and retrieve / modify the content of it.
+ *
+ * If you are creating a utility that does something common when using the active text editor,
+ * consider adding them here.
+ */
 export class EditorUtils {
   /** Finds the header at the specified line, if any.
    *
@@ -336,17 +357,3 @@ export class EditorUtils {
     }
   }
 }
-
-export type ProcessSelectionOpts = {
-  qs?: string;
-  vault?: DVault;
-  anchor?: DNoteAnchorBasic;
-  overrides?: Partial<NoteProps>;
-  kind?: TargetKind;
-  /**
-   * What {@link vscode.ViewColumn} to open note in
-   */
-  column?: ViewColumn;
-  /** added for contextual UI analytics. */
-  source?: string;
-};

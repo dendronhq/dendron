@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import vscode from "vscode";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { EditorUtils } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { findReferences, getReferenceAtPosition } from "../utils/md";
 import { WSUtilsV2 } from "../WSUtilsV2";
 

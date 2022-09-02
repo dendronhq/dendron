@@ -18,7 +18,7 @@ import {
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { ITextDocumentService } from "../ITextDocumentService";
-import { EditorUtils } from "../../utils/editor";
+import { EditorUtils } from "../../utils/EditorUtils";
 
 /**
  * This service keeps client state note state synchronized with the engine

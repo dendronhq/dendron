@@ -7,6 +7,7 @@ import {
   DNoteAnchorPositioned,
   ERROR_STATUS,
   getSlugger,
+  IntermediateDendronConfig,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
   NoteChangeEntry,
@@ -696,8 +697,9 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   private async updateBacklinksToAnchorsInSelection(opts: {
     selection: vscode.Selection | undefined;
     destNote: NoteProps;
+    config: IntermediateDendronConfig;
   }): Promise<NoteChangeEntry[]> {
-    const { selection, destNote } = opts;
+    const { selection, destNote, config } = opts;
     if (selection === undefined) {
       return [];
     }
@@ -741,14 +743,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
 
           const vault = wsUtils.getVaultFromUri(location.uri);
           const noteToUpdate = (
-            await ExtensionProvider.getEngine().findNotes({
+            await engine.findNotes({
               fname,
               vault,
             })
           )[0];
           const linksToUpdate = LinkUtils.findLinksFromBody({
             note: noteToUpdate,
-            engine: ExtensionProvider.getEngine(),
+            engine,
+            config,
           })
             .filter((link) => {
               return (
@@ -799,6 +802,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           await this.updateBacklinksToAnchorsInSelection({
             selection,
             destNote: note,
+            config: ws.config,
           });
 
           const body = note.body + "\n\n" + document.getText(range).trim();

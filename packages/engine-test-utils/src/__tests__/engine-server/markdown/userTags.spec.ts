@@ -217,10 +217,9 @@ describe("user tags", () => {
   describe("WHEN disabled in config", () => {
     test("THEN user tags don't get parsed or processed", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ wsRoot, vaults }) => {
           const proc = MDUtilsV5.procRehypeFull(
             {
-              engine,
               vault: vaults[0],
               config: DConfig.readConfigSync(wsRoot),
               fname: "root",

@@ -18,9 +18,8 @@ function procDendronForPublish(
     noteIndex: NoteProps;
   }
 ) {
-  const { engine, config, fname, vault } = opts;
+  const { config, fname, vault } = opts;
   const proc = MDUtilsV5.procRehypeFull({
-    engine,
     config,
     fname,
     vault,
@@ -36,7 +35,6 @@ describe("hierarchies", () => {
       const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
@@ -46,7 +44,6 @@ describe("hierarchies", () => {
         return { resp };
       } else {
         const proc = procDendronForPublish({
-          engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
@@ -78,7 +75,6 @@ describe("hierarchies", () => {
       };
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "foo",
           config,
           dest: extra.dest,
@@ -88,7 +84,6 @@ describe("hierarchies", () => {
         return { resp };
       } else {
         const proc = procDendronForPublish({
-          engine,
           config,
           fname: "foo",
           noteIndex: engine.notes["foo"],
@@ -117,7 +112,6 @@ describe("hierarchies", () => {
       const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
@@ -127,7 +121,6 @@ describe("hierarchies", () => {
         return { resp };
       } else {
         const proc = procDendronForPublish({
-          engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
@@ -168,7 +161,6 @@ describe("hierarchies", () => {
       };
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
@@ -178,7 +170,6 @@ describe("hierarchies", () => {
         return { resp };
       } else {
         const proc = procDendronForPublish({
-          engine,
           fname: "foo",
           noteIndex: engine.notes["foo"],
           vault: vaults[0],
@@ -203,7 +194,6 @@ describe("hierarchies", () => {
       const config = DConfig.readConfigSync(wsRoot);
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "daily",
           dest: extra.dest,
           vault: vaults[0],
@@ -213,7 +203,6 @@ describe("hierarchies", () => {
         return { resp };
       } else {
         const proc = procDendronForPublish({
-          engine,
           fname: "daily",
           noteIndex: engine.notes["daily"],
           vault: vaults[0],

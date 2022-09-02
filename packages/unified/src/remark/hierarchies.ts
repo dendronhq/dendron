@@ -3,8 +3,6 @@ import {
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
   NoteDictsUtils,
-  NoteProps,
-  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -15,7 +13,6 @@ import { Node } from "unist";
 import u from "unist-builder";
 import visit from "unist-util-visit";
 import { HierarchyUtils } from "../HierarchyUtils";
-import { SiteUtils } from "../SiteUtils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 import { frontmatterTag2WikiLinkNoteV4, RemarkUtils } from "./utils";
@@ -86,8 +83,7 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
 
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, vault, dest, config, insideNoteRef } =
-      MDUtilsV5.getProcData(proc);
+    const { fname, dest, config, insideNoteRef } = MDUtilsV5.getProcData(proc);
     let addedBreak = false;
 
     if (dest !== DendronASTDest.HTML) {
@@ -143,18 +139,9 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       addFootnotes();
       return;
     }
-    const { engine, noteToRender, noteCacheForRender } =
-      MDUtilsV5.getProcData(proc);
-    let note: NoteProps | undefined;
-    if (engine) {
-      note = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        engine,
-        vault: vault!,
-      });
-    } else {
-      note = noteToRender;
-    }
+    const { noteToRender, noteCacheForRender } = MDUtilsV5.getProcData(proc);
+
+    const note = noteToRender;
 
     // check if v5 is active
     if (MDUtilsV5.isV5Active(proc)) {
@@ -208,19 +195,7 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
         return;
       }
       let children;
-      if (engine) {
-        children = HierarchyUtils.getChildren({
-          skipLevels: note.custom?.skipLevels || 0,
-          note,
-          notes: engine.notes,
-        })
-          .filter((note) => SiteUtils.canPublish({ note, engine, config }))
-          .filter(
-            (note) =>
-              _.isUndefined(note.custom?.nav_exclude) ||
-              !note.custom?.nav_exclude
-          );
-      } else if (noteCacheForRender) {
+      if (noteCacheForRender) {
         const notesById =
           NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
 

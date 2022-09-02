@@ -11,6 +11,7 @@ import {
   getStage,
   IntermediateDendronConfig,
   isWebUri,
+  NoteFnameDictUtils,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
@@ -253,7 +254,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }
 
   async _renderNote({
-    engine,
     note,
     notes,
     engineConfig,
@@ -263,13 +263,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     notes: NotePropsByIdDict;
     engineConfig: IntermediateDendronConfig;
   }) {
+    const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
+
+    const noteCacheForRenderDict = {
+      notesById: notes,
+      notesByFname,
+    };
+
     const proc = MDUtilsV5.procRehypeFull(
       {
-        engine,
+        noteCacheForRenderDict,
         fname: note.fname,
         vault: note.vault,
         config: engineConfig,
-        notes,
       },
       { flavor: ProcFlavor.PUBLISHING }
     );

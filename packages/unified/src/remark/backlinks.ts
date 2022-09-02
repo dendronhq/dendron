@@ -1,16 +1,10 @@
-import {
-  ConfigUtils,
-  NoteProps,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
-import { SiteUtils } from "../SiteUtils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 
@@ -20,7 +14,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, vault, dest, insideNoteRef, config, engine, noteToRender } =
+    const { fname, dest, insideNoteRef, config, noteToRender } =
       MDUtilsV5.getProcData(proc);
 
     // Don't show backlinks for the following cases:
@@ -35,12 +29,12 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-    let note: NoteProps | undefined;
-    if (engine) {
-      note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
-    } else {
-      note = noteToRender;
-    }
+    // let note: NoteProps | undefined;
+    // if (engine) {
+    //   note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
+    // } else {
+    const note = noteToRender;
+    // }
     if (_.isUndefined(note)) {
       return;
     }
@@ -54,42 +48,45 @@ const plugin: Plugin = function (this: Unified.Processor) {
       return;
     }
 
-    const backlinks = _.uniqBy(
+    const backlinksToPublish = _.uniqBy(
       (note?.links || []).filter((ent) => ent.type === "backlink"),
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
+    // JYTODO: Check that this filtering happens _before_ we start any parsing.
     // filter out invalid backlinks
-    const backlinksToPublish = _.filter(backlinks, (backlink) => {
-      const vaultName = backlink.from.vaultName!;
-      const vault = VaultUtils.getVaultByName({
-        vaults: engine.vaults,
-        vname: vaultName,
-      })!;
+    // const backlinksToPublish = _.filter(backlinks, (backlink) => {
+    //   const vaultName = backlink.from.vaultName!;
+    //   const vault = VaultUtils.getVaultByName({
+    //     vaults: engine.vaults,
+    //     vname: vaultName,
+    //   })!;
 
-      let note: NoteProps | undefined;
-      if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname: backlink.from.fname!,
-          engine,
-          vault,
-        });
-      } else {
-        note = noteToRender;
-      }
+    //   // let note: NoteProps | undefined;
+    //   // if (engine) {
+    //   //   note = NoteUtils.getNoteByFnameFromEngine({
+    //   //     fname: backlink.from.fname!,
+    //   //     engine,
+    //   //     vault,
+    //   //   });
+    //   // } else {
+    //   //   note = noteToRender;
+    //   // }
+    //   const note = noteToRender;
 
-      // if note doesn't exist, don't include in backlinks
-      if (!note) {
-        return false;
-      }
-      // if note exists but it can't be published, don't include
-      const out = SiteUtils.canPublish({
-        note,
-        engine,
-        config,
-      });
-      return out;
-    });
+    //   // if note doesn't exist, don't include in backlinks
+    //   if (!note) {
+    //     return false;
+    //   }
+    //   // if note exists but it can't be published, don't include
+    //   const out = SiteUtils.canPublish({
+    //     note,
+    //     config,
+    //     wsRoot,
+    //     vaults,
+    //   });
+    //   return out;
+    // });
 
     if (!_.isEmpty(backlinksToPublish)) {
       root.children.push({
@@ -102,25 +99,26 @@ const plugin: Plugin = function (this: Unified.Processor) {
           backlinksToPublish.map((mdLink) => {
             let alias;
 
-            let note: NoteProps | undefined;
+            // let note: NoteProps | undefined;
 
-            if (engine) {
-              note = NoteUtils.getNoteByFnameFromEngine({
-                fname: mdLink.from.fname!,
-                vault: VaultUtils.getVaultByName({
-                  vaults: engine.vaults,
-                  vname: mdLink.from.vaultName!,
-                })!,
-                engine,
-              });
-            } else {
-              note = noteToRender;
-            }
+            // if (engine) {
+            //   note = NoteUtils.getNoteByFnameFromEngine({
+            //     fname: mdLink.from.fname!,
+            //     vault: VaultUtils.getVaultByName({
+            //       vaults: engine.vaults,
+            //       vname: mdLink.from.vaultName!,
+            //     })!,
+            //     engine,
+            //   });
+            // } else {
+            //   note = noteToRender;
+            // }
+            const note = noteToRender;
 
             if (note) {
               alias =
                 note.title +
-                (engine.vaults.length > 1
+                (config.vaults && config.vaults.length > 1
                   ? ` (${mdLink.from.vaultName!})`
                   : "");
             } else {

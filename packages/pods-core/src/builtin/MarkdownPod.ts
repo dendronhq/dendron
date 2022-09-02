@@ -478,7 +478,6 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
           const proc = MDUtilsV5.procRemarkFull({
-            engine,
             fname: note.fname,
             vault: note.vault,
             dest: DendronASTDest.MD_DENDRON,
@@ -552,7 +551,6 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
         ...DConfig.readConfigSync(engine.wsRoot),
         usePrettyRefs: false,
       },
-      engine,
       fname: note.fname,
       vault: note.vault,
     });

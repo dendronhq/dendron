@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
-  DEngine,
   IntermediateDendronConfig,
+  ReducedDEngine,
   TaskNoteUtils,
   VaultUtils,
   VSRange,
@@ -23,16 +23,15 @@ export async function decorateTaskNote({
   vaultName,
   config,
 }: {
-  engine: DEngine;
+  engine: ReducedDEngine;
   range: VSRange;
   fname: string;
   vaultName?: string;
   config: IntermediateDendronConfig;
 }) {
-  const { vaults } = engine;
   const taskConfig = ConfigUtils.getTask(config);
   const vault = vaultName
-    ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
+    ? VaultUtils.getVaultByName({ vname: vaultName, vaults: config.vaults! }) // JYTODO: Ugh, use vaults from outside config
     : undefined;
 
   const note = (await engine.findNotes({ fname, vault }))[0];

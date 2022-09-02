@@ -2,13 +2,11 @@ import {
   assertUnreachable,
   ConfigUtils,
   DendronError,
-  DEngineClient,
   DVault,
   ERROR_STATUS,
   IntermediateDendronConfig,
+  NoteDicts,
   NoteProps,
-  NotePropsByIdDict,
-  NoteUtils,
   OptionalExceptFor,
   ProcFlavor,
 } from "@dendronhq/common-all";
@@ -96,7 +94,7 @@ export type ProcOptsV5 = {
  * The additional options are also there as an override - letting us override specific engine props without mutating the engine.
  */
 export type ProcDataFullOptsV5 = {
-  engine: DEngineClient;
+  // engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
@@ -104,7 +102,7 @@ export type ProcDataFullOptsV5 = {
   /**
    * Supply alternative dictionary of notes to use when resolving note ids
    */
-  notes?: NotePropsByIdDict;
+  // notes?: NotePropsByIdDict;
   /**
    * Check to see if we are in a note reference.
    */
@@ -121,6 +119,7 @@ export type ProcDataFullOptsV5 = {
 } & {
   noteToRender?: NoteProps;
   noteCacheForRender?: NoteProps[];
+  noteCacheForRenderDict?: NoteDicts;
 };
 
 /**
@@ -128,16 +127,17 @@ export type ProcDataFullOptsV5 = {
  */
 export type ProcDataFullV5 = {
   // main properties that are configured when processor is created
-  engine: DEngineClient;
+  // engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
   wsRoot: string;
+  vaults: DVault[];
 
   // derived: unless passed in, these come from engine or are set by
   // other unified plugins
   config: IntermediateDendronConfig;
-  notes?: NotePropsByIdDict;
+  // notes?: NotePropsByIdDict;
   insideNoteRef?: boolean;
 
   fm?: any;
@@ -148,6 +148,7 @@ export type ProcDataFullV5 = {
 
   noteToRender?: NoteProps;
   noteCacheForRender?: NoteProps[];
+  noteCacheForRenderDict?: NoteDicts;
 };
 
 function checkProps({
@@ -189,8 +190,8 @@ export class MDUtilsV5 {
 
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-    const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
-    return proc.data("dendronProcDatav5", { ..._data, ...opts, notes });
+    // const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
+    return proc.data("dendronProcDatav5", { ..._data, ...opts });
   }
 
   static setProcOpts(proc: Processor, opts: ProcOptsV5) {
@@ -266,7 +267,7 @@ export class MDUtilsV5 {
               message: `data is required when not using raw proc`,
             });
           }
-          const requiredProps = ["vault", "engine", "fname", "dest"];
+          const requiredProps = ["vault", "fname", "dest"];
           const resp = checkProps({ requiredProps, data });
           if (!resp.valid) {
             throw DendronError.createFromStatus({
@@ -276,14 +277,10 @@ export class MDUtilsV5 {
               )} missing`,
             });
           }
-          if (!data.wsRoot) {
-            data.wsRoot = data.engine!.wsRoot;
-          }
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: data.fname!,
-            engine: data.engine!,
-            vault: data.vault!,
-          });
+          // if (!data.wsRoot) {
+          //   data.wsRoot = data.engine!.wsRoot;
+          // }
+          const note = data.noteToRender;
 
           if (!_.isUndefined(note)) {
             proc = proc.data("fm", this.getFM({ note }));
@@ -369,9 +366,9 @@ export class MDUtilsV5 {
             )} missing`,
           });
         }
-        if (!data.wsRoot) {
-          data.wsRoot = data.engine!.wsRoot;
-        }
+        // if (!data.wsRoot) {
+        //   data.wsRoot = data.engine!.wsRoot;
+        // }
 
         // backwards compatibility, default to v4 values
         this.setProcData(proc, data as ProcDataFullV5);

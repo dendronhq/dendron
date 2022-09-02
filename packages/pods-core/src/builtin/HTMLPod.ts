@@ -1,6 +1,9 @@
 import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
-import { MDUtilsV5 } from "@dendronhq/unified";
+import {
+  getHTMLRenderDependencyNoteCache,
+  MDUtilsV5,
+} from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
@@ -67,8 +70,18 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const previewConfig = ConfigUtils.getPreview(overrideConfig);
     previewConfig.enablePrettyRefs = enablePrettyRefs;
-    const proc = MDUtilsV5.procRehypeFull({
+
+    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      note,
       engine,
+      config,
+      config.vaults
+    );
+
+    // TODO: Figure out if we also need children / backlinks here.
+
+    const proc = MDUtilsV5.procRehypeFull({
+      noteCacheForRenderDict,
       vault: note.vault,
       fname,
       config: overrideConfig,

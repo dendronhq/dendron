@@ -93,7 +93,7 @@ export class EngineUtils {
    */
   static refreshNoteLinksAndAnchors({
     note,
-    engine,
+    // engine,
     config,
     fmChangeOnly,
     silent,
@@ -125,7 +125,7 @@ export class EngineUtils {
     const links = LinkUtils.findLinks({
       note,
       type: "regular",
-      engine,
+      // engine,  JYTODO: Examine
       config,
     });
     note.links = links;
@@ -143,7 +143,7 @@ export class EngineUtils {
         const linkCandidates = LinkUtils.findLinks({
           note,
           type: "candidate",
-          engine,
+          // engine, JYTODO: Examine
           config,
         });
         note.links = note.links.concat(linkCandidates);

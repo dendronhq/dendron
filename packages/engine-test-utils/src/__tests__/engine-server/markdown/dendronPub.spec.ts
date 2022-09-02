@@ -25,14 +25,14 @@ import { checkString, TestUnifiedUtils } from "../../../utils";
 import { checkNotInVFile, checkVFile } from "./utils";
 
 function proc(
-  engine: DEngineClient,
+  // engine: DEngineClient,
   dendron: DendronASTData,
   opts?: DendronPubOpts,
   flavor?: ProcFlavor
 ) {
   return MDUtilsV5.procRehypeFull(
     {
-      engine,
+      // engine,
       ...dendron,
       wikiLinksOpts: {
         useId: false,
@@ -101,7 +101,7 @@ function genPublishConfigWithAllPublicHierarchies() {
 
 function createProc({
   vaults,
-  engine,
+  // engine,
   linkText,
   fname,
   config,
@@ -115,7 +115,7 @@ function createProc({
 
   const proc = MDUtilsV5.procRehypeFull(
     {
-      engine,
+      // engine,
       fname,
       vault,
       config,
@@ -384,9 +384,9 @@ describe("GIVEN dendronPub", () => {
 
 describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("prefix", () => {
-    testWithEngine("imagePrefix", async ({ engine, wsRoot, vaults }) => {
+    testWithEngine("imagePrefix", async ({ wsRoot, vaults }) => {
       const out = proc(
-        engine,
+        // engine,
         {
           fname: "foo",
           dest: DendronASTDest.HTML,
@@ -402,9 +402,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "imagePrefix with forward slash",
-      async ({ engine, wsRoot, vaults }) => {
+      async ({ wsRoot, vaults }) => {
         const out = proc(
-          engine,
+          // engine,
           {
             fname: "foo",
             dest: DendronASTDest.HTML,
@@ -420,11 +420,11 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
     );
   });
 
-  testWithEngine("in IMPORT mode", async ({ engine, vaults, wsRoot }) => {
+  testWithEngine("in IMPORT mode", async ({ vaults, wsRoot }) => {
     const config = DConfig.readConfigSync(wsRoot);
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.IMPORT },
-      { dest: DendronASTDest.HTML, engine, wsRoot, vault: vaults[0], config }
+      { dest: DendronASTDest.HTML, wsRoot, vault: vaults[0], config }
     );
     const out = await proc.process("Testing publishing in IMPORT mode");
     await checkVFile(out, "Testing publishing in IMPORT mode");
@@ -438,7 +438,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
     }) => {
       const { engine, vaults, flavor } = opts;
       const out = await proc(
-        engine,
         {
           fname: "has.fmtags",
           dest: DendronASTDest.HTML,
@@ -458,7 +457,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
     }) => {
       const { engine, vaults, flavor } = opts;
       const out = await proc(
-        engine,
+        // engine,
         {
           fname: "no.fmtags",
           dest: DendronASTDest.HTML,
@@ -643,8 +642,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("note reference", () => {
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -672,8 +671,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("WHEN refs are right on the next line THEN render all", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -711,8 +710,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("WHEN refs are back to back THEN render all", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -745,8 +744,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("nonexistent", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -774,8 +773,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("assume vault", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -804,8 +803,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: with vault prefix", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -841,8 +840,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: with vault prefix", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -877,8 +876,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: wildcard", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -914,8 +913,8 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: wildcard no match", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
-          const out = await proc(engine, {
+        async ({ wsRoot, vaults }) => {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -953,9 +952,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("ok: ambiguous but duplicateNoteBehavior set", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ wsRoot, vaults }) => {
           const config = DConfig.readConfigSync(wsRoot);
-          const out = await proc(engine, {
+          const out = await proc({
             fname: "ref",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
@@ -995,12 +994,11 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: ambiguous", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ wsRoot, vaults }) => {
           const config = DConfig.readConfigSync(wsRoot);
           ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
           const out = await MDUtilsV5.procRehypeFull(
             {
-              engine,
               fname: "ref",
               vault: vaults[0],
               config,
@@ -1043,7 +1041,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("enablePrettyRefs", () => {
     testWithEngine(
       "config.publishing.enablePrettyRef: true",
-      async ({ engine, vaults }) => {
+      async ({ vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
@@ -1051,7 +1049,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
         const resp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1071,7 +1068,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "config.publishing.enablePrettyRef: false",
-      async ({ engine, vaults }) => {
+      async ({ vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
@@ -1079,7 +1076,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1099,7 +1095,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "config.enablePrettyRef: true",
-      async ({ engine, vaults }) => {
+      async ({ vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
@@ -1107,7 +1103,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1127,7 +1122,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "config.enablePrettyRef: false",
-      async ({ engine, vaults }) => {
+      async ({ vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
@@ -1135,7 +1130,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
         const resp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1155,11 +1149,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "enablePrettyRef defaults to true in both cases",
-      async ({ engine, vaults }) => {
+      async ({ vaults }) => {
         const config = ConfigUtils.genDefaultConfig();
         const previewResp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1176,7 +1169,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
         const publishResp = await MDUtilsV5.procRehypeFull(
           {
-            engine,
             fname: "foo",
             vault: vaults[0],
             config,
@@ -1198,7 +1190,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       describe("AND note overrides to false", () => {
         testWithEngine(
           "THEN renders without pretty refs",
-          async ({ engine, vaults }) => {
+          async ({ vaults }) => {
             const config = ConfigUtils.genDefaultConfig();
             ConfigUtils.setPreviewProps(config, "enablePrettyRefs", true);
             ConfigUtils.setPublishProp(config, "siteHierarchies", [
@@ -1208,7 +1200,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
             const resp = await MDUtilsV5.procRehypeFull(
               {
-                engine,
                 fname: "with-override",
                 vault: vaults[0],
                 config,
@@ -1248,7 +1239,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       describe("AND note overrides to true", () => {
         testWithEngine(
           "THEN renders with pretty refs",
-          async ({ engine, vaults }) => {
+          async ({ vaults }) => {
             const config = ConfigUtils.genDefaultConfig();
             ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
             ConfigUtils.setPublishProp(config, "siteHierarchies", [
@@ -1258,7 +1249,6 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
             const resp = await MDUtilsV5.procRehypeFull(
               {
-                engine,
                 fname: "with-override",
                 vault: vaults[0],
                 config,

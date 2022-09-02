@@ -68,7 +68,7 @@ export async function runAllDecorators(
     config: IntermediateDendronConfig;
   }
 ) {
-  const { note, ranges, engine, config } = opts;
+  const { note, ranges, config } = opts;
 
   const allDecorations: Decoration[] = [];
   const allDiagnostics: Diagnostic[] = [];
@@ -80,8 +80,8 @@ export async function runAllDecorators(
       parseOnly: true,
     },
     {
+      //JYTODO: May need to plugin note cache here
       dest: DendronASTDest.MD_DENDRON,
-      engine,
       vault: note.vault,
       fname: note.fname,
       config,

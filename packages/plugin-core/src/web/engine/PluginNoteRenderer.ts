@@ -3,6 +3,7 @@ import {
   DendronError,
   DVault,
   IntermediateDendronConfig,
+  NoteDictsUtils,
   NoteProps,
   NoteUtils,
   ProcFlavor,
@@ -12,12 +13,10 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  getNoteDependencies,
+  getHTMLRenderDependencyNoteCache,
   MDUtilsV5,
   MDUtilsV5Web,
-  ProcDataFullOptsV5,
 } from "@dendronhq/unified";
-import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import { INoteRenderer } from "./INoteRenderer";
 
@@ -63,36 +62,11 @@ export class PluginNoteRenderer implements INoteRenderer {
     flavor: ProcFlavor;
     dest: DendronASTDest;
   }): Promise<string> {
-    let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    if (dest === DendronASTDest.HTML) {
-      proc = MDUtilsV5Web.procRehypeWeb(
-        {
-          noteToRender: note,
-          fname: note.fname,
-          vault: note.vault,
-          config: this.publishingConfig,
-        } as ProcDataFullOptsV5, // We need this cast to avoid sending in engine.
-        { flavor }
-      );
-    } else {
-      // Only support Preview rendering right now:
-      return "Only HTML Rendering is supported right now.";
-    }
-    const serialized = NoteUtils.serialize(note);
-
-    const ast = proc.parse(serialized);
-
-    const renderDependencies = getNoteDependencies(ast);
-
-    let allData: NoteProps[] = await Promise.all(
-      renderDependencies.map(async (note) => {
-        const vault = _.find(
-          this.vaults,
-          (vault) => vault.name === note.vaultName
-        );
-        const notes = await this.engine.findNotes({ fname: note.fname, vault });
-        return notes[0];
-      })
+    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      note,
+      this.engine,
+      this.publishingConfig,
+      this.vaults
     );
 
     // Also include children to render the 'children' hierarchy at the footer of the page:
@@ -103,17 +77,30 @@ export class PluginNoteRenderer implements INoteRenderer {
         const childNote = await this.engine.getNote(childId);
 
         if (childNote.data) {
-          allData.push(childNote.data);
+          NoteDictsUtils.add(childNote.data, noteCacheForRenderDict);
         }
       })
     );
 
-    allData = _.compact(allData);
+    let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
+    if (dest === DendronASTDest.HTML) {
+      proc = MDUtilsV5Web.procRehypeWeb(
+        {
+          noteToRender: note,
+          fname: note.fname,
+          vault: note.vault,
+          config: this.publishingConfig,
+          noteCacheForRenderDict,
+        },
+        { flavor }
+      );
+    } else {
+      // Only support Preview rendering right now:
+      return "Only HTML Rendering is supported right now.";
+    }
 
-    const secondProc = proc();
-    MDUtilsV5.setProcData(secondProc, { noteCacheForRender: allData });
-
-    const payload = await secondProc.process(serialized);
+    const serialized = NoteUtils.serialize(note);
+    const payload = await proc.process(serialized);
 
     const renderedNote = payload.toString();
     return renderedNote;

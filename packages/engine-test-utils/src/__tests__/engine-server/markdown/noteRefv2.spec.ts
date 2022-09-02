@@ -403,10 +403,9 @@ describe("noteRefV2", () => {
 
     const REGULAR_CASE = createProcTests({
       name: "regular",
-      setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
+      setupFunc: async ({ wsRoot, vaults, extra }) => {
         const config = DConfig.readConfigSync(wsRoot);
         const proc2 = MDUtilsV5.procRemarkFull({
-          engine,
           fname: "foo",
           wikiLinksOpts: { useId: true },
           dest: extra.dest,
@@ -864,10 +863,9 @@ describe("noteRefV2", () => {
 
     const RECURSIVE_TEST_CASES = createProcTests({
       name: "recursive",
-      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
+      setupFunc: async ({ wsRoot, extra, vaults }) => {
         const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
-          engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -929,7 +927,6 @@ describe("noteRefV2", () => {
         const note = engine.notes["id.journal"];
         const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
-          engine,
           config,
           dest: extra.dest,
           vault: vaults[0],
@@ -980,7 +977,6 @@ describe("noteRefV2", () => {
         const note = engine.notes["one"];
         const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
-          engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -1046,7 +1042,6 @@ describe("noteRefV2", () => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
         const resp = await MDUtilsV5.procRemarkFull({
-          engine,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",

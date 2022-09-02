@@ -8,11 +8,11 @@ describe("backlinks", () => {
   describe("frontmatter tags", () => {
     test("single", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ wsRoot, vaults }) => {
           const config = DConfig.readConfigSync(wsRoot);
           const vault = vaults[0];
           const resp = await MDUtilsV5.procRehypeFull({
-            engine,
+            // engine,
             vault,
             fname: "tags.test",
             config,
@@ -62,11 +62,11 @@ describe("backlinks", () => {
 
     test("multiple", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ wsRoot, vaults }) => {
           const config = DConfig.readConfigSync(wsRoot);
           const vault = vaults[0];
           const resp = await MDUtilsV5.procRehypeFull({
-            engine,
+            // engine,
             vault,
             fname: "tags.test",
             config,
@@ -129,11 +129,10 @@ describe("backlinks", () => {
   //
   test("hashtag", async () => {
     await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
+      async ({ wsRoot, vaults }) => {
         const config = DConfig.readConfigSync(wsRoot);
         const vault = vaults[0];
         const resp = await MDUtilsV5.procRehypeFull({
-          engine,
           vault,
           fname: "tags.test",
           config,

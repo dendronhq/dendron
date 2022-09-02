@@ -595,7 +595,8 @@ export class DendronEngineV2 implements DEngine {
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5.procRehypeFull(
         {
-          engine: this,
+          noteToRender: note,
+          // engine: this, JYTODO: Examine
           fname: note.fname,
           vault: note.vault,
           config,
@@ -605,7 +606,8 @@ export class DendronEngineV2 implements DEngine {
     } else {
       proc = MDUtilsV5.procRemarkFull(
         {
-          engine: this,
+          // engine: this, JYTODO: Examine
+          noteToRender: note,
           fname: note.fname,
           vault: note.vault,
           dest,
@@ -693,7 +695,7 @@ export class DendronEngineV2 implements DEngine {
         });
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        engine: this,
+        // engine: this, JYTODO: Examine
         config: DConfig.readConfigSync(this.wsRoot, true),
       });
       if (opts.filterByAnchorType) {

@@ -1069,7 +1069,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const prevNote = _.cloneDeep(note);
     const foundLinks = LinkUtils.findLinksFromBody({
       note,
-      engine: this,
+      // engine: this,
       filter: { loc: oldLoc },
       config,
     });

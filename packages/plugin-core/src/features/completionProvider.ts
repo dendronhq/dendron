@@ -392,8 +392,9 @@ export const resolveCompletionItem = sentryReportingCallback(
       // Render a preview of this note
       const proc = MDUtilsV5.procRemarkFull(
         {
+          noteToRender: note,
           dest: DendronASTDest.MD_REGULAR,
-          engine,
+          // engine, // JYTODO: Add data
           vault: note.vault,
           fname: note.fname,
           config: DConfig.readConfigSync(engine.wsRoot, true),

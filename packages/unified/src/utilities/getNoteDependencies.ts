@@ -1,13 +1,69 @@
-import { DNodeCompositeKey } from "@dendronhq/common-all";
-import { Node, Data } from "unist";
+import {
+  DNodeCompositeKey,
+  DVault,
+  IntermediateDendronConfig,
+  NoteDicts,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
+  NoteProps,
+  NoteUtils,
+  ReducedDEngine,
+} from "@dendronhq/common-all";
+import _ from "lodash";
+import { Data, Node } from "unist";
 import visit from "unist-util-visit";
 import {
   DendronASTTypes,
-  WikiLinkNoteV4,
-  NoteRefNoteV4,
   HashTag,
+  NoteRefNoteV4,
   UserTag,
+  WikiLinkNoteV4,
 } from "../types";
+import { ProcDataFullOptsV5 } from "../utilsv5";
+import { MDUtilsV5Web } from "../utilsWeb";
+
+export async function getHTMLRenderDependencyNoteCache(
+  noteToRender: NoteProps,
+  engine: ReducedDEngine,
+  config: IntermediateDendronConfig,
+  vaults: DVault[]
+): Promise<NoteDicts> {
+  const proc = MDUtilsV5Web.procRehypeWeb(
+    {
+      noteToRender,
+      fname: noteToRender.fname,
+      vault: noteToRender.vault,
+      config,
+    } as ProcDataFullOptsV5 // We need this cast to avoid sending in engine.
+  );
+
+  const serialized = NoteUtils.serialize(noteToRender);
+
+  const ast = proc.parse(serialized);
+
+  const renderDependencies = getNoteDependencies(ast);
+
+  // TODO: Also add in Note Ref Dependencies.
+
+  let allData: NoteProps[] = await Promise.all(
+    renderDependencies.map(async (note) => {
+      const vault = _.find(vaults, (vault) => vault.name === note.vaultName);
+      const notes = await engine.findNotes({ fname: note.fname, vault });
+      return notes[0];
+    })
+  );
+
+  allData = _.compact(allData);
+  allData = _.uniqBy(allData, (value) => value.id);
+
+  const notesById = NoteDictsUtils.createNotePropsByIdDict(allData);
+  const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+
+  return {
+    notesById,
+    notesByFname,
+  };
+}
 
 /**
  * For a given AST, find all note dependencies whose data will be needed for

@@ -1,7 +1,6 @@
 import {
   ConfigUtils,
   DendronError,
-  DEngineClient,
   DVault,
   ERROR_SEVERITY,
   IntermediateDendronConfig,
@@ -73,17 +72,17 @@ function getVault({
   vaultMissingBehavior,
   vaultName,
   vault,
-  engine,
+  vaults,
 }: {
   vaultName?: string;
   vaultMissingBehavior: VaultMissingBehavior;
   vault: DVault;
-  engine: DEngineClient;
+  vaults: DVault[];
 }) {
   if (vaultName) {
     try {
       vault = VaultUtils.getVaultByNameOrThrow({
-        vaults: engine.vaults,
+        vaults,
         vname: vaultName,
       });
     } catch (err) {
@@ -189,8 +188,7 @@ function shouldInsertTitle({ proc }: { proc: Processor }) {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  // eslint-disable-next-line prefer-const
-  let { vault, engine } = MDUtilsV5.getProcData(proc);
+  const { vault, vaults, wsRoot } = MDUtilsV5.getProcData(proc);
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
   const pData = MDUtilsV5.getProcData(proc);
@@ -218,13 +216,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       let note;
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
-        note = SiteUtils.create403StaticNote({ engine });
-      } else if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          vault,
-          engine,
-        });
+        note = SiteUtils.create403StaticNote({ vaults });
+        // } else if (engine) {
+        //   note = NoteUtils.getNoteByFnameFromEngine({
+        //     fname,
+        //     vault,
+        //     engine,
+        //   });
       } else {
         note = noteToRender;
       }
@@ -283,10 +281,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let isPublished = true;
         const data = _node.data;
         // eslint-disable-next-line prefer-const
-        let { vault, engine } = MDUtilsV5.getProcData(proc);
+        let { vault } = MDUtilsV5.getProcData(proc);
         vault = getVault({
-          engine,
           vault,
+          vaults,
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
           vaultName: data.vaultName,
         });
@@ -305,12 +303,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               notesById,
               notesByFname,
             })[0];
-          } else if (engine) {
-            note = NoteUtils.getNoteByFnameFromEngine({
-              fname: valueOrig,
-              vault,
-              engine,
-            });
           }
 
           if (!note) {
@@ -323,7 +315,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           const { color: maybeColor, type: colorType } = NoteUtils.color({
             fname: value,
             vault,
-            engine,
           });
           const enableRandomlyColoredTagsConfig =
             ConfigUtils.getEnableRandomlyColoredTags(config);
@@ -366,7 +357,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             isPublished = SiteUtils.isPublished({
               note,
               config,
-              engine,
+              wsRoot,
+              vaults,
             });
             if (!isPublished) {
               value = _.toString(StatusCodes.FORBIDDEN);

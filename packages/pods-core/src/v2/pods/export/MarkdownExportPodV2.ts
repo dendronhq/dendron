@@ -233,9 +233,8 @@ export class MarkdownExportPodV2
         ...config,
         usePrettyRefs: false,
       },
-      engine,
-      fname: note.fname,
-      vault: note.vault,
+      fname: input.fname,
+      vault: input.vault,
     });
     if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
       remark = remark.use(

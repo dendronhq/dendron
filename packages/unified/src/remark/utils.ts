@@ -295,12 +295,10 @@ const getLinks = ({
 
 const getLinkCandidates = ({
   ast,
-  note,
-  engine,
-}: {
+}: // note,
+{
   ast: DendronASTNode;
   note: NoteProps;
-  engine: DEngineClient;
 }) => {
   const textNodes: Text[] = [];
   visit(
@@ -314,49 +312,50 @@ const getLinkCandidates = ({
   );
 
   const linkCandidates: DLink[] = [];
-  _.map(textNodes, (textNode: Text) => {
-    const value = textNode.value as string;
-    value.split(/\s+/).forEach((word) => {
-      const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
-        fname: word,
-        engine,
-        vault: note.vault,
-      }).filter((note) => note.stub !== true);
-      linkCandidates.push(
-        ...possibleCandidates.map((candidate): DLink => {
-          const startColumn = value.indexOf(word) + 1;
-          const endColumn = startColumn + word.length;
+  // JYTODO: Re-enable link candidates
+  // _.map(textNodes, (textNode: Text) => {
+  //   const value = textNode.value as string;
+  //   value.split(/\s+/).forEach((word) => {
+  //     const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
+  //       fname: word,
+  //       engine,
+  //       vault: note.vault,
+  //     }).filter((note) => note.stub !== true);
+  //     linkCandidates.push(
+  //       ...possibleCandidates.map((candidate): DLink => {
+  //         const startColumn = value.indexOf(word) + 1;
+  //         const endColumn = startColumn + word.length;
 
-          const position: Position = {
-            start: {
-              line: textNode.position!.start.line,
-              column: startColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + startColumn - 1
-                : undefined,
-            },
-            end: {
-              line: textNode.position!.start.line,
-              column: endColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + endColumn - 1
-                : undefined,
-            },
-          };
-          return {
-            type: "linkCandidate",
-            from: NoteUtils.toNoteLoc(note),
-            value: value.trim(),
-            position,
-            to: {
-              fname: word,
-              vaultName: VaultUtils.getName(candidate.vault),
-            },
-          };
-        })
-      );
-    });
-  });
+  //         const position: Position = {
+  //           start: {
+  //             line: textNode.position!.start.line,
+  //             column: startColumn,
+  //             offset: textNode.position!.start.offset
+  //               ? textNode.position!.start.offset + startColumn - 1
+  //               : undefined,
+  //           },
+  //           end: {
+  //             line: textNode.position!.start.line,
+  //             column: endColumn,
+  //             offset: textNode.position!.start.offset
+  //               ? textNode.position!.start.offset + endColumn - 1
+  //               : undefined,
+  //           },
+  //         };
+  //         return {
+  //           type: "linkCandidate",
+  //           from: NoteUtils.toNoteLoc(note),
+  //           value: value.trim(),
+  //           position,
+  //           to: {
+  //             fname: word,
+  //             vaultName: VaultUtils.getName(candidate.vault),
+  //           },
+  //         };
+  //       })
+  //     );
+  //   });
+  // });
   return linkCandidates;
 };
 
@@ -393,13 +392,11 @@ export class LinkUtils {
    */
   static findLinks({
     note,
-    engine,
     type,
     config,
     filter,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
@@ -409,7 +406,6 @@ export class LinkUtils {
       case "regular":
         links = LinkUtils.findLinksFromBody({
           note,
-          engine,
           filter,
           config,
         });
@@ -417,7 +413,6 @@ export class LinkUtils {
       case "candidate":
         links = LinkUtils.findLinkCandidates({
           note,
-          engine,
           config,
         });
         break;
@@ -439,12 +434,10 @@ export class LinkUtils {
    */
   static findLinksFromBody({
     note,
-    engine,
     config,
     filter,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
     filter?: LinkFilter;
   }): DLink[] {
@@ -452,7 +445,7 @@ export class LinkUtils {
     const remark = MDUtilsV5.procRemarkParseFull(
       { flavor: ProcFlavor.REGULAR },
       {
-        engine,
+        // JYTODO: maybe Add noteCache data
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
@@ -784,18 +777,16 @@ export class LinkUtils {
 
   static findLinkCandidates({
     note,
-    engine,
     config,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
   }) {
     const content = note.body;
     const remark = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
-        engine,
+        // JYTODO: Add renderCache data
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
@@ -806,7 +797,6 @@ export class LinkUtils {
     const linkCandidates: DLink[] = getLinkCandidates({
       ast: tree,
       note,
-      engine,
     });
     return linkCandidates;
   }
@@ -1492,15 +1482,13 @@ export class RemarkUtils {
    */
   static async extractBlocks({
     note,
-    engine,
     config,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
-      engine,
+      // JYTODO: Add render cache
       vault: note.vault,
       fname: note.fname,
       dest: DendronASTDest.MD_DENDRON,

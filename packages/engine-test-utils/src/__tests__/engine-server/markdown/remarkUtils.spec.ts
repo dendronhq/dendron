@@ -190,7 +190,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine, wsRoot }) => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
-        const links = LinkUtils.findLinksFromBody({ note, engine, config });
+        const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("bar");
       },
@@ -211,7 +211,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine, wsRoot }) => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
-        const links = LinkUtils.findLinksFromBody({ note, engine, config });
+        const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
         expect(_.isEmpty(links)).toBeTruthy();
       },
@@ -232,7 +232,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine, wsRoot }) => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
-        const links = LinkUtils.findLinksFromBody({ note, engine, config });
+        const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
         expect(links[0].from).toEqual({
           fname: "foo",
@@ -261,7 +261,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine, wsRoot }) => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
-        const links = LinkUtils.findLinksFromBody({ note, engine, config });
+        const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("tags.bar");
       },
@@ -282,7 +282,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine, wsRoot }) => {
           const note = engine.notes["foo.one-id"];
           const config = DConfig.readConfigSync(wsRoot);
-          const links = LinkUtils.findLinksFromBody({ note, engine, config });
+          const links = LinkUtils.findLinksFromBody({ note, config });
           expect(links).toMatchSnapshot();
           checkLink({
             src: {
@@ -331,7 +331,6 @@ describe("RemarkUtils and LinkUtils", () => {
         const config = DConfig.readConfigSync(engine.wsRoot);
         const links = LinkUtils.findLinksFromBody({
           note,
-          engine,
           filter,
           config,
         });
@@ -386,7 +385,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine, wsRoot }) => {
           const note = engine.notes["foo.one-id"];
           const config = DConfig.readConfigSync(wsRoot);
-          const links = LinkUtils.findLinksFromBody({ note, engine, config });
+          const links = LinkUtils.findLinksFromBody({ note, config });
           const link = LinkUtils.dlink2DNoteLink(links[0]);
           const newBody = LinkUtils.updateLink({
             note,
@@ -426,7 +425,7 @@ describe("RemarkUtils and LinkUtils", () => {
           async ({ engine, wsRoot }) => {
             const note = engine.notes["foo"];
             const config = DConfig.readConfigSync(wsRoot);
-            const links = LinkUtils.findLinksFromBody({ note, engine, config });
+            const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[0]);
             const newLink = {
               ...link,
@@ -456,7 +455,7 @@ describe("RemarkUtils and LinkUtils", () => {
             const newLine = "nospace[[bar]]";
             const note = engine.notes["foo"];
             const config = DConfig.readConfigSync(wsRoot);
-            const links = LinkUtils.findLinksFromBody({ note, engine, config });
+            const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
             const newLink = {
               ...link,
@@ -486,7 +485,7 @@ describe("RemarkUtils and LinkUtils", () => {
             const newLine = "onespace [[bar]]";
             const note = engine.notes["foo"];
             const config = DConfig.readConfigSync(wsRoot);
-            const links = LinkUtils.findLinksFromBody({ note, engine, config });
+            const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
             const newLink = {
               ...link,
@@ -515,12 +514,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(3);
@@ -549,12 +547,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(5);
@@ -583,12 +580,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("nested list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(8);
@@ -620,12 +616,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(3);
@@ -657,12 +652,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("existing anchors", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(7);
@@ -707,12 +701,11 @@ describe("RemarkUtils and LinkUtils", () => {
     test("header", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = DConfig.readConfigSync(wsRoot);
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
-            engine,
             config,
           });
           expect(blocks.length).toEqual(4);
@@ -878,7 +871,6 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["bar"];
           const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates[0].from.fname).toEqual("bar");
@@ -898,7 +890,6 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["baz"];
           const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates.length).toEqual(8);
@@ -916,7 +907,6 @@ describe("RemarkUtils and LinkUtils", () => {
           const note = engine.notes["nodes"];
           const linkCandidates = LinkUtils.findLinkCandidates({
             note,
-            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates.length).toEqual(8);
@@ -937,7 +927,6 @@ describe("h1ToTitle", () => {
         const config = DConfig.readConfigSync(wsRoot);
         const proc = MDUtilsV5.procRemarkFull({
           dest: DendronASTDest.MD_REGULAR,
-          engine,
           fname: "foo",
           vault: vaults[0],
           config,

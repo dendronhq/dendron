@@ -1,22 +1,21 @@
-import { Decoration, DECORATION_TYPES, Decorator } from "./utils";
 import {
   containsNonDendronUri,
   DendronError,
-  DEngine,
-  DEngineClient,
+  DVault,
   getTextRange,
   IDendronError,
   isNotUndefined,
   NoteProps,
-  NoteUtils,
   position2VSCodeRange,
+  ReducedDEngine,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { AnchorUtils } from "../remark";
 import _ from "lodash";
+import { AnchorUtils } from "../remark";
+import { isBeginBlockAnchorId, isEndBlockAnchorId } from "../remark/noteRefsV2";
 import { WikiLinkNoteV4 } from "../types";
 import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
-import { isBeginBlockAnchorId, isEndBlockAnchorId } from "../remark/noteRefsV2";
+import { Decoration, DECORATION_TYPES, Decorator } from "./utils";
 
 export type DecorationWikilink = Decoration & {
   type: DECORATION_TYPES.wikiLink | DECORATION_TYPES.brokenWikilink;
@@ -48,6 +47,7 @@ export const decorateWikilink: Decorator<
     vaultName,
     note,
     engine,
+    vaults: config.vaults ?? [], // JYTODO: Wrong
   });
   const wikilinkRange = position2VSCodeRange(position);
   const decorations: DecorationsForDecorateWikilink[] = [];
@@ -119,19 +119,21 @@ export async function linkedNoteType({
   vaultName,
   note,
   engine,
+  vaults,
 }: {
   fname?: string;
   anchorStart?: string;
   anchorEnd?: string;
   vaultName?: string;
   note?: NoteProps;
-  engine: DEngine | DEngineClient;
+  engine: ReducedDEngine;
+  vaults: DVault[];
 }): Promise<{
   type: DECORATION_TYPES.brokenWikilink | DECORATION_TYPES.wikiLink;
   errors: IDendronError[];
 }> {
   const ctx = "linkedNoteType";
-  const { vaults } = engine;
+  // const { vaults } = engine;
   const vault = vaultName
     ? VaultUtils.getVaultByName({ vname: vaultName, vaults })
     : undefined;
@@ -148,11 +150,7 @@ export async function linkedNoteType({
     matchingNotes = note ? [note] : [];
   } else if (fname) {
     try {
-      matchingNotes = NoteUtils.getNotesByFnameFromEngine({
-        fname,
-        vault,
-        engine,
-      });
+      matchingNotes = await engine.findNotes({ fname, vault });
     } catch (err) {
       return {
         type: DECORATION_TYPES.brokenWikilink,

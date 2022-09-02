@@ -1,13 +1,11 @@
 /* eslint-disable func-names */
 import {
-  ConfigUtils,
   CONSTANTS,
   DendronError,
   NoteDictsUtils,
   NoteFnameDictUtils,
   NoteUtils,
   Position,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Eat } from "remark-parse";
@@ -91,7 +89,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
-      const { dest, vault } = MDUtilsV5.getProcData(proc);
+      const { dest } = MDUtilsV5.getProcData(proc);
 
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
@@ -115,7 +113,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (copts.useId && dest === DendronASTDest.HTML) {
         let notes;
-        const { engine, noteCacheForRender } = MDUtilsV5.getProcData(proc);
+        const { noteCacheForRender } = MDUtilsV5.getProcData(proc);
         // TODO: Consolidate logic.
         if (noteCacheForRender) {
           const notesById =
@@ -129,16 +127,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
             notesById,
             notesByFname,
           });
-        } else if (!engine) {
-          return "error with engine";
         } else {
-          // TODO: check for vault
-          notes = NoteUtils.getNotesByFnameFromEngine({
-            fname: value,
-            vault,
-            engine,
-          });
+          return "error - no note cache provided";
         }
+
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
           addError(proc, error);
@@ -183,74 +175,73 @@ function attachParser(proc: Unified.Processor) {
     }
 
     const procData = MDUtilsV5.getProcData(proc);
-    let { vault } = procData;
-    const engine = procData.engine;
-    const { config, dest, fname, noteCacheForRender } = procData;
-    if (out.vaultName) {
-      const maybeVault = VaultUtils.getVaultByName({
-        vaults: engine.vaults,
-        vname: out.vaultName,
-      });
-      if (_.isUndefined(maybeVault)) {
-        addError(
-          proc,
-          new DendronError({
-            message: `fname: ${fname}, vault ${
-              out.vaultName
-            } not found in ${JSON.stringify(out)}`,
-          })
-        );
-      } else {
-        vault = maybeVault;
-      }
-      // default to current note
-    }
+    // let { vault } = procData;
+    const { fname } = procData;
+    // if (out.vaultName) {
+    //   const maybeVault = VaultUtils.getVaultByName({
+    //     vaults: engine.vaults,
+    //     vname: out.vaultName,
+    //   });
+    //   if (_.isUndefined(maybeVault)) {
+    //     addError(
+    //       proc,
+    //       new DendronError({
+    //         message: `fname: ${fname}, vault ${
+    //           out.vaultName
+    //         } not found in ${JSON.stringify(out)}`,
+    //       })
+    //     );
+    //   } else {
+    //     vault = maybeVault;
+    //   }
+    //   // default to current note
+    // }
     if (!out.value) {
       // same file block reference, value is implicitly current file
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
       if (!out.alias) out.alias = out.value;
     }
-    const shouldApplyPublishingRules =
-      MDUtilsV5.shouldApplyPublishingRules(proc);
-    const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
-      config,
-      shouldApplyPublishingRules
-    );
+    // const shouldApplyPublishingRules =
+    //   MDUtilsV5.shouldApplyPublishingRules(proc);
+    // const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+    //   config,
+    //   shouldApplyPublishingRules
+    // );
 
     // TODO: We can probably get rid of this if clause. No need to add this data
     // at parsing time, this information should only get added during compile
     // time.
-    if (
-      dest !== DendronASTDest.MD_DENDRON &&
-      enableNoteTitleForLink &&
-      out.alias === out.value &&
-      vault
-    ) {
-      let note;
-      if (noteCacheForRender) {
-        // TODO: Consolidate logic.
-        const notesById =
-          NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-        const notesByFname =
-          NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
-        // TODO: Add vault filter
-        const notes = NoteDictsUtils.findByFname(out.value, {
-          notesById,
-          notesByFname,
-        });
+    // if (
+    //   dest !== DendronASTDest.MD_DENDRON &&
+    //   enableNoteTitleForLink &&
+    //   out.alias === out.value &&
+    //   vault
+    // ) {
+    //   let note;
+    //   if (noteCacheForRender) {
+    //     // TODO: Consolidate logic.
+    //     const notesById =
+    //       NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+    //     const notesByFname =
+    //       NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+    //     // TODO: Add vault filter
+    //     const notes = NoteDictsUtils.findByFname(out.value, {
+    //       notesById,
+    //       notesByFname,
+    //     });
 
-        note = notes[0]; // TODO: get rid of 0.
-      } else if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname: out.value,
-          engine,
-          vault,
-        });
-      }
-      if (note) {
-        out.alias = note.title;
-      }
-    }
+    //     note = notes[0]; // TODO: get rid of 0.
+    //   } else if (engine) {
+    //     note = NoteUtils.getNoteByFnameFromEngine({
+    //       fname: out.value,
+    //       engine,
+    //       vault,
+    //     });
+    //   }
+    //   if (note) {
+    //     out.alias = note.title;
+    //   }
+    // }
     return out;
   }
 

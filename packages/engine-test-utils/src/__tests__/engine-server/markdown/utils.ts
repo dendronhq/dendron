@@ -217,14 +217,14 @@ export const createProcCompileTests = (opts: {
             flavor,
             testCase: new TestPresetEntryV4(
               async (presetOpts) => {
-                const { engine, wsRoot, vaults } = presetOpts;
+                const { wsRoot, vaults } = presetOpts;
                 const config = DConfig.readConfigSync(wsRoot);
                 const vault = vaults[0];
                 let proc: Processor;
                 switch (dest) {
                   case DendronASTDest.HTML:
                     proc = MDUtilsV5.procRehypeFull(
-                      { engine, fname, vault, config },
+                      { fname, vault, config },
                       { flavor: flavor as ProcFlavor }
                     );
                     break;
@@ -232,7 +232,6 @@ export const createProcCompileTests = (opts: {
                     proc = MDUtilsV5.procRemarkFull(
                       {
                         dest,
-                        engine,
                         fname,
                         vault,
                         config,
@@ -308,7 +307,6 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const config = configOverride || DConfig.readConfigSync(engine.wsRoot);
   if (opts.dest !== DendronASTDest.HTML) {
     const proc = MDUtilsV5.procRemarkFull({
-      engine,
       config,
       fname,
       dest: opts.dest,
@@ -318,7 +316,6 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
     return { resp };
   } else {
     const proc = MDUtilsV5.procRehypeFull({
-      engine,
       config,
       fname,
       vault,

@@ -627,7 +627,7 @@ export class FileStorage implements DStore {
         ) {
           const linkCandidates = LinkUtils.findLinkCandidates({
             note: noteFrom,
-            engine: this.engine,
+            // engine: this.engine // JYTODO: Examine
             config: this.config,
           });
           noteFrom.links = noteFrom.links.concat(linkCandidates);
@@ -781,7 +781,7 @@ export class FileStorage implements DStore {
     const _n = resp.data;
     const foundLinks = LinkUtils.findLinksFromBody({
       note: _n,
-      engine: this.engine,
+      // engine: this.engine, // JYTODO: Examine
       filter: { loc: oldLoc },
       config: this.config,
     });

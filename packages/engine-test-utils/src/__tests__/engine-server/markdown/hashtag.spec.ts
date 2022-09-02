@@ -441,10 +441,9 @@ describe("hashtag", () => {
     describe("WHEN disabled in config", () => {
       test("THEN hashtags don't get parsed or processed", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot, vaults }) => {
+          async ({ wsRoot, vaults }) => {
             const proc = MDUtilsV5.procRehypeFull(
               {
-                engine,
                 vault: vaults[0],
                 config: DConfig.readConfigSync(wsRoot),
                 fname: "root",

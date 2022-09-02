@@ -750,7 +750,6 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           )[0];
           const linksToUpdate = LinkUtils.findLinksFromBody({
             note: noteToUpdate,
-            engine,
             config,
           })
             .filter((link) => {

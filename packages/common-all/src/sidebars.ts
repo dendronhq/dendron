@@ -140,7 +140,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
   notes: notesById,
   duplicateNoteBehavior,
 }) => {
-  function findHierarchySource() {
+  function findHierarchySources() {
     const isTopLevel = item.id === ROOT_KEYWORD;
 
     // 1. if item-pointer to root find all root notes
@@ -259,16 +259,13 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
     );
   }
 
-  const hierarchySource = findHierarchySource();
+  const hierarchySource = findHierarchySources();
   if (!hierarchySource) {
     // TODO `err` path if `hierarchySource` is undefined. This probably means the user has a typo.
     return [];
   }
 
-  const sidebar = generateSidebar(hierarchySource);
-  const sortedSidebar = sortItems(sidebar);
-
-  return sortedSidebar;
+  return _.flow(generateSidebar, sortItems)(hierarchySource);
 };
 
 function processSiderbar(
@@ -308,8 +305,6 @@ function processSidebars(
   );
   return processedSidebars;
 }
-
-// function preProcessSidebars(sidebars: Sidebars) {}
 
 export async function getSidebars(input: unknown, options: SidebarOptions) {
   const sidebarsConfigResult = parse(sidebars, input);

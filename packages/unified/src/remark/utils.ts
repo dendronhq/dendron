@@ -832,6 +832,86 @@ export class LinkUtils {
 
     return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];
   }
+
+  /**
+   * Given an array of links that need to be updated,
+   * and a note that contains the links,
+   * update all links in given array so that they point to
+   * the destination note.
+   *
+   * returns note change entries
+   */
+  static async updateLinksInNote(opts: {
+    linksToUpdate: DNoteLink[];
+    note: NoteProps;
+    destNote: NoteProps;
+    engine: DEngineClient;
+  }) {
+    const { linksToUpdate, note, destNote, engine } = opts;
+    // sort links to update in descending order of appearance.
+    // this is necessary in order to preserve the link positions.
+    const linksToUpdateDesc = _.orderBy(
+      linksToUpdate,
+      (link: DNoteLink) => {
+        return link.position?.start.offset;
+      },
+      "desc"
+    );
+    const modifiedNote = await _.reduce<DNoteLink, Promise<NoteProps>>(
+      linksToUpdateDesc,
+      async (prev, linkToUpdate) => {
+        // wait for last iteration.
+        const acc = await prev;
+
+        const oldLink = linkToUpdate;
+
+        // see if we have more than one note with same fname as destination
+        // if so, we need to specify the vault in the link.
+        const notesWithSameName = await engine.findNotes({
+          fname: destNote.fname,
+        });
+        // there are more than one note with same name, or the link we are updating
+        // is already a cross vault link.
+        const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
+
+        // create the new link
+        const newLink = {
+          // inherits most of the old link's data,
+          ...oldLink,
+          from: {
+            ...oldLink.from,
+            // if it had an alias, keep it. otherwise, it's going to be
+            // updated to the destination's fname
+            alias:
+              oldLink.from.alias === oldLink.from.fname
+                ? destNote.fname
+                : oldLink.from.alias,
+            fname: destNote.fname,
+            vaultName: VaultUtils.getName(destNote.vault),
+          },
+          data: {
+            ...oldLink.data,
+            // preserve the cross vault status or add it if necessary
+            xvault: isXVault,
+          },
+        };
+
+        const newBody = LinkUtils.updateLink({
+          note: acc,
+          oldLink,
+          newLink,
+        });
+
+        acc.body = newBody;
+        return acc;
+      },
+      Promise.resolve(note)
+    );
+
+    note.body = modifiedNote.body;
+    const writeResp = await engine.writeNote(note);
+    return writeResp;
+  }
 }
 
 export class AnchorUtils {

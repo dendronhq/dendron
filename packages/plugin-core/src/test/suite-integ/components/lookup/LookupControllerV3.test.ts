@@ -55,7 +55,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
         MultiSelectBtn.create({ pressed: false }),
         CopyNoteLinkBtn.create(false),
         DirectChildFilterBtn.create(false),
-        SelectionExtractBtn.create(false),
+        SelectionExtractBtn.create({ pressed: false }),
         Selection2LinkBtn.create(false),
         Selection2ItemsBtn.create({
           pressed: false,
@@ -183,7 +183,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
         MultiSelectBtn.create({ pressed: false }),
         CopyNoteLinkBtn.create(false),
         DirectChildFilterBtn.create(false),
-        SelectionExtractBtn.create(false),
+        SelectionExtractBtn.create({ pressed: false }),
         Selection2LinkBtn.create(true),
         Selection2ItemsBtn.create({
           pressed: false,

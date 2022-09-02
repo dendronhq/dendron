@@ -3,7 +3,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { getHeaderAt, isBrokenWikilink } from "../../utils/editor";
+import { EditorUtils } from "../../utils/EditorUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import {
@@ -33,7 +33,7 @@ suite("Contextual UI Tests", function () {
           const end = LocationTestUtils.getPresetWikiLinkPosition({ char: 10 });
           editor.selection = new vscode.Selection(start, end);
           expect(
-            await isBrokenWikilink({
+            await EditorUtils.isBrokenWikilink({
               editor,
               selection: editor.selection,
               engine,
@@ -62,7 +62,7 @@ suite("Contextual UI Tests", function () {
             const editor = await WSUtils.openNote(noteWithLink);
             editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
             expect(
-              await isBrokenWikilink({
+              await EditorUtils.isBrokenWikilink({
                 editor,
                 selection: editor.selection,
                 engine,
@@ -95,7 +95,7 @@ suite("Contextual UI Tests", function () {
               const editor = await WSUtils.openNote(noteWithLink);
               editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
               expect(
-                await isBrokenWikilink({
+                await EditorUtils.isBrokenWikilink({
                   editor,
                   selection: editor.selection,
                   engine,
@@ -131,7 +131,7 @@ suite("Contextual UI Tests", function () {
         const end = new vscode.Position(7, 10);
         editor.selection = new vscode.Selection(start, end);
         expect(
-          await isBrokenWikilink({
+          await EditorUtils.isBrokenWikilink({
             editor,
             selection: editor.selection,
             engine,
@@ -139,7 +139,10 @@ suite("Contextual UI Tests", function () {
           })
         ).toBeFalsy();
         expect(
-          getHeaderAt({ document: editor.document, position: start })
+          EditorUtils.getHeaderAt({
+            document: editor.document,
+            position: start,
+          })
         ).toNotEqual(undefined);
       });
     }
@@ -165,10 +168,13 @@ suite("Contextual UI Tests", function () {
         const end = new vscode.Position(7, 18);
         editor.selection = new vscode.Selection(start, end);
         expect(
-          getHeaderAt({ document: editor.document, position: start })
+          EditorUtils.getHeaderAt({
+            document: editor.document,
+            position: start,
+          })
         ).toEqual(undefined);
         expect(
-          await isBrokenWikilink({
+          await EditorUtils.isBrokenWikilink({
             editor,
             selection: editor.selection,
             engine,

@@ -85,6 +85,7 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
 import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
+import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -140,6 +141,7 @@ const ALL_COMMANDS = [
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
+  MoveSelectionToCommand,
   RenameNoteCommand,
   RenameHeaderCommand,
   MoveHeaderCommand,

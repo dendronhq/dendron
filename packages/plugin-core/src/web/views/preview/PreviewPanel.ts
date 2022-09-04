@@ -10,7 +10,6 @@ import {
   NoteViewMessageEnum,
   OnUpdatePreviewHTMLData,
   OnUpdatePreviewHTMLMsg,
-  ResponseUtil,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
@@ -367,7 +366,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         note,
       });
 
-      if (ResponseUtil.hasError(resp)) {
+      if (resp.error) {
         vscode.window.showErrorMessage(
           `Problem Rendering Note: ${resp.error?.message}`
         );

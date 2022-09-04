@@ -1,5 +1,11 @@
 import _ from "lodash";
-import { DEngineClient, FuseExtendedSearchConstants, NoteProps } from "..";
+import {
+  DEngineClient,
+  FuseExtendedSearchConstants,
+  NoteProps,
+  NotePropsByIdDict,
+  NoteUtils,
+} from "..";
 
 const PAGINATE_LIMIT = 50;
 
@@ -59,12 +65,20 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResults = async (engine: DEngineClient) => {
+  static fetchRootResultsFromEngine = async (engine: DEngineClient) => {
     const roots = await engine.findNotes({ fname: "root" });
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
     const childrenOfRootNotes = await engine.bulkGetNotes(childrenOfRoot);
     return roots.concat(childrenOfRootNotes.data);
+  };
+
+  static fetchRootResults = (notes: NotePropsByIdDict) => {
+    const roots: NoteProps[] = NoteUtils.getRoots(notes);
+
+    const childrenOfRoot = roots.flatMap((ent) => ent.children);
+    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
+    return roots.concat(childrenOfRootNotes);
   };
 
   /**
@@ -83,7 +97,7 @@ export class NoteLookupUtils {
 
     // special case: if query is empty, fetch top level notes
     if (_.isEmpty(qsClean)) {
-      return NoteLookupUtils.fetchRootResults(engine);
+      return NoteLookupUtils.fetchRootResultsFromEngine(engine);
     }
 
     // otherwise, query engine for results

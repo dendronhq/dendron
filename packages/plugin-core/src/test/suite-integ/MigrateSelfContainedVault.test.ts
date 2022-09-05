@@ -214,7 +214,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       test("THEN the vault is migrated", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         expect(
-          verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
+          await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
 
@@ -302,7 +302,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       test("THEN the vault is migrated", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         expect(
-          verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
+          await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
     }
@@ -341,7 +341,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       test("THEN the vault is migrated", async () => {
         const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
         expect(
-          verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
+          await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
     }
@@ -401,9 +401,6 @@ async function verifyVaultHasMigrated({
   ).toBeTruthy();
   // and there should be no notes outside the notes folder
   expect(await fs.pathExists(path.join(vaultFolder, "root.md"))).toBeFalsy();
-  expect(
-    await fs.pathExists(path.join(vaultFolder, "root.schema.yml"))
-  ).toBeFalsy();
   // and the vault should be marked as self contained in the config
   const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(

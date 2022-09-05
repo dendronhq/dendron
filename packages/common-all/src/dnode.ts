@@ -54,6 +54,16 @@ import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 import { NoteDictsUtils } from "./noteDictsUtils";
 
+export type ValidateFnameResp =
+  | {
+      isValid: false;
+      reason: InvalidFilenameReason;
+    }
+  | {
+      isValid: true;
+      reason?: never;
+    };
+
 /**
  * Utilities for dealing with nodes
  */
@@ -1117,15 +1127,7 @@ export class NoteUtils {
    * @param fname filename
    * @returns boolean value representing the validity of the filename, and the reason if invalid
    */
-  static validateFname(fname: string):
-    | {
-        isValid: false;
-        reason: InvalidFilenameReason;
-      }
-    | {
-        isValid: true;
-        reason?: never;
-      } {
+  static validateFname(fname: string): ValidateFnameResp {
     // Each hierarchy string
     // 1. should not be empty
     // 2. should not have leading trailing whitespace
@@ -1158,6 +1160,31 @@ export class NoteUtils {
     }
 
     return { isValid: true };
+  }
+
+  /**
+   * Given a file name, clean it so that it is valid
+   * as per {@link NoteUtils.validateFname}
+   * Optionally pass in the replace string that is used to replace
+   * the illegal characters
+   */
+  static cleanFname(opts: { fname: string; replaceWith?: string }) {
+    const { fname, replaceWith } = opts;
+    // replace illegal strings before cleaning up hierarchy strings
+    const fnameAfterReplace = fname.replace(
+      /[(),'']/g,
+      replaceWith === undefined ? " " : replaceWith
+    );
+    const hierarchies = fnameAfterReplace.split(".");
+    const cleanedFname = hierarchies
+      // cut out empty hierarchies
+      .filter((value) => value !== "")
+      // trim leading / trailing whitespace
+      .map((value) => {
+        return _.trim(value, " ");
+      })
+      .join(".");
+    return cleanedFname;
   }
 
   /** Generate a random color for `note`, but allow the user to override that color selection.

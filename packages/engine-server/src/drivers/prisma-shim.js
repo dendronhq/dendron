@@ -3,10 +3,38 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const https = require('https');
+const { admZip: AdmZip } = require('./adm-zip');
 
-function loadPrisma() {
-  const DENDRON_SYSTEM_ROOT = path.join(os.homedir(), ".dendron");
-  const prismaPath = path.join(DENDRON_SYSTEM_ROOT, "generated_prisma_client");
+const DENDRON_SYSTEM_ROOT = path.join(os.homedir(), ".dendron");
+
+async function downloadPrisma() {
+
+  return new Promise((resolve, reject) => {
+    const url = "https://org-dendron-public-assets.s3.amazonaws.com/publish/generated-prisma-client.zip";
+    const tmpPath = path.join(DENDRON_SYSTEM_ROOT, "tmp_client");
+    if (fs.existsSync(tmpPath)) {
+      fs.unlinkSync(tmpPath);
+    }
+    const file = fs.createWriteStream(tmpPath);
+    https.get(url, (response) => {
+      response.pipe(file);
+
+      // after download completed close filestream
+      file.on("finish", () => {
+        file.close();
+        resolve({ prismaDownloadPath: tmpPath });
+      });
+      file.on("error", (err) => {
+        reject(err)
+      })
+    });
+
+  })
+}
+
+async function loadPrisma() {
+  const prismaPath = path.join(DENDRON_SYSTEM_ROOT, "generated-prisma-client");
   if (fs.existsSync(prismaPath)) {
     const { Prisma, PrismaClient } = require(prismaPath);
     return {
@@ -14,8 +42,12 @@ function loadPrisma() {
       PrismaClient,
     }
   } else {
+    const { prismaDownloadPath } = await downloadPrisma()
+
     // Prisma not installed
-    fs.renameSync("/tmp/generated_prisma_client/", prismaPath);
+    const zip = new AdmZip(prismaDownloadPath);
+    zip.extractAllTo(prismaPath, true);
+    // TODO: remove download
     const { Prisma, PrismaClient } = require(prismaPath);
     return {
       Prisma,

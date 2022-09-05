@@ -6,7 +6,7 @@ function main() {
 	// copy client
 	const srcPath = path.join("/tmp", "generated-prisma-client");
 	const DENDRON_SYSTEM_ROOT = path.join(os.homedir(), ".dendron");
-	const libPath = path.join(DENDRON_SYSTEM_ROOT, "generated_prisma_client");
+	const libPath = path.join(DENDRON_SYSTEM_ROOT, "generated-prisma-client");
 	fs.ensureDirSync(DENDRON_SYSTEM_ROOT);
 	fs.removeSync(libPath);
 	fs.copy(srcPath, libPath, { overwrite: true });

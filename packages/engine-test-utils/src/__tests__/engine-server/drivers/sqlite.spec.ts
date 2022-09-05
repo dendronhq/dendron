@@ -4,15 +4,15 @@ import fs from "fs-extra";
 import _ from "lodash";
 import sinon from "sinon";
 import { ENGINE_HOOKS, runEngineTestV5 } from "../../..";
-import os from "os";
+// import os from "os";
 
 // current issue with windows test
 // pathname is generated in the following format
 // unable to open database file: D:///c%3A/Users/RUNNER~1/AppData/Local/Temp/tmp-6392-F8nMLdBlS5Ty/metadata.db\n
-const describeSkipWindows =
-  os.platform() === "win32" ? describe.skip : describe;
+// const describeSkipWindows =
+//   os.platform() === "win32" ? describe.skip : describe;
 
-describeSkipWindows("GIVEN sqlite store", () => {
+describe.skip("GIVEN sqlite store", () => {
   afterEach(async () => {
     await SQLiteMetadataStore.prisma().$disconnect();
   });

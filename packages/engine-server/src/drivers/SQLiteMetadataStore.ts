@@ -31,6 +31,8 @@ export type NoteIndexLightProps = {
 };
 
 export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
+  public status: "loading" | "ready";
+
   constructor({
     wsRoot,
     client,
@@ -41,22 +43,28 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     force?: boolean;
   }) {
     if (_prisma && (!force || client)) {
+      this.status = "ready";
       // TODO: throw an error
       return;
     }
     if (client && !force) {
       _prisma = client;
+      this.status = "ready";
       return;
     }
-    // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
+
+    this.status = "loading";
+    // example uri: "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
     const dbUrl = URI.file(`${wsRoot}/metadata.db`);
-    const { PrismaClient } = loadPrisma();
-    _prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: dbUrl.toString(),
+    loadPrisma().then(({ PrismaClient }: { PrismaClient: any }) => {
+      _prisma = new PrismaClient({
+        datasources: {
+          db: {
+            url: dbUrl.toString(),
+          },
         },
-      },
+      });
+      this.status = "ready";
     });
   }
 

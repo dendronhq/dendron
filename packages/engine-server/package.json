@@ -29,7 +29,7 @@
     "buildPrismaClient": "yarn prisma generate && node copyPrismaClient.js",
     "prepublishOnly": "yarn build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
-    "build": "yarn compile && yarn buildPrismaClient",
+    "build": "yarn compile && yarn buildPrismaClient && yarn compile",
     "buildCI": "yarn compile && yarn buildPrismaClient",
     "compile": "tsc -p tsconfig.build.json ",
     "watch": "yarn compile --watch"

@@ -120,6 +120,12 @@ jobs:
         run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 30
 
+      - name: Create test artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-artifact
+          path: ./packages/nextjs-template/tests/**/*.png
+
   test-plugin-web:
     strategy:
       # Allow other matrix jobs to continue after one fails, allowing us to

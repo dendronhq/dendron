@@ -229,7 +229,7 @@ export class BuildUtils {
         "engine-server",
         "src",
         "drivers",
-        "prisma-shim.ts"
+        "prisma-shim.js"
       ),
       path.join(this.getPluginRootPath(), "dist", "prisma-shim.js")
     );

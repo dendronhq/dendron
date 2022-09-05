@@ -11,7 +11,9 @@ import {
 import _ from "lodash";
 import { URI } from "vscode-uri";
 // @ts-ignore
-import { Prisma, PrismaClient } from "./prisma-shim";
+import { loadPrisma } from "./prisma-shim";
+
+type PrismaClient = any;
 
 let _prisma: PrismaClient | undefined;
 
@@ -48,9 +50,7 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     }
     // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
     const dbUrl = URI.file(`${wsRoot}/metadata.db`);
-    // // eslint-disable-next-line global-require
-    // const fs = require("fs-extra");
-    // fs.appendFileSync("/tmp/bond.txt", dbUrl.toString(), { encoding: "uft8" });
+    const { PrismaClient } = loadPrisma();
     _prisma = new PrismaClient({
       datasources: {
         db: {
@@ -70,7 +70,7 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     return { data: note as unknown as NotePropsMeta };
   }
 
-  async find(opts: Prisma.NoteFindManyArgs["where"]) {
+  async find(opts: any) {
     const note = (await getPrismaClient().note.findMany({
       where: opts,
     })) as unknown as NotePropsMeta[];

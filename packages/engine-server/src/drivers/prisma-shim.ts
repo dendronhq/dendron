@@ -1,10 +1,11 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import fs from "fs";
-import path from "path";
-import os from "os";
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
 
-function requireUncached(module: string) {
+// @ts-ignore
+function requireUncached(module) {
   delete require.cache[require.resolve(module)];
   return require(module);
 }

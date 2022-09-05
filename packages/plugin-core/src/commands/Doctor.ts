@@ -5,9 +5,13 @@ import {
   ExtensionEvents,
   isNotUndefined,
   KeybindingConflictDetectedSource,
+  NoteDicts,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   Position,
+  ValidateFnameResp,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -326,6 +330,79 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return { installStatus, contents };
   }
 
+  async showFixInvalidFileNamePreview(opts: {
+    canRename: {
+      cleanedFname: string;
+      canRename: boolean;
+      note: NoteProps;
+      resp: ValidateFnameResp;
+    }[];
+    cantRename: {
+      cleanedFname: string;
+      canRename: boolean;
+      note: NoteProps;
+      resp: ValidateFnameResp;
+    }[];
+  }) {
+    const { canRename, cantRename } = opts;
+    const canRenameContent =
+      canRename.length > 0
+        ? [
+            "These notes have invalid filenames and can be automatically fixed:",
+            "",
+            "| file name || change to | reason |",
+            "|-|-|-|-|",
+            canRename
+              .map((item) => {
+                const { note, resp, cleanedFname } = item;
+                return `| \`${note.fname}\` || __${cleanedFname}__ | ${resp.reason} |`;
+              })
+              .join("\n"),
+          ].join("\n")
+        : "";
+
+    const cantRenameContent =
+      cantRename.length > 0
+        ? [
+            "These notes have invalid filenames but cannot be automatically fixed because it will create duplicate notes with same file names.",
+            "",
+            "Please review them and rename manually:",
+            "",
+            "| file name || change to | reason |",
+            "|-|-|-|-|",
+            cantRename
+              .map((item) => {
+                const { note, resp, cleanedFname } = item;
+                return `| \`${note.fname}\`|| __${cleanedFname}__ | ${resp.reason} |`;
+              })
+              .join("\n"),
+            "",
+          ].join("\n")
+        : "";
+    const contents = [
+      "# Fix Invalid Filenames",
+      "",
+      "The notes listed below are invalid.",
+      "",
+      "Please see [Restrictions](https://wiki.dendron.so/notes/v21pacjod0eqgdhb7zo7fvw) to learn more about file name restrictions.",
+      "",
+      "***",
+      canRenameContent,
+      "",
+      cantRenameContent,
+      "",
+    ].join("\n");
+    const panel = window.createWebviewPanel(
+      "invalidFileNamesPreview",
+      "Invalid Filenames",
+      ViewColumn.One,
+      {
+        enableCommandUris: true,
+      }
+    );
+    panel.webview.html = md.render(contents);
+  }
+
   private async reload() {
     const engine = await new ReloadIndexCommand().execute();
     if (_.isUndefined(engine)) {
@@ -549,6 +626,54 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         }
 
         ds.dispose();
+        break;
+      }
+      case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
+        const ds = new DoctorService();
+        const notes = (await engine.queryNotes({ qs: "*", originalQS: "*" }))
+          .data;
+        if (notes !== undefined) {
+          const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
+          const notesByFname =
+            NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+          const noteDicts: NoteDicts = { notesById, notesByFname };
+          const { canRename, cantRename } = ds.findInvalidFileNames({
+            notes,
+            noteDicts,
+          });
+          if (canRename.length > 0 || cantRename.length > 0) {
+            await this.showFixInvalidFileNamePreview({ canRename, cantRename });
+            if (canRename.length > 0) {
+              const options = ["proceed", "cancel"];
+              const shouldProceed = await VSCodeUtils.showQuickPick(options, {
+                placeHolder: "proceed",
+                ignoreFocusOut: true,
+              });
+              if (shouldProceed !== "proceed") {
+                window.showInformationMessage("cancelled");
+                break;
+              }
+              window.showInformationMessage("Fixing invalid filenames...");
+              await ds.fixInvalidFileNames({
+                canRename,
+                engine,
+                quiet: true,
+              });
+              const maybeReminder =
+                cantRename.length > 0
+                  ? " Don't forget to manually rename invalid notes that cannot be automatically fixed."
+                  : "";
+              window.showInformationMessage(
+                `Invalid filenames fixed.${maybeReminder}`
+              );
+            }
+          } else {
+            window.showInformationMessage("There are no invalid filenames!");
+          }
+          ds.dispose();
+        } else {
+          window.showErrorMessage("Doctor failed. Please reload and try again");
+        }
         break;
       }
       default: {

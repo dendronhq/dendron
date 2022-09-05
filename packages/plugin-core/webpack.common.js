@@ -30,8 +30,7 @@ const config = {
       "pino-pretty": "pino-pretty",
     },
     // see [[../packages/plugin-core/webpack-require-hack.js]] for more details
-    /\.\/webpack-require-hack/,
-    /\.\/generated-prisma-client/,
+    /\.\/webpack-require-hack/
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],

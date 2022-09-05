@@ -219,6 +219,7 @@ export class BuildUtils {
       dependencies: [
         "@dendronhq/common-test-utils",
         "@dendronhq/engine-test-utils",
+        "vscode-test",
       ],
     });
 

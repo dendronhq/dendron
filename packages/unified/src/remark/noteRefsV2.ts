@@ -596,7 +596,6 @@ function prepareNoteRefIndices<T>({
   anchorEnd?: string;
   bodyAST: DendronASTNode;
   makeErrorData: (msg: string) => T;
-  enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;

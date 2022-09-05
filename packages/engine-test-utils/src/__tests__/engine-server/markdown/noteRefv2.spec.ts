@@ -329,13 +329,13 @@ describe("noteRefV2", () => {
       );
     });
 
-    describe.skip("AND note has beginning section", () => {
+    describe("AND note has beginning section", () => {
       runTestCases(
         createProcCompileTests({
           name: "THEN parse beginning section",
           fname: "foo",
           setup: async (opts) => {
-            const text = "![[foo#header-1:^end]]";
+            const text = "![[foo#header-1:#^end]]";
             const { proc } = getOpts(opts);
             const resp = await proc.process(text);
             return { resp, proc };
@@ -354,13 +354,13 @@ describe("noteRefV2", () => {
       );
     });
 
-    describe.skip("AND note ends on a header", () => {
+    describe("AND note ends on a header", () => {
       runTestCases(
         createProcCompileTests({
           name: "THEN parse beginning section",
           fname: "foo",
           setup: async (opts) => {
-            const text = "![[foo#header-1:^end]]";
+            const text = "![[foo#header-1:#^end]]";
             const { proc } = getOpts(opts);
             const resp = await proc.process(text);
             return { resp, proc };

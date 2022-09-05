@@ -122,6 +122,7 @@ jobs:
 
       - name: Create test artifact
         uses: actions/upload-artifact@v3
+        if: success() || failure()
         with:
           name: test-artifact
           path: ./packages/nextjs-template/tests/**/*.png

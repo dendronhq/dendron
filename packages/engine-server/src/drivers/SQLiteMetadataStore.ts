@@ -10,8 +10,8 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { URI } from "vscode-uri";
-
-import { Prisma, PrismaClient } from "./generated-prisma-client";
+// @ts-ignore
+import { Prisma, PrismaClient } from "./prisma-shim";
 
 let _prisma: PrismaClient | undefined;
 

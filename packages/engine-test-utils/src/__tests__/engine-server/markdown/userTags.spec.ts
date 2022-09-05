@@ -1,10 +1,10 @@
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTTypes,
   UserTag,
   MDUtilsV5,
-  ProcMode,
   UnistNode,
 } from "@dendronhq/unified";
 import _ from "lodash";
@@ -23,9 +23,7 @@ import {
 const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
-  return MDUtilsV5.procRehypeParse({
-    mode: ProcMode.NO_DATA,
-  });
+  return MDUtilsV5.procRemarkParseNoData({}, { dest: DendronASTDest.HTML });
 }
 
 function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
@@ -219,12 +217,12 @@ describe("user tags", () => {
   describe("WHEN disabled in config", () => {
     test("THEN user tags don't get parsed or processed", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, wsRoot, vaults }) => {
           const proc = MDUtilsV5.procRehypeFull(
             {
               engine,
               vault: vaults[0],
-              config: engine.config,
+              config: DConfig.readConfigSync(wsRoot),
               fname: "root",
             },
             {}

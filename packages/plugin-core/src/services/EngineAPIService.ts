@@ -1,13 +1,10 @@
 import {
   APIUtils,
   BulkWriteNotesOpts,
-  ConfigWriteOpts,
   DendronAPI,
   DEngineClient,
   DEngineInitResp,
-  DEngineSyncOpts,
   DHookDict,
-  DLink,
   DVault,
   EngagementEvents,
   EngineDeleteNotePayload,
@@ -27,7 +24,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
@@ -35,7 +31,6 @@ import {
   NotePropsMeta,
   Optional,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -158,32 +153,11 @@ export class EngineAPIService
     this._internalEngine.schemas = arg;
   }
 
-  public get links(): DLink[] {
-    return this._internalEngine.links;
-  }
-  public set links(arg: DLink[]) {
-    this._internalEngine.links = arg;
-  }
-
   public get vaults(): DVault[] {
     return this._internalEngine.vaults;
   }
   public set vaults(arg: DVault[]) {
     this._internalEngine.vaults = arg;
-  }
-
-  public get configRoot(): string {
-    return this._internalEngine.configRoot;
-  }
-  public set configRoot(arg: string) {
-    this._internalEngine.configRoot = arg;
-  }
-
-  public get config(): IntermediateDendronConfig {
-    return this._internalEngine.config;
-  }
-  public set config(arg: IntermediateDendronConfig) {
-    this._internalEngine.config = arg;
   }
 
   public get hooks(): DHookDict {
@@ -216,10 +190,6 @@ export class EngineAPIService
    */
   async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
     return this._internalEngine.findNotesMeta(opts);
-  }
-
-  async refreshNotes(opts: RefreshNotesOpts) {
-    return this._internalEngine.refreshNotes(opts);
   }
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {
@@ -278,10 +248,6 @@ export class EngineAPIService
     return this._internalEngine.info();
   }
 
-  sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp> {
-    return this._internalEngine.sync(opts);
-  }
-
   getSchema(qs: string): Promise<RespV3<SchemaModuleProps>> {
     return this._internalEngine.getSchema(qs);
   }
@@ -316,14 +282,6 @@ export class EngineAPIService
 
   getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
     return this._internalEngine.getNoteBlocks(opts);
-  }
-
-  writeConfig(opts: ConfigWriteOpts): Promise<RespV2<void>> {
-    return this._internalEngine.writeConfig(opts);
-  }
-
-  getConfig(): Promise<RespV2<IntermediateDendronConfig>> {
-    return this._internalEngine.getConfig();
   }
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {

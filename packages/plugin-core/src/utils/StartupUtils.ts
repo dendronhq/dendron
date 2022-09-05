@@ -11,9 +11,8 @@ import {
   VSCodeEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
-import { readMD } from "@dendronhq/common-server";
+import { DConfig, readMD } from "@dendronhq/common-server";
 import {
-  DConfig,
   DEPRECATED_PATHS,
   DoctorActionsEnum,
   InactvieUserMsgStatusEnum,

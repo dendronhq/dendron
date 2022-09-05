@@ -1,11 +1,8 @@
 import {
   BulkResp,
   BulkWriteNotesOpts,
-  ConfigWriteOpts,
   DEngineInitResp,
-  DEngineSyncOpts,
   DHookDict,
-  DLink,
   DVault,
   EngineDeleteNotePayload,
   EngineDeleteOpts,
@@ -22,7 +19,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
@@ -30,7 +26,6 @@ import {
   NotePropsMeta,
   Optional,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -56,10 +51,7 @@ export interface IEngineAPIService {
   noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   schemas: SchemaModuleDict;
-  links: DLink[];
   vaults: DVault[];
-  configRoot: string;
-  config: IntermediateDendronConfig;
   hooks: DHookDict;
   engineEventEmitter: EngineEventEmitter;
 
@@ -75,8 +67,6 @@ export interface IEngineAPIService {
    * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
    */
   findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
-
-  refreshNotes(opts: RefreshNotesOpts): Promise<RespV2<void>>;
 
   bulkWriteNotes(
     opts: BulkWriteNotesOpts
@@ -110,8 +100,6 @@ export interface IEngineAPIService {
 
   info(): Promise<RespV2<EngineInfoResp>>;
 
-  sync(opts?: DEngineSyncOpts | undefined): Promise<DEngineInitResp>;
-
   getSchema(qs: string): Promise<RespV3<SchemaModuleProps>>;
 
   querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>>;
@@ -133,10 +121,6 @@ export interface IEngineAPIService {
   renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>>;
 
   getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload>;
-
-  writeConfig(opts: ConfigWriteOpts): Promise<RespV2<void>>;
-
-  getConfig(): Promise<RespV2<IntermediateDendronConfig>>;
 
   getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload>;
   getLinks: (

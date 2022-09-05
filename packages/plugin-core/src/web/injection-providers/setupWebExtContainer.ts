@@ -1,19 +1,23 @@
 import {
+  DLogger,
   EngineEventEmitter,
   IDataStore,
   IFileStore,
   INoteStore,
+  IntermediateDendronConfig,
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
-import { type ILookupProvider } from "../commands/lookup/ILookupProvider";
+import { PreviewProxy } from "../../components/views/PreviewProxy";
+import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
-import { type ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
+import { PreviewPanel } from "../views/preview/PreviewPanel";
+import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
@@ -21,6 +25,21 @@ import { getSiteIndex } from "./getSiteIndex";
 import { getSiteUrl } from "./getSiteUrl";
 import { getVaults } from "./getVaults";
 import { getWSRoot } from "./getWSRoot";
+import * as vscode from "vscode";
+import { URI } from "vscode-uri";
+import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
+import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
+import { ITextDocumentService } from "../../services/ITextDocumentService";
+import { ConsoleLogger } from "../utils/ConsoleLogger";
+import {
+  DummyPreviewPanelConfig,
+  IPreviewPanelConfig,
+} from "../views/preview/IPreviewPanelConfig";
+import { INoteRenderer } from "../engine/INoteRenderer";
+import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
+import { getWorkspaceConfig } from "./getWorkspaceConfig";
+import { TextDocumentService } from "../../services/web/TextDocumentService";
+import { Event, TextDocument, workspace } from "vscode";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension
@@ -28,7 +47,7 @@ import { getWSRoot } from "./getWSRoot";
  *
  * It uses a VSCodeFileStore and includes a reduced engine that runs in-memory.
  */
-export async function setupWebExtContainer() {
+export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   const wsRoot = await getWSRoot();
 
   if (!wsRoot) {
@@ -105,5 +124,48 @@ export async function setupWebExtContainer() {
 
   container.register<ITreeViewConfig>("ITreeViewConfig", {
     useClass: TreeViewDummyConfig,
+  });
+
+  container.register<PreviewProxy>("PreviewProxy", {
+    useClass: PreviewPanel,
+  });
+
+  container.register<URI>("extensionUri", {
+    useValue: context.extensionUri,
+  });
+
+  container.register<IPreviewLinkHandler>("IPreviewLinkHandler", {
+    useClass: PreviewLinkHandler,
+  });
+
+  container.register<IPreviewPanelConfig>("IPreviewPanelConfig", {
+    useClass: DummyPreviewPanelConfig, // TODO: Add a real one
+  });
+
+  container.register<ITextDocumentService>("ITextDocumentService", {
+    useClass: TextDocumentService,
+  });
+
+  container.register<Event<TextDocument>>("textDocumentEvent", {
+    useValue: workspace.onDidSaveTextDocument,
+  });
+
+  container.register<DLogger>("logger", {
+    useClass: ConsoleLogger,
+  });
+
+  // Just use a dummy number - this isn't actually used by the web logic, but
+  // it's a dependency in some util methods.
+  container.register<number>("port", {
+    useValue: 1,
+  });
+
+  container.register<INoteRenderer>("INoteRenderer", {
+    useClass: PluginNoteRenderer,
+  });
+
+  const config = await getWorkspaceConfig(wsRoot);
+  container.register<IntermediateDendronConfig>("IntermediateDendronConfig", {
+    useValue: config as IntermediateDendronConfig,
   });
 }

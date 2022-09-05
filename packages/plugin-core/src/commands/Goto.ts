@@ -16,7 +16,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
-import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { getURLAt } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
@@ -62,7 +62,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async execute(): Promise<CommandOutput> {
     const externalLink = getURLAt(VSCodeUtils.getActiveTextEditor());
-    const noteLink = await getLinkFromSelectionWithWorkspace();
+    const noteLink = await EditorUtils.getLinkFromSelectionWithWorkspace();
 
     /* If the link read is not a valid link, exit from the command with a message */
     if (!externalLink && !noteLink) {

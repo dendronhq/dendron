@@ -1,16 +1,20 @@
 import {
   DendronASTDest,
+  DLogger,
   DVault,
+  genHash,
   NoteProps,
   NoteUtils,
+  Point,
+  PointOffset,
+  ReducedDEngine,
   string2Note,
-  VaultUtils,
+  URI,
+  VaultUtilsV2,
 } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
-import { EngineUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import _ from "lodash";
-import path from "path";
+import { inject, injectable } from "tsyringe";
 import visit from "unist-util-visit";
 import * as vscode from "vscode";
 import {
@@ -19,61 +23,33 @@ import {
   TextDocument,
   TextDocumentChangeEvent,
 } from "vscode";
-import { IDendronExtension } from "../dendronExtensionInterface";
-import { Logger } from "../logger";
-import { VSCodeUtils } from "../vsCodeUtils";
+import { Utils } from "vscode-uri";
+import { isPathInWorkspace } from "../../web/utils/isPathInWorkspace";
+import { ITextDocumentService } from "../ITextDocumentService";
 
 /**
- * Interface for a service that processes text document changes from vscode.
- */
-export interface ITextDocumentService extends Disposable {
-  /**
-   * Process content changes from TextDocumentChangeEvent and return an updated note prop.
-   *
-   * Return undefined if changes cannot be processed (such as missing frontmatter or dirty changes) or if no changes have been detected
-   *
-   * @param event Event containing document changes
-   * @return NoteProps
-   */
-  processTextDocumentChangeEvent(
-    event: TextDocumentChangeEvent
-  ): Promise<NoteProps | undefined>;
-
-  /**
-   * Apply content from a TextDocument to an existing note
-   *
-   * @param note Existing note to update
-   * @param textDocument TextDocument representation of note. May or may not have content changes from note
-   * @return New NoteProps with updated contents from TextDocument
-   */
-  applyTextDocumentToNoteProps(
-    note: NoteProps,
-    textDocument: TextDocument
-  ): Promise<NoteProps>;
-}
-
-/**
+ * This version of TextDocumentService is specific to Web Ext and has the
+ * following limitations before feature parity:
+ *  - does not call refreshNoteLinksAndAnchors
+ *
  * This service keeps client state note state synchronized with the engine
  * state. It also exposes an event that allows callback functionality whenever
- * the engine has finished updating a note state. See {@link ITextDocumentService}
- * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
+ * the engine has finished updating a note state. See
+ * {@link ITextDocumentService} See [[Note Sync
+ * Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
  * additional docs
  */
+@injectable()
 export class TextDocumentService implements ITextDocumentService {
-  private L: DLogger;
-
   _textDocumentEventHandle: Disposable;
-  _extension: IDendronExtension;
 
-  /**
-   *
-   * @param ext Instance of IDendronExtension
-   * @param textDocumentEvent - Event returning TextDocument, such as
-   * vscode.workspace.OnDidSaveTextDocument. This call is not debounced
-   */
-  constructor(ext: IDendronExtension, textDocumentEvent: Event<TextDocument>) {
-    this.L = Logger;
-    this._extension = ext;
+  constructor(
+    @inject("textDocumentEvent") textDocumentEvent: Event<TextDocument>,
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("vaults") private vaults: DVault[],
+    @inject("ReducedDEngine") private engine: ReducedDEngine,
+    @inject("logger") private L: DLogger
+  ) {
     this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
   }
 
@@ -89,7 +65,8 @@ export class TextDocumentService implements ITextDocumentService {
     vault: DVault;
   }) {
     const ctx = "TextDocumentService:updateNoteContents";
-    const { content, fmChangeOnly, fname, vault, oldNote } = opts;
+    const { content, fname, vault, oldNote } = opts;
+    // const { content, fmChangeOnly, fname, vault, oldNote } = opts;
     // note is considered dirty, apply any necessary changes here
     // call `doc.getText` to get latest note
     let note = string2Note({
@@ -107,11 +84,12 @@ export class TextDocumentService implements ITextDocumentService {
         keepBackLinks: true,
       },
     });
-    EngineUtils.refreshNoteLinksAndAnchors({
-      note,
-      fmChangeOnly,
-      engine: this._extension.getEngine(),
-    });
+    // TODO: Add back
+    // EngineUtils.refreshNoteLinksAndAnchors({
+    //   note,
+    //   fmChangeOnly,
+    //   engine: this._extension.getEngine(),
+    // });
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
 
@@ -119,7 +97,8 @@ export class TextDocumentService implements ITextDocumentService {
   }
 
   /**
-   * Callback function for vscode.workspace.OnDidSaveTextDocument. Updates note with contents from document and saves to engine
+   * Callback function for vscode.workspace.OnDidSaveTextDocument. Updates note
+   * with contents from document and saves to engine
    * @param document
    * @returns
    */
@@ -128,34 +107,30 @@ export class TextDocumentService implements ITextDocumentService {
   ): Promise<NoteProps | undefined> {
     const ctx = "TextDocumentService:onDidSave";
     const uri = document.uri;
-    const fname = path.basename(uri.fsPath, ".md");
+    const fname = Utils.basename(uri);
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
-    if (
-      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
-    ) {
+    const wsRoot = this.wsRoot;
+    const vaults = this.vaults;
+
+    if (!isPathInWorkspace({ wsRoot, vaults, fsPath: uri })) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });
-    const engine = this._extension.getEngine();
-    const vault = VaultUtils.getVaultByFilePath({
-      vaults: engine.vaults,
+    const vault = VaultUtilsV2.getVaultByFilePath({
+      vaults,
       wsRoot,
-      fsPath: uri.fsPath,
+      fsPath: uri,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+
+    const noteHydrated = (await this.engine.findNotes({ fname, vault }))[0];
     if (_.isUndefined(noteHydrated)) {
       return;
     }
 
     const content = document.getText();
-    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+    if (!this.noteContentChanged({ content, note: noteHydrated })) {
       this.L.debug({
         ctx,
         uri: uri.fsPath,
@@ -169,10 +144,10 @@ export class TextDocumentService implements ITextDocumentService {
       content,
       fmChangeOnly: false,
       fname,
-      vault,
+      vault: vault!, // TODO: Remove !
     });
 
-    const resp = await engine.updateNote(props);
+    const resp = await this.engine.writeNote(props);
 
     // This altering of response type is only for maintaining test compatibility
     if (resp.data && resp.data.length > 0) {
@@ -195,12 +170,12 @@ export class TextDocumentService implements ITextDocumentService {
 
     const ctx = "TextDocumentService:processTextDocumentChangeEvent";
     const uri = document.uri;
-    const fname = path.basename(uri.fsPath, ".md");
+    const fname = _.trimEnd(Utils.basename(uri), ".md");
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
-    if (
-      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
-    ) {
+    const wsRoot = this.wsRoot;
+    const vaults = this.vaults;
+
+    if (!isPathInWorkspace({ wsRoot, vaults, fsPath: uri })) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
@@ -223,37 +198,33 @@ export class TextDocumentService implements ITextDocumentService {
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });
-    const engine = this._extension.getEngine();
-    const vault = VaultUtils.getVaultByFilePath({
-      vaults: engine.vaults,
-      wsRoot: this._extension.getEngine().wsRoot,
-      fsPath: uri.fsPath,
+    const vault = VaultUtilsV2.getVaultByFilePath({
+      vaults,
+      wsRoot,
+      fsPath: uri,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
-    if (_.isUndefined(noteHydrated)) {
+    const note = (await this.engine.findNotes({ fname, vault }))[0];
+
+    if (_.isUndefined(note)) {
       return;
     }
 
     const content = document.getText();
-    if (!WorkspaceUtils.noteContentChanged({ content, note: noteHydrated })) {
+    if (!this.noteContentChanged({ content, note })) {
       this.L.debug({
         ctx,
         uri: uri.fsPath,
         msg: "note content unchanged, ignoring",
       });
-      return noteHydrated;
+      return note;
     }
 
     return this.updateNoteContents({
-      oldNote: noteHydrated,
+      oldNote: note,
       content,
       fmChangeOnly,
       fname,
-      vault,
+      vault: vault!, // TODO: Remove !
     });
   }
 
@@ -275,7 +246,7 @@ export class TextDocumentService implements ITextDocumentService {
     this.L.debug({ ctx, uri: uri.fsPath });
 
     const content = textDocument.getText();
-    if (!WorkspaceUtils.noteContentChanged({ content, note })) {
+    if (!this.noteContentChanged({ content, note })) {
       this.L.debug({
         ctx,
         uri: uri.fsPath,
@@ -317,7 +288,7 @@ export class TextDocumentService implements ITextDocumentService {
       const parsed = proc.parse(document.getText());
       visit(parsed, ["yaml"], (node) => {
         if (_.isUndefined(node.position)) return resolve(false); // Should never happen
-        const position = VSCodeUtils.point2VSCodePosition(node.position.end, {
+        const position = this.point2VSCodePosition(node.position.end, {
           line: 1,
         });
         resolve(position);
@@ -325,10 +296,25 @@ export class TextDocumentService implements ITextDocumentService {
     });
   };
 
-  // eslint-disable-next-line camelcase
-  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
-    return {
-      onDidSave: this.onDidSave.bind(this),
-    };
+  private noteContentChanged({
+    content,
+    note,
+  }: {
+    content: string;
+    note: NoteProps;
+  }) {
+    const noteHash = genHash(content);
+    if (_.isUndefined(note.contentHash)) {
+      return true;
+    }
+    return noteHash !== note.contentHash;
+  }
+
+  private point2VSCodePosition(point: Point, offset?: PointOffset) {
+    return new vscode.Position(
+      // remark Point's are 0 indexed
+      point.line - 1 + (offset?.line || 0),
+      point.column - 1 + (offset?.column || 0)
+    );
   }
 }

@@ -36,7 +36,7 @@ export const decorateWikilink: Decorator<
   WikiLinkNoteV4,
   DecorationsForDecorateWikilink
 > = async (opts) => {
-  const { node: wikiLink, engine, note, noteText } = opts;
+  const { node: wikiLink, engine, note, noteText, config } = opts;
   const { position } = wikiLink;
 
   const fname: string | undefined = wikiLink.value;
@@ -84,6 +84,7 @@ export const decorateWikilink: Decorator<
       fname,
       vaultName,
       engine,
+      config,
     });
     if (taskDecoration) decorations.push(taskDecoration);
   }

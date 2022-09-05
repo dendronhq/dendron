@@ -12,6 +12,7 @@ import {
   WorkspaceSettings,
 } from "@dendronhq/common-all";
 import {
+  DConfig,
   getDurationMilliseconds,
   tmpDir,
   vault2Path,
@@ -28,7 +29,6 @@ import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
   createEngineV3,
-  DConfig,
   WorkspaceConfig,
   WorkspaceService,
 } from "@dendronhq/engine-server";

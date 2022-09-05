@@ -5,7 +5,6 @@ import {
   NoteProps,
   RefactoringCommandUsedPayload,
   StatisticsUtils,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import {
@@ -230,61 +229,26 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }) {
     const ctx = `${this.key}:updateLinkInNote`;
     const { id, sourceNote, destNote } = opts;
-    const getNoteResp = await this.extension.getEngine().getNote(id);
+    const engine = this.extension.getEngine();
+    const getNoteResp = await engine.getNote(id);
     if (getNoteResp.error) {
       throw getNoteResp.error;
     }
     const noteToUpdate = getNoteResp.data;
     if (noteToUpdate !== undefined) {
-      const linksToUpdate = noteToUpdate.links.filter(
-        (link) => link.value === sourceNote.fname
-      );
-      const modifiedNote = await _.reduce<
-        typeof linksToUpdate[0],
-        Promise<NoteProps>
-      >(
-        // we need to do it in reverse order to not mess up the location we update
-        linksToUpdate.reverse(),
-        async (prev, linkToUpdate) => {
-          const acc = await prev;
-          const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
-          const notesWithSameName = await this.extension.getEngine().findNotes({
-            fname: destNote.fname,
-          });
-          const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
-          const newLink = {
-            ...oldLink,
-            from: {
-              ...oldLink.from,
-              alias:
-                oldLink.from.alias === oldLink.from.fname
-                  ? destNote.fname
-                  : oldLink.from.alias,
-              fname: destNote.fname,
-              vaultName: VaultUtils.getName(destNote.vault),
-            },
-            data: {
-              ...oldLink.data,
-              xvault: isXVault,
-            },
-          };
-          const newBody = LinkUtils.updateLink({
-            note: acc,
-            oldLink,
-            newLink,
-          });
-          acc.body = newBody;
-          return acc;
-        },
-        Promise.resolve(noteToUpdate)
-      );
+      const linksToUpdate = noteToUpdate.links
+        .filter((link) => link.value === sourceNote.fname)
+        .map((link) => LinkUtils.dlink2DNoteLink(link));
 
-      noteToUpdate.body = modifiedNote.body;
-      const writeResp = await this.extension
-        .getEngine()
-        .writeNote(noteToUpdate);
-      if (writeResp.data) {
-        return writeResp.data;
+      const resp = await LinkUtils.updateLinksInNote({
+        linksToUpdate,
+        note: noteToUpdate,
+        destNote,
+        engine,
+      });
+
+      if (resp.data) {
+        return resp.data;
       } else {
         // We specifically filtered for notes that do have some links to update,
         // so this is very unlikely to be reached.

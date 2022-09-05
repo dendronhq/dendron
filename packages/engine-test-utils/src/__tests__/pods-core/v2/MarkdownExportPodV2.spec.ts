@@ -13,6 +13,7 @@ import {
   NOTE_PRESETS_V4,
   RunEngineTestFunctionOpts,
 } from "@dendronhq/common-test-utils";
+import { DConfig } from "@dendronhq/common-server";
 import {
   MarkdownExportPodV2,
   MarkdownExportReturnType,
@@ -33,7 +34,7 @@ const setupPod = (setupOpts: {
   publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
 }) => {
   const { opts, fname, podConfigOpts } = setupOpts;
-  const config = opts.engine.config;
+  const config = DConfig.readConfigSync(opts.engine.wsRoot);
   if (config.publishing) {
     config.publishing.siteUrl = "https://foo.com";
   }

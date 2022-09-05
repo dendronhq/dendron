@@ -15,7 +15,7 @@ import {
   USERS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -396,6 +396,7 @@ export const resolveCompletionItem = sentryReportingCallback(
           engine,
           vault: note.vault,
           fname: note.fname,
+          config: DConfig.readConfigSync(engine.wsRoot, true),
         },
         {
           flavor: ProcFlavor.HOVER_PREVIEW,

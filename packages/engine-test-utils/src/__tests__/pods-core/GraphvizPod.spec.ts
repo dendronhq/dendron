@@ -55,7 +55,6 @@ describe("graphviz export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GraphvizExportPod();
-        engine.config.useFMTitle = true;
 
         await pod.execute({
           engine,
@@ -97,7 +96,6 @@ describe("graphviz export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GraphvizExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,
@@ -128,7 +126,6 @@ describe("graphviz export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GraphvizExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,
@@ -158,7 +155,6 @@ describe("graphviz export pod", () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GraphvizExportPod();
-        engine.config.useFMTitle = true;
         await pod.execute({
           engine,
           vaults,

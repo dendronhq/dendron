@@ -12,7 +12,6 @@ export class WebEngine implements DEngineClient {
   public notes: NotePropsByIdDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
-  public configRoot: string;
   public vaults: DVault[];
   // public links: DLink[];
   // public fuseEngine: FuseEngine;
@@ -31,7 +30,6 @@ export class WebEngine implements DEngineClient {
     this.wsRoot = wsRoot;
     this.schemas = schemas;
     this.vaults = vaults;
-    this.configRoot = wsRoot;
     this.config = config;
   }
 }

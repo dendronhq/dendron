@@ -9,11 +9,11 @@ import {
 import {
   createFileWatcher,
   createLogger,
+  DConfig,
   DLogger,
 } from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
 import _ from "lodash";
-import { DConfig } from "../config";
 import { DendronEngineClient } from "../engineClient";
 import {
   EngineUtils,

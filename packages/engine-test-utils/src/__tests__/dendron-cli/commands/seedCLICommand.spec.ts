@@ -6,9 +6,9 @@ import {
   SeedCommands,
   SeedConfig,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { DConfig, tmpDir } from "@dendronhq/common-server";
 import { SeedCLICommand, SeedCLICommandOpts } from "@dendronhq/dendron-cli";
-import { DConfig, SeedInitMode } from "@dendronhq/engine-server";
+import { SeedInitMode } from "@dendronhq/engine-server";
 import os from "os";
 import path from "path";
 import { runEngineTestV5 } from "../../../engine";

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.110.0",
+  "version": "0.110.1",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -35,10 +35,9 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.110.0",
-    "@dendronhq/common-server": "^0.110.0",
-    "@dendronhq/remark-mermaid": "^0.3.0",
-    "@dendronhq/unified": "^0.110.0",
+    "@dendronhq/common-all": "^0.110.1",
+    "@dendronhq/common-server": "^0.110.1",
+    "@dendronhq/unified": "^0.110.1",
     "@jcoreio/async-throttle": "^1.4.3",
     "@mapbox/rehype-prism": "^0.5.0",
     "@prisma/client": "^4.1.1",

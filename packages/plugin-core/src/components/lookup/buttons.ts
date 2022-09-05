@@ -45,7 +45,11 @@ export class Selection2LinkBtn extends DendronBtn {
 }
 
 export class SelectionExtractBtn extends DendronBtn {
-  static create(pressed?: boolean) {
+  static create(opts: { pressed?: boolean; canToggle?: boolean }) {
+    const { pressed, canToggle } = _.defaults(opts, {
+      pressed: false,
+      canToggle: true,
+    });
     return new SelectionExtractBtn({
       title: "Selection Extract",
       description: MODIFIER_DESCRIPTIONS["selectionExtract"],
@@ -53,6 +57,7 @@ export class SelectionExtractBtn extends DendronBtn {
       iconOn: "menu-selection",
       type: "selectionExtract",
       pressed,
+      canToggle,
     });
   }
 }
@@ -210,7 +215,7 @@ export function createAllButtons(
     MultiSelectBtn.create({}),
     CopyNoteLinkBtn.create(),
     DirectChildFilterBtn.create(),
-    SelectionExtractBtn.create(),
+    SelectionExtractBtn.create({}),
     Selection2LinkBtn.create(),
     Selection2ItemsBtn.create({}),
     JournalBtn.create(),

@@ -11,13 +11,14 @@ import {
   ERROR_SEVERITY,
   extractNoteChangeEntryCounts,
   getSlugger,
+  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { file2Note, vault2Path } from "@dendronhq/common-server";
+import { DConfig, file2Note, vault2Path } from "@dendronhq/common-server";
 import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
 import {
   MDUtilsV5,
@@ -47,7 +48,7 @@ import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
-import { findReferences, FoundRefT } from "../utils/md";
+import { findReferences, FoundRefT, hasAnchorsToUpdate } from "../utils/md";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
@@ -101,6 +102,7 @@ export class MoveHeaderCommand extends BasicCommand<
       fname: note.fname,
       vault: note.vault,
       dest: DendronASTDest.MD_DENDRON,
+      config: DConfig.readConfigSync(engine.wsRoot),
     });
   };
 
@@ -365,38 +367,6 @@ export class MoveHeaderCommand extends BasicCommand<
 
   /**
    * Helper for {@link MoveHeaderCommand.updateReferences}
-   * Given a {@link FoundRefT} and a list of anchor names,
-   * check if ref contains an anchor name to update.
-   * @param ref
-   * @param anchorNamesToUpdate
-   * @returns
-   */
-  private hasAnchorsToUpdate(ref: FoundRefT, anchorNamesToUpdate: string[]) {
-    const matchText = ref.matchText;
-    const wikiLinkRegEx = /\[\[(?<text>.+?)\]\]/;
-
-    const wikiLinkMatch = wikiLinkRegEx.exec(matchText);
-
-    if (wikiLinkMatch && wikiLinkMatch.groups?.text) {
-      let processed = wikiLinkMatch.groups.text;
-      if (processed.includes("|")) {
-        const [_alias, link] = processed.split("|");
-        processed = link;
-      }
-
-      if (processed.includes("#")) {
-        const [_fname, anchor] = processed.split("#");
-        return anchorNamesToUpdate.includes(anchor);
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Helper for {@link MoveHeaderCommand.updateReferences}
    * Given an note, origin note, and a list of anchor names,
    * return all links that should be updated in {@link note},
    * is a descending order of location offset.
@@ -410,11 +380,13 @@ export class MoveHeaderCommand extends BasicCommand<
     note: NoteProps,
     engine: IEngineAPIService,
     origin: NoteProps,
-    anchorNamesToUpdate: string[]
+    anchorNamesToUpdate: string[],
+    config: IntermediateDendronConfig
   ) {
     const links = LinkUtils.findLinksFromBody({
       note,
       engine,
+      config,
     }).filter((link) => {
       return (
         link.to?.fname?.toLowerCase() === origin.fname.toLowerCase() &&
@@ -512,9 +484,10 @@ export class MoveHeaderCommand extends BasicCommand<
     const ctx = `${this.key}:updateReferences`;
     const refsToProcess = foundReferences
       .filter((ref) => !ref.isCandidate)
-      .filter((ref) => this.hasAnchorsToUpdate(ref, anchorNamesToUpdate))
+      .filter((ref) => hasAnchorsToUpdate(ref, anchorNamesToUpdate))
       .map((ref) => this.getNoteByLocation(ref.location, engine))
       .filter((note) => note !== undefined);
+    const config = DConfig.readConfigSync(engine.wsRoot);
 
     await asyncLoopOneAtATime(refsToProcess, async (note) => {
       try {
@@ -534,7 +507,8 @@ export class MoveHeaderCommand extends BasicCommand<
           _note,
           engine,
           origin,
-          anchorNamesToUpdate
+          anchorNamesToUpdate,
+          config
         );
         const modifiedNote = this.updateLinksInNote({
           note: _note,

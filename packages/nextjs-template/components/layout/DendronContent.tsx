@@ -6,26 +6,27 @@ import { FooterText } from "../DendronNoteFooter";
 import { DENDRON_STYLE_CONSTANTS } from "../../styles/constants";
 import { useDendronContext } from "../../context/useDendronContext";
 
-const { LAYOUT, HEADER, SIDER } = DENDRON_STYLE_CONSTANTS;
+const { LAYOUT } = DENDRON_STYLE_CONSTANTS;
 
 export const DendronContent: React.FC<any> = (props) => {
   const { isResponsive, isSidebarCollapsed } = useDendronContext();
   return (
-    <Layout
+    <Content
       className="side-layout-main"
       style={{
         maxWidth: "1200px",
-        display: !isSidebarCollapsed && isResponsive ? "none" : "initial",
+        minWidth: 0,
+        display: !isSidebarCollapsed && isResponsive ? "none" : "block",
       }}
     >
-      <Content
+      <div
         className="main-content"
         role="main"
         style={{ padding: `0 ${LAYOUT.PADDING}px` }}
       >
         <DendronBreadCrumb {...props} />
         {props.children}
-      </Content>
+      </div>
       <Divider />
       <Footer
         style={{
@@ -34,6 +35,6 @@ export const DendronContent: React.FC<any> = (props) => {
       >
         <FooterText />
       </Footer>
-    </Layout>
+    </Content>
   );
 };

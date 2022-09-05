@@ -990,7 +990,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/706549?v=4",
       "profile": "http://carloscamara.es/en",
       "contributions": [
-        "doc"
+        "doc",
+        "bug"
       ]
     },
     {
@@ -2101,6 +2102,33 @@
       "profile": "https://github.com/vladsanchez",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "wbpayne22902",
+      "name": "Wilhelm Payne",
+      "avatar_url": "https://avatars.githubusercontent.com/u/107161609?v=4",
+      "profile": "https://github.com/wbpayne22902",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Alecton4",
+      "name": "Yttrium ZHAO",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43232804?v=4",
+      "profile": "https://github.com/Alecton4",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "saifahn",
+      "name": "Sean Li",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9913851?v=4",
+      "profile": "https://github.com/saifahn",
+      "contributions": [
+        "code"
       ]
     }
   ],

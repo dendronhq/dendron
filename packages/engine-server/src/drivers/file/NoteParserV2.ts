@@ -26,8 +26,9 @@ import {
   SchemaModuleDict,
   string2Note,
   globMatch,
+  IntermediateDendronConfig,
 } from "@dendronhq/common-all";
-import { DLogger, vault2Path } from "@dendronhq/common-server";
+import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -105,6 +106,7 @@ export class NoteParserV2 {
     this.logger.info({ ctx, msg: "enter", vault });
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
+    const config = DConfig.readConfigSync(this.engine.wsRoot);
     const errors: IDendronError<any>[] = [];
 
     // get root note
@@ -129,6 +131,7 @@ export class NoteParserV2 {
       fpath: rootFile.fpath,
       addParent: false,
       vault,
+      config,
     });
     if (rootProps.error) {
       errors.push(rootProps.error);
@@ -156,6 +159,7 @@ export class NoteParserV2 {
             fpath: ent.fpath,
             addParent: false,
             vault,
+            config,
           });
           // Store each successfully parsed node in note dict and keep track of errors
           if (resp.error) {
@@ -205,6 +209,7 @@ export class NoteParserV2 {
               noteDicts: { notesById, notesByFname },
               addParent: true,
               vault,
+              config,
             });
 
             if (resp.error) {
@@ -287,6 +292,7 @@ export class NoteParserV2 {
     noteDicts?: NoteDicts;
     addParent: boolean;
     vault: DVault;
+    config: IntermediateDendronConfig;
   }): RespV2<NoteChangeEntry[]> {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
@@ -295,7 +301,7 @@ export class NoteParserV2 {
         notesByFname: {},
       },
     });
-    const { fpath, noteDicts, vault } = cleanOpts;
+    const { fpath, noteDicts, vault, config } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fpath });
     const wsRoot = this.engine.wsRoot;
@@ -307,6 +313,7 @@ export class NoteParserV2 {
       const { data: note, error } = this.file2NoteWithCache({
         fpath: path.join(vpath, fpath),
         vault,
+        config,
       });
 
       if (note) {
@@ -349,9 +356,11 @@ export class NoteParserV2 {
   private file2NoteWithCache({
     fpath,
     vault,
+    config,
   }: {
     fpath: string;
     vault: DVault;
+    config: IntermediateDendronConfig;
   }): RespV2<NoteProps> {
     const content = fs.readFileSync(fpath, { encoding: "utf8" });
     const { name } = path.parse(fpath);
@@ -392,7 +401,11 @@ export class NoteParserV2 {
     // Link/anchor errors should be logged but not interfere with rest of parsing
     let error: IDendronError | null = null;
     try {
-      EngineUtils.refreshNoteLinksAndAnchors({ note, engine: this.engine });
+      EngineUtils.refreshNoteLinksAndAnchors({
+        note,
+        engine: this.engine,
+        config,
+      });
     } catch (_err: any) {
       error = ErrorFactory.wrapIfNeeded(_err);
     }

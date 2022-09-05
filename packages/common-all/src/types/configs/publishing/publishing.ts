@@ -1,4 +1,5 @@
 import { DVault } from "../../workspace";
+import { GiscusConfig } from "./giscus";
 import { GithubConfig, genDefaultGithubConfig } from "./github";
 import { SEOConfig, genDefaultSEOConfig } from "./seo";
 
@@ -49,6 +50,7 @@ export type DendronPublishingConfig = {
   cognitoClientId?: string;
   enablePrettyLinks: boolean;
   siteBanner?: string;
+  giscus?: GiscusConfig;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &

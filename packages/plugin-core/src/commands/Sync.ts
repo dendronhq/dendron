@@ -5,8 +5,8 @@ import {
   ERROR_SEVERITY,
   VaultUtils,
 } from "@dendronhq/common-all";
+import { DConfig } from "@dendronhq/common-server";
 import {
-  DConfig,
   SeedService,
   SyncActionResult,
   SyncActionStatus,

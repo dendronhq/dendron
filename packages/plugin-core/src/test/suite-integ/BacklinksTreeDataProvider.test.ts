@@ -27,6 +27,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
+import { DConfig } from "@dendronhq/common-server";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
@@ -678,7 +679,9 @@ suite("BacklinksTreeDataProvider", function () {
         mockEvents = new MockEngineEvents();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
           mockEvents,
-          ExtensionProvider.getEngine().config.dev?.enableLinkCandidates
+          DConfig.readConfigSync(
+            ExtensionProvider.getDWorkspace().wsRoot
+          ).dev?.enableLinkCandidates
         );
 
         updateSortOrder = sinon

@@ -5,6 +5,7 @@ import {
   Diagnostic,
   GetDecorationsOpts,
   IDendronError,
+  IntermediateDendronConfig,
   NonOptional,
   NoteProps,
   offsetRange,
@@ -61,9 +62,13 @@ function runDecorator(
 
 /** Get all decorations within the visible ranges for given note. */
 export async function runAllDecorators(
-  opts: Omit<GetDecorationsOpts, "id"> & { note: NoteProps; engine: DEngine }
+  opts: Omit<GetDecorationsOpts, "id"> & {
+    note: NoteProps;
+    engine: DEngine;
+    config: IntermediateDendronConfig;
+  }
 ) {
-  const { note, ranges, engine } = opts;
+  const { note, ranges, engine, config } = opts;
 
   const allDecorations: Decoration[] = [];
   const allDiagnostics: Diagnostic[] = [];
@@ -79,20 +84,18 @@ export async function runAllDecorators(
       engine,
       vault: note.vault,
       fname: note.fname,
+      config,
     }
   );
+  const maxNoteLength = ConfigUtils.getWorkspace(config).maxNoteLength;
 
   for (const { range, text } of ranges) {
-    if (text.length > ConfigUtils.getWorkspace(engine.config).maxNoteLength) {
+    if (text.length > maxNoteLength) {
       return {
         errors: [
           new DendronError({
             message: `Stopping decorations because visible range is too large. Unless you have a massive screen or really long lines of text, this may be a bug.`,
-            payload: {
-              maxNoteLength: ConfigUtils.getWorkspace(engine.config)
-                .maxNoteLength,
-              textLength: text.length,
-            },
+            payload: { maxNoteLength, textLength: text.length },
           }),
         ],
       };

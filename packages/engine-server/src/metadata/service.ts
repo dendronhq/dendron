@@ -24,6 +24,7 @@ export enum ShowcaseEntry {
   GraphPanel = "GraphPanel",
   BacklinksPanelHover = "BacklinksPanelHover",
   ObsidianImport = "ObsidianImport",
+  SettingsUI = "SettingsUI",
 }
 
 /**

@@ -46,7 +46,7 @@ describe(`GIVEN a LookupV3QuickPick`, () => {
     MultiSelectBtn.create({ pressed: false }),
     CopyNoteLinkBtn.create(false),
     DirectChildFilterBtn.create(false),
-    SelectionExtractBtn.create(false),
+    SelectionExtractBtn.create({ pressed: false }),
     Selection2LinkBtn.create(false),
     Selection2ItemsBtn.create({
       pressed: false,

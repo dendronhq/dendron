@@ -9,6 +9,7 @@ import {
   DVault,
   FuseEngine,
   NoteProps,
+  NoteQuickInput,
   NoteUtils,
   OrderedMatcher,
   RenameNoteOpts,
@@ -655,6 +656,11 @@ export class PickerUtilsV2 {
     delete picker.moreResults;
     delete picker.offset;
     delete picker.allResults;
+  }
+
+  static noteQuickInputToNote(item: NoteQuickInput): NoteProps {
+    const props: NoteProps = _.omit(item, "label", "detail", "alwaysShow");
+    return props;
   }
 }
 

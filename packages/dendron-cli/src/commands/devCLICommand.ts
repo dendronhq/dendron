@@ -10,12 +10,12 @@ import {
   TimeUtils,
 } from "@dendronhq/common-all";
 import {
+  DConfig,
   readYAML,
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   MigrationChangeSetStatus,
   MigrationService,
   MigrationUtils,

@@ -13,12 +13,12 @@ import {
   WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
+  DConfig,
   GitUtils,
   pathForVaultRoot,
   simpleGit,
 } from "@dendronhq/common-server";
 import {
-  DConfig,
   Git,
   WorkspaceService,
   WorkspaceUtils,

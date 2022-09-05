@@ -1,4 +1,9 @@
-import { ConfigUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -15,7 +20,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, vault, dest, insideNoteRef, config, engine } =
+    const { fname, vault, dest, insideNoteRef, config, engine, noteToRender } =
       MDUtilsV5.getProcData(proc);
 
     // Don't show backlinks for the following cases:
@@ -30,8 +35,12 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-
-    const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
+    let note: NoteProps | undefined;
+    if (engine) {
+      note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
+    } else {
+      note = noteToRender;
+    }
     if (_.isUndefined(note)) {
       return;
     }
@@ -57,11 +66,17 @@ const plugin: Plugin = function (this: Unified.Processor) {
         vaults: engine.vaults,
         vname: vaultName,
       })!;
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: backlink.from.fname!,
-        engine,
-        vault,
-      });
+
+      let note: NoteProps | undefined;
+      if (engine) {
+        note = NoteUtils.getNoteByFnameFromEngine({
+          fname: backlink.from.fname!,
+          engine,
+          vault,
+        });
+      } else {
+        note = noteToRender;
+      }
 
       // if note doesn't exist, don't include in backlinks
       if (!note) {
@@ -71,7 +86,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       const out = SiteUtils.canPublish({
         note,
         engine,
-        config: engine.config,
+        config,
       });
       return out;
     });
@@ -86,14 +101,21 @@ const plugin: Plugin = function (this: Unified.Processor) {
           "unordered",
           backlinksToPublish.map((mdLink) => {
             let alias;
-            const note = NoteUtils.getNoteByFnameFromEngine({
-              fname: mdLink.from.fname!,
-              vault: VaultUtils.getVaultByName({
-                vaults: engine.vaults,
-                vname: mdLink.from.vaultName!,
-              })!,
-              engine,
-            });
+
+            let note: NoteProps | undefined;
+
+            if (engine) {
+              note = NoteUtils.getNoteByFnameFromEngine({
+                fname: mdLink.from.fname!,
+                vault: VaultUtils.getVaultByName({
+                  vaults: engine.vaults,
+                  vname: mdLink.from.vaultName!,
+                })!,
+                engine,
+              });
+            } else {
+              note = noteToRender;
+            }
 
             if (note) {
               alias =

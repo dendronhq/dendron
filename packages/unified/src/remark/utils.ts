@@ -396,10 +396,12 @@ export class LinkUtils {
     note,
     engine,
     type,
+    config,
     filter,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
   }): DLink[] {
@@ -410,12 +412,14 @@ export class LinkUtils {
           note,
           engine,
           filter,
+          config,
         });
         break;
       case "candidate":
         links = LinkUtils.findLinkCandidates({
           note,
           engine,
+          config,
         });
         break;
       default:
@@ -437,10 +441,12 @@ export class LinkUtils {
   static findLinksFromBody({
     note,
     engine,
+    config,
     filter,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
@@ -451,6 +457,7 @@ export class LinkUtils {
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
+        config,
       }
     );
     const out = remark.parse(content) as DendronASTNode;
@@ -779,9 +786,11 @@ export class LinkUtils {
   static findLinkCandidates({
     note,
     engine,
+    config,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
   }) {
     const content = note.body;
     const remark = MDUtilsV5.procRemarkParse(
@@ -791,6 +800,7 @@ export class LinkUtils {
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
+        config,
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
@@ -821,6 +831,86 @@ export class LinkUtils {
     });
 
     return matched.filter((match) => !_.isNull(match)) as ParseLinkV2Resp[];
+  }
+
+  /**
+   * Given an array of links that need to be updated,
+   * and a note that contains the links,
+   * update all links in given array so that they point to
+   * the destination note.
+   *
+   * returns note change entries
+   */
+  static async updateLinksInNote(opts: {
+    linksToUpdate: DNoteLink[];
+    note: NoteProps;
+    destNote: NoteProps;
+    engine: DEngineClient;
+  }) {
+    const { linksToUpdate, note, destNote, engine } = opts;
+    // sort links to update in descending order of appearance.
+    // this is necessary in order to preserve the link positions.
+    const linksToUpdateDesc = _.orderBy(
+      linksToUpdate,
+      (link: DNoteLink) => {
+        return link.position?.start.offset;
+      },
+      "desc"
+    );
+    const modifiedNote = await _.reduce<DNoteLink, Promise<NoteProps>>(
+      linksToUpdateDesc,
+      async (prev, linkToUpdate) => {
+        // wait for last iteration.
+        const acc = await prev;
+
+        const oldLink = linkToUpdate;
+
+        // see if we have more than one note with same fname as destination
+        // if so, we need to specify the vault in the link.
+        const notesWithSameName = await engine.findNotes({
+          fname: destNote.fname,
+        });
+        // there are more than one note with same name, or the link we are updating
+        // is already a cross vault link.
+        const isXVault = oldLink.data.xvault || notesWithSameName.length > 1;
+
+        // create the new link
+        const newLink = {
+          // inherits most of the old link's data,
+          ...oldLink,
+          from: {
+            ...oldLink.from,
+            // if it had an alias, keep it. otherwise, it's going to be
+            // updated to the destination's fname
+            alias:
+              oldLink.from.alias === oldLink.from.fname
+                ? destNote.fname
+                : oldLink.from.alias,
+            fname: destNote.fname,
+            vaultName: VaultUtils.getName(destNote.vault),
+          },
+          data: {
+            ...oldLink.data,
+            // preserve the cross vault status or add it if necessary
+            xvault: isXVault,
+          },
+        };
+
+        const newBody = LinkUtils.updateLink({
+          note: acc,
+          oldLink,
+          newLink,
+        });
+
+        acc.body = newBody;
+        return acc;
+      },
+      Promise.resolve(note)
+    );
+
+    note.body = modifiedNote.body;
+    const writeResp = await engine.writeNote(note);
+    return writeResp;
   }
 }
 
@@ -1045,9 +1135,10 @@ export class RemarkUtils {
   }
 
   static findAnchors(content: string): Anchor[] {
-    const parser = MDUtilsV5.procRehypeParse({
-      mode: ProcMode.NO_DATA,
-    });
+    const parser = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.HTML }
+    );
     const parsed = parser.parse(content);
     return [
       ...(selectAll(DendronASTTypes.HEADING, parsed) as Heading[]),
@@ -1401,15 +1492,18 @@ export class RemarkUtils {
   static async extractBlocks({
     note,
     engine,
+    config,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
       engine,
       vault: note.vault,
       fname: note.fname,
       dest: DendronASTDest.MD_DENDRON,
+      config,
     });
     const slugger = getSlugger();
 
@@ -1518,9 +1612,9 @@ export class RemarkUtils {
    */
   static extractFMTags(body: string) {
     let parsed: ReturnType<typeof parseFrontmatter> | undefined;
-    const noteAST = MDUtilsV5.procRemarkParse(
-      { mode: ProcMode.NO_DATA },
-      {}
+    const noteAST = MDUtilsV5.procRemarkParseNoData(
+      {},
+      { dest: DendronASTDest.MD_DENDRON }
     ).parse(body);
     visit(noteAST, [DendronASTTypes.FRONTMATTER], (frontmatter: YAML) => {
       parsed = parseFrontmatter(frontmatter);

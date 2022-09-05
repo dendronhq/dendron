@@ -9,6 +9,9 @@
   line-height: $content-line-height;
   font-size: $root-font-size;
 
+  /* to protect the layout to break from long words */
+  overflow-wrap: break-word;
+
   ol,
   ul,
   dl,
@@ -249,4 +252,9 @@ a.fnref {
 a.fn {
   text-decoration: none;
   margin-left: 1rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }

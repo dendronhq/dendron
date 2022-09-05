@@ -6,6 +6,7 @@ import {
   DEngineClient,
   ErrorFactory,
   ERROR_SEVERITY,
+  IntermediateDendronConfig,
   NoteProps,
   RespV3,
   VaultUtils,
@@ -93,16 +94,18 @@ export class EngineUtils {
   static refreshNoteLinksAndAnchors({
     note,
     engine,
+    config,
     fmChangeOnly,
     silent,
   }: {
     note: NoteProps;
     engine: DEngineClient;
+    config: IntermediateDendronConfig;
     fmChangeOnly?: boolean;
     silent?: boolean;
   }): void {
     const maxNoteLength = Math.min(
-      ConfigUtils.getWorkspace(engine.config).maxNoteLength,
+      ConfigUtils.getWorkspace(config).maxNoteLength,
       CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
     );
     if (note.body.length > maxNoteLength) {
@@ -123,6 +126,7 @@ export class EngineUtils {
       note,
       type: "regular",
       engine,
+      config,
     });
     note.links = links;
 
@@ -133,13 +137,14 @@ export class EngineUtils {
 
       note.anchors = anchors;
 
-      const devConfig = ConfigUtils.getProp(engine.config, "dev");
+      const devConfig = ConfigUtils.getProp(config, "dev");
       const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
       if (linkCandidatesEnabled) {
         const linkCandidates = LinkUtils.findLinks({
           note,
           type: "candidate",
           engine,
+          config,
         });
         note.links = note.links.concat(linkCandidates);
       }

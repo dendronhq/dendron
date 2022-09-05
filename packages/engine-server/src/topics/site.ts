@@ -24,13 +24,13 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  DConfig,
   resolvePath,
   vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DConfig } from "../config";
 import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 

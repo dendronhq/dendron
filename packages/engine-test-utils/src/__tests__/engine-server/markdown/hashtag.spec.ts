@@ -8,7 +8,6 @@ import {
   DendronASTTypes,
   HashTag,
   MDUtilsV5,
-  ProcMode,
   UnistNode,
 } from "@dendronhq/unified";
 import _ from "lodash";
@@ -26,13 +25,12 @@ import {
 import { TestConfigUtils } from "../../..";
 import { TestUnifiedUtils } from "../../../utils";
 import { getOpts, runTestCases } from "./v5/utils";
+import { DConfig } from "@dendronhq/common-server";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
 function proc() {
-  return MDUtilsV5.procRehypeParse({
-    mode: ProcMode.NO_DATA,
-  });
+  return MDUtilsV5.procRemarkParseNoData({}, { dest: DendronASTDest.HTML });
 }
 
 function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
@@ -443,12 +441,12 @@ describe("hashtag", () => {
     describe("WHEN disabled in config", () => {
       test("THEN hashtags don't get parsed or processed", async () => {
         await runEngineTestV5(
-          async ({ engine, vaults }) => {
+          async ({ engine, wsRoot, vaults }) => {
             const proc = MDUtilsV5.procRehypeFull(
               {
                 engine,
                 vault: vaults[0],
-                config: engine.config,
+                config: DConfig.readConfigSync(wsRoot),
                 fname: "root",
               },
               {}

@@ -1,17 +1,13 @@
 import {
   APIUtils,
   BulkWriteNotesOpts,
-  ConfigGetPayload,
   ConfigUtils,
-  ConfigWriteOpts,
   DendronAPI,
   DendronError,
-  DEngine,
   DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
-  DLink,
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOpts,
@@ -30,7 +26,6 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksPayload,
   GetNoteLinksPayload,
-  IntermediateDendronConfig,
   NoteChangeEntry,
   NoteFnameDictUtils,
   NoteDictsUtils,
@@ -40,7 +35,6 @@ import {
   NoteUtils,
   Optional,
   QueryNotesOpts,
-  RefreshNotesOpts,
   RenameNoteOpts,
   RenameNotePayload,
   RenderNoteOpts,
@@ -59,10 +53,9 @@ import {
   EngineEventEmitter,
   NoteIndexProps,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger, readYAML } from "@dendronhq/common-server";
+import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import {
   NoteIndexLightProps,
@@ -83,16 +76,13 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   public noteFnames: NotePropsByFnameDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
-  public links: DLink[];
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
   public vaults: DVault[];
-  public configRoot: string;
   public history?: HistoryService;
   public logger: DLogger;
   public store: FileStorage;
-  public config: IntermediateDendronConfig;
   public hooks: DHookDict;
 
   static create({
@@ -139,23 +129,21 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.notes = {};
     this.noteFnames = {};
     this.schemas = {};
-    this.links = [];
     this.vaults = vaults;
     this.wsRoot = ws;
     this.ws = ws;
-    this.configRoot = this.wsRoot;
     this.history = history;
     this.logger = logger || createLogger();
-    const cpath = DConfig.configPath(ws);
-    this.config = readYAML(cpath, true) as IntermediateDendronConfig;
+    const config = DConfig.readConfigSync(ws);
     this.fuseEngine = new FuseEngine({
-      fuzzThreshold: ConfigUtils.getLookup(this.config).note.fuzzThreshold,
+      fuzzThreshold: ConfigUtils.getLookup(config).note.fuzzThreshold,
     });
     this.store = new FileStorage({
       engine: this,
       logger: this.logger,
+      config,
     });
-    this.hooks = ConfigUtils.getWorkspace(this.config).hooks || {
+    this.hooks = ConfigUtils.getWorkspace(config).hooks || {
       onCreate: [],
     };
   }
@@ -190,7 +178,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     if (!resp.data) {
       throw new DendronError({ message: "no data" });
     }
-    const { notes, schemas } = resp.data;
+    const { notes, schemas, config } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
@@ -202,8 +190,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       error: resp.error,
       data: {
         notes,
+        config,
         schemas,
-        config: this.config,
         wsRoot: this.wsRoot,
         vaults: this.vaults,
       },
@@ -318,13 +306,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     };
   }
 
-  async getConfig(): Promise<RespV2<ConfigGetPayload>> {
-    const resp = await this.api.configGet({
-      ws: this.ws,
-    });
-    return resp;
-  }
-
   async info(): Promise<RespV2<EngineInfoResp>> {
     const resp = await this.api.engineInfo();
     return resp;
@@ -335,7 +316,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   ): Promise<NoteProps[]> {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
-    if (this.config.workspace.metadataStore === "sqlite") {
+    const config = DConfig.readConfigSync(this.wsRoot);
+    if (config.workspace.metadataStore === "sqlite") {
       try {
         const resp = await SQLiteMetadataStore.search(qs);
         noteIndexProps = resp.hits;
@@ -394,11 +376,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   async renderNote(opts: RenderNoteOpts) {
     return this.api.noteRender({ ...opts, ws: this.ws });
-  }
-
-  async refreshNotes(opts: RefreshNotesOpts) {
-    await this.refreshNotesV2(opts.notes);
-    return { error: null };
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
@@ -473,7 +450,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     if (!resp.data) {
       throw new DendronError({ message: "no data", payload: resp });
     }
-    const { notes, schemas } = resp.data;
+    const { notes, schemas, config } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     this.schemas = schemas;
@@ -486,7 +463,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         schemas,
         vaults: this.vaults,
         wsRoot: this.wsRoot,
-        config: this.config,
+        config,
       },
     };
   }
@@ -555,13 +532,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     await this.api.schemaUpdate({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
     return;
-  }
-
-  async writeConfig(opts: ConfigWriteOpts): ReturnType<DEngine["writeConfig"]> {
-    await this.api.configWrite({ ...opts, ws: this.ws });
-    return {
-      error: null,
-    };
   }
 
   async writeSchema(schema: SchemaModuleProps): Promise<void> {

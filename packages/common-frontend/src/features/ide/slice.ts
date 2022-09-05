@@ -32,6 +32,7 @@ type InitialState = {
   showOutwardLinks?: boolean;
   showHierarchy?: boolean;
   isLocked?: boolean;
+  previewHTML: string;
 };
 
 const INITIAL_STATE: InitialState = {
@@ -49,6 +50,7 @@ const INITIAL_STATE: InitialState = {
   showOutwardLinks: true,
   showHierarchy: true,
   isLocked: false,
+  previewHTML: "",
 };
 
 export { InitialState as IDEState };
@@ -57,6 +59,9 @@ export const ideSlice = createSlice({
   name: "ide",
   initialState: INITIAL_STATE,
   reducers: {
+    setPreviewHTML: (state, action: PayloadAction<string>) => {
+      state.previewHTML = action.payload;
+    },
     setNoteActive: (state, action: PayloadAction<NoteProps | undefined>) => {
       state.notePrev = state.noteActive;
       state.noteActive = action.payload;

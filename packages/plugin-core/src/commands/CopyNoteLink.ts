@@ -9,7 +9,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { isInsidePath } from "@dendronhq/common-server";
+import { DConfig, isInsidePath } from "@dendronhq/common-server";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
@@ -19,7 +19,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { clipboard } from "../utils";
-import { getBlockAnchorAt, getSelectionAnchors } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
@@ -110,7 +110,7 @@ export class CopyNoteLinkCommand
     if (!editor.selection.isEmpty) {
       // First check if there's already a block anchor where the user selected.
       // If there is, we'll just use the existing anchor.
-      const foundAnchor = getBlockAnchorAt({
+      const foundAnchor = EditorUtils.getBlockAnchorAt({
         editor,
         position: editor.selection.start,
       });
@@ -149,14 +149,14 @@ export class CopyNoteLinkCommand
   private async createNoteLink(editor: TextEditor, note: NoteProps) {
     const engine = this.extension.getEngine();
     const { selection } = VSCodeUtils.getSelection();
-    const { startAnchor: anchor } = await getSelectionAnchors({
+    const { startAnchor: anchor } = await EditorUtils.getSelectionAnchors({
       editor,
       selection,
       engine,
       doEndAnchor: false,
     });
 
-    const { config } = engine;
+    const config = DConfig.readConfigSync(engine.wsRoot);
     const aliasMode = ConfigUtils.getAliasMode(config);
 
     return {

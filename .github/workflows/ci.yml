@@ -125,7 +125,7 @@ jobs:
         if: success() || failure()
         with:
           name: test-artifact
-          path: ./packages/nextjs-template/tests/**/*.png
+          path: ./packages/nextjs-template/test-results/
 
   test-plugin-web:
     strategy:

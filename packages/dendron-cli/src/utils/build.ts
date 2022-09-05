@@ -219,6 +219,7 @@ export class BuildUtils {
       dependencies: [
         "@dendronhq/common-test-utils",
         "@dendronhq/engine-test-utils",
+        "vscode-test",
       ],
     });
 
@@ -229,9 +230,9 @@ export class BuildUtils {
         "engine-server",
         "src",
         "drivers",
-        "generated-prisma-client"
+        "prisma-shim.js"
       ),
-      path.join(this.getPluginRootPath(), "dist", "generated-prisma-client")
+      path.join(this.getPluginRootPath(), "dist", "prisma-shim.js")
     );
   }
 

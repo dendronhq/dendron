@@ -10,8 +10,10 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { URI } from "vscode-uri";
+// @ts-ignore
+import { loadPrisma } from "./prisma-shim";
 
-import { Prisma, PrismaClient } from "./generated-prisma-client";
+type PrismaClient = any;
 
 let _prisma: PrismaClient | undefined;
 
@@ -29,6 +31,8 @@ export type NoteIndexLightProps = {
 };
 
 export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
+  public status: "loading" | "ready";
+
   constructor({
     wsRoot,
     client,
@@ -39,24 +43,28 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     force?: boolean;
   }) {
     if (_prisma && (!force || client)) {
+      this.status = "ready";
       // TODO: throw an error
       return;
     }
     if (client && !force) {
       _prisma = client;
+      this.status = "ready";
       return;
     }
-    // "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
+
+    this.status = "loading";
+    // example uri: "DATABASE_URL="file://Users/kevinlin/code/dendron/local/notes.db""
     const dbUrl = URI.file(`${wsRoot}/metadata.db`);
-    // // eslint-disable-next-line global-require
-    // const fs = require("fs-extra");
-    // fs.appendFileSync("/tmp/bond.txt", dbUrl.toString(), { encoding: "uft8" });
-    _prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: dbUrl.toString(),
+    loadPrisma().then(({ PrismaClient }: { PrismaClient: any }) => {
+      _prisma = new PrismaClient({
+        datasources: {
+          db: {
+            url: dbUrl.toString(),
+          },
         },
-      },
+      });
+      this.status = "ready";
     });
   }
 
@@ -70,7 +78,7 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     return { data: note as unknown as NotePropsMeta };
   }
 
-  async find(opts: Prisma.NoteFindManyArgs["where"]) {
+  async find(opts: any) {
     const note = (await getPrismaClient().note.findMany({
       where: opts,
     })) as unknown as NotePropsMeta[];

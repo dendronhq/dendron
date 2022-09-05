@@ -31,7 +31,8 @@ const config = {
     },
     // see [[../packages/plugin-core/webpack-require-hack.js]] for more details
     /\.\/webpack-require-hack/,
-    /\.\/prisma-shim/
+    /\.\/prisma-shim/,
+    /\.\/adm-zip/,
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],

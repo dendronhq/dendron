@@ -222,17 +222,17 @@ export class BuildUtils {
       ],
     });
 
-    // await fs.copy(
-    //   path.join(
-    //     this.getPluginRootPath(),
-    //     "..",
-    //     "engine-server",
-    //     "src",
-    //     "drivers",
-    //     "generated-prisma-client"
-    //   ),
-    //   path.join(this.getPluginRootPath(), "dist", "generated-prisma-client")
-    // );
+    await fs.copy(
+      path.join(
+        this.getPluginRootPath(),
+        "..",
+        "engine-server",
+        "src",
+        "drivers",
+        "prisma-shim.ts"
+      ),
+      path.join(this.getPluginRootPath(), "dist", "prisma-shim.js")
+    );
   }
 
   /**

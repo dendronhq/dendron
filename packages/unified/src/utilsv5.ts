@@ -32,6 +32,8 @@ import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
+// import rehypeWrap from "rehype-wrap";
+import { wrap } from "./rehype/wrap";
 import { Processor } from "unified";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
@@ -406,6 +408,7 @@ export class MDUtilsV5 {
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
+      .use(wrap, { selector: "table", wrapper: "div.table-responsive" })
       .use(raw)
       .use(slug);
 

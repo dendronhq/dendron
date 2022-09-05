@@ -121,13 +121,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         shouldReject,
       };
     }
-
-    // if (result.isValid) {
-    //   return { shouldReject: false };
-    // } else if (PickerUtilsV2.isCreateNewNotePick(item)) {
-    //   return { shouldReject: true, reason: result.reason };
-    // }
-    // return { shouldReject: false };
   }
 
   /**

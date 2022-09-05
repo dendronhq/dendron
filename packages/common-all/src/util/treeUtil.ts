@@ -27,6 +27,7 @@ export type TreeMenuNode = {
 export type TreeMenu = {
   roots: TreeMenuNode[];
   child2parent: { [key: string]: string | null };
+  notesLabelById: { [key: string]: string }; // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
 };
 
 export enum TreeViewItemLabelTypeEnum {
@@ -77,9 +78,14 @@ export class TreeUtils {
 
     function itemToTreeMenuNode(
       sidebarItem: SidebarItemProcessed,
-      child2parent: Record<string, string | null> = {},
-      parent: string | null = null
+      opts: {
+        child2parent: Record<string, string | null>;
+        parent: string | null;
+        notesLabelById: Record<string, string>;
+      }
     ): TreeMenuNode | undefined {
+      const { child2parent, parent, notesLabelById } = opts;
+
       const note = itemToNote(sidebarItem);
 
       if (_.isUndefined(note)) {
@@ -97,11 +103,15 @@ export class TreeUtils {
         return null;
       });
 
+      const title = sidebarItem.label ?? note.title;
+
+      notesLabelById[note.id] = title;
+
       const fm = PublishUtils.getPublishFM(note);
 
       const treeMenuNode: TreeMenuNode = {
         key: note.id,
-        title: sidebarItem.label ?? note.title,
+        title,
         icon,
         hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
         vaultName: VaultUtils.getName(note.vault),
@@ -115,7 +125,13 @@ export class TreeUtils {
 
       if (sidebarItem.type === "category") {
         treeMenuNode.children = sidebarItem.items
-          .map((item) => itemToTreeMenuNode(item, child2parent, note.id))
+          .map((item) =>
+            itemToTreeMenuNode(item, {
+              child2parent,
+              parent: note.id,
+              notesLabelById,
+            })
+          )
           .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
             Boolean(maybeTreeMenuNode)
           );
@@ -126,9 +142,16 @@ export class TreeUtils {
 
     const treeMenuMap = _.mapValues(sidebars, (sidebar) => {
       const child2parent: { [key: string]: string | null } = {};
+      const notesLabelById: { [key: string]: string } = {};
 
       const roots = sidebar
-        .map((sidebarItem) => itemToTreeMenuNode(sidebarItem, child2parent))
+        .map((sidebarItem) =>
+          itemToTreeMenuNode(sidebarItem, {
+            child2parent,
+            parent: null,
+            notesLabelById,
+          })
+        )
         .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
           Boolean(maybeTreeMenuNode)
         );
@@ -136,11 +159,18 @@ export class TreeUtils {
       return {
         roots,
         child2parent,
+        notesLabelById,
       };
     });
 
     // for now we only support a single sidebar
-    return Object.values(treeMenuMap).at(0) ?? { roots: [], child2parent: {} };
+    return (
+      Object.values(treeMenuMap).at(0) ?? {
+        roots: [],
+        child2parent: {},
+        notesLabelById: {},
+      }
+    );
   }
 
   static generateTreeData(
@@ -162,7 +192,7 @@ export class TreeUtils {
       child2parent[noteId] = note.parent;
     });
 
-    return { roots, child2parent };
+    return { roots, child2parent, notesLabelById: {} };
   }
 
   static getAllParents = ({

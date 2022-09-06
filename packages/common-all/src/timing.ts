@@ -1,3 +1,6 @@
+import { ErrorFactory } from "./error";
+import { RespV3 } from "./types";
+
 const NANOS_IN_SECOND = 1000000000;
 const NANOS_IN_MILLI_SEC = 1000000;
 
@@ -26,5 +29,27 @@ export class TimeUtils {
         resolve({ sleep: ms });
       }, ms);
     });
+  }
+
+  static async awaitWithLimit<T>(
+    opts: { limitMs: number },
+    cb: () => Promise<T>
+  ): Promise<RespV3<T>> {
+    let timeout = false;
+    const resp = await Promise.race([
+      (async () => {
+        await TimeUtils.sleep(opts.limitMs);
+        timeout = true;
+      })(),
+      cb(),
+    ]);
+    if (timeout) {
+      return {
+        error: ErrorFactory.createInvalidStateError({
+          message: "cb took too long",
+        }),
+      };
+    }
+    return { data: resp as T };
   }
 }

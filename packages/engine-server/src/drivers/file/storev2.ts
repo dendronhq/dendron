@@ -497,14 +497,25 @@ export class FileStorage implements DStore {
         force: true,
       });
 
-      // TODO: stop sleeping after max timeout
       // sleep until store is done
-      while (store.status === "loading") {
-        this.logger.info({ ctx, msg: "downloading sql dependencies..." });
-        // eslint-disable-next-line no-await-in-loop
-        await TimeUtils.sleep(1000);
-      }
-      this.logger.info({ ctx, msg: "checking if sql is initialized..." });
+      const output = await TimeUtils.awaitWithLimit(
+        { limitMs: 9e4 },
+        async () => {
+          while (store.status === "loading") {
+            this.logger.info({ ctx, msg: "downloading sql dependencies..." });
+            // eslint-disable-next-line no-await-in-loop
+            await TimeUtils.sleep(1000);
+          }
+          return;
+        }
+      );
+
+      debugger;
+      this.logger.info({
+        ctx,
+        msg: "checking if sql is initialized...",
+        output,
+      });
       if (!(await SQLiteMetadataStore.isDBInitialized())) {
         await SQLiteMetadataStore.createAllTables();
         await SQLiteMetadataStore.createWorkspace(this.wsRoot);

@@ -138,7 +138,9 @@ export class BuildUtils {
   static installPluginDependencies() {
     // remove root package.json before installing locally
     fs.removeSync(path.join(this.getLernaRoot(), "package.json"));
-    return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
+    return $(`yarn install --no-lockfile --update-checksums`, {
+      cwd: this.getPluginRootPath(),
+    });
   }
 
   static installPluginLocally(version: string) {
@@ -478,7 +480,7 @@ export class BuildUtils {
   }
 
   static async installAndPackageDeps({ cwd }: { cwd: string }) {
-    await $("yarn install --no-lockfile", { cwd });
+    await $("yarn install --no-lockfile ", { cwd });
     await $("vsce package --yarn", { cwd });
   }
 

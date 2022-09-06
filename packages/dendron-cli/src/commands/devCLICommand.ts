@@ -3,10 +3,10 @@ import {
   CLIEvents,
   DendronError,
   DVault,
-  error2PlainObject,
   ERROR_STATUS,
   NoteProps,
   NoteUtils,
+  stringifyError,
   TimeUtils,
 } from "@dendronhq/common-all";
 import {
@@ -403,7 +403,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       if (err instanceof DendronError) {
         this.print(["status:", err.status, err.message].join(" "));
       } else {
-        this.print("unknown error " + error2PlainObject(err));
+        this.print("unknown error " + stringifyError(err));
       }
       return { error: err };
     }

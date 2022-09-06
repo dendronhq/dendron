@@ -1177,12 +1177,12 @@ export class NoteUtils {
     );
     const hierarchies = fnameAfterReplace.split(".");
     const cleanedFname = hierarchies
-      // cut out empty hierarchies
-      .filter((value) => value !== "")
       // trim leading / trailing whitespace
       .map((value) => {
         return _.trim(value, " ");
       })
+      // cut out empty hierarchies
+      .filter((value) => value !== "")
       .join(".");
     return cleanedFname;
   }

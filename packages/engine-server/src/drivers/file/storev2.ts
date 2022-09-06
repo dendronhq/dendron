@@ -499,7 +499,7 @@ export class FileStorage implements DStore {
 
       // sleep until store is done
       const output = await TimeUtils.awaitWithLimit(
-        { limitMs: 9e4 },
+        { limitMs: 6e4 },
         async () => {
           while (store.status === "loading") {
             this.logger.info({ ctx, msg: "downloading sql dependencies..." });
@@ -510,7 +510,6 @@ export class FileStorage implements DStore {
         }
       );
 
-      debugger;
       this.logger.info({
         ctx,
         msg: "checking if sql is initialized...",

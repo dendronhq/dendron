@@ -16,7 +16,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { clipboard } from "../utils";
-import { getSelectionAnchors } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
@@ -68,7 +68,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const slugger = getSlugger();
     const { selection } = VSCodeUtils.getSelection();
     if (selection) {
-      const { startAnchor, endAnchor } = await getSelectionAnchors({
+      const { startAnchor, endAnchor } = await EditorUtils.getSelectionAnchors({
         editor,
         selection,
         engine: getEngine(),

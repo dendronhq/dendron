@@ -5,7 +5,6 @@ import path from "path";
 import sinon from "sinon";
 import * as vscode from "vscode";
 import {
-  LinkType,
   PreviewLinkHandler,
   ShowPreviewAssetOpener,
 } from "../../components/views/PreviewLinkHandler";
@@ -18,6 +17,7 @@ import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import fs from "fs-extra";
 import { tmpDir } from "@dendronhq/common-server";
 import _ from "lodash";
+import { LinkType } from "../../components/views/IPreviewLinkHandler";
 
 suite("PreviewLinkHandler", () => {
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {

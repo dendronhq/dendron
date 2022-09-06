@@ -102,6 +102,8 @@
     "rimraf": "^2.6.2",
     "ts-node": "^8.10.2",
     "tslint": "^5.11.0",
+    "prisma": "^4.1.1",
+    "@prisma/client": "^4.1.1",
     "tslint-config-prettier": "^1.15.0"
   },
   "engines": {

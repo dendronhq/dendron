@@ -61,4 +61,18 @@ export class WSUtilsWeb {
 
     return notes[0];
   }
+
+  /**
+   * Returns a URI for a given fname/vault combination. Note - this will return
+   * a URI, even if a valid note doesn't exist at the specified location/vault.
+   * @param fname
+   * @param vault
+   */
+  public async getURIForNote(fname: string, vault: DVault) {
+    return Utils.joinPath(
+      this.wsRoot,
+      VaultUtils.getRelPath(vault),
+      fname + ".md"
+    );
+  }
 }

@@ -498,6 +498,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy To Clipboard`,
     when: "false",
   },
+  COPY_CODESPACE_URL: {
+    key: "dendron.copyCodespaceURL",
+    title: `${CMD_PREFIX} Copy Codespace URL`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
   DELETE: {
     key: "dendron.delete",
     title: `${CMD_PREFIX} Delete`,
@@ -521,6 +526,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
+  MOVE_SELECTION_TO: {
+    key: "dendron.moveSelectionTo",
+    title: `${CMD_PREFIX} Move Selection To`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   MERGE_NOTE: {

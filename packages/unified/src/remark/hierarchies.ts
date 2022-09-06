@@ -2,6 +2,8 @@ import {
   ConfigUtils,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
+  NoteDictsUtils,
+  NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -141,12 +143,18 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       addFootnotes();
       return;
     }
-    const { engine } = MDUtilsV5.getProcData(proc);
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      engine,
-      vault: vault!,
-    });
+    const { engine, noteToRender, noteCacheForRender } =
+      MDUtilsV5.getProcData(proc);
+    let note: NoteProps | undefined;
+    if (engine) {
+      note = NoteUtils.getNoteByFnameFromEngine({
+        fname,
+        engine,
+        vault: vault!,
+      });
+    } else {
+      note = noteToRender;
+    }
 
     // check if v5 is active
     if (MDUtilsV5.isV5Active(proc)) {
@@ -199,16 +207,35 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       ) {
         return;
       }
-      const children = HierarchyUtils.getChildren({
-        skipLevels: note.custom?.skipLevels || 0,
-        note,
-        notes: engine.notes,
-      })
-        .filter((note) => SiteUtils.canPublish({ note, engine, config }))
-        .filter(
-          (note) =>
-            _.isUndefined(note.custom?.nav_exclude) || !note.custom?.nav_exclude
-        );
+      let children;
+      if (engine) {
+        children = HierarchyUtils.getChildren({
+          skipLevels: note.custom?.skipLevels || 0,
+          note,
+          notes: engine.notes,
+        })
+          .filter((note) => SiteUtils.canPublish({ note, engine, config }))
+          .filter(
+            (note) =>
+              _.isUndefined(note.custom?.nav_exclude) ||
+              !note.custom?.nav_exclude
+          );
+      } else if (noteCacheForRender) {
+        const notesById =
+          NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
+
+        children = HierarchyUtils.getChildren({
+          skipLevels: note.custom?.skipLevels || 0,
+          note,
+          notes: notesById,
+        })
+          // .filter((note) => SiteUtils.canPublish({ note, engine, config })) // TODO: Add back later
+          .filter(
+            (note) =>
+              _.isUndefined(note.custom?.nav_exclude) ||
+              !note.custom?.nav_exclude
+          );
+      }
 
       if (!_.isEmpty(children)) {
         addBreak();

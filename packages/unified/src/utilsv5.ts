@@ -32,6 +32,8 @@ import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
+// import rehypeWrap from "rehype-wrap";
+import { wrap } from "./rehype/wrap";
 import { Processor } from "unified";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
@@ -116,6 +118,9 @@ export type ProcDataFullOptsV5 = {
   backlinkHoverOpts?: BacklinkOpts;
 } & {
   wsRoot?: string;
+} & {
+  noteToRender?: NoteProps;
+  noteCacheForRender?: NoteProps[];
 };
 
 /**
@@ -140,6 +145,9 @@ export type ProcDataFullV5 = {
    * Keep track of current note ref level
    */
   noteRefLvl: number;
+
+  noteToRender?: NoteProps;
+  noteCacheForRender?: NoteProps[];
 };
 
 function checkProps({
@@ -271,7 +279,6 @@ export class MDUtilsV5 {
           if (!data.wsRoot) {
             data.wsRoot = data.engine!.wsRoot;
           }
-
           const note = NoteUtils.getNoteByFnameFromEngine({
             fname: data.fname!,
             engine: data.engine!,
@@ -401,6 +408,7 @@ export class MDUtilsV5 {
     let pRehype = pRemarkParse
       .use(remark2rehype, { allowDangerousHtml: true })
       .use(rehypePrism, { ignoreMissing: true })
+      .use(wrap, { selector: "table", wrapper: "div.table-responsive" })
       .use(raw)
       .use(slug);
 

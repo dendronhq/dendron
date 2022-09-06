@@ -20,7 +20,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { getAnalyticsPayload } from "../utils/analytics";
-import { getLinkFromSelectionWithWorkspace } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { PluginFileUtils } from "../utils/files";
 import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -60,7 +60,7 @@ export const findAnchorPos = (opts: {
 };
 
 type FoundLinkSelection = NonNullable<
-  Awaited<ReturnType<typeof getLinkFromSelectionWithWorkspace>>
+  Awaited<ReturnType<typeof EditorUtils.getLinkFromSelectionWithWorkspace>>
 >;
 
 /**
@@ -181,7 +181,7 @@ export class GotoNoteCommand extends BasicCommand<
       return opts;
     }
 
-    const link = await getLinkFromSelectionWithWorkspace();
+    const link = await EditorUtils.getLinkFromSelectionWithWorkspace();
     if (!link) {
       window.showErrorMessage("selection is not a valid link");
       return null;

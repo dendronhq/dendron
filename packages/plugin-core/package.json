@@ -56,7 +56,7 @@
       },
       {
         "view": "dendron.treeView",
-        "contents": "Open a Dendron note to see the tree view."
+        "contents": "First open a Dendron note to see the tree view."
       }
     ],
     "viewsContainers": {
@@ -236,6 +236,10 @@
         "title": "Dendron: Copy To Clipboard"
       },
       {
+        "command": "dendron.copyCodespaceURL",
+        "title": "Dendron: Copy Codespace URL"
+      },
+      {
         "command": "dendron.delete",
         "title": "Dendron: Delete"
       },
@@ -250,6 +254,10 @@
       {
         "command": "dendron.moveNote",
         "title": "Dendron: Move Note"
+      },
+      {
+        "command": "dendron.moveSelectionTo",
+        "title": "Dendron: Move Selection To"
       },
       {
         "command": "dendron.mergeNote",
@@ -644,6 +652,10 @@
           "when": "false"
         },
         {
+          "command": "dendron.copyCodespaceURL",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
           "command": "dendron.delete",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
@@ -657,6 +669,10 @@
         },
         {
           "command": "dendron.moveNote",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.moveSelectionTo",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
@@ -1414,7 +1430,7 @@
     "compile-web": "webpack --config webpack.webext.js",
     "watch-web": "webpack --watch --config webpack.webext.js",
     "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js",
-    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. .",
+    "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ~/dendron-20/",
     "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput"
   },
   "devDependencies": {

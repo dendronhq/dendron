@@ -103,16 +103,10 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      - name: Download notes.zip
+      - name: Export test-workspace
         if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
-        uses: wei/curl@master
-        with:
-          args: -LO https://artifacts-prod-artifactb7980f61-19orqnnuurvwy.s3.us-west-2.amazonaws.com/artifacts/dendron-site.zip
-
-      - name: Unzip notes.zip
-        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
-        run: |
-          unzip -o dendron-site.zip -d packages/nextjs-template
+        working-directory: ./test-workspace
+        run:  ../node_modules/.bin/dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"
 
       - name: Install Playwright dependencies
         if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
@@ -121,6 +115,13 @@ jobs:
       - name: Run Playwright tests
         if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x'
         run: yarn ci:test:template
+
+      - name: Upload Playwright test results
+        uses: actions/upload-artifact@v3
+        if: runner.os == 'Linux' && matrix.suite == 'cli' && matrix.node-version == '14.x' && (success() || failure())
+        with:
+          name: test-artifact
+          path: ./packages/nextjs-template/test-results/
 
       - name: Run tests
         run: yarn ci:test:${{ matrix.suite }}

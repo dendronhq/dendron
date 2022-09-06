@@ -42,19 +42,28 @@ export const useWorkspaceProps = (): [WorkspaceProps] => {
 
 /**
  * Body of current note
- * @param param0
+ * @param param0 - if previewHTML is passed in, just return that HTML directly
+ * and don't do any additional rendering.
  * @returns
  */
 export const useRenderedNoteBody = ({
   engine,
   noteProps,
   workspace,
-}: DendronProps & { noteProps?: NoteProps }) => {
+  previewHTML,
+}: DendronProps & { noteProps?: NoteProps; previewHTML?: string }) => {
   const { id: noteId, contentHash } = noteProps || {
     id: undefined,
     contentHash: undefined,
   };
-  const noteContent = noteId ? engine.notesRendered[noteId] : undefined;
+
+  let noteContent: string | undefined;
+
+  if (previewHTML) {
+    noteContent = previewHTML;
+  } else {
+    noteContent = noteId ? engine.notesRendered[noteId] : undefined;
+  }
   const renderedNoteContentHash = React.useRef<string>();
   const dispatch = engineHooks.useEngineAppDispatch();
 
@@ -63,7 +72,10 @@ export const useRenderedNoteBody = ({
       return;
     }
     // if no "render to markdown" has happended or the note body changed
-    if (!noteContent || contentHash !== renderedNoteContentHash.current) {
+    if (
+      !previewHTML &&
+      (!noteContent || contentHash !== renderedNoteContentHash.current)
+    ) {
       renderedNoteContentHash.current = contentHash;
       dispatch(
         engineSlice.renderNote({ ...workspace, id: noteId, note: noteProps })

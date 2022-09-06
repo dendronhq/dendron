@@ -26,7 +26,7 @@ import { PasteLinkCommand } from "../commands/PasteLink";
 import { RenameHeaderCommand } from "../commands/RenameHeader";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { sentryReportingCallback } from "../utils/analytics";
-import { getHeaderAt, isBrokenWikilink } from "../utils/editor";
+import { EditorUtils } from "../utils/EditorUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { WSUtilsV2 } from "../WSUtilsV2";
@@ -105,7 +105,7 @@ export const refactorProvider: CodeActionProvider = {
       const { editor, selection, text } = VSCodeUtils.getSelection();
       if (!editor || !selection) return;
 
-      const header = getHeaderAt({
+      const header = EditorUtils.getHeaderAt({
         document: editor.document,
         position: selection.start,
       });
@@ -181,7 +181,12 @@ export const refactorProvider: CodeActionProvider = {
         //return a code action for create note if user clicked next to a broken wikilink
         if (
           note &&
-          (await isBrokenWikilink({ editor, engine, note, selection }))
+          (await EditorUtils.isBrokenWikilink({
+            editor,
+            engine,
+            note,
+            selection,
+          }))
         ) {
           return [brokenWikilinkAction];
         }

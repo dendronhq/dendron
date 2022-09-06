@@ -53,6 +53,7 @@ import {
   isNotNull,
   ErrorUtils,
   RespV3,
+  TimeUtils,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -491,7 +492,29 @@ export class FileStorage implements DStore {
     // instantiate so we can use singleton later
     if (this.config.workspace.metadataStore === "sqlite") {
       // eslint-disable-next-line no-new
-      new SQLiteMetadataStore({ wsRoot: this.wsRoot, force: true });
+      const store = new SQLiteMetadataStore({
+        wsRoot: this.wsRoot,
+        force: true,
+      });
+
+      // sleep until store is done
+      const output = await TimeUtils.awaitWithLimit(
+        { limitMs: 6e4 },
+        async () => {
+          while (store.status === "loading") {
+            this.logger.info({ ctx, msg: "downloading sql dependencies..." });
+            // eslint-disable-next-line no-await-in-loop
+            await TimeUtils.sleep(1000);
+          }
+          return;
+        }
+      );
+
+      this.logger.info({
+        ctx,
+        msg: "checking if sql is initialized...",
+        output,
+      });
       if (!(await SQLiteMetadataStore.isDBInitialized())) {
         await SQLiteMetadataStore.createAllTables();
         await SQLiteMetadataStore.createWorkspace(this.wsRoot);

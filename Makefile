@@ -19,8 +19,6 @@ cleanBuild:
 
 db-gen:
 	cd packages/engine-server && yarn prisma generate 
-	cd packages/engine-server && rm -rf lib/generated-prisma-client
-	cd packages/engine-server && cp -R src/generated-prisma-client lib/generated-prisma-client
 
 start-local-registry:
 	yarn config set registry http://localhost:4873

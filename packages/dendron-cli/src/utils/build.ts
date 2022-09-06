@@ -138,7 +138,9 @@ export class BuildUtils {
   static installPluginDependencies() {
     // remove root package.json before installing locally
     fs.removeSync(path.join(this.getLernaRoot(), "package.json"));
-    return $(`yarn install --no-lockfile`, { cwd: this.getPluginRootPath() });
+    return $(`yarn install --no-lockfile --update-checksums`, {
+      cwd: this.getPluginRootPath(),
+    });
   }
 
   static installPluginLocally(version: string) {
@@ -219,19 +221,24 @@ export class BuildUtils {
       dependencies: [
         "@dendronhq/common-test-utils",
         "@dendronhq/engine-test-utils",
+        "vscode-test",
       ],
     });
 
-    await fs.copy(
-      path.join(
-        this.getPluginRootPath(),
-        "..",
-        "engine-server",
-        "src",
-        "drivers",
-        "generated-prisma-client"
-      ),
-      path.join(this.getPluginRootPath(), "dist", "generated-prisma-client")
+    await Promise.all(
+      ["prisma-shim.js", "adm-zip.js"].map((ent) => {
+        return fs.copy(
+          path.join(
+            this.getPluginRootPath(),
+            "..",
+            "engine-server",
+            "src",
+            "drivers",
+            ent
+          ),
+          path.join(this.getPluginRootPath(), "dist", ent)
+        );
+      })
     );
   }
 
@@ -473,7 +480,7 @@ export class BuildUtils {
   }
 
   static async installAndPackageDeps({ cwd }: { cwd: string }) {
-    await $("yarn install --no-lockfile", { cwd });
+    await $("yarn install --no-lockfile ", { cwd });
     await $("vsce package --yarn", { cwd });
   }
 

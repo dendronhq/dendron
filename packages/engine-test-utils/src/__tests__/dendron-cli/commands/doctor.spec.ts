@@ -102,6 +102,15 @@ const setupWithAliasedWikilink = async (opts: WorkspaceOpts) => {
   });
 };
 
+const setupWithInvalidFilename = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "bar..('foo',)",
+  });
+};
+
 const setupWithXVaultWikilink = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
   await NoteTestUtilsV4.createNote({
@@ -973,6 +982,30 @@ describe("GIVEN removeDeprecatedConfigs", () => {
           }
         },
         {
+          expect,
+        }
+      );
+    });
+  });
+});
+
+describe("GIVEN fixInvalidFilenames", () => {
+  const action = DoctorActionsEnum.FIX_INVALID_FILENAMES;
+  describe("WHEN workspace with note that has invalid filename", () => {
+    test("THEN invalid file name is automatically fixed", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          await runDoctor({
+            wsRoot,
+            engine,
+            action,
+          });
+          const getNoteResp = await engine.getNote("bar..('foo',)");
+          expect(getNoteResp.data).toBeTruthy();
+          expect(getNoteResp.data?.fname).toEqual("bar.foo");
+        },
+        {
+          preSetupHook: setupWithInvalidFilename,
           expect,
         }
       );

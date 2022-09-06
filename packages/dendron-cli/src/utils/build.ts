@@ -234,18 +234,6 @@ export class BuildUtils {
       ),
       path.join(this.getPluginRootPath(), "dist", "prisma-shim.js")
     );
-
-    await fs.copy(
-      path.join(
-        this.getPluginRootPath(),
-        "..",
-        "engine-server",
-        "src",
-        "drivers",
-        "adm-zip.js"
-      ),
-      path.join(this.getPluginRootPath(), "dist", "adm-zip.js")
-    );
   }
 
   /**

@@ -147,7 +147,11 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
     if (isTopLevel) {
       return Object.values(notesById)
         .filter((note) => {
-          const hierarchyPath = note.fname.split(".");
+          const { fname } = note;
+          if (fname === "root") {
+            return false;
+          }
+          const hierarchyPath = fname.split(".");
           if (hierarchyPath.length === 1) {
             return true;
           }

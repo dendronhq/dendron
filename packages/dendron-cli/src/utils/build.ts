@@ -223,16 +223,20 @@ export class BuildUtils {
       ],
     });
 
-    await fs.copy(
-      path.join(
-        this.getPluginRootPath(),
-        "..",
-        "engine-server",
-        "src",
-        "drivers",
-        "prisma-shim.js"
-      ),
-      path.join(this.getPluginRootPath(), "dist", "prisma-shim.js")
+    await Promise.all(
+      ["prisma-shim.js", "adm-zip.js"].map((ent) => {
+        return fs.copy(
+          path.join(
+            this.getPluginRootPath(),
+            "..",
+            "engine-server",
+            "src",
+            "drivers",
+            ent
+          ),
+          path.join(this.getPluginRootPath(), "dist", ent)
+        );
+      })
     );
   }
 

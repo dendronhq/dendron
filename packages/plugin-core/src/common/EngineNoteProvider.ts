@@ -19,7 +19,7 @@ import {
   TreeItemCollapsibleState,
 } from "vscode";
 import { URI } from "vscode-uri";
-import { ICONS } from "../../../constants";
+import { ICONS } from "../constants";
 import { type ITreeViewConfig } from "./ITreeViewConfig";
 import { TreeNote } from "./TreeNote";
 

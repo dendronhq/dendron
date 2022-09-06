@@ -6,10 +6,10 @@ import {
 import _ from "lodash";
 import { injectable } from "tsyringe";
 import { Disposable, TextEditor, TreeView, window } from "vscode";
-import { WSUtilsWeb } from "../../utils/WSUtils";
 import { EngineNoteProvider } from "./EngineNoteProvider";
 import { TreeNote } from "./TreeNote";
 import * as vscode from "vscode";
+import { WSUtilsWeb } from "../web/utils/WSUtils";
 /**
  * Class managing the vscode native version of the Dendron tree view - this is
  * the side panel UI that gives a tree view of the Dendron note hierarchy

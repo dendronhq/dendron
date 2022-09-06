@@ -3,12 +3,12 @@ import "reflect-metadata"; // This needs to be the topmost import for tsyringe t
 
 import { container } from "tsyringe";
 import * as vscode from "vscode";
+import { NativeTreeView } from "../common/NativeTreeView";
 import { DENDRON_COMMANDS } from "../constants";
 import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
-import { NativeTreeView } from "./views/treeView/NativeTreeView";
 
 /**
  * This is the entry point for the web extension variant of Dendron

@@ -11,7 +11,7 @@ const DENDRON_SYSTEM_ROOT = path.join(os.homedir(), ".dendron");
 async function downloadPrisma() {
 
   return new Promise((resolve, reject) => {
-    const url = "https://org-dendron-public-assets.s3.amazonaws.com/publish/generated-prisma-client.zip";
+    const url = "https://d2q204iup008xl.cloudfront.net/publish/generated-prisma-client.zip";
     const tmpPath = path.join(DENDRON_SYSTEM_ROOT, "tmp_client");
     if (fs.existsSync(tmpPath)) {
       fs.unlinkSync(tmpPath);

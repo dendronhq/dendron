@@ -80,6 +80,12 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ds = new DoctorService();
     const out = await ds.executeDoctorActions(opts);
+    if (out.resp) {
+      this._analyticsPayload = {
+        ...this._analyticsPayload,
+        ...out.resp,
+      };
+    }
     ds.dispose();
     return out;
   }

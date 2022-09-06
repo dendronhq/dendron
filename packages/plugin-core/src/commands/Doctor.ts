@@ -3,8 +3,10 @@ import {
   DEngineClient,
   DVault,
   ExtensionEvents,
+  extractNoteChangeEntryCounts,
   isNotUndefined,
   KeybindingConflictDetectedSource,
+  NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
   NoteFnameDictUtils,
@@ -70,6 +72,7 @@ type CommandOpts = {
 
 type CommandOutput = {
   data: Finding[];
+  extra: any;
 };
 
 type CreateQuickPickOpts = {
@@ -411,10 +414,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return engine;
   }
 
-  addAnalyticsPayload(opts: CommandOpts) {
+  addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
     return {
       action: opts.action,
       scope: opts.scope,
+      ...out.extra,
     };
   }
 
@@ -423,6 +427,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     window.showInformationMessage("Calling the doctor.");
     const { wsRoot, config } = this.extension.getDWorkspace();
     const findings: Finding[] = [];
+    let extra: any;
     if (_.isUndefined(wsRoot)) {
       throw new DendronError({ message: "rootDir undefined" });
     }
@@ -637,10 +642,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const notesByFname =
             NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
           const noteDicts: NoteDicts = { notesById, notesByFname };
-          const { canRename, cantRename } = ds.findInvalidFileNames({
+          const { canRename, cantRename, stats } = ds.findInvalidFileNames({
             notes,
             noteDicts,
           });
+
+          extra = stats;
+          let changes: NoteChangeEntry[] = [];
           if (canRename.length > 0 || cantRename.length > 0) {
             await this.showFixInvalidFileNamePreview({ canRename, cantRename });
             if (canRename.length > 0) {
@@ -654,7 +662,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
                 break;
               }
               window.showInformationMessage("Fixing invalid filenames...");
-              await ds.fixInvalidFileNames({
+              changes = await ds.fixInvalidFileNames({
                 canRename,
                 engine,
                 quiet: true,
@@ -671,6 +679,11 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             window.showInformationMessage("There are no invalid filenames!");
           }
           ds.dispose();
+          const changeCounts = extractNoteChangeEntryCounts(changes);
+          extra = {
+            ...extra,
+            ...changeCounts,
+          };
         } else {
           window.showErrorMessage("Doctor failed. Please reload and try again");
         }
@@ -704,7 +717,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       delayedUpdateDecorations();
     }
 
-    return { data: findings };
+    return { data: findings, extra };
   }
   async showResponse(findings: CommandOutput) {
     findings.data.forEach((f) => {

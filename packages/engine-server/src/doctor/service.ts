@@ -7,7 +7,9 @@ import {
   Disposable,
   DLink,
   DVault,
+  extractNoteChangeEntryCounts,
   genUUID,
+  InvalidFilenameReason,
   isNotUndefined,
   NoteChangeEntry,
   NoteDicts,
@@ -596,13 +598,14 @@ export class DoctorService implements Disposable {
         break;
       }
       case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
-        const { canRename, cantRename } = this.findInvalidFileNames({
+        const { canRename, cantRename, stats } = this.findInvalidFileNames({
           notes,
           noteDicts: {
             notesById,
             notesByFname,
           },
         });
+        resp = stats;
 
         if (canRename.length > 0 && !opts.quiet) {
           console.log("Found invalid filename in notes:\n");
@@ -616,9 +619,9 @@ export class DoctorService implements Disposable {
             console.log(`  Can be automatically fixed to "${cleanedFname}"`);
           });
         }
-
+        let changes: NoteChangeEntry[] = [];
         if (!dryRun) {
-          await this.fixInvalidFileNames({
+          changes = await this.fixInvalidFileNames({
             canRename,
             engine,
             quiet: opts.quiet,
@@ -640,6 +643,11 @@ export class DoctorService implements Disposable {
           });
         }
 
+        const changeCounts = extractNoteChangeEntryCounts(changes);
+        resp = {
+          ...resp,
+          ...changeCounts,
+        };
         break;
       }
       default:
@@ -698,6 +706,19 @@ export class DoctorService implements Disposable {
     const invalidResps = validationResps.filter(
       (validationResp) => !validationResp.resp.isValid
     );
+    const stats = {
+      numEmptyHierarchy: invalidResps.filter(
+        (item) => item.resp.reason === InvalidFilenameReason.EMPTY_HIERARCHY
+      ).length,
+      numIllegalCharacter: invalidResps.filter(
+        (item) => item.resp.reason === InvalidFilenameReason.ILLEGAL_CHARACTER
+      ).length,
+      numLeadingOrTrailingWhitespace: invalidResps.filter(
+        (item) =>
+          item.resp.reason ===
+          InvalidFilenameReason.LEADING_OR_TRAILING_WHITESPACE
+      ).length,
+    };
 
     const [canRename, cantRename] = _.partition(
       invalidResps.map((item) => {
@@ -721,6 +742,7 @@ export class DoctorService implements Disposable {
     return {
       canRename,
       cantRename,
+      stats,
     };
   }
 
@@ -735,6 +757,7 @@ export class DoctorService implements Disposable {
     quiet?: boolean;
   }) {
     const { canRename, engine, quiet } = opts;
+    let changes: NoteChangeEntry[] = [];
     if (canRename.length > 0) {
       await asyncLoopOneAtATime(canRename, async (item) => {
         const { note, cleanedFname } = item;
@@ -750,6 +773,7 @@ export class DoctorService implements Disposable {
             vaultName,
           },
         });
+        if (out.data) changes = changes.concat(out.data);
         if (!quiet) {
           if (out.data) {
             console.log(
@@ -767,5 +791,6 @@ export class DoctorService implements Disposable {
         console.log("\n");
       }
     }
+    return changes;
   }
 }

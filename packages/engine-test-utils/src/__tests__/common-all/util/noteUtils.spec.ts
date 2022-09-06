@@ -1,8 +1,4 @@
-import {
-  InvalidFilenameReason,
-  NoteUtils,
-  ThemeMessageType,
-} from "@dendronhq/common-all";
+import { InvalidFilenameReason, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 
 const validFnames = ["foo", "bar", "foo.bar", "foo bar"];

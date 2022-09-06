@@ -319,7 +319,7 @@ suite("onAccept", () => {
           alwaysShow: true,
         };
         const out = provider.shouldRejectItem!({ item });
-        expect(out).toBeFalsy();
+        expect(out.shouldReject).toBeFalsy();
         cmd.cleanUp();
       });
     }
@@ -349,7 +349,8 @@ suite("onAccept", () => {
           alwaysShow: true,
         };
         const out = provider.shouldRejectItem!({ item });
-        expect(out).toBeTruthy();
+        expect(out.shouldReject).toBeTruthy();
+        expect(out.reason).toBeTruthy();
         cmd.cleanUp();
       });
     }

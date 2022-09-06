@@ -7,24 +7,31 @@ import {
   FOLDERS,
   IDendronError,
   IntermediateDendronConfig,
+  IProgress,
+  IProgressStep,
   NoteProps,
   ResponseUtil,
   RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
+import {
+  createDisposableLogger,
+  DConfig,
+  getDurationMilliseconds,
+} from "@dendronhq/common-server";
 import { DendronASTDest, MDUtilsV5, RemarkUtils } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
+import { mapLimit } from "async";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import fs from "fs-extra";
+import { PodExportScope } from "../..";
 import {
   ConfigFileUtils,
   ExportPodV2,
   MarkdownV2PodConfig,
   RunnableMarkdownV2PodConfig,
 } from "../../..";
-import { PodExportScope } from "../..";
-import { createDisposableLogger, DConfig } from "@dendronhq/common-server";
 
 /**
  * Markdown Export Pod (V2 - for compatibility with Pod V2 workflow).
@@ -54,12 +61,17 @@ export class MarkdownExportPodV2
     this._dendronConfig = dendronConfig;
   }
 
-  async exportNotes(input: NoteProps[]): Promise<MarkdownExportReturnType> {
+  async exportNotes(
+    notes: NoteProps[],
+    progress?: IProgress<IProgressStep>
+  ): Promise<MarkdownExportReturnType> {
     const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
     const { destination, exportScope } = this._config;
+    const ctx = "exportNotes";
+    const config = { ...DConfig.readConfigSync(this._engine.wsRoot) };
 
     if (destination === "clipboard") {
-      const exportedNotes = await this.renderNote(input[0]);
+      const exportedNotes = await this.renderNote({ note: notes[0], config });
       return ResponseUtil.createHappyResponse({
         data: {
           exportedNotes,
@@ -77,29 +89,69 @@ export class MarkdownExportPodV2
     }
     logger.debug({ msg: "pre:iterate_notes" });
     const errors: IDendronError[] = [];
-    const result = await Promise.all(
-      input.map(async (note) => {
-        try {
-          const body = await this.renderNote(note);
-          const hpath = this.dot2Slash(note.fname) + ".md";
-          const vname = VaultUtils.getName(note.vault);
-          const fpath = path.join(destination, vname, hpath);
-          logger.debug({ fpath, msg: "pre:write" });
-          await fs.ensureDir(path.dirname(fpath));
-          await fs.writeFile(fpath, body);
-          return note;
-        } catch (err) {
-          errors.push(err as DendronError);
-          return;
+    const total = notes.length;
+    progress?.report({ message: `Importing ${total} notes...` });
+    let acc = 0;
+    const minStep = Math.max(100, total / 20.0);
+
+    // looks like one is ideal, doing this in parallel slows down this process
+    // eg. with limit of 1, latency is 30ms, with limit of 2, latency is 600ms
+    const result = await mapLimit(notes, 1, async (note: NoteProps) => {
+      try {
+        const startActivate = process.hrtime();
+        const body = await this.renderNote({ note, config });
+        const hpath = this.dot2Slash(note.fname) + ".md";
+        const vname = VaultUtils.getName(note.vault);
+        const fpath = path.join(destination, vname, hpath);
+        logger.debug({ fpath, msg: "pre:write" });
+        await fs.ensureDir(path.dirname(fpath));
+        await fs.writeFile(fpath, body);
+        if (progress) {
+          acc += 1;
+          if (acc / minStep === 0) {
+            progress.report({ increment: acc / total });
+          }
         }
-      })
-    );
+        const duration = getDurationMilliseconds(startActivate);
+        logger.info({ ctx, duration, id: fpath });
+        return note;
+      } catch (err) {
+        errors.push(err as DendronError);
+        return;
+      }
+      // 100
+      // 10 = 1s
+      // 100 = 10s
+      // 1k = 100s
+      // 10k = 1ks, 16min
+    });
+    // const result = await parallelLimit(
+    //   notes.map(async (note) => {
+    //     try {
+    //       const body = await this.renderNote(note);
+    //       const hpath = this.dot2Slash(note.fname) + ".md";
+    //       const vname = VaultUtils.getName(note.vault);
+    //       const fpath = path.join(destination, vname, hpath);
+    //       logger.debug({ fpath, msg: "pre:write" });
+    //       await fs.ensureDir(path.dirname(fpath));
+    //       await fs.writeFile(fpath, body);
+    //       if (progress) {
+    //         progress.report({ increment: 1 });
+    //       }
+    //       return note;
+    //     } catch (err) {
+    //       errors.push(err as DendronError);
+    //       return;
+    //     }
+    //   }),
+    //   50
+    // );
 
     // Export Assets for vault and workspace exportScope
     const vaultsArray: DVault[] = [];
     switch (exportScope) {
       case PodExportScope.Vault: {
-        vaultsArray.push(input[0].vault);
+        vaultsArray.push(notes[0].vault);
         break;
       }
       case PodExportScope.Workspace: {
@@ -148,47 +200,56 @@ export class MarkdownExportPodV2
     }
   }
 
-  async renderNote(input: NoteProps) {
+  /**
+   * TODO: OPTIMIZE
+   * Currently, this can take anywhere between 30ms to 1300ms to execute on one document.
+   * Also does not work well in parallel. Need to do some profiling work
+   */
+  async renderNote({
+    note,
+    config,
+  }: {
+    note: NoteProps;
+    config: IntermediateDendronConfig;
+  }) {
     const {
       convertTagNotesToLinks = false,
       convertUserNotesToLinks = false,
       addFrontmatterTitle,
     } = this._config;
     const engine = this._engine;
-    const overrideConfig = { ...DConfig.readConfigSync(engine.wsRoot) };
-
-    const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);
+    const workspaceConfig = ConfigUtils.getWorkspace(config);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
 
     if (!_.isUndefined(addFrontmatterTitle)) {
-      const previewConfig = ConfigUtils.getPreview(overrideConfig);
+      const previewConfig = ConfigUtils.getPreview(config);
       previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
     let remark = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_REGULAR,
       config: {
-        ...overrideConfig,
+        ...config,
         usePrettyRefs: false,
       },
       engine,
-      fname: input.fname,
-      vault: input.vault,
+      fname: note.fname,
+      vault: note.vault,
     });
     if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
       remark = remark.use(
         RemarkUtils.convertWikiLinkToNoteUrl(
-          input,
+          note,
           [],
           this._engine,
           this._dendronConfig
         )
       );
     } else {
-      remark = remark.use(RemarkUtils.convertLinksFromDotNotation(input, []));
+      remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));
     }
-    const out = (await remark.process(input.body)).toString();
+    const out = (await remark.process(note.body)).toString();
     return _.trim(out);
   }
 

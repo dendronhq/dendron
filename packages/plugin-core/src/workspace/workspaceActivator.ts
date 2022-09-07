@@ -548,17 +548,14 @@ export class WorkspaceActivator {
     const reloadSuccess = await reloadWorkspace({ ext, wsService });
     const durationReloadWorkspace = getDurationMilliseconds(start);
 
-    // check if we have errors during init
-    try {
-      // NOTE: tracking is not awaited, don't block on this
-      ExtensionUtils.trackWorkspaceInit({
-        durationReloadWorkspace,
-        activatedSuccess: !!reloadSuccess,
-        ext,
-      });
-    } catch (error) {
+    // NOTE: tracking is not awaited, don't block on this
+    ExtensionUtils.trackWorkspaceInit({
+      durationReloadWorkspace,
+      activatedSuccess: !!reloadSuccess,
+      ext,
+    }).catch((error) => {
       Sentry.captureException(error);
-    }
+    });
 
     analyzeWorkspace({ wsService });
 

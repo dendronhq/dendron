@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { AxiosError } from "axios";
-import type { Result as NeverThrowResult } from "neverthrow";
+import type { Result } from "neverthrow";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 import { RespV3, RespV3ErrorResp } from "./types";
 
@@ -416,5 +416,8 @@ export function isTSError(err: any): err is Error {
   );
 }
 
-
-export type DendronResult<T> = NeverThrowResult<T, IDendronError>;
+/**
+ * [Result type](https://en.wikipedia.org/wiki/Result_type)
+ * See https://github.com/supermacro/neverthrow/wiki/Introduction:-Type-Safe-Errors-in-JS-&-TypeScript-(10-minute-read)#making-your-types-more-intuitive
+ */
+export type DendronResult<T> = Result<T, IDendronError>;

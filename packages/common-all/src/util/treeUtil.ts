@@ -41,7 +41,7 @@ export type TreeNode = {
 };
 
 export class TreeUtils {
-  static generateTreeDataV2(
+  static generateTreeData(
     noteDict: NotePropsByIdDict,
     sidebars: Sidebars
   ): TreeMenu {
@@ -173,28 +173,6 @@ export class TreeUtils {
     );
   }
 
-  static generateTreeData(
-    allNotes: NotePropsByIdDict,
-    domains: NoteProps[]
-  ): TreeMenu {
-    // --- Calc
-    const roots = domains
-      .map((note) => {
-        return TreeUtils.note2Tree({
-          noteId: note.id,
-          noteDict: allNotes,
-        });
-      })
-      .filter((ent): ent is TreeMenuNode => !_.isUndefined(ent));
-
-    const child2parent: { [key: string]: string | null } = {};
-    Object.entries(allNotes).forEach(([noteId, note]) => {
-      child2parent[noteId] = note.parent;
-    });
-
-    return { roots, child2parent, notesLabelById: {} };
-  }
-
   static getAllParents = ({
     child2parent,
     noteId,
@@ -211,62 +189,6 @@ export class TreeUtils {
 
     return activeNoteIds;
   };
-
-  static note2Tree({
-    noteId,
-    noteDict,
-  }: {
-    noteId: string;
-    noteDict: NotePropsByIdDict;
-  }): TreeMenuNode | undefined {
-    const note = noteDict[noteId];
-    const fm = PublishUtils.getPublishFM(note);
-
-    // return children of the current note
-    const getChildren = () => {
-      if (fm.nav_exclude_children || fm.has_collection) {
-        return [];
-      }
-
-      const { data } = this.sortNotesAtLevel({
-        noteIds: note.children,
-        noteDict,
-        reverse: fm.sort_order === "reverse",
-      });
-
-      return data
-        .map((noteId) =>
-          TreeUtils.note2Tree({
-            noteId,
-            noteDict,
-          })
-        )
-        .filter(isNotUndefined);
-    };
-
-    if (_.isUndefined(note)) {
-      return undefined;
-    }
-
-    let icon: TreeMenuNodeIcon | null = null;
-    if (note.schema) {
-      icon = TreeMenuNodeIcon.bookOutlined;
-    } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-      icon = TreeMenuNodeIcon.numberOutlined;
-    } else if (note.stub) {
-      icon = TreeMenuNodeIcon.plusOutlined;
-    }
-
-    return {
-      key: note.id,
-      title: note.title,
-      icon,
-      hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
-      vaultName: VaultUtils.getName(note.vault),
-      navExclude: fm.nav_exclude || false,
-      children: getChildren(),
-    };
-  }
 
   static sortNotesAtLevel = ({
     noteIds,

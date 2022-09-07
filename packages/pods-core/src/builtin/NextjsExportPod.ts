@@ -580,8 +580,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const treeDstPath = path.join(podDstDir, "tree.json");
 
     const sidebars = sidebarsResult.value;
-    const tree = TreeUtils.generateTreeDataV2(payload.notes, sidebars);
-    // const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
+    const tree = TreeUtils.generateTreeData(payload.notes, sidebars);
 
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");

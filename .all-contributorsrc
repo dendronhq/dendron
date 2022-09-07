@@ -2130,6 +2130,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "bigheadghost",
+      "name": "bigheadghost",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1214531?v=4",
+      "profile": "https://github.com/bigheadghost",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

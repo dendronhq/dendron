@@ -75,11 +75,15 @@ export type DoctorServiceOpts = {
 export class DoctorService implements Disposable {
   public L: ReturnType<typeof createDisposableLogger>["logger"];
   private loggerDispose: ReturnType<typeof createDisposableLogger>["dispose"];
+  private print: Function;
 
-  constructor() {
+  constructor(opts?: { printFunc?: Function }) {
     const { logger, dispose } = createDisposableLogger("DoctorService");
     this.L = logger;
     this.loggerDispose = dispose;
+    // if given a print function, use that.
+    // otherwise, no-op
+    this.print = opts?.printFunc ? opts.printFunc : () => {};
   }
 
   dispose() {
@@ -307,8 +311,7 @@ export class DoctorService implements Disposable {
         return { exit: true };
       }
       case DoctorActionsEnum.FIX_FRONTMATTER: {
-        // eslint-disable-next-line no-console
-        console.log(
+        this.print(
           "the CLI currently doesn't support this action. please run this using the plugin"
         );
         return { exit };
@@ -607,16 +610,16 @@ export class DoctorService implements Disposable {
         });
         resp = stats;
 
-        if (canRename.length > 0 && !opts.quiet) {
-          console.log("Found invalid filename in notes:\n");
+        if (canRename.length > 0) {
+          this.print("Found invalid filename in notes:\n");
           canRename.forEach((item) => {
             const { note, resp, cleanedFname } = item;
             const { fname, vault } = note;
             const vaultName = VaultUtils.getName(vault);
-            console.log(
+            this.print(
               `Note "${fname}" in ${vaultName} (reason: ${resp.reason})`
             );
-            console.log(`  Can be automatically fixed to "${cleanedFname}"`);
+            this.print(`  Can be automatically fixed to "${cleanedFname}"`);
           });
         }
         let changes: NoteChangeEntry[] = [];
@@ -628,18 +631,18 @@ export class DoctorService implements Disposable {
           });
         }
 
-        if (cantRename.length > 0 && !opts.quiet) {
-          console.log(
+        if (cantRename.length > 0) {
+          this.print(
             "These notes' filenames cannot be automatically fixed because it will result in duplicate notes:"
           );
           cantRename.forEach((item) => {
             const { note, resp, cleanedFname } = item;
             const { fname, vault } = note;
             const vaultName = VaultUtils.getName(vault);
-            console.log(
+            this.print(
               `Note "${fname}" in ${vaultName} (reason: ${resp.reason})`
             );
-            console.log(`  Note "${cleanedFname}" already exists.`);
+            this.print(`  Note "${cleanedFname}" already exists.`);
           });
         }
 
@@ -665,9 +668,8 @@ export class DoctorService implements Disposable {
       }
     }
     this.L.info({ msg: "doctor done", numChanges });
-    if (action === DoctorActionsEnum.FIND_BROKEN_LINKS && !opts.quiet) {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify({ brokenLinks: resp }, null, "  "));
+    if (action === DoctorActionsEnum.FIND_BROKEN_LINKS) {
+      this.print(JSON.stringify({ brokenLinks: resp }, null, "  "));
     }
     return { exit, resp };
   }
@@ -773,23 +775,19 @@ export class DoctorService implements Disposable {
             vaultName,
           },
         });
-        if (out.data) changes = changes.concat(out.data);
-        if (!quiet) {
-          if (out.data) {
-            console.log(
-              `Note "${fname}" in ${vaultName} renamed to "${cleanedFname}"`
-            );
-          }
-          if (out.error) {
-            console.log(
-              `Error encountered while renaming "${fname}" in vault ${vaultName}. The filename of this note is still invalid. Please manually rename this note.`
-            );
-          }
+        if (out.data) {
+          changes = changes.concat(out.data);
+          this.print(
+            `Note "${fname}" in ${vaultName} renamed to "${cleanedFname}"`
+          );
+        }
+        if (out.error) {
+          this.print(
+            `Error encountered while renaming "${fname}" in vault ${vaultName}. The filename of this note is still invalid. Please manually rename this note.`
+          );
         }
       });
-      if (!quiet) {
-        console.log("\n");
-      }
+      this.print("\n");
     }
     return changes;
   }

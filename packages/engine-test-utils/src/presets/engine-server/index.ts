@@ -11,8 +11,6 @@ import { ENGINE_RENDER_PRESETS } from "./render";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
 import _ from "lodash";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { ENGINE_GET_LINKS_PRESETS } from "./getLinks";
-import { ENGINE_GET_ANCHORS_PRESETS } from "./getAnchors";
 
 export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
 export { ENGINE_RENAME_PRESETS };
@@ -31,8 +29,6 @@ export const ENGINE_SERVER = {
   ENGINE_QUERY_PRESETS,
   ENGINE_BULK_WRITE_NOTES_PRESETS,
   ENGINE_RENDER_PRESETS,
-  ENGINE_GET_LINKS_PRESETS,
-  ENGINE_GET_ANCHORS_PRESETS,
 };
 
 type TestPresetEntry = TestPresetEntryV4;
@@ -120,8 +116,6 @@ export const ENGINE_PRESETS = [
   { name: "render", presets: ENGINE_SERVER.ENGINE_RENDER_PRESETS },
   { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
   { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
-  { name: "getLinks", presets: ENGINE_SERVER.ENGINE_GET_LINKS_PRESETS },
-  { name: "getAnchors", presets: ENGINE_SERVER.ENGINE_GET_ANCHORS_PRESETS },
 ];
 
 export const ENGINE_PRESETS_MULTI = [
@@ -139,6 +133,7 @@ export const ENGINE_V3_PRESETS = [
   },
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
   { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
+  { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
   { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
   { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
   { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },

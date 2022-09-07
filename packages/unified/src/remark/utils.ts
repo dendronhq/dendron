@@ -17,7 +17,6 @@ import {
   DNoteRefLink,
   DNoteRefLinkRaw,
   DVault,
-  GetAnchorsResp,
   getSlugger,
   IntermediateDendronConfig,
   isBlockAnchor,
@@ -913,6 +912,8 @@ export class LinkUtils {
     return writeResp;
   }
 }
+
+export type GetAnchorsResp = { [index: string]: DNoteAnchorPositioned };
 
 export class AnchorUtils {
   /** Given a header, finds the text of that header, including any wikilinks or hashtags that are included in the header.

@@ -40,7 +40,7 @@ const SCHEMAS = {
           expected: 3,
         },
         {
-          actual: resp.data.length,
+          actual: resp.data!.length,
           expected: 2,
           msg: "query should have same results",
         },

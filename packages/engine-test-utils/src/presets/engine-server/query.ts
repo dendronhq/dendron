@@ -37,7 +37,7 @@ const SCHEMAS = {
       const { data } = await engine.querySchema("*");
       return [
         {
-          actual: data.length,
+          actual: data!.length,
           expected: 2,
         },
       ];

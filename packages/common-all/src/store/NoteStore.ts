@@ -102,6 +102,13 @@ export class NoteStore implements Disposable, INoteStore<string> {
   }
 
   /**
+   * See {@link INoteStore.bulkGetMetadata}
+   */
+  async bulkGetMetadata(keys: string[]): Promise<RespV3<NotePropsMeta>[]> {
+    return Promise.all(keys.map((key) => this.getMetadata(key)));
+  }
+
+  /**
    * See {@link INoteStore.find}
    */
   async find(opts: FindNoteOpts): Promise<RespV3<NoteProps[]>> {

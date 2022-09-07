@@ -274,7 +274,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         Logger.debug({ ctx, msg: "empty qs" });
-        const items = NotePickerUtils.fetchRootQuickPickResults({ engine });
+        const items = await NotePickerUtils.fetchRootQuickPickResults({
+          engine,
+        });
         const extraItems = this.opts.extraItems;
         if (extraItems) {
           items.unshift(...extraItems);

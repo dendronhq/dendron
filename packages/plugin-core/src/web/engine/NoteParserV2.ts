@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   cleanName,
   DendronCompositeError,
   DendronError,
@@ -21,6 +20,7 @@ import {
   NotePropsByIdDict,
   NoteUtils,
   RespV2,
+  RespWithOptError,
   string2Note,
   stringifyError,
   VaultUtils,
@@ -69,7 +69,7 @@ export class NoteParserV2 {
   async parseFiles(
     allPaths: string[],
     vault: DVault
-  ): Promise<BulkResp<NoteDicts>> {
+  ): Promise<RespWithOptError<NoteDicts>> {
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     // In-memory representation of NoteProps dictionary
@@ -83,21 +83,21 @@ export class NoteParserV2 {
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootFile = fileMetaDict[1].find((n) => n.fpath === "root.md");
     if (!rootFile) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootProps = await this.parseNoteProps({
       fpath: cleanName(rootFile.fpath), // TODO: Don't think cleanName is necessary here
@@ -108,12 +108,12 @@ export class NoteParserV2 {
       errors.push(rootProps.error);
     }
     if (!rootProps.data || rootProps.data.length === 0) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootNote = rootProps.data[0].note;
     NoteDictsUtils.add(rootNote, noteDicts);
@@ -218,7 +218,10 @@ export class NoteParserV2 {
       // eslint-disable-next-line no-await-in-loop
       await Promise.all(anotherOp);
     }
-    return { data: noteDicts, error: new DendronCompositeError(errors) };
+    return {
+      data: noteDicts,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
+    };
   }
 
   /**

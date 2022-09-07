@@ -64,7 +64,6 @@ const createEngine = createEngineFactory({
         ],
       });
       return {
-        error: null,
         data: resp?.changed,
       };
     };

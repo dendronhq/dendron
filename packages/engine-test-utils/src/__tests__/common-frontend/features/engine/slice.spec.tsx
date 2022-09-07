@@ -24,7 +24,7 @@ describe("GIVEN syncNote", () => {
               contentHash: undefined,
             },
           });
-          await engine.updateNote(newNote, { newNode: true });
+          await engine.writeNote(newNote, { metaOnly: true });
           expect(port).toBeTruthy();
           const url = APIUtils.getLocalEndpoint(port!);
 

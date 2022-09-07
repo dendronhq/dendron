@@ -1,7 +1,7 @@
 import {
   DendronError,
   IntermediateDendronConfig,
-  RespV2,
+  RespV3,
   WorkspaceRequest,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -20,29 +20,16 @@ export class ConfigController {
 
   async get({
     ws,
-  }: WorkspaceRequest): Promise<RespV2<IntermediateDendronConfig>> {
+  }: WorkspaceRequest): Promise<RespV3<IntermediateDendronConfig>> {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
-      const config = DConfig.readConfigSync(engine.wsRoot);
-      return { data: config, error: null };
+      return { data: DConfig.readConfigSync(engine.wsRoot) };
     } catch (err) {
       return {
         error: new DendronError({ message: JSON.stringify(err) }),
-        data: undefined,
       };
     }
-  }
-
-  async write({
-    ws,
-    ...opts
-  }: WorkspaceRequest & IntermediateDendronConfig): Promise<RespV2<void>> {
-    const engine = ws
-      ? await getWSEngine({ ws })
-      : MemoryStore.instance().getEngine();
-    await DConfig.writeConfig({ wsRoot: engine.wsRoot, config: opts });
-    return { error: null };
   }
 }

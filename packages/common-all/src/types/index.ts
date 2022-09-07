@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import { DNodeType } from "./foundation";
 
 export * from "./compat";
 export * from "./foundation";
@@ -23,44 +22,8 @@ export * from "./store";
 export * from "./ReducedDEngine";
 
 export type Stage = "dev" | "prod" | "test";
-export type DEngineQuery = {
-  queryString: string;
-  mode: DNodeType;
-  opts?: QueryOpts;
-};
 
 export type DEngineMode = "exact" | "fuzzy";
-
-export interface QueryOpts {
-  /**
-   * Should add to full nodes
-   */
-  fullNode?: boolean;
-  /**
-   * Just get one result
-   */
-  queryOne?: boolean;
-  /**
-   * Use with `createIfNew`
-   * If true, create a stub node.
-   * A stub node is not written to disk
-   */
-  stub?: boolean;
-  /**
-   * If node does not exist, create it?
-   */
-  createIfNew?: boolean;
-  // --- hints
-  // DEPPRECATE
-  webClient?: boolean;
-  initialQuery?: boolean;
-  mode?: DNodeType;
-}
-
-export interface Resp<T> {
-  data: T;
-  error?: Error | null;
-}
 
 export type DendronSiteFM = {
   published?: boolean;

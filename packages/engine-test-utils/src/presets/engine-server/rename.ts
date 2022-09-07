@@ -5,7 +5,6 @@ import {
   IDendronError,
   NoteChangeEntry,
   NoteUtils,
-  RenameNotePayload,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -1595,7 +1594,7 @@ const NOTES = {
         },
       });
 
-      const changedEntries: RenameNotePayload | undefined = out.data;
+      const changedEntries: NoteChangeEntry[] | undefined = out.data;
       const fooStub = changedEntries?.find((entry) => {
         return entry.status === "create" && entry.note.fname === "foo";
       })?.note;

@@ -1,9 +1,8 @@
 import {
+  DEngineInitResp,
   error2PlainObject,
   ERROR_SEVERITY,
-  InitializePayload,
   WorkspaceInitRequest,
-  WorkspaceSyncPayload,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
@@ -20,7 +19,7 @@ export class WorkspaceController {
     return WorkspaceController.singleton;
   }
 
-  async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
+  async init({ uri }: WorkspaceInitRequest): Promise<DEngineInitResp> {
     const start = process.hrtime();
 
     const ctx = "WorkspaceController:init";
@@ -30,19 +29,20 @@ export class WorkspaceController {
       wsRoot: uri,
       logger,
     });
-    let { error } = await engine.init();
+    const { data, error } = await engine.init();
     if (error && error.severity === ERROR_SEVERITY.FATAL) {
       logger.error({ ctx, msg: "fatal error initializing notes", error });
-      return { error };
+      return { data, error };
     }
     await putWS({ ws: uri, engine });
     const duration = getDurationMilliseconds(start);
     logger.info({ ctx, msg: "finish init", duration, uri, error });
+    let error2;
     if (error) {
-      error = error2PlainObject(error);
+      error2 = error2PlainObject(error);
     }
-    const payload: InitializePayload = {
-      error,
+    const payload = {
+      error: error2,
       data: {
         notes: engine.notes,
         schemas: engine.schemas,
@@ -54,11 +54,10 @@ export class WorkspaceController {
     return payload;
   }
 
-  async sync({ ws }: WorkspaceSyncRequest): Promise<WorkspaceSyncPayload> {
+  async sync({ ws }: WorkspaceSyncRequest): Promise<DEngineInitResp> {
     const engine = await getWSEngine({ ws });
     const { notes, schemas } = engine;
     return {
-      error: null,
       data: {
         notes,
         schemas,

@@ -45,35 +45,18 @@ export class TreeUtils {
     noteDict: NotePropsByIdDict,
     sidebars: Sidebars
   ): TreeMenu {
-    function itemToNote(item: SidebarItem) {
-      const noteId = do_(() => {
-        const { type } = item;
-        switch (type) {
-          case "category": {
-            const { link } = item;
-            return do_(() => {
-              switch (link.type) {
-                case "note":
-                  return link.id;
-
-                default:
-                  assertUnreachable(link.type);
-              }
-            });
-          }
-          case "note": {
-            return item.id;
-          }
-          default:
-            assertUnreachable(type);
+    function itemToNoteId(item: SidebarItem) {
+      const { type } = item;
+      switch (type) {
+        case "category": {
+          return item.link?.id;
         }
-      });
-
-      // explicitly casting since `noUncheckedIndexedAccess` is currently not enabled
-      const maybeNote = noteDict[noteId] as NoteProps | undefined;
-
-      // TODO check if note could be found by id and if note search for matching `fname`
-      return maybeNote;
+        case "note": {
+          return item.id;
+        }
+        default:
+          assertUnreachable(type);
+      }
     }
 
     function itemToTreeMenuNode(
@@ -86,7 +69,8 @@ export class TreeUtils {
     ): TreeMenuNode | undefined {
       const { child2parent, parent, notesLabelById } = opts;
 
-      const note = itemToNote(sidebarItem);
+      const noteId = itemToNoteId(sidebarItem);
+      const note = noteDict[noteId] as NoteProps | undefined; // explicitly casting since `noUncheckedIndexedAccess` is currently not enabled
 
       if (_.isUndefined(note)) {
         return undefined;

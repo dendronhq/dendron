@@ -44,12 +44,22 @@ type SidebarItemCategoryConfig = {
 };
 const sidebarItemCategoryConfig: v.Type<SidebarItemCategoryConfig> = v.lazy(
   () =>
-    v.object({
-      type: categoryLiteral,
-      label: v.string(),
-      items: v.array(v.lazy(() => sidebarItemConfig)),
-      link: sidebarItemCategoryLink,
-    })
+    v
+      .object({
+        type: categoryLiteral,
+        label: v.string(),
+        items: v.array(v.lazy(() => sidebarItemConfig)),
+        link: sidebarItemCategoryLink,
+      })
+      .chain((item) => {
+        // error when this item is invalid and therefore won't show up in the sidebar
+        if (item.items.length === 0 && !item.link) {
+          return v.err(
+            `Sidebar category '${item.label}' has neither any subitem nor a link. This makes this item not able to link to anything.`
+          );
+        }
+        return v.ok(item);
+      })
 );
 
 const sidebarItemCategory: v.Type<SidebarItemCategory> = v.lazy(() =>

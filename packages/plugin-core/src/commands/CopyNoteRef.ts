@@ -58,7 +58,6 @@ export class CopyNoteRefCommand extends BasicCommand<
     note: NoteProps;
     useVaultPrefix?: boolean;
     editor: TextEditor;
-    enableSmartRefs?: boolean;
   }) {
     const { note, useVaultPrefix, editor } = opts;
     const { fname, vault } = note;
@@ -77,22 +76,10 @@ export class CopyNoteRefCommand extends BasicCommand<
       if (!_.isUndefined(startAnchor) && !isBlockAnchor(startAnchor)) {
         // if a header is selected, skip the header itself
         linkData.anchorStart = slugger.slug(startAnchor);
-        if (!opts.enableSmartRefs) {
-          linkData.anchorStartOffset = 1;
-        }
       }
       linkData.anchorEnd = endAnchor;
       if (!_.isUndefined(endAnchor) && !isBlockAnchor(endAnchor)) {
         linkData.anchorEnd = slugger.slug(endAnchor);
-      }
-      if (
-        _.isUndefined(endAnchor) &&
-        !_.isUndefined(startAnchor) &&
-        this.hasNextHeader({ selection }) &&
-        !opts.enableSmartRefs
-      ) {
-        // if a header is selected for the start, and nothing for the end, and there's a next anchor, then use the wildcard
-        linkData.anchorEnd = "*";
       }
     }
     const link: DNoteRefLink = {
@@ -115,8 +102,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const vault = PickerUtilsV2.getVaultForOpenEditor();
-    const { config, engine } = ExtensionProvider.getDWorkspace();
-    const enableSmartRefs = config.workspace.enableSmartRefs;
+    const { engine } = ExtensionProvider.getDWorkspace();
     const note = NoteUtils.getNoteByFnameFromEngine({
       fname,
       engine,
@@ -128,7 +114,6 @@ export class CopyNoteRefCommand extends BasicCommand<
         note,
         useVaultPrefix,
         editor,
-        enableSmartRefs,
       });
       try {
         clipboard.writeText(link);

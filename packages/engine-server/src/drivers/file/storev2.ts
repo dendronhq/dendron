@@ -1254,7 +1254,7 @@ export class FileStorage implements DStore {
   ): Promise<WriteNoteResp> {
     const ctx = `FileStore:writeNote:${note.fname}`;
     let changedEntries: NoteChangeEntry[] = [];
-    let error: DendronError | null = null;
+    let error: IDendronError | null = null;
     this.logger.info({
       ctx,
       msg: "enter",
@@ -1324,6 +1324,7 @@ export class FileStorage implements DStore {
         const valResp = NoteUtils.validate(resp.note);
         if (valResp.error) {
           this.logger.error({ ctx, error: stringifyError(valResp.error) });
+          error = valResp.error;
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });

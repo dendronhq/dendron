@@ -679,7 +679,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
               changes = await ds.fixInvalidFileNames({
                 canRename,
                 engine,
-                quiet: true,
               });
               const maybeReminder =
                 cantRename.length > 0

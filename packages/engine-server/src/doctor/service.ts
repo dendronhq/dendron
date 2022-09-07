@@ -627,7 +627,6 @@ export class DoctorService implements Disposable {
           changes = await this.fixInvalidFileNames({
             canRename,
             engine,
-            quiet: opts.quiet,
           });
         }
 
@@ -756,9 +755,8 @@ export class DoctorService implements Disposable {
       resp: ValidateFnameResp;
     }[];
     engine: DEngineClient;
-    quiet?: boolean;
   }) {
-    const { canRename, engine, quiet } = opts;
+    const { canRename, engine } = opts;
     let changes: NoteChangeEntry[] = [];
     if (canRename.length > 0) {
       await asyncLoopOneAtATime(canRename, async (item) => {

@@ -1322,9 +1322,8 @@ export class FileStorage implements DStore {
         this.logger.error({ ctx, error: stringifyError(error) });
       } else {
         const valResp = NoteUtils.validate(resp.note);
-        if (valResp instanceof DendronError) {
-          error = valResp;
-          this.logger.error({ ctx, error: stringifyError(error) });
+        if (valResp.error) {
+          this.logger.error({ ctx, error: stringifyError(valResp.error) });
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });

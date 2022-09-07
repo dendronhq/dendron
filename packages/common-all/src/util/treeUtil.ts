@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { DendronError } from "..";
+import { DendronError, NoteUtils } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
 import { isNotUndefined, PublishUtils } from "../utils";
@@ -163,6 +163,15 @@ export class TreeUtils {
       });
     }
 
+    const getNoteTitleOrError = (note: NoteProps) => {
+      const { error } = NoteUtils.validate(note);
+      if (!error) {
+        return note.title.toLowerCase();
+      } else {
+        return `BAD NOTE TITLE: ${note.fname} + ${error.message}`;
+      }
+    };
+
     const out = _.sortBy(
       safeNoteIds,
       // Sort by nav order if set
@@ -172,9 +181,9 @@ export class TreeUtils {
         if (labelType) {
           return labelType === TreeViewItemLabelTypeEnum.filename
             ? _.last(noteDict[noteId]?.fname.split("."))?.toLowerCase()
-            : noteDict[noteId]?.title?.toLowerCase();
+            : getNoteTitleOrError(noteDict[noteId]);
         } else {
-          return noteDict[noteId]?.title?.toLowerCase();
+          return getNoteTitleOrError(noteDict[noteId]);
         }
       },
       // If titles are identical, sort by last updated date

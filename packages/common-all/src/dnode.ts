@@ -37,6 +37,7 @@ import {
   SchemaRaw,
   NotePropsMeta,
   NoteQuickInputV2,
+  RespV3,
 } from "./types";
 import {
   DefaultMap,
@@ -1089,20 +1090,37 @@ export class NoteUtils {
     return path.basename(uri.fsPath, ".md");
   }
 
-  static validate(noteProps: Partial<NoteProps>) {
-    if (_.isUndefined(noteProps)) {
-      return DendronError.createFromStatus({
-        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
-        message: "NoteProps is undefined",
-      });
+  /**
+   * Check if input is a valid note
+   * @param maybeNoteProps
+   * @returns
+   */
+  static validate(maybeNoteProps: any): RespV3<boolean> {
+    if (_.isUndefined(maybeNoteProps)) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+          message: "NoteProps is undefined",
+        }),
+      };
     }
-    if (_.isUndefined(noteProps.vault)) {
-      return DendronError.createFromStatus({
-        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
-        message: "note vault is undefined",
-      });
+    if (_.isUndefined(maybeNoteProps.vault)) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+          message: "note vault is undefined",
+        }),
+      };
     }
-    return true;
+    if (!_.isString(maybeNoteProps.title)) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+          message: "note title not set as string",
+        }),
+      };
+    }
+    return { data: true };
   }
 
   static validateFname(fname: string) {

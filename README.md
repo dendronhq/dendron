@@ -493,7 +493,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
   <tr>
     <td align="center"><a href="https://github.com/Alecton4"><img src="https://avatars.githubusercontent.com/u/43232804?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yttrium ZHAO</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AAlecton4" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/saifahn"><img src="https://avatars.githubusercontent.com/u/9913851?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean Li</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=saifahn" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/bigheadghost"><img src="https://avatars.githubusercontent.com/u/1214531?v=4?s=100" width="100px;" alt=""/><br /><sub><b>bigheadghost</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Abigheadghost" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=bigheadghost" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/bigheadghost"><img src="https://avatars.githubusercontent.com/u/1214531?v=4?s=100" width="100px;" alt=""/><br /><sub><b>bigheadghost</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Abigheadghost" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

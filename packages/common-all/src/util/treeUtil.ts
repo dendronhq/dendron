@@ -5,7 +5,7 @@ import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
 import { isNotUndefined, PublishUtils, do_ } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
-import type { SidebarsProcessed, SidebarItemProcessed } from "../sidebars";
+import type { Sidebars, SidebarItem } from "../sidebars";
 
 export enum TreeMenuNodeIcon {
   bookOutlined = "bookOutlined",
@@ -43,9 +43,9 @@ export type TreeNode = {
 export class TreeUtils {
   static generateTreeDataV2(
     noteDict: NotePropsByIdDict,
-    sidebars: SidebarsProcessed
+    sidebars: Sidebars
   ): TreeMenu {
-    function itemToNote(item: SidebarItemProcessed) {
+    function itemToNote(item: SidebarItem) {
       const noteId = do_(() => {
         const { type } = item;
         switch (type) {
@@ -77,7 +77,7 @@ export class TreeUtils {
     }
 
     function itemToTreeMenuNode(
-      sidebarItem: SidebarItemProcessed,
+      sidebarItem: SidebarItem,
       opts: {
         child2parent: Record<string, string | null>;
         parent: string | null;

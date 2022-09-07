@@ -1,7 +1,6 @@
 import {
   CLIEvents,
   DendronError,
-  isDendronResp,
   RespV3,
   config,
   RuntimeUtils,
@@ -229,7 +228,7 @@ export abstract class CLICommand<
     this.L.info({ args, state: "execute:pre" });
     const out = await this.execute(opts.data);
     this.L.info({ args, state: "execute:post" });
-    if (isDendronResp(out) && out.error) {
+    if (out.error instanceof DendronError && out.error) {
       this.L.error(out.error);
     }
 

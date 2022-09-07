@@ -1,21 +1,23 @@
 import {
-  BulkResp,
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
+  BulkWriteNoteResp,
   BulkWriteNotesOpts,
-  EngineDeleteNotePayload,
+  DeleteNoteResp,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNoteOpts,
   genUUID,
-  NoteChangeEntry,
   NoteMetadataStore,
   NoteProps,
   NotePropsMeta,
   NoteUtils,
   QueryNotesOpts,
+  QueryNotesResp,
   RenameNoteOpts,
-  RenameNotePayload,
-  RespV2,
+  RenameNoteResp,
   RespV3,
+  WriteNoteResp,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 
@@ -73,6 +75,14 @@ export class MockEngineAPIService implements ReducedDEngine {
     return this.store.get(id) as Promise<RespV3<NoteProps>>;
   }
 
+  bulkGetNotes(_ids: string[]): Promise<BulkGetNoteResp> {
+    throw new Error("Not Implemented");
+  }
+
+  bulkGetNotesMeta(_ids: string[]): Promise<BulkGetNoteMetaResp> {
+    throw new Error("Not Implemented");
+  }
+
   findNotes(_opts: FindNoteOpts): Promise<NoteProps[]> {
     throw new Error("Not Implemented");
   }
@@ -81,27 +91,25 @@ export class MockEngineAPIService implements ReducedDEngine {
     throw new Error("Not Implemented");
   }
 
-  bulkWriteNotes(
-    _opts: BulkWriteNotesOpts
-  ): Promise<BulkResp<NoteChangeEntry[]>> {
+  bulkWriteNotes(_opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
     throw new Error("Method not implemented.");
   }
   writeNote(
     _note: NoteProps,
     _opts?: EngineWriteOptsV2 | undefined
-  ): Promise<RespV2<NoteChangeEntry[]>> {
+  ): Promise<WriteNoteResp> {
     throw new Error("Method not implemented.");
   }
   deleteNote(
     _id: string,
     _opts?: EngineDeleteOpts | undefined
-  ): Promise<Required<RespV2<EngineDeleteNotePayload>>> {
+  ): Promise<DeleteNoteResp> {
     throw new Error("Method not implemented.");
   }
-  renameNote(_opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
+  renameNote(_opts: RenameNoteOpts): Promise<RenameNoteResp> {
     throw new Error("Method not implemented.");
   }
-  async queryNotes(_opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
+  async queryNotes(_opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // throw new Error("Method not implemented.");
 
     const resp = await this.store.get("foo");
@@ -109,7 +117,6 @@ export class MockEngineAPIService implements ReducedDEngine {
     const data = resp.data as NoteProps;
     return Promise.resolve({
       data: [data],
-      error: null,
     });
   }
 }

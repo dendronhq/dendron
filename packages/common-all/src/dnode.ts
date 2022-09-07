@@ -17,7 +17,6 @@ import {
   DNodeImplicitPropsEnum,
   DNodeOpts,
   DNodeProps,
-  DNodePropsDict,
   DNodePropsQuickInputV2,
   DNoteLoc,
   DVault,
@@ -257,28 +256,6 @@ export class DNodeUtils {
     return path.join(root, opts.basename);
   }
 
-  static getChildren(
-    node: DNodeProps,
-    opts: {
-      recursive?: boolean;
-      nodeDict: DNodePropsDict;
-    }
-  ): DNodeProps[] {
-    const { nodeDict, recursive } = opts;
-    const children = node.children.map((id) => {
-      if (!_.has(nodeDict, id)) {
-        throw Error("child nod found");
-      }
-      return nodeDict[id];
-    });
-    if (recursive) {
-      return children.concat(
-        children.map((c) => DNodeUtils.getChildren(c, opts)).flat()
-      );
-    }
-    return children;
-  }
-
   static isRoot(note: NotePropsMeta) {
     return note.fname === "root";
   }
@@ -514,7 +491,7 @@ export class NoteUtils {
    * @returns
    */
   static createWikiLink(opts: {
-    note: NoteProps;
+    note: NotePropsMeta;
     anchor?: {
       value: string;
       type: "header" | "blockAnchor";

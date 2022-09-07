@@ -141,7 +141,7 @@ export class TextDocumentService implements ITextDocumentService {
       vault,
     });
 
-    const resp = await engine.updateNote(props);
+    const resp = await engine.writeNote(props, { metaOnly: true });
 
     // This altering of response type is only for maintaining test compatibility
     if (resp.data && resp.data.length > 0) {

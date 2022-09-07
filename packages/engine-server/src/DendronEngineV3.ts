@@ -1,12 +1,12 @@
 import {
-  BulkResp,
   ConfigUtils,
   CONSTANTS,
+  RespWithOptError,
   DendronCompositeError,
   DendronError,
   DEngine,
   DEngineClient,
-  DEngineDeleteSchemaResp,
+  DeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
   DHookEntry,
@@ -24,18 +24,13 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   FuseEngine,
-  GetAnchorsRequest,
-  GetDecorationsPayload,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
-  GetNoteBlocksPayload,
-  GetNoteLinksPayload,
+  GetDecorationsResp,
+  GetNoteBlocksResp,
   IDendronError,
   IFileStore,
   INoteStore,
   IntermediateDendronConfig,
   ISchemaStore,
-  isNotNull,
   isNotUndefined,
   NoteChangeEntry,
   NoteDicts,
@@ -46,30 +41,29 @@ import {
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
-  NoteQueryResp,
+  QueryNotesResp,
   NoteStore,
   NoteUtils,
-  Optional,
   QueryNotesOpts,
   RenameNoteOpts,
-  RenameNotePayload,
-  RenderNotePayload,
-  RespV2,
   RespV3,
   SchemaMetadataStore,
   SchemaModuleDict,
   SchemaModuleProps,
-  SchemaQueryResp,
+  QuerySchemaResp,
   SchemaStore,
   SchemaUtils,
   stringifyError,
   TAGS_HIERARCHY,
-  UpdateNoteResp,
   URI,
   USERS_HIERARCHY,
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
+  RenameNoteResp,
+  RenderNoteResp,
+  GetSchemaResp,
+  WriteSchemaResp,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -85,8 +79,7 @@ import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
 import { FileStorage } from "./drivers/file/storev2";
-// import { AnchorUtils, LinkUtils } from "./markdown";
-import { AnchorUtils, LinkUtils } from "@dendronhq/unified";
+import { LinkUtils } from "@dendronhq/unified";
 import { NodeJSFileStore } from "./store";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { EngineUtils } from "./utils/engineUtils";
@@ -199,10 +192,18 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
+    const defaultResp = {
+      notes: {},
+      schemas: {},
+      wsRoot: this.wsRoot,
+      vaults: this.vaults,
+      config: ConfigUtils.genDefaultConfig(),
+    };
     try {
       const { data: schemas, error: schemaErrors } = await this.initSchema();
       if (_.isUndefined(schemas)) {
         return {
+          data: defaultResp,
           error: DendronError.createFromStatus({
             message: "No schemas found",
             status: ERROR_STATUS.UNKNOWN,
@@ -220,6 +221,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       );
       if (_.isUndefined(notes)) {
         return {
+          data: defaultResp,
           error: DendronError.createFromStatus({
             message: "No notes found",
             status: ERROR_STATUS.UNKNOWN,
@@ -253,16 +255,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         }
         return valid;
       });
-      let allErrors = noteErrors
-        ? hookErrors.concat(noteErrors.errors)
-        : hookErrors;
-      allErrors = schemaErrors
-        ? allErrors.concat(schemaErrors.errors)
-        : allErrors;
-      let error: IDendronError | null;
+      let allErrors = noteErrors ? hookErrors.concat(noteErrors) : hookErrors;
+      allErrors = schemaErrors ? allErrors.concat(schemaErrors) : allErrors;
+      let error: IDendronError | undefined;
       switch (_.size(allErrors)) {
         case 0: {
-          error = null;
           break;
         }
         case 1: {
@@ -292,6 +289,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       const { message, stack, status } = error;
       const payload = { message, stack };
       return {
+        data: defaultResp,
         error: DendronError.createPlainError({
           payload,
           message,
@@ -310,7 +308,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
-    let error: DendronError | null = null;
     const ctx = "DEngine:writeNewNote";
     this.logger.info({
       ctx,
@@ -360,13 +357,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           })
       );
       if (resp instanceof DendronError) {
-        error = resp;
-        this.logger.error({ ctx, error: stringifyError(error) });
+        this.logger.error({ ctx, error: stringifyError(resp) });
+        return { error: resp };
       } else {
         const valResp = NoteUtils.validate(resp.note);
         if (valResp instanceof DendronError) {
-          error = valResp;
-          this.logger.error({ ctx, error: stringifyError(error) });
+          this.logger.error({ ctx, error: stringifyError(valResp) });
+          return { error: valResp };
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
@@ -528,7 +525,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
     });
     return {
-      error,
       data: changes,
     };
   }
@@ -538,7 +534,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    *
    * TODO: make atomic
    */
-  async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
+  async renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {
     const ctx = "DEngine:renameNote";
     const { oldLoc, newLoc } = opts;
     this.logger.info({ ctx, msg: "enter", opts });
@@ -709,13 +705,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
 
     this.logger.info({ ctx, msg: "exit", opts, out: notesChangedEntries });
-    return { data: notesChangedEntries, error: null };
+    return { data: notesChangedEntries };
   }
 
   /**
    * See {@link DEngine.getSchema}
    */
-  async getSchema(id: string): Promise<RespV3<SchemaModuleProps>> {
+  async getSchema(id: string): Promise<GetSchemaResp> {
     return this._schemaStore.getMetadata(id);
   }
 
@@ -725,20 +721,22 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   async writeSchema(
     schema: SchemaModuleProps,
     opts?: EngineSchemaWriteOpts
-  ): Promise<void> {
+  ): Promise<WriteSchemaResp> {
     const maybeSchema = await this._schemaStore.getMetadata(schema.root.id);
 
-    if (opts?.metaOnly) {
-      await this._schemaStore.writeMetadata({ key: schema.root.id, schema });
-    } else {
-      await this._schemaStore.write({ key: schema.root.id, schema });
-    }
+    const resp = opts?.metaOnly
+      ? await this._schemaStore.writeMetadata({ key: schema.root.id, schema })
+      : await this._schemaStore.write({ key: schema.root.id, schema });
 
+    if (resp.error) {
+      return { error: resp.error };
+    }
     // Remove existing schema from fuse engine first
     if (maybeSchema.data) {
       this.fuseEngine.removeSchemaFromIndex(maybeSchema.data);
     }
     this.fuseEngine.addSchemaToIndex(schema);
+    return { data: undefined };
   }
 
   /**
@@ -747,7 +745,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<DEngineDeleteSchemaResp> {
+  ): Promise<DeleteSchemaResp> {
     if (opts?.metaOnly) {
       await this._schemaStore.deleteMetadata(id);
     } else {
@@ -757,11 +755,10 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     return this.init();
   }
 
-  async info(): Promise<RespV2<EngineInfoResp>> {
+  async info(): Promise<EngineInfoResp> {
     const version = NodeJSUtils.getVersionFromPkg();
     if (!version) {
       return {
-        data: undefined,
         error: DendronError.createPlainError({
           message: "Unable to read Dendron version",
         }),
@@ -771,7 +768,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       data: {
         version,
       },
-      error: null,
     };
   }
 
@@ -782,7 +778,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   /**
    * See {@link DEngine.querySchema}
    */
-  async querySchema(queryString: string): Promise<SchemaQueryResp> {
+  async querySchema(queryString: string): Promise<QuerySchemaResp> {
     const ctx = "DEngine:querySchema";
 
     const schemaIds = this.fuseEngine
@@ -792,7 +788,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const schemas = responses.map((resp) => resp.data).filter(isNotUndefined);
     this.logger.info({ ctx, msg: "exit" });
     return {
-      error: null,
       data: schemas,
     };
   }
@@ -800,7 +795,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   /**
    * See {@link DEngine.queryNotes}
    */
-  async queryNotes(opts: QueryNotesOpts): Promise<NoteQueryResp> {
+  async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     const ctx = "DEngine:queryNotes";
     const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
@@ -818,7 +813,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       .map((ent) => ent.id);
 
     if (noteIds.length === 0) {
-      return { error: null, data: [] };
+      return { data: [] };
     }
 
     const responses = await this._noteStore.bulkGet(noteIds);
@@ -830,117 +825,76 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
     this.logger.info({ ctx, msg: "exit" });
     return {
-      error: null,
       data: notes,
     };
   }
 
-  async renderNote(): Promise<RespV2<RenderNotePayload>> {
+  async renderNote(): Promise<RenderNoteResp> {
     throw Error("renderNote not implemented");
   }
 
-  /**
-   * @deprecated: Use {@link DEngine.writeNote}
-   */
-  async updateNote(): Promise<UpdateNoteResp> {
-    throw new Error("updateNote not implemented");
-  }
-
-  /**
-   * @deprecated: Use {@link DEngine.writeSchema}
-   */
-  async updateSchema() {
-    throw Error("updateSchema not implemented");
-  }
-
-  async getNoteBlocks(): Promise<GetNoteBlocksPayload> {
+  async getNoteBlocks(): Promise<GetNoteBlocksResp> {
     throw Error("getNoteBlocks not implemented");
   }
 
-  async getDecorations(): Promise<GetDecorationsPayload> {
+  async getDecorations(): Promise<GetDecorationsResp> {
     throw Error("getDecorations not implemented");
   }
 
-  /**
-   * @deprecated: Use {@link LinkUtils.findLinks}
-   */
-  async getLinks(
-    opts: Optional<GetLinksRequest, "ws">
-  ): Promise<GetNoteLinksPayload> {
-    const { type, note } = opts;
-    return {
-      data: LinkUtils.findLinks({
-        note,
-        type,
-        engine: this,
-        config: DConfig.readConfigSync(this.wsRoot),
-      }),
-      error: null,
-    };
-  }
-
-  /**
-   * @deprecated: Use {@link AnchorUtils.findAnchors}
-   */
-  async getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
-    return {
-      data: AnchorUtils.findAnchors({
-        note: opts.note,
-      }),
-      error: null,
-    };
-  }
-
-  private async initSchema(): Promise<BulkResp<SchemaModuleProps[]>> {
+  private async initSchema(): Promise<RespWithOptError<SchemaModuleProps[]>> {
     const ctx = "DEngine:initSchema";
     this.logger.info({ ctx, msg: "enter" });
     let errorList: IDendronError[] = [];
 
-    const schemaResponses: BulkResp<SchemaModuleProps[]>[] = await Promise.all(
-      (this.vaults as DVault[]).map(async (vault) => {
-        const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
-        // Get list of files from filesystem
-        const maybeFiles = await this._fileStore.readDir({
-          root: URI.parse(vpath),
-          include: ["*.schema.yml"],
-        });
-        if (maybeFiles.error || maybeFiles.data.length === 0) {
-          // Keep initializing other vaults
-          return {
-            error: new DendronCompositeError([
-              new DendronError({
-                message: `Unable to get schemas for vault ${VaultUtils.getName(
-                  vault
-                )}`,
-                status: ERROR_STATUS.NO_SCHEMA_FOUND,
-                severity: ERROR_SEVERITY.MINOR,
-                payload: maybeFiles.error,
-              }),
-            ]),
-          };
-        }
-        const schemaFiles = maybeFiles.data.map((entry) => entry.toString());
-        this.logger.info({ ctx, schemaFiles });
-        const { schemas, errors } = await new SchemaParser({
-          wsRoot: this.wsRoot,
-          logger: this.logger,
-        }).parse(schemaFiles, vault);
+    const schemaResponses: RespWithOptError<SchemaModuleProps[]>[] =
+      await Promise.all(
+        (this.vaults as DVault[]).map(async (vault) => {
+          const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+          // Get list of files from filesystem
+          const maybeFiles = await this._fileStore.readDir({
+            root: URI.parse(vpath),
+            include: ["*.schema.yml"],
+          });
+          if (maybeFiles.error || maybeFiles.data.length === 0) {
+            // Keep initializing other vaults
+            return {
+              error: new DendronCompositeError([
+                new DendronError({
+                  message: `Unable to get schemas for vault ${VaultUtils.getName(
+                    vault
+                  )}`,
+                  status: ERROR_STATUS.NO_SCHEMA_FOUND,
+                  severity: ERROR_SEVERITY.MINOR,
+                  payload: maybeFiles.error,
+                }),
+              ]),
+              data: [],
+            };
+          }
+          const schemaFiles = maybeFiles.data.map((entry) => entry.toString());
+          this.logger.info({ ctx, schemaFiles });
+          const { schemas, errors } = await new SchemaParser({
+            wsRoot: this.wsRoot,
+            logger: this.logger,
+          }).parse(schemaFiles, vault);
 
-        if (errors) {
-          errorList = errorList.concat(errors);
-        }
-        return {
-          data: schemas,
-          error: _.isNull(errors) ? null : new DendronCompositeError(errors),
-        };
-      })
-    );
+          if (errors) {
+            errorList = errorList.concat(errors);
+          }
+          return {
+            data: schemas,
+            error: _.isNull(errors)
+              ? undefined
+              : new DendronCompositeError(errors),
+          };
+        })
+      );
     const errors = schemaResponses
       .flatMap((response) => response.error)
-      .filter(isNotNull);
+      .filter(isNotUndefined);
 
     return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
       data: schemaResponses
         .flatMap((response) => response.data)
         .filter(isNotUndefined),
@@ -955,7 +909,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    */
   private async initNotes(
     schemas: SchemaModuleDict
-  ): Promise<BulkResp<NotePropsByIdDict>> {
+  ): Promise<RespWithOptError<NotePropsByIdDict>> {
     const ctx = "DEngine:initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
@@ -998,7 +952,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           logger: this.logger,
         }).parseFiles(maybeFiles.data, vault, schemas);
         if (error) {
-          errors = errors.concat(error?.errors);
+          errors = errors.concat(error);
         }
         if (notesDict) {
           const { notesById, notesByFname } = notesDict;

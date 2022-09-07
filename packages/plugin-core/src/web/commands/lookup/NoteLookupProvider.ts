@@ -45,7 +45,7 @@ export class NoteLookupProvider implements ILookupProvider {
     try {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
-        const items = this.fetchRootQuickPickResults({
+        const items = await this.fetchRootQuickPickResults({
           schemas: workspaceState.schemas,
         });
         return items;

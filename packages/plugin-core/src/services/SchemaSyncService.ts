@@ -48,7 +48,7 @@ export class SchemaSyncService implements ISchemaSyncService {
     if (_.isEmpty(parsedSchema.errors)) {
       await Promise.all(
         _.map(parsedSchema.schemas, async (schema) => {
-          await engineClient.updateSchema(schema);
+          await engineClient.writeSchema(schema, { metaOnly: true });
         })
       );
 

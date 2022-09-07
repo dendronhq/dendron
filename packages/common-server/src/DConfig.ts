@@ -4,7 +4,7 @@ import {
   configIsV4,
   ConfigUtils,
   CONSTANTS,
-  DataWithOptError,
+  RespWithOptError,
   DeepPartial,
   DendronError,
   DendronPublishingConfig,
@@ -270,7 +270,7 @@ export class DConfig {
   static readConfigAndApplyLocalOverrideSync(
     wsRoot: string,
     useCache?: boolean
-  ): DataWithOptError<IntermediateDendronConfig> {
+  ): RespWithOptError<IntermediateDendronConfig> {
     const config = this.readConfigSync(wsRoot, useCache);
     const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
 

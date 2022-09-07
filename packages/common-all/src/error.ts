@@ -182,7 +182,7 @@ export class DendronCompositeError extends Error implements IDendronError {
     // sometimes a composite error can be of size one. unwrap and show regular error message in this case
     if (this.errors.length === 1) {
       this.message = this.errors[0].message;
-    } else {
+    } else if (this.errors.length > 1) {
       const out = ["Multiple errors: "];
       const messages = this.errors.map((err) => ` - ${err.message}`);
       this.message = out.concat(messages).join("\n");

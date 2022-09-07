@@ -36,7 +36,7 @@ suite("ValidateEngineCommand tests", function () {
         // Purposely remove children from foo note
         const foo = (await engine.getNote("foo")).data!;
         foo.children = [];
-        await engine.updateNote(foo);
+        await engine.writeNote(foo, { metaOnly: true });
         await new ValidateEngineCommand().execute();
         expect(windowSpy.callCount).toEqual(1);
         const errorMsg = windowSpy.getCall(0).args[0];

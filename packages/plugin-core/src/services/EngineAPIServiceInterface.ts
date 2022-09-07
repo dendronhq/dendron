@@ -1,40 +1,39 @@
 import {
-  BulkResp,
   BulkWriteNotesOpts,
   DEngineInitResp,
   DHookDict,
   DVault,
-  EngineDeleteNotePayload,
+  DeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineInfoResp,
-  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   FindNoteOpts,
-  GetAnchorsRequest,
   GetDecorationsOpts,
-  GetDecorationsPayload,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
+  GetDecorationsResp,
   GetNoteBlocksOpts,
-  GetNoteBlocksPayload,
-  GetNoteLinksPayload,
-  NoteChangeEntry,
+  GetNoteBlocksResp,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
-  NotePropsMeta,
-  Optional,
   QueryNotesOpts,
   RenameNoteOpts,
-  RenameNotePayload,
   RenderNoteOpts,
-  RenderNotePayload,
-  RespV2,
-  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
-  UpdateNoteResp,
+  WriteNoteResp,
+  GetNoteResp,
+  FindNotesResp,
+  FindNotesMetaResp,
+  BulkGetNoteResp,
+  BulkGetNoteMetaResp,
+  BulkWriteNoteResp,
+  RenameNoteResp,
+  QueryNotesResp,
+  RenderNoteResp,
+  GetSchemaResp,
+  QuerySchemaResp,
+  WriteSchemaResp,
 } from "@dendronhq/common-all";
 
 export interface IEngineAPIService {
@@ -58,53 +57,52 @@ export interface IEngineAPIService {
   /**
    * Get NoteProps by id. If note doesn't exist, return undefined
    */
-  getNote: (id: string) => Promise<RespV3<NoteProps>>;
+  getNote: (id: string) => Promise<GetNoteResp>;
+  /**
+   * Bulk get NoteProps by list of ids
+   */
+  bulkGetNotes: (ids: string[]) => Promise<BulkGetNoteResp>;
+  /**
+   * Bulk get NoteProps metadata by list of ids
+   */
+  bulkGetNotesMeta: (ids: string[]) => Promise<BulkGetNoteMetaResp>;
   /**
    * Find NoteProps by note properties. If no notes match, return empty list
    */
-  findNotes: (opts: FindNoteOpts) => Promise<NoteProps[]>;
+  findNotes: (opts: FindNoteOpts) => Promise<FindNotesResp>;
   /**
    * Find NoteProps metadata by note properties. If no notes metadata match, return empty list
    */
-  findNotesMeta: (opts: FindNoteOpts) => Promise<NotePropsMeta[]>;
+  findNotesMeta: (opts: FindNoteOpts) => Promise<FindNotesMetaResp>;
 
-  bulkWriteNotes(
-    opts: BulkWriteNotesOpts
-  ): Promise<BulkResp<NoteChangeEntry[]>>;
-
-  updateNote(
-    note: NoteProps,
-    opts?: EngineUpdateNodesOptsV2
-  ): Promise<UpdateNoteResp>;
-
-  updateSchema(schema: SchemaModuleProps): Promise<void>;
+  bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp>;
 
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<RespV2<NoteChangeEntry[]>>;
+  ): Promise<WriteNoteResp>;
 
-  writeSchema(schema: SchemaModuleProps): Promise<void>;
+  writeSchema(schema: SchemaModuleProps): Promise<WriteSchemaResp>;
 
   init(): Promise<DEngineInitResp>;
 
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<RespV2<EngineDeleteNotePayload>>;
+  ): Promise<DeleteNoteResp>;
 
   deleteSchema(
     id: string,
     opts?: EngineDeleteOpts | undefined
   ): Promise<DEngineInitResp>;
 
-  info(): Promise<RespV2<EngineInfoResp>>;
+  info(): Promise<EngineInfoResp>;
 
-  getSchema(qs: string): Promise<RespV3<SchemaModuleProps>>;
+  getSchema(qs: string): Promise<GetSchemaResp>;
 
-  querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>>;
+  querySchema(qs: string): Promise<QuerySchemaResp>;
 
-  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>>;
+  queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp>;
 
   queryNotesSync({
     qs,
@@ -114,17 +112,13 @@ export interface IEngineAPIService {
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): RespV2<NoteProps[]>;
+  }): QueryNotesResp;
 
-  renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
+  renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp>;
 
-  renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>>;
+  renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp>;
 
-  getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload>;
+  getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksResp>;
 
-  getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload>;
-  getLinks: (
-    opts: Optional<GetLinksRequest, "ws">
-  ) => Promise<GetNoteLinksPayload>;
-  getAnchors: (opts: GetAnchorsRequest) => Promise<GetNoteAnchorsPayload>;
+  getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsResp>;
 }

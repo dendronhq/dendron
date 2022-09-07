@@ -1,5 +1,6 @@
 import {
   APIUtils,
+  BulkWriteNoteResp,
   BulkWriteNotesOpts,
   DendronAPI,
   DEngineClient,
@@ -7,39 +8,38 @@ import {
   DHookDict,
   DVault,
   EngagementEvents,
-  EngineDeleteNotePayload,
+  DeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineInfoResp,
-  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   Event,
   extractNoteChangeEntriesByType,
   FindNoteOpts,
-  GetAnchorsRequest,
   GetDecorationsOpts,
-  GetDecorationsPayload,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
+  GetDecorationsResp,
   GetNoteBlocksOpts,
-  GetNoteBlocksPayload,
-  GetNoteLinksPayload,
+  GetNoteBlocksResp,
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
-  Optional,
   QueryNotesOpts,
   RenameNoteOpts,
-  RenameNotePayload,
   RenderNoteOpts,
-  RenderNotePayload,
-  RespV2,
-  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
-  UpdateNoteResp,
+  WriteNoteResp,
+  BulkGetNoteResp,
+  BulkGetNoteMetaResp,
+  GetNoteResp,
+  RenameNoteResp,
+  QueryNotesResp,
+  RenderNoteResp,
+  GetSchemaResp,
+  QuerySchemaResp,
+  WriteSchemaResp,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -174,8 +174,22 @@ export class EngineAPIService
   /**
    * See {@link IEngineAPIService.getNote}
    */
-  async getNote(id: string): Promise<RespV3<NoteProps>> {
+  async getNote(id: string): Promise<GetNoteResp> {
     return this._internalEngine.getNote(id);
+  }
+
+  /**
+   * See {@link IEngineAPIService.bulkGetNotes}
+   */
+  async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {
+    return this._internalEngine.bulkGetNotes(ids);
+  }
+
+  /**
+   * See {@link IEngineAPIService.bulkGetNotesMeta}
+   */
+  async bulkGetNotesMeta(ids: string[]): Promise<BulkGetNoteMetaResp> {
+    return this._internalEngine.bulkGetNotesMeta(ids);
   }
 
   /**
@@ -192,25 +206,14 @@ export class EngineAPIService
     return this._internalEngine.findNotesMeta(opts);
   }
 
-  async bulkWriteNotes(opts: BulkWriteNotesOpts) {
+  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
     return this._internalEngine.bulkWriteNotes(opts);
-  }
-
-  updateNote(
-    note: NoteProps,
-    opts?: EngineUpdateNodesOptsV2
-  ): Promise<UpdateNoteResp> {
-    return this._internalEngine.updateNote(note, opts);
-  }
-
-  updateSchema(schema: SchemaModuleProps): Promise<void> {
-    return this._internalEngine.updateSchema(schema);
   }
 
   writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2 | undefined
-  ): Promise<RespV2<NoteChangeEntry[]>> {
+  ): Promise<WriteNoteResp> {
     if (!this._trustedWorkspace) {
       if (!opts) {
         opts = { runHooks: false };
@@ -222,7 +225,7 @@ export class EngineAPIService
     return this._internalEngine.writeNote(note, opts);
   }
 
-  writeSchema(schema: SchemaModuleProps): Promise<void> {
+  writeSchema(schema: SchemaModuleProps): Promise<WriteSchemaResp> {
     return this._internalEngine.writeSchema(schema);
   }
   init(): Promise<DEngineInitResp> {
@@ -233,7 +236,7 @@ export class EngineAPIService
   deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<RespV2<EngineDeleteNotePayload>> {
+  ): Promise<DeleteNoteResp> {
     return this._internalEngine.deleteNote(id, opts);
   }
 
@@ -244,19 +247,19 @@ export class EngineAPIService
     return this._internalEngine.deleteSchema(id, opts);
   }
 
-  info(): Promise<RespV2<EngineInfoResp>> {
+  info(): Promise<EngineInfoResp> {
     return this._internalEngine.info();
   }
 
-  getSchema(qs: string): Promise<RespV3<SchemaModuleProps>> {
+  getSchema(qs: string): Promise<GetSchemaResp> {
     return this._internalEngine.getSchema(qs);
   }
 
-  querySchema(qs: string): Promise<Required<RespV2<SchemaModuleProps[]>>> {
+  querySchema(qs: string): Promise<QuerySchemaResp> {
     return this._internalEngine.querySchema(qs);
   }
 
-  queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
+  queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     return this._internalEngine.queryNotes(opts);
   }
 
@@ -268,34 +271,24 @@ export class EngineAPIService
     qs: string;
     originalQS: string;
     vault?: DVault | undefined;
-  }): RespV2<NoteProps[]> {
+  }): QueryNotesResp {
     return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 
-  renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
+  renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {
     return this._internalEngine.renameNote(opts);
   }
 
-  renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+  renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp> {
     return this._internalEngine.renderNote(opts);
   }
 
-  getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+  getNoteBlocks(opts: GetNoteBlocksOpts): Promise<GetNoteBlocksResp> {
     return this._internalEngine.getNoteBlocks(opts);
   }
 
-  getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsPayload> {
+  getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsResp> {
     return this._internalEngine.getDecorations(opts);
-  }
-
-  getLinks(
-    opts: Optional<GetLinksRequest, "ws">
-  ): Promise<GetNoteLinksPayload> {
-    return this._internalEngine.getLinks(opts);
-  }
-
-  getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
-    return this._internalEngine.getAnchors(opts);
   }
 
   /**

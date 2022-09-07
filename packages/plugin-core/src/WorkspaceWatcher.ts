@@ -344,7 +344,7 @@ export class WorkspaceWatcher {
       // eslint-disable-next-line  no-async-promise-executor
       const p = new Promise(async (resolve) => {
         note.updated = now;
-        await engine.updateNote(note);
+        await engine.writeNote(note, { metaOnly: true });
         return resolve(changes);
       });
       event.waitUntil(p);
@@ -469,11 +469,14 @@ export class WorkspaceWatcher {
       if (ErrorUtils.isErrorResp(resp)) {
         throw resp.error;
       }
-      const noteRaw = resp.data;
-      const newNote = NoteUtils.hydrate({
-        noteRaw,
-        noteHydrated: engine.notes[noteRaw.id],
-      });
+      let newNote = resp.data;
+      const noteHydrated = await engine.getNote(newNote.id);
+      if (noteHydrated.data) {
+        newNote = NoteUtils.hydrate({
+          noteRaw: newNote,
+          noteHydrated: noteHydrated.data,
+        });
+      }
       newNote.title = NoteUtils.genTitle(fname);
       await engine.writeNote(newNote);
     } catch (error: any) {

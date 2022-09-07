@@ -40,6 +40,15 @@ export interface INoteStore<K> {
   getMetadata(key: K): Promise<RespV3<NotePropsMeta>>;
 
   /**
+   * Bulk get NoteProps metadata by list of key
+   * If no notes are found, return empty list.
+   *
+   * @param key: keys of NoteProps
+   * @return list of NoteProps metadata
+   */
+  bulkGetMetadata(keys: K[]): Promise<RespV3<NotePropsMeta>[]>;
+
+  /**
    * Find NoteProps by criteria. If no criteria is set, return empty array.
    * If multiple criterias are set, find NoteProps that matches all criteria
    *

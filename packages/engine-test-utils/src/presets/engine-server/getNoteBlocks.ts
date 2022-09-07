@@ -1,7 +1,7 @@
 import {
   DEngineClient,
   DVault,
-  GetNoteBlocksPayload,
+  GetNoteBlocksResp,
   NoteProps,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -24,7 +24,7 @@ const runGetNoteBlocks = async ({
   wsRoot: string;
   note?: NoteProps;
   filterByAnchorType?: "block" | "header";
-  cb: (opts: GetNoteBlocksPayload) => TestResult[];
+  cb: (opts: GetNoteBlocksResp) => TestResult[];
 }) => {
   if (_.isUndefined(note))
     note = (

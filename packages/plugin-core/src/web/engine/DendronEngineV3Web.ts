@@ -1,5 +1,4 @@
 import {
-  BulkResp,
   ConsoleLogger,
   DendronCompositeError,
   DendronError,
@@ -27,9 +26,10 @@ import {
   NotePropsMeta,
   NoteUtils,
   ReducedDEngine,
-  RenameNotePayload,
+  RenameNoteResp,
   RespV2,
   RespV3,
+  RespWithOptError,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -108,9 +108,7 @@ export class DendronEngineV3Web
       //   }
       //   return valid;
       // });
-      const allErrors = storeError
-        ? hookErrors.concat(storeError.errors)
-        : hookErrors;
+      const allErrors = storeError ? hookErrors.concat(storeError) : hookErrors;
       let error: IDendronError | null;
       switch (_.size(allErrors)) {
         case 0: {
@@ -140,7 +138,7 @@ export class DendronEngineV3Web
     }
   }
 
-  async renameNote(): Promise<RespV2<RenameNotePayload>> {
+  async renameNote(): Promise<RenameNoteResp> {
     throw Error("renameNote not implemented");
   }
 
@@ -150,7 +148,6 @@ export class DendronEngineV3Web
   ): Promise<WriteNoteResp> {
     let changes: NoteChangeEntry[] = [];
     const ctx = "DendronEngineV3Web:writeNewNote";
-    const error: DendronError | null = null;
     this.logger.info({
       ctx,
       msg: `enter with ${opts}`,
@@ -342,7 +339,6 @@ export class DendronEngineV3Web
       changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
     });
     return {
-      error,
       data: changes,
     };
   }
@@ -353,7 +349,7 @@ export class DendronEngineV3Web
 
   private async initNotesNew(
     vaults: DVault[]
-  ): Promise<BulkResp<NotePropsByIdDict>> {
+  ): Promise<RespWithOptError<NotePropsByIdDict>> {
     const ctx = "DendronEngineV3Web:initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
@@ -403,7 +399,7 @@ export class DendronEngineV3Web
           this.wsRoot
         ).parseFiles(filteredFiles, vault);
         if (error) {
-          errors = errors.concat(error?.errors);
+          errors = errors.concat(error);
         }
         if (notesDict) {
           const { notesById, notesByFname } = notesDict;

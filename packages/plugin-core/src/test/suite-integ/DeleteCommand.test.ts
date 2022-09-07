@@ -24,7 +24,7 @@ suite("Delete Command", function () {
         const note = (await engine.findNotes({ fname: "bar" }))[0];
         await WSUtilsV2.instance().openNote(note);
         const resp = await deleteCmd.execute();
-        expect(resp?.error).toEqual(null);
+        expect(resp?.error).toEqual(undefined);
         const noteAfterDelete = await engine.findNotes({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });
@@ -34,7 +34,7 @@ suite("Delete Command", function () {
         const note = (await engine.findNotes({ fname: "foo.ch1" }))[0];
         await WSUtilsV2.instance().openNote(note);
         const resp = await deleteCmd.execute({ noConfirm: true });
-        expect(resp?.error).toEqual(null);
+        expect(resp?.error).toEqual(undefined);
         const noteAfterDelete = await engine.findNotes({ fname: "foo.ch1" });
         expect(noteAfterDelete).toEqual([]);
       });
@@ -60,7 +60,7 @@ suite("Delete Command", function () {
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
         await engine.findNotes({ fname: "bar" });
         const resp = await deleteCmd.execute(barUri);
-        expect(resp?.error).toEqual(null);
+        expect(resp?.error).toEqual(undefined);
         const noteAfterDelete = await engine.findNotes({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });
@@ -79,7 +79,7 @@ suite("Delete Command", function () {
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
         const note = (await engine.findNotes({ fname: "bar" }))[0];
         const resp = await deleteCmd.execute(note);
-        expect(resp?.error).toEqual(null);
+        expect(resp?.error).toEqual(undefined);
         const noteAfterDelete = await engine.findNotes({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });

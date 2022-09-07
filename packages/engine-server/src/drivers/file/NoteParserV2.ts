@@ -20,13 +20,13 @@ import {
   genHash,
   RespV2,
   cleanName,
-  BulkResp,
   DendronCompositeError,
   SchemaUtils,
   SchemaModuleDict,
   string2Note,
   globMatch,
   IntermediateDendronConfig,
+  RespWithOptError,
 } from "@dendronhq/common-all";
 import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -92,7 +92,7 @@ export class NoteParserV2 {
     allPaths: string[],
     vault: DVault,
     schemas: SchemaModuleDict
-  ): Promise<BulkResp<NoteDicts>> {
+  ): Promise<RespWithOptError<NoteDicts>> {
     const ctx = "parseFiles";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -111,21 +111,21 @@ export class NoteParserV2 {
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootFile = fileMetaDict[1].find((n) => n.fpath === "root.md");
     if (!rootFile) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootProps = this.parseNoteProps({
       fpath: rootFile.fpath,
@@ -137,12 +137,12 @@ export class NoteParserV2 {
       errors.push(rootProps.error);
     }
     if (!rootProps.data || rootProps.data.length === 0) {
-      errors.push(
-        DendronError.createFromStatus({
+      return {
+        data: noteDicts,
+        error: DendronError.createFromStatus({
           status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        })
-      );
-      return { error: new DendronCompositeError(errors) };
+        }),
+      };
     }
     const rootNote = rootProps.data[0].note;
     NoteDictsUtils.add(rootNote, noteDicts);
@@ -278,7 +278,10 @@ export class NoteParserV2 {
     }
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
-    return { data: noteDicts, error: new DendronCompositeError(errors) };
+    return {
+      data: noteDicts,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
+    };
   }
 
   /**

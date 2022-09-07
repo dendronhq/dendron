@@ -8,24 +8,29 @@ import { DendronCompositeError, DendronError } from "../error";
 import { FuseEngine } from "../fuse";
 import { INoteStore } from "../store";
 import {
-  BulkResp,
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
+  BulkWriteNoteResp,
   BulkWriteNotesOpts,
-  EngineDeleteNoteResp,
+  DeleteNoteResp,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNoteOpts,
+  FindNotesMetaResp,
+  FindNotesResp,
+  GetNoteResp,
   NoteChangeEntry,
   NoteProps,
   NotePropsMeta,
   QueryNotesOpts,
+  QueryNotesResp,
   ReducedDEngine,
   RenameNoteOpts,
-  RenameNotePayload,
-  RespV2,
+  RenameNoteResp,
   RespV3,
   WriteNoteResp,
 } from "../types";
-import { isNotNull, isNotUndefined } from "../utils";
+import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 
 /**
@@ -43,14 +48,50 @@ export abstract class EngineV3Base implements ReducedDEngine {
   /**
    * See {@link DEngine.getNote}
    */
-  async getNote(id: string): Promise<RespV3<NoteProps>> {
+  async getNote(id: string): Promise<GetNoteResp> {
     return this.noteStore.get(id);
+  }
+
+  /**
+   * See {@link DEngine.bulkGetNotes}
+   */
+  async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {
+    const bulkResponses = await this.noteStore.bulkGet(ids);
+
+    const errors = bulkResponses
+      .flatMap((response) => response.error)
+      .filter(isNotUndefined);
+
+    return {
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
+      data: bulkResponses
+        .flatMap((response) => response.data)
+        .filter(isNotUndefined),
+    };
+  }
+
+  /**
+   * See {@link DEngine.bulkGetNotesMeta}
+   */
+  async bulkGetNotesMeta(ids: string[]): Promise<BulkGetNoteMetaResp> {
+    const bulkResponses = await this.noteStore.bulkGetMetadata(ids);
+
+    const errors = bulkResponses
+      .flatMap((response) => response.error)
+      .filter(isNotUndefined);
+
+    return {
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
+      data: bulkResponses
+        .flatMap((response) => response.data)
+        .filter(isNotUndefined),
+    };
   }
 
   /**
    * See {@link DEngine.findNotes}
    */
-  async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
+  async findNotes(opts: FindNoteOpts): Promise<FindNotesResp> {
     const resp = await this.noteStore.find(opts);
     return resp.data ? resp.data : [];
   }
@@ -58,7 +99,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
   /**
    * See {@link DEngine.findNotesMeta}
    */
-  async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
+  async findNotesMeta(opts: FindNoteOpts): Promise<FindNotesMetaResp> {
     const resp = await this.noteStore.findMetaData(opts);
     return resp.data ? resp.data : [];
   }
@@ -66,18 +107,16 @@ export abstract class EngineV3Base implements ReducedDEngine {
   /**
    * See {@link DEngine.bulkWriteNotes}
    */
-  async bulkWriteNotes(
-    opts: BulkWriteNotesOpts
-  ): Promise<Required<BulkResp<NoteChangeEntry[]>>> {
+  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
     const writeResponses = await Promise.all(
       opts.notes.map((note) => this.writeNote(note, opts.opts))
     );
     const errors = writeResponses
       .flatMap((response) => response.error)
-      .filter(isNotNull);
+      .filter(isNotUndefined);
 
     return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
       data: writeResponses
         .flatMap((response) => response.data)
         .filter(isNotUndefined),
@@ -90,7 +129,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
   async deleteNote(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<EngineDeleteNoteResp> {
+  ): Promise<DeleteNoteResp> {
     const ctx = "DEngine:deleteNote";
     if (id === "root") {
       throw new DendronError({
@@ -221,12 +260,11 @@ export abstract class EngineV3Base implements ReducedDEngine {
       changed: changes.map((n) => NoteUtils.toLogObj(n.note)),
     });
     return {
-      error: null,
       data: changes,
     };
   }
 
-  async queryNotes(opts: QueryNotesOpts): Promise<RespV2<NoteProps[]>> {
+  async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // const ctx = "Engine:queryNotes";
     const { qs, vault, onlyDirectChildren, originalQS } = opts;
 
@@ -242,7 +280,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
     });
 
     if (items.length === 0) {
-      return { error: null, data: [] };
+      return { data: [] };
     }
 
     const notes = await Promise.all(
@@ -263,7 +301,6 @@ export abstract class EngineV3Base implements ReducedDEngine {
     }
 
     return {
-      error: null,
       // data: items,
       data: modifiedNotes,
     };
@@ -272,7 +309,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
   /**
    * See {@link DEngine.renameNote}
    */
-  abstract renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>>;
+  abstract renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp>;
 
   /**
    * See {@link DEngine.writeNote}

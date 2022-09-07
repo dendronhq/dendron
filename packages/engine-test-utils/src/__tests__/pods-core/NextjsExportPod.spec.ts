@@ -52,6 +52,7 @@ async function verifyExport(dest: string) {
     "dendron.json",
     "meta",
     "notes",
+    "refs",
     "notes.json",
     "tree.json"
   );
@@ -118,6 +119,71 @@ describe("GIVEN NextExport pod", () => {
             expect,
             preSetupHook: async (opts) => {
               await ENGINE_HOOKS.setupBasic(opts);
+              await createAssetsInVault({
+                wsRoot: opts.wsRoot,
+                vault: opts.vaults[0],
+              });
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  copyAssets: true,
+                },
+              });
+            },
+          }
+        );
+      });
+      test("THEN assets are copied (refs)", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+            await verifyExportedAssets(dest);
+            await checkDir(
+              { fpath: path.join(dest, "data", "refs") },
+              "simple-note-refone---0.html"
+            );
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupRefs(opts);
+              await createAssetsInVault({
+                wsRoot: opts.wsRoot,
+                vault: opts.vaults[0],
+              });
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  copyAssets: true,
+                },
+              });
+            },
+          }
+        );
+      });
+      test("THEN assets are copied (refs recursive)", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+            await verifyExportedAssets(dest);
+            await checkDir(
+              { fpath: path.join(dest, "data", "refs") },
+              "fooone-id---0.html",
+              "footwo---0.html"
+            );
+            await checkDir(
+              { fpath: path.join(dest, "data", "notes") },
+              "foo.html",
+              "foo.one-id.html",
+              "foo.two.html"
+            );
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupNoteRefRecursive(opts);
               await createAssetsInVault({
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],

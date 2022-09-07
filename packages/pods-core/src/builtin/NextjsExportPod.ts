@@ -579,6 +579,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     // render refs
     const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
+    fs.ensureDirSync(refsRoot);
     const refIds: string[] = await Promise.all(
       fs.readdirSync(refsRoot).map(async (ent) => {
         const { node, refId } = fs.readJSONSync(

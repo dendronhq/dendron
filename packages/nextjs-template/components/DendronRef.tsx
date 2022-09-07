@@ -12,9 +12,19 @@ interface Window {
   testingVariable: any;
 }
 
+const MAX_REFERENCE_DEPTH = 3;
+
 export function DendronRef(props: IDendronRefProps) {
-  const { body, noteUrl, noteTitle } = props;
   useIFrameHeightAdjuster();
+  const { body, noteUrl, noteTitle } = props;
+  let renderBody = true;
+  if (typeof window !== "undefined") {
+    const frameDepth = getFrameDepth(window.self);
+    if (frameDepth > MAX_REFERENCE_DEPTH) {
+      renderBody = false;
+    }
+  }
+
   return (
     <div className="ref-container">
       <Head>
@@ -37,8 +47,27 @@ export function DendronRef(props: IDendronRefProps) {
           <div className="portal-parent-fader-bottom" />
         </div>
         {/* eslint-disable-next-line react/no-danger */}
-        <div dangerouslySetInnerHTML={{ __html: body }} />
+        {renderBody ? (
+          <div dangerouslySetInnerHTML={{ __html: body }} />
+        ) : (
+          <p>
+            (note not rendered, references can only render up to{" "}
+            {MAX_REFERENCE_DEPTH} level deep.)
+          </p>
+        )}
       </div>
     </div>
   );
+}
+
+/** Useful function for debugging */
+/** Called with window.self, get the depth of the window.  0 is top */
+function getFrameDepth(windowDotSelf: any): number {
+  if (windowDotSelf === window.top) {
+    return 0;
+  } else if (windowDotSelf.parent === window.top) {
+    return 1;
+  }
+
+  return 1 + getFrameDepth(windowDotSelf.parent);
 }

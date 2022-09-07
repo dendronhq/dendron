@@ -28,15 +28,3 @@ export function useIFrameHeightAdjuster() {
 
   return;
 }
-
-/** Useful function for debugging */
-/** Called with window.self, get the depth of the window.  0 is top */
-// function getFrameDepth(winToID: any): number {
-//   if (winToID === window.top) {
-//     return 0;
-//   } else if (winToID.parent === window.top) {
-//     return 1;
-//   }
-
-//   return 1 + getFrameDepth(winToID.parent);
-// }

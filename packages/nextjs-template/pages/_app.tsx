@@ -53,7 +53,6 @@ function AppContainer(appProps: AppProps) {
 
   const defaultTheme = ConfigUtils.getPublishing(config).theme || Theme.LIGHT;
   logger.info({ ctx: "enter", defaultTheme });
-  logger.info({ debug: router.pathname });
   logger.info({ json: JSON.stringify(appProps, null, 2) });
   if (router.pathname === "/refs/[id]") {
     logger.info({ appProps });

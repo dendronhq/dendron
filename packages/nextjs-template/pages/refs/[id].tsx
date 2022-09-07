@@ -58,13 +58,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
 function stripThreeDashes(s: string): string {
   const hyphenatedPortions = s.split("-");
   if (hyphenatedPortions.length < 3) {
-    // console.warn("expected a string with at least 3 hyphens in it");
     return s;
   }
   return hyphenatedPortions.splice(0, hyphenatedPortions.length - 3).join("-");
 }
 
-// @ts-ignore
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
@@ -79,8 +77,6 @@ export const getStaticProps: GetStaticProps = async (
 
   try {
     const body = await getRefBody(id);
-    // strip the lass 4 from id.  ie, -001 (need to figure out where that comes from)
-    // const baseId = id.substring(0, id.length - 4);
     const baseId = stripThreeDashes(id);
 
     let noteTitle = `default note title`;
@@ -89,10 +85,11 @@ export const getStaticProps: GetStaticProps = async (
       noteTitle = metaData.title;
     } catch (e) {
       noteTitle = `error retrieving note title for getNoteMeta(${baseId})`;
+      // eslint-disable-next-line no-console
+      console.error(noteTitle);
     }
 
     const noteUrl = `/notes/${baseId}/`;
-    // i think fname would be better, title is parity
 
     return {
       props: {
@@ -103,6 +100,7 @@ export const getStaticProps: GetStaticProps = async (
       },
     };
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(error2PlainObject(err as DendronError));
     throw err;
   }

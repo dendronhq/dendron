@@ -168,7 +168,7 @@ export class TreeUtils {
       if (!error) {
         return note.title.toLowerCase();
       } else {
-        return `BAD NOTE TITLE: ${note.fname} + ${error.message}`;
+        return `BAD NOTE TITLE: ${note.fname}`;
       }
     };
 

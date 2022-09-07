@@ -2,7 +2,7 @@ import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
-import { isNotUndefined, PublishUtils, do_ } from "../utils";
+import { PublishUtils, do_ } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebars, SidebarItem } from "../sidebars";

@@ -7,13 +7,15 @@ import {
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
+  DUtils,
   DVault,
   getSlugger,
   IDendronError,
   IntermediateDendronConfig,
   isBlockAnchor,
-  NoteDictsUtils,
+  NoteDicts,
   NoteProps,
+  NoteUtils,
   RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -66,24 +68,35 @@ type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
 //   return out.join(" ");
 // };
 
-function gatherNoteRefs({ link }: { link: DNoteRefLink; vault: DVault }) {
-  const noteRefs: DNoteLoc[] = [];
-  // if (link.from.fname.endsWith("*")) {
-  //   const resp = engine.queryNotesSync({
-  //     qs: link.from.fname,
-  //     originalQS: link.from.fname,
-  //     vault,
-  //   });
-  //   const out = _.filter(resp.data, (ent) =>
-  //     DUtils.minimatch(ent.fname, link.from.fname)
-  //   );
-  //   noteRefs = _.sortBy(
-  //     out.map((ent) => NoteUtils.toNoteLoc(ent)),
-  //     "fname"
-  //   );
-  // } else {
-  noteRefs.push(link.from);
-  // }
+function gatherNoteRefs({
+  link,
+  vault,
+  noteDicts,
+}: {
+  link: DNoteRefLink;
+  vault: DVault;
+  noteDicts?: NoteDicts;
+}) {
+  let noteRefs: DNoteLoc[] = [];
+  if (link.from.fname.endsWith("*")) {
+    // We must have note dicts to process wildcard references.
+    if (!noteDicts) {
+      return [];
+    }
+    const out = _.filter(
+      Object.values(noteDicts.notesById),
+      (ent) =>
+        VaultUtils.isEqualV2(vault, ent.vault) &&
+        DUtils.minimatch(ent.fname, link.from.fname)
+    );
+
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      "fname"
+    );
+  } else {
+    noteRefs.push(link.from);
+  }
   return noteRefs;
 }
 
@@ -96,8 +109,9 @@ export function isEndBlockAnchorId(anchorId: string) {
 }
 
 function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
+  // debugger;
   const procData = MDUtilsV5.getProcData(proc);
-  const { config, fname, vault, dest, noteCacheForRenderDict } = procData;
+  const { config, dest, noteToRender } = procData;
 
   // pretty refs not valid for regular markdown
   if (
@@ -106,32 +120,23 @@ function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
     return false;
   }
 
-  // The note that contains this reference might override the pretty refs option for references inside it.
+  // The note that contains this reference might override the pretty refs option
+  // for references inside it.
+  const containingNote = noteToRender;
+  const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
 
-  if (noteCacheForRenderDict) {
-    const containingNote = NoteDictsUtils.findByFname(
-      fname,
-      noteCacheForRenderDict,
-      vault
-    )[0];
-
-    const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
-
-    let prettyRefs =
-      ConfigUtils.getEnablePrettyRefs(config, {
-        note: containingNote,
-        shouldApplyPublishRules,
-      }) ?? true;
-    if (
-      containingNote?.custom?.usePrettyRefs !== undefined &&
-      _.isBoolean(containingNote.custom?.usePrettyRefs)
-    ) {
-      prettyRefs = containingNote.custom.usePrettyRefs;
-    }
-    return prettyRefs;
+  let prettyRefs =
+    ConfigUtils.getEnablePrettyRefs(config, {
+      note: containingNote,
+      shouldApplyPublishRules,
+    }) ?? true;
+  if (
+    containingNote?.custom?.usePrettyRefs !== undefined &&
+    _.isBoolean(containingNote.custom?.usePrettyRefs)
+  ) {
+    prettyRefs = containingNote.custom.usePrettyRefs;
   }
-
-  return true;
+  return prettyRefs;
 }
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -296,7 +301,7 @@ export function convertNoteRefASTV2(
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
           }
-          if (note.custom.permalink === "/") {
+          if (note.custom?.permalink === "/") {
             href = "";
             suffix = "";
           }
@@ -330,6 +335,7 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
+      // debugger;
       const msg = `Error rendering note reference for ${note?.fname}`;
       return MdastUtils.genMDErrorMsg(msg);
     }
@@ -367,7 +373,11 @@ export function convertNoteRefASTV2(
   // process note references.
   // let noteRefs: DNoteLoc[] = [];
   const vault = procData.vault;
-  const noteRefs: DNoteLoc[] = gatherNoteRefs({ link, vault });
+  const noteRefs: DNoteLoc[] = gatherNoteRefs({
+    link,
+    vault,
+    noteDicts: noteCacheForRenderDict,
+  });
   if (link.from.fname.endsWith("*")) {
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
@@ -416,13 +426,12 @@ export function convertNoteRefASTV2(
     const { fname } = link.from;
 
     const data = noteCacheForRenderDict?.notesByFname[fname];
-
     if (!data) {
       return {
         error: undefined,
         data: [
           MdastUtils.genMDErrorMsg(
-            `Unable to find note with name ${fname} in cache`
+            `No note with name ${fname} found in cache during parsing.`
           ),
         ],
       };

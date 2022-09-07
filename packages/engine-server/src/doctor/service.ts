@@ -142,19 +142,13 @@ export class DoctorService implements Disposable {
   getBrokenLinkDestinations(notes: NoteProps[], engine: DEngineClient) {
     const { vaults } = engine;
     let brokenWikiLinks: DLink[] = [];
-    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
-    const notesByFname =
-      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+    const noteDicts = NoteDictsUtils.createNoteDicts(notes);
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
         return;
       }
-      const brokenLinks = this.findBrokenLinks(
-        note,
-        { notesById, notesByFname },
-        engine
-      );
+      const brokenLinks = this.findBrokenLinks(note, noteDicts, engine);
       brokenWikiLinks = brokenWikiLinks.concat(brokenLinks);
 
       return true;
@@ -219,9 +213,8 @@ export class DoctorService implements Disposable {
     if (notes) {
       notes = notes.filter((n) => !n.stub);
     }
-    const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
-    const notesByFname =
-      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+
+    const noteDicts = NoteDictsUtils.createNoteDicts(notes);
     // this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
     let resp: any;
@@ -327,6 +320,7 @@ export class DoctorService implements Disposable {
             },
             {
               dest: DendronASTDest.MD_DENDRON,
+              noteToRender: note,
               // engine, // JYTODO: Examine
               fname: note.fname,
               vault: note.vault,
@@ -358,6 +352,7 @@ export class DoctorService implements Disposable {
             },
             {
               dest: DendronASTDest.MD_DENDRON,
+              noteToRender: note,
               // engine, // JYTODO: Examine
               fname: note.fname,
               vault: note.vault,
@@ -424,11 +419,7 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         resp = [];
         doctorAction = async (note: NoteProps) => {
-          const brokenLinks = this.findBrokenLinks(
-            note,
-            { notesById, notesByFname },
-            engine
-          );
+          const brokenLinks = this.findBrokenLinks(note, noteDicts, engine);
           if (brokenLinks.length > 0) {
             resp.push({
               file: note.fname,

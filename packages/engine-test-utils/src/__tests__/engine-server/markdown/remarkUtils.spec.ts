@@ -925,7 +925,16 @@ describe("h1ToTitle", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const config = DConfig.readConfigSync(wsRoot);
+
+        const noteToRender = await NoteTestUtilsV4.createNote({
+          wsRoot,
+          vault: vaults[0],
+          fname: "foo",
+          body: [`# Foo Header`, `## Foo Content`].join("\n"),
+        });
+
         const proc = MDUtilsV5.procRemarkFull({
+          noteToRender,
           dest: DendronASTDest.MD_REGULAR,
           fname: "foo",
           vault: vaults[0],

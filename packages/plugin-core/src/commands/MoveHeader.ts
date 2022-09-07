@@ -98,6 +98,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
   private getProc = (engine: IEngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
+      noteToRender: note,
       fname: note.fname,
       vault: note.vault,
       dest: DendronASTDest.MD_DENDRON,

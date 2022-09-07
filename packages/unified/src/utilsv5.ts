@@ -99,6 +99,7 @@ export type ProcDataFullOptsV5 = {
   fname: string;
   dest: DendronASTDest;
   config: IntermediateDendronConfig;
+  vaults?: DVault[];
   /**
    * Supply alternative dictionary of notes to use when resolving note ids
    */
@@ -117,8 +118,7 @@ export type ProcDataFullOptsV5 = {
 } & {
   wsRoot?: string;
 } & {
-  noteToRender?: NoteProps;
-  noteCacheForRender?: NoteProps[];
+  noteToRender: NoteProps;
   noteCacheForRenderDict?: NoteDicts;
 };
 
@@ -146,8 +146,8 @@ export type ProcDataFullV5 = {
    */
   noteRefLvl: number;
 
-  noteToRender?: NoteProps;
-  noteCacheForRender?: NoteProps[];
+  noteToRender: NoteProps;
+  // noteCacheForRender?: NoteProps[];
   noteCacheForRenderDict?: NoteDicts;
 };
 
@@ -356,7 +356,7 @@ export class MDUtilsV5 {
         }
         break;
       case ProcMode.IMPORT: {
-        const requiredProps = ["vault", "engine", "dest"];
+        const requiredProps = ["vault", "dest"];
         const resp = checkProps({ requiredProps, data });
         if (!resp.valid) {
           throw DendronError.createFromStatus({

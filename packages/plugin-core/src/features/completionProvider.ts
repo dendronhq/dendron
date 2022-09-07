@@ -398,6 +398,7 @@ export const resolveCompletionItem = sentryReportingCallback(
           vault: note.vault,
           fname: note.fname,
           config: DConfig.readConfigSync(engine.wsRoot, true),
+          wsRoot,
         },
         {
           flavor: ProcFlavor.HOVER_PREVIEW,

@@ -1,11 +1,12 @@
 /* eslint-disable func-names */
 import {
+  ConfigUtils,
   CONSTANTS,
   DendronError,
   NoteDictsUtils,
-  NoteFnameDictUtils,
   NoteUtils,
   Position,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Eat } from "remark-parse";
@@ -77,11 +78,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const pOpts = MDUtilsV5.getProcOpts(proc);
       const data = node.data;
       let value = node.value;
-      const { alias, anchorHeader } = data;
+      const { anchorHeader } = data;
 
       if (pOpts.mode === ProcMode.NO_DATA) {
         const link = value;
-        const calias = alias !== value ? `${alias}|` : "";
+        const calias = data.alias !== value ? `${data.alias}|` : "";
         const anchor = anchorHeader ? `#${anchorHeader}` : "";
         const vaultPrefix = data.vaultName
           ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
@@ -89,7 +90,39 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
-      const { dest } = MDUtilsV5.getProcData(proc);
+      const { dest, noteCacheForRenderDict, vaults, config } =
+        MDUtilsV5.getProcData(proc);
+
+      let alias = data.alias;
+
+      const shouldApplyPublishingRules =
+        MDUtilsV5.shouldApplyPublishingRules(proc);
+      const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+        config,
+        shouldApplyPublishingRules
+      );
+
+      if (
+        dest !== DendronASTDest.MD_DENDRON &&
+        enableNoteTitleForLink &&
+        !data.alias
+      ) {
+        if (noteCacheForRenderDict) {
+          const targetVault = data.vaultName
+            ? VaultUtils.getVaultByName({ vname: data.vaultName, vaults })
+            : undefined;
+
+          const target = NoteDictsUtils.findByFname(
+            value,
+            noteCacheForRenderDict,
+            targetVault
+          )[0];
+
+          if (target) {
+            alias = target.title;
+          }
+        }
+      }
 
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
@@ -97,7 +130,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
           link: {
             from: {
               fname: value,
-              alias: data.alias,
+              alias,
               anchorHeader: data.anchorHeader,
               vaultName: data.vaultName,
             },
@@ -113,20 +146,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (copts.useId && dest === DendronASTDest.HTML) {
         let notes;
-        const { noteCacheForRender } = MDUtilsV5.getProcData(proc);
+        const { noteCacheForRenderDict } = MDUtilsV5.getProcData(proc);
         // TODO: Consolidate logic.
-        if (noteCacheForRender) {
-          const notesById =
-            NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-          const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
-            this.notes
-          );
-
+        if (noteCacheForRenderDict) {
           // TODO: Add vault filter
-          notes = NoteDictsUtils.findByFname(alias, {
-            notesById,
-            notesByFname,
-          });
+          notes = NoteDictsUtils.findByFname(alias, noteCacheForRenderDict);
         } else {
           return "error - no note cache provided";
         }
@@ -140,14 +164,15 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
       }
 
+      const aliasToUse = alias ?? value;
       switch (dest) {
         case DendronASTDest.MD_REGULAR: {
-          const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${normalizeSpaces(value)})`;
+          return `[${aliasToUse}](${copts.prefix || ""}${normalizeSpaces(
+            value
+          )})`;
         }
         case DendronASTDest.HTML: {
-          const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${value}.html${
+          return `[${aliasToUse}](${copts.prefix || ""}${value}.html${
             data.anchorHeader ? "#" + data.anchorHeader : ""
           })`;
         }
@@ -166,7 +191,10 @@ function attachParser(proc: Unified.Processor) {
   function parseLink(linkMatch: string) {
     const pOpts = MDUtilsV5.getProcOpts(proc);
     linkMatch = NoteUtils.normalizeFname(linkMatch);
-    const out = LinkUtils.parseLinkV2({ linkString: linkMatch });
+    const out = LinkUtils.parseLinkV2({
+      linkString: linkMatch,
+      explicitAlias: true,
+    });
     if (_.isNull(out)) {
       throw new DendronError({ message: `link is null: ${linkMatch}` });
     }
@@ -198,8 +226,7 @@ function attachParser(proc: Unified.Processor) {
     // }
     if (!out.value) {
       // same file block reference, value is implicitly current file
-      out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
-      if (!out.alias) out.alias = out.value;
+      out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value would have been parsed
     }
     // const shouldApplyPublishingRules =
     //   MDUtilsV5.shouldApplyPublishingRules(proc);

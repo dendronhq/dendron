@@ -4,7 +4,6 @@ import {
   IntermediateDendronConfig,
   NoteDicts,
   NoteDictsUtils,
-  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   ReducedDEngine,
@@ -22,12 +21,53 @@ import {
 import { ProcDataFullOptsV5 } from "../utilsv5";
 import { MDUtilsV5Web } from "../utilsWeb";
 
-export async function getHTMLRenderDependencyNoteCache(
+export async function getChildrenDependencies(
+  noteToRender: NoteProps,
+  engine: ReducedDEngine
+): Promise<NoteProps[]> {
+  const results: NoteProps[] = [];
+
+  // Also include children to render the 'children' hierarchy at the footer of the page:
+  await Promise.all(
+    noteToRender.children.map(async (childId) => {
+      // TODO: Can we use a bulk get API instead (if/when it exists) to speed
+      // up fetching time
+      const childNote = await engine.getNote(childId);
+
+      if (childNote.data) {
+        results.push(childNote.data);
+      }
+    })
+  );
+
+  return results;
+}
+
+export async function getBacklinkDependencies(
+  noteToRender: NoteProps,
+  engine: ReducedDEngine
+): Promise<NoteProps[]> {
+  const results = await Promise.all(
+    noteToRender.links
+      .filter((link) => link.type === "backlink" && link.from.id)
+      .map(async (link) => {
+        const linkedNote = await engine.getNote(link.from.id!);
+        if (linkedNote.data) {
+          return linkedNote.data;
+        }
+        return undefined;
+      })
+  );
+
+  return _.uniqBy(_.compact(results), (value) => value.id);
+}
+
+export async function getForwardLinkDependencies(
   noteToRender: NoteProps,
   engine: ReducedDEngine,
   config: IntermediateDendronConfig,
   vaults: DVault[]
-): Promise<NoteDicts> {
+): Promise<NoteProps[]> {
   const proc = MDUtilsV5Web.procRehypeWeb(
     {
       noteToRender,
@@ -45,6 +85,8 @@ export async function getHTMLRenderDependencyNoteCache(
 
   // TODO: Also add in Note Ref Dependencies.
 
+  // TODO: Account for wildcard wikilink syntax. See gatherNoteRefs.
+
   let allData: NoteProps[] = await Promise.all(
     renderDependencies.map(async (note) => {
       const vault = _.find(vaults, (vault) => vault.name === note.vaultName);
@@ -56,13 +98,28 @@ export async function getHTMLRenderDependencyNoteCache(
   allData = _.compact(allData);
   allData = _.uniqBy(allData, (value) => value.id);
 
-  const notesById = NoteDictsUtils.createNotePropsByIdDict(allData);
-  const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+  return allData;
+}
 
-  return {
-    notesById,
-    notesByFname,
-  };
+export async function getHTMLRenderDependencyNoteCache(
+  noteToRender: NoteProps,
+  engine: ReducedDEngine,
+  config: IntermediateDendronConfig,
+  vaults: DVault[]
+): Promise<NoteDicts> {
+  let allData: NoteProps[] = [];
+
+  allData.push(
+    ...(await getForwardLinkDependencies(noteToRender, engine, config, vaults))
+  );
+
+  allData.push(...(await getBacklinkDependencies(noteToRender, engine)));
+  allData.push(...(await getChildrenDependencies(noteToRender, engine)));
+
+  allData = _.compact(allData);
+  allData = _.uniqBy(allData, (value) => value.id);
+
+  return NoteDictsUtils.createNoteDicts(allData);
 }
 
 /**

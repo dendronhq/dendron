@@ -1,10 +1,11 @@
-import { ConfigUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteDictsUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
+import { SiteUtils } from "../SiteUtils";
 import { DendronASTDest, DendronASTTypes, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 
@@ -14,15 +15,23 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, dest, insideNoteRef, config, noteToRender } =
-      MDUtilsV5.getProcData(proc);
+    const {
+      fname,
+      dest,
+      insideNoteRef,
+      config,
+      noteToRender,
+      noteCacheForRenderDict,
+      vaults,
+      wsRoot,
+    } = MDUtilsV5.getProcData(proc);
 
     // Don't show backlinks for the following cases:
     // - we are inside a note ref
     // - the destination isn't HTML
     // - the note can't be found
-    // - neableChild links is toggled off
-    // enableBackLinks is set to false
+    // - enableChild links is toggled off
+    // - enableBackLinks is set to false
     if (!fname || insideNoteRef) {
       return;
     }
@@ -48,45 +57,44 @@ const plugin: Plugin = function (this: Unified.Processor) {
       return;
     }
 
-    const backlinksToPublish = _.uniqBy(
+    let backlinksToPublish = _.uniqBy(
       (note?.links || []).filter((ent) => ent.type === "backlink"),
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
-    // JYTODO: Check that this filtering happens _before_ we start any parsing.
     // filter out invalid backlinks
-    // const backlinksToPublish = _.filter(backlinks, (backlink) => {
-    //   const vaultName = backlink.from.vaultName!;
-    //   const vault = VaultUtils.getVaultByName({
-    //     vaults: engine.vaults,
-    //     vname: vaultName,
-    //   })!;
+    backlinksToPublish = _.filter(backlinksToPublish, (backlink) => {
+      const vaultName = backlink.from.vaultName!;
+      const vault = VaultUtils.getVaultByName({
+        vaults,
+        vname: vaultName,
+      })!;
 
-    //   // let note: NoteProps | undefined;
-    //   // if (engine) {
-    //   //   note = NoteUtils.getNoteByFnameFromEngine({
-    //   //     fname: backlink.from.fname!,
-    //   //     engine,
-    //   //     vault,
-    //   //   });
-    //   // } else {
-    //   //   note = noteToRender;
-    //   // }
-    //   const note = noteToRender;
+      // let note: NoteProps | undefined;
 
-    //   // if note doesn't exist, don't include in backlinks
-    //   if (!note) {
-    //     return false;
-    //   }
-    //   // if note exists but it can't be published, don't include
-    //   const out = SiteUtils.canPublish({
-    //     note,
-    //     config,
-    //     wsRoot,
-    //     vaults,
-    //   });
-    //   return out;
-    // });
+      if (!noteCacheForRenderDict) {
+        return false;
+      }
+
+      const note = NoteDictsUtils.findByFname(
+        backlink.from.fname!,
+        noteCacheForRenderDict,
+        vault
+      )[0];
+
+      // if note doesn't exist, don't include in backlinks
+      if (!note) {
+        return false;
+      }
+      // if note exists but it can't be published, don't include
+      const out = SiteUtils.canPublish({
+        note,
+        config,
+        wsRoot,
+        vaults,
+      });
+      return out;
+    });
 
     if (!_.isEmpty(backlinksToPublish)) {
       root.children.push({
@@ -99,26 +107,21 @@ const plugin: Plugin = function (this: Unified.Processor) {
           backlinksToPublish.map((mdLink) => {
             let alias;
 
-            // let note: NoteProps | undefined;
+            const notes = NoteDictsUtils.findByFname(
+              mdLink.from.fname!,
+              noteCacheForRenderDict!,
+              VaultUtils.getVaultByName({
+                vaults,
+                vname: mdLink.from.vaultName!,
+              })
+            );
 
-            // if (engine) {
-            //   note = NoteUtils.getNoteByFnameFromEngine({
-            //     fname: mdLink.from.fname!,
-            //     vault: VaultUtils.getVaultByName({
-            //       vaults: engine.vaults,
-            //       vname: mdLink.from.vaultName!,
-            //     })!,
-            //     engine,
-            //   });
-            // } else {
-            //   note = noteToRender;
-            // }
-            const note = noteToRender;
+            const note = notes[0];
 
             if (note) {
               alias =
                 note.title +
-                (config.vaults && config.vaults.length > 1
+                (vaults && vaults.length > 1
                   ? ` (${mdLink.from.vaultName!})`
                   : "");
             } else {

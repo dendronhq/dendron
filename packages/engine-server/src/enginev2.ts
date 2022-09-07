@@ -71,6 +71,7 @@ import {
   ProcFlavor,
   runAllDecorators,
   RemarkUtils,
+  getHTMLRenderDependencyNoteCache,
 } from "@dendronhq/unified";
 import { HookUtils } from "./topics/hooks";
 
@@ -592,26 +593,38 @@ export class DendronEngineV2 implements DEngine {
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
     const config = DConfig.readConfigSync(this.wsRoot);
+
+    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      note,
+      this,
+      config,
+      this.vaults
+    );
+
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5.procRehypeFull(
         {
           noteToRender: note,
-          // engine: this, JYTODO: Examine
+          noteCacheForRenderDict,
           fname: note.fname,
           vault: note.vault,
           config,
+          vaults: this._vaults,
+          wsRoot: this.wsRoot,
         },
         { flavor }
       );
     } else {
       proc = MDUtilsV5.procRemarkFull(
         {
-          // engine: this, JYTODO: Examine
           noteToRender: note,
+          noteCacheForRenderDict,
           fname: note.fname,
           vault: note.vault,
           dest,
           config,
+          vaults: this._vaults,
+          wsRoot: this.wsRoot,
         },
         { flavor }
       );

@@ -1,3 +1,4 @@
+import { DConfig } from "@dendronhq/common-server";
 import {
   AssertUtils,
   NoteTestUtilsV4,
@@ -11,11 +12,12 @@ import { createProcForTest, createProcTests } from "./utils";
 describe("footnotes", () => {
   const BASIC = createProcTests({
     name: "basic",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = createProcForTest({
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        config: DConfig.readConfigSync(wsRoot),
       });
       const resp = await proc2.process(
         [
@@ -55,11 +57,12 @@ describe("footnotes", () => {
 
   const UNUSED = createProcTests({
     name: "unused footnote",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = createProcForTest({
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        config: DConfig.readConfigSync(wsRoot),
       });
       const resp = await proc2.process(
         [
@@ -96,11 +99,12 @@ describe("footnotes", () => {
 
   const WITH_LINK = createProcTests({
     name: "footnote containing link",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = createProcForTest({
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        config: DConfig.readConfigSync(wsRoot),
       });
       const resp = await proc2.process(
         [
@@ -159,11 +163,26 @@ describe("footnotes", () => {
         ].join("\n"),
       });
     },
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const proc2 = createProcForTest({
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const target = await NoteTestUtilsV4.createNote({
+        fname: "target",
+        wsRoot,
+        vault: vaults[0],
+        body: [
+          "Odio delectus veniam qui molestiae tenetur. [^1]",
+          "Ipsum iusto impedit provident. [^vel]",
+          "",
+          "[^vel]: Vel omnis deleniti omnis.",
+          "[^1]: Animi eius nesciunt.",
+        ].join("\n"),
+      });
+
+      const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        config: DConfig.readConfigSync(wsRoot),
+        parsingDependenciesByNoteProps: [target],
       });
       const resp = await proc2.process(
         [

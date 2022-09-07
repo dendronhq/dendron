@@ -254,6 +254,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }
 
   async _renderNote({
+    engine,
     note,
     notes,
     engineConfig,
@@ -272,10 +273,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const proc = MDUtilsV5.procRehypeFull(
       {
+        noteToRender: note,
         noteCacheForRenderDict,
         fname: note.fname,
         vault: note.vault,
         config: engineConfig,
+        vaults: engine.vaults,
       },
       { flavor: ProcFlavor.PUBLISHING }
     );

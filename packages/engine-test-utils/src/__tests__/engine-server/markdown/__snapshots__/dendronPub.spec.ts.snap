@@ -24,7 +24,9 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
 VFile {
   "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#with-override\\"></a>With Override</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>",
+<p></p><blockquote>
+No note with name bar found in cache during parsing.
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -35,12 +37,9 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
+<p></p><blockquote>
+No note with name bar found in cache during parsing.
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -61,12 +60,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -77,12 +71,9 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
-<p></p><p></p><p>bar body</p><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
-</ol>",
+<p></p><blockquote>
+No note with name bar found in cache during parsing.
+</blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -103,12 +94,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
-</ol>",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -129,12 +115,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -155,12 +136,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
-</ol>",
+</div></div><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -536,7 +512,7 @@ exports[`GIVEN dendronPub (old tests - need to be migrated) note reference fail:
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
-No note with name bar found in vault vault2
+No note with name bar found in cache during parsing.
 </blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -549,7 +525,7 @@ exports[`GIVEN dendronPub (old tests - need to be migrated) note reference nonex
 VFile {
   "contents": "<h1 id=\\"ref\\">Ref</h1>
 <p></p><blockquote>
-No note with name bar found
+No note with name bar found in cache during parsing.
 </blockquote><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -686,12 +662,7 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) prefix imagePrefix 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
+<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -702,12 +673,7 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) prefix imagePrefix with forward slash 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"foo.ch1\\">Ch1</a></li>
-</ol>",
+<p><img src=\\"/image-url.jpg\\" alt=\\"alt-text\\"></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -718,13 +684,7 @@ VFile {
 exports[`GIVEN dendronPub WHEN all notes are public WHEN publishing links to task notes THEN all links are rendered 1`] = `
 VFile {
   "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#beta\\"></a>Beta</h1>
-<p><a href=\\"/notes/alpha.task\\"><input type=\\"checkbox\\" disabled class=\\"task-before task-status\\" checked>Task<span class=\\"task-after task-priority\\">priority:high</span><span class=\\"task-after task-due\\">due:2022-08-28</span><span class=\\"task-after task-owner\\">@turing</span></a></p>
-<hr>
-<strong>Backlinks</strong>
-<ul>
-<li><a href=\\"/notes/alpha\\">Alpha (vault1)</a></li>
-<li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">Omega (vault1) (Private)</a></li>
-</ul>",
+<p><a href=\\"/notes/alpha.task\\"><input type=\\"checkbox\\" disabled class=\\"task-before task-status\\" checked>Task<span class=\\"task-after task-priority\\">priority:high</span><span class=\\"task-after task-due\\">due:2022-08-28</span><span class=\\"task-after task-owner\\">@turing</span></a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

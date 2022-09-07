@@ -2,7 +2,6 @@ import {
   ConfigUtils,
   FOOTNOTE_DEF_CLASS,
   FOOTNOTE_REF_CLASS,
-  NoteDictsUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -68,7 +67,6 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
   const { config } = MDUtilsV5.getProcData(this);
   let hierarchyDisplayTitle = config?.hierarchyDisplayTitle || "Children";
   let hierarchyDisplay = config?.hierarchyDisplay;
-
   if (MDUtilsV5.shouldApplyPublishingRules(proc)) {
     const hierarchyConfigForPublishing =
       ConfigUtils.getHierarchyDisplayConfigForPublishing(config);
@@ -139,7 +137,8 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
       addFootnotes();
       return;
     }
-    const { noteToRender, noteCacheForRender } = MDUtilsV5.getProcData(proc);
+    const { noteToRender, noteCacheForRenderDict } =
+      MDUtilsV5.getProcData(proc);
 
     const note = noteToRender;
 
@@ -195,14 +194,11 @@ const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
         return;
       }
       let children;
-      if (noteCacheForRender) {
-        const notesById =
-          NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-
+      if (noteCacheForRenderDict) {
         children = HierarchyUtils.getChildren({
           skipLevels: note.custom?.skipLevels || 0,
           note,
-          notes: notesById,
+          notes: noteCacheForRenderDict.notesById,
         })
           // .filter((note) => SiteUtils.canPublish({ note, engine, config })) // TODO: Add back later
           .filter(

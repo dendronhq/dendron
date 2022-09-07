@@ -1,21 +1,35 @@
 import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { MDUtilsV5 } from "@dendronhq/unified";
+import {
+  getHTMLRenderDependencyNoteCache,
+  MDUtilsV5,
+} from "@dendronhq/unified";
 import { runEngineTestV5, TestConfigUtils } from "../../..";
 
 describe("backlinks", () => {
   describe("frontmatter tags", () => {
     test("single", async () => {
       await runEngineTestV5(
-        async ({ wsRoot, vaults }) => {
+        async ({ wsRoot, vaults, engine }) => {
           const config = DConfig.readConfigSync(wsRoot);
           const vault = vaults[0];
+          const noteToRender = (
+            await engine.findNotes({ fname: "tags.test", vault })
+          )[0];
+          const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+            noteToRender,
+            engine,
+            config,
+            vaults
+          );
           const resp = await MDUtilsV5.procRehypeFull({
-            // engine,
+            noteToRender,
+            noteCacheForRenderDict,
             vault,
             fname: "tags.test",
             config,
+            vaults,
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -62,14 +76,25 @@ describe("backlinks", () => {
 
     test("multiple", async () => {
       await runEngineTestV5(
-        async ({ wsRoot, vaults }) => {
+        async ({ wsRoot, vaults, engine }) => {
           const config = DConfig.readConfigSync(wsRoot);
           const vault = vaults[0];
+          const noteToRender = (
+            await engine.findNotes({ fname: "tags.test", vault })
+          )[0];
+          const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+            noteToRender,
+            engine,
+            config,
+            vaults
+          );
           const resp = await MDUtilsV5.procRehypeFull({
-            // engine,
+            noteToRender,
+            noteCacheForRenderDict,
             vault,
             fname: "tags.test",
             config,
+            vaults,
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
@@ -129,13 +154,25 @@ describe("backlinks", () => {
   //
   test("hashtag", async () => {
     await runEngineTestV5(
-      async ({ wsRoot, vaults }) => {
+      async ({ wsRoot, vaults, engine }) => {
         const config = DConfig.readConfigSync(wsRoot);
         const vault = vaults[0];
+        const noteToRender = (
+          await engine.findNotes({ fname: "tags.test", vault })
+        )[0];
+        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+          noteToRender,
+          engine,
+          config,
+          vaults
+        );
         const resp = await MDUtilsV5.procRehypeFull({
+          noteToRender,
+          noteCacheForRenderDict,
           vault,
           fname: "tags.test",
           config,
+          vaults,
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();

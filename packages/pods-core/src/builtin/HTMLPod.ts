@@ -1,4 +1,4 @@
-import { ConfigUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteDictsUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import {
   getHTMLRenderDependencyNoteCache,
@@ -78,9 +78,21 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       config.vaults
     );
 
-    // TODO: Figure out if we also need children / backlinks here.
+    // Also include children to render the 'children' hierarchy at the footer of the page:
+    await Promise.all(
+      note.children.map(async (childId) => {
+        // TODO: Can we use a bulk get API instead (if/when it exists) to speed
+        // up fetching time
+        const childNote = await engine.getNote(childId);
+
+        if (childNote.data) {
+          NoteDictsUtils.add(childNote.data, noteCacheForRenderDict);
+        }
+      })
+    );
 
     const proc = MDUtilsV5.procRehypeFull({
+      noteToRender: note,
       noteCacheForRenderDict,
       vault: note.vault,
       fname,

@@ -474,7 +474,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
           }
         );
       });
-      test("THEN expect cross vault wikilinks inside ref links to be converted to Note URL", async () => {
+      test.only("THEN expect cross vault wikilinks inside ref links to be converted to Note URL", async () => {
         await runEngineTestV5(
           async (opts) => {
             const { props, pod } = setupPod({

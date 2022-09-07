@@ -1,3 +1,4 @@
+import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   ExtendedImage,
@@ -103,11 +104,12 @@ describe("extendedImage", () => {
   describe("rendering", () => {
     const SINGLE_STYLE_PROP = createProcTests({
       name: "single style prop",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
+          config: DConfig.readConfigSync(wsRoot),
         });
         const resp = await proc2.process(
           `![alt text](/assets/image.png){width: 50%}`
@@ -162,11 +164,12 @@ describe("extendedImage", () => {
 
     const NO_ALT = createProcTests({
       name: "no alt",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
+          config: DConfig.readConfigSync(wsRoot),
         });
         const resp = await proc2.process(`![](/assets/image.png){width: 50%}`);
         return { resp };
@@ -217,11 +220,12 @@ describe("extendedImage", () => {
 
     const MULTIPLE_STYLE_PROPS = createProcTests({
       name: "multiple style props",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
+          config: DConfig.readConfigSync(wsRoot),
         });
         const resp = await proc2.process(
           `![alt text](/assets/image.png){width: 50%, max-height: 400px, opacity: 0.8}`

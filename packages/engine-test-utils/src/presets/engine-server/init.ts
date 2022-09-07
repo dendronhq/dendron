@@ -384,7 +384,7 @@ const NOTES = {
           actual: noteAlpha.links,
           expected: [
             {
-              alias: "beta",
+              alias: undefined,
               from: {
                 fname: "alpha",
                 id: "alpha",
@@ -414,7 +414,7 @@ const NOTES = {
               xvault: false,
             },
             {
-              alias: "alpha",
+              alias: undefined,
               from: {
                 fname: "beta",
                 id: "beta",

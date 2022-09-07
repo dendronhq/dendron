@@ -72,9 +72,7 @@ export class NoteLookupUtils {
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
     const childrenOfRootNotes = await engine.bulkGetNotes(childrenOfRoot);
-    return roots.concat(
-      _.compact(childrenOfRootNotes.data.map((resp) => resp.data))
-    );
+    return roots.concat(childrenOfRootNotes.data);
   };
 
   static fetchRootResults = (notes: NotePropsByIdDict) => {

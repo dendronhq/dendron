@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { AxiosError } from "axios";
+import type { Result as NeverThrowResult } from "neverthrow";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 import { RespV3, RespV3ErrorResp } from "./types";
 
@@ -414,3 +415,6 @@ export function isTSError(err: any): err is Error {
     (err as Error).message !== undefined && (err as Error).name !== undefined
   );
 }
+
+
+export type DendronResult<T> = NeverThrowResult<T, IDendronError>;

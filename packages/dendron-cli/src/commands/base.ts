@@ -107,6 +107,8 @@ export abstract class CLICommand<
     this.L.info({ msg: `Telemetry is disabled? ${segment.hasOptedOut}` });
   }
 
+  addAnalyticsPayload?(opts?: TOpts, out?: TOut): any;
+
   async validateConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
 
@@ -179,7 +181,15 @@ export abstract class CLICommand<
   }
 
   addArgsToPayload(data: any) {
-    _.set(this._analyticsPayload, "args", data);
+    this.addToPayload({
+      key: "args",
+      value: data,
+    });
+  }
+
+  addToPayload(opts: { key: string; value: any }) {
+    const { key, value } = opts;
+    _.set(this._analyticsPayload, key, value);
   }
 
   /**

@@ -415,11 +415,25 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
-    return {
+    let payload = {
       action: opts.action,
       scope: opts.scope,
-      ...out.extra,
     };
+    if (out.extra) {
+      switch (opts.action) {
+        case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
+          payload = {
+            ...payload,
+            ...out.extra,
+          };
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+    return payload;
   }
 
   async execute(opts: CommandOpts) {

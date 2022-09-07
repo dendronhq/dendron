@@ -15,7 +15,7 @@ import {
 import { ThemeTarget, ThemeType } from "./constants";
 import { DendronCompositeError, DendronError } from "./error";
 import {
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
   DeleteNoteResp,
   DeleteSchemaResp,
   DEngineInitResp,
@@ -331,7 +331,7 @@ export class DendronAPI extends API {
     });
   }
 
-  engineBulkAdd(req: EngineBulkAddRequest): Promise<BulkWriteNoteResp> {
+  engineBulkAdd(req: EngineBulkAddRequest): Promise<BulkWriteNotesResp> {
     return this._makeRequest({
       path: "note/bulkAdd",
       method: "post",

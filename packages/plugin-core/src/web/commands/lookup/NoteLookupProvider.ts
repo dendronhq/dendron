@@ -45,10 +45,9 @@ export class NoteLookupProvider implements ILookupProvider {
     try {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
-        const items = await this.fetchRootQuickPickResults({
+        return this.fetchRootQuickPickResults({
           schemas: workspaceState.schemas,
         });
-        return items;
       }
 
       // const items: NoteQuickInput[] = [...picker.items];
@@ -156,7 +155,7 @@ export class NoteLookupProvider implements ILookupProvider {
   }: {
     schemas: SchemaModuleDict;
   }) => {
-    const nodes = await this.fetchRootResults();
+    const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(this.engine);
 
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInputV4({
@@ -164,19 +163,6 @@ export class NoteLookupProvider implements ILookupProvider {
         schemas,
       });
     });
-  };
-
-  private fetchRootResults = async () => {
-    // TODO: Change to findNotesMeta
-    const roots = await this.engine.findNotes({ fname: "root" });
-
-    const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const childrenOfRootNotes = await Promise.all(
-      _.map(childrenOfRoot, (ent) => this.engine.getNote(ent))
-    );
-    return roots.concat(
-      _.compact(childrenOfRootNotes.map((resp) => resp.data))
-    );
   };
 
   private async fetchPickerResults(opts: {

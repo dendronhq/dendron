@@ -445,7 +445,7 @@ export type FindNotesMetaResp = NotePropsMeta[];
  * - notes that have had their links re-written
  */
 export type WriteNoteResp = RespV3<NoteChangeEntry[]>;
-export type BulkWriteNoteResp = RespWithOptError<NoteChangeEntry[]>;
+export type BulkWriteNotesResp = RespWithOptError<NoteChangeEntry[]>;
 export type UpdateNoteResp = RespV2<NoteChangeEntry[]>; // TODO: remove
 export type DeleteNoteResp = RespV3<NoteChangeEntry[]>;
 export type QueryNotesResp = RespV3<NoteProps[]>;
@@ -470,7 +470,7 @@ export type GetDecorationsResp = RespWithOptError<{
 
 // --- Common
 export type DCommonMethods = {
-  bulkWriteNotes: (opts: BulkWriteNotesOpts) => Promise<BulkWriteNoteResp>;
+  bulkWriteNotes: (opts: BulkWriteNotesOpts) => Promise<BulkWriteNotesResp>;
 
   /**
    * Write note to metadata store and/or filesystem. This will update existing note or create new if one doesn't exist.

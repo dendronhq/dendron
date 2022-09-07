@@ -1,7 +1,7 @@
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
   BulkWriteNotesOpts,
   DeleteNoteResp,
   EngineDeleteOpts,
@@ -91,7 +91,7 @@ export class MockEngineAPIService implements ReducedDEngine {
     throw new Error("Not Implemented");
   }
 
-  bulkWriteNotes(_opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
+  bulkWriteNotes(_opts: BulkWriteNotesOpts): Promise<BulkWriteNotesResp> {
     throw new Error("Method not implemented.");
   }
   writeNote(

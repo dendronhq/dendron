@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
   BulkWriteNotesOpts,
   DendronAPI,
   DEngineClient,
@@ -206,7 +206,7 @@ export class EngineAPIService
     return this._internalEngine.findNotesMeta(opts);
   }
 
-  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
+  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNotesResp> {
     return this._internalEngine.bulkWriteNotes(opts);
   }
 

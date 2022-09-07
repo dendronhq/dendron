@@ -5,6 +5,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
+  ReducedDEngine,
 } from "..";
 
 const PAGINATE_LIMIT = 50;
@@ -65,12 +66,15 @@ export class NoteLookupUtils {
     return lastDotIndex < 0 ? "" : qs.slice(0, lastDotIndex + 1);
   };
 
-  static fetchRootResultsFromEngine = async (engine: DEngineClient) => {
+  static fetchRootResultsFromEngine = async (engine: ReducedDEngine) => {
+    // TODO: Support findNotesMeta
     const roots = await engine.findNotes({ fname: "root" });
 
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
     const childrenOfRootNotes = await engine.bulkGetNotes(childrenOfRoot);
-    return roots.concat(childrenOfRootNotes.data);
+    return roots.concat(
+      _.compact(childrenOfRootNotes.data.map((resp) => resp.data))
+    );
   };
 
   static fetchRootResults = (notes: NotePropsByIdDict) => {

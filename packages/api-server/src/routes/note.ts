@@ -9,7 +9,7 @@ import {
   NoteQueryRequest,
   RenderNoteOpts,
   WriteNoteResp,
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -78,7 +78,7 @@ router.post(
 
 router.post(
   "/bulkAdd",
-  asyncHandler(async (req: Request, res: Response<BulkWriteNoteResp>) => {
+  asyncHandler(async (req: Request, res: Response<BulkWriteNotesResp>) => {
     const { ws, opts } = req.body as EngineBulkAddRequest;
     const engine = await getWSEngine({ ws: ws || "" });
     const out = await engine.bulkWriteNotes(opts);

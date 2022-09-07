@@ -27,7 +27,7 @@ import {
   FindNotesMetaResp,
   BulkGetNoteResp,
   BulkGetNoteMetaResp,
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
   RenameNoteResp,
   QueryNotesResp,
   RenderNoteResp,
@@ -75,7 +75,7 @@ export interface IEngineAPIService {
    */
   findNotesMeta: (opts: FindNoteOpts) => Promise<FindNotesMetaResp>;
 
-  bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp>;
+  bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNotesResp>;
 
   writeNote(
     note: NoteProps,

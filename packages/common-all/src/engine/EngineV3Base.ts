@@ -10,7 +10,7 @@ import { INoteStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
-  BulkWriteNoteResp,
+  BulkWriteNotesResp,
   BulkWriteNotesOpts,
   DeleteNoteResp,
   EngineDeleteOpts,
@@ -107,7 +107,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
   /**
    * See {@link DEngine.bulkWriteNotes}
    */
-  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNoteResp> {
+  async bulkWriteNotes(opts: BulkWriteNotesOpts): Promise<BulkWriteNotesResp> {
     const writeResponses = await Promise.all(
       opts.notes.map((note) => this.writeNote(note, opts.opts))
     );

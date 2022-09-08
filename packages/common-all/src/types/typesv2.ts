@@ -274,7 +274,7 @@ export type RespV3ErrorResp = {
   data?: never;
 };
 
-type RespV3SuccessResp<T> = {
+export type RespV3SuccessResp<T> = {
   error?: never;
   data: T;
 };

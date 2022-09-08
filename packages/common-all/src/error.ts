@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import _ from "lodash";
 import { AxiosError } from "axios";
-import type { Result } from "neverthrow";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 import { RespV3, RespV3ErrorResp } from "./types";
 
@@ -416,8 +415,67 @@ export function isTSError(err: any): err is Error {
   );
 }
 
-/**
- * [Result type](https://en.wikipedia.org/wiki/Result_type)
- * See https://github.com/supermacro/neverthrow/wiki/Introduction:-Type-Safe-Errors-in-JS-&-TypeScript-(10-minute-read)#making-your-types-more-intuitive
- */
-export type DendronResult<T> = Result<T, IDendronError>;
+/** Utility class for helping with dataflow of RespV3 objects. */
+export class ErrorFuncUtils {
+  /**
+   * Throws an error if `RespV3` contains it, otherwise returns the containing data.
+   */
+  static unwrap<T>(value: RespV3<T>): T {
+    if (value.error) {
+      throw value.error;
+    }
+    return value.data;
+  }
+
+  /**
+   * map the data containt inside `RespV3` object to another value.
+   */
+  static map<T, R>(resp: RespV3<T>, fn: (value: T) => R): RespV3<R> {
+    if (resp.error) {
+      return resp;
+    } else {
+      return {
+        data: fn(resp.data),
+      };
+    }
+  }
+
+  /**
+   * Takes an array of `RespV3` objects and converts it into a single `RespV3`.
+   */
+  static combine<T>(respList: RespV3<T>[]) {
+    return respList.reduce<RespV3<T[]>>(
+      (acc, current) => {
+        if (acc.error) {
+          return acc;
+        }
+        if (current.error) {
+          return current;
+        }
+        acc.data.push(current.data);
+        return acc;
+      },
+      { data: [] }
+    );
+  }
+
+  /**
+   * Wraps a throwable function and returns an higher-order function that returns a `RespV3` object.
+   */
+  static encase<T, A extends any[]>(fn: (...args: A) => T) {
+    return (...args: A): RespV3<T> => {
+      try {
+        return { data: fn(...args) };
+      } catch (error) {
+        return {
+          error: DendronError.isDendronError(error)
+            ? error
+            : DendronError.createFromStatus({
+                message: "Error when processing sidebarItem",
+                status: ERROR_STATUS.INVALID_CONFIG,
+              }),
+        };
+      }
+    };
+  }
+}

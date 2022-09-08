@@ -1,19 +1,18 @@
 import * as v from "@badrap/valita";
-import { ok, err } from "neverthrow";
 import { DendronError } from "./error";
-import type { DendronResult } from "./error";
+import { RespV3 } from "./types";
 
 export const parse = <T extends v.Type>(
   schema: T,
   raw: unknown,
   msg?: string
-): DendronResult<v.Infer<T>> => {
+): RespV3<v.Infer<T>> => {
   const parsed = schema.try(raw);
   if (parsed.ok) {
-    return ok(parsed.value);
+    return { data: parsed.value };
   } else {
-    return err(
-      new DendronError({
+    return {
+      error: new DendronError({
         message: [
           [
             "Schema Parse Error",
@@ -22,7 +21,7 @@ export const parse = <T extends v.Type>(
           ...(msg ? [msg] : []),
           JSON.stringify(parsed.issues, null, 2),
         ].join("\n"),
-      })
-    );
+      }),
+    };
   }
 };

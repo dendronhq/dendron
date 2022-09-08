@@ -520,7 +520,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const sidebarPath =
       "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
 
-    const sidebarsResult = getSidebars(
+    const sidebarsResp = getSidebars(
       await NextjsExportPodUtils.loadSidebarsFile(sidebarPath),
       {
         notes: publishedNotes,
@@ -531,8 +531,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       }
     );
 
-    if (sidebarsResult.isErr()) {
-      throw sidebarsResult.error;
+    if (sidebarsResp.error) {
+      throw sidebarsResp.error;
     }
 
     const siteNotes = SiteUtils.createSiteOnlyNotes({
@@ -577,7 +577,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const treeDstPath = path.join(podDstDir, "tree.json");
 
-    const sidebars = sidebarsResult.value;
+    const sidebars = sidebarsResp.data;
     const tree = TreeUtils.generateTreeData(payload.notes, sidebars);
 
     // Generate full text search data

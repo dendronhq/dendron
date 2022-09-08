@@ -10,7 +10,7 @@ import type { Option } from "./utils";
 import { PublishUtils, do_ } from "./utils";
 import { parse } from "./parse";
 import { DendronError, assertUnreachable } from "./error";
-import type { DendronResult } from './error'
+import type { DendronResult } from "./error";
 import { ERROR_STATUS } from "./constants";
 
 const noteLiteral = v.literal("note");
@@ -118,7 +118,7 @@ type WithPosition<T> = T & {
   reverse?: boolean;
 };
 
-const ROOT_KEYWORD = "*";
+const ROOT_KEYWORD = "root";
 
 export const DefaultSidebars: SidebarsConfig = {
   defaultSidebar: [

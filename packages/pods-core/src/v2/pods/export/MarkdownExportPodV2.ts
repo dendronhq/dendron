@@ -90,7 +90,7 @@ export class MarkdownExportPodV2
     logger.debug({ msg: "pre:iterate_notes" });
     const errors: IDendronError[] = [];
     const total = notes.length;
-    progress?.report({ message: `Importing ${total} notes...` });
+    progress?.report({ message: `Exporting ${total} notes...` });
     let acc = 0;
     const minStep = Math.max(100, total / 20.0);
 

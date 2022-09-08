@@ -10,15 +10,15 @@ import _ from "lodash";
 import { after, before, beforeEach, describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
+import { container } from "tsyringe";
 import { Uri } from "vscode";
 import { DeleteCommand } from "../../commands/DeleteCommand";
 import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { EngineNoteProvider } from "../../views/EngineNoteProvider";
+import { EngineNoteProvider } from "../../common/EngineNoteProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
-import { MockEngineEvents } from "./MockEngineEvents";
 
 function getNoteUri(opts: { note: NotePropsMeta; wsRoot: string }) {
   const { note, wsRoot } = opts;
@@ -73,14 +73,14 @@ async function runDeleteNote(opts: { noteId: string }) {
 }
 
 async function getFullTree(opts: {
-  root: NoteProps;
+  root: string;
   provider: EngineNoteProvider;
   extra?: {
     [key in keyof Partial<NoteProps>]: boolean;
   };
 }): Promise<{ fname: string; childNodes: any }> {
   const { root, provider } = opts;
-  const children = await (provider.getChildren(root) as Promise<NoteProps[]>);
+  const children = await (provider.getChildren(root) as Promise<string[]>);
   const childNodes = await Promise.all(
     children.map(async (child) => {
       const tree = await getFullTree({
@@ -91,14 +91,16 @@ async function getFullTree(opts: {
       return tree;
     })
   );
-  const res = { fname: root.fname, childNodes };
+  const engine = ExtensionProvider.getEngine();
+  const rootNote = (await engine.getNote(root)).data!;
+  const res = { fname: rootNote.fname, childNodes };
   if (opts.extra) {
     const extraKeys = _.keys(opts.extra);
     extraKeys.forEach((key) => {
       if (opts.extra && opts.extra[key as keyof NoteProps]) {
-        const value = root[key as keyof NoteProps];
+        const value = rootNote[key as keyof NoteProps];
         if (value !== undefined) {
-          _.set(res, key, root[key as keyof NoteProps]);
+          _.set(res, key, rootNote[key as keyof NoteProps]);
         }
       }
     });
@@ -125,29 +127,38 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
+          const engine = ExtensionProvider.getEngine();
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
 
           const vaultOneRootPropsBefore = propsBefore[0];
 
           const childrenBefore = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenBefore.map((child) => child.fname)).toEqual(["foo"]);
+          ) as string[]);
+          const resp = await Promise.all(
+            childrenBefore.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp).toEqual(["foo"]);
 
           await runRenameNote({
-            noteId: childrenBefore[0].id,
+            noteId: childrenBefore[0],
             newName: "fooz",
           });
 
           const childrenAfter = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenAfter.map((child) => child.fname)).toEqual(["fooz"]);
+          ) as string[]);
+          const result = await Promise.all(
+            childrenAfter.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(result).toEqual(["fooz"]);
         });
       }
     );
@@ -167,47 +178,61 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
 
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
+          const engine = ExtensionProvider.getEngine();
 
           const childrenBefore = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenBefore.map((child) => child.fname)).toEqual(["foo"]);
+          ) as Promise<string[]>);
+          const resp1 = await Promise.all(
+            childrenBefore.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp1).toEqual(["foo"]);
 
           const grandChildrenBefore = await (provider.getChildren(
             childrenBefore[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenBefore.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-          ]);
+          ) as Promise<string[]>);
+          const resp2 = await Promise.all(
+            grandChildrenBefore.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp2).toEqual(["foo.bar"]);
 
           await runRenameNote({
-            noteId: grandChildrenBefore[0].id,
+            noteId: grandChildrenBefore[0],
             newName: "foo.baz",
           });
 
-          const engine = ExtensionProvider.getEngine();
           const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const childrenAfter = await (provider.getChildren(
-            vault1RootPropsAfter
-          ) as Promise<NoteProps[]>);
-          expect(childrenAfter.map((child) => child.fname)).toEqual(["foo"]);
+            vault1RootPropsAfter?.id
+          ) as Promise<string[]>);
+          const resp3 = await Promise.all(
+            childrenAfter.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp3).toEqual(["foo"]);
 
           const grandChildrenAfter = await (provider.getChildren(
             childrenAfter[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenAfter.map((gchild) => gchild.fname)).toEqual([
-            "foo.baz",
-          ]);
+          ) as Promise<string[]>);
+          const resp4 = await Promise.all(
+            grandChildrenAfter.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp4).toEqual(["foo.baz"]);
         });
       }
     );
@@ -233,11 +258,9 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
 
           const vaultOneRootPropsBefore = propsBefore[0];
@@ -280,7 +303,7 @@ suite("NativeTreeView tests", function () {
           });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -334,11 +357,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
 
           const vaultOneRootPropsBefore = propsBefore[0];
@@ -376,7 +398,7 @@ suite("NativeTreeView tests", function () {
           });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -435,47 +457,61 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
+          const engine = ExtensionProvider.getEngine();
 
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
 
           const childrenBefore = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenBefore.map((child) => child.fname)).toEqual(["foo"]);
+          ) as string[]);
+          const resp = await Promise.all(
+            childrenBefore.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp).toEqual(["foo"]);
 
           const grandChildrenBefore = await (provider.getChildren(
             childrenBefore[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenBefore.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-          ]);
+          ) as Promise<string[]>);
+          const resp2 = await Promise.all(
+            grandChildrenBefore.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp2).toEqual(["foo.bar"]);
 
           await runRenameNote({
-            noteId: grandChildrenBefore[0].id,
+            noteId: grandChildrenBefore[0],
             newName: "foo.baz",
           });
 
-          const engine = ExtensionProvider.getEngine();
           const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const childrenAfter = await (provider.getChildren(
-            vault1RootPropsAfter
-          ) as Promise<NoteProps[]>);
-          expect(childrenAfter.map((child) => child.fname)).toEqual(["foo"]);
+            vault1RootPropsAfter?.id
+          ) as Promise<string[]>);
+          const resp3 = await Promise.all(
+            childrenAfter.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp3).toEqual(["foo"]);
 
           const grandChildrenAfter = await (provider.getChildren(
             childrenAfter[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenAfter.map((gchild) => gchild.fname)).toEqual([
-            "foo.baz",
-          ]);
+          ) as Promise<string[]>);
+          const resp4 = await Promise.all(
+            grandChildrenAfter.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp4).toEqual(["foo.baz"]);
         });
       }
     );
@@ -501,68 +537,90 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
+          const engine = ExtensionProvider.getEngine();
 
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
 
           const childrenBefore = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenBefore.map((child) => child.fname)).toEqual(["foo"]);
+          ) as Promise<string[]>);
+          const resp1 = await Promise.all(
+            childrenBefore.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp1).toEqual(["foo"]);
 
           const grandChildrenBefore = await (provider.getChildren(
             childrenBefore[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenBefore.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-          ]);
+          ) as Promise<string[]>);
+          const resp2 = await Promise.all(
+            grandChildrenBefore.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp2).toEqual(["foo.bar"]);
 
           const greatGrandChildrenBefore = await (provider.getChildren(
             grandChildrenBefore[0]
-          ) as Promise<NoteProps[]>);
-          expect(
-            greatGrandChildrenBefore.map((ggchild) => ggchild.fname)
-          ).toEqual(["foo.bar.egg"]);
+          ) as Promise<string[]>);
 
-          const engine = ExtensionProvider.getEngine();
+          const resp3 = await Promise.all(
+            greatGrandChildrenBefore.map(
+              async (ggchild) => (await engine.getNote(ggchild)).data?.fname
+            )
+          );
+          expect(resp3).toEqual(["foo.bar.egg"]);
+
           await runRenameNote({
-            noteId: childrenBefore[0].id,
+            noteId: childrenBefore[0],
             newName: "fooz",
           });
 
           const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const childrenAfter = await (provider.getChildren(
-            vault1RootPropsAfter
-          ) as Promise<NoteProps[]>);
-          expect(
-            childrenAfter.map((child) => {
-              return { fname: child.fname, stub: child.stub };
+            vault1RootPropsAfter?.id
+          ) as Promise<string[]>);
+
+          const resp4 = await Promise.all(
+            childrenAfter.map(async (child) => {
+              const data = (await engine.getNote(child)).data;
+              return { fname: data?.fname, stub: data?.stub };
             })
-          ).toEqual([
+          );
+
+          expect(resp4).toEqual([
             { fname: "foo", stub: true },
             { fname: "fooz", stub: undefined },
           ]);
 
           const grandChildrenAfter = await (provider.getChildren(
             childrenAfter[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenAfter.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-          ]);
+          ) as Promise<string[]>);
+          const resp5 = await Promise.all(
+            grandChildrenAfter.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+
+          expect(resp5).toEqual(["foo.bar"]);
 
           const greatGrandChildrenAfter = await (provider.getChildren(
             grandChildrenAfter[0]
-          ) as Promise<NoteProps[]>);
-          expect(
-            greatGrandChildrenAfter.map((ggchild) => ggchild.fname)
-          ).toEqual(["foo.bar.egg"]);
+          ) as Promise<string[]>);
+
+          const resp6 = await Promise.all(
+            greatGrandChildrenAfter.map(
+              async (ggchild) => (await engine.getNote(ggchild)).data?.fname
+            )
+          );
+          expect(resp6).toEqual(["foo.bar.egg"]);
         });
       }
     );
@@ -594,56 +652,69 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
+          const engine = ExtensionProvider.getEngine();
 
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
 
           const childrenBefore = await (provider.getChildren(
             vaultOneRootPropsBefore
-          ) as Promise<NoteProps[]>);
-          expect(childrenBefore.map((child) => child.fname)).toEqual(["foo"]);
+          ) as Promise<string[]>);
+          const resp1 = await Promise.all(
+            childrenBefore.map(
+              async (child) => (await engine.getNote(child)).data?.fname
+            )
+          );
+          expect(resp1).toEqual(["foo"]);
 
           const grandChildrenBefore = await (provider.getChildren(
             childrenBefore[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenBefore.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-            "foo.baz",
-          ]);
+          ) as Promise<string[]>);
 
-          const engine = ExtensionProvider.getEngine();
+          const resp2 = await Promise.all(
+            grandChildrenBefore.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+
+          expect(resp2).toEqual(["foo.bar", "foo.baz"]);
+
           await runRenameNote({
-            noteId: childrenBefore[0].id,
+            noteId: childrenBefore[0],
             newName: "fooz",
           });
 
           const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const childrenAfter = await (provider.getChildren(
-            vault1RootPropsAfter
-          ) as Promise<NoteProps[]>);
-          expect(
-            childrenAfter.map((child) => {
-              return { fname: child.fname, stub: child.stub };
+            vault1RootPropsAfter?.id
+          ) as Promise<string[]>);
+
+          const resp4 = await Promise.all(
+            childrenAfter.map(async (child) => {
+              const data = (await engine.getNote(child)).data;
+              return { fname: data?.fname, stub: data?.stub };
             })
-          ).toEqual([
+          );
+
+          expect(resp4).toEqual([
             { fname: "foo", stub: true },
             { fname: "fooz", stub: undefined },
           ]);
 
           const grandChildrenAfter = await (provider.getChildren(
             childrenAfter[0]
-          ) as Promise<NoteProps[]>);
-          expect(grandChildrenAfter.map((gchild) => gchild.fname)).toEqual([
-            "foo.bar",
-            "foo.baz",
-          ]);
+          ) as Promise<string[]>);
+          const resp5 = await Promise.all(
+            grandChildrenAfter.map(
+              async (gchild) => (await engine.getNote(gchild)).data?.fname
+            )
+          );
+          expect(resp5).toEqual(["foo.bar", "foo.baz"]);
         });
       }
     );
@@ -662,17 +733,14 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
+          const propsBefore = await (provider.getChildren() as Promise<
+            string[]
+          >);
           const engine = ExtensionProvider.getEngine();
 
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
           const fullTreeBefore = await getFullTree({
             root: vaultOneRootPropsBefore,
             provider,
@@ -710,7 +778,7 @@ suite("NativeTreeView tests", function () {
           const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
+            root: vaultOneRootPropsAfter?.id,
             provider,
           });
           expect(fullTreeAfter).toEqual({
@@ -740,17 +808,15 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
+          const propsBefore = await (provider.getChildren() as Promise<
+            string[]
+          >);
 
           const engine = ExtensionProvider.getEngine();
 
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
           const fullTreeBefore = await getFullTree({
             root: vaultOneRootPropsBefore,
             provider,
@@ -773,7 +839,7 @@ suite("NativeTreeView tests", function () {
           const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
+            root: vaultOneRootPropsAfter?.id,
             provider,
           });
           expect(fullTreeAfter).toEqual({
@@ -823,17 +889,16 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly displays renamed note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
+
+          const propsBefore = await (provider.getChildren() as Promise<
+            string[]
+          >);
 
           const engine = ExtensionProvider.getEngine();
 
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-
           const vaultOneRootPropsBefore = propsBefore[0];
-          const vaultOneRootId = propsBefore[0].id;
+          const vaultOneRootId = propsBefore[0];
           const fullTreeBefore = await getFullTree({
             root: vaultOneRootPropsBefore,
             provider,
@@ -870,7 +935,7 @@ suite("NativeTreeView tests", function () {
           const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
             .data!;
           const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
+            root: vaultOneRootPropsAfter?.id,
             provider,
           });
           expect(fullTreeAfter).toEqual({
@@ -914,12 +979,11 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
+          const provider = container.resolve(EngineNoteProvider);
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
+
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
             root: vaultOneRootPropsBefore,
@@ -939,7 +1003,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "foo" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -969,11 +1033,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note and stub parent", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
@@ -1001,7 +1064,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "foo.bar" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -1037,11 +1100,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
@@ -1068,7 +1130,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "foo.bar" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -1109,11 +1171,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note and replaces it with a stub", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
@@ -1146,7 +1207,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "foo" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -1204,11 +1265,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note and replaces it with a stub", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
@@ -1239,7 +1299,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "foo" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -1284,11 +1344,10 @@ suite("NativeTreeView tests", function () {
       },
       () => {
         test("THEN tree view correctly removes deleted note and all its ancestor stubs", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
           const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsBefore = propsBefore[0];
           const fullTreeBefore = await getFullTree({
@@ -1328,7 +1387,7 @@ suite("NativeTreeView tests", function () {
           await runDeleteNote({ noteId: "one.two.three.foo" });
 
           const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
+            string[]
           >);
           const vaultOneRootPropsAfter = propsAfter[0];
           const fullTreeAfter = await getFullTree({
@@ -1360,8 +1419,7 @@ suite("NativeTreeView tests", function () {
       () => {
         describe("AND created note is top hierarchy", () => {
           test("THEN tree view correctly removes deleted note", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
             const { wsRoot, vaults, engine } =
               ExtensionProvider.getDWorkspace();
             await NoteTestUtilsV4.createNoteWithEngine({
@@ -1371,7 +1429,7 @@ suite("NativeTreeView tests", function () {
               engine,
             });
             const propsBefore = await (provider.getChildren() as Promise<
-              NoteProps[]
+              string[]
             >);
             const vaultOneRootPropsBefore = propsBefore[0];
             const fullTreeBefore = await getFullTree({
@@ -1397,7 +1455,7 @@ suite("NativeTreeView tests", function () {
             await runDeleteNote({ noteId: "bar" });
 
             const propsAfter = await (provider.getChildren() as Promise<
-              NoteProps[]
+              string[]
             >);
             const vaultOneRootPropsAfter = propsAfter[0];
             const fullTreeAfter = await getFullTree({
@@ -1415,152 +1473,242 @@ suite("NativeTreeView tests", function () {
             });
           });
         });
+      }
+    );
 
-        describe("AND created note also creates stub parent", () => {
-          test("THEN tree view correctly removes deleted note and stub parent", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
-            await NoteTestUtilsV4.createNoteWithEngine({
-              wsRoot,
-              vault: vaults[0],
-              fname: "bar.egg",
-              engine,
-            });
-            const propsBefore = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-            const vaultOneRootPropsBefore = propsBefore[0];
-            const fullTreeBefore = await getFullTree({
-              root: vaultOneRootPropsBefore,
-              provider,
-              extra: { stub: true },
-            });
+    describe("AND created note also creates stub parent", () => {
+      test("THEN tree view correctly removes deleted note and stub parent", async () => {
+        const provider = container.resolve(EngineNoteProvider);
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        await NoteTestUtilsV4.createNoteWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          fname: "bar.egg",
+          engine,
+        });
+        const propsBefore = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsBefore = propsBefore[0];
+        const fullTreeBefore = await getFullTree({
+          root: vaultOneRootPropsBefore,
+          provider,
+          extra: { stub: true },
+        });
 
-            expect(fullTreeBefore).toEqual({
-              fname: "root",
+        expect(fullTreeBefore).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "bar",
               childNodes: [
                 {
-                  fname: "bar",
+                  fname: "bar.egg",
+                  childNodes: [],
+                },
+              ],
+              stub: true,
+            },
+            {
+              fname: "foo",
+              childNodes: [],
+            },
+          ],
+        });
+
+        await runDeleteNote({ noteId: "bar.egg" });
+
+        const propsAfter = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsAfter = propsAfter[0];
+        const fullTreeAfter = await getFullTree({
+          root: vaultOneRootPropsAfter,
+          provider,
+          extra: { stub: true },
+        });
+        expect(fullTreeAfter).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "foo",
+              childNodes: [],
+            },
+          ],
+        });
+      });
+    });
+
+    describe("AND created note has stub children", () => {
+      test("THEN tree view correctly removes deleted note and replaces it with a stub", async () => {
+        const provider = container.resolve(EngineNoteProvider);
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        await NoteTestUtilsV4.createNoteWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          fname: "one.two.three",
+          engine,
+        });
+
+        await NoteTestUtilsV4.createNoteWithEngine({
+          wsRoot,
+          vault: vaults[0],
+          fname: "one.two",
+          engine,
+        });
+        const propsBefore = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsBefore = propsBefore[0];
+        const fullTreeBefore = await getFullTree({
+          root: vaultOneRootPropsBefore,
+          provider,
+          extra: { stub: true },
+        });
+
+        expect(fullTreeBefore).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "foo",
+              childNodes: [],
+            },
+            {
+              fname: "one",
+              childNodes: [
+                {
+                  fname: "one.two",
                   childNodes: [
                     {
-                      fname: "bar.egg",
+                      fname: "one.two.three",
+                      childNodes: [],
+                    },
+                  ],
+                },
+              ],
+              stub: true,
+            },
+          ],
+        });
+
+        await runDeleteNote({ noteId: "one.two" });
+
+        const propsAfter = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsAfter = propsAfter[0];
+        const fullTreeAfter = await getFullTree({
+          root: vaultOneRootPropsAfter,
+          provider,
+          extra: { stub: true },
+        });
+        expect(fullTreeAfter).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "foo",
+              childNodes: [],
+            },
+            {
+              fname: "one",
+              childNodes: [
+                {
+                  fname: "one.two",
+                  childNodes: [
+                    {
+                      fname: "one.two.three",
                       childNodes: [],
                     },
                   ],
                   stub: true,
                 },
-                {
-                  fname: "foo",
-                  childNodes: [],
-                },
               ],
-            });
+              stub: true,
+            },
+          ],
+        });
+      });
+    });
+  });
+  describeMultiWS("WHEN deleting note that was just renamed", {}, () => {
+    beforeEach(async () => {
+      const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+      await NoteTestUtilsV4.createNoteWithEngine({
+        wsRoot,
+        vault: vaults[0],
+        fname: "foo",
+        engine,
+      });
+    });
+    describe("AND renamed note is top hierarchy", () => {
+      test("THEN tree view correctly removes note that was just renamed and deleted", async () => {
+        const provider = container.resolve(EngineNoteProvider);
 
-            await runDeleteNote({ noteId: "bar.egg" });
-
-            const propsAfter = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-            const vaultOneRootPropsAfter = propsAfter[0];
-            const fullTreeAfter = await getFullTree({
-              root: vaultOneRootPropsAfter,
-              provider,
-              extra: { stub: true },
-            });
-            expect(fullTreeAfter).toEqual({
-              fname: "root",
-              childNodes: [
-                {
-                  fname: "foo",
-                  childNodes: [],
-                },
-              ],
-            });
-          });
+        await runRenameNote({
+          noteId: "foo",
+          newName: "bar",
         });
 
-        describe("AND created note has stub children", () => {
-          test("THEN tree view correctly removes deleted note and replaces it with a stub", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
-            await NoteTestUtilsV4.createNoteWithEngine({
-              wsRoot,
-              vault: vaults[0],
-              fname: "one.two.three",
-              engine,
-            });
+        const propsBefore = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsBefore = propsBefore[0];
+        const fullTreeBefore = await getFullTree({
+          root: vaultOneRootPropsBefore,
+          provider,
+          extra: { stub: true },
+        });
 
-            await NoteTestUtilsV4.createNoteWithEngine({
-              wsRoot,
-              vault: vaults[0],
-              fname: "one.two",
-              engine,
-            });
-            const propsBefore = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-            const vaultOneRootPropsBefore = propsBefore[0];
-            const fullTreeBefore = await getFullTree({
-              root: vaultOneRootPropsBefore,
-              provider,
-              extra: { stub: true },
-            });
+        expect(fullTreeBefore).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "bar",
+              childNodes: [],
+            },
+          ],
+        });
 
-            expect(fullTreeBefore).toEqual({
-              fname: "root",
+        await runDeleteNote({
+          noteId: "foo",
+        });
+
+        const propsAfter = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsAfter = propsAfter[0];
+        const fullTreeAfter = await getFullTree({
+          root: vaultOneRootPropsAfter,
+          provider,
+          extra: { stub: true },
+        });
+
+        expect(fullTreeAfter).toEqual({
+          fname: "root",
+          childNodes: [],
+        });
+      });
+    });
+
+    describe("AND renamed note created a stub parent", () => {
+      test("THEN tree view correctly removes note that was just renamed and deleted as well as the stub parent", async () => {
+        const provider = container.resolve(EngineNoteProvider);
+
+        await runRenameNote({
+          noteId: "foo",
+          newName: "one.two.three.foo",
+        });
+
+        const propsBefore = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsBefore = propsBefore[0];
+        const fullTreeBefore = await getFullTree({
+          root: vaultOneRootPropsBefore,
+          provider,
+          extra: { stub: true },
+        });
+
+        expect(fullTreeBefore).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "one",
               childNodes: [
                 {
-                  fname: "foo",
-                  childNodes: [],
-                },
-                {
-                  fname: "one",
+                  fname: "one.two",
                   childNodes: [
                     {
-                      fname: "one.two",
+                      fname: "one.two.three",
                       childNodes: [
                         {
-                          fname: "one.two.three",
-                          childNodes: [],
-                        },
-                      ],
-                    },
-                  ],
-                  stub: true,
-                },
-              ],
-            });
-
-            await runDeleteNote({ noteId: "one.two" });
-
-            const propsAfter = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-            const vaultOneRootPropsAfter = propsAfter[0];
-            const fullTreeAfter = await getFullTree({
-              root: vaultOneRootPropsAfter,
-              provider,
-              extra: { stub: true },
-            });
-            expect(fullTreeAfter).toEqual({
-              fname: "root",
-              childNodes: [
-                {
-                  fname: "foo",
-                  childNodes: [],
-                },
-                {
-                  fname: "one",
-                  childNodes: [
-                    {
-                      fname: "one.two",
-                      childNodes: [
-                        {
-                          fname: "one.two.three",
+                          fname: "one.two.three.foo",
                           childNodes: [],
                         },
                       ],
@@ -1570,299 +1718,183 @@ suite("NativeTreeView tests", function () {
                   stub: true,
                 },
               ],
-            });
-          });
+              stub: true,
+            },
+          ],
         });
-      }
-    );
-    describeMultiWS("WHEN deleting note that was just renamed", {}, () => {
-      beforeEach(async () => {
+
+        await runDeleteNote({
+          noteId: "foo",
+        });
+
+        const propsAfter = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsAfter = propsAfter[0];
+        const fullTreeAfter = await getFullTree({
+          root: vaultOneRootPropsAfter,
+          provider,
+          extra: { stub: true },
+        });
+
+        expect(fullTreeAfter).toEqual({
+          fname: "root",
+          childNodes: [],
+        });
+      });
+    });
+
+    describe("AND renamed note has any children", () => {
+      test("THEN THEN tree view correctly removes note that was just renamed and deleted and replaces it with a stub", async () => {
+        const provider = container.resolve(EngineNoteProvider);
+
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],
-          fname: "foo",
+          fname: "one.two.three.foo",
           engine,
         });
-      });
-      describe("AND renamed note is top hierarchy", () => {
-        test("THEN tree view correctly removes note that was just renamed and deleted", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
 
-          await runRenameNote({
-            noteId: "foo",
-            newName: "bar",
-          });
-
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsBefore = propsBefore[0];
-          const fullTreeBefore = await getFullTree({
-            root: vaultOneRootPropsBefore,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeBefore).toEqual({
-            fname: "root",
-            childNodes: [
-              {
-                fname: "bar",
-                childNodes: [],
-              },
-            ],
-          });
-
-          await runDeleteNote({
-            noteId: "foo",
-          });
-
-          const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsAfter = propsAfter[0];
-          const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeAfter).toEqual({
-            fname: "root",
-            childNodes: [],
-          });
+        await runRenameNote({
+          noteId: "foo",
+          newName: "one.two.three",
         });
-      });
 
-      describe("AND renamed note created a stub parent", () => {
-        test("THEN tree view correctly removes note that was just renamed and deleted as well as the stub parent", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
-          await runRenameNote({
-            noteId: "foo",
-            newName: "one.two.three.foo",
-          });
-
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsBefore = propsBefore[0];
-          const fullTreeBefore = await getFullTree({
-            root: vaultOneRootPropsBefore,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeBefore).toEqual({
-            fname: "root",
-            childNodes: [
-              {
-                fname: "one",
-                childNodes: [
-                  {
-                    fname: "one.two",
-                    childNodes: [
-                      {
-                        fname: "one.two.three",
-                        childNodes: [
-                          {
-                            fname: "one.two.three.foo",
-                            childNodes: [],
-                          },
-                        ],
-                        stub: true,
-                      },
-                    ],
-                    stub: true,
-                  },
-                ],
-                stub: true,
-              },
-            ],
-          });
-
-          await runDeleteNote({
-            noteId: "foo",
-          });
-
-          const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsAfter = propsAfter[0];
-          const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeAfter).toEqual({
-            fname: "root",
-            childNodes: [],
-          });
+        const propsBefore = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsBefore = propsBefore[0];
+        const fullTreeBefore = await getFullTree({
+          root: vaultOneRootPropsBefore,
+          provider,
+          extra: { stub: true },
         });
-      });
 
-      describe("AND renamed note has any children", () => {
-        test("THEN THEN tree view correctly removes note that was just renamed and deleted and replaces it with a stub", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+        expect(fullTreeBefore).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "one",
+              childNodes: [
+                {
+                  fname: "one.two",
+                  childNodes: [
+                    {
+                      fname: "one.two.three",
+                      childNodes: [
+                        {
+                          fname: "one.two.three.foo",
+                          childNodes: [],
+                        },
+                      ],
+                    },
+                  ],
+                  stub: true,
+                },
+              ],
+              stub: true,
+            },
+          ],
+        });
 
-          const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
-          await NoteTestUtilsV4.createNoteWithEngine({
-            wsRoot,
-            vault: vaults[0],
-            fname: "one.two.three.foo",
-            engine,
-          });
+        await runDeleteNote({ noteId: "foo" });
 
-          await runRenameNote({
-            noteId: "foo",
-            newName: "one.two.three",
-          });
+        const propsAfter = await (provider.getChildren() as Promise<string[]>);
+        const vaultOneRootPropsAfter = propsAfter[0];
+        const fullTreeAfter = await getFullTree({
+          root: vaultOneRootPropsAfter,
+          provider,
+          extra: { stub: true },
+        });
 
-          const propsBefore = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsBefore = propsBefore[0];
-          const fullTreeBefore = await getFullTree({
-            root: vaultOneRootPropsBefore,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeBefore).toEqual({
-            fname: "root",
-            childNodes: [
-              {
-                fname: "one",
-                childNodes: [
-                  {
-                    fname: "one.two",
-                    childNodes: [
-                      {
-                        fname: "one.two.three",
-                        childNodes: [
-                          {
-                            fname: "one.two.three.foo",
-                            childNodes: [],
-                          },
-                        ],
-                      },
-                    ],
-                    stub: true,
-                  },
-                ],
-                stub: true,
-              },
-            ],
-          });
-
-          await runDeleteNote({ noteId: "foo" });
-
-          const propsAfter = await (provider.getChildren() as Promise<
-            NoteProps[]
-          >);
-          const vaultOneRootPropsAfter = propsAfter[0];
-          const fullTreeAfter = await getFullTree({
-            root: vaultOneRootPropsAfter,
-            provider,
-            extra: { stub: true },
-          });
-
-          expect(fullTreeAfter).toEqual({
-            fname: "root",
-            childNodes: [
-              {
-                fname: "one",
-                childNodes: [
-                  {
-                    fname: "one.two",
-                    childNodes: [
-                      {
-                        fname: "one.two.three",
-                        childNodes: [
-                          {
-                            fname: "one.two.three.foo",
-                            childNodes: [],
-                          },
-                        ],
-                        stub: true,
-                      },
-                    ],
-                    stub: true,
-                  },
-                ],
-                stub: true,
-              },
-            ],
-          });
+        expect(fullTreeAfter).toEqual({
+          fname: "root",
+          childNodes: [
+            {
+              fname: "one",
+              childNodes: [
+                {
+                  fname: "one.two",
+                  childNodes: [
+                    {
+                      fname: "one.two.three",
+                      childNodes: [
+                        {
+                          fname: "one.two.three.foo",
+                          childNodes: [],
+                        },
+                      ],
+                      stub: true,
+                    },
+                  ],
+                  stub: true,
+                },
+              ],
+              stub: true,
+            },
+          ],
         });
       });
     });
-  });
-  describe("error handling", function () {
-    describeMultiWS(
-      "GIVEN note id that is not in noteDict",
-      {
-        preSetupHook: async (opts) => {
-          const { wsRoot, vaults } = opts;
-          await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "foo",
-          });
+
+    describe("error handling", function () {
+      describeMultiWS(
+        "GIVEN note id that is not in noteDict",
+        {
+          preSetupHook: async (opts) => {
+            const { wsRoot, vaults } = opts;
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "foo",
+            });
+          },
         },
-      },
-      () => {
-        let sortNotesAtLevelSpy: sinon.SinonSpy;
+        () => {
+          let sortNotesAtLevelSpy: sinon.SinonSpy;
 
-        before(() => {
-          sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
-        });
-
-        after(() => {
-          sortNotesAtLevelSpy.restore();
-        });
-
-        test("THEN gracefully render only the available notes and log omitted note id.", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
-
-          const props = await (provider.getChildren() as Promise<NoteProps[]>);
-
-          const vault1RootProps = props[0];
-
-          vault1RootProps.children.push("fake-id");
-
-          const fullTree = await getFullTree({
-            root: vault1RootProps,
-            provider,
+          before(() => {
+            sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
           });
 
-          const sortResps = sortNotesAtLevelSpy.returnValues;
-          const sortRespWithError = sortResps.find((sortResp) => {
-            return sortResp.error instanceof DendronError;
-          });
-          expect(fullTree).toEqual({
-            fname: "root",
-            childNodes: [
-              {
-                fname: "foo",
-                childNodes: [],
-              },
-            ],
+          after(() => {
+            sortNotesAtLevelSpy.restore();
           });
 
-          expect(sortRespWithError !== undefined);
-          expect(sortRespWithError.error.payload).toEqual(
-            '{"omitted":["fake-id"]}'
-          );
-        });
-      }
-    );
+          test("THEN gracefully render only the available notes and log omitted note id.", async () => {
+            const provider = container.resolve(EngineNoteProvider);
+            const engine = ExtensionProvider.getEngine();
+            const props = await (provider.getChildren() as Promise<string[]>);
+
+            const vault1RootProps = props[0];
+            const vault1Root = await (
+              await engine.getNote(vault1RootProps)
+            ).data!;
+            vault1Root.children.push("fake-id");
+
+            const fullTree = await getFullTree({
+              root: vault1RootProps,
+              provider,
+            });
+
+            const sortResps = sortNotesAtLevelSpy.returnValues;
+            const sortRespWithError = sortResps.find((sortResp) => {
+              return sortResp.error instanceof DendronError;
+            });
+            expect(fullTree).toEqual({
+              fname: "root",
+              childNodes: [
+                {
+                  fname: "foo",
+                  childNodes: [],
+                },
+              ],
+            });
+
+            expect(sortRespWithError !== undefined);
+            expect(sortRespWithError.error.payload).toEqual(
+              '{"omitted":["fake-id"]}'
+            );
+          });
+        }
+      );
+    });
   });
-  describe("filesystem change interactions", function () {});
 });

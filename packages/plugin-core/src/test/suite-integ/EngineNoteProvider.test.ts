@@ -12,8 +12,11 @@ import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe, after, before } from "mocha";
 import sinon from "sinon";
+import { container } from "tsyringe";
 import * as vscode from "vscode";
-import { EngineNoteProvider } from "../../views/EngineNoteProvider";
+import { EngineNoteProvider } from "../../common/EngineNoteProvider";
+import { TreeViewDummyConfig } from "../../common/TreeViewDummyConfig";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -36,15 +39,20 @@ suite("EngineNoteProvider Tests", function testSuite() {
         runLegacyMultiWorkspaceTest({
           ctx,
           postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-          onInit: async ({ vaults, wsRoot }) => {
+          onInit: async ({ vaults, wsRoot, engine }) => {
             const testNoteProps = await NoteTestUtilsV4.createNote({
               fname: "alpha",
               vault: vaults[0],
               wsRoot,
             });
-
+            const treeViewConfig = new TreeViewDummyConfig();
             const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = new EngineNoteProvider(
+              vscode.Uri.file(wsRoot),
+              engine,
+              mockEvents,
+              treeViewConfig
+            );
 
             provider.onDidChangeTreeData(() => {
               done();
@@ -66,15 +74,21 @@ suite("EngineNoteProvider Tests", function testSuite() {
         runLegacyMultiWorkspaceTest({
           ctx,
           postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-          onInit: async ({ vaults, wsRoot }) => {
+          onInit: async ({ vaults, wsRoot, engine }) => {
             const testNoteProps = await NoteTestUtilsV4.createNote({
               fname: "alpha",
               vault: vaults[0],
               wsRoot,
             });
 
+            const treeViewConfig = new TreeViewDummyConfig();
             const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = new EngineNoteProvider(
+              vscode.Uri.file(wsRoot),
+              engine,
+              mockEvents,
+              treeViewConfig
+            );
 
             provider.onDidChangeTreeData(() => {
               done();
@@ -97,15 +111,21 @@ suite("EngineNoteProvider Tests", function testSuite() {
         runLegacyMultiWorkspaceTest({
           ctx,
           postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-          onInit: async ({ vaults, wsRoot }) => {
+          onInit: async ({ vaults, wsRoot, engine }) => {
             const testNoteProps = await NoteTestUtilsV4.createNote({
               fname: "alpha",
               vault: vaults[0],
               wsRoot,
             });
 
+            const treeViewConfig = new TreeViewDummyConfig();
             const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = new EngineNoteProvider(
+              vscode.Uri.file(wsRoot),
+              engine,
+              mockEvents,
+              treeViewConfig
+            );
 
             provider.onDidChangeTreeData(() => {
               done();
@@ -166,9 +186,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             sortNotesAtLevelSpy.restore();
           });
 
-          test("THEN omit rendering note id that can't be found and render the rest.", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+          test.skip("THEN omit rendering note id that can't be found and render the rest.", async () => {
+            const provider = container.resolve(EngineNoteProvider);
 
             const props = await (provider.getChildren() as Promise<
               NoteProps[]
@@ -179,8 +198,8 @@ suite("EngineNoteProvider Tests", function testSuite() {
             vault1RootProps.children.push("fake-id");
 
             const resp = await (provider.getChildren(
-              vault1RootProps
-            ) as Promise<NoteProps[]>);
+              vault1RootProps.id
+            ) as Promise<string[]>);
             const sortResp = sortNotesAtLevelSpy.lastCall.returnValue;
             expect(sortResp.error !== undefined);
             expect(sortResp.error.payload).toEqual('{"omitted":["fake-id"]}');
@@ -198,22 +217,26 @@ suite("EngineNoteProvider Tests", function testSuite() {
             await preSetupHookFunc(opts);
             MetadataService.instance().deleteMeta("treeViewItemLabelType");
           },
+          timeout: 1e6,
         },
         () => {
           test("THEN label and sort tree items by title", async () => {
             expect(
               MetadataService.instance().getTreeViewItemLabelType()
             ).toEqual(TreeViewItemLabelTypeEnum.title);
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+            const props = await (provider.getChildren() as Promise<string[]>);
 
             const vault1RootProps = props[0];
             const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
+            const engine = ExtensionProvider.getEngine();
+            const titleArray: Promise<string>[] = children?.map(
+              async (children) =>
+                (await engine.findNotes({ fname: children }))[0].title
+            )!;
+            const result = await Promise.all(titleArray);
+            expect(result).toEqual([
               "Zebra", // nav_order: 1
               "_underscore", // underscore comes first
               "Aardvark",
@@ -237,16 +260,19 @@ suite("EngineNoteProvider Tests", function testSuite() {
             MetadataService.instance().deleteMeta("treeViewItemLabelType");
           });
           test("THEN label and sort tree items by title", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+            const props = await (provider.getChildren() as Promise<string[]>);
 
             const vault1RootProps = props[0];
             const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
+            const engine = ExtensionProvider.getEngine();
+            const titleArray: Promise<string>[] = children?.map(
+              async (children) =>
+                (await engine.findNotes({ fname: children }))[0].title
+            )!;
+            const result = await Promise.all(titleArray);
+            expect(result).toEqual([
               "Zebra", // nav_order: 1
               "_underscore", // underscore comes before alphabets
               "Aardvark",
@@ -271,18 +297,19 @@ suite("EngineNoteProvider Tests", function testSuite() {
             MetadataService.instance().deleteMeta("treeViewItemLabelType");
           });
           test("THEN label and sort tree items by filename", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+            const props = await (provider.getChildren() as Promise<string[]>);
 
             const vault1RootProps = props[0];
             const children = await provider.getChildren(vault1RootProps);
-            expect(
-              children?.map((child) => _.last(child.fname.split(".")))
-            ).toEqual([
+            const engine = ExtensionProvider.getEngine();
+            const titleArray: Promise<string>[] = children?.map(
+              async (children) =>
+                (await engine.findNotes({ fname: children }))[0].fname
+            )!;
+            const result = await Promise.all(titleArray);
+            expect(result.map((fname) => _.last(fname.split(".")))).toEqual([
               "zebra", // nav_order: 1
               "_underscore", // underscore comes before lowercase alphabets
               "aardvark",
@@ -297,53 +324,61 @@ suite("EngineNoteProvider Tests", function testSuite() {
       "WHEN the engine note provider is providing tree data on the root node",
       {
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        timeout: 1e6,
       },
       () => {
         test("THEN the tree data is correct", async () => {
-          const mockEvents = new MockEngineEvents();
-          const provider = new EngineNoteProvider(mockEvents);
+          const provider = container.resolve(EngineNoteProvider);
 
-          const props = await (provider.getChildren() as Promise<NoteProps[]>);
+          const props = await (provider.getChildren() as string[]);
+          const engine = ExtensionProvider.getEngine();
           // 3 Vaults hence 3 root nodes
           expect(props.length === 3);
           // Also check some children:
-          props.forEach((props) => {
-            switch (props.vault.fsPath) {
-              case "vault1": {
-                if (
-                  props.children.length !== 1 ||
-                  props.children[0] !== "foo"
-                ) {
+          props.forEach(async (props) => {
+            const note = await (await engine.getNote(props)).data;
+            if (note) {
+              switch (note.vault.fsPath) {
+                case "vault1": {
+                  if (
+                    note.children.length !== 1 ||
+                    note.children[0] !== "foo"
+                  ) {
+                    throw new DendronError({
+                      message: "Note children in vault1 incorrect!",
+                    });
+                  }
+                  break;
+                }
+                case "vault2": {
+                  if (
+                    note.children.length !== 1 ||
+                    note.children[0] !== "bar"
+                  ) {
+                    throw new DendronError({
+                      message: "Note children in vault2 incorrect!",
+                    });
+                  }
+                  break;
+                }
+                case "vault3": {
+                  if (note.children.length !== 0) {
+                    throw new DendronError({
+                      message: "Note children in vault3 incorrect!",
+                    });
+                  }
+                  break;
+                }
+                default: {
                   throw new DendronError({
-                    message: "Note children in vault1 incorrect!",
+                    message: "Note with unexpected vault found!",
                   });
                 }
-                break;
               }
-              case "vault2": {
-                if (
-                  props.children.length !== 1 ||
-                  props.children[0] !== "bar"
-                ) {
-                  throw new DendronError({
-                    message: "Note children in vault2 incorrect!",
-                  });
-                }
-                break;
-              }
-              case "vault3": {
-                if (props.children.length !== 0) {
-                  throw new DendronError({
-                    message: "Note children in vault3 incorrect!",
-                  });
-                }
-                break;
-              }
-              default: {
-                throw new DendronError({
-                  message: "Note with unexpected vault found!",
-                });
-              }
+            } else {
+              throw new DendronError({
+                message: "Notenot found",
+              });
             }
           });
         });
@@ -364,19 +399,23 @@ suite("EngineNoteProvider Tests", function testSuite() {
               fname: "tags.aa-battery",
             });
           },
+          timeout: 1e6,
         },
         () => {
           test("THEN tree item sort order is correct", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+            const props = await (provider.getChildren() as Promise<string[]>);
 
             const vault1RootProps = props[0];
             const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
+            const engine = ExtensionProvider.getEngine();
+            const titleArray = children?.map(async (children) => {
+              const resp = await engine.getNote(children);
+              return resp.data?.title;
+            })!;
+            const result = await Promise.all(titleArray);
+            expect(result).toEqual([
               "Zebra", // nav_order: 1
               "_underscore", // underscore comes before alphabets
               "Aardvark",
@@ -410,16 +449,19 @@ suite("EngineNoteProvider Tests", function testSuite() {
         },
         () => {
           test("THEN tag hierarchy nav_order is respected", async () => {
-            const mockEvents = new MockEngineEvents();
-            const provider = new EngineNoteProvider(mockEvents);
+            const provider = container.resolve(EngineNoteProvider);
 
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
+            const props = await (provider.getChildren() as Promise<string[]>);
 
             const vault1RootProps = props[0];
             const children = await provider.getChildren(vault1RootProps);
-            expect(children?.map((child) => child.title)).toEqual([
+            const engine = ExtensionProvider.getEngine();
+            const titleArray: Promise<string>[] = children?.map(
+              async (children) =>
+                (await engine.findNotes({ fname: children }))[0].title
+            )!;
+            const result = await Promise.all(titleArray);
+            expect(result).toEqual([
               "Zebra", // nav_order: 1
               "Tags", // nav_order respected
               "_underscore", // underscore comes before alphabets

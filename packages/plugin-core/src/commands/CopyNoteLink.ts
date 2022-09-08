@@ -6,6 +6,7 @@ import {
   isLineAnchor,
   NoteChangeEntry,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -146,7 +147,7 @@ export class CopyNoteLinkCommand
     return { link: `[[${fsPath}${anchor}]]`, anchor };
   }
 
-  private async createNoteLink(editor: TextEditor, note: NoteProps) {
+  private async createNoteLink(editor: TextEditor, note: NotePropsMeta) {
     const engine = this.extension.getEngine();
     const { selection } = VSCodeUtils.getSelection();
     const { startAnchor: anchor } = await EditorUtils.getSelectionAnchors({
@@ -218,8 +219,8 @@ export class CopyNoteLinkCommand
       // Do nothing as engine may still not be up-to-date
       return;
     } else {
-      const note: NoteProps | undefined = (
-        await engine.findNotes({ fname, vault })
+      const note: NotePropsMeta | undefined = (
+        await engine.findNotesMeta({ fname, vault })
       )[0];
       return this.executeCopyNoteLink(note, editor);
     }
@@ -233,7 +234,7 @@ export class CopyNoteLinkCommand
   }
 
   private async executeCopyNoteLink(
-    note: NoteProps | undefined,
+    note: NotePropsMeta | undefined,
     editor: TextEditor
   ) {
     let link: string;

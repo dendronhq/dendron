@@ -259,7 +259,7 @@ function processSidebar(
 
       const hasDuplicates = possibleNotes.length > 1;
 
-      const note =
+      const note = _.first(
         // if more than a single note was found than use `duplicateNoteBehavior` to select a single note.
         (hasDuplicates &&
           do_(() => {
@@ -271,11 +271,10 @@ function processSidebar(
             );
             return getPriorityVaults(duplicateNoteBehavior)
               ?.filter((vaultName) => map.has(vaultName))
-              .map((vaultName) => map.get(vaultName))
-              .at(0);
+              .map((vaultName) => map.get(vaultName));
           })) ||
-        // default to first
-        possibleNotes.at(0);
+          possibleNotes
+      );
 
       if (!note) {
         throw DendronError.createFromStatus({

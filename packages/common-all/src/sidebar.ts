@@ -352,7 +352,7 @@ function processSidebar(
   return ErrorRespV3Utils.unwrap(sidebarProcessedResp);
 }
 
-export function getSidebars(
+export function getSidebar(
   input: unknown,
   options: SidebarOptions
 ): RespV3<Sidebar> {

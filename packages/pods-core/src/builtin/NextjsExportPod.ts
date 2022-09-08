@@ -18,7 +18,7 @@ import {
   RespV3,
   Theme,
   TreeUtils,
-  getSidebars,
+  getSidebar,
   DisabledSidebar,
   DefaultSidebar,
 } from "@dendronhq/common-all";
@@ -520,7 +520,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const sidebarPath =
       "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
 
-    const sidebarsResp = getSidebars(
+    const sidebarResp = getSidebar(
       await NextjsExportPodUtils.loadSidebarsFile(sidebarPath),
       {
         notes: publishedNotes,
@@ -531,8 +531,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       }
     );
 
-    if (sidebarsResp.error) {
-      throw sidebarsResp.error;
+    if (sidebarResp.error) {
+      throw sidebarResp.error;
     }
 
     const siteNotes = SiteUtils.createSiteOnlyNotes({
@@ -577,8 +577,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const treeDstPath = path.join(podDstDir, "tree.json");
 
-    const sidebars = sidebarsResp.data;
-    const tree = TreeUtils.generateTreeData(payload.notes, sidebars);
+    const sidebar = sidebarResp.data;
+    const tree = TreeUtils.generateTreeData(payload.notes, sidebar);
 
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");

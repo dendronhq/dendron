@@ -79,7 +79,6 @@ import {
   WikiLinkNoteV4,
   WikiLinkProps,
 } from "../types";
-import { getHTMLRenderDependencyNoteCache } from "../utilities";
 import { MDUtilsV5, ProcFlavor, ProcMode } from "../utilsv5";
 import { getFrontmatterTags, parseFrontmatter } from "../yaml";
 
@@ -295,7 +294,7 @@ const getLinks = ({
   return dlinks;
 };
 
-const getLinkCandidates = ({
+const getLinkCandidates = async ({
   ast,
   note,
   engine,
@@ -316,49 +315,52 @@ const getLinkCandidates = ({
   );
 
   const linkCandidates: DLink[] = [];
-  _.map(textNodes, (textNode: Text) => {
-    const value = textNode.value as string;
-    //TODO: This is async but non-awaitable right now
-    value.split(/\s+/).forEach(async (word) => {
-      const possibleCandidates = (
-        await engine.findNotes({ fname: word, vault: note.vault })
-      ).filter((note) => note.stub !== true);
+  await Promise.all(
+    _.map(textNodes, async (textNode: Text) => {
+      const value = textNode.value as string;
+      await Promise.all(
+        value.split(/\s+/).map(async (word) => {
+          const possibleCandidates = (
+            await engine.findNotes({ fname: word, vault: note.vault })
+          ).filter((note) => note.stub !== true);
 
-      linkCandidates.push(
-        ...possibleCandidates.map((candidate): DLink => {
-          const startColumn = value.indexOf(word) + 1;
-          const endColumn = startColumn + word.length;
+          linkCandidates.push(
+            ...possibleCandidates.map((candidate): DLink => {
+              const startColumn = value.indexOf(word) + 1;
+              const endColumn = startColumn + word.length;
 
-          const position: Position = {
-            start: {
-              line: textNode.position!.start.line,
-              column: startColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + startColumn - 1
-                : undefined,
-            },
-            end: {
-              line: textNode.position!.start.line,
-              column: endColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + endColumn - 1
-                : undefined,
-            },
-          };
-          return {
-            type: "linkCandidate",
-            from: NoteUtils.toNoteLoc(note),
-            value: value.trim(),
-            position,
-            to: {
-              fname: word,
-              vaultName: VaultUtils.getName(candidate.vault),
-            },
-          };
+              const position: Position = {
+                start: {
+                  line: textNode.position!.start.line,
+                  column: startColumn,
+                  offset: textNode.position!.start.offset
+                    ? textNode.position!.start.offset + startColumn - 1
+                    : undefined,
+                },
+                end: {
+                  line: textNode.position!.start.line,
+                  column: endColumn,
+                  offset: textNode.position!.start.offset
+                    ? textNode.position!.start.offset + endColumn - 1
+                    : undefined,
+                },
+              };
+              return {
+                type: "linkCandidate",
+                from: NoteUtils.toNoteLoc(note),
+                value: value.trim(),
+                position,
+                to: {
+                  fname: word,
+                  vaultName: VaultUtils.getName(candidate.vault),
+                },
+              };
+            })
+          );
         })
       );
-    });
-  });
+    })
+  );
   return linkCandidates;
 };
 
@@ -393,17 +395,19 @@ export class LinkUtils {
   /**
    * Get links from note body while maintaining existing backlinks
    */
-  static findLinks({
+  static async findLinks({
     note,
+    engine,
     type,
     config,
     filter,
   }: {
     note: NoteProps;
+    engine: ReducedDEngine;
     config: IntermediateDendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
-  }): DLink[] {
+  }): Promise<DLink[]> {
     let links = [];
     switch (type) {
       case "regular":
@@ -414,8 +418,9 @@ export class LinkUtils {
         });
         break;
       case "candidate":
-        links = LinkUtils.findLinkCandidates({
+        links = await LinkUtils.findLinkCandidates({
           note,
+          engine,
           config,
         });
         break;
@@ -780,7 +785,7 @@ export class LinkUtils {
     );
   }
 
-  static findLinkCandidates({
+  static async findLinkCandidates({
     note,
     engine,
     config,
@@ -791,11 +796,10 @@ export class LinkUtils {
   }) {
     const content = note.body;
 
-    getHTMLRenderDependencyNoteCache();
     const remark = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
-        // JYTODO: Add renderCache data
+        noteToRender: note,
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
@@ -803,7 +807,8 @@ export class LinkUtils {
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
-    const linkCandidates: DLink[] = getLinkCandidates({
+    const linkCandidates: DLink[] = await getLinkCandidates({
+      engine,
       ast: tree,
       note,
     });

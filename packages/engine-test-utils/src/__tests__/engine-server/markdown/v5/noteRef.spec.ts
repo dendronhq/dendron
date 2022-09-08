@@ -41,7 +41,6 @@ describe("GIVEN noteRef plugin", () => {
         parsingDependenciesByFname: ["bar"],
         name: "ASSET_PREFIX_SET",
         setup: async (opts) => {
-          // debugger;
           const { proc } = getOpts(opts);
           const txt = `![[bar.md]]`;
           const resp = await proc.process(txt);

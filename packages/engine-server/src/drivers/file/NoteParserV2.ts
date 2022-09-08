@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
   DendronError,
   DEngineClient,
@@ -27,6 +28,7 @@ import {
   globMatch,
   IntermediateDendronConfig,
   RespWithOptError,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -127,7 +129,7 @@ export class NoteParserV2 {
         }),
       };
     }
-    const rootProps = this.parseNoteProps({
+    const rootProps = await this.parseNoteProps({
       fpath: rootFile.fpath,
       addParent: false,
       vault,
@@ -150,12 +152,13 @@ export class NoteParserV2 {
     this.logger.info({ ctx, msg: "post:parseRootNote" });
 
     // Parse root hierarchies
-    fileMetaDict[1]
-      // Don't count root node
-      .filter((n) => n.fpath !== "root.md")
-      .map(async (ent) => {
+    await asyncLoopOneAtATime(
+      fileMetaDict[1]
+        // Don't count root node
+        .filter((n) => n.fpath !== "root.md"),
+      async (ent) => {
         try {
-          const resp = this.parseNoteProps({
+          const resp = await this.parseNoteProps({
             fpath: ent.fpath,
             addParent: false,
             vault,
@@ -191,20 +194,21 @@ export class NoteParserV2 {
             `Failed to read ${ent.fpath} in ${vault.fsPath}: ` + error.message;
           errors.push(error);
         }
-      });
+      }
+    );
 
     this.logger.info({ ctx, msg: "post:parseDomainNotes" });
 
     // Parse level by level
     let lvl = 2;
     while (lvl <= maxLvl) {
-      (fileMetaDict[lvl] || [])
-        .filter((ent) => {
+      await asyncLoopOneAtATime(
+        (fileMetaDict[lvl] || []).filter((ent) => {
           return !globMatch(["root.*"], ent.fpath);
-        })
-        .flatMap((ent) => {
+        }),
+        async (ent) => {
           try {
-            const resp = this.parseNoteProps({
+            const resp = await this.parseNoteProps({
               fpath: ent.fpath,
               noteDicts: { notesById, notesByFname },
               addParent: true,
@@ -248,7 +252,8 @@ export class NoteParserV2 {
               dendronError.message;
             errors.push(dendronError);
           }
-        });
+        }
+      );
       lvl += 1;
     }
     this.logger.info({ ctx, msg: "post:parseAllNotes" });
@@ -290,13 +295,13 @@ export class NoteParserV2 {
    *
    * @returns List of all notes changed. If a note has no direct parents, stub notes are added instead
    */
-  private parseNoteProps(opts: {
+  private async parseNoteProps(opts: {
     fpath: string;
     noteDicts?: NoteDicts;
     addParent: boolean;
     vault: DVault;
     config: IntermediateDendronConfig;
-  }): RespV2<NoteChangeEntry[]> {
+  }): Promise<RespV2<NoteChangeEntry[]>> {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       noteDicts: {
@@ -313,7 +318,7 @@ export class NoteParserV2 {
 
     try {
       // Get note props from file and propagate any errors
-      const { data: note, error } = this.file2NoteWithCache({
+      const { data: note, error } = await this.file2NoteWithCache({
         fpath: path.join(vpath, fpath),
         vault,
         config,
@@ -356,7 +361,7 @@ export class NoteParserV2 {
    *
    * @returns NoteProp associated with fpath
    */
-  private file2NoteWithCache({
+  private async file2NoteWithCache({
     fpath,
     vault,
     config,
@@ -364,7 +369,7 @@ export class NoteParserV2 {
     fpath: string;
     vault: DVault;
     config: IntermediateDendronConfig;
-  }): RespV2<NoteProps> {
+  }): Promise<RespV2<NoteProps>> {
     const content = fs.readFileSync(fpath, { encoding: "utf8" });
     const { name } = path.parse(fpath);
     const sig = genHash(content);
@@ -404,7 +409,7 @@ export class NoteParserV2 {
     // Link/anchor errors should be logged but not interfere with rest of parsing
     let error: IDendronError | null = null;
     try {
-      EngineUtils.refreshNoteLinksAndAnchors({
+      await EngineUtils.refreshNoteLinksAndAnchors({
         note,
         engine: this.engine,
         config,

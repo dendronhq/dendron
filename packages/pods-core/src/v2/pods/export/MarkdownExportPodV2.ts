@@ -236,7 +236,6 @@ export class MarkdownExportPodV2
       ...overrideConfig,
       usePrettyRefs: false,
     };
-    // debugger;
     const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
       input,
       engine,

@@ -135,7 +135,7 @@ export class FileWatcher {
         //TODO recognise vscode's create new file menu option to create a note.
       }
 
-      EngineUtils.refreshNoteLinksAndAnchors({
+      await EngineUtils.refreshNoteLinksAndAnchors({
         note,
         fmChangeOnly: false,
         engine,

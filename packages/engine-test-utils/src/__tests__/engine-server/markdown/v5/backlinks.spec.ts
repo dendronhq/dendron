@@ -227,7 +227,7 @@ describe("GIVEN dendron.yml default", () => {
         preSetupHook: async (opts: any) => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
 
-          const wtf = TestConfigUtils.withConfig(
+          TestConfigUtils.withConfig(
             (config) => {
               const vaults = ConfigUtils.getVaults(config);
               const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");

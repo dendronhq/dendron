@@ -114,6 +114,7 @@ export const createProcForTest = async (opts: {
       },
     },
     config: DConfig.readConfigSync(engine.wsRoot),
+    vaults: engine.vaults,
   };
   if (dest === DendronASTDest.HTML) {
     return MDUtilsV5.procRehypeFull(data);
@@ -267,12 +268,9 @@ export const createProcCompileTests = (opts: {
                     vaults
                   );
 
-                // debugger;
                 if (opts.parsingDependenciesByFname) {
                   await Promise.all(
                     opts.parsingDependenciesByFname.map(async (dep) => {
-                      // const wtf = await engine.getNote(dep);
-                      // debugger;
                       NoteDictsUtils.add(
                         (await engine.getNote(dep)).data!,
                         noteCacheForRenderDict
@@ -287,7 +285,6 @@ export const createProcCompileTests = (opts: {
                   });
                 }
 
-                // debugger;
                 switch (dest) {
                   case DendronASTDest.HTML:
                     proc = MDUtilsV5.procRehypeFull(

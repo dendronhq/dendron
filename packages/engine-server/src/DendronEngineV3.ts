@@ -317,7 +317,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
     // Update links/anchors based on note body
     // TODO: update backlinks as well
-    EngineUtils.refreshNoteLinksAndAnchors({
+    await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
       config: DConfig.readConfigSync(this.wsRoot),

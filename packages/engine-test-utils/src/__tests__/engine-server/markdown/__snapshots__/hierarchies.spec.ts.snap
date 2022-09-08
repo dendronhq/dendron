@@ -71,6 +71,48 @@ VFile {
 }
 `;
 
+exports[`hierarchies "MD_DENDRON: BASIC" 1`] = `
+VFile {
+  "contents": "# Foo
+
+[Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`hierarchies "MD_DENDRON: NO_HIERARCHY" 1`] = `
+VFile {
+  "contents": "# Foo
+
+[Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`hierarchies "MD_DENDRON: NO_HIERARCHY_VIA_FM" 1`] = `
+VFile {
+  "contents": "# Foo
+
+[Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`hierarchies "MD_DENDRON: SKIP_LEVELS" 1`] = `
 VFile {
   "contents": "# Daily

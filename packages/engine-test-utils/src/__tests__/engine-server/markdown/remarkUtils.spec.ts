@@ -869,8 +869,9 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const note = engine.notes["bar"];
-          const linkCandidates = LinkUtils.findLinkCandidates({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
+            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates[0].from.fname).toEqual("bar");
@@ -888,8 +889,9 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const note = engine.notes["baz"];
-          const linkCandidates = LinkUtils.findLinkCandidates({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
+            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates.length).toEqual(8);
@@ -905,8 +907,9 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
           const note = engine.notes["nodes"];
-          const linkCandidates = LinkUtils.findLinkCandidates({
+          const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
+            engine,
             config: DConfig.readConfigSync(wsRoot),
           });
           expect(linkCandidates.length).toEqual(8);

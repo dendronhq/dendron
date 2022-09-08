@@ -8,15 +8,16 @@ export function makeResponse<T>(resp: T) {
  * Loop through iterable one element at a time and await on async callback at every iteration
  *  ^a7sx98zzqg5y
  */
-export async function asyncLoopOneAtATime<T>(
+export async function asyncLoopOneAtATime<T, R = any>(
   things: T[],
-  cb: (t: T) => Promise<any>
-) {
+  cb: (t: T) => Promise<R>
+): Promise<R[]> {
+  const returnValues: R[] = [];
   for (const thing of things) {
     // eslint-disable-next-line no-await-in-loop
-    await cb(thing);
+    returnValues.push(await cb(thing));
   }
-  return;
+  return returnValues;
 }
 
 /**

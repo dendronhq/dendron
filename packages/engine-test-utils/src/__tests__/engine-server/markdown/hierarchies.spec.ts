@@ -357,10 +357,10 @@ describe("hierarchies", () => {
   });
 
   const ALL_TEST_CASES = [
-    // ...NO_HIERARCHY,
-    // ...NO_HIERARCHY_VIA_FM,
-    // ...BASIC,
-    // ...DIFF_HIERARCHY_TITLE,
+    ...NO_HIERARCHY,
+    ...NO_HIERARCHY_VIA_FM,
+    ...BASIC,
+    ...DIFF_HIERARCHY_TITLE,
     ...SKIP_LEVELS,
   ];
 

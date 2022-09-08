@@ -643,7 +643,7 @@ export class DendronEngineV2 implements DEngine {
             notesByFname: this.noteFnames,
           });
         } else {
-          EngineUtils.refreshNoteLinksAndAnchors({
+          await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
             config: DConfig.readConfigSync(this.wsRoot),
@@ -682,7 +682,7 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    EngineUtils.refreshNoteLinksAndAnchors({
+    await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
       config: DConfig.readConfigSync(this.wsRoot),

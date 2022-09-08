@@ -14,7 +14,6 @@ import {
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
-  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   ProcFlavor,

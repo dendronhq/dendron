@@ -231,7 +231,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       // }
       // ^53ueid06urse
       if (insertTitle) {
-        // debugger;
         const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
         root.children.splice(
           idx,
@@ -278,7 +277,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           shouldApplyPublishingRules
         );
 
-        // debugger;
         // If the target is Dendron, no processing of links is needed
         if (dest === DendronASTDest.MD_DENDRON) return;
         const _node = node as WikiLinkNoteV4;

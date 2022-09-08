@@ -109,7 +109,6 @@ export function isEndBlockAnchorId(anchorId: string) {
 }
 
 function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
-  // debugger;
   const procData = MDUtilsV5.getProcData(proc);
   const { config, dest, noteToRender } = procData;
 
@@ -335,7 +334,6 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
-      // debugger;
       const msg = `Error rendering note reference for ${note?.fname}`;
       return MdastUtils.genMDErrorMsg(msg);
     }

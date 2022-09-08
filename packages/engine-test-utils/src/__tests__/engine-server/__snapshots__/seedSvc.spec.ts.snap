@@ -85,7 +85,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
     seeds:
         dendron.foo: {}
 preview:
@@ -240,7 +239,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
     seeds:
         dendron.foo:
             site:
@@ -385,7 +383,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -497,7 +494,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -626,7 +622,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: true
 preview:
     enableFMTitle: true
     enableNoteTitleForLink: true
@@ -762,7 +757,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
     seeds: {}
 preview:
     enableFMTitle: true
@@ -884,7 +878,6 @@ workspace:
     maxPreviewsCached: 10
     maxNoteLength: 204800
     enableFullHierarchyNoteTitle: false
-    enableSmartRefs: false
     seeds: {}
 preview:
     enableFMTitle: true

@@ -2,27 +2,22 @@ import {
   EngineBulkAddRequest,
   EngineDeleteRequest,
   EngineRenameNoteRequest,
-  EngineUpdateNoteRequest,
   EngineWriteRequest,
-  GetAnchorsRequest,
   GetDecorationsRequest,
-  GetLinksRequest,
-  GetNoteBlocksPayload,
+  GetNoteBlocksResp,
   GetNoteBlocksRequest,
   NoteQueryRequest,
   RenderNoteOpts,
   WriteNoteResp,
+  BulkWriteNotesResp,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
-import { AnchorUtils } from "@dendronhq/unified";
 import { Request, Response, Router } from "express";
 import asyncHandler from "express-async-handler";
-import { getLogger } from "../core";
 import { NoteController } from "../modules/notes";
 import { getWSEngine } from "../utils";
 
 const router = Router();
-const L = getLogger();
 
 router.post(
   "/delete",
@@ -72,19 +67,6 @@ router.get(
 );
 
 router.post(
-  "/update",
-  asyncHandler(async (req: Request, res: Response) => {
-    const ctx = "router:note:update";
-    // TODO: Convert .update() to RespV2 then use ExpressUtils to set the Response
-    const resp = await NoteController.instance().update(
-      req.body as EngineUpdateNoteRequest
-    );
-    L.debug({ ctx, msg: "exit", payload: req.body });
-    res.json(resp);
-  })
-);
-
-router.post(
   "/write",
   asyncHandler(async (req: Request, res: Response<WriteNoteResp>) => {
     const { ws, node, opts } = req.body as EngineWriteRequest;
@@ -96,7 +78,7 @@ router.post(
 
 router.post(
   "/bulkAdd",
-  asyncHandler(async (req: Request, res: Response<WriteNoteResp>) => {
+  asyncHandler(async (req: Request, res: Response<BulkWriteNotesResp>) => {
     const { ws, opts } = req.body as EngineBulkAddRequest;
     const engine = await getWSEngine({ ws: ws || "" });
     const out = await engine.bulkWriteNotes(opts);
@@ -106,7 +88,7 @@ router.post(
 
 router.get(
   "/blocks",
-  asyncHandler(async (req: Request, res: Response<GetNoteBlocksPayload>) => {
+  asyncHandler(async (req: Request, res: Response<GetNoteBlocksResp>) => {
     const { id, ws, filterByAnchorType } = req.query as GetNoteBlocksRequest;
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(
@@ -118,33 +100,11 @@ router.get(
 
 router.post(
   "/decorations",
-  asyncHandler(async (req: Request, res: Response<GetNoteBlocksPayload>) => {
+  asyncHandler(async (req: Request, res: Response<GetNoteBlocksResp>) => {
     const opts = req.body as any as GetDecorationsRequest;
     const { ws } = opts;
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(res, await engine.getDecorations(opts));
-  })
-);
-
-router.post(
-  "/links",
-  asyncHandler(async (req: Request, res: Response) => {
-    const opts = req.body as GetLinksRequest;
-    const { ws } = opts;
-    const engine = await getWSEngine({ ws });
-    const links = await engine.getLinks(opts);
-    ExpressUtils.setResponse(res, links);
-  })
-);
-
-router.post(
-  "/anchors",
-  asyncHandler(async (req: Request, res: Response) => {
-    const { note } = req.body as GetAnchorsRequest;
-    const anchors = AnchorUtils.findAnchors({
-      note,
-    });
-    ExpressUtils.setResponse(res, { data: anchors, error: null });
   })
 );
 

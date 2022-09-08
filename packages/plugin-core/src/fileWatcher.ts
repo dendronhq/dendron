@@ -141,9 +141,7 @@ export class FileWatcher {
         engine,
         config: DConfig.readConfigSync(engine.wsRoot),
       });
-      await engine.updateNote(note, {
-        newNode: true,
-      });
+      await engine.writeNote(note);
     } catch (err: any) {
       this.L.error({ ctx, error: err });
       throw err;

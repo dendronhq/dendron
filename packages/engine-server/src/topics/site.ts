@@ -15,12 +15,12 @@ import {
   NoteUtils,
   UseVaultBehavior,
   VaultUtils,
-  BooleanResp,
   ConfigUtils,
   DendronPublishingConfig,
   configIsV4,
   isBlockAnchor,
   getSlugger,
+  IDendronError,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -341,7 +341,7 @@ export class SiteUtils {
         await engine.writeNote(note);
       } else {
         // eslint-disable-next-line no-await-in-loop
-        await engine.updateNote(note);
+        await engine.writeNote(note, { metaOnly: true });
       }
 
       // if `skipLevels` is enabled, the children of the current note are descendants
@@ -648,21 +648,20 @@ export class SiteUtils {
     return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }
 
-  static validateConfig(
-    sconfig: DendronSiteConfig | DendronPublishingConfig
-  ): BooleanResp {
+  static validateConfig(sconfig: DendronSiteConfig | DendronPublishingConfig): {
+    error?: IDendronError;
+  } {
     // asset prefix needs one slash
     if (!_.isUndefined(sconfig.assetsPrefix)) {
       if (!sconfig.assetsPrefix.startsWith("/")) {
         return {
-          data: false,
           error: new DendronError({
             message: "assetsPrefix requires a '/' in front of the path",
           }),
         };
       }
     }
-    return { data: true, error: null };
+    return { error: undefined };
   }
 }
 

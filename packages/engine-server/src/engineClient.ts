@@ -5,27 +5,22 @@ import {
   DendronAPI,
   DendronError,
   DEngineClient,
-  DEngineDeleteSchemaResp,
+  DeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
   DVault,
-  EngineDeleteNoteResp,
+  DeleteNoteResp,
   EngineDeleteOpts,
   EngineInfoResp,
-  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
   Event,
   EventEmitter,
   FuseEngine,
-  GetAnchorsRequest,
   GetDecorationsOpts,
-  GetDecorationsPayload,
-  GetLinksRequest,
-  GetNoteAnchorsPayload,
+  GetDecorationsResp,
   GetNoteBlocksOpts,
-  GetNoteBlocksPayload,
-  GetNoteLinksPayload,
+  GetNoteBlocksResp,
   NoteChangeEntry,
   NoteFnameDictUtils,
   NoteDictsUtils,
@@ -33,25 +28,26 @@ import {
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NoteUtils,
-  Optional,
   QueryNotesOpts,
   RenameNoteOpts,
-  RenameNotePayload,
   RenderNoteOpts,
-  RespV2,
   SchemaModuleDict,
   SchemaModuleProps,
-  SchemaQueryResp,
+  QuerySchemaResp,
   SchemaUtils,
   VaultUtils,
   WriteNoteResp,
   FindNoteOpts,
   NotePropsMeta,
-  UpdateNoteResp,
   RespV3,
   ERROR_STATUS,
   EngineEventEmitter,
   NoteIndexProps,
+  BulkGetNoteResp,
+  BulkGetNoteMetaResp,
+  RenameNoteResp,
+  GetSchemaResp,
+  WriteSchemaResp,
 } from "@dendronhq/common-all";
 import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -172,6 +168,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
     if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {
       return {
+        data: resp.data,
         error: resp.error,
       };
     }
@@ -214,6 +211,26 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         }),
       };
     }
+  }
+
+  /**
+   * See {@link DEngine.bulkGetNotes}
+   * TODO: remove this.notes
+   */
+  async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {
+    return {
+      data: ids.map((id) => {
+        return _.cloneDeep(this.notes[id]);
+      }),
+    };
+  }
+
+  /**
+   * See {@link DEngine.bulkGetNotesMeta}
+   * TODO: remove this.notes
+   */
+  async bulkGetNotesMeta(ids: string[]): Promise<BulkGetNoteMetaResp> {
+    return this.bulkGetNotes(ids);
   }
 
   /**
@@ -263,7 +280,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   async deleteNote(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<EngineDeleteNoteResp> {
+  ): Promise<DeleteNoteResp> {
     const ws = this.ws;
     const resp = await this.api.engineDelete({ id, opts, ws });
     if (!resp.data) {
@@ -279,7 +296,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     }
 
     return {
-      error: null,
       data: resp.data,
     };
   }
@@ -287,7 +303,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<DEngineDeleteSchemaResp> {
+  ): Promise<DeleteSchemaResp> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];
@@ -301,12 +317,11 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.fuseEngine.replaceNotesIndex(notes);
     this.fuseEngine.replaceSchemaIndex(schemas);
     return {
-      error: null,
       data: resp.data,
     };
   }
 
-  async info(): Promise<RespV2<EngineInfoResp>> {
+  async info(): Promise<EngineInfoResp> {
     const resp = await this.api.engineInfo();
     return resp;
   }
@@ -349,7 +364,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const items = await this.queryNote(opts);
     return {
       data: items,
-      error: null,
     };
   }
 
@@ -369,7 +383,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       });
     }
     return {
-      error: null,
       data: items.map((ent) => this.notes[ent.id]),
     };
   }
@@ -432,7 +445,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    *  command in parallel, wait for a single call to finish before requesting another call.
    *  Otherwise some race condition starts to cause intermittent failures.
    *  */
-  async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
+  async renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
     if (resp.error || _.isUndefined(resp.data)) {
       throw resp.error;
@@ -468,22 +481,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     };
   }
 
-  async updateNote(
-    note: NoteProps,
-    opts?: EngineUpdateNodesOptsV2
-  ): Promise<UpdateNoteResp> {
-    const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
-    if (resp.error || !resp.data) {
-      return resp;
-    }
-
-    await this.refreshNotesV2(resp.data);
-
-    this._onNoteChangedEmitter.fire(resp.data);
-
-    return resp;
-  }
-
   async writeNote(
     note: NoteProps,
     opts?: EngineWriteOptsV2
@@ -507,7 +504,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   // ~~~ schemas
-  async getSchema(id: string): Promise<RespV3<SchemaModuleProps>> {
+  async getSchema(id: string): Promise<GetSchemaResp> {
     const maybeSchema = this.schemas[id];
 
     if (maybeSchema) {
@@ -523,27 +520,21 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     }
   }
 
-  async querySchema(qs: string): Promise<SchemaQueryResp> {
+  async querySchema(qs: string): Promise<QuerySchemaResp> {
     const out = await this.api.schemaQuery({ qs, ws: this.ws });
     return _.defaults(out, { data: [] });
   }
 
-  async updateSchema(schema: SchemaModuleProps): Promise<void> {
-    await this.api.schemaUpdate({ schema, ws: this.ws });
+  async writeSchema(schema: SchemaModuleProps): Promise<WriteSchemaResp> {
+    const out = await this.api.schemaWrite({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
-    return;
-  }
-
-  async writeSchema(schema: SchemaModuleProps): Promise<void> {
-    await this.api.schemaWrite({ schema, ws: this.ws });
-    await this.refreshSchemas([schema]);
-    return;
+    return out;
   }
 
   async getNoteBlocks({
     id,
     filterByAnchorType,
-  }: GetNoteBlocksOpts): Promise<GetNoteBlocksPayload> {
+  }: GetNoteBlocksOpts): Promise<GetNoteBlocksResp> {
     const out = await this.api.getNoteBlocks({
       id,
       filterByAnchorType,
@@ -552,26 +543,11 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     return out;
   }
 
-  async getDecorations(
-    opts: GetDecorationsOpts
-  ): Promise<GetDecorationsPayload> {
+  async getDecorations(opts: GetDecorationsOpts): Promise<GetDecorationsResp> {
     const out = await this.api.getDecorations({
       ...opts,
       ws: this.ws,
     });
     return out;
-  }
-
-  getAnchors(opts: GetAnchorsRequest): Promise<GetNoteAnchorsPayload> {
-    return this.api.getAnchors(opts);
-  }
-
-  getLinks(
-    opts: Optional<GetLinksRequest, "ws">
-  ): Promise<GetNoteLinksPayload> {
-    return this.api.getLinks({
-      ws: this.ws,
-      ...opts,
-    });
   }
 }

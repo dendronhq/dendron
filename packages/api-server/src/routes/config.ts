@@ -1,7 +1,4 @@
-import {
-  IntermediateDendronConfig,
-  WorkspaceRequest,
-} from "@dendronhq/common-all";
+import { WorkspaceRequest } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
 import asyncHandler from "express-async-handler";
@@ -20,17 +17,6 @@ router.get(
       req.query as WorkspaceRequest
     );
     L.info({ ctx, msg: "get:ext", resp });
-    ExpressUtils.setResponse(res, resp);
-  })
-);
-
-router.post(
-  "/write",
-  asyncHandler(async (req: Request, res: Response) => {
-    L.info({ ctx, msg: "write:enter", payload: req.body });
-    const resp = await ConfigController.instance().write(
-      req.body as IntermediateDendronConfig & WorkspaceRequest
-    );
     ExpressUtils.setResponse(res, resp);
   })
 );

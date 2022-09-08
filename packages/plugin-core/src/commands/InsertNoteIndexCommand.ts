@@ -1,9 +1,4 @@
-import {
-  ConfigUtils,
-  DNodeUtils,
-  NoteProps,
-  NoteUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NotePropsMeta, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
@@ -31,7 +26,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
   // TODO: make this into a util once the cli version is implemented.
   // NOTE: the marker flag is not exposed to the plugin yet.
   genNoteIndex(
-    notes: NoteProps[],
+    notes: NotePropsMeta[],
     opts: {
       marker?: boolean;
     }
@@ -71,9 +66,8 @@ export class InsertNoteIndexCommand extends BasicCommand<
       return opts;
     }
     const engine = getEngine();
-    const children = DNodeUtils.getChildren(activeNote, {
-      nodeDict: engine.notes,
-    });
+    const bulkResp = await engine.bulkGetNotesMeta(activeNote.children);
+    const children = bulkResp.data;
     if (children.length === 0) {
       window.showInformationMessage("This note does not have any child notes.");
       return opts;

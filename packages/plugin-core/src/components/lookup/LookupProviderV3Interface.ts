@@ -2,6 +2,7 @@ import { DendronQuickPickerV2 } from "./types";
 import { CancellationToken, CancellationTokenSource } from "vscode";
 import {
   DNodePropsQuickInputV2,
+  InvalidFilenameReason,
   NoteQuickInput,
   RespV2,
   SchemaQuickInput,
@@ -16,7 +17,15 @@ export type ILookupProviderV3 = {
     quickpick: DendronQuickPickerV2;
     cancellationToken: CancellationTokenSource;
   }): any;
-  shouldRejectItem?: (opts: { item: NoteQuickInput }) => boolean;
+  shouldRejectItem?: (opts: { item: NoteQuickInput }) =>
+    | {
+        shouldReject: true;
+        reason: InvalidFilenameReason;
+      }
+    | {
+        shouldReject: false;
+        reason?: never;
+      };
 };
 
 export interface INoteLookupProviderFactory {

@@ -55,6 +55,7 @@ import { isWebUri } from "../util/regex";
 
 export * from "./lookup";
 export * from "./publishUtils";
+export * from "./vscode-utils";
 
 /**
  * Dendron utilities
@@ -593,7 +594,7 @@ export class ConfigUtils {
         version: 5,
         ...common,
         commands: genDefaultCommandConfig(),
-        workspace: { ...genDefaultWorkspaceConfig(), enableSmartRefs: true },
+        workspace: { ...genDefaultWorkspaceConfig() },
         preview: genDefaultPreviewConfig(),
         publishing: genDefaultPublishingConfig(),
       } as StrictConfigV5,

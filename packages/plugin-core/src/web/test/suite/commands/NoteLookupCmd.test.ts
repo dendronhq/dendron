@@ -129,7 +129,7 @@ suite("GIVEN a NoteLookupCmd", () => {
 
     const mockEngine = stubInterface<ReducedDEngine>();
 
-    mockEngine.writeNote.resolves({ error: null });
+    mockEngine.writeNote.resolves({ data: [] });
 
     const cmd = new NoteLookupCmd(
       factory,

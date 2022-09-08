@@ -1,4 +1,4 @@
-import { ConfigUtils, ERROR_STATUS, Position } from "@dendronhq/common-all";
+import { ConfigUtils, Position } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
@@ -521,8 +521,11 @@ const NOTES = {
       return [
         // should have caught the broken note
         {
-          actual: initResp.error?.status,
-          expected: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+          actual: _.includes(
+            initResp.error?.message,
+            "foo.md could not be parsed"
+          ),
+          expected: true,
         },
         // should have still parsed remaining notes
         {

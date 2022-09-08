@@ -334,7 +334,7 @@ describe("GIVEN a DendronEngineClient running on client-side", () => {
             }
           );
 
-          await engineClient.updateNote(rootFile!);
+          await engineClient.writeNote(rootFile!, { metaOnly: true });
         },
         {
           expect,

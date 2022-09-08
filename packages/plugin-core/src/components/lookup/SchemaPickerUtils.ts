@@ -1,4 +1,4 @@
-import { DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
+import { DNodeUtils, SchemaProps, SchemaUtils } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
@@ -15,16 +15,10 @@ export class SchemaPickerUtils {
   }) {
     const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(picker.value);
-    const node = SchemaUtils.getModuleRoot(resp.data[0]);
-    const perfectMatch = node.fname === picker.value;
-    return !perfectMatch
-      ? [
-          NotePickerUtils.createNoActiveItem({
-            fname: picker.value,
-            detail: CREATE_NEW_SCHEMA_DETAIL,
-          }),
-        ]
-      : [
+    if (resp.data && resp.data.length > 0) {
+      const node = SchemaUtils.getModuleRoot(resp.data[0]);
+      if (node.fname === picker.value) {
+        return [
           DNodeUtils.enhancePropForQuickInputV3({
             wsRoot,
             props: node,
@@ -32,6 +26,14 @@ export class SchemaPickerUtils {
             vaults,
           }),
         ];
+      }
+    }
+    return [
+      NotePickerUtils.createNoActiveItem({
+        fname: picker.value,
+        detail: CREATE_NEW_SCHEMA_DETAIL,
+      }),
+    ];
   }
 
   static async fetchPickerResults(opts: {
@@ -43,7 +45,10 @@ export class SchemaPickerUtils {
     const { picker, qs } = opts;
     const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(qs);
-    let nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
+    let nodes: SchemaProps[] = [];
+    if (resp.data) {
+      nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
+    }
 
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;

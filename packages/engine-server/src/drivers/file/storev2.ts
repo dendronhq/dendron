@@ -6,15 +6,13 @@ import {
   IntermediateDendronConfig,
   DendronError,
   DEngineClient,
-  DEngineDeleteSchemaResp,
+  DeleteSchemaResp,
   DEngineInitResp,
-  DEngineInitSchemaResp,
   DHookEntry,
   DLink,
   DNoteAnchorPositioned,
   DStore,
   DVault,
-  EngineDeleteNotePayload,
   EngineDeleteOpts,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -29,12 +27,9 @@ import {
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
-  RenameNotePayload,
-  ResponseUtil,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaUtils,
-  StoreDeleteNoteResp,
   stringifyError,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
@@ -50,10 +45,10 @@ import {
   NoteDictsUtils,
   NoteFnameDictUtils,
   FindNoteOpts,
-  isNotNull,
   ErrorUtils,
   RespV3,
   TimeUtils,
+  RespWithOptError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -75,6 +70,8 @@ import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { NotesFileSystemCache } from "../../cache";
 import { URI } from "vscode-uri";
 import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
+
+export type DEngineInitSchemaResp = RespWithOptError<SchemaModuleProps[]>;
 
 export class FileStorage implements DStore {
   public vaults: DVault[];
@@ -117,7 +114,7 @@ export class FileStorage implements DStore {
     let errors: IDendronError<any>[] = [];
     try {
       const resp = await this.initSchema();
-      if (ResponseUtil.hasError(resp)) {
+      if (resp.error) {
         errors.push(FileStorage.createMalformedSchemaError(resp));
       }
       resp.data.map((ent) => {
@@ -137,7 +134,7 @@ export class FileStorage implements DStore {
       }
 
       const { notes, schemas, config } = this;
-      let error: IDendronError | null = errors[0] || null;
+      let error: IDendronError | undefined = errors[0];
       if (errors.length > 1) {
         error = new DendronCompositeError(errors);
       }
@@ -245,7 +242,7 @@ export class FileStorage implements DStore {
   async deleteNote(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<StoreDeleteNoteResp> {
+  ): Promise<NoteChangeEntry[]> {
     const ctx = "deleteNote";
     if (id === "root") {
       throw new DendronError({
@@ -326,7 +323,7 @@ export class FileStorage implements DStore {
         });
       }
       // remove from parent
-      const resps: Promise<EngineDeleteNotePayload>[] = [];
+      const resps: Promise<NoteChangeEntry[]>[] = [];
       let parentNote = this.notes[noteToDelete.parent];
 
       if (parentNote) {
@@ -386,7 +383,7 @@ export class FileStorage implements DStore {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOpts
-  ): Promise<DEngineDeleteSchemaResp> {
+  ): Promise<DeleteSchemaResp> {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
@@ -432,7 +429,7 @@ export class FileStorage implements DStore {
     const result = {
       data,
       error: _.isEmpty(errors)
-        ? null
+        ? undefined
         : new DendronError({ message: "multiple errors", payload: errors }),
     };
     return result;
@@ -728,7 +725,6 @@ export class FileStorage implements DStore {
         return { note: n, status: "create" as const };
       });
       return {
-        error: null,
         data: notesChanged,
       };
     }
@@ -739,10 +735,10 @@ export class FileStorage implements DStore {
     );
     const errors = writeResponses
       .flatMap((response) => response.error)
-      .filter(isNotNull);
+      .filter(isNotUndefined);
 
     return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : null,
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
       data: writeResponses
         .flatMap((response) => response.data)
         .filter(isNotUndefined),
@@ -931,7 +927,7 @@ export class FileStorage implements DStore {
     return;
   }
 
-  async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
+  async renameNote(opts: RenameNoteOpts): Promise<NoteChangeEntry[]> {
     const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
     const { wsRoot } = this;
@@ -1026,7 +1022,7 @@ export class FileStorage implements DStore {
       msg: "deleteNote:meta:pre",
       note: NoteUtils.toLogObj(oldNote),
     });
-    let changedFromDelete: EngineDeleteNotePayload = [];
+    let changedFromDelete: NoteChangeEntry[] = [];
     let changeFromWrite: NoteChangeEntry[] | undefined;
     if (
       oldNote.fname.toLowerCase() === newNote.fname.toLowerCase() &&
@@ -1137,13 +1133,6 @@ export class FileStorage implements DStore {
     }
 
     return { data: changes, error: null };
-  }
-
-  async updateSchema(schemaModule: SchemaModuleProps) {
-    this.schemas[schemaModule.root.id] = schemaModule;
-    // const vaultDir = this.vaults[0];
-    // await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
-    // TODO: update notes
   }
 
   /**
@@ -1318,13 +1307,13 @@ export class FileStorage implements DStore {
           })
       );
       if (resp instanceof DendronError) {
-        error = resp;
-        this.logger.error({ ctx, error: stringifyError(error) });
+        this.logger.error({ ctx, error: stringifyError(resp) });
+        return { error: resp };
       } else {
         const valResp = NoteUtils.validate(resp.note);
         if (valResp.error) {
           this.logger.error({ ctx, error: stringifyError(valResp.error) });
-          error = valResp.error;
+          return valResp.erro;
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
@@ -1387,7 +1376,6 @@ export class FileStorage implements DStore {
       msg: "exit",
     });
     return {
-      error,
       data: changedEntries,
     };
   }
@@ -1397,5 +1385,6 @@ export class FileStorage implements DStore {
     const vault = schemaModule.vault;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     await schemaModuleProps2File(schemaModule, vpath, schemaModule.fname);
+    return { data: undefined };
   }
 }

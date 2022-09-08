@@ -8,9 +8,7 @@ import {
   ProcFlavor,
   ReducedDEngine,
   RenderNoteOpts,
-  RenderNotePayload,
-  ResponseUtil,
-  RespV2,
+  RenderNoteResp,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -35,7 +33,7 @@ export class PluginNoteRenderer implements INoteRenderer {
     @inject("vaults") private vaults: DVault[]
   ) {}
 
-  async renderNote(opts: RenderNoteOpts): Promise<RespV2<RenderNotePayload>> {
+  async renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp> {
     try {
       const data = await this._renderNote({
         note: opts.note!, // TODO: get rid of !
@@ -43,16 +41,16 @@ export class PluginNoteRenderer implements INoteRenderer {
         dest: opts.dest || DendronASTDest.HTML,
       });
 
-      return ResponseUtil.createHappyResponse({ data });
+      return { data };
     } catch (error) {
-      return ResponseUtil.createUnhappyResponse({
+      return {
         error: new DendronError({
           message: `Unable to render note ${
             opts.note!.fname
           } in ${VaultUtils.getName(opts.note!.vault)}`,
           payload: error,
         }),
-      });
+      };
     }
   }
 

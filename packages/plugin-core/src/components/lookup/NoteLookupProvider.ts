@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DNodeUtils,
+  InvalidFilenameReason,
   LookupEvents,
   NoteLookupUtils,
   NoteProps,
@@ -97,12 +98,29 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return;
   }
 
-  shouldRejectItem(opts: { item: NoteQuickInput }) {
+  shouldRejectItem(opts: { item: NoteQuickInput }):
+    | {
+        shouldReject: true;
+        reason: InvalidFilenameReason;
+      }
+    | {
+        shouldReject: false;
+        reason?: never;
+      } {
     const { item } = opts;
-    return (
-      !NoteUtils.validateFname(item.fname) &&
-      PickerUtilsV2.isCreateNewNotePick(item)
-    );
+    const result = NoteUtils.validateFname(item.fname);
+    const shouldReject =
+      !result.isValid && PickerUtilsV2.isCreateNewNotePick(item);
+    if (shouldReject) {
+      return {
+        shouldReject,
+        reason: result.reason,
+      };
+    } else {
+      return {
+        shouldReject,
+      };
+    }
   }
 
   /**
@@ -149,10 +167,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // validates fname.
       if (selectedItems.length === 1) {
         const item = selectedItems[0];
-        if (this.shouldRejectItem({ item })) {
-          window.showErrorMessage(
-            "Hierarchies cannot have leading / trailing whitespace or be empty."
-          );
+        const result = this.shouldRejectItem({ item });
+        if (result.shouldReject) {
+          window.showErrorMessage(result.reason);
           return;
         }
       }
@@ -274,7 +291,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
         Logger.debug({ ctx, msg: "empty qs" });
-        const items = NotePickerUtils.fetchRootQuickPickResults({ engine });
+        const items = await NotePickerUtils.fetchRootQuickPickResults({
+          engine,
+        });
         const extraItems = this.opts.extraItems;
         if (extraItems) {
           items.unshift(...extraItems);

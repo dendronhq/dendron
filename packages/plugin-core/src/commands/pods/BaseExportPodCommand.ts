@@ -4,6 +4,8 @@ import {
   DendronError,
   DNodeProps,
   DVault,
+  IProgress,
+  IProgressStep,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
@@ -194,7 +196,7 @@ export abstract class BaseExportPodCommand<
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: "Running Export...",
+        title: "Running Export ",
         cancellable: true,
       },
       async (_progress, token) => {
@@ -211,7 +213,7 @@ export abstract class BaseExportPodCommand<
           case PodExportScope.LinksInSelection:
           case PodExportScope.Hierarchy:
           case PodExportScope.Workspace: {
-            await this.executeExportNotes(opts);
+            await this.executeExportNotes(opts, _progress);
 
             break;
           }
@@ -316,13 +318,15 @@ export abstract class BaseExportPodCommand<
     }
   }
 
-  private async executeExportNotes(opts: {
-    config: Config;
-    payload: NoteProps[];
-  }): Promise<string | void> {
+  private async executeExportNotes(
+    opts: {
+      config: Config;
+      payload: NoteProps[];
+    },
+    progress?: IProgress<IProgressStep>
+  ): Promise<string | void> {
     const pod = this.createPod(opts.config);
-
-    const result = await pod.exportNotes(opts.payload);
+    const result = await pod.exportNotes(opts.payload, progress);
     return this.onExportComplete({
       exportReturnValue: result,
       payload: opts.payload,

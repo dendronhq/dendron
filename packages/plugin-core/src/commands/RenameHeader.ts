@@ -4,8 +4,7 @@ import {
   extractNoteChangeEntryCounts,
   getSlugger,
   NoteProps,
-  RenameNotePayload,
-  RespV2,
+  RenameNoteResp,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -45,7 +44,7 @@ type CommandOpts =
       note?: NoteProps;
     }
   | undefined;
-export type CommandOutput = RespV2<RenameNotePayload> | undefined;
+export type CommandOutput = RenameNoteResp | undefined;
 
 export class RenameHeaderCommand extends BasicCommand<
   CommandOpts,

@@ -93,13 +93,13 @@ export class NotePickerUtils {
     return [...picker.selectedItems];
   }
 
-  static fetchRootQuickPickResults = ({
+  static fetchRootQuickPickResults = async ({
     engine,
   }: {
     engine: DEngineClient;
   }) => {
     const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-    const nodes = NoteLookupUtils.fetchRootResults(engine.notes);
+    const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(engine);
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInput({
         wsRoot,

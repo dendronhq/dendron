@@ -591,13 +591,11 @@ function prepareNoteRefIndices<T>({
   anchorEnd,
   bodyAST,
   makeErrorData,
-  enableSmartRef,
 }: {
   anchorStart?: string;
   anchorEnd?: string;
   bodyAST: DendronASTNode;
   makeErrorData: (msg: string) => T;
-  enableSmartRef?: boolean;
 }): {
   start: FindAnchorResult;
   end: FindAnchorResult;
@@ -673,7 +671,7 @@ function prepareNoteRefIndices<T>({
   if (
     !anchorEnd &&
     // smart header ref
-    ((start.type === "header" && enableSmartRef) ||
+    (start.type === "header" ||
       // smart block
       start.type === "block-begin") &&
     start.node
@@ -732,7 +730,7 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
-  const { engine, config } = MDUtilsV5.getProcData(proc);
+  const { engine } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -763,7 +761,6 @@ function convertNoteRefHelperAST(
 
   const { start, end, data, error } = prepareNoteRefIndices({
     anchorStart,
-    enableSmartRef: ConfigUtils.getWorkspace(config).enableSmartRefs,
     anchorEnd,
     bodyAST,
     makeErrorData: (msg) => {

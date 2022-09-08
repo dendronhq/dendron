@@ -65,6 +65,7 @@ describe("engine, schemas/", () => {
 
   ENGINE_V3_PRESETS.forEach((pre) => {
     const { name, presets } = pre;
+    // @ts-ignore
     const presetByNodeType = presets[nodeType];
     if (!_.isEmpty(presetByNodeType)) {
       describe(name, () => {

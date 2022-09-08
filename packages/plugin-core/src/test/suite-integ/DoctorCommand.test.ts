@@ -18,6 +18,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
+import { describe } from "mocha";
 
 suite("DoctorCommandTest", function () {
   describeMultiWS(
@@ -744,6 +745,58 @@ suite("FIX_AIRTABLE_METADATA", function () {
           hierarchyQuickPickStub.restore();
           podIdQuickPickStub.restore();
         }
+      });
+    }
+  );
+});
+
+suite("FIX_INVALID_FILENAMES", function () {
+  describeMultiWS(
+    "GIVEN workspace with with invalid file",
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          wsRoot,
+          fname: "bar..'(foo,)'",
+          vault: vaults[0],
+        });
+      },
+    },
+    () => {
+      describe("WHEN FIX_INVALID_FILENAMES is run", () => {
+        test("THEN notes with invalid file name is correctly renamed", async () => {
+          const ext = ExtensionProvider.getExtension();
+          const engine = ext.getEngine();
+          const getNoteResp = await engine.getNote("bar..'(foo,)'");
+
+          expect(getNoteResp.error).toBeFalsy();
+          const invalidNote = getNoteResp.data;
+          expect(invalidNote?.fname).toEqual("bar..'(foo,)'");
+
+          const cmd = new DoctorCommand(ext);
+          const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
+            Promise.resolve({
+              action: DoctorActionsEnum.FIX_INVALID_FILENAMES,
+              scope: "workspace",
+            })
+          );
+          const quickPickStub = sinon.stub(VSCodeUtils, "showQuickPick");
+          try {
+            quickPickStub
+              .onCall(0)
+              .returns(
+                Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
+              );
+            await cmd.run();
+            const getNoteResp2 = await engine.getNote("bar..'(foo,)'");
+            expect(getNoteResp2.error).toBeFalsy();
+            const postRunNote = getNoteResp2.data;
+            expect(postRunNote?.fname).toEqual("bar.foo");
+          } finally {
+            gatherInputsStub.restore();
+            quickPickStub.restore();
+          }
+        });
       });
     }
   );

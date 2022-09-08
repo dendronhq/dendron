@@ -3,7 +3,7 @@
 exports[`hierarchies "HTML: BASIC" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
@@ -19,7 +19,7 @@ VFile {
 exports[`hierarchies "HTML: DIFF_HIERARCHY_TITLE" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>
 <hr>
 <strong>Better Children</strong>
 <ol>
@@ -35,7 +35,7 @@ VFile {
 exports[`hierarchies "HTML: NO_HIERARCHY" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -46,7 +46,7 @@ VFile {
 exports[`hierarchies "HTML: NO_HIERARCHY_VIA_FM" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -57,7 +57,7 @@ VFile {
 exports[`hierarchies "HTML: SKIP_LEVELS" 1`] = `
 VFile {
   "contents": "<h1 id=\\"daily\\">Daily</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>
 <hr>
 <strong>Children</strong>
 <ol>

@@ -177,10 +177,10 @@ export class ImportPodCommand extends BaseCommand<
     return importedNotes;
   }
 
-  addAnalyticsPayload(opts: CommandOpts, out: NoteProps[]) {
+  addAnalyticsPayload(opts?: CommandOpts, out?: NoteProps[]) {
     return {
       ...PodUtils.getAnalyticsPayload(opts),
-      importCount: out.length,
+      importCount: out?.length,
     };
   }
 }

@@ -88,10 +88,6 @@ describe("noteRefV2", () => {
   describe("WHEN parse header", () => {
     const preSetupHookForHeaders: PreSetupHookFunction = async (opts) => {
       await ANCHOR_WITH_SPACE_PRE_SETUP(opts);
-      TestConfigUtils.withConfig((config) => {
-        config.workspace.enableSmartRefs = true;
-        return config;
-      }, opts);
     };
     describe("AND parse from start header", () => {
       runTestCases(
@@ -340,7 +336,7 @@ describe("noteRefV2", () => {
           name: "THEN parse beginning section",
           fname: "foo",
           setup: async (opts) => {
-            const text = "![[foo#header-1:^end]]";
+            const text = "![[foo#header-1:#^end]]";
             const { proc } = getOpts(opts);
             const resp = await proc.process(text);
             return { resp, proc };
@@ -365,7 +361,7 @@ describe("noteRefV2", () => {
           name: "THEN parse beginning section",
           fname: "foo",
           setup: async (opts) => {
-            const text = "![[foo#header-1:^end]]";
+            const text = "![[foo#header-1:#^end]]";
             const { proc } = getOpts(opts);
             const resp = await proc.process(text);
             return { resp, proc };

@@ -1,10 +1,9 @@
 import {
   APIUtils,
   DendronAPI,
-  DendronError,
   DVault,
   NoteProps,
-  RenderNotePayload,
+  RenderNoteResp,
 } from "@dendronhq/common-all";
 import { createServer, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
@@ -28,7 +27,7 @@ async function getApiWithInitializedWS(wsRoot: string, vaults: DVault[]) {
 
 describe("api/note/render tests", () => {
   describe(`WHEN calling /render on non existent file`, () => {
-    let rendered: { data: RenderNotePayload; error: DendronError | null };
+    let rendered: RenderNoteResp;
 
     beforeAll(async () => {
       await runEngineTestV5(
@@ -57,10 +56,7 @@ describe("api/note/render tests", () => {
     const EXPECTED_FOO_RENDERED =
       '<h1 id="foo">Foo</h1>\n<p>foo body</p>\n<hr>\n<strong>Children</strong>\n<ol>\n<li><a href="foo.ch1">Ch1</a></li>\n</ol>';
 
-    let renderFoo: () => Promise<{
-      data: RenderNotePayload;
-      error: DendronError | null;
-    }>;
+    let renderFoo: () => Promise<RenderNoteResp>;
     let updateFoo: (noteUpdateValues: any) => Promise<void>;
 
     beforeAll(async () => {
@@ -86,10 +82,10 @@ describe("api/note/render tests", () => {
 
           updateFoo = async (noteUpdateValues: any) => {
             // Modify the value of foo
-            await api.engineUpdateNote({
+            await api.engineWrite({
               ws: wsRoot,
-              opts: { newNode: false },
-              note: {
+              opts: { metaOnly: true },
+              node: {
                 ...fooNote,
                 updated: fooNote.updated + 1,
                 ...noteUpdateValues,
@@ -107,7 +103,7 @@ describe("api/note/render tests", () => {
     });
 
     it(`THEN error is null.`, async () => {
-      expect((await renderFoo()).error).toBeNull();
+      expect((await renderFoo()).error).toBeUndefined();
     });
 
     describe(`AND body is updated`, () => {
@@ -159,7 +155,7 @@ describe("api/note/render tests", () => {
     });
 
     describe(`WHEN top level foo is rendered`, () => {
-      let rendered: { data: RenderNotePayload; error: DendronError | null };
+      let rendered: RenderNoteResp;
 
       beforeAll(async () => {
         rendered = await api.noteRender({
@@ -169,7 +165,7 @@ describe("api/note/render tests", () => {
       });
 
       it(`THEN it should be error free`, () => {
-        expect(rendered.error).toBeNull();
+        expect(rendered.error).toBeUndefined();
       });
 
       it(`THEN it should contain content from nested foo.two`, () => {
@@ -180,14 +176,14 @@ describe("api/note/render tests", () => {
     });
 
     describe(`WHEN foo.two is updated AND foo is rendered`, () => {
-      let rendered: { data: RenderNotePayload; error: DendronError | null };
+      let rendered: RenderNoteResp;
 
       beforeAll(async () => {
         // Modify the value of foo-two
-        await api.engineUpdateNote({
+        await api.engineWrite({
           ws: wsRoot,
-          opts: { newNode: false },
-          note: {
+          opts: { metaOnly: true },
+          node: {
             ...fooTwo,
             updated: 2,
             body: "modified-val",
@@ -201,7 +197,7 @@ describe("api/note/render tests", () => {
       });
 
       it(`THEN rendered should be error free`, () => {
-        expect(rendered.error).toBeNull();
+        expect(rendered.error).toBeUndefined();
       });
 
       it(`THEN rendered to not contain previous foo.two value`, () => {

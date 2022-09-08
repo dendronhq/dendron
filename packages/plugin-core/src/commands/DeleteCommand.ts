@@ -1,7 +1,7 @@
 import {
+  DeleteNoteResp,
   DLink,
   DVault,
-  EngineDeletePayload,
   NoteProps,
   NoteUtils,
   Position,
@@ -26,7 +26,7 @@ import { InputArgCommand } from "./base";
 
 type CommandOpts = any;
 
-type CommandOutput = EngineDeletePayload | void;
+type CommandOutput = DeleteNoteResp | void;
 export type { CommandOutput as DeleteNodeCommandOutput };
 
 function formatDeletedMsg({
@@ -103,7 +103,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
       await VSCodeUtils.closeCurrentFileEditor();
     }
 
-    const out = (await engine.deleteNote(note.id)) as EngineDeletePayload;
+    const out = await engine.deleteNote(note.id);
     if (out.error) {
       Logger.error({ ctx, msg: "error deleting node", error: out.error });
       return;

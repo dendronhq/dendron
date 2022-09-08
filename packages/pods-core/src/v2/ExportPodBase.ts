@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { NoteProps, IProgressStep, IProgress } from "@dendronhq/common-all";
 import { RunnablePodConfigV2 } from "..";
 
 /**
@@ -20,5 +20,8 @@ export interface ExportPodV2<R> {
    * batching
    * @param input
    */
-  exportNotes(input: NoteProps[]): Promise<R>;
+  exportNotes(
+    input: NoteProps[],
+    progress?: IProgress<IProgressStep>
+  ): Promise<R>;
 }

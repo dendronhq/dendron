@@ -1,4 +1,10 @@
-import { error2PlainObject, RespV2, StatusCodes } from "@dendronhq/common-all";
+import {
+  error2PlainObject,
+  RespV2,
+  RespV3,
+  RespWithOptError,
+  StatusCodes,
+} from "@dendronhq/common-all";
 import { Response } from "express";
 
 export class ExpressUtils {
@@ -25,7 +31,7 @@ export class ExpressUtils {
    */
   static setResponse(
     expressResponse: Response,
-    dendronResponse: RespV2<any>
+    dendronResponse: RespV3<any> | RespWithOptError<any>
   ): void {
     if (dendronResponse.error) {
       // TODO: Don't set a status code of 500 by default.  The default for

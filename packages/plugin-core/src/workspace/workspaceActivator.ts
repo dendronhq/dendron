@@ -34,8 +34,6 @@ import { TextDocumentServiceFactory } from "../services/TextDocumentServiceFacto
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { ExtensionUtils } from "../utils/ExtensionUtils";
 import { StartupUtils } from "../utils/StartupUtils";
-import { EngineNoteProvider } from "../views/EngineNoteProvider";
-import { NativeTreeView } from "../views/NativeTreeView";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { DendronExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
@@ -44,6 +42,8 @@ import { DendronNativeWorkspace } from "./nativeWorkspace";
 import { WorkspaceInitFactory } from "./WorkspaceInitFactory";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 import { CreateNoteCommand } from "../commands/CreateNoteCommand";
+import { NativeTreeView } from "../common/NativeTreeView";
+import { container } from "tsyringe";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -224,15 +224,9 @@ async function checkNoDuplicateVaultNames(vaults: DVault[]): Promise<boolean> {
   return true;
 }
 
-async function initTreeView({
-  providerConstructor,
-  context,
-}: {
-  providerConstructor: any;
-  context: vscode.ExtensionContext;
-}) {
+async function initTreeView({ context }: { context: vscode.ExtensionContext }) {
   const existingCommands = await vscode.commands.getCommands();
-  const treeView = new NativeTreeView(providerConstructor);
+  const treeView = container.resolve(NativeTreeView);
   treeView.show();
   _setupTreeViewCommands(treeView, existingCommands);
   context.subscriptions.push(treeView);
@@ -541,7 +535,6 @@ export class WorkspaceActivator {
     wsService,
     wsRoot,
     opts,
-    engine,
     workspaceInitializer,
   }: WorkspaceActivatorOpts &
     WorkspaceActivatorSkipOpts & {
@@ -593,13 +586,9 @@ export class WorkspaceActivator {
 
     // Setup tree view
     // This needs to happen after activation because we need the engine.
-    const providerConstructor = function () {
-      return new EngineNoteProvider(engine);
-    };
     if (!opts?.skipTreeView) {
       await initTreeView({
         context,
-        providerConstructor,
       });
     }
 

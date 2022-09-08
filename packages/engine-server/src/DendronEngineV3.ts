@@ -361,9 +361,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         return { error: resp };
       } else {
         const valResp = NoteUtils.validate(resp.note);
-        if (valResp instanceof DendronError) {
-          this.logger.error({ ctx, error: stringifyError(valResp) });
-          return { error: valResp };
+        if (valResp.error) {
+          this.logger.error({ ctx, error: stringifyError(valResp.error) });
+          return { error: valResp.error };
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });

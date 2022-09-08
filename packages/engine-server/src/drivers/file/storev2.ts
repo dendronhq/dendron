@@ -1,54 +1,54 @@
 import {
   assert,
+  asyncLoopOneAtATime,
   BulkWriteNotesOpts,
+  ConfigUtils,
   CONSTANTS,
+  DeleteSchemaResp,
   DendronCompositeError,
-  IntermediateDendronConfig,
   DendronError,
   DEngineClient,
-  DeleteSchemaResp,
   DEngineInitResp,
   DHookEntry,
   DLink,
+  DNodeUtils,
   DNoteAnchorPositioned,
+  DNoteLoc,
   DStore,
   DVault,
   EngineDeleteOpts,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
+  ErrorUtils,
   ERROR_SEVERITY,
   ERROR_STATUS,
+  FindNoteOpts,
   IDendronError,
+  IntermediateDendronConfig,
   isNotUndefined,
   NoteChangeEntry,
+  NoteChangeUpdateEntry,
+  NoteDictsUtils,
+  NoteFnameDictUtils,
   NoteProps,
+  NotePropsByFnameDict,
   NotePropsByIdDict,
   NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
+  RespV3,
+  RespWithOptError,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaUtils,
   stringifyError,
   TAGS_HIERARCHY,
+  TimeUtils,
   USERS_HIERARCHY,
+  USER_MESSAGES,
   VaultUtils,
   WriteNoteResp,
-  ConfigUtils,
-  USER_MESSAGES,
-  DNoteLoc,
-  NoteChangeUpdateEntry,
-  DNodeUtils,
-  asyncLoopOneAtATime,
-  NotePropsByFnameDict,
-  NoteDictsUtils,
-  NoteFnameDictUtils,
-  FindNoteOpts,
-  ErrorUtils,
-  RespV3,
-  TimeUtils,
-  RespWithOptError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -59,17 +59,17 @@ import {
   schemaModuleProps2File,
   vault2Path,
 } from "@dendronhq/common-server";
+import { LinkUtils } from "@dendronhq/unified";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { LinkUtils } from "@dendronhq/unified";
+import { URI } from "vscode-uri";
+import { NotesFileSystemCache } from "../../cache";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
+import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
-import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
-import { NotesFileSystemCache } from "../../cache";
-import { URI } from "vscode-uri";
-import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 
 export type DEngineInitSchemaResp = RespWithOptError<SchemaModuleProps[]>;
 
@@ -1310,9 +1310,9 @@ export class FileStorage implements DStore {
         return { error: resp };
       } else {
         const valResp = NoteUtils.validate(resp.note);
-        if (valResp instanceof DendronError) {
-          this.logger.error({ ctx, error: stringifyError(valResp) });
-          return { error: valResp };
+        if (valResp.error) {
+          this.logger.error({ ctx, error: stringifyError(valResp.error) });
+          return { error: valResp.error };
         } else {
           note = resp.note;
           this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });

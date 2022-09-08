@@ -553,7 +553,10 @@ export class WorkspaceActivator {
       durationReloadWorkspace,
       activatedSuccess: !!reloadSuccess,
       ext,
+    }).catch((error) => {
+      Sentry.captureException(error);
     });
+
     analyzeWorkspace({ wsService });
 
     if (!reloadSuccess) {

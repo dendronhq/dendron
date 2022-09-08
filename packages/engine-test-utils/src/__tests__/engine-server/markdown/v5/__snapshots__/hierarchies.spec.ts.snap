@@ -19,7 +19,7 @@ VFile {
 exports[`WHEN enableHierarchyDisplay is set to false "HTML: enableHierarchyDisplay: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -30,7 +30,7 @@ VFile {
 exports[`WHEN enableHierarchyDisplay is set to true "HTML: enableHierarchyDisplay: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>
 <hr>
 <strong>Children</strong>
 <ol>
@@ -46,7 +46,7 @@ VFile {
 exports[`WHEN hierarchyDisplayTitle is set to 'Better Children'  "HTML: hierarchyDisplayTitle: PUBLISHING" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
-<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<p><a href=\\"/foo.ch1.html\\">Ch1</a></p>
 <hr>
 <strong>Better Children</strong>
 <ol>

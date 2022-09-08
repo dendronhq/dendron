@@ -129,6 +129,76 @@ describe("GIVEN dendronPub", () => {
   const fnameAlpha = "alpha";
   const fnameBeta = "beta";
 
+  describe("WHEN note contains markdown link to a non-web uri (asset path)", () => {
+    let resp: VFile;
+    describe("AND assetsPrefix is set", () => {
+      const config = genPublishConfigWithAllPublicHierarchies();
+      ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname: fnameAlpha,
+              linkText: [
+                "[some pdf](assets/dummy-pdf.pdf)",
+                "[some pdf](/assets/dummy-pdf2.pdf)",
+              ].join("\n\n"),
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+
+      test("THEN asset prefix is added properly", () => {
+        checkString(
+          resp.contents as string,
+          `<a href="/foo/assets/dummy-pdf.pdf">some pdf</a>`
+        );
+        checkString(
+          resp.contents as string,
+          `<a href="/foo/assets/dummy-pdf2.pdf">some pdf</a>`
+        );
+      });
+    });
+    describe("AND assetsPrefix is not set", () => {
+      const config = genPublishConfigWithAllPublicHierarchies();
+      beforeAll(async () => {
+        await runEngineTestV5(
+          async (opts) => {
+            resp = await createProc({
+              ...opts,
+              config,
+              fname: fnameAlpha,
+              linkText: [
+                "[some pdf](assets/dummy-pdf.pdf)",
+                "[some pdf](/assets/dummy-pdf2.pdf)",
+              ].join("\n\n"),
+            });
+          },
+          {
+            preSetupHook: ENGINE_HOOKS.setupLinks,
+            expect,
+          }
+        );
+      });
+      test("THEN link is corrected to start with forward slash", () => {
+        checkString(
+          resp.contents as string,
+          `<a href="/assets/dummy-pdf.pdf">some pdf</a>`
+        );
+        checkString(
+          resp.contents as string,
+          `<a href="/assets/dummy-pdf2.pdf">some pdf</a>`
+        );
+      });
+    });
+  });
+
   describe("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
     const fname = fnameBeta;

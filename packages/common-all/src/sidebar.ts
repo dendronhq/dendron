@@ -352,6 +352,19 @@ function processSidebar(
   return ErrorRespV3Utils.unwrap(sidebarProcessedResp);
 }
 
+/**
+
+The sidebar gets generated through the following steps:
+
+1. **Parsing**. using [zod](https://github.com/colinhacks/zod) we parse the content of the sidebar config file. Returns `SidbarConfig`.
+  - this is inspired by [Parse, don’t validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+  - If we support shorthand (for now we skip it) parsing would also have a transformation step from shorthand to longhand.
+  - here we should also check if the hierarchies that the sidebar config points to are actually going to be published. If not an `RespV3ErrorResp` should returned.
+2. **Generate**. Generate domains
+  - consists of:
+    - processing
+      - resolve autogenerates
+*/
 export function getSidebar(
   input: unknown,
   options: SidebarOptions

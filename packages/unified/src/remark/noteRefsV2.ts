@@ -743,6 +743,7 @@ function convertNoteRefHelperAST(
       fname: note.fname,
       vault: note.vault,
       noteCacheForRenderDict,
+      config,
     },
     MDUtilsV5.getProcOpts(proc)
   );

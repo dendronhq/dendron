@@ -593,10 +593,7 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
         const { canRename, cantRename, stats } = this.findInvalidFileNames({
           notes,
-          noteDicts: {
-            notesById,
-            notesByFname,
-          },
+          noteDicts,
         });
         resp = stats;
 

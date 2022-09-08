@@ -166,6 +166,7 @@ describe("GIVEN dendronPub", () => {
         await runEngineTestV5(
           async (opts) => {
             resp = await createProc({
+              noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
               ...opts,
               config,
               fname: fnameAlpha,
@@ -199,6 +200,7 @@ describe("GIVEN dendronPub", () => {
         await runEngineTestV5(
           async (opts) => {
             resp = await createProc({
+              noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
               ...opts,
               config,
               fname: fnameAlpha,

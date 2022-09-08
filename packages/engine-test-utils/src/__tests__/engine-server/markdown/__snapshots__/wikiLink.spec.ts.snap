@@ -1,9 +1,301 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`wikiLinks compile "HTML: WITH_ALIAS" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">bar doesn't foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_ALIAS_APOSTROPHE" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"kb.note.20211011124050\\">Coulomb's Constant</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">#bar</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo#one\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo#^block\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_EXTENSION" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_ID_AS_LINK" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo-id\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo-id\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"/\\">Root</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a href=\\"foo-2\\">Foo</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">bar</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "HTML: regular" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"root\\">Root</h1>
+<p><a href=\\"foo\\">Foo</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[bar doesn't foo|foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_ALIAS_APOSTROPHE" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[Coulomb's Constant|kb.note.20211011124050]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[#bar|foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[foo#one]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[foo#^block]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_EXTENSION" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_ID_AS_LINK" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[root#^block]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_SPACE_AND_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[bar|foo bar]]
+
+",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -25,7 +317,203 @@ VFile {
 }
 `;
 
+exports[`wikiLinks compile "MD_DENDRON: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[dendron://vault1/foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[bar|dendron://vault1/foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_DENDRON: regular" 1`] = `
+VFile {
+  "contents": "# Root
+
+[[foo]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[bar doesn't foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_ALIAS_APOSTROPHE" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Coulomb's Constant](kb.note.20211011124050)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_ALIAS_HASH" 1`] = `
+VFile {
+  "contents": "# Root
+
+[#bar](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_EXTENSION" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Root](root)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_SPACE_AND_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[bar](foo%20bar)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`wikiLinks compile "MD_REGULAR: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
+VFile {
+  "contents": "# Root
+
+[Foo](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS" 1`] = `
+VFile {
+  "contents": "# Root
+
+[bar](foo)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`wikiLinks compile "MD_REGULAR: regular" 1`] = `
 VFile {
   "contents": "# Root
 

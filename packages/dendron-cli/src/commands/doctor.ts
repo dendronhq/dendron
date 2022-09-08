@@ -77,9 +77,40 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return { data: { ...args, ...engineArgs } };
   }
 
+  /**
+   * Given opts and out,
+   * prepare the analytics payload that should be included to the
+   * tracked event.
+   *
+   * Implement {@link DoctorService.executeDoctorActions} so that
+   * it outputs the necessary information,
+   * and prepare / add it here.
+   *
+   * Only the cases implemented will add a payload.
+   */
+  async addAnalyticsPayload(opts: CommandOpts, out: CommandOutput) {
+    switch (opts.action) {
+      case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
+        const payload = out.resp;
+        if (payload) {
+          _.entries(payload).forEach((entry) => {
+            const [key, value] = entry;
+            this.addToPayload({ key, value });
+          });
+        }
+        break;
+      }
+      default: {
+        // no-op.
+        break;
+      }
+    }
+  }
+
   async execute(opts: CommandOpts): Promise<CommandOutput> {
-    const ds = new DoctorService();
+    const ds = new DoctorService({ printFunc: this.print.bind(this) });
     const out = await ds.executeDoctorActions(opts);
+    await this.addAnalyticsPayload(opts, out);
     ds.dispose();
     return out;
   }

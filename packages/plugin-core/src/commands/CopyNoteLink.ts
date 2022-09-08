@@ -5,7 +5,6 @@ import {
   isBlockAnchor,
   isLineAnchor,
   NoteChangeEntry,
-  NoteProps,
   NotePropsMeta,
   NoteUtils,
   VaultUtils,

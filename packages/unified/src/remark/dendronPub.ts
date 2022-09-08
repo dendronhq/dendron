@@ -164,8 +164,6 @@ class NodeUrlHandler extends DendronNodeHander {
       : cOpts?.assetsPrefix;
     const NodeToHandle = node;
 
-    console.log({ node });
-
     if (!isWebUri(NodeToHandle.url)) {
       const url = _.trim(NodeToHandle.url, "/");
       NodeToHandle.url = (assetsPrefix ? assetsPrefix + "/" : "/") + url;
@@ -173,14 +171,6 @@ class NodeUrlHandler extends DendronNodeHander {
     return { node: NodeToHandle };
   }
 }
-
-/**
- * Handler for published markdown links.
- * This matches all vanilla markdown links [](),
- * check if the href is referencing a path (i.e. not a web address),
- * and if so correctly resolve the path so they point to the right location
- * when published.
- */
 
 function shouldInsertTitle({ proc }: { proc: Processor }) {
   const data = MDUtilsV5.getProcData(proc);

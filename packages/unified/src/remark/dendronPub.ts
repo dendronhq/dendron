@@ -18,7 +18,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import type { Image, Root } from "mdast";
+import type { Image, Link, Root } from "mdast";
 import { paragraph, text } from "mdast-builder";
 import Unified, { Processor, Transformer } from "unified";
 import { Node, Parent } from "unist";
@@ -134,34 +134,53 @@ abstract class DendronNodeHander {
   ) => boolean;
 }
 
-class ImageNodeHandler extends DendronNodeHander {
+/**
+ * Handles AST nodes that contain urls (i.e images, extended images, and links)
+ *
+ * Provides a matcher that could be used in the transformer so that a node could be
+ * matched for potential transformation.
+ *
+ * Handler takes the node and correct / resolves the url properly.
+ */
+class NodeUrlHandler extends DendronNodeHander {
   static match(node: Node | any, { pData }: DendronUnifiedHandlerMatchOpts) {
     return (
       (node.type === DendronASTTypes.IMAGE ||
-        node.type === DendronASTTypes.EXTENDED_IMAGE) &&
+        node.type === DendronASTTypes.EXTENDED_IMAGE ||
+        node.type === DendronASTTypes.LINK) &&
       pData.dest === DendronASTDest.HTML
     );
   }
 
   static handle(
-    node: Image,
+    node: Image | Link,
     { proc, cOpts }: DendronUnifiedHandlerHandleOpts<PluginOpts>
-  ): { node: Image; nextAction?: DendronUnifiedHandlerNextAction } {
+  ): { node: Image | Link; nextAction?: DendronUnifiedHandlerNextAction } {
     const { config } = MDUtilsV5.getProcData(proc);
     //handle assetPrefix
     const publishingConfig = ConfigUtils.getPublishingConfig(config);
     const assetsPrefix = MDUtilsV5.isV5Active(proc)
       ? publishingConfig.assetsPrefix
       : cOpts?.assetsPrefix;
-    const imageNode = node;
+    const NodeToHandle = node;
 
-    if (!isWebUri(imageNode.url)) {
-      const imageUrl = _.trim(imageNode.url, "/");
-      imageNode.url = (assetsPrefix ? assetsPrefix + "/" : "/") + imageUrl;
+    console.log({ node });
+
+    if (!isWebUri(NodeToHandle.url)) {
+      const url = _.trim(NodeToHandle.url, "/");
+      NodeToHandle.url = (assetsPrefix ? assetsPrefix + "/" : "/") + url;
     }
-    return { node: imageNode };
+    return { node: NodeToHandle };
   }
 }
+
+/**
+ * Handler for published markdown links.
+ * This matches all vanilla markdown links [](),
+ * check if the href is referencing a path (i.e. not a web address),
+ * and if so correctly resolve the path so they point to the right location
+ * when published.
+ */
 
 function shouldInsertTitle({ proc }: { proc: Processor }) {
   const data = MDUtilsV5.getProcData(proc);
@@ -542,8 +561,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       // The url correction needs to happen for both regular and extended images
-      if (ImageNodeHandler.match(node, { pData, pOpts })) {
-        const { nextAction } = ImageNodeHandler.handle(node as Image, {
+      if (NodeUrlHandler.match(node, { pData, pOpts })) {
+        const { nextAction } = NodeUrlHandler.handle(node as Image, {
           proc,
           parent,
           cOpts: opts,

@@ -5,7 +5,7 @@ import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
 import { PublishUtils, do_ } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
-import type { Sidebars, SidebarItem } from "../sidebars";
+import type { Sidebar, SidebarItem } from "../sidebars";
 
 export enum TreeMenuNodeIcon {
   bookOutlined = "bookOutlined",
@@ -43,7 +43,7 @@ export type TreeNode = {
 export class TreeUtils {
   static generateTreeData(
     noteDict: NotePropsByIdDict,
-    sidebars: Sidebars
+    sidebar: Sidebar
   ): TreeMenu {
     function itemToNoteId(item: SidebarItem) {
       const { type } = item;
@@ -124,37 +124,26 @@ export class TreeUtils {
       return treeMenuNode;
     }
 
-    const treeMenuMap = _.mapValues(sidebars, (sidebar) => {
-      const child2parent: { [key: string]: string | null } = {};
-      const notesLabelById: { [key: string]: string } = {};
+    const child2parent: { [key: string]: string | null } = {};
+    const notesLabelById: { [key: string]: string } = {};
 
-      const roots = sidebar
-        .map((sidebarItem) =>
-          itemToTreeMenuNode(sidebarItem, {
-            child2parent,
-            parent: null,
-            notesLabelById,
-          })
-        )
-        .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
-          Boolean(maybeTreeMenuNode)
-        );
+    const roots = sidebar
+      .map((sidebarItem) =>
+        itemToTreeMenuNode(sidebarItem, {
+          child2parent,
+          parent: null,
+          notesLabelById,
+        })
+      )
+      .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
+        Boolean(maybeTreeMenuNode)
+      );
 
-      return {
-        roots,
-        child2parent,
-        notesLabelById,
-      };
-    });
-
-    // for now we only support a single sidebar
-    return (
-      Object.values(treeMenuMap).at(0) ?? {
-        roots: [],
-        child2parent: {},
-        notesLabelById: {},
-      }
-    );
+    return {
+      roots,
+      child2parent,
+      notesLabelById,
+    };
   }
 
   static getAllParents = ({

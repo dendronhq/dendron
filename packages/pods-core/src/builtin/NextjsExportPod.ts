@@ -19,8 +19,8 @@ import {
   Theme,
   TreeUtils,
   getSidebars,
-  DisabledSidebars,
-  DefaultSidebars,
+  DisabledSidebar,
+  DefaultSidebar,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -242,16 +242,16 @@ export class NextjsExportPodUtils {
     sidebarFilePath: string | false | undefined | null
   ): Promise<unknown> {
     if (sidebarFilePath === false) {
-      return DisabledSidebars;
+      return DisabledSidebar;
     }
 
     if (_.isNil(sidebarFilePath)) {
-      return DefaultSidebars;
+      return DefaultSidebar;
     }
 
     // Non-existent sidebars file: no sidebars
     if (!(await fs.pathExists(sidebarFilePath))) {
-      return DisabledSidebars;
+      return DisabledSidebar;
     }
 
     /* eslint-disable-next-line import/no-dynamic-require, global-require */

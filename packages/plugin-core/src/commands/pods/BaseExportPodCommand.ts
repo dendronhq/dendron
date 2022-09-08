@@ -243,26 +243,17 @@ export abstract class BaseExportPodCommand<
    * Gets notes matching the selected hierarchy(for a specefic vault)
    * @returns
    */
-  private async getPropsForHierarchyScope(): Promise<
-    DNodeProps<any, any>[] | undefined
-  > {
-    return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {
-      this.hierarchySelector.getHierarchy().then((selection) => {
-        if (!selection) {
-          return resolve(undefined);
-        }
-        const { hierarchy, vault } = selection;
-        const notes = this.extension.getEngine().notes;
+  private async getPropsForHierarchyScope(): Promise<NoteProps[] | undefined> {
+    return this.hierarchySelector.getHierarchy().then(async (selection) => {
+      if (!selection) {
+        return undefined;
+      }
+      const { hierarchy, vault } = selection;
+      const notes = await this.extension
+        .getEngine()
+        .findNotes({ excludeStub: true, vault });
 
-        resolve(
-          Object.values(notes).filter(
-            (value) =>
-              value.fname.startsWith(hierarchy) &&
-              value.stub !== true &&
-              VaultUtils.isEqualV2(value.vault, vault)
-          )
-        );
-      });
+      return notes.filter((value) => value.fname.startsWith(hierarchy));
     });
   }
 

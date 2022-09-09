@@ -232,25 +232,23 @@ export class MarkdownExportPodV2
       previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
-    const config = {
-      ...overrideConfig,
-      usePrettyRefs: false,
-    };
     const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
-      input,
+      note,
       engine,
       config,
       engine.vaults
     );
 
     let remark = MDUtilsV5.procRemarkFull({
-      noteToRender: input,
+      noteToRender: note,
       noteCacheForRenderDict,
       dest: DendronASTDest.MD_REGULAR,
-      config,
-      fname: input.fname,
-      vault: input.vault,
-      vaults: engine.vaults,
+      config: {
+        ...config,
+        usePrettyRefs: false,
+      },
+      fname: note.fname,
+      vault: note.vault,
     });
     if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
       remark = remark.use(

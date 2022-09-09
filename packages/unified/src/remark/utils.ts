@@ -453,7 +453,6 @@ export class LinkUtils {
     const remark = MDUtilsV5.procRemarkParseFull(
       { flavor: ProcFlavor.REGULAR },
       {
-        // JYTODO: maybe Add noteCache data
         noteToRender: note,
         fname: note.fname,
         vault: note.vault,
@@ -1502,7 +1501,6 @@ export class RemarkUtils {
     config: IntermediateDendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
-      // JYTODO: Add render cache
       noteToRender: note,
       vault: note.vault,
       fname: note.fname,

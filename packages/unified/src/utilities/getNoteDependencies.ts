@@ -1,4 +1,6 @@
+/* eslint-disable no-await-in-loop */
 import {
+  DendronASTDest,
   DNodeCompositeKey,
   DVault,
   IntermediateDendronConfig,
@@ -7,6 +9,7 @@ import {
   NoteProps,
   NoteUtils,
   ReducedDEngine,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Data, Node } from "unist";
@@ -18,10 +21,30 @@ import {
   UserTag,
   WikiLinkNoteV4,
 } from "../types";
-import { ProcDataFullOptsV5 } from "../utilsv5";
-import { MDUtilsV5Web } from "../utilsWeb";
+import { MDUtilsV5 } from "../utilsv5";
 
-export async function getChildrenDependencies(
+export async function getHTMLRenderDependencyNoteCache(
+  noteToRender: NoteProps,
+  engine: ReducedDEngine,
+  config: IntermediateDendronConfig,
+  vaults: DVault[]
+): Promise<NoteDicts> {
+  let allData: NoteProps[] = [];
+
+  allData.push(
+    ...(await getForwardLinkDependencies(noteToRender, vaults, engine, config))
+  );
+
+  allData.push(...(await getBacklinkDependencies(noteToRender, engine)));
+  allData.push(...(await getChildrenDependencies(noteToRender, engine)));
+
+  allData = _.compact(allData);
+  allData = _.uniqBy(allData, (value) => value.id);
+
+  return NoteDictsUtils.createNoteDicts(allData);
+}
+
+async function getChildrenDependencies(
   noteToRender: NoteProps,
   engine: ReducedDEngine
 ): Promise<NoteProps[]> {
@@ -43,7 +66,7 @@ export async function getChildrenDependencies(
   return results;
 }
 
-export async function getBacklinkDependencies(
+async function getBacklinkDependencies(
   noteToRender: NoteProps,
   engine: ReducedDEngine
 ): Promise<NoteProps[]> {
@@ -62,73 +85,13 @@ export async function getBacklinkDependencies(
   return _.uniqBy(_.compact(results), (value) => value.id);
 }
 
-export async function getForwardLinkDependencies(
-  noteToRender: NoteProps,
-  engine: ReducedDEngine,
-  config: IntermediateDendronConfig,
-  vaults: DVault[]
-): Promise<NoteProps[]> {
-  const proc = MDUtilsV5Web.procRehypeWeb(
-    {
-      noteToRender,
-      fname: noteToRender.fname,
-      vault: noteToRender.vault,
-      config,
-    } as ProcDataFullOptsV5 // We need this cast to avoid sending in engine.
-  );
-
-  const serialized = NoteUtils.serialize(noteToRender);
-
-  const ast = proc.parse(serialized);
-
-  const renderDependencies = getNoteDependencies(ast);
-
-  // TODO: Also add in Note Ref Dependencies.
-
-  // TODO: Account for wildcard wikilink syntax. See gatherNoteRefs.
-
-  let allData: NoteProps[] = await Promise.all(
-    renderDependencies.map(async (note) => {
-      const vault = _.find(vaults, (vault) => vault.name === note.vaultName);
-      const notes = await engine.findNotes({ fname: note.fname, vault });
-      return notes[0];
-    })
-  );
-
-  allData = _.compact(allData);
-  allData = _.uniqBy(allData, (value) => value.id);
-
-  return allData;
-}
-
-export async function getHTMLRenderDependencyNoteCache(
-  noteToRender: NoteProps,
-  engine: ReducedDEngine,
-  config: IntermediateDendronConfig,
-  vaults: DVault[]
-): Promise<NoteDicts> {
-  let allData: NoteProps[] = [];
-
-  allData.push(
-    ...(await getForwardLinkDependencies(noteToRender, engine, config, vaults))
-  );
-
-  allData.push(...(await getBacklinkDependencies(noteToRender, engine)));
-  allData.push(...(await getChildrenDependencies(noteToRender, engine)));
-
-  allData = _.compact(allData);
-  allData = _.uniqBy(allData, (value) => value.id);
-
-  return NoteDictsUtils.createNoteDicts(allData);
-}
-
 /**
  * For a given AST, find all note dependencies whose data will be needed for
  * rendering.
  * @param ast the syntax tree to look for dependencies
  * @returns an array of fname-vault? combinations that this tree depends on.
  */
-export function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
+function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
   const renderDependencies: DNodeCompositeKey[] = [];
 
   visit(
@@ -136,7 +99,7 @@ export function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
     [DendronASTTypes.WIKI_LINK],
     (wikilink: WikiLinkNoteV4, _index) => {
       renderDependencies.push({
-        fname: wikilink.value,
+        fname: wikilink.value, //JYTODO: I think this is wrong for cross vault links.
         vaultName: wikilink.data.vaultName,
       });
     }
@@ -147,8 +110,8 @@ export function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
     [DendronASTTypes.REF_LINK_V2],
     (noteRef: NoteRefNoteV4, _index) => {
       renderDependencies.push({
-        fname: noteRef.value,
-        vaultName: noteRef.data.vaultName,
+        fname: noteRef.data.link.from.fname,
+        vaultName: noteRef.data.link.data.vaultName,
       });
     }
   );
@@ -175,9 +138,7 @@ export function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
  * @param ast the syntax tree to look for recursive dependencies
  * @returns an array of fname-vault? combinations that this tree depends on.
  */
-export function getRecursiveNoteDependencies(
-  ast: Node<Data>
-): DNodeCompositeKey[] {
+function getRecursiveNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
   const renderDependencies: DNodeCompositeKey[] = [];
 
   visit(
@@ -185,11 +146,92 @@ export function getRecursiveNoteDependencies(
     [DendronASTTypes.REF_LINK_V2],
     (noteRef: NoteRefNoteV4, _index) => {
       renderDependencies.push({
-        fname: noteRef.value,
-        vaultName: noteRef.data.vaultName,
+        fname: noteRef.data.link.from.fname,
+        vaultName: noteRef.data.link.data.vaultName,
       });
     }
   );
 
   return renderDependencies;
+}
+
+async function getForwardLinkDependencies(
+  noteToRender: NoteProps,
+  vaults: DVault[],
+  engine: ReducedDEngine,
+  config: IntermediateDendronConfig
+): Promise<NoteProps[]> {
+  const MAX_DEPTH = 3;
+
+  let curDepth = 1;
+
+  const allDependencies: DNodeCompositeKey[] = [];
+  let curDependencies: DNodeCompositeKey[] = [];
+
+  // Initialize curDependencies:
+  const proc = MDUtilsV5.procRemarkFull({
+    noteToRender,
+    fname: noteToRender.fname,
+    vault: noteToRender.vault,
+    config,
+    dest: DendronASTDest.MD_DENDRON,
+  });
+
+  const serialized = NoteUtils.serialize(noteToRender);
+  const ast = proc.parse(serialized);
+
+  allDependencies.push(...getNoteDependencies(ast));
+  curDependencies.push(...getRecursiveNoteDependencies(ast));
+
+  while (curDepth < MAX_DEPTH && curDependencies.length > 0) {
+    const newRecursiveDependencies: DNodeCompositeKey[] = [];
+
+    await Promise.all(
+      curDependencies.map(async (key) => {
+        const vault = key.vaultName
+          ? VaultUtils.getVaultByName({ vaults, vname: key.vaultName })
+          : noteToRender.vault;
+
+        const notes = await engine.findNotes({ fname: key.fname, vault });
+
+        notes.forEach((note) => {
+          const proc = MDUtilsV5.procRemarkFull({
+            noteToRender: note,
+            fname: note.fname,
+            vault: note.vault,
+            config,
+            dest: DendronASTDest.MD_DENDRON,
+          });
+
+          const serialized = NoteUtils.serialize(note);
+          const ast = proc.parse(serialized);
+
+          allDependencies.push(...getNoteDependencies(ast));
+          newRecursiveDependencies.push(...getRecursiveNoteDependencies(ast));
+        });
+      })
+    );
+
+    curDependencies = newRecursiveDependencies;
+    curDepth += 1;
+  }
+
+  // TODO: Account for wildcard wikilink syntax. See gatherNoteRefs.
+
+  let allData: NoteProps[] = [];
+
+  await Promise.all(
+    allDependencies.map(async (dependency) => {
+      const vault = dependency.vaultName
+        ? _.find(vaults, (vault) => vault.name === dependency.vaultName)
+        : undefined;
+      const notes = await engine.findNotes({ fname: dependency.fname, vault });
+      allData.push(...notes);
+    })
+  );
+
+  allData = _.compact(allData);
+  allData = _.uniqBy(allData, (value) => value.id);
+
+  return allData;
 }

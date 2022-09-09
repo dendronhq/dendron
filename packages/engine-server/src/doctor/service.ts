@@ -320,7 +320,6 @@ export class DoctorService implements Disposable {
             {
               dest: DendronASTDest.MD_DENDRON,
               noteToRender: note,
-              // engine, // JYTODO: Examine
               fname: note.fname,
               vault: note.vault,
               config: DConfig.readConfigSync(engine.wsRoot),
@@ -352,7 +351,6 @@ export class DoctorService implements Disposable {
             {
               dest: DendronASTDest.MD_DENDRON,
               noteToRender: note,
-              // engine, // JYTODO: Examine
               fname: note.fname,
               vault: note.vault,
               config: DConfig.readConfigSync(engine.wsRoot),

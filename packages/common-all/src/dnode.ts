@@ -1192,7 +1192,7 @@ export class NoteUtils {
     color: string;
     type: "configured" | "generated";
   } {
-    // JYTODO: Re-enable the ancestor color logic later
+    // TODO: Re-enable the ancestor color logic later
     // const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
     // for (const note of ancestors) {
     //   if (note.color) return { color: note.color, type: "configured" };

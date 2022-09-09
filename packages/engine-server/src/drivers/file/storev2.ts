@@ -783,7 +783,6 @@ export class FileStorage implements DStore {
     const _n = resp.data;
     const foundLinks = LinkUtils.findLinksFromBody({
       note: _n,
-      // engine: this.engine, // JYTODO: Examine
       filter: { loc: oldLoc },
       config: this.config,
     });

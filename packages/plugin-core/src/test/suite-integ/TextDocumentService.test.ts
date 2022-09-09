@@ -391,7 +391,9 @@ suite("TextDocumentService", function testSuite() {
           expect(updatedNote?.links).toEqual(note.links);
           expect(engine.notes[fname].links).toEqual(note.links);
           expect(updatedNote?.links.length).toEqual(2);
-          expect(updatedNote?.links[0].alias).toEqual("beta");
+          expect(updatedNote?.links[0].value).toEqual("beta");
+          expect(updatedNote?.links[0].type).toEqual("wiki");
+          expect(updatedNote?.links[0].alias).toEqual(undefined);
           expect(updatedNote?.links[0].position).toEqual({
             end: {
               column: 9,
@@ -405,7 +407,9 @@ suite("TextDocumentService", function testSuite() {
               offset: 0,
             },
           });
-          expect(updatedNote?.links[1].alias).toEqual("alpha");
+          expect(updatedNote?.links[1].value).toEqual("alpha");
+          expect(updatedNote?.links[1].type).toEqual("backlink");
+          expect(updatedNote?.links[1].alias).toEqual(undefined);
           expect(updatedNote?.links[1].position).toEqual({
             end: {
               column: 13,

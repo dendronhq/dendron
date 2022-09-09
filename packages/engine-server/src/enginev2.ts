@@ -708,7 +708,6 @@ export class DendronEngineV2 implements DEngine {
         });
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        // engine: this, JYTODO: Examine
         config: DConfig.readConfigSync(this.wsRoot, true),
       });
       if (opts.filterByAnchorType) {

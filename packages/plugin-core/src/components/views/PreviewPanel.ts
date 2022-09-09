@@ -333,6 +333,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         fname: note.fname,
         vault: note.vault,
         config: DConfig.readConfigSync(this._ext.getDWorkspace().wsRoot, true),
+        wsRoot: this._ext.getDWorkspace().wsRoot,
+        vaults: this._ext.getDWorkspace().vaults,
       });
       const tree = parser.parse(note.body);
       // ^preview-rewrites-images

@@ -14,6 +14,7 @@ import {
   IntermediateDendronConfig,
   isBlockAnchor,
   NoteDicts,
+  NoteDictsUtils,
   NoteProps,
   NoteUtils,
   RespV2,
@@ -423,8 +424,12 @@ export function convertNoteRefASTV2(
     // const { vaultName: vname } = link.data;
     const { fname } = link.from;
 
-    const data = noteCacheForRenderDict?.notesByFname[fname];
-    if (!data) {
+    let data;
+    if (noteCacheForRenderDict) {
+      data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict);
+      // data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict, vault);
+    }
+    if (!data || data.length === 0) {
       return {
         error: undefined,
         data: [
@@ -490,18 +495,17 @@ export function convertNoteRefASTV2(
       } else {
         // no need to apply publish rules, try to pick the one that is in same vault
 
-        const _note = _.find(data, (noteId) => {
-          const note = noteCacheForRenderDict.notesById[noteId];
+        const _note = _.find(data, (note) => {
           return VaultUtils.isEqual(note.vault, vaultFromProc, wsRoot);
         });
         if (_note) {
-          note = noteCacheForRenderDict.notesById[_note];
+          note = _note;
         } else {
-          note = noteCacheForRenderDict.notesById[data[0]]; // JYTODO: Not sure I understand this line
+          note = data[0];
         }
       }
     } else {
-      note = noteCacheForRenderDict.notesById[data[0]];
+      note = data[0];
     }
 
     const processedRefs = noteRefs.map((ref) => {

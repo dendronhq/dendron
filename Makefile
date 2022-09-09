@@ -32,5 +32,5 @@ build-plugin:
 	dendron dev prep_plugin && rm package.json
 	dendron dev package_plugin
 
-export-test:
+setup-nextjs-test:
 	cd test-workspace && npx dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"

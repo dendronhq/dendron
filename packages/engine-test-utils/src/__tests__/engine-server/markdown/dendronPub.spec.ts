@@ -126,12 +126,12 @@ function createProc({
 }
 
 describe("GIVEN dendronPub", () => {
-  const fnameAlpha = "alpha";
-  const fnameBeta = "beta";
+  const FNAME_ALPHA = "alpha";
+  const FNAME_BETA = "beta";
 
   describe("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
 
     describe("AND WHEN wikilink", () => {
       let resp: VFile;
@@ -152,8 +152,8 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN all links are rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
-        await verifyPublicLink(resp, fnameAlpha);
+        await verifyPublicLink(resp, FNAME_BETA);
+        await verifyPublicLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -203,7 +203,7 @@ describe("GIVEN dendronPub", () => {
   });
 
   describe("WHEN publish and private hierarchies", () => {
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
     const config = genPublishConfigWithPublicPrivateHierarchies();
 
     describe("AND WHEN noteRef", () => {
@@ -250,10 +250,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -277,10 +277,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
   });

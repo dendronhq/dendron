@@ -17,9 +17,9 @@ import {
   isBlockAnchor,
   NoteProps,
   NoteUtils,
+  ProcFlavor,
   RespV2,
   VaultUtils,
-  ProcFlavor,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading } from "mdast";
@@ -206,8 +206,9 @@ function attachParser(proc: Unified.Processor) {
       } else {
         const link = LinkUtils.parseNoteRef(linkMatch);
         // If the link is same file [[#header]], it's implicitly to the same file it's located in
-        if (link.from?.fname === "")
+        if (link.from?.fname === "") {
           link.from.fname = MDUtilsV5.getProcData(proc).fname;
+        }
         const { value } = LinkUtils.parseLink(linkMatch);
         const refNote: NoteRefNoteV4 = {
           type: DendronASTTypes.REF_LINK_V2,
@@ -368,17 +369,19 @@ export function convertNoteRefASTV2(
           : undefined;
 
         // publishing
-        if (
-          MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
-          !_.isUndefined(linkString)
-        ) {
-          return genRefAsIFrame({
-            proc,
-            link,
-            noteId: note.id,
-            content: data,
-            title,
-          });
+        if (MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING) {
+          if (!_.isUndefined(linkString)) {
+            return genRefAsIFrame({
+              proc,
+              link,
+              noteId: note.id,
+              content: data,
+              title,
+            });
+          } else {
+            // todo
+            return paragraph();
+          }
         }
 
         return renderPrettyAST({
@@ -996,6 +999,8 @@ const genRefAsIFrame = ({
 }) => {
   const refId = getRefId({ id: noteId, link });
   MDUtilsV5.serializeRefId(proc, { refId: { id: noteId, link }, content });
+
+  // maybe don't wrap in paragraph
   return paragraph(
     html(
       `<iframe src="/refs/${refId}" title="Reference to the note called ${title}">Your browser does not support iframes.</iframe>`

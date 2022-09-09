@@ -4,6 +4,8 @@ import {
   DEngineClient,
   DVault,
   DVaultVisibility,
+  IntermediateDendronConfig,
+  ProcFlavor,
   PublishUtils,
   VaultUtils,
   WorkspaceOpts,
@@ -19,10 +21,12 @@ import {
   checkDir,
   checkFile,
   checkNotInDir,
+  checkString,
   TestUnifiedUtils,
 } from "../../utils";
 import fs from "fs-extra";
 import _ from "lodash";
+import { MDUtilsV5, VFile } from "@dendronhq/unified";
 
 async function setupExport(
   opts: WorkspaceOpts & {
@@ -590,6 +594,7 @@ describe("nextjs export", () => {
         expect,
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
+
           TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
@@ -642,49 +647,139 @@ describe("nextjs export", () => {
   });
 });
 
-// fdescribe("setupLinks data set", () => {
-//   test("Private Links", async () => {
-//     await runEngineTestV5(
-//       async ({ engine, vaults, wsRoot }) => {
-//         const dest = await setupExport({ engine, wsRoot, vaults });
+const fnameBeta = "beta";
+const fname = fnameBeta;
 
-//         await verifyExport(dest);
-//         await verifyExportedAssets(dest);
-//         await checkDir({ fpath: path.join(dest, "data") }, "refs.json");
-//         await checkFile(
-//           {
-//             fpath: path.join(
-//               dest,
-//               "data",
-//               "refs.json",
-//             ),
-//           },
-//           "iframe",
-//         );
-//       },
-//       {
-//         expect,
-//         preSetupHook: async (opts) => {
-//           await ENGINE_HOOKS.setupLinks(opts);
-//           await createAssetsInVault({
-//             wsRoot: opts.wsRoot,
-//             vault: opts.vaults[0],
-//           });
-//           setupConfig({
-//             ...opts,
-//             siteConfig: {
-//               siteHierarchies: [
-//                 "beta",
-//               ],
-//             },
-//           });
-//         },
-//       },
-//     );
+function createProc({
+  vaults,
+  engine,
+  linkText,
+  fname,
+  config,
+}: WorkspaceOpts & {
+  engine: DEngineClient;
+  linkText: string;
+  fname: string;
+  config: IntermediateDendronConfig;
+}) {
+  const vault = vaults[0];
+
+  const proc = MDUtilsV5.procRehypeFull(
+    {
+      engine,
+      fname,
+      vault,
+      config,
+    },
+    { flavor: ProcFlavor.PUBLISHING }
+  );
+  return proc.process(linkText);
+}
+
+function genPublishConfigWithPublicPrivateHierarchies() {
+  const config = ConfigUtils.genDefaultConfig();
+  ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);
+  return config;
+}
+
+// const config = genPublishConfigWithPublicPrivateHierarchies();
+
+// function verifyPublicNoteRef(resp: VFile, match: string) {
+//   // example: <a href=\\"/notes/beta\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+//   // return checkString(resp.contents as string, `<a href="/notes/${match}">`);
+//   return checkString(
+//     resp.contents as string,
+//     `<a href="/notes/${match}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`,
+//   );
+// }
+
+// const verifyPrivateLink = async (
+//   vfile: VFile,
+//   value: string,
+//   capitalize = true,
+// ) => {
+//   return TestUnifiedUtils.verifyPrivateLink({
+//     contents: vfile.contents as string,
+//     value: capitalize ? _.capitalize(value) : value,
 //   });
-// });
+// };
 
-// todo rewrite this test.
+describe("AND WHEN noteref of published note", () => {
+  let dest: any;
+  beforeAll(async () => {
+    await runEngineTestV5(
+      async (opts) => {
+        let { engine, wsRoot, vaults } = opts;
+        dest = await setupExport({ engine, wsRoot, vaults });
+      },
+      {
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupLinks(opts);
+
+          await NoteTestUtilsV4.createNote({
+            wsRoot: opts.wsRoot,
+            body: "[[beta]] ![[beta]]\n\nalpha [[alpha]] ![[alpha]]\n\n[[omega]] ![[omega]]",
+            fname: "omega",
+            vault: opts.vaults[0],
+          });
+          setupConfig({
+            ...opts,
+            siteConfig: { siteHierarchies: ["omega"] },
+          });
+        },
+        expect,
+      }
+    );
+  });
+
+  // needs
+  test("THEN published note is rendered", async () => {
+    await verifyExport(dest);
+    // espect not this:
+    // await checkDir(
+    //   { fpath: path.join(dest, "data", "notes") },
+    //   "alpha.html",
+    // );
+    // check the contents of alpha.html...
+    // await checkFile(
+    //   { fpath: path.join(dest, "data", "notes", "alpha.html") },
+    //   `href="#alpha"`,
+    // );
+
+    await checkDir(
+      { fpath: path.join(dest, "data", "refs") },
+      "omega---0.html"
+    );
+    await checkFile(
+      { fpath: path.join(dest, "data", "refs", "omega---0.html") },
+      `href="alpha"`
+    );
+
+    await checkFile(
+      { fpath: path.join(dest, "data", "refs", "omega---0.html") },
+      `private`
+    );
+
+    // await checkFile(
+    //   { fpath: path.join(dest, "data", "notes", "omega.html") },
+    //   `failing`,
+    // );
+
+    // await checkDir(
+    //   { fpath: path.join(dest, "data", "refs") },
+    //   "alpha---0.html",
+    // );
+    // Old way:
+    // await verifyPublicNoteRef(resp, "beta");
+    // New way:
+    // get contents of the beta--0 reference?
+    // content of alpha should be private?
+  });
+  // xtest("THEN private link in published note is hidden", async () => {
+  //   await verifyPrivateLink(resp, "alpha");
+  // });
+});
+
 // describe("AND WHEN noteref of published note", () => {
 //   let resp: VFile;
 //   beforeAll(async () => {
@@ -693,7 +788,7 @@ describe("nextjs export", () => {
 //         resp = await createProc({
 //           ...opts,
 //           config,
-//           fname,
+//           fname: "beta",
 //           linkText: `![[beta]]`,
 //         });
 //       },
@@ -704,9 +799,13 @@ describe("nextjs export", () => {
 //     );
 //   });
 //   test("THEN published note is rendered", async () => {
-//     // await verifyPublicNoteRef(resp, fnameBeta);
+//     // Old way:
+//     // await verifyPublicNoteRef(resp, "beta");
+//     // New way:
+//     // get contents of the beta--0 reference?
+//     // content of alpha should be private?
 //   });
-//   test("THEN private link in published note is hidden", async () => {
-//     // await verifyPrivateLink(resp, fnameAlpha);
+//   xtest("THEN private link in published note is hidden", async () => {
+//     await verifyPrivateLink(resp, "alpha");
 //   });
 // });

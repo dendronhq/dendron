@@ -3,6 +3,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   createSerializedFuseNoteIndex,
+  DendronASTDest,
   DendronError,
   DendronPublishingConfig,
   DendronSiteConfig,
@@ -18,7 +19,6 @@ import {
   RespV3,
   Theme,
   TreeUtils,
-  DendronASTDest,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -27,10 +27,10 @@ import {
 } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
 import {
+  getRefId,
   MDUtilsV5,
   ProcFlavor,
   SerializedNoteRef,
-  getRefId,
   UnistNode,
 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
@@ -297,6 +297,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     node: UnistNode;
     engineConfig: IntermediateDendronConfig;
   }) {
+    // turn the file to markdown?
     const proc = MDUtilsV5.procRemarkFull({
       dest: DendronASTDest.MD_DENDRON,
       engine,
@@ -306,6 +307,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       notes,
     });
     const out = proc.stringify(node);
+    // turn the file to note?
     const proc2 = MDUtilsV5.procRehypeFull(
       {
         engine,

@@ -468,12 +468,7 @@ export class ErrorFuncUtils {
         return { data: fn(...args) };
       } catch (error) {
         return {
-          error: DendronError.isDendronError(error)
-            ? error
-            : DendronError.createFromStatus({
-                message: "Error when processing sidebarItem",
-                status: ERROR_STATUS.INVALID_CONFIG,
-              }),
+          error: ErrorFactory.wrapIfNeeded(error),
         };
       }
     };

@@ -32,11 +32,11 @@ suite("WHEN syncing schema", function () {
             .then(async (editor) => {
               await editor.edit((editBuilder) => {
                 /**
-								 * Results in the following text
-									- id: ch1
-										children: [{pattern: one}]
-										title: ch1
-								 */
+                 * Results in the following text
+                 * - id: ch1
+                 * 	children: [{pattern: one}]
+                 * 	title: ch1
+                 */
                 return editBuilder.insert(
                   new vscode.Position(9, 15),
                   "{pattern: one}"

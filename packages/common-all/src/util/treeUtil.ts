@@ -5,7 +5,7 @@ import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
 import { PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
-import type { Sidebar, SidebarItem } from "../sidebars";
+import type { Sidebar, SidebarItem } from "../sidebar";
 
 export enum TreeMenuNodeIcon {
   bookOutlined = "bookOutlined",

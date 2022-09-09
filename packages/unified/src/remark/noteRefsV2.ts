@@ -272,6 +272,52 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
 
 const MAX_REF_LVL = 3;
 
+// export function processRefFromAST(opts: {
+//   node: Parent;
+//   note: NoteProps;
+//   config: IntermediateDendronConfig;
+//   ref: DNoteLoc;
+//   proc: Processor;
+// // }) {
+//   const procData = MDUtilsV5.getProcData(opts.proc);
+//   const { noteRefLvl: refLvl } = procData;
+//   if (refLvl >= MAX_REF_LVL) {
+//     return {
+//       error: new DendronError({ message: "too many nested note refs" }),
+//       data: [MdastUtils.genMDErrorMsg("too many nested note refs")],
+//     };
+//   }
+
+//   let href = opts.note.id;
+//   const title = getTitle({
+//     config: opts.config,
+//     note: opts.note,
+//     loc: opts.ref,
+//     shouldApplyPublishRules: false,
+//   });
+//   const suffix = "";
+
+//   // check if we're at the index note
+//   if (opts.note.custom.permalink === "/") {
+//     href = "";
+//   }
+
+//   const isPublished = SiteUtils.isPublished({
+//     note: opts.note,
+//     config: opts.config,
+//     // fake engine
+//     engine: {} as DEngineClient,
+//   });
+//   const linkString = isPublished
+//     ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
+//     : undefined;
+//     return renderPrettyAST({
+//       content: opts.node,
+//       title,
+//       link: linkString,
+//     });
+// }
+
 // ^m0vy37pdpzgy
 /**
  * This exists because {@link dendronPub} converts note refs using the AST
@@ -369,7 +415,10 @@ export function convertNoteRefASTV2(
           : undefined;
 
         // publishing
-        if (MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING) {
+        if (
+          MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
+          !procData.insideNoteRef
+        ) {
           return genRefAsIFrame({
             proc,
             link,
@@ -605,7 +654,7 @@ function removeSingleItemNestedLists(nodes: ParentWithIndex[]): void {
   }
 }
 
-function prepareNoteRefIndices<T>({
+export function prepareNoteRefIndices<T>({
   anchorStart,
   anchorEnd,
   bodyAST,

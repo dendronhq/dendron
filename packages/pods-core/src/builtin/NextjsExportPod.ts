@@ -32,6 +32,7 @@ import {
   ProcFlavor,
   SerializedNoteRef,
   UnistNode,
+  convertNoteRefASTV2,
 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
@@ -581,7 +582,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     // render refs
     const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
     fs.ensureDirSync(refsRoot);
-    const refIds: string[] = await Promise.all(
+
+    const refIds: { id: string; refString: string }[] = await Promise.all(
       fs.readdirSync(refsRoot).map(async (ent) => {
         const { node, refId } = fs.readJSONSync(
           path.join(refsRoot, ent)
@@ -593,13 +595,44 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         if (!noteForRef) {
           throw Error(`no note found for ${JSON.stringify(refId)}`);
         }
-        const out = await this._renderRef({
-          engine,
-          note: noteForRef,
-          node,
-          engineConfig,
-          notes: publishedNotes,
+
+        const proc = MDUtilsV5.procRehypeFull(
+          {
+            engine,
+            fname: noteForRef.fname,
+            vault: noteForRef.vault,
+            config,
+            insideNoteRef: true,
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        );
+
+        const assetsPrefix = ConfigUtils.getPublishing(config).assetsPrefix;
+        MDUtilsV5.setNoteRefLvl(proc, 1);
+        const { data } = convertNoteRefASTV2({
+          proc,
+          link: refId.link,
+          procOpts: MDUtilsV5.getProcOpts(proc),
+          compilerOpts: {
+            wikiLinkOpts: {
+              prefix: assetsPrefix ? assetsPrefix + "/notes/" : "/notes/",
+            },
+          },
         });
+        if (!data) {
+          throw Error(`no note ref extracted for ${JSON.stringify(refId)}`);
+        }
+        const out = data
+          .map((ent) => proc.stringify(proc.runSync(ent)))
+          .join("\n");
+
+        // const out = await this._renderRef({
+        //   engine,
+        //   note: noteForRef,
+        //   node,
+        //   engineConfig,
+        //   notes: publishedNotes,
+        // });
         const refIdString = getRefId(refId);
         const dst = path.join(notesRefsDir, refIdString + ".html");
         this.L.debug({ ctx, dst, msg: "writeNote" });

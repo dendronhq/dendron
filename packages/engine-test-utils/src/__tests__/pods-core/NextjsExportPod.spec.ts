@@ -534,7 +534,7 @@ describe("nextjs export", () => {
     );
   });
 
-  describe.only("noterefs", () => {
+  describe("noterefs", () => {
     test("WHEN note ref of a private note ", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
@@ -544,14 +544,8 @@ describe("nextjs export", () => {
             vaults,
           });
 
-          // verifyExport(dest);
-          await checkDir({ fpath: path.join(dest, "data"), snapshot: true });
-          await checkDir({
-            fpath: path.join(dest, "data", "refs"),
-            snapshot: true,
-          });
-          await checkDir({
-            fpath: path.join(dest, "data", "notes"),
+          await checkFile({
+            fpath: path.join(dest, "data", "refs.json"),
             snapshot: true,
           });
 
@@ -559,7 +553,6 @@ describe("nextjs export", () => {
             fpath: path.join(dest, "data", "refs", "private---0.html"),
             snapshot: true,
           });
-          expect("bond").toMatchSnapshot();
         },
         {
           expect,
@@ -576,14 +569,6 @@ describe("nextjs export", () => {
                 "\n"
               ),
             });
-
-            // await NoteTestUtilsV4.createNote({
-            //   fname: "beta.reference",
-            //   vault,
-            //   wsRoot,
-            //   body: ["- [[beta]]", "- [[alpha]]"].join("\n"),
-            // });
-
             await NoteTestUtilsV4.createNote({
               fname: "public",
               vault,
@@ -597,6 +582,130 @@ describe("nextjs export", () => {
               body: ["one"].join("\n"),
             });
 
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot }
+            );
+          },
+        }
+      );
+    });
+
+    test("WHEN note ref of a note with anchor ", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({
+            engine,
+            wsRoot,
+            vaults,
+          });
+          await checkFile(
+            {
+              fpath: path.join(dest, "data", "refs", "private-anchor2--0.html"),
+              snapshot: true,
+              nomatch: ["anchor 1 content"],
+            },
+            "anchor 2 content"
+          );
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            // await ENGINE_HOOKS.setupBasic(opts);
+            const vault = opts.vaults[0];
+            const wsRoot = opts.wsRoot;
+            await NoteTestUtilsV4.createNote({
+              fname: "private",
+              vault,
+              wsRoot,
+              body: [
+                "# anchor1",
+                "anchor 1 content",
+                "- [[public]]",
+                "- [[private]]",
+                "- [[public.one]]",
+                "# anchor2",
+                "anchor 2 content",
+              ].join("\n"),
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "public",
+              vault,
+              wsRoot,
+              body: ["![[private#anchor2]]"].join("\n"),
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "public.one",
+              vault,
+              wsRoot,
+              body: ["one", "![[private#anchor2]]"].join("\n"),
+            });
+
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot }
+            );
+          },
+        }
+      );
+    });
+
+    test("WHEN note ref of a note that references itself", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({
+            engine,
+            wsRoot,
+            vaults,
+          });
+
+          // await checkDir({
+          //   fpath: path.join(dest, "data", "refs"),
+          //   snapshot: true,
+          //   msg: "BOND1",
+          // });
+
+          await checkFile(
+            {
+              fpath: path.join(dest, "data", "refs", "public---0.html"),
+              snapshot: true,
+            },
+            "too many nested note refs",
+            "public content"
+          );
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            // await ENGINE_HOOKS.setupBasic(opts);
+            const vault = opts.vaults[0];
+            const wsRoot = opts.wsRoot;
+            await NoteTestUtilsV4.createNote({
+              fname: "public",
+              vault,
+              wsRoot,
+              body: ["public content", "![[public]]"].join("\n"),
+            });
             TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
@@ -729,166 +838,3 @@ describe("nextjs export", () => {
     );
   });
 });
-
-const fnameBeta = "beta";
-const fname = fnameBeta;
-
-function createProc({
-  vaults,
-  engine,
-  linkText,
-  fname,
-  config,
-}: WorkspaceOpts & {
-  engine: DEngineClient;
-  linkText: string;
-  fname: string;
-  config: IntermediateDendronConfig;
-}) {
-  const vault = vaults[0];
-
-  const proc = MDUtilsV5.procRehypeFull(
-    {
-      engine,
-      fname,
-      vault,
-      config,
-    },
-    { flavor: ProcFlavor.PUBLISHING }
-  );
-  return proc.process(linkText);
-}
-
-function genPublishConfigWithPublicPrivateHierarchies() {
-  const config = ConfigUtils.genDefaultConfig();
-  ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);
-  return config;
-}
-
-// const config = genPublishConfigWithPublicPrivateHierarchies();
-
-// function verifyPublicNoteRef(resp: VFile, match: string) {
-//   // example: <a href=\\"/notes/beta\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-//   // return checkString(resp.contents as string, `<a href="/notes/${match}">`);
-//   return checkString(
-//     resp.contents as string,
-//     `<a href="/notes/${match}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`,
-//   );
-// }
-
-// const verifyPrivateLink = async (
-//   vfile: VFile,
-//   value: string,
-//   capitalize = true,
-// ) => {
-//   return TestUnifiedUtils.verifyPrivateLink({
-//     contents: vfile.contents as string,
-//     value: capitalize ? _.capitalize(value) : value,
-//   });
-// };
-
-describe("AND WHEN noteref of published note", () => {
-  let dest: any;
-  beforeAll(async () => {
-    await runEngineTestV5(
-      async (opts) => {
-        let { engine, wsRoot, vaults } = opts;
-        dest = await setupExport({ engine, wsRoot, vaults });
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupLinks(opts);
-
-          await NoteTestUtilsV4.createNote({
-            wsRoot: opts.wsRoot,
-            body: "[[beta]] ![[beta]]\n\nalpha [[alpha]] ![[alpha]]\n\n[[omega]] ![[omega]]",
-            fname: "omega",
-            vault: opts.vaults[0],
-          });
-          setupConfig({
-            ...opts,
-            siteConfig: { siteHierarchies: ["omega"] },
-          });
-        },
-        expect,
-      }
-    );
-  });
-
-  // needs
-  test("THEN published note is rendered", async () => {
-    await verifyExport(dest);
-    // espect not this:
-    // await checkDir(
-    //   { fpath: path.join(dest, "data", "notes") },
-    //   "alpha.html",
-    // );
-    // check the contents of alpha.html...
-    // await checkFile(
-    //   { fpath: path.join(dest, "data", "notes", "alpha.html") },
-    //   `href="#alpha"`,
-    // );
-
-    await checkDir(
-      { fpath: path.join(dest, "data", "refs") },
-      "omega---0.html"
-    );
-    await checkFile(
-      { fpath: path.join(dest, "data", "refs", "omega---0.html") },
-      `href="alpha"`
-    );
-
-    await checkFile(
-      { fpath: path.join(dest, "data", "refs", "omega---0.html") },
-      `private`
-    );
-
-    // await checkFile(
-    //   { fpath: path.join(dest, "data", "notes", "omega.html") },
-    //   `failing`,
-    // );
-
-    // await checkDir(
-    //   { fpath: path.join(dest, "data", "refs") },
-    //   "alpha---0.html",
-    // );
-    // Old way:
-    // await verifyPublicNoteRef(resp, "beta");
-    // New way:
-    // get contents of the beta--0 reference?
-    // content of alpha should be private?
-  });
-  // xtest("THEN private link in published note is hidden", async () => {
-  //   await verifyPrivateLink(resp, "alpha");
-  // });
-});
-
-// describe("AND WHEN noteref of published note", () => {
-//   let resp: VFile;
-//   beforeAll(async () => {
-//     await runEngineTestV5(
-//       async (opts) => {
-//         resp = await createProc({
-//           ...opts,
-//           config,
-//           fname: "beta",
-//           linkText: `![[beta]]`,
-//         });
-//       },
-//       {
-//         preSetupHook: ENGINE_HOOKS.setupLinks,
-//         expect,
-//       },
-//     );
-//   });
-//   test("THEN published note is rendered", async () => {
-//     // Old way:
-//     // await verifyPublicNoteRef(resp, "beta");
-//     // New way:
-//     // get contents of the beta--0 reference?
-//     // content of alpha should be private?
-//   });
-//   xtest("THEN private link in published note is hidden", async () => {
-//     await verifyPrivateLink(resp, "alpha");
-//   });
-// });

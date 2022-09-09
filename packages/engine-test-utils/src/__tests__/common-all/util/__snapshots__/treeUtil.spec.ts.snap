@@ -42,17 +42,8 @@ Object {
 }
 `;
 
-exports[`WHEN has_collection enabled AND nav_children_exclude set to false THEN return only root 1`] = `
+exports[`GIVEN sidebar WHEN has_collection enabled AND nav_children_exclude set to false THEN return only root 1`] = `
 Array [
-  Object {
-    "children": Array [],
-    "hasTitleNumberOutlined": false,
-    "icon": null,
-    "key": "bar",
-    "navExclude": false,
-    "title": "Bar",
-    "vaultName": "vault1",
-  },
   Object {
     "children": Array [],
     "hasTitleNumberOutlined": false,
@@ -65,17 +56,8 @@ Array [
 ]
 `;
 
-exports[`WHEN has_collection enabled THEN return only root 1`] = `
+exports[`GIVEN sidebar WHEN has_collection enabled THEN return only root 1`] = `
 Array [
-  Object {
-    "children": Array [],
-    "hasTitleNumberOutlined": false,
-    "icon": null,
-    "key": "bar",
-    "navExclude": false,
-    "title": "Bar",
-    "vaultName": "vault1",
-  },
   Object {
     "children": Array [],
     "hasTitleNumberOutlined": false,
@@ -88,17 +70,8 @@ Array [
 ]
 `;
 
-exports[`WHEN nav_exclude_children enabled THEN return only root 1`] = `
+exports[`GIVEN sidebar WHEN nav_exclude_children enabled THEN return only root 1`] = `
 Array [
-  Object {
-    "children": Array [],
-    "hasTitleNumberOutlined": false,
-    "icon": null,
-    "key": "bar",
-    "navExclude": false,
-    "title": "Bar",
-    "vaultName": "vault1",
-  },
   Object {
     "children": Array [],
     "hasTitleNumberOutlined": false,
@@ -111,17 +84,8 @@ Array [
 ]
 `;
 
-exports[`WHEN regular tree THEN return regular tree 1`] = `
+exports[`GIVEN sidebar WHEN regular tree THEN return regular tree 1`] = `
 Array [
-  Object {
-    "children": Array [],
-    "hasTitleNumberOutlined": false,
-    "icon": null,
-    "key": "bar",
-    "navExclude": false,
-    "title": "Bar",
-    "vaultName": "vault1",
-  },
   Object {
     "children": Array [
       Object {

@@ -25,6 +25,7 @@ export enum ShowcaseEntry {
   BacklinksPanelHover = "BacklinksPanelHover",
   ObsidianImport = "ObsidianImport",
   SettingsUI = "SettingsUI",
+  CreateScratchNoteKeybindingTip = "CreateScratchNoteKeybindingTip",
 }
 
 /**

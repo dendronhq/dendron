@@ -29,8 +29,9 @@ export class CreateScratchNoteKeybindingTip implements IFeatureShowcaseMessage {
   }
 
   onConfirm() {
-    // TODO: get actual link
-    VSCodeUtils.openLink("https://wiki.dendron.so");
+    VSCodeUtils.openLink(
+      "https://wiki.dendron.so/notes/50kdbcwwda3gphjhccb0e5t"
+    );
   }
 
   get confirmText(): string {

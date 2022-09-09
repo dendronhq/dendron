@@ -71,6 +71,7 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
+import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -353,7 +354,14 @@ export async function _activate(
         const ONE_MINUTE_IN_MS = 60_000;
         setTimeout(() => {
           const showcase = new FeatureShowcaseToaster();
-          showcase.showToast();
+          // Temporarily show the new toast instead of the rest.
+          // for subsequent sessions this will not be shown as it already has been shown.
+          const hasShown = showcase.showSpecificToast(
+            new CreateScratchNoteKeybindingTip()
+          );
+          if (!hasShown) {
+            showcase.showToast();
+          }
         }, ONE_MINUTE_IN_MS);
       }
     } else {

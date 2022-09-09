@@ -394,7 +394,6 @@ export const resolveCompletionItem = sentryReportingCallback(
         {
           noteToRender: note,
           dest: DendronASTDest.MD_REGULAR,
-          // engine, // JYTODO: Add data
           vault: note.vault,
           fname: note.fname,
           config: DConfig.readConfigSync(engine.wsRoot, true),

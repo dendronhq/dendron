@@ -1,10 +1,7 @@
 import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import {
-  getHTMLRenderDependencyNoteCache,
-  MDUtilsV5,
-} from "@dendronhq/unified";
+import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { runEngineTestV5, TestConfigUtils } from "../../..";
 
 describe("backlinks", () => {
@@ -17,7 +14,7 @@ describe("backlinks", () => {
           const noteToRender = (
             await engine.findNotes({ fname: "tags.test", vault })
           )[0];
-          const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+          const noteCacheForRenderDict = await getParsingDependencyDicts(
             noteToRender,
             engine,
             config,
@@ -82,7 +79,7 @@ describe("backlinks", () => {
           const noteToRender = (
             await engine.findNotes({ fname: "tags.test", vault })
           )[0];
-          const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+          const noteCacheForRenderDict = await getParsingDependencyDicts(
             noteToRender,
             engine,
             config,
@@ -160,7 +157,7 @@ describe("backlinks", () => {
         const noteToRender = (
           await engine.findNotes({ fname: "tags.test", vault })
         )[0];
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           noteToRender,
           engine,
           config,

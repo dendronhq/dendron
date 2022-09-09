@@ -87,23 +87,14 @@ export type ProcOptsV5 = {
 
 /**
  * Data to initialize the processor
- *
- * @remark You might have picked up that there is a large overlap between optional properties in `ProcData` and what is available with a `Engine`.
- * This is because depending on what `ProcMode` the processor is operating on, we might not have (or need) access to an `engine`
- * instance (eg. when running a doctor command to check for valid markdown syntax )
- * The additional options are also there as an override - letting us override specific engine props without mutating the engine.
  */
 export type ProcDataFullOptsV5 = {
-  // engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
   config: IntermediateDendronConfig;
   vaults?: DVault[];
-  /**
-   * Supply alternative dictionary of notes to use when resolving note ids
-   */
-  // notes?: NotePropsByIdDict;
+
   /**
    * Check to see if we are in a note reference.
    */
@@ -115,9 +106,7 @@ export type ProcDataFullOptsV5 = {
   wikiLinksOpts?: WikiLinksOpts;
   publishOpts?: DendronPubOpts;
   backlinkHoverOpts?: BacklinkOpts;
-} & {
   wsRoot?: string;
-} & {
   noteToRender: NoteProps;
   noteCacheForRenderDict?: NoteDicts;
 };
@@ -127,7 +116,6 @@ export type ProcDataFullOptsV5 = {
  */
 export type ProcDataFullV5 = {
   // main properties that are configured when processor is created
-  // engine: DEngineClient;
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
@@ -137,7 +125,6 @@ export type ProcDataFullV5 = {
   // derived: unless passed in, these come from engine or are set by
   // other unified plugins
   config: IntermediateDendronConfig;
-  // notes?: NotePropsByIdDict;
   insideNoteRef?: boolean;
 
   fm?: any;
@@ -147,7 +134,6 @@ export type ProcDataFullV5 = {
   noteRefLvl: number;
 
   noteToRender: NoteProps;
-  // noteCacheForRender?: NoteProps[];
   noteCacheForRenderDict?: NoteDicts;
 };
 
@@ -190,7 +176,6 @@ export class MDUtilsV5 {
 
   static setProcData(proc: Processor, opts: Partial<ProcDataFullV5>) {
     const _data = proc.data("dendronProcDatav5") as ProcDataFullV5;
-    // const notes = _.isUndefined(opts.notes) ? opts?.engine?.notes : opts.notes;
     return proc.data("dendronProcDatav5", { ..._data, ...opts });
   }
 
@@ -277,9 +262,6 @@ export class MDUtilsV5 {
               )} missing`,
             });
           }
-          // if (!data.wsRoot) {
-          //   data.wsRoot = data.engine!.wsRoot;
-          // }
           const note = data.noteToRender;
 
           if (!_.isUndefined(note)) {
@@ -366,9 +348,6 @@ export class MDUtilsV5 {
             )} missing`,
           });
         }
-        // if (!data.wsRoot) {
-        //   data.wsRoot = data.engine!.wsRoot;
-        // }
 
         // backwards compatibility, default to v4 values
         this.setProcData(proc, data as ProcDataFullV5);

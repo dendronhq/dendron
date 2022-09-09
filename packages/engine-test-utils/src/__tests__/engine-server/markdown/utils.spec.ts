@@ -59,10 +59,6 @@ async function createProc(
 ) {
   const { engine, vaults, wsRoot, extra } = opts;
 
-  // const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
-  //   (await engine.getNote("foo")).data!,
-  // ]);
-
   const procData = _.defaults(procOverride, {
     noteToRender: (await engine.getNote("foo")).data!,
     dest: extra.dest,
@@ -292,7 +288,6 @@ const NOTE_W_LINK_AND_SPACE = createProcTests({
     const noteToRender = (await opts.engine.getNote("foo-id")).data!;
     const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
       noteToRender,
-      // (await opts.engine.getNote("bar")).data!,
     ]);
 
     const proc = await createProc(opts, {

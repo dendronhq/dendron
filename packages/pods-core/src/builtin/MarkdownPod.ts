@@ -17,7 +17,7 @@ import {
   DendronASTDest,
   DendronASTNode,
   DendronASTTypes,
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
   Image,
   Link,
   MDUtilsV5,
@@ -548,7 +548,7 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     const { engine, note, config, dendronConfig } = opts;
     const { wikiLinkToURL = false } = config;
 
-    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       engine,
       config,

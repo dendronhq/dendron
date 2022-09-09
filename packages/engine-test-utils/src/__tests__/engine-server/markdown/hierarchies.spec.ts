@@ -10,7 +10,7 @@ import {
 import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
   MDUtilsV5,
   ProcDataFullOptsV5,
 } from "@dendronhq/unified";
@@ -44,7 +44,7 @@ describe("hierarchies", () => {
       const noteToRender = (
         await engine.findNotes({ fname: "foo", vault: vaults[0] })
       )[0];
-      const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      const noteCacheForRenderDict = await getParsingDependencyDicts(
         noteToRender,
         engine,
         config,
@@ -191,7 +191,7 @@ describe("hierarchies", () => {
       const noteToRender = (
         await engine.findNotes({ fname: "foo", vault: vaults[0] })
       )[0];
-      const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      const noteCacheForRenderDict = await getParsingDependencyDicts(
         noteToRender,
         engine,
         config,
@@ -237,7 +237,7 @@ describe("hierarchies", () => {
       const noteToRender = (
         await engine.findNotes({ fname: "daily", vault: vaults[0] })
       )[0];
-      const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+      const noteCacheForRenderDict = await getParsingDependencyDicts(
         noteToRender,
         engine,
         config,

@@ -36,7 +36,6 @@ function proc({
   wsRoot,
 }: {
   noteToRender: NoteProps;
-  // engine: DEngineClient,
   dendron: DendronASTData;
   opts?: DendronPubOpts;
   flavor?: ProcFlavor;
@@ -139,9 +138,7 @@ async function createProc({
 
   const proc = MDUtilsV5.procRehypeFull(
     {
-      // engine,
       noteToRender,
-      // noteToRender: (await engine.getNote(fname)).data!,
       fname,
       vault,
       config,

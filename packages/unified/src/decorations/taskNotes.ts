@@ -30,9 +30,10 @@ export async function decorateTaskNote({
   config: IntermediateDendronConfig;
 }) {
   const taskConfig = ConfigUtils.getTask(config);
-  const vault = vaultName
-    ? VaultUtils.getVaultByName({ vname: vaultName, vaults: config.vaults! }) // JYTODO: Ugh, use vaults from outside config
-    : undefined;
+  const vault =
+    vaultName && config.vaults
+      ? VaultUtils.getVaultByName({ vname: vaultName, vaults: config.vaults })
+      : undefined;
 
   const note = (await engine.findNotes({ fname, vault }))[0];
   if (!note || !TaskNoteUtils.isTaskNote(note)) return;

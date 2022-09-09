@@ -57,7 +57,7 @@ export async function decorateTag({
   const { type, errors } = await linkedNoteType({
     fname,
     engine,
-    vaults: config.vaults ?? [], // JYTODO: Fix
+    vaults: config.vaults ?? [],
   });
   const decoration: DecorationHashTag = {
     type,

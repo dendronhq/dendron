@@ -23,8 +23,18 @@ import {
 } from "../types";
 import { MDUtilsV5 } from "../utilsv5";
 
-export async function getHTMLRenderDependencyNoteCache(
-  noteToRender: NoteProps,
+/**
+ * For a given note to process with unified, this function determines all
+ * NoteProp dependencies that will be needed in order to parse/render the note. It then
+ * creates a set of NoteDicts containing all dependencies and returns it.
+ * @param noteToProcess
+ * @param engine
+ * @param config
+ * @param vaults
+ * @returns
+ */
+export async function getParsingDependencyDicts(
+  noteToProcess: NoteProps,
   engine: ReducedDEngine,
   config: IntermediateDendronConfig,
   vaults: DVault[]
@@ -32,11 +42,11 @@ export async function getHTMLRenderDependencyNoteCache(
   let allData: NoteProps[] = [];
 
   allData.push(
-    ...(await getForwardLinkDependencies(noteToRender, vaults, engine, config))
+    ...(await getForwardLinkDependencies(noteToProcess, vaults, engine, config))
   );
 
-  allData.push(...(await getBacklinkDependencies(noteToRender, engine)));
-  allData.push(...(await getChildrenDependencies(noteToRender, engine)));
+  allData.push(...(await getBacklinkDependencies(noteToProcess, engine)));
+  allData.push(...(await getChildrenDependencies(noteToProcess, engine)));
 
   allData = _.compact(allData);
   allData = _.uniqBy(allData, (value) => value.id);
@@ -155,6 +165,16 @@ function getRecursiveNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
   return renderDependencies;
 }
 
+/**
+ * Get all dependencies caused by forward links. If a recursive element is
+ * encountered (like a note reference), then the recursive dependencies will
+ * also be included, up to a MAX_DEPTH.
+ * @param noteToRender
+ * @param vaults
+ * @param engine
+ * @param config
+ * @returns
+ */
 async function getForwardLinkDependencies(
   noteToRender: NoteProps,
   vaults: DVault[],

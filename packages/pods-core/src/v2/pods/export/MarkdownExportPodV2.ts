@@ -21,7 +21,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   DendronASTDest,
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
   MDUtilsV5,
   RemarkUtils,
 } from "@dendronhq/unified";
@@ -232,7 +232,7 @@ export class MarkdownExportPodV2
       previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
-    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       engine,
       config,

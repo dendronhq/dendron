@@ -38,12 +38,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-    // let note: NoteProps | undefined;
-    // if (engine) {
-    //   note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
-    // } else {
     const note = noteToRender;
-    // }
     if (_.isUndefined(note)) {
       return;
     }
@@ -69,8 +64,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
         vaults,
         vname: vaultName,
       })!;
-
-      // let note: NoteProps | undefined;
 
       if (!noteCacheForRenderDict) {
         return false;

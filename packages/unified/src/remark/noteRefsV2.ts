@@ -440,21 +440,6 @@ export function convertNoteRefASTV2(
       };
     }
 
-    // const resp = tryGetNotes({
-    //   fname,
-    //   vname,
-    //   vaults: engine.vaults,
-    //   engine,
-    // });
-
-    // check for edge cases
-    // if (resp.error) {
-    //   return {
-    //     error: undefined,
-    //     data: [MdastUtils.genMDErrorMsg(resp.error.message)],
-    //   };
-    // }
-
     // multiple results
     if (data.length > 1) {
       // applying publish rules but no behavior defined for duplicate notes

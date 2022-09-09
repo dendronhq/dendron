@@ -53,7 +53,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       // This is an image that the preview supports
       if (!(await fs.pathExists(foundUri.fsPath))) {
         // Warn the user if the image is missing
-        return `file ${foundUri.fsPath} in reference ${refAtPos.ref} is missin3g`;
+        return `file ${foundUri.fsPath} in reference ${refAtPos.ref} is missing`;
       }
       return `![](${foundUri.toString()}|height=${HOVER_IMAGE_MAX_HEIGHT})`;
     }

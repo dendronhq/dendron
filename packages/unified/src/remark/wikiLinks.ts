@@ -203,72 +203,13 @@ function attachParser(proc: Unified.Processor) {
     }
 
     const procData = MDUtilsV5.getProcData(proc);
-    // let { vault } = procData;
     const { fname } = procData;
-    // if (out.vaultName) {
-    //   const maybeVault = VaultUtils.getVaultByName({
-    //     vaults: engine.vaults,
-    //     vname: out.vaultName,
-    //   });
-    //   if (_.isUndefined(maybeVault)) {
-    //     addError(
-    //       proc,
-    //       new DendronError({
-    //         message: `fname: ${fname}, vault ${
-    //           out.vaultName
-    //         } not found in ${JSON.stringify(out)}`,
-    //       })
-    //     );
-    //   } else {
-    //     vault = maybeVault;
-    //   }
-    //   // default to current note
-    // }
+
     if (!out.value) {
       // same file block reference, value is implicitly current file
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value would have been parsed
     }
-    // const shouldApplyPublishingRules =
-    //   MDUtilsV5.shouldApplyPublishingRules(proc);
-    // const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
-    //   config,
-    //   shouldApplyPublishingRules
-    // );
 
-    // TODO: We can probably get rid of this if clause. No need to add this data
-    // at parsing time, this information should only get added during compile
-    // time.
-    // if (
-    //   dest !== DendronASTDest.MD_DENDRON &&
-    //   enableNoteTitleForLink &&
-    //   out.alias === out.value &&
-    //   vault
-    // ) {
-    //   let note;
-    //   if (noteCacheForRender) {
-    //     // TODO: Consolidate logic.
-    //     const notesById =
-    //       NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-    //     const notesByFname =
-    //       NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
-    //     // TODO: Add vault filter
-    //     const notes = NoteDictsUtils.findByFname(out.value, {
-    //       notesById,
-    //       notesByFname,
-    //     });
-
-    //     note = notes[0]; // TODO: get rid of 0.
-    //   } else if (engine) {
-    //     note = NoteUtils.getNoteByFnameFromEngine({
-    //       fname: out.value,
-    //       engine,
-    //       vault,
-    //     });
-    //   }
-    //   if (note) {
-    //     out.alias = note.title;
-    //   }
-    // }
     return out;
   }
 

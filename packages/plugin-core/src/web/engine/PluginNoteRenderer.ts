@@ -13,7 +13,7 @@ import {
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
   MDUtilsV5,
   MDUtilsV5Web,
 } from "@dendronhq/unified";
@@ -62,7 +62,7 @@ export class PluginNoteRenderer implements INoteRenderer {
     flavor: ProcFlavor;
     dest: DendronASTDest;
   }): Promise<string> {
-    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       this.engine,
       this.publishingConfig,

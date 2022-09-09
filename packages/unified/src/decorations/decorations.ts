@@ -80,7 +80,6 @@ export async function runAllDecorators(
       parseOnly: true,
     },
     {
-      //JYTODO: May need to plugin note cache here
       dest: DendronASTDest.MD_DENDRON,
       vault: note.vault,
       fname: note.fname,

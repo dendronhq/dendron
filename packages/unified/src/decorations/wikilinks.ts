@@ -47,7 +47,7 @@ export const decorateWikilink: Decorator<
     vaultName,
     note,
     engine,
-    vaults: config.vaults ?? [], // JYTODO: Wrong
+    vaults: config.vaults ?? [],
   });
   const wikilinkRange = position2VSCodeRange(position);
   const decorations: DecorationsForDecorateWikilink[] = [];

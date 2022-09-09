@@ -14,10 +14,7 @@ import {
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/common-server";
-import {
-  getHTMLRenderDependencyNoteCache,
-  MDUtilsV5,
-} from "@dendronhq/unified";
+import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
@@ -457,7 +454,7 @@ describe("noteRefV2", () => {
         const noteToRender = (
           await engine.findNotes({ fname: "foo", vault: vaults[0] })
         )[0];
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           noteToRender,
           engine,
           config,
@@ -816,7 +813,6 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
-          // parsingDependenciesByFname: ["target"],
           parsingDependenciesByNoteProps: [target],
         });
       },
@@ -877,7 +873,6 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
-          // parsingDependenciesByFname: ["target"],
           parsingDependenciesByNoteProps: [target],
         });
       },
@@ -929,7 +924,7 @@ describe("noteRefV2", () => {
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           noteToRender,
           engine,
           config,
@@ -1009,7 +1004,7 @@ describe("noteRefV2", () => {
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           noteToRender,
           engine,
           config,
@@ -1133,7 +1128,7 @@ describe("noteRefV2", () => {
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["one"];
         const config = DConfig.readConfigSync(wsRoot);
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           note,
           engine,
           config,
@@ -1209,7 +1204,7 @@ describe("noteRefV2", () => {
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
-        const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
           noteToRender,
           engine,
           config,

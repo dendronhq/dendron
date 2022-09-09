@@ -71,7 +71,7 @@ import {
   ProcFlavor,
   runAllDecorators,
   RemarkUtils,
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
 } from "@dendronhq/unified";
 import { HookUtils } from "./topics/hooks";
 
@@ -594,7 +594,7 @@ export class DendronEngineV2 implements DEngine {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
     const config = DConfig.readConfigSync(this.wsRoot);
 
-    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       this,
       config,

@@ -1,9 +1,6 @@
 import { ConfigUtils, NoteDictsUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
-import {
-  getHTMLRenderDependencyNoteCache,
-  MDUtilsV5,
-} from "@dendronhq/unified";
+import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
@@ -71,7 +68,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     const previewConfig = ConfigUtils.getPreview(overrideConfig);
     previewConfig.enablePrettyRefs = enablePrettyRefs;
 
-    const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       engine,
       config,

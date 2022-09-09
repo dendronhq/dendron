@@ -216,19 +216,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
         note = SiteUtils.create403StaticNote({ vaults });
-        // } else if (engine) {
-        //   note = NoteUtils.getNoteByFnameFromEngine({
-        //     fname,
-        //     vault,
-        //     engine,
-        //   });
       } else {
         note = noteToRender;
       }
-
-      // if (!note) {
-      //   throw new DendronError({ message: `no note found for ${fname}` });
-      // }
       // ^53ueid06urse
       if (insertTitle) {
         const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");

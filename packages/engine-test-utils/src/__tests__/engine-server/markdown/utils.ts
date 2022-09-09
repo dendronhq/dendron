@@ -15,7 +15,7 @@ import {
 import {
   DendronASTData,
   DendronASTDest,
-  getHTMLRenderDependencyNoteCache,
+  getParsingDependencyDicts,
   MDUtilsV5,
   ProcDataFullOptsV5,
   Processor,
@@ -77,7 +77,7 @@ export const createProcForTest = async (opts: {
   if (opts.useIdAsLink === undefined) opts.useIdAsLink = false;
 
   const noteToRender = (await engine.findNotes({ fname, vault }))[0];
-  const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+  const noteCacheForRenderDict = await getParsingDependencyDicts(
     noteToRender,
     engine,
     config,
@@ -260,13 +260,12 @@ export const createProcCompileTests = (opts: {
                 const noteToRender = (
                   await engine.findNotes({ fname, vault })
                 )[0];
-                const noteCacheForRenderDict =
-                  await getHTMLRenderDependencyNoteCache(
-                    noteToRender,
-                    engine,
-                    config,
-                    vaults
-                  );
+                const noteCacheForRenderDict = await getParsingDependencyDicts(
+                  noteToRender,
+                  engine,
+                  config,
+                  vaults
+                );
 
                 if (opts.parsingDependenciesByFname) {
                   await Promise.all(
@@ -384,7 +383,7 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const { engine, text, fname, vault, configOverride } = opts;
   const config = configOverride || DConfig.readConfigSync(engine.wsRoot);
   const noteToRender = (await engine.findNotes({ fname, vault }))[0];
-  const noteCacheForRenderDict = await getHTMLRenderDependencyNoteCache(
+  const noteCacheForRenderDict = await getParsingDependencyDicts(
     noteToRender,
     engine,
     config,

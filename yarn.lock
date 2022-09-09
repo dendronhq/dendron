@@ -1839,11 +1839,6 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@badrap/valita@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.npmjs.org/@badrap/valita/-/valita-0.1.6.tgz#08a38e620215f148cced871fa94265fe5b11bcc4"
-  integrity sha512-LgyswD5zXVywj5Acnhk17gRkLJ8Fzs+lZYmhmxJFMvSNGSnvllYnMp7qMVrfJZedKy3AcgYQUOqgGxFEUUp2CQ==
-
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
@@ -27480,6 +27475,11 @@ zen-observable@^0.8.0:
   version "0.8.15"
   resolved "https://registry.npmjs.org/zen-observable/-/zen-observable-0.8.15.tgz#96415c512d8e3ffd920afd3889604e30b9eaac15"
   integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
+
+zod@^3.19.0:
+  version "3.19.0"
+  resolved "https://registry.npmjs.org/zod/-/zod-3.19.0.tgz#a9303fcaed0950a3dc57bf35cc11f6282d4f52f2"
+  integrity sha512-Yw0qvUsCNGBe5YacikdMt5gVYeUuaEFVDIHKMfElrGSaBhwR3CQK6vOzgfAJOjTdGIhEeoaj8GtT+NDZrepZbw==
 
 zwitch@^1.0.0:
   version "1.0.5"

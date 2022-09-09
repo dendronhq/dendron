@@ -48,21 +48,23 @@ type SidebarItemCategoryConfig = {
 };
 const sidebarItemCategoryConfig: z.ZodType<SidebarItemCategoryConfig> = z.lazy(
   () =>
-    z.object({
-      type: categoryLiteral,
-      label: z.string(),
-      items: z.array(z.lazy(() => sidebarItemConfig)),
-      link: sidebarItemCategoryLink,
-    })
-  // .chain((item) => {
-  //   // error when this item is invalid and therefore won't show up in the sidebar
-  //   if (item.items.length === 0 && !item.link) {
-  //     return v.err(
-  //       `Sidebar category '${item.label}' has neither any subitem nor a link. This makes this item not able to link to anything.`
-  //     );
-  //   }
-  //   return v.ok(item);
-  // })
+    z
+      .object({
+        type: categoryLiteral,
+        label: z.string(),
+        items: z.array(z.lazy(() => sidebarItemConfig)),
+        link: sidebarItemCategoryLink,
+      })
+      .refine(
+        (item) => {
+          return !(item.items.length === 0 && !item.link);
+        },
+        (item) => {
+          return {
+            message: `Sidebar category '${item.label}' has neither any subitem nor a link. This makes this item not able to link to anything.`,
+          };
+        }
+      )
 );
 
 const sidebarItemCategory: z.ZodType<SidebarItemCategory> = z.lazy(() =>

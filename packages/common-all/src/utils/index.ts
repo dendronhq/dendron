@@ -120,14 +120,6 @@ export function isFalsy(u: any): boolean {
   return _.some([_.isUndefined(u), _.isEmpty(u), _.isNull(u)]);
 }
 
-/**
- * `do` expession
- * [ECMAScript proposal: `do` expressions](https://github.com/tc39/proposal-do-expressions)
- */
-export function do_<T>(f: () => T): T {
-  return f();
-}
-
 /** Calculates a basic integer hash for the given string.
  *
  * This is very unsafe, do not rely on this for anything where collisions are bad.

@@ -7,7 +7,7 @@ import type {
   RespV3,
 } from "./types";
 import type { Option } from "./utils";
-import { PublishUtils, do_ } from "./utils";
+import { PublishUtils } from "./utils";
 import { parse } from "./parse";
 import {
   DendronError,
@@ -251,7 +251,7 @@ function processSidebar(
 
   function resolveItem(item: SidebarItemConfig): SidebarItemConfig {
     function resolveItemId(sidebarId: string) {
-      const possibleNotes = [
+      const realizableNotes = [
         // 1. check if associated using note id.
         notes[sidebarId] ??
           // 2. find note based on `fname`
@@ -260,23 +260,21 @@ function processSidebar(
           }),
       ].flat();
 
-      const hasDuplicates = possibleNotes.length > 1;
+      const getPrioritizedRealizableNotes = () => {
+        const map = new Map(
+          realizableNotes.map((note) => [
+            note.vault.name ?? note.vault.fsPath,
+            note,
+          ])
+        );
+        return getPriorityVaults(duplicateNoteBehavior)
+          ?.filter((vaultName) => map.has(vaultName))
+          .map((vaultName) => map.get(vaultName));
+      };
 
+      const hasDuplicates = realizableNotes.length > 1;
       const note = _.first(
-        // if more than a single note was found than use `duplicateNoteBehavior` to select a single note.
-        (hasDuplicates &&
-          do_(() => {
-            const map = new Map(
-              possibleNotes.map((note) => [
-                note.vault.name ?? note.vault.fsPath,
-                note,
-              ])
-            );
-            return getPriorityVaults(duplicateNoteBehavior)
-              ?.filter((vaultName) => map.has(vaultName))
-              .map((vaultName) => map.get(vaultName));
-          })) ||
-          possibleNotes
+        (hasDuplicates && getPrioritizedRealizableNotes()) || realizableNotes
       );
 
       if (!note) {
@@ -373,7 +371,7 @@ export function getSidebar(
 }
 
 /**
- * Returns list of vault names ordered by priority
+ * Returns list of vault names sorted by `duplicateNoteBehavior`
  */
 function getPriorityVaults(
   duplicateNoteBehavior?: DuplicateNoteBehavior

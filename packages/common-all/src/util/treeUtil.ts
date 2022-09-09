@@ -2,7 +2,7 @@ import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
-import { PublishUtils, do_ } from "../utils";
+import { PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebar, SidebarItem } from "../sidebars";
@@ -76,17 +76,15 @@ export class TreeUtils {
         return undefined;
       }
 
-      const icon = do_(() => {
-        if (note.schema) {
-          return TreeMenuNodeIcon.bookOutlined;
-        } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-          return TreeMenuNodeIcon.numberOutlined;
-        } else if (note.stub) {
-          return TreeMenuNodeIcon.plusOutlined;
-        }
-        return null;
-      });
+      let icon = null;
 
+      if (note.schema) {
+        icon = TreeMenuNodeIcon.bookOutlined;
+      } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
+        icon = TreeMenuNodeIcon.numberOutlined;
+      } else if (note.stub) {
+        icon = TreeMenuNodeIcon.plusOutlined;
+      }
       const title = sidebarItem.label ?? note.title;
 
       notesLabelById[note.id] = title;

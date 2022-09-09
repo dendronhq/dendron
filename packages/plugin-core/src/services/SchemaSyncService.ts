@@ -21,7 +21,7 @@ export class SchemaSyncService implements ISchemaSyncService {
 
     Logger.info({
       ctx: "SchemaSyncService:onDidChange",
-      msg: "updating schema.",
+      msg: "updating schema",
     });
 
     await this.saveSchema({ uri });

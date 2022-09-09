@@ -370,18 +370,13 @@ export function convertNoteRefASTV2(
 
         // publishing
         if (MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING) {
-          if (!_.isUndefined(linkString)) {
-            return genRefAsIFrame({
-              proc,
-              link,
-              noteId: note.id,
-              content: data,
-              title,
-            });
-          } else {
-            // todo
-            return paragraph();
-          }
+          return genRefAsIFrame({
+            proc,
+            link,
+            noteId: note.id,
+            content: data,
+            title,
+          });
         }
 
         return renderPrettyAST({

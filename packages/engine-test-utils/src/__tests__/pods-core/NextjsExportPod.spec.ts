@@ -534,6 +534,89 @@ describe("nextjs export", () => {
     );
   });
 
+  describe.only("noterefs", () => {
+    test("WHEN note ref of a private note ", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({
+            engine,
+            wsRoot,
+            vaults,
+          });
+
+          // verifyExport(dest);
+          await checkDir({ fpath: path.join(dest, "data"), snapshot: true });
+          await checkDir({
+            fpath: path.join(dest, "data", "refs"),
+            snapshot: true,
+          });
+          await checkDir({
+            fpath: path.join(dest, "data", "notes"),
+            snapshot: true,
+          });
+
+          await checkFile({
+            fpath: path.join(dest, "data", "refs", "private---0.html"),
+            snapshot: true,
+          });
+          expect("bond").toMatchSnapshot();
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            // await ENGINE_HOOKS.setupBasic(opts);
+            const vault = opts.vaults[0];
+            const wsRoot = opts.wsRoot;
+
+            await NoteTestUtilsV4.createNote({
+              fname: "private",
+              vault,
+              wsRoot,
+              body: ["- [[public]]", "- [[private]]", "- [[public.one]]"].join(
+                "\n"
+              ),
+            });
+
+            // await NoteTestUtilsV4.createNote({
+            //   fname: "beta.reference",
+            //   vault,
+            //   wsRoot,
+            //   body: ["- [[beta]]", "- [[alpha]]"].join("\n"),
+            // });
+
+            await NoteTestUtilsV4.createNote({
+              fname: "public",
+              vault,
+              wsRoot,
+              body: ["![[private]]", "[[public.one]]"].join("\n"),
+            });
+            await NoteTestUtilsV4.createNote({
+              fname: "public.one",
+              vault,
+              wsRoot,
+              body: ["one"].join("\n"),
+            });
+
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot }
+            );
+          },
+        }
+      );
+    });
+  });
+
   test("ok, with assetPrefix", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {

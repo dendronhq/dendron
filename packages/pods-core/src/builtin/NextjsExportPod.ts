@@ -298,15 +298,15 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engineConfig: IntermediateDendronConfig;
   }) {
     // turn the file to markdown?
-    const proc = MDUtilsV5.procRemarkFull({
-      dest: DendronASTDest.MD_DENDRON,
-      engine,
-      fname: note.fname,
-      vault: note.vault,
-      config: engineConfig,
-      notes,
-    });
-    const out = proc.stringify(node);
+    // const proc = MDUtilsV5.procRemarkFull({
+    //   dest: DendronASTDest.MD_DENDRON,
+    //   engine,
+    //   fname: note.fname,
+    //   vault: note.vault,
+    //   config: engineConfig,
+    //   notes,
+    // });
+    // const out = proc.stringify(node);
     // turn the file to note?
     const proc2 = MDUtilsV5.procRehypeFull(
       {
@@ -317,9 +317,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         notes,
         insideNoteRef: true,
       },
-      { flavor: ProcFlavor.REGULAR }
+      { flavor: ProcFlavor.PUBLISHING }
     );
-    const resp = await proc2.process(out);
+    const resp = await proc2.process(NoteUtils.serialize(note));
     return resp.contents;
   }
 

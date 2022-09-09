@@ -1,3 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GIVEN NextExport pod WHEN copy siteBanner AND WHEN siteBanner exist THEN banner is copied 1`] = `"export default function Banner { return <div> Banner </div> };"`;
+
+exports[`nextjs export noterefs WHEN note ref of a private note  1`] = `"dendron.json fuse.json meta notes notes.json refs refs.json tree.json"`;
+
+exports[`nextjs export noterefs WHEN note ref of a private note  2`] = `"private---0.html"`;
+
+exports[`nextjs export noterefs WHEN note ref of a private note  3`] = `"403.html 403.md public.html public.md public.one.html public.one.md"`;
+
+exports[`nextjs export noterefs WHEN note ref of a private note  4`] = `
+"<ul>
+<li><a href=\\"/\\">Public</a></li>
+<li><a title=\\"Private\\" href=\\"https://wiki.dendron.so/notes/hfyvYGJZQiUwQaaxQO27q.html\\" target=\\"_blank\\" class=\\"private\\">Private (Private)</a></li>
+<li><a href=\\"/notes/public.one\\">One</a></li>
+</ul>"
+`;
+
+exports[`nextjs export noterefs WHEN note ref of a private note  5`] = `"bond"`;

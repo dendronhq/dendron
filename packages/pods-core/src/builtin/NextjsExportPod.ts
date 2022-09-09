@@ -318,7 +318,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       { flavor: ProcFlavor.REGULAR }
     );
     const resp = await proc2.process(out);
-    // TODO: add custom iframe code here
     return resp.contents;
   }
 

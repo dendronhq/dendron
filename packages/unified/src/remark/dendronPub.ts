@@ -155,9 +155,14 @@ class ImageNodeHandler extends DendronNodeHander {
       : cOpts?.assetsPrefix;
     const imageNode = node;
 
-    if (!isWebUri(imageNode.url)) {
-      const imageUrl = _.trim(imageNode.url, "/");
-      imageNode.url = (assetsPrefix ? assetsPrefix + "/" : "/") + imageUrl;
+    // TODO: find a better way to determine if the note is being processed twice
+    // else if assetPrefix is foo, image sources within a noteref will be /foo/foo/ instead of just /foo/
+    const isNoteRef = assetsPrefix && imageNode.url.indexOf(assetsPrefix) === 0;
+    if (!isNoteRef) {
+      if (!isWebUri(imageNode.url)) {
+        const imageUrl = _.trim(imageNode.url, "/");
+        imageNode.url = (assetsPrefix ? assetsPrefix + "/" : "/") + imageUrl;
+      }
     }
     return { node: imageNode };
   }

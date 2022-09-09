@@ -207,32 +207,6 @@ describe("GIVEN dendronPub", () => {
     const config = genPublishConfigWithPublicPrivateHierarchies();
 
     describe("AND WHEN noteRef", () => {
-      describe("AND WHEN noteref of published note", () => {
-        let resp: VFile;
-        beforeAll(async () => {
-          await runEngineTestV5(
-            async (opts) => {
-              resp = await createProc({
-                ...opts,
-                config,
-                fname,
-                linkText: `![[beta]]`,
-              });
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupLinks,
-              expect,
-            }
-          );
-        });
-        test("THEN published note is rendered", async () => {
-          await verifyPublicNoteRef(resp, fnameBeta);
-        });
-        test("THEN private link in published note is hidden", async () => {
-          await verifyPrivateLink(resp, fnameAlpha);
-        });
-      });
-
       describe("AND WHEN noteref of private note", () => {
         let resp: VFile;
         beforeAll(async () => {
@@ -1117,7 +1091,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         expect(
           await AssertUtils.assertInString({
             body: publishResp.contents as string,
-            match: ["portal-container"],
+            match: [
+              `<iframe src="/refs/bar---0" title="Reference to the note called Bar">Your browser does not support iframes.</iframe>`,
+            ],
           })
         ).toBeTruthy();
       },

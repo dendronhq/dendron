@@ -641,3 +641,72 @@ describe("nextjs export", () => {
     );
   });
 });
+
+// fdescribe("setupLinks data set", () => {
+//   test("Private Links", async () => {
+//     await runEngineTestV5(
+//       async ({ engine, vaults, wsRoot }) => {
+//         const dest = await setupExport({ engine, wsRoot, vaults });
+
+//         await verifyExport(dest);
+//         await verifyExportedAssets(dest);
+//         await checkDir({ fpath: path.join(dest, "data") }, "refs.json");
+//         await checkFile(
+//           {
+//             fpath: path.join(
+//               dest,
+//               "data",
+//               "refs.json",
+//             ),
+//           },
+//           "iframe",
+//         );
+//       },
+//       {
+//         expect,
+//         preSetupHook: async (opts) => {
+//           await ENGINE_HOOKS.setupLinks(opts);
+//           await createAssetsInVault({
+//             wsRoot: opts.wsRoot,
+//             vault: opts.vaults[0],
+//           });
+//           setupConfig({
+//             ...opts,
+//             siteConfig: {
+//               siteHierarchies: [
+//                 "beta",
+//               ],
+//             },
+//           });
+//         },
+//       },
+//     );
+//   });
+// });
+
+// todo rewrite this test.
+// describe("AND WHEN noteref of published note", () => {
+//   let resp: VFile;
+//   beforeAll(async () => {
+//     await runEngineTestV5(
+//       async (opts) => {
+//         resp = await createProc({
+//           ...opts,
+//           config,
+//           fname,
+//           linkText: `![[beta]]`,
+//         });
+//       },
+//       {
+//         preSetupHook: ENGINE_HOOKS.setupLinks,
+//         expect,
+//       },
+//     );
+//   });
+//   test("THEN published note is rendered", async () => {
+//     // await verifyPublicNoteRef(resp, fnameBeta);
+//   });
+//   test("THEN private link in published note is hidden", async () => {
+//     // await verifyPrivateLink(resp, fnameAlpha);
+//   });
+// });

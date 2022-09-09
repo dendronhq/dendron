@@ -1,6 +1,8 @@
 import {
+  ConfigUtils,
   DendronError,
   error2PlainObject,
+  IntermediateDendronConfig,
   NoteProps,
 } from "@dendronhq/common-all";
 import { DendronNote } from "@dendronhq/common-frontend";
@@ -20,6 +22,8 @@ import {
   getRefBody,
 } from "../../utils/build";
 import { DendronCommonProps } from "../../utils/types";
+import fs from "fs-extra";
+import path from "path";
 
 export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps & {
@@ -55,6 +59,19 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
+let _assetsPrefix: undefined | string;
+function getAssetsPrefix() {
+  if (_assetsPrefix === undefined) {
+    const config = fs.readJSONSync(
+      path.join("data", "dendron.json")
+    ) as IntermediateDendronConfig;
+    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const assetsPrefix = publishingConfig.assetsPrefix;
+    _assetsPrefix = assetsPrefix ?? "";
+  }
+  return _assetsPrefix;
+}
+
 function stripThreeDashes(s: string): string {
   const hyphenatedPortions = s.split("-");
   if (hyphenatedPortions.length < 3) {
@@ -89,7 +106,8 @@ export const getStaticProps: GetStaticProps = async (
       console.error(noteTitle);
     }
 
-    const noteUrl = `/notes/${baseId}/`;
+    const assetPrefix = getAssetsPrefix();
+    const noteUrl = `${assetPrefix}/notes/${baseId}/`;
 
     return {
       props: {

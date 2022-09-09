@@ -48,6 +48,7 @@ import {
   RenameNoteResp,
   GetSchemaResp,
   WriteSchemaResp,
+  EngineSchemaWriteOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -525,8 +526,16 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     return _.defaults(out, { data: [] });
   }
 
-  async writeSchema(schema: SchemaModuleProps): Promise<WriteSchemaResp> {
-    const out = await this.api.schemaWrite({ schema, ws: this.ws });
+  async writeSchema(
+    schema: SchemaModuleProps,
+    opts?: EngineSchemaWriteOpts
+  ): Promise<WriteSchemaResp> {
+    this.logger.debug({
+      ctx: "engineClient.writeSchema",
+      schema: schema.fname,
+      metaOnly: opts?.metaOnly,
+    });
+    const out = await this.api.schemaWrite({ schema, ws: this.ws, opts });
     await this.refreshSchemas([schema]);
     return out;
   }

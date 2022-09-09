@@ -19,9 +19,9 @@ export class SchemaController {
   }
 
   async create(req: SchemaWriteRequest): Promise<WriteSchemaResp> {
-    const { ws, schema } = req;
+    const { ws, schema, opts } = req;
     const engine = await getWSEngine({ ws });
-    return engine.writeSchema(schema);
+    return engine.writeSchema(schema, opts);
   }
 
   async delete({

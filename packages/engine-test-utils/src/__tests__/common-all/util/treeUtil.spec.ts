@@ -46,7 +46,7 @@ describe("GIVEN sidebar", () => {
 
           const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
           expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[1];
+          const fooNode = treeData.roots[0];
           expect(fooNode.children).toEqual([]);
         },
         {
@@ -66,7 +66,7 @@ describe("GIVEN sidebar", () => {
 
           const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
           expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[1];
+          const fooNode = treeData.roots[0];
           expect(fooNode.children).toEqual([]);
         },
         {
@@ -87,7 +87,7 @@ describe("GIVEN sidebar", () => {
 
           const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
           expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[1];
+          const fooNode = treeData.roots[0];
           expect(fooNode.children).toEqual([]);
         },
         {

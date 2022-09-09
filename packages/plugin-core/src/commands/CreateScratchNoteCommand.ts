@@ -14,6 +14,8 @@ import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegi
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
+import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
+import { CreateScratchNoteKeybindingTip } from "../showcase/CreateScratchNoteKeybindingTip";
 
 type CommandOpts = NoteLookupRunOpts;
 type CommandOutput = void;
@@ -61,5 +63,9 @@ export class CreateScratchNoteCommand extends BasicCommand<
     const lookupCmd = AutoCompletableRegistrar.getNoteLookupCmd();
     lookupCmd.controller = this.createLookupController();
     await lookupCmd.run(opts);
+
+    // TODO: remove after we sufficiently warned users.
+    const showcase = new FeatureShowcaseToaster();
+    showcase.showSpecificToast(new CreateScratchNoteKeybindingTip());
   }
 }

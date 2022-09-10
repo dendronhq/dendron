@@ -612,14 +612,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         const out = data
           .map((ent) => proc.stringify(proc.runSync(ent)))
           .join("\n");
-
-        // const out = await this._renderRef({
-        //   engine,
-        //   note: noteForRef,
-        //   node,
-        //   engineConfig,
-        //   notes: publishedNotes,
-        // });
         const refIdString = getRefId(refId);
         const dst = path.join(notesRefsDir, refIdString + ".html");
         this.L.debug({ ctx, dst, msg: "writeNote" });

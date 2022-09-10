@@ -3,7 +3,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   createSerializedFuseNoteIndex,
-  DendronASTDest,
   DendronError,
   DendronPublishingConfig,
   DendronSiteConfig,
@@ -571,9 +570,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
     fs.ensureDirSync(refsRoot);
 
-    const refIds: { id: string; refString: string }[] = await Promise.all(
+    const refIds: string[] = await Promise.all(
       fs.readdirSync(refsRoot).map(async (ent) => {
-        const { node, refId } = fs.readJSONSync(
+        const { refId } = fs.readJSONSync(
           path.join(refsRoot, ent)
         ) as SerializedNoteRef;
         const noteId = refId.id;

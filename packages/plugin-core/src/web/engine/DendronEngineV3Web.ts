@@ -4,6 +4,8 @@ import {
   DendronError,
   DNodeUtils,
   DVault,
+  EngineDeleteNoteResp,
+  EngineDeleteOpts,
   EngineEventEmitter,
   EngineV3Base,
   EngineWriteOptsV2,
@@ -345,6 +347,30 @@ export class DendronEngineV3Web
 
   async writeSchema() {
     throw Error("writeSchema not implemented");
+  }
+
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOpts | undefined
+  ): Promise<EngineDeleteNoteResp> {
+    const ctx = "DendronEngineV3Web:delete";
+    const changes = await super.deleteNote(id, opts);
+    if (changes.error) {
+      throw new DendronError({
+        message: `Unable to delete note ${id}`,
+        severity: ERROR_SEVERITY.MINOR,
+        payload: changes.error,
+      });
+    }
+    if (changes.data) this._onNoteChangedEmitter.fire(changes.data);
+
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.data?.map((n) => NoteUtils.toLogObj(n.note)),
+    });
+
+    return changes;
   }
 
   private async initNotesNew(

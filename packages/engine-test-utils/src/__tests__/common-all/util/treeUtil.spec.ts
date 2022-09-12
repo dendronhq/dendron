@@ -36,67 +36,6 @@ describe("GIVEN sidebar", () => {
       );
     });
   });
-
-  describe("WHEN nav_exclude_children enabled", () => {
-    test("THEN return only root", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const domain = engine.notes["foo"];
-          domain.custom.nav_exclude_children = true;
-
-          const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
-          expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[0];
-          expect(fooNode.children).toEqual([]);
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
-
-  describe("WHEN has_collection enabled", () => {
-    test("THEN return only root", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const domain = engine.notes["foo"];
-          domain.custom.has_collection = true;
-
-          const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
-          expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[0];
-          expect(fooNode.children).toEqual([]);
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
-
-  describe("WHEN has_collection enabled AND nav_children_exclude set to false", () => {
-    test("THEN return only root", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const domain = engine.notes["foo"];
-          domain.custom.has_collection = true;
-          domain.custom.nav_children_exclude = false;
-
-          const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
-          expect(treeData.roots).toMatchSnapshot();
-          const fooNode = treeData.roots[0];
-          expect(fooNode.children).toEqual([]);
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
 });
 
 describe("sortNotesAtLevel", () => {

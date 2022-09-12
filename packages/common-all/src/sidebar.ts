@@ -201,10 +201,12 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
         }
 
         if (isCategory) {
+          const shouldIgnoreChildren =
+            fm.nav_exclude_children || fm.has_collection;
           return {
             type: "category",
             label: note.title,
-            items: generateSidebar(children),
+            items: shouldIgnoreChildren ? [] : generateSidebar(children),
             link: { type: "note", id: note.id },
             ...positionalProps,
           } as SidebarItemCategory;

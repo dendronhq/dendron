@@ -105,9 +105,7 @@ export class TreeUtils {
         child2parent[note.id] = parent;
       }
 
-      const shouldIgnoreChildren = fm.nav_exclude_children || fm.has_collection;
-
-      if (!shouldIgnoreChildren && sidebarItem.type === "category") {
+      if (sidebarItem.type === "category") {
         treeMenuNode.children = sidebarItem.items
           .map((item) =>
             itemToTreeMenuNode(item, {

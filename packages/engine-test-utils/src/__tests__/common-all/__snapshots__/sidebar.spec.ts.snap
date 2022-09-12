@@ -1,5 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`GIVEN sidebar config input WHEN has_collection is enabled AND nav_exclude_children is set to false THEN return sidebar object 1`] = `
+Array [
+  Object {
+    "id": "bar",
+    "label": "Bar",
+    "type": "note",
+  },
+  Object {
+    "items": Array [],
+    "label": "Foo",
+    "link": Object {
+      "id": "foo",
+      "type": "note",
+    },
+    "type": "category",
+  },
+]
+`;
+
+exports[`GIVEN sidebar config input WHEN has_collection is enabled THEN return sidebar object 1`] = `
+Array [
+  Object {
+    "id": "bar",
+    "label": "Bar",
+    "type": "note",
+  },
+  Object {
+    "items": Array [],
+    "label": "Foo",
+    "link": Object {
+      "id": "foo",
+      "type": "note",
+    },
+    "type": "category",
+  },
+]
+`;
+
+exports[`GIVEN sidebar config input WHEN nav_exclude_children is enabled THEN return sidebar object 1`] = `
+Array [
+  Object {
+    "id": "bar",
+    "label": "Bar",
+    "type": "note",
+  },
+  Object {
+    "items": Array [],
+    "label": "Foo",
+    "link": Object {
+      "id": "foo",
+      "type": "note",
+    },
+    "type": "category",
+  },
+]
+`;
+
 exports[`GIVEN sidebar config input WHEN providing DefaultSidebar THEN return sidebar object 1`] = `
 Array [
   Object {

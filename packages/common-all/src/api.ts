@@ -19,6 +19,7 @@ import {
   DeleteNoteResp,
   DeleteSchemaResp,
   DEngineInitResp,
+  EngineSchemaWriteOpts,
   GetDecorationsResp,
   GetNoteBlocksResp,
   GetSchemaResp,
@@ -146,6 +147,7 @@ export type SchemaQueryRequest = {
 } & Partial<WorkspaceRequest>;
 export type SchemaWriteRequest = {
   schema: SchemaModuleProps;
+  opts?: EngineSchemaWriteOpts;
 } & WorkspaceRequest;
 
 export type AssetGetRequest = { fpath: string } & WorkspaceRequest;

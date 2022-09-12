@@ -8,6 +8,7 @@ import {
   NoteProps,
   NoteUtils,
   RespV3,
+  SchemaModuleProps,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -262,6 +263,12 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   async openNote(note: NoteProps) {
     const { vault, fname } = note;
     const fnameWithExtension = `${fname}.md`;
+    return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
+  }
+
+  async openSchema(schema: SchemaModuleProps) {
+    const { vault, fname } = schema;
+    const fnameWithExtension = `${fname}.schema.yml`;
     return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);
   }
 }

@@ -26,6 +26,8 @@ describe("GIVEN sidebar config input", () => {
             notes: engine.notes,
           });
           expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp.data).toHaveLength(2);
+          expect(sidebarResp.data).toHaveProperty("[1].items[0].id", "foo.ch1");
         },
         {
           expect,

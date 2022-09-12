@@ -16,6 +16,8 @@ import { ConfigUtils } from "@dendronhq/common-all";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 import { FeatureShowcaseToaster } from "../showcase/FeatureShowcaseToaster";
 import { CreateScratchNoteKeybindingTip } from "../showcase/CreateScratchNoteKeybindingTip";
+import { MetadataService } from "@dendronhq/engine-server";
+import semver from "semver";
 
 type CommandOpts = NoteLookupRunOpts;
 type CommandOutput = void;
@@ -64,8 +66,14 @@ export class CreateScratchNoteCommand extends BasicCommand<
     lookupCmd.controller = this.createLookupController();
     await lookupCmd.run(opts);
 
-    // TODO: remove after we sufficiently warned users.
-    const showcase = new FeatureShowcaseToaster();
-    showcase.showSpecificToast(new CreateScratchNoteKeybindingTip());
+    // TODO: remove after 1-2 weeks.
+    const firstInstallVersion = MetadataService.instance().firstInstallVersion;
+    if (
+      firstInstallVersion === undefined ||
+      semver.lt(firstInstallVersion, "0.113.0")
+    ) {
+      const showcase = new FeatureShowcaseToaster();
+      showcase.showSpecificToast(new CreateScratchNoteKeybindingTip());
+    }
   }
 }

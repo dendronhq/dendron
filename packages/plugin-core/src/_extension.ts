@@ -72,6 +72,7 @@ import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
 import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
+import semver from "semver";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -356,9 +357,19 @@ export async function _activate(
           const showcase = new FeatureShowcaseToaster();
           // Temporarily show the new toast instead of the rest.
           // for subsequent sessions this will not be shown as it already has been shown.
-          const hasShown = showcase.showSpecificToast(
-            new CreateScratchNoteKeybindingTip()
-          );
+          // TODO: remove this special treatment after 1~2 weeks.
+          let hasShown = false;
+          // only show for users installed prior to v113
+          const firstInstallVersion =
+            MetadataService.instance().firstInstallVersion;
+          if (
+            firstInstallVersion === undefined ||
+            semver.lt(firstInstallVersion, "0.113.0")
+          ) {
+            hasShown = showcase.showSpecificToast(
+              new CreateScratchNoteKeybindingTip()
+            );
+          }
           if (!hasShown) {
             showcase.showToast();
           }

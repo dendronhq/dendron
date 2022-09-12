@@ -25,7 +25,7 @@ export class CreateScratchNoteKeybindingTip implements IFeatureShowcaseMessage {
   }
 
   getDisplayMessage(_displayLocation: DisplayLocation): string {
-    return `Keyboard shortcut for "Dendron: Create Scratch Note" has changed. If you wish to keep the original, please follow the instructions.`;
+    return `Keyboard shortcut for "Dendron: Create Scratch Note" has changed. If you wish to keep the original, please follow the instructions online.`;
   }
 
   onConfirm() {

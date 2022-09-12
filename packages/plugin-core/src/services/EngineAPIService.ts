@@ -40,6 +40,7 @@ import {
   GetSchemaResp,
   QuerySchemaResp,
   WriteSchemaResp,
+  EngineSchemaWriteOpts,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -225,8 +226,11 @@ export class EngineAPIService
     return this._internalEngine.writeNote(note, opts);
   }
 
-  writeSchema(schema: SchemaModuleProps): Promise<WriteSchemaResp> {
-    return this._internalEngine.writeSchema(schema);
+  writeSchema(
+    schema: SchemaModuleProps,
+    opts?: EngineSchemaWriteOpts
+  ): Promise<WriteSchemaResp> {
+    return this._internalEngine.writeSchema(schema, opts);
   }
   init(): Promise<DEngineInitResp> {
     // this.setupEngineAnalyticsTracking();

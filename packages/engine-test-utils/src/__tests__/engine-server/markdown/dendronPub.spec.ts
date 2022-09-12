@@ -64,29 +64,6 @@ function verifyPublicLink(resp: any, match: string) {
   return checkString(resp.contents as string, `<a href="/notes/${match}">`);
 }
 
-function verifyPrivateNoteRef(resp: VFile) {
-  // Example:
-  // A private note ref is currently 2 empty <p> blocks in succession
-  //
-  // "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\">
-  // <use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
-  // <p></p><p></p><div class=\\"portal-container\\">
-  // <div class=\\"portal-head\\">
-  return checkString(
-    resp.contents as string,
-    `<p></p><p></p><div class="portal-container">`
-  );
-}
-
-function verifyPublicNoteRef(resp: VFile, match: string) {
-  // example: <a href=\\"/notes/beta\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-  // return checkString(resp.contents as string, `<a href="/notes/${match}">`);
-  return checkString(
-    resp.contents as string,
-    `<a href="/notes/${match}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`
-  );
-}
-
 function genPublishConfigWithPublicPrivateHierarchies() {
   const config = ConfigUtils.genDefaultConfig();
   ConfigUtils.setPublishProp(config, "siteHierarchies", ["beta"]);

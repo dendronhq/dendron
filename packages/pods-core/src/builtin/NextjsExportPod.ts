@@ -61,7 +61,7 @@ export enum PublishTarget {
 
 export const mapObject = (
   obj: { [k: string]: any },
-  fn: (k: string, v: any) => any
+  fn: (k: string, v: any) => any,
 ) => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(k, v)]));
 
 export const removeBodyFromNote = ({ body, ...note }: Record<string, any>) =>
@@ -86,7 +86,7 @@ function getSiteConfig({
     } as DendronSiteConfig;
   } else {
     const publishingConfig = ConfigUtils.getPublishing(
-      config
+      config,
     ) as DendronPublishingConfig;
     return {
       ...publishingConfig,
@@ -110,7 +110,8 @@ async function validateSiteConfig({
       ) {
         return {
           error: new DendronError({
-            message: `A custom theme is set in the publishing config, but ${CONSTANTS.CUSTOM_THEME_CSS} does not exist in ${wsRoot}`,
+            message:
+              `A custom theme is set in the publishing config, but ${CONSTANTS.CUSTOM_THEME_CSS} does not exist in ${wsRoot}`,
             severity: ERROR_SEVERITY.FATAL,
           }),
         };
@@ -208,7 +209,7 @@ export class NextjsExportPodUtils {
 
     if (nextPathExists) {
       const pkgJsonExists = await fs.pathExists(
-        path.join(nextPath, "package.json")
+        path.join(nextPath, "package.json"),
       );
       if (pkgJsonExists) {
         return true;
@@ -278,7 +279,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         config: engineConfig,
         notes,
       },
-      { flavor: ProcFlavor.PUBLISHING }
+      { flavor: ProcFlavor.PUBLISHING },
     );
     const payload = await proc.process(NoteUtils.serialize(note));
     return payload.toString();
@@ -305,7 +306,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         notes,
         insideNoteRef: true,
       },
-      { flavor: ProcFlavor.PUBLISHING }
+      { flavor: ProcFlavor.PUBLISHING },
     );
     const resp = await proc.process(NoteUtils.serialize(note));
     return resp.contents;
@@ -388,14 +389,15 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     // custom components
     if (PublishUtils.hasCustomSiteBanner(config)) {
-      const bannerPath =
-        PublishUtils.getCustomSiteBannerPathFromWorkspace(wsRoot);
+      const bannerPath = PublishUtils.getCustomSiteBannerPathFromWorkspace(
+        wsRoot,
+      );
       if (!fs.existsSync(bannerPath)) {
         throw Error(`no banner found at ${bannerPath}`);
       }
       fs.copySync(
         bannerPath,
-        PublishUtils.getCustomSiteBannerPathToPublish(dest)
+        PublishUtils.getCustomSiteBannerPathToPublish(dest),
       );
     }
 
@@ -446,7 +448,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       fs.ensureDirSync(publishedThemeRoot);
       fs.copySync(
         customThemePath,
-        path.join(publishedThemeRoot, CONSTANTS.CUSTOM_THEME_CSS)
+        path.join(publishedThemeRoot, CONSTANTS.CUSTOM_THEME_CSS),
       );
     }
   }
@@ -519,8 +521,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const engineConfig: IntermediateDendronConfig =
-      ConfigUtils.overridePublishingConfig(config, siteConfig);
+    const engineConfig: IntermediateDendronConfig = ConfigUtils
+      .overridePublishingConfig(config, siteConfig);
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,
@@ -563,7 +565,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
           this.renderBodyAsMD({ note, notesDir: notesBodyDir }),
         ]);
-      })
+      }),
     );
 
     // render refs
@@ -573,7 +575,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const refIds: string[] = await Promise.all(
       fs.readdirSync(refsRoot).map(async (ent) => {
         const { refId } = fs.readJSONSync(
-          path.join(refsRoot, ent)
+          path.join(refsRoot, ent),
         ) as SerializedNoteRef;
         const noteId = refId.id;
         const noteForRef = _.get(engine.notes, noteId);
@@ -591,7 +593,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             config,
             insideNoteRef: true,
           },
-          { flavor: ProcFlavor.PUBLISHING }
+          { flavor: ProcFlavor.PUBLISHING },
         );
 
         const assetsPrefix = ConfigUtils.getPublishing(config).assetsPrefix;
@@ -618,7 +620,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         fs.ensureFileSync(dst);
         fs.writeFileSync(dst, out);
         return refIdString;
-      })
+      }),
     );
 
     const podDstPath = path.join(podDstDir, "notes.json");
@@ -639,7 +641,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
           ...payload,
           notes: removeBodyFromNotesDict(payload.notes),
         },
-        { encoding: "utf8", spaces: 2 }
+        { encoding: "utf8", spaces: 2 },
       ),
       fs.writeJSONSync(refDstPath, refIds, {
         encoding: "utf8",

@@ -4,8 +4,6 @@ import {
   DEngineClient,
   DVault,
   DVaultVisibility,
-  IntermediateDendronConfig,
-  ProcFlavor,
   PublishUtils,
   VaultUtils,
   WorkspaceOpts,
@@ -21,12 +19,10 @@ import {
   checkDir,
   checkFile,
   checkNotInDir,
-  checkString,
   TestUnifiedUtils,
 } from "../../utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { MDUtilsV5, VFile } from "@dendronhq/unified";
 
 async function setupExport(
   opts: WorkspaceOpts & {

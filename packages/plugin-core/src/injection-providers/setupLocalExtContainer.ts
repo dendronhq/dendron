@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { DVault, EngineEventEmitter } from "@dendronhq/common-all";
 import { container } from "tsyringe";
 import { ITreeViewConfig } from "../common/ITreeViewConfig";

@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import assert from "assert";
 import _ from "lodash";
 import { container } from "tsyringe";

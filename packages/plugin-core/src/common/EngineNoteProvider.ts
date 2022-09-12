@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {
   EngineEventEmitter,
   type ReducedDEngine,

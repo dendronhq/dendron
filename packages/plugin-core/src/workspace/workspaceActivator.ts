@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { SubProcessExitType } from "@dendronhq/api-server";
 import * as Sentry from "@sentry/node";
 import {

@@ -251,7 +251,7 @@ export class NextjsExportPodUtils {
 
     // Non-existent sidebars file: no sidebars
     if (!(await fs.pathExists(sidebarFilePath))) {
-      return DisabledSidebar;
+      throw new Error(`no sidebar file found at ${sidebarFilePath}`);
     }
 
     /* eslint-disable-next-line import/no-dynamic-require, global-require */

@@ -965,6 +965,10 @@ export class ConfigUtils {
     return this.getCommands(config).copyNoteLink.aliasMode;
   }
 
+  static getVersion(config: IntermediateDendronConfig): number {
+    return config.version;
+  }
+
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

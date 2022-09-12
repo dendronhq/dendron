@@ -1,15 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GIVEN sidebar config input WHEN containing autogenrated sidebar item THEN return resolved sidebar 1`] = `
-Array [
-  Object {
-    "id": "foo.ch1",
-    "label": "Ch1",
-    "type": "note",
-  },
-]
-`;
-
 exports[`GIVEN sidebar config input WHEN providing DefaultSidebar THEN return default sidebar 1`] = `
 Array [
   Object {

@@ -34,5 +34,3 @@ Array [
   },
 ]
 `;
-
-exports[`GIVEN sidebar config input WHEN providing empty config THEN return empty sidebar 1`] = `Array []`;

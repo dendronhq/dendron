@@ -8,7 +8,7 @@ describe("GIVEN sidebar config input", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const sidebarResp = getSidebar([], { notes: engine.notes });
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp.data).toHaveLength(0);
         },
         {
           expect,

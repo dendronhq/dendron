@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GIVEN sidebar config input WHEN providing DefaultSidebar THEN return default sidebar 1`] = `
+exports[`GIVEN sidebar config input WHEN providing DefaultSidebar THEN return sidebar object 1`] = `
 Array [
   Object {
     "id": "bar",
@@ -18,6 +18,51 @@ Array [
     "label": "Foo",
     "link": Object {
       "id": "foo",
+      "type": "note",
+    },
+    "type": "category",
+  },
+]
+`;
+
+exports[`GIVEN sidebar config input WHEN providing custom sidebar THEN return sidebar object 1`] = `
+Array [
+  Object {
+    "id": "foo",
+    "label": "Foo label",
+    "type": "note",
+  },
+  Object {
+    "items": Array [
+      Object {
+        "items": Array [
+          Object {
+            "id": "foo.ch1.gch1.ggch1",
+            "label": "Ggch1",
+            "type": "note",
+          },
+        ],
+        "label": "Gch1",
+        "link": Object {
+          "id": "foo.ch1.gch1",
+          "type": "note",
+        },
+        "type": "category",
+      },
+      Object {
+        "id": "foo.ch1.gch2",
+        "label": "Gch2",
+        "type": "note",
+      },
+      Object {
+        "id": "goo.ends-with-ch1.no-ch1-by-itself",
+        "label": "Some deep note",
+        "type": "note",
+      },
+    ],
+    "label": "Some category label",
+    "link": Object {
+      "id": "bar",
       "type": "note",
     },
     "type": "category",

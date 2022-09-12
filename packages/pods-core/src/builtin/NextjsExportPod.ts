@@ -505,6 +505,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       throw error;
     }
 
+    const sidebarPath =
+      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
+    const sidebarConfigInput = await NextjsExportPodUtils.loadSidebarsFile(
+      sidebarPath
+    );
+
     await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
@@ -517,19 +523,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       noExpandSingleDomain: true,
     });
 
-    const sidebarPath =
-      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
-
-    const sidebarResp = getSidebar(
-      await NextjsExportPodUtils.loadSidebarsFile(sidebarPath),
-      {
-        notes: publishedNotes,
-        duplicateNoteBehavior:
-          "duplicateNoteBehavior" in siteConfig
-            ? siteConfig.duplicateNoteBehavior
-            : undefined,
-      }
-    );
+    const sidebarResp = getSidebar(sidebarConfigInput, {
+      notes: publishedNotes,
+      duplicateNoteBehavior:
+        "duplicateNoteBehavior" in siteConfig
+          ? siteConfig.duplicateNoteBehavior
+          : undefined,
+    });
 
     if (sidebarResp.error) {
       throw sidebarResp.error;

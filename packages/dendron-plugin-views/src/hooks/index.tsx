@@ -1,8 +1,4 @@
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
@@ -95,7 +91,6 @@ export const useRenderedNoteBody = ({
  * https://mermaid-js.github.io/mermaid/#/
  */
 export const useMermaid = ({
-  config,
   themeType,
   mermaid,
   noteRenderedBody,
@@ -107,25 +102,23 @@ export const useMermaid = ({
 }) => {
   React.useEffect(() => {
     const logger = createLogger("useMermaid");
-    if (config && ConfigUtils.getPreview(config)?.enableMermaid) {
-      mermaid.initialize({
-        startOnLoad: true,
-        // Cast here because the type definitions seem to be incorrect. I can't
-        // get a value for the mermaid Theme enum, it's always undefined at
-        // runtime.
-        theme: (themeType === "light" ? "forest" : "dark") as any,
-      });
-      // use for debugging
-      // @ts-ignore
-      window._mermaid = mermaid;
-      // @ts-ignore
-      mermaid.init();
-      logger.info({ msg: "init mermaid library", themeType });
-    } else {
-      logger.info("skip mermaid library");
-    }
+
+    mermaid.initialize({
+      startOnLoad: true,
+      // Cast here because the type definitions seem to be incorrect. I can't
+      // get a value for the mermaid Theme enum, it's always undefined at
+      // runtime.
+      theme: (themeType === "light" ? "forest" : "dark") as any,
+    });
+    // use for debugging
+    // @ts-ignore
+    window._mermaid = mermaid;
+    // @ts-ignore
+    mermaid.init();
+    logger.info({ msg: "init mermaid library", themeType });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, noteRenderedBody, themeType]);
+  }, [noteRenderedBody, themeType]);
 };
 
 /**

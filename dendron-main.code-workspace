@@ -64,10 +64,11 @@
   ],
   "settings": {
     "files.exclude": {
+      ".next/**": true
       "**/profile": true,
       "**/*.tff": true,
       "**/*.woff": true,
-      "**/*.woff2": true,
+      "**/*.woff2": true
     },
     "editor.codeActionsOnSave": {},
     "search.exclude": {
@@ -76,6 +77,7 @@
       "**/node_modules": true,
       "**/bower_components": true,
       "CHANGELOG.md": true,
+      ".next/**": true
     },
     "files.watcherExclude": {
       "**/.git/objects/**": true,

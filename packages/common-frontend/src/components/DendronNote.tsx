@@ -1,11 +1,9 @@
 /* eslint-disable react/no-danger */
-import { IntermediateDendronConfig } from "@dendronhq/common-all";
 import React from "react";
 import { createLogger } from "../utils/logger";
 
 type Props = {
   noteContent: string;
-  config: IntermediateDendronConfig;
 };
 
 export const useMermaid = ({

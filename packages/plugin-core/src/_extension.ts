@@ -57,7 +57,7 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
-import { setupLocalExtContainer } from "./local/injection-providers/SetupLocalExtContainer";
+import { setupLocalExtContainer } from "./injection-providers/setupLocalExtContainer";
 import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";

@@ -3,7 +3,7 @@ import _ from "lodash";
 import { container } from "tsyringe";
 import { NativeTreeView } from "../../common/NativeTreeView";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { setupLocalExtContainer } from "../../local/injection-providers/SetupLocalExtContainer";
+import { setupLocalExtContainer } from "../../injection-providers/setupLocalExtContainer";
 import { EngineAPIService } from "../../services/EngineAPIService";
 import { describeSingleWS } from "../testUtilsV3";
 

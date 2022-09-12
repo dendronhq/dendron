@@ -2,6 +2,10 @@ import { getSidebar, DefaultSidebar } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 
+/*
+ * See [[dendron://dendron.dendron-site/dendron.topic.publish.sidebar#complex-sidebar-example]] for sidebar docs and example
+ */
+
 describe("GIVEN sidebar config input", () => {
   describe("WHEN providing empty config", () => {
     test("THEN return empty sidebar object", async () => {

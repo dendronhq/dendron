@@ -181,7 +181,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
         const isCategory = hasChildren;
         const isNote = !hasChildren;
 
-        if (!note) {
+        if (!note || fm.nav_exclude) {
           return undefined;
         }
 

@@ -79,7 +79,6 @@ export default function DendronTreeMenu(
   const roots = treeMenuNode2DataNode({
     roots: tree.roots,
     showVaultName: false,
-    applyNavExclude: true,
   });
 
   // --- Methods
@@ -149,7 +148,7 @@ function MenuView({
   activeNote: string;
 } & Partial<NoteData>) {
   const ExpandIcon = useCallback(
-    ({ isOpen, ...rest }: { isOpen: boolean }) => {
+    ({ isOpen }: { isOpen: boolean }) => {
       const UncollapsedIcon = isOpen ? UpOutlined : DownOutlined;
       const Icon = collapsed ? RightOutlined : UncollapsedIcon;
       return (
@@ -243,11 +242,9 @@ function MenuItemTitle(props: Partial<NoteData> & { menu: DataNode }) {
 function treeMenuNode2DataNode({
   roots,
   showVaultName,
-  applyNavExclude = false,
 }: {
   roots: TreeMenuNode[];
   showVaultName?: boolean;
-  applyNavExclude: boolean;
 }): DataNode[] {
   return roots
     .map((node: TreeMenuNode) => {
@@ -258,10 +255,6 @@ function treeMenuNode2DataNode({
         icon = <NumberOutlined />;
       } else if (node.icon === TreeMenuNodeIcon.plusOutlined) {
         icon = <PlusOutlined />;
-      }
-
-      if (applyNavExclude && node.navExclude) {
-        return undefined;
       }
 
       let title: any = node.title;
@@ -284,7 +277,6 @@ function treeMenuNode2DataNode({
           ? treeMenuNode2DataNode({
               roots: node.children,
               showVaultName,
-              applyNavExclude,
             })
           : [],
       };

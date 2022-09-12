@@ -38,6 +38,16 @@ Array [
 ]
 `;
 
+exports[`GIVEN sidebar config input WHEN nav_exclude is enabled THEN return sidebar object 1`] = `
+Array [
+  Object {
+    "id": "bar",
+    "label": "Bar",
+    "type": "note",
+  },
+]
+`;
+
 exports[`GIVEN sidebar config input WHEN nav_exclude_children is enabled THEN return sidebar object 1`] = `
 Array [
   Object {

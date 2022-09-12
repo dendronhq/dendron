@@ -2,7 +2,6 @@ import _ from "lodash";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
-import { PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebar, SidebarItem } from "../sidebar";
@@ -19,7 +18,6 @@ export type TreeMenuNode = {
   icon: TreeMenuNodeIcon | null;
   hasTitleNumberOutlined: boolean;
   vaultName: string;
-  navExclude: boolean;
   children?: TreeMenuNode[];
   contextValue?: string;
 };
@@ -89,15 +87,12 @@ export class TreeUtils {
 
       notesLabelById[note.id] = title;
 
-      const fm = PublishUtils.getPublishFM(note);
-
       const treeMenuNode: TreeMenuNode = {
         key: note.id,
         title,
         icon,
         hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
         vaultName: VaultUtils.getName(note.vault),
-        navExclude: fm.nav_exclude || false,
         children: [],
       };
 

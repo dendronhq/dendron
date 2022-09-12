@@ -192,7 +192,12 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
           severity: ERROR_SEVERITY.MINOR,
         });
       }
-      const out = this.deleteNote({ note: response.data, opts, engine, ctx });
+      const out = await this.deleteNote({
+        note: response.data,
+        opts,
+        engine,
+        ctx,
+      });
       return out;
     } else {
       const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;

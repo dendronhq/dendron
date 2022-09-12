@@ -1,10 +1,10 @@
 import {
   ConsoleLogger,
+  DeleteNoteResp,
   DendronCompositeError,
   DendronError,
   DNodeUtils,
   DVault,
-  EngineDeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineV3Base,
@@ -352,7 +352,7 @@ export class DendronEngineV3Web
   async deleteNote(
     id: string,
     opts?: EngineDeleteOpts | undefined
-  ): Promise<EngineDeleteNoteResp> {
+  ): Promise<DeleteNoteResp> {
     const ctx = "DendronEngineV3Web:delete";
     const changes = await super.deleteNote(id, opts);
     if (changes.error) {

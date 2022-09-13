@@ -64,7 +64,7 @@
   ],
   "settings": {
     "files.exclude": {
-      ".next/**": true,
+      ".next/**": true
       "**/profile": true,
       "**/*.tff": true,
       "**/*.woff": true,

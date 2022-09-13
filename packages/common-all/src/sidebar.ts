@@ -353,7 +353,7 @@ function processSidebar(
     );
     return sidebarProcssedFlattenedResp;
   });
-  return ErrorRespV3Utils.unwrap(sidebarProcessedResp);
+  return ErrorRespV3Utils.andThen(sidebarProcessedResp, (x) => x);
 }
 
 function parseSidebarConfig(input: unknown): RespV3<SidebarConfig> {

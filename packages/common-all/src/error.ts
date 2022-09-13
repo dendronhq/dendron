@@ -418,7 +418,7 @@ export function isTSError(err: any): err is Error {
 /** Utility class for helping with dataflow of RespV3 objects. */
 export class ErrorFuncUtils {
   /**
-   * Throws an error if `RespV3` contains it, otherwise returns the containing data.
+   * Unwrap the RespV3SuccessResp value, or throw if there is an RespV3ErrorResp.
    */
   static unwrap<T>(value: RespV3<T>): T {
     if (value.error) {
@@ -428,7 +428,17 @@ export class ErrorFuncUtils {
   }
 
   /**
-   * map the data containt inside `RespV3` object to another value.
+   * Unwrap the RespV3SuccessResp value, or return the default if there is an RespV3ErrorResp.
+   */
+  static unwrapOr<T, TT>(value: RespV3<T>, or: TT): T | TT {
+    if (value.error) {
+      return or;
+    }
+    return value.data;
+  }
+
+  /**
+   * Map the data containt inside `RespV3` object to another value.
    */
   static map<T, R>(resp: RespV3<T>, fn: (value: T) => R): RespV3<R> {
     if (resp.error) {
@@ -437,6 +447,20 @@ export class ErrorFuncUtils {
       return {
         data: fn(resp.data),
       };
+    }
+  }
+
+  /**
+   * Same as map. Except you need to return a new `RespV3`.
+   */
+  static andThen<T, R>(
+    resp: RespV3<T>,
+    fn: (value: T) => RespV3<R>
+  ): RespV3<R> {
+    if (resp.error) {
+      return resp;
+    } else {
+      return fn(resp.data);
     }
   }
 

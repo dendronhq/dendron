@@ -1,3 +1,4 @@
+import { WriteSchemaResp } from "@dendronhq/common-all";
 import vscode, { Uri } from "vscode";
 
 /**
@@ -13,5 +14,5 @@ export interface ISchemaSyncService {
   }: {
     uri: Uri;
     isBrandNewFile?: boolean;
-  }): Promise<void>;
+  }): Promise<WriteSchemaResp[] | undefined>;
 }

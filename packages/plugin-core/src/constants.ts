@@ -627,8 +627,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.createScratchNote",
     title: `${CMD_PREFIX} Create Scratch Note`,
     keybindings: {
-      key: "ctrl+shift+s",
-      mac: "cmd+shift+s",
+      key: "ctrl+k s",
+      mac: "cmd+k s",
       when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
     },
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,

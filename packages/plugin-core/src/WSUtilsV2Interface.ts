@@ -4,6 +4,7 @@ import {
   DVault,
   NoteProps,
   RespV3,
+  SchemaModuleProps,
 } from "@dendronhq/common-all";
 
 export interface IWSUtilsV2 {
@@ -35,6 +36,7 @@ export interface IWSUtilsV2 {
   ): Promise<vscode.TextEditor>;
 
   openNote(note: NoteProps): Promise<vscode.TextEditor>;
+  openSchema(schema: SchemaModuleProps): Promise<vscode.TextEditor>;
 
   /**
    * Given list of notes, prompt user to pick note by selecting corresponding vault name

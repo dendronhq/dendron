@@ -17,6 +17,7 @@ import {
   DStore,
   DVault,
   EngineDeleteOpts,
+  EngineSchemaWriteOpts,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   error2PlainObject,
@@ -49,6 +50,7 @@ import {
   USER_MESSAGES,
   VaultUtils,
   WriteNoteResp,
+  WriteSchemaResp,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -1379,8 +1381,14 @@ export class FileStorage implements DStore {
     };
   }
 
-  async writeSchema(schemaModule: SchemaModuleProps) {
+  async writeSchema(
+    schemaModule: SchemaModuleProps,
+    opts?: EngineSchemaWriteOpts
+  ): Promise<WriteSchemaResp> {
     this.schemas[schemaModule.root.id] = schemaModule;
+    if (opts?.metaOnly) {
+      return { data: undefined };
+    }
     const vault = schemaModule.vault;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     await schemaModuleProps2File(schemaModule, vpath, schemaModule.fname);

@@ -380,6 +380,10 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "object",
     group: "publishing",
   },
+  "publishing.sidebarPath": {
+    type: "string",
+    group: "publishing",
+  },
   "dev.enableLinkCandidates": {
     type: "boolean",
     group: "dev",

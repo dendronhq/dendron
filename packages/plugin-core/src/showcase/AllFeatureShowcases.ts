@@ -1,5 +1,6 @@
 import { ShowcaseEntry } from "@dendronhq/engine-server";
 import { BacklinksPanelHoverTip } from "./BacklinksPanelHoverTip";
+import { CreateScratchNoteKeybindingTip } from "./CreateScratchNoteKeybindingTip";
 import { GraphPanelTip } from "./GraphPanelTip";
 import { GraphThemeTip } from "./GraphThemeTip";
 import { IFeatureShowcaseMessage } from "./IFeatureShowcaseMessage";
@@ -90,4 +91,5 @@ export const ALL_FEATURE_SHOWCASES: IFeatureShowcaseMessage[] = [
   new BacklinksPanelHoverTip(),
   new ObsidianImportTip(),
   new SettingsUITip(),
+  new CreateScratchNoteKeybindingTip(),
 ];

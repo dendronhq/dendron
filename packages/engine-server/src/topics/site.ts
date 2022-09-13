@@ -250,7 +250,7 @@ export class SiteUtils {
     });
     const notesForHierarchy = _.clone(engine.notes);
 
-    // get the domain note
+    // get the domain notes
     const notes = NoteUtils.getNotesByFnameFromEngine({
       fname: domain,
       engine,

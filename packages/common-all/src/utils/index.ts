@@ -507,6 +507,12 @@ export class TagUtils {
  */
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
+/**
+ * simple Option type
+ * See https://en.wikipedia.org/wiki/Option_type
+ */
+export type Option<T> = T | undefined;
+
 /** Makes a single property within a type required. */
 export type NonOptional<T, K extends keyof T> = Pick<Required<T>, K> &
   Omit<T, K>;
@@ -963,6 +969,10 @@ export class ConfigUtils {
   }
   static getAliasMode(config: IntermediateDendronConfig) {
     return this.getCommands(config).copyNoteLink.aliasMode;
+  }
+
+  static getVersion(config: IntermediateDendronConfig): number {
+    return config.version;
   }
 
   // set

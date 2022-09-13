@@ -1,14 +1,6 @@
 {
   "folders": [
     {
-      "path": "docs/dendron-docs",
-      "name": "dendron-docs"
-    },
-    {
-      "path": "docs/seeds/dendron.dendron-site",
-      "name": "dendron.dendron-site"
-    },
-    {
       "path": ".",
       "name": "root"
     },
@@ -72,15 +64,20 @@
   ],
   "settings": {
     "files.exclude": {
-      "*.d.ts": true,
-      "profile": true
+      ".next/**": true
+      "**/profile": true,
+      "**/*.tff": true,
+      "**/*.woff": true,
+      "**/*.woff2": true
     },
     "editor.codeActionsOnSave": {},
     "search.exclude": {
+      "docs/*.md": true,
+      "**/*.d.ts": true,
       "**/node_modules": true,
       "**/bower_components": true,
       "CHANGELOG.md": true,
-      "*.d.ts": true
+      ".next/**": true
     },
     "files.watcherExclude": {
       "**/.git/objects/**": true,
@@ -107,8 +104,6 @@
     "typescript.tsdk": "root/node_modules/typescript/lib"
   },
   "extensions": {
-    "recommendations": [
-      "esbenp.prettier-vscode"
-    ]
+    "recommendations": ["esbenp.prettier-vscode"]
   }
 }

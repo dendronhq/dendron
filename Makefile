@@ -2,13 +2,13 @@ clean:
 	echo "Cleaning project"
 	./bootstrap/scripts/cleanup.sh
 
-install: 
+install:
 	echo "Installing yarn dependencies..."
 	yarn
 	echo "Installing package dependencies..."
 	yarn setup
 
-watch: 
+watch:
 	echo "Watching for changes..."
 	./bootstrap/scripts/watch.sh
 
@@ -18,12 +18,12 @@ cleanBuild:
 	make install
 
 db-gen:
-	cd packages/engine-server && yarn prisma generate 
+	cd packages/engine-server && yarn prisma generate
 
 start-local-registry:
 	yarn config set registry http://localhost:4873
 	npm set registry http://localhost:4873/
-	npx verdaccio -c ./bootstrap/data/verdaccio/config.yaml 
+	npx verdaccio -c ./bootstrap/data/verdaccio/config.yaml
 
 publish-local:
 	lerna publish from-package --ignore-scripts
@@ -31,3 +31,6 @@ publish-local:
 build-plugin:
 	dendron dev prep_plugin && rm package.json
 	dendron dev package_plugin
+
+setup-nextjs-test:
+	cd test-workspace && npx dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"

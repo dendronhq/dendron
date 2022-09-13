@@ -400,13 +400,11 @@ describe("GIVEN nextjs export", () => {
           `"siteUrl": "https://foo.com"`,
           `"enablePrettyLinks": true`
         );
-
         await checkFile(
           { fpath: path.join(dest, "data", "tree.json") },
           `"roots": [`,
           `"child2parent": {`
         );
-
         // check pretty url
         await checkFile(
           {
@@ -592,6 +590,54 @@ describe("GIVEN nextjs export", () => {
           },
         }
       );
+    });
+  });
+
+  describe("WHEN sidebarPath", () => {
+    describe("AND is set to false", () => {
+      test("THEN ok", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            const dest = await setupExport({ engine, wsRoot, vaults });
+            await verifyExport(dest);
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  sidebarPath: false,
+                },
+              });
+            },
+          }
+        );
+      });
+    });
+    describe("AND points to non-existend file", () => {
+      test("THEN throw", async () => {
+        await runEngineTestV5(
+          async ({ engine, vaults, wsRoot }) => {
+            await expect(async () => {
+              await setupExport({ engine, wsRoot, vaults });
+            }).rejects.toThrow();
+          },
+          {
+            expect,
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              setupConfig({
+                ...opts,
+                siteConfig: {
+                  sidebarPath: "./non-existend-file.js",
+                },
+              });
+            },
+          }
+        );
+      });
     });
   });
 });

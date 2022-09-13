@@ -356,11 +356,7 @@ export class DendronEngineV3Web
     const ctx = "DendronEngineV3Web:delete";
     const changes = await super.deleteNote(id, opts);
     if (changes.error) {
-      throw new DendronError({
-        message: `Unable to delete note ${id}`,
-        severity: ERROR_SEVERITY.MINOR,
-        payload: changes.error,
-      });
+      return changes;
     }
     if (changes.data) this._onNoteChangedEmitter.fire(changes.data);
 

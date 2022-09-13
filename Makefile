@@ -32,5 +32,17 @@ build-plugin:
 	dendron dev prep_plugin && rm package.json
 	dendron dev package_plugin
 
+docs-push:
+	cd docs && zip -r generated-api-docs.zip generated-api-docs
+	cd docs && env AWS_DEFAULT_PROFILE=aws-s3-bot aws s3 cp --acl public-read generated-api-docs.zip "s3://org-dendron-public-assets/publish/generated-api-docs.zip"
+
+docs-pull:
+	cd docs && curl https://d2q204iup008xl.cloudfront.net/publish/generated-api-docs.zip -O -J -L
+	cd docs && unzip generated-api-docs.zip
+	cd docs && rm generated-api-docs.zip
+
+docs-build:
+	yarn typedoc --plugin typedoc-plugin-markdown --out docs/generated-api-docs --entryPointStrategy packages "packages/{common-all,common-server}" 
+
 setup-nextjs-test:
 	cd test-workspace && npx dendron exportPod --podId dendron.nextjs --config "dest=../packages/nextjs-template/"

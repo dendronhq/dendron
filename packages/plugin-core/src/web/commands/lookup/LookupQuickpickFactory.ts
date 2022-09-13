@@ -7,10 +7,10 @@ import {
   NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import path from "path";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickOptions } from "vscode";
+import { Utils } from "vscode-uri";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
@@ -159,10 +159,9 @@ export class LookupQuickpickFactory {
   }
 
   private getInitialValueBasedOnActiveNote() {
-    const initialValue = path.basename(
-      vscode.window.activeTextEditor?.document.uri.fsPath || "",
-      ".md"
-    );
+    const uri = vscode.window.activeTextEditor?.document.uri;
+    if (!uri) return "";
+    const initialValue = _.trimEnd(Utils.basename(uri), ".md");
     return initialValue;
   }
 

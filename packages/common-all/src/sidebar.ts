@@ -244,7 +244,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
   return _.flow(generateSidebar, sortItems)(hierarchySource);
 };
 
-function processSidebar(
+export function processSidebar(
   sidebarResp: RespV3<SidebarConfig>,
   { notes, duplicateNoteBehavior }: SidebarOptions
 ): RespV3<Sidebar> {
@@ -356,7 +356,7 @@ function processSidebar(
   return ErrorRespV3Utils.andThen(sidebarProcessedResp, (x) => x);
 }
 
-function parseSidebarConfig(input: unknown): RespV3<SidebarConfig> {
+export function parseSidebarConfig(input: unknown): RespV3<SidebarConfig> {
   if (Array.isArray(input)) {
     const x = input.map((maybeSidebarItem) => {
       const { type } = maybeSidebarItem;

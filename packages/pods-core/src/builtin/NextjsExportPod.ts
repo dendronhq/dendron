@@ -18,7 +18,8 @@ import {
   RespV3,
   Theme,
   TreeUtils,
-  getSidebar,
+  processSidebar,
+  parseSidebarConfig,
   DisabledSidebar,
   DefaultSidebar,
 } from "@dendronhq/common-all";
@@ -510,6 +511,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const sidebarConfigInput = await NextjsExportPodUtils.loadSidebarsFile(
       sidebarPath
     );
+    const sidebarConfig = parseSidebarConfig(sidebarConfigInput);
+
+    // fail early, before computing `SiteUtils.filterByConfig`.
+    if (sidebarConfig.error) {
+      throw sidebarConfig.error;
+    }
 
     await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
@@ -523,14 +530,17 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       noExpandSingleDomain: true,
     });
 
-    const sidebarResp = getSidebar(sidebarConfigInput, {
+    const duplicateNoteBehavior =
+      "duplicateNoteBehavior" in siteConfig
+        ? siteConfig.duplicateNoteBehavior
+        : undefined;
+
+    const sidebarResp = processSidebar(sidebarConfig, {
       notes: publishedNotes,
-      duplicateNoteBehavior:
-        "duplicateNoteBehavior" in siteConfig
-          ? siteConfig.duplicateNoteBehavior
-          : undefined,
+      duplicateNoteBehavior,
     });
 
+    // fail if sidebar could not be created
     if (sidebarResp.error) {
       throw sidebarResp.error;
     }

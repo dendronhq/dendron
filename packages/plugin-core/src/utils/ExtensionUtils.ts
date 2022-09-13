@@ -396,6 +396,7 @@ export class ExtensionUtils {
     const previewTheme = dendronConfig?.preview?.theme;
     const enabledExportPodV2 = dendronConfig.dev?.enableExportPodV2;
     const { workspaceFile, workspaceFolders } = vscode.workspace;
+    const configVersion = ConfigUtils.getVersion(dendronConfig);
 
     const trackProps = {
       duration: durationReloadWorkspace,
@@ -412,6 +413,7 @@ export class ExtensionUtils {
       numTaskNotes,
       workspaceType,
       codeWorkspacePresent,
+      configVersion,
       selfContainedVaultsEnabled:
         dendronConfig.dev?.enableSelfContainedVaults || false,
       numSelfContainedVaults: vaults.filter(VaultUtils.isSelfContained).length,

@@ -36,3 +36,4 @@ packages/dendron-viz/lib
 generated-prisma-client
 packages/engine-server/prisma/dev.db
 dev.db-journal
+builds

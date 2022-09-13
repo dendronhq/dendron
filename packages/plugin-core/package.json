@@ -1342,8 +1342,8 @@
       },
       {
         "command": "dendron.createScratchNote",
-        "key": "ctrl+shift+s",
-        "mac": "cmd+shift+s",
+        "key": "ctrl+k s",
+        "mac": "cmd+k s",
         "when": "dendron:pluginActive && shellExecutionSupported"
       },
       {

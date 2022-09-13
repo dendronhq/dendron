@@ -51,6 +51,7 @@ export type DendronPublishingConfig = {
   enablePrettyLinks: boolean;
   siteBanner?: string;
   giscus?: GiscusConfig;
+  sidebarPath?: string | false;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &

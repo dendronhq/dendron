@@ -34,6 +34,7 @@ import * as Sentry from "@sentry/node";
 import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { URI, Utils } from "vscode-uri";
+import { VersionProvider } from "../versionProvider";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -273,6 +274,8 @@ export class ExtensionUtils {
       const metadata = MetadataService.instance().getMeta();
       if (metadata.firstInstall === undefined && !UUIDPathExists) {
         MetadataService.instance().setInitialInstall();
+        const version = VersionProvider.version();
+        MetadataService.instance().setInitialInstallVersion(version);
       } else {
         // we still want to proceed with InstallStatus.INITIAL_INSTALL because we want everything
         // tied to initial install to happen in this instance of VSCode once for the first time

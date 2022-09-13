@@ -48,7 +48,8 @@
     "semver": "^7.3.2",
     "spark-md5": "^3.0.2",
     "title": "^3.4.4",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.0.3",
+    "zod": "^3.19.0"
   },
   "devDependencies": {
     "@types/fast-levenshtein": "^0.0.2",

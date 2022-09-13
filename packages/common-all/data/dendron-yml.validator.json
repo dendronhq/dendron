@@ -1187,6 +1187,17 @@
         },
         "giscus": {
           "$ref": "#/definitions/GiscusConfig"
+        },
+        "sidebarPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean",
+              "const": false
+            }
+          ]
         }
       },
       "required": [

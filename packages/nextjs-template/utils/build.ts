@@ -40,7 +40,7 @@ export function getNotes(): NoteData {
   if (_.isUndefined(_NOTES_CACHE)) {
     const dataDir = getDataDir();
     _NOTES_CACHE = fs.readJSONSync(
-      path.join(dataDir, "notes.json"),
+      path.join(dataDir, "notes.json")
     ) as NoteData;
   }
   return _NOTES_CACHE;
@@ -60,11 +60,9 @@ export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
   // filter out the index node
   const paths = Object.keys(notes)
     .filter((id) => id !== noteIndex.id)
-    .map(
-      (id) => {
-        return { params: { id } };
-      },
-    );
+    .map((id) => {
+      return { params: { id } };
+    });
   return {
     paths,
     fallback: false,
@@ -76,9 +74,7 @@ export function getNotePaths(): GetStaticPathsResult<DendronNotePageParams> {
  */
 export function getNoteMeta(id: string): Promise<NoteProps> {
   const dataDir = getDataDir();
-  return fs.readJSON(
-    path.join(dataDir, NOTE_META_DIR, `${id}.json`),
-  );
+  return fs.readJSON(path.join(dataDir, NOTE_META_DIR, `${id}.json`));
 }
 
 let _CONFIG_CACHE: IntermediateDendronConfig | undefined;
@@ -91,7 +87,11 @@ export function getConfig(): Promise<IntermediateDendronConfig> {
 }
 
 export function getPublicDir(): string {
-  return path.join(process.cwd(), "public");
+  const publicDir = process.env.PUBLIC_DIR;
+  if (!publicDir) {
+    throw new Error("PUBLIC_DIR not set");
+  }
+  return publicDir;
 }
 
 export async function getCustomHead(): Promise<string | null> {

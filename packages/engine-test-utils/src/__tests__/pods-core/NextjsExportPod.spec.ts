@@ -389,8 +389,8 @@ describe("GIVEN NextExport pod", () => {
   });
 });
 
-describe("nextjs export", () => {
-  test("ok", async () => {
+describe("GIVEN nextjs export", () => {
+  test("THEN ok", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const dest = await setupExport({ engine, wsRoot, vaults });
@@ -432,146 +432,166 @@ describe("nextjs export", () => {
     );
   });
 
-  test("ok, override siteUrl", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const dest = await setupExport({
-          engine,
-          wsRoot,
-          vaults,
-          podConfig: { overrides: { siteUrl: "https://bar.com" } },
-        });
-        verifyExport(dest);
+  describe("WHEN override siteUrl", () => {
+    test("THEN ok", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({
+            engine,
+            wsRoot,
+            vaults,
+            podConfig: { overrides: { siteUrl: "https://bar.com" } },
+          });
+          verifyExport(dest);
 
-        await checkFile(
-          { fpath: path.join(dest, "data", "dendron.json") },
-          `"siteUrl": "https://bar.com"`
-        );
-      },
-      {
-        expect,
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupBasic(opts);
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
+          await checkFile(
+            { fpath: path.join(dest, "data", "dendron.json") },
+            `"siteUrl": "https://bar.com"`
           );
         },
-      }
-    );
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
+          },
+        }
+      );
+    });
   });
 
-  test("ok, with assetPrefix", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const dest = await setupExport({ engine, wsRoot, vaults });
-        await verifyExport(dest);
-        await checkFile(
-          { fpath: path.join(dest, ".env.production") },
-          "NEXT_PUBLIC_ASSET_PREFIX=/customPrefix"
-        );
-        await checkFile(
-          {
-            fpath: path.join(dest, "data", "notes", "foo.html"),
-          },
-          `href="/customPrefix/notes/foo.ch1"`
-        );
-      },
-      {
-        expect,
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupBasic(opts);
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              ConfigUtils.setPublishProp(
-                config,
-                "assetsPrefix",
-                "/customPrefix"
-              );
-              return config;
+  describe("WHEN assetPrefix is set", () => {
+    test("THEN ok", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({ engine, wsRoot, vaults });
+          await verifyExport(dest);
+          await checkFile(
+            { fpath: path.join(dest, ".env.production") },
+            "NEXT_PUBLIC_ASSET_PREFIX=/customPrefix"
+          );
+          await checkFile(
+            {
+              fpath: path.join(dest, "data", "notes", "foo.html"),
             },
-            { wsRoot: opts.wsRoot }
+            `href="/customPrefix/notes/foo.ch1"`
           );
         },
-      }
-    );
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                ConfigUtils.setPublishProp(
+                  config,
+                  "assetsPrefix",
+                  "/customPrefix"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
+          },
+        }
+      );
+    });
   });
 
-  test("ok, override canonical", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const dest = await setupExport({
-          engine,
-          wsRoot,
-          vaults,
-          podConfig: {
-            overrides: {
-              canonicalBaseUrl: "https://foobar.com",
+  describe("WHEN override canonical", () => {
+    test("THEN ok", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({
+            engine,
+            wsRoot,
+            vaults,
+            podConfig: {
+              overrides: {
+                canonicalBaseUrl: "https://foobar.com",
+              },
             },
-          },
-        });
-        await verifyExport(dest);
-        await checkFile(
-          { fpath: path.join(dest, "data", "dendron.json") },
-          `"canonicalBaseUrl": "https://foobar.com"`
-        );
-      },
-      {
-        expect,
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupBasic(opts);
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
+          });
+          await verifyExport(dest);
+          await checkFile(
+            { fpath: path.join(dest, "data", "dendron.json") },
+            `"canonicalBaseUrl": "https://foobar.com"`
           );
         },
-      }
-    );
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
+          },
+        }
+      );
+    });
   });
 
-  test("ok, create githubCname", async () => {
-    await runEngineTestV5(
-      async ({ engine, vaults, wsRoot }) => {
-        const dest = tmpDir().name;
-        const pod = new NextjsExportPod();
-        await pod.execute({
-          engine,
-          vaults,
-          wsRoot,
-          config: {
-            dest,
-            overrides: {
-              siteUrl: "https://bar.com",
+  describe("WHEN github Cname", () => {
+    test("THEN ok", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = tmpDir().name;
+          const pod = new NextjsExportPod();
+          await pod.execute({
+            engine,
+            vaults,
+            wsRoot,
+            config: {
+              dest,
+              overrides: {
+                siteUrl: "https://bar.com",
+              },
             },
-          },
-        });
-        await checkDir({ fpath: dest }, "data", "public");
-        await checkDir({ fpath: path.join(dest, "public") }, "CNAME");
-        await checkFile(
-          { fpath: path.join(dest, "public", "CNAME") },
-          `11ty.dendron.so`
-        );
-      },
-      {
-        expect,
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS.setupBasic(opts);
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
+          });
+          await checkDir({ fpath: dest }, "data", "public");
+          await checkDir({ fpath: path.join(dest, "public") }, "CNAME");
+          await checkFile(
+            { fpath: path.join(dest, "public", "CNAME") },
+            `11ty.dendron.so`
           );
         },
-      }
-    );
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
+          },
+        }
+      );
+    });
   });
 });

@@ -2,6 +2,7 @@
 import {
   DendronASTDest,
   DNodeCompositeKey,
+  DUtils,
   DVault,
   IntermediateDendronConfig,
   NoteDicts,
@@ -25,8 +26,10 @@ import { MDUtilsV5 } from "../utilsv5";
 
 /**
  * For a given note to process with unified, this function determines all
- * NoteProp dependencies that will be needed in order to parse/render the note. It then
- * creates a set of NoteDicts containing all dependencies and returns it.
+ * NoteProp dependencies that will be needed in order to parse/render the note.
+ * It then creates a set of NoteDicts containing all dependencies and returns
+ * it. Any nested/recursive dependencies, such as with note references, will
+ * also be included.
  * @param noteToProcess
  * @param engine
  * @param config
@@ -115,17 +118,6 @@ function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
     }
   );
 
-  visit(
-    ast,
-    [DendronASTTypes.REF_LINK_V2],
-    (noteRef: NoteRefNoteV4, _index) => {
-      renderDependencies.push({
-        fname: noteRef.data.link.from.fname,
-        vaultName: noteRef.data.link.data.vaultName,
-      });
-    }
-  );
-
   visit(ast, [DendronASTTypes.HASHTAG], (hashtag: HashTag, _index) => {
     renderDependencies.push({
       fname: hashtag.value,
@@ -148,18 +140,49 @@ function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
  * @param ast the syntax tree to look for recursive dependencies
  * @returns an array of fname-vault? combinations that this tree depends on.
  */
-function getRecursiveNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
+async function getRecursiveNoteDependencies(
+  ast: Node<Data>,
+  engine: ReducedDEngine
+): Promise<DNodeCompositeKey[]> {
   const renderDependencies: DNodeCompositeKey[] = [];
+  const wildCards: { fname: string; vaultName?: string }[] = [];
 
   visit(
     ast,
     [DendronASTTypes.REF_LINK_V2],
     (noteRef: NoteRefNoteV4, _index) => {
-      renderDependencies.push({
-        fname: noteRef.data.link.from.fname,
-        vaultName: noteRef.data.link.data.vaultName,
-      });
+      if (noteRef.data.link.from.fname.endsWith("*")) {
+        wildCards.push({
+          fname: noteRef.data.link.from.fname,
+          vaultName: noteRef.data.link.data.vaultName,
+        });
+      } else {
+        renderDependencies.push({
+          fname: noteRef.data.link.from.fname,
+          vaultName: noteRef.data.link.data.vaultName,
+        });
+      }
     }
+  );
+
+  // In the case that it's a wildcard note reference, then we need to include
+  // the all notes that match the wildcard pattern.
+  await Promise.all(
+    wildCards.map(async (data) => {
+      const resp = await engine.queryNotes({
+        qs: data.fname,
+        originalQS: data.fname,
+        // vault: data.vaultName
+      });
+
+      const out = _.filter(resp.data, (ent) =>
+        DUtils.minimatch(ent.fname, data.fname)
+      );
+
+      out.forEach((value) => {
+        renderDependencies.push({ fname: value.fname });
+      });
+    })
   );
 
   return renderDependencies;
@@ -201,7 +224,11 @@ async function getForwardLinkDependencies(
   const ast = proc.parse(serialized);
 
   allDependencies.push(...getNoteDependencies(ast));
-  curDependencies.push(...getRecursiveNoteDependencies(ast));
+
+  const recursiveDependencies = await getRecursiveNoteDependencies(ast, engine);
+
+  allDependencies.push(...recursiveDependencies);
+  curDependencies.push(...recursiveDependencies);
 
   while (curDepth < MAX_DEPTH && curDependencies.length > 0) {
     const newRecursiveDependencies: DNodeCompositeKey[] = [];
@@ -214,21 +241,28 @@ async function getForwardLinkDependencies(
 
         const notes = await engine.findNotes({ fname: key.fname, vault });
 
-        notes.forEach((note) => {
-          const proc = MDUtilsV5.procRemarkFull({
-            noteToRender: note,
-            fname: note.fname,
-            vault: note.vault,
-            config,
-            dest: DendronASTDest.MD_DENDRON,
-          });
+        await Promise.all(
+          notes.map(async (note) => {
+            const proc = MDUtilsV5.procRemarkFull({
+              noteToRender: note,
+              fname: note.fname,
+              vault: note.vault,
+              config,
+              dest: DendronASTDest.MD_DENDRON,
+            });
 
-          const serialized = NoteUtils.serialize(note);
-          const ast = proc.parse(serialized);
+            const serialized = NoteUtils.serialize(note);
+            const ast = proc.parse(serialized);
 
-          allDependencies.push(...getNoteDependencies(ast));
-          newRecursiveDependencies.push(...getRecursiveNoteDependencies(ast));
-        });
+            const recursiveDependencies = await getRecursiveNoteDependencies(
+              ast,
+              engine
+            );
+
+            allDependencies.push(...recursiveDependencies);
+            newRecursiveDependencies.push(...recursiveDependencies);
+          })
+        );
       })
     );
 

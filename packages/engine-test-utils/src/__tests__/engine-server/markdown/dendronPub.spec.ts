@@ -1284,7 +1284,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
 
-        const references: NoteProps[] = [(await engine.getNote("bar")).data!];
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
         const noteCacheForRenderDict =
           NoteDictsUtils.createNoteDicts(references);
 
@@ -1318,11 +1321,21 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
         ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
+
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
+        const noteCacheForRenderDict =
+          NoteDictsUtils.createNoteDicts(references);
+
         const resp = await MDUtilsV5.procRehypeFull(
           {
             noteToRender: (await engine.getNote("foo")).data!,
+            noteCacheForRenderDict,
             fname: "foo",
             vault: vaults[0],
+            vaults,
             config,
           },
           { flavor: ProcFlavor.PUBLISHING }
@@ -1330,7 +1343,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         expect(resp).toMatchSnapshot();
         expect(
           await AssertUtils.assertInString({
-            body: resp.contents as string,
+            body: `<p>bar body</p>`,
             nomatch: ["portal-container"],
           })
         ).toBeTruthy();
@@ -1347,7 +1360,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
 
-        const references: NoteProps[] = [(await engine.getNote("bar")).data!];
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
         const noteCacheForRenderDict =
           NoteDictsUtils.createNoteDicts(references);
 
@@ -1381,11 +1397,21 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
         ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
+
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
+        const noteCacheForRenderDict =
+          NoteDictsUtils.createNoteDicts(references);
+
         const resp = await MDUtilsV5.procRehypeFull(
           {
             noteToRender: (await engine.getNote("foo")).data!,
+            noteCacheForRenderDict,
             fname: "foo",
             vault: vaults[0],
+            vaults,
             config,
           },
           { flavor: ProcFlavor.PREVIEW }
@@ -1406,7 +1432,10 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       async ({ vaults, engine }) => {
         const config = ConfigUtils.genDefaultConfig();
 
-        const references: NoteProps[] = [(await engine.getNote("bar")).data!];
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
         const noteCacheForRenderDict =
           NoteDictsUtils.createNoteDicts(references);
 
@@ -1463,11 +1492,20 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             ]);
             ConfigUtils.setPublishProp(config, "siteRootDir", "with-override");
             ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
+
+            const references: NoteProps[] = [
+              (await engine.getNote("bar")).data!,
+            ];
+            const noteCacheForRenderDict =
+              NoteDictsUtils.createNoteDicts(references);
+
             const resp = await MDUtilsV5.procRehypeFull(
               {
                 noteToRender: (await engine.getNote("with-override")).data!,
+                noteCacheForRenderDict,
                 fname: "with-override",
                 vault: vaults[0],
+                vaults,
                 config,
               },
               { flavor: ProcFlavor.PUBLISHING }
@@ -1475,7 +1513,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             expect(resp).toMatchSnapshot();
             expect(
               await AssertUtils.assertInString({
-                body: resp.contents as string,
+                body: `<p>bar body</p>`,
                 nomatch: ["portal-container"],
               })
             ).toBeTruthy();

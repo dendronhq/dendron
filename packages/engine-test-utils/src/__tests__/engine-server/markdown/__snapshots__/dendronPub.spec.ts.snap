@@ -24,9 +24,7 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs true AND note overrides to false THEN renders without pretty refs 1`] = `
 VFile {
   "contents": "<h1 id=\\"with-override\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#with-override\\"></a>With Override</h1>
-<p></p><blockquote>
-No note with name bar found in cache during parsing.
-</blockquote><p></p>",
+<p></p><p></p><p>bar body</p><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -37,9 +35,12 @@ No note with name bar found in cache during parsing.
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo</h1>
-<p></p><blockquote>
-No note with name bar found in cache during parsing.
-</blockquote><p></p>",
+<p></p><p></p><p>bar body</p><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -60,7 +61,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>",
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -71,9 +77,12 @@ VFile {
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: false 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
-<p></p><blockquote>
-No note with name bar found in cache during parsing.
-</blockquote><p></p>",
+<p></p><p></p><p>bar body</p><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -94,7 +103,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>",
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -115,7 +129,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>",
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -136,7 +155,12 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
-</div></div><p></p><p></p>",
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

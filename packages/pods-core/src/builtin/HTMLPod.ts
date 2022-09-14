@@ -1,6 +1,6 @@
-import { ConfigUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NoteDictsUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
-import { MDUtilsV5 } from "@dendronhq/unified";
+import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
@@ -67,8 +67,30 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const previewConfig = ConfigUtils.getPreview(overrideConfig);
     previewConfig.enablePrettyRefs = enablePrettyRefs;
-    const proc = MDUtilsV5.procRehypeFull({
+
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
       engine,
+      config,
+      config.vaults
+    );
+
+    // Also include children to render the 'children' hierarchy at the footer of the page:
+    await Promise.all(
+      note.children.map(async (childId) => {
+        // TODO: Can we use a bulk get API instead (if/when it exists) to speed
+        // up fetching time
+        const childNote = await engine.getNote(childId);
+
+        if (childNote.data) {
+          NoteDictsUtils.add(childNote.data, noteCacheForRenderDict);
+        }
+      })
+    );
+
+    const proc = MDUtilsV5.procRehypeFull({
+      noteToRender: note,
+      noteCacheForRenderDict,
       vault: note.vault,
       fname,
       config: overrideConfig,

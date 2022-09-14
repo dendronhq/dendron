@@ -16,6 +16,17 @@ import { VaultUtils } from "./vault";
  */
 export class NoteDictsUtils {
   /**
+   * Construct a full NoteDicts from a set of Note Props
+   * @param notes
+   */
+  static createNoteDicts(notes: NoteProps[]): NoteDicts {
+    const notesById = this.createNotePropsByIdDict(notes);
+    const notesByFname =
+      NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
+
+    return { notesById, notesByFname };
+  }
+  /**
    * Construct NotePropsByIdDict from list of NoteProps
    *
    * @param notes Used to populate map

@@ -133,7 +133,7 @@ describe("WHEN extracting links", () => {
     });
     test("THEN link is equal to filter", () => {
       expect(links[0]).toMatchObject({
-        alias: "gamma",
+        alias: undefined,
         from: { fname: "foo", id: "foo", vaultName: "vault1" },
         position: {
           end: { column: 10, line: 3, offset: 22 },

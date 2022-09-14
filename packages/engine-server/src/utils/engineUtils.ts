@@ -3,11 +3,11 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
-  DEngineClient,
   ErrorFactory,
   ERROR_SEVERITY,
   IntermediateDendronConfig,
   NoteProps,
+  ReducedDEngine,
   RespV3,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -91,7 +91,7 @@ export class EngineUtils {
    *
    * NOTE: if the `note.body.length > maxNoteLength`, throw error to client informing them to increase maxNoteLength
    */
-  static refreshNoteLinksAndAnchors({
+  static async refreshNoteLinksAndAnchors({
     note,
     engine,
     config,
@@ -99,11 +99,11 @@ export class EngineUtils {
     silent,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
+    engine: ReducedDEngine;
     config: IntermediateDendronConfig;
     fmChangeOnly?: boolean;
     silent?: boolean;
-  }): void {
+  }): Promise<void> {
     const maxNoteLength = Math.min(
       ConfigUtils.getWorkspace(config).maxNoteLength,
       CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH
@@ -122,7 +122,7 @@ export class EngineUtils {
         severity: ERROR_SEVERITY.MINOR,
       });
     }
-    const links = LinkUtils.findLinks({
+    const links = await LinkUtils.findLinks({
       note,
       type: "regular",
       engine,
@@ -140,7 +140,7 @@ export class EngineUtils {
       const devConfig = ConfigUtils.getProp(config, "dev");
       const linkCandidatesEnabled = devConfig?.enableLinkCandidates;
       if (linkCandidatesEnabled) {
-        const linkCandidates = LinkUtils.findLinks({
+        const linkCandidates = await LinkUtils.findLinks({
           note,
           type: "candidate",
           engine,

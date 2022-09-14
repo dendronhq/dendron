@@ -1,9 +1,9 @@
 import {
-  DEngine,
   IntermediateDendronConfig,
   NoteUtils,
   Position,
   position2VSCodeRange,
+  ReducedDEngine,
 } from "@dendronhq/common-all";
 import { HashTag } from "../types";
 import { Decorator } from "./utils";
@@ -40,7 +40,7 @@ export async function decorateTag({
   config,
 }: {
   fname: string;
-  engine: DEngine;
+  engine: ReducedDEngine;
   position: Position;
   lineOffset?: number;
   config: IntermediateDendronConfig;
@@ -48,13 +48,17 @@ export async function decorateTag({
   let color: string | undefined;
   const { color: foundColor, type: colorType } = NoteUtils.color({
     fname,
-    engine,
+    // engine,
   });
   if (colorType === "configured" || !config.noRandomlyColoredTags) {
     color = foundColor;
   }
 
-  const { type, errors } = await linkedNoteType({ fname, engine });
+  const { type, errors } = await linkedNoteType({
+    fname,
+    engine,
+    vaults: config.vaults ?? [],
+  });
   const decoration: DecorationHashTag = {
     type,
     range: position2VSCodeRange(position, { line: lineOffset }),

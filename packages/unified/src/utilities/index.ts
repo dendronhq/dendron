@@ -1,1 +1,1 @@
-export * from "./getNoteDependencies";
+export * from "./getParsingDependencyDicts";

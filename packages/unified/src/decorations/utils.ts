@@ -1,10 +1,10 @@
 import type {
-  DEngine,
   IDendronError,
   NonOptional,
   NoteProps,
   Decoration,
   IntermediateDendronConfig,
+  ReducedDEngine,
 } from "@dendronhq/common-all";
 import { Node } from "hast";
 import { DendronASTNode } from "../types";
@@ -21,7 +21,7 @@ export type DecoratorIn<N extends Omit<DendronASTNode, "children"> = Node> = {
   node: NonOptional<N, "position">;
   note: NoteProps;
   noteText: string;
-  engine: DEngine;
+  engine: ReducedDEngine;
   config: IntermediateDendronConfig;
 };
 

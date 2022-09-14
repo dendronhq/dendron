@@ -1,14 +1,12 @@
 import {
   ConfigUtils,
   DendronError,
-  DEngineClient,
   DVault,
   ERROR_SEVERITY,
   IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
   NoteDictsUtils,
-  NoteFnameDictUtils,
   NoteProps,
   NoteUtils,
   ProcFlavor,
@@ -73,17 +71,17 @@ function getVault({
   vaultMissingBehavior,
   vaultName,
   vault,
-  engine,
+  vaults,
 }: {
   vaultName?: string;
   vaultMissingBehavior: VaultMissingBehavior;
   vault: DVault;
-  engine: DEngineClient;
+  vaults: DVault[];
 }) {
   if (vaultName) {
     try {
       vault = VaultUtils.getVaultByNameOrThrow({
-        vaults: engine.vaults,
+        vaults,
         vname: vaultName,
       });
     } catch (err) {
@@ -189,8 +187,7 @@ function shouldInsertTitle({ proc }: { proc: Processor }) {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  // eslint-disable-next-line prefer-const
-  let { vault, engine } = MDUtilsV5.getProcData(proc);
+  const { vault, vaults, wsRoot } = MDUtilsV5.getProcData(proc);
   const pOpts = MDUtilsV5.getProcOpts(proc);
   const { mode } = pOpts;
   const pData = MDUtilsV5.getProcData(proc);
@@ -200,7 +197,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     config,
     insideNoteRef,
     noteToRender,
-    noteCacheForRender,
+    noteCacheForRenderDict,
   } = pData;
 
   function transformer(tree: Node, _file: VFile) {
@@ -218,19 +215,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       let note;
       // Special Logic for 403 Error Static Page:
       if (fname === "403") {
-        note = SiteUtils.create403StaticNote({ engine });
-      } else if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          vault,
-          engine,
-        });
+        note = SiteUtils.create403StaticNote({ vaults });
       } else {
         note = noteToRender;
-      }
-
-      if (!note) {
-        throw new DendronError({ message: `no note found for ${fname}` });
       }
       // ^53ueid06urse
       if (insertTitle) {
@@ -273,6 +260,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         parent.children[parentIndex] = node;
       }
       if (node.type === DendronASTTypes.WIKI_LINK) {
+        const shouldApplyPublishingRules =
+          MDUtilsV5.shouldApplyPublishingRules(proc);
+        const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+          config,
+          shouldApplyPublishingRules
+        );
+
         // If the target is Dendron, no processing of links is needed
         if (dest === DendronASTDest.MD_DENDRON) return;
         const _node = node as WikiLinkNoteV4;
@@ -283,10 +277,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let isPublished = true;
         const data = _node.data;
         // eslint-disable-next-line prefer-const
-        let { vault, engine } = MDUtilsV5.getProcData(proc);
+        let { vault } = MDUtilsV5.getProcData(proc);
         vault = getVault({
-          engine,
           vault,
+          vaults,
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
           vaultName: data.vaultName,
         });
@@ -294,23 +288,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let error: DendronError | undefined;
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
-          if (noteCacheForRender) {
-            const notesById =
-              NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-            const notesByFname =
-              NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
-
-            // TODO: Add vault filter
-            note = NoteDictsUtils.findByFname(valueOrig, {
-              notesById,
-              notesByFname,
-            })[0];
-          } else if (engine) {
-            note = NoteUtils.getNoteByFnameFromEngine({
-              fname: valueOrig,
-              vault,
-              engine,
-            });
+          if (noteCacheForRenderDict) {
+            note = NoteDictsUtils.findByFname(
+              valueOrig,
+              noteCacheForRenderDict,
+              vault
+            )[0];
           }
 
           if (!note) {
@@ -323,7 +306,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           const { color: maybeColor, type: colorType } = NoteUtils.color({
             fname: value,
             vault,
-            engine,
           });
           const enableRandomlyColoredTagsConfig =
             ConfigUtils.getEnableRandomlyColoredTags(config);
@@ -366,7 +348,8 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             isPublished = SiteUtils.isPublished({
               note,
               config,
-              engine,
+              wsRoot,
+              vaults,
             });
             if (!isPublished) {
               value = _.toString(StatusCodes.FORBIDDEN);
@@ -390,7 +373,27 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             value = note.id;
           }
         }
-        const alias = data.alias ? data.alias : value;
+
+        let title;
+        if (enableNoteTitleForLink) {
+          if (noteCacheForRenderDict) {
+            const targetVault = data.vaultName
+              ? VaultUtils.getVaultByName({ vname: data.vaultName, vaults })
+              : undefined;
+
+            const target = NoteDictsUtils.findByFname(
+              valueOrig,
+              noteCacheForRenderDict,
+              targetVault
+            )[0];
+
+            if (target) {
+              title = target.title;
+            }
+          }
+        }
+
+        const alias = data.alias ?? title ?? value;
         const href = SiteUtils.getSiteUrlPathForNote({
           addPrefix: pOpts.flavor === ProcFlavor.PUBLISHING,
           pathValue: value,
@@ -427,8 +430,9 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         } as RehypeLinkData;
 
         if (value === "403") {
+          const aliasToUse = alias === "403" ? valueOrig : alias;
           _node.data = {
-            alias,
+            alias: aliasToUse,
             hName: "a",
             hProperties: {
               title: "Private",
@@ -439,7 +443,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             hChildren: [
               {
                 type: "text",
-                value: `${alias} (Private)`,
+                value: `${aliasToUse} (Private)`,
               },
             ],
           } as RehypeLinkData;

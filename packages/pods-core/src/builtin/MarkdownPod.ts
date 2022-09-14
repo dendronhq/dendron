@@ -17,6 +17,7 @@ import {
   DendronASTDest,
   DendronASTNode,
   DendronASTTypes,
+  getParsingDependencyDicts,
   Image,
   Link,
   MDUtilsV5,
@@ -478,7 +479,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
           const proc = MDUtilsV5.procRemarkFull({
-            engine,
+            noteToRender: (await engine.getNote(note.fname)).data!, // JYTODO: check !
             fname: note.fname,
             vault: note.vault,
             dest: DendronASTDest.MD_DENDRON,
@@ -546,13 +547,23 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
   async plant(opts: PublishPodPlantOpts) {
     const { engine, note, config, dendronConfig } = opts;
     const { wikiLinkToURL = false } = config;
+
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
+      engine,
+      config,
+      engine.vaults
+    );
+
     let remark = MDUtilsV5.procRemarkFull({
+      noteToRender: note,
+      noteCacheForRenderDict,
+      vaults: engine.vaults,
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...DConfig.readConfigSync(engine.wsRoot),
         usePrettyRefs: false,
       },
-      engine,
       fname: note.fname,
       vault: note.vault,
     });

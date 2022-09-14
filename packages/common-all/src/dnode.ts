@@ -1188,18 +1188,15 @@ export class NoteUtils {
    * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color(opts: {
-    fname: string;
-    vault?: DVault;
-    engine: DEngineClient;
-  }): {
+  static color(opts: { fname: string; vault?: DVault }): {
     color: string;
     type: "configured" | "generated";
   } {
-    const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
-    for (const note of ancestors) {
-      if (note.color) return { color: note.color, type: "configured" };
-    }
+    // TODO: Re-enable the ancestor color logic later
+    // const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
+    // for (const note of ancestors) {
+    //   if (note.color) return { color: note.color, type: "configured" };
+    // }
     return { color: randomColor(opts.fname), type: "generated" };
   }
 

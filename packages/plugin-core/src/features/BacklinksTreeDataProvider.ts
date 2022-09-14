@@ -530,7 +530,7 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
   ): Promise<string> {
     const proc = MDUtilsV5.procRemarkFull(
       {
-        engine: ExtensionProvider.getEngine(),
+        noteToRender: ref.note,
         fname: ref.note.fname,
         vault: ref.note.vault,
         dest: DendronASTDest.MD_REGULAR,

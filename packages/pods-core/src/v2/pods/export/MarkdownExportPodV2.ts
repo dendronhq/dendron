@@ -19,7 +19,12 @@ import {
   DConfig,
   getDurationMilliseconds,
 } from "@dendronhq/common-server";
-import { DendronASTDest, MDUtilsV5, RemarkUtils } from "@dendronhq/unified";
+import {
+  DendronASTDest,
+  getParsingDependencyDicts,
+  MDUtilsV5,
+  RemarkUtils,
+} from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { mapLimit } from "async";
 import fs from "fs-extra";
@@ -227,13 +232,21 @@ export class MarkdownExportPodV2
       previewConfig.enableFMTitle = addFrontmatterTitle;
     }
 
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
+      engine,
+      config,
+      engine.vaults
+    );
+
     let remark = MDUtilsV5.procRemarkFull({
+      noteToRender: note,
+      noteCacheForRenderDict,
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...config,
         usePrettyRefs: false,
       },
-      engine,
       fname: note.fname,
       vault: note.vault,
     });

@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  NoteDictsUtils,
   NoteProps,
   NoteUtils,
   WorkspaceOpts,
@@ -57,12 +58,16 @@ async function createProc(
   procOverride?: Partial<Parameters<typeof MDUtilsV5.procRemarkFull>[0]>
 ) {
   const { engine, vaults, wsRoot, extra } = opts;
+
   const procData = _.defaults(procOverride, {
-    engine,
+    noteToRender: (await engine.getNote("foo")).data!,
     dest: extra.dest,
     fname: "foo",
     vault: vaults[0],
-    config: DConfig.readConfigSync(wsRoot),
+    config:
+      procOverride && procOverride.config
+        ? procOverride.config
+        : DConfig.readConfigSync(wsRoot),
   });
   if (procData.dest === DendronASTDest.HTML) {
     return MDUtilsV5.procRehypeFull(procData);
@@ -236,8 +241,16 @@ const WITH_FOOTNOTES = createProcTests({
 const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   name: "NOTE_REF_WITH_REHYPE",
   setupFunc: async (opts) => {
+    const noteToRender = (await opts.engine.getNote("foo-id")).data!;
+    const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+      noteToRender,
+      (await opts.engine.getNote("bar")).data!,
+    ]);
+
     const proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
+      noteToRender,
+      noteCacheForRenderDict,
     });
 
     const text = `![[foo.md]]`;
@@ -272,7 +285,15 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
 const NOTE_W_LINK_AND_SPACE = createProcTests({
   name: "NOTE_W_LINK_AND_SPACE",
   setupFunc: async (opts) => {
-    const proc = await createProc(opts);
+    const noteToRender = (await opts.engine.getNote("foo-id")).data!;
+    const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+      noteToRender,
+    ]);
+
+    const proc = await createProc(opts, {
+      noteToRender,
+      noteCacheForRenderDict,
+    });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
     return readAndProcessFile({ npath, proc });
   },
@@ -297,11 +318,21 @@ const NOTE_W_LINK_AND_SPACE = createProcTests({
   },
 });
 
-const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
+const NOTE_REF_RECURSIVE_WITH_REHYPE = createProcTests({
   name: "NOTE_REF_RECURSIVE_WITH_REHYPE",
   setupFunc: async (opts) => {
+    const noteToRender = (await opts.engine.getNote("foo-id")).data!;
+    const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+      noteToRender,
+      (await opts.engine.getNote("foo-id")).data!,
+      (await opts.engine.getNote("foo.one-id")).data!,
+      (await opts.engine.getNote("foo.two")).data!,
+    ]);
+
     const proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
+      noteToRender,
+      noteCacheForRenderDict,
     });
     const text = `![[foo.md]]`;
     return processText({ text, proc });
@@ -329,7 +360,15 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
 const WITH_TITLE_FOR_LINK = createProcTests({
   name: "WITH_TITLE_FOR_LINK",
   setupFunc: async (opts) => {
+    const noteToRender = (await opts.engine.getNote("foo")).data!;
+    const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+      noteToRender,
+      (await opts.engine.getNote("foo.ch1")).data!,
+    ]);
+
     const proc = await createProc(opts, {
+      noteToRender,
+      noteCacheForRenderDict,
       config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
@@ -361,7 +400,15 @@ const WITH_TITLE_FOR_LINK = createProcTests({
 const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
   name: "WITH_TITLE_FOR_LINK_X_VAULT",
   setupFunc: async (opts) => {
+    const noteToRender = (await opts.engine.getNote("foo")).data!;
+    const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+      noteToRender,
+      (await opts.engine.getNote("bar")).data!,
+    ]);
+
     const proc = await createProc(opts, {
+      noteToRender,
+      noteCacheForRenderDict,
       config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
@@ -385,7 +432,7 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
 const ALL_TEST_CASES = [
   ...WITH_ABBR,
   ...WITH_VARIABLE,
-  ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
+  ...NOTE_REF_RECURSIVE_WITH_REHYPE,
   ...NOTE_REF_BASIC_WITH_REHYPE,
   ...WITH_TITLE,
   ...NOTE_W_LINK_AND_SPACE,

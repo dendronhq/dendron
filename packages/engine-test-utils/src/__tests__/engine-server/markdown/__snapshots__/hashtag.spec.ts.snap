@@ -33,96 +33,10 @@ VFile {
 }
 `;
 
-exports[`hashtag rendering colors overrides color cascading from parent 1`] = `
-VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #00FF11;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"tags\\">Tags</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`hashtag rendering colors when enableRandomlyGeneratedColors is false, only uses explicit colors 1`] = `
-VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color\\">#color</a> <a href=\\"tags.uncolored\\">#uncolored</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"tags\\">Tags</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`hashtag rendering colors with color 1`] = `
-VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.color\\">#color</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"tags\\">Tags</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`hashtag rendering colors with color cascading from parent, self exists 1`] = `
-VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"tags\\">Tags</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`hashtag rendering colors with color cascading from parent, self missing 1`] = `
-VFile {
-  "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #FF0033;\\" href=\\"tags.parent.color\\">#parent.color</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"tags\\">Tags</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
 exports[`hashtag rendering compile "HTML: inside a link" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -133,13 +47,7 @@ VFile {
 exports[`hashtag rendering compile "HTML: inside a link" 2`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><a href=\\"https://twitter.com/hashtag/dendron\\">#dendron</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -150,13 +58,7 @@ VFile {
 exports[`hashtag rendering compile "HTML: simple" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"tags.my-hash.tag0\\">#my-hash.tag0</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"tags.my-hash.tag0\\">#my-hash.tag0</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

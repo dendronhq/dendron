@@ -38,6 +38,7 @@ describe("GIVEN noteRef plugin", () => {
   describe("WHEN assetPrefix set", () => {
     runTestCases(
       createProcCompileTests({
+        parsingDependenciesByFname: ["bar"],
         name: "ASSET_PREFIX_SET",
         setup: async (opts) => {
           const { proc } = getOpts(opts);
@@ -75,6 +76,7 @@ describe("GIVEN noteRef plugin", () => {
   describe("WHEN note ref to html AND prettyLinks = true", () => {
     runTestCases(
       createProcCompileTests({
+        parsingDependenciesByFname: ["alpha-id", "bar"],
         name: "NOTE_REF_WITH_REHYPE",
         setup: async (opts) => {
           const { proc } = getOpts(opts);

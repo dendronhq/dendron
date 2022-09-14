@@ -7,7 +7,7 @@ export const decorateReference: Decorator<
   NoteRefNoteV4,
   DecorationWikilink
 > = async (opts) => {
-  const { node: reference, engine, note } = opts;
+  const { node: reference, engine, note, config } = opts;
   const { position } = reference;
 
   const { type, errors } = await linkedNoteType({
@@ -17,6 +17,7 @@ export const decorateReference: Decorator<
     vaultName: reference.data.link.data.vaultName,
     engine,
     note,
+    vaults: config.vaults ?? [],
   });
   const decoration: DecorationWikilink = {
     type,

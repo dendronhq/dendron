@@ -4,7 +4,6 @@ import {
   CONSTANTS,
   DendronError,
   NoteDictsUtils,
-  NoteFnameDictUtils,
   NoteUtils,
   Position,
   VaultUtils,
@@ -79,11 +78,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const pOpts = MDUtilsV5.getProcOpts(proc);
       const data = node.data;
       let value = node.value;
-      const { alias, anchorHeader } = data;
+      const { anchorHeader } = data;
 
       if (pOpts.mode === ProcMode.NO_DATA) {
         const link = value;
-        const calias = alias !== value ? `${alias}|` : "";
+        const calias = data.alias !== value ? `${data.alias}|` : "";
         const anchor = anchorHeader ? `#${anchorHeader}` : "";
         const vaultPrefix = data.vaultName
           ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
@@ -91,7 +90,39 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
-      const { dest, vault } = MDUtilsV5.getProcData(proc);
+      const { dest, noteCacheForRenderDict, vaults, config } =
+        MDUtilsV5.getProcData(proc);
+
+      let alias = data.alias;
+
+      const shouldApplyPublishingRules =
+        MDUtilsV5.shouldApplyPublishingRules(proc);
+      const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
+        config,
+        shouldApplyPublishingRules
+      );
+
+      if (
+        dest !== DendronASTDest.MD_DENDRON &&
+        enableNoteTitleForLink &&
+        !data.alias
+      ) {
+        if (noteCacheForRenderDict) {
+          const targetVault = data.vaultName
+            ? VaultUtils.getVaultByName({ vname: data.vaultName, vaults })
+            : undefined;
+
+          const target = NoteDictsUtils.findByFname(
+            value,
+            noteCacheForRenderDict,
+            targetVault
+          )[0];
+
+          if (target) {
+            alias = target.title;
+          }
+        }
+      }
 
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
@@ -99,7 +130,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
           link: {
             from: {
               fname: value,
-              alias: data.alias,
+              alias,
               anchorHeader: data.anchorHeader,
               vaultName: data.vaultName,
             },
@@ -115,30 +146,15 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (copts.useId && dest === DendronASTDest.HTML) {
         let notes;
-        const { engine, noteCacheForRender } = MDUtilsV5.getProcData(proc);
+        const { noteCacheForRenderDict } = MDUtilsV5.getProcData(proc);
         // TODO: Consolidate logic.
-        if (noteCacheForRender) {
-          const notesById =
-            NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-          const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
-            this.notes
-          );
-
+        if (noteCacheForRenderDict) {
           // TODO: Add vault filter
-          notes = NoteDictsUtils.findByFname(alias, {
-            notesById,
-            notesByFname,
-          });
-        } else if (!engine) {
-          return "error with engine";
+          notes = NoteDictsUtils.findByFname(alias, noteCacheForRenderDict);
         } else {
-          // TODO: check for vault
-          notes = NoteUtils.getNotesByFnameFromEngine({
-            fname: value,
-            vault,
-            engine,
-          });
+          return "error - no note cache provided";
         }
+
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
           addError(proc, error);
@@ -148,14 +164,15 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
       }
 
+      const aliasToUse = alias ?? value;
       switch (dest) {
         case DendronASTDest.MD_REGULAR: {
-          const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${normalizeSpaces(value)})`;
+          return `[${aliasToUse}](${copts.prefix || ""}${normalizeSpaces(
+            value
+          )})`;
         }
         case DendronASTDest.HTML: {
-          const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${value}.html${
+          return `[${aliasToUse}](${copts.prefix || ""}${value}.html${
             data.anchorHeader ? "#" + data.anchorHeader : ""
           })`;
         }
@@ -174,7 +191,10 @@ function attachParser(proc: Unified.Processor) {
   function parseLink(linkMatch: string) {
     const pOpts = MDUtilsV5.getProcOpts(proc);
     linkMatch = NoteUtils.normalizeFname(linkMatch);
-    const out = LinkUtils.parseLinkV2({ linkString: linkMatch });
+    const out = LinkUtils.parseLinkV2({
+      linkString: linkMatch,
+      explicitAlias: true,
+    });
     if (_.isNull(out)) {
       throw new DendronError({ message: `link is null: ${linkMatch}` });
     }
@@ -183,74 +203,13 @@ function attachParser(proc: Unified.Processor) {
     }
 
     const procData = MDUtilsV5.getProcData(proc);
-    let { vault } = procData;
-    const engine = procData.engine;
-    const { config, dest, fname, noteCacheForRender } = procData;
-    if (out.vaultName) {
-      const maybeVault = VaultUtils.getVaultByName({
-        vaults: engine.vaults,
-        vname: out.vaultName,
-      });
-      if (_.isUndefined(maybeVault)) {
-        addError(
-          proc,
-          new DendronError({
-            message: `fname: ${fname}, vault ${
-              out.vaultName
-            } not found in ${JSON.stringify(out)}`,
-          })
-        );
-      } else {
-        vault = maybeVault;
-      }
-      // default to current note
-    }
+    const { fname } = procData;
+
     if (!out.value) {
       // same file block reference, value is implicitly current file
-      out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
-      if (!out.alias) out.alias = out.value;
+      out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value would have been parsed
     }
-    const shouldApplyPublishingRules =
-      MDUtilsV5.shouldApplyPublishingRules(proc);
-    const enableNoteTitleForLink = ConfigUtils.getEnableNoteTitleForLink(
-      config,
-      shouldApplyPublishingRules
-    );
 
-    // TODO: We can probably get rid of this if clause. No need to add this data
-    // at parsing time, this information should only get added during compile
-    // time.
-    if (
-      dest !== DendronASTDest.MD_DENDRON &&
-      enableNoteTitleForLink &&
-      out.alias === out.value &&
-      vault
-    ) {
-      let note;
-      if (noteCacheForRender) {
-        // TODO: Consolidate logic.
-        const notesById =
-          NoteDictsUtils.createNotePropsByIdDict(noteCacheForRender);
-        const notesByFname =
-          NoteFnameDictUtils.createNotePropsByFnameDict(notesById);
-        // TODO: Add vault filter
-        const notes = NoteDictsUtils.findByFname(out.value, {
-          notesById,
-          notesByFname,
-        });
-
-        note = notes[0]; // TODO: get rid of 0.
-      } else if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname: out.value,
-          engine,
-          vault,
-        });
-      }
-      if (note) {
-        out.alias = note.title;
-      }
-    }
     return out;
   }
 

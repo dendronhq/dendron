@@ -3,13 +3,7 @@
 exports[`extendedImage rendering compile "HTML: multiple style props" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;max-height:400px;opacity:0.8;\\"></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;max-height:400px;opacity:0.8;\\"></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -20,13 +14,7 @@ VFile {
 exports[`extendedImage rendering compile "HTML: no alt" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><img src=\\"/assets/image.png\\" style=\\"width:50%;\\"></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><img src=\\"/assets/image.png\\" style=\\"width:50%;\\"></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -37,13 +25,7 @@ VFile {
 exports[`extendedImage rendering compile "HTML: single style prop" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;\\"></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><img src=\\"/assets/image.png\\" alt=\\"alt text\\" style=\\"width:50%;\\"></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

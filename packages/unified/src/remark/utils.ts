@@ -31,6 +31,7 @@ import {
   parseDendronURI,
   Point,
   Position,
+  ReducedDEngine,
   TAGS_HIERARCHY,
   TAGS_HIERARCHY_BASE,
   TagUtils,
@@ -293,14 +294,14 @@ const getLinks = ({
   return dlinks;
 };
 
-const getLinkCandidates = ({
+const getLinkCandidates = async ({
   ast,
   note,
   engine,
 }: {
   ast: DendronASTNode;
   note: NoteProps;
-  engine: DEngineClient;
+  engine: ReducedDEngine;
 }) => {
   const textNodes: Text[] = [];
   visit(
@@ -314,49 +315,52 @@ const getLinkCandidates = ({
   );
 
   const linkCandidates: DLink[] = [];
-  _.map(textNodes, (textNode: Text) => {
-    const value = textNode.value as string;
-    value.split(/\s+/).forEach((word) => {
-      const possibleCandidates = NoteUtils.getNotesByFnameFromEngine({
-        fname: word,
-        engine,
-        vault: note.vault,
-      }).filter((note) => note.stub !== true);
-      linkCandidates.push(
-        ...possibleCandidates.map((candidate): DLink => {
-          const startColumn = value.indexOf(word) + 1;
-          const endColumn = startColumn + word.length;
+  await Promise.all(
+    _.map(textNodes, async (textNode: Text) => {
+      const value = textNode.value as string;
+      await Promise.all(
+        value.split(/\s+/).map(async (word) => {
+          const possibleCandidates = (
+            await engine.findNotes({ fname: word, vault: note.vault })
+          ).filter((note) => note.stub !== true);
 
-          const position: Position = {
-            start: {
-              line: textNode.position!.start.line,
-              column: startColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + startColumn - 1
-                : undefined,
-            },
-            end: {
-              line: textNode.position!.start.line,
-              column: endColumn,
-              offset: textNode.position!.start.offset
-                ? textNode.position!.start.offset + endColumn - 1
-                : undefined,
-            },
-          };
-          return {
-            type: "linkCandidate",
-            from: NoteUtils.toNoteLoc(note),
-            value: value.trim(),
-            position,
-            to: {
-              fname: word,
-              vaultName: VaultUtils.getName(candidate.vault),
-            },
-          };
+          linkCandidates.push(
+            ...possibleCandidates.map((candidate): DLink => {
+              const startColumn = value.indexOf(word) + 1;
+              const endColumn = startColumn + word.length;
+
+              const position: Position = {
+                start: {
+                  line: textNode.position!.start.line,
+                  column: startColumn,
+                  offset: textNode.position!.start.offset
+                    ? textNode.position!.start.offset + startColumn - 1
+                    : undefined,
+                },
+                end: {
+                  line: textNode.position!.start.line,
+                  column: endColumn,
+                  offset: textNode.position!.start.offset
+                    ? textNode.position!.start.offset + endColumn - 1
+                    : undefined,
+                },
+              };
+              return {
+                type: "linkCandidate",
+                from: NoteUtils.toNoteLoc(note),
+                value: value.trim(),
+                position,
+                to: {
+                  fname: word,
+                  vaultName: VaultUtils.getName(candidate.vault),
+                },
+              };
+            })
+          );
         })
       );
-    });
-  });
+    })
+  );
   return linkCandidates;
 };
 
@@ -391,7 +395,7 @@ export class LinkUtils {
   /**
    * Get links from note body while maintaining existing backlinks
    */
-  static findLinks({
+  static async findLinks({
     note,
     engine,
     type,
@@ -399,23 +403,22 @@ export class LinkUtils {
     filter,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
+    engine: ReducedDEngine;
     config: IntermediateDendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
-  }): DLink[] {
+  }): Promise<DLink[]> {
     let links = [];
     switch (type) {
       case "regular":
         links = LinkUtils.findLinksFromBody({
           note,
-          engine,
           filter,
           config,
         });
         break;
       case "candidate":
-        links = LinkUtils.findLinkCandidates({
+        links = await LinkUtils.findLinkCandidates({
           note,
           engine,
           config,
@@ -439,12 +442,10 @@ export class LinkUtils {
    */
   static findLinksFromBody({
     note,
-    engine,
     config,
     filter,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
     filter?: LinkFilter;
   }): DLink[] {
@@ -452,7 +453,7 @@ export class LinkUtils {
     const remark = MDUtilsV5.procRemarkParseFull(
       { flavor: ProcFlavor.REGULAR },
       {
-        engine,
+        noteToRender: note,
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
@@ -507,6 +508,7 @@ export class LinkUtils {
     const re = new RegExp(LINK_CONTENTS, "i");
     const out = linkString.match(re);
     if (out && out.groups) {
+      let aliasToUse;
       let { alias, value } = out.groups;
       const { anchor } = out.groups;
       if (!value && !anchor) return null; // Does not actually link to anything
@@ -518,10 +520,10 @@ export class LinkUtils {
         if (!alias && !explicitAlias) {
           alias = value;
         }
-        alias = _.trim(alias);
+        aliasToUse = alias ? _.trim(alias) : undefined;
       }
       return {
-        alias,
+        alias: aliasToUse,
         value,
         anchorHeader: anchor,
         vaultName,
@@ -782,20 +784,21 @@ export class LinkUtils {
     );
   }
 
-  static findLinkCandidates({
+  static async findLinkCandidates({
     note,
     engine,
     config,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
+    engine: ReducedDEngine;
     config: IntermediateDendronConfig;
   }) {
     const content = note.body;
+
     const remark = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
-        engine,
+        noteToRender: note,
         fname: note.fname,
         vault: note.vault,
         dest: DendronASTDest.MD_DENDRON,
@@ -803,10 +806,10 @@ export class LinkUtils {
       }
     );
     const tree = remark.parse(content) as DendronASTNode;
-    const linkCandidates: DLink[] = getLinkCandidates({
+    const linkCandidates: DLink[] = await getLinkCandidates({
+      engine,
       ast: tree,
       note,
-      engine,
     });
     return linkCandidates;
   }
@@ -1492,15 +1495,13 @@ export class RemarkUtils {
    */
   static async extractBlocks({
     note,
-    engine,
     config,
   }: {
     note: NoteProps;
-    engine: DEngineClient;
     config: IntermediateDendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
-      engine,
+      noteToRender: note,
       vault: note.vault,
       fname: note.fname,
       dest: DendronASTDest.MD_DENDRON,

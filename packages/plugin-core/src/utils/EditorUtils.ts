@@ -241,8 +241,8 @@ export class EditorUtils {
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
+        noteToRender: note,
         dest: DendronASTDest.MD_DENDRON,
-        engine,
         vault: note.vault,
         fname: note.fname,
         config: DConfig.readConfigSync(engine.wsRoot),
@@ -264,7 +264,8 @@ export class EditorUtils {
         if (!link) return false;
         fname =
           link.type === DendronASTTypes.WIKI_LINK ? link.value : link.fname;
-        type = (await linkedNoteType({ fname, engine })).type;
+        type = (await linkedNoteType({ fname, engine, vaults: engine.vaults }))
+          .type;
         return false;
       }
     );

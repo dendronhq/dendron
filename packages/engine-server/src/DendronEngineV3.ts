@@ -317,7 +317,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
     // Update links/anchors based on note body
     // TODO: update backlinks as well
-    EngineUtils.refreshNoteLinksAndAnchors({
+    await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
       config: DConfig.readConfigSync(this.wsRoot),
@@ -1052,8 +1052,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   }
 
   /**
-   * Update the links inside this note that need to be updated for the rename from `oldLoc` to `newLoc`
-   * Will update the note in place and return note if something has changed
+   * Update the links inside this note that need to be updated for the rename
+   * from `oldLoc` to `newLoc` Will update the note in place and return note if
+   * something has changed
    */
   private processNoteChangedByRename({
     note,
@@ -1069,7 +1070,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const prevNote = _.cloneDeep(note);
     const foundLinks = LinkUtils.findLinksFromBody({
       note,
-      engine: this,
       filter: { loc: oldLoc },
       config,
     });

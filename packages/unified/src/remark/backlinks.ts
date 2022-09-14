@@ -1,9 +1,4 @@
-import {
-  ConfigUtils,
-  NoteProps,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { ConfigUtils, NoteDictsUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -20,27 +15,30 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     const root = tree as Root;
-    const { fname, vault, dest, insideNoteRef, config, engine, noteToRender } =
-      MDUtilsV5.getProcData(proc);
+    const {
+      fname,
+      dest,
+      insideNoteRef,
+      config,
+      noteToRender,
+      noteCacheForRenderDict,
+      vaults,
+      wsRoot,
+    } = MDUtilsV5.getProcData(proc);
 
     // Don't show backlinks for the following cases:
     // - we are inside a note ref
     // - the destination isn't HTML
     // - the note can't be found
-    // - neableChild links is toggled off
-    // enableBackLinks is set to false
+    // - enableChild links is toggled off
+    // - enableBackLinks is set to false
     if (!fname || insideNoteRef) {
       return;
     }
     if (dest !== DendronASTDest.HTML) {
       return;
     }
-    let note: NoteProps | undefined;
-    if (engine) {
-      note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
-    } else {
-      note = noteToRender;
-    }
+    const note = noteToRender;
     if (_.isUndefined(note)) {
       return;
     }
@@ -54,29 +52,28 @@ const plugin: Plugin = function (this: Unified.Processor) {
       return;
     }
 
-    const backlinks = _.uniqBy(
+    let backlinksToPublish = _.uniqBy(
       (note?.links || []).filter((ent) => ent.type === "backlink"),
       (ent) => ent.from.fname + (ent.from.vaultName || "")
     );
 
     // filter out invalid backlinks
-    const backlinksToPublish = _.filter(backlinks, (backlink) => {
+    backlinksToPublish = _.filter(backlinksToPublish, (backlink) => {
       const vaultName = backlink.from.vaultName!;
       const vault = VaultUtils.getVaultByName({
-        vaults: engine.vaults,
+        vaults,
         vname: vaultName,
       })!;
 
-      let note: NoteProps | undefined;
-      if (engine) {
-        note = NoteUtils.getNoteByFnameFromEngine({
-          fname: backlink.from.fname!,
-          engine,
-          vault,
-        });
-      } else {
-        note = noteToRender;
+      if (!noteCacheForRenderDict) {
+        return false;
       }
+
+      const note = NoteDictsUtils.findByFname(
+        backlink.from.fname!,
+        noteCacheForRenderDict,
+        vault
+      )[0];
 
       // if note doesn't exist, don't include in backlinks
       if (!note) {
@@ -85,8 +82,9 @@ const plugin: Plugin = function (this: Unified.Processor) {
       // if note exists but it can't be published, don't include
       const out = SiteUtils.canPublish({
         note,
-        engine,
         config,
+        wsRoot,
+        vaults,
       });
       return out;
     });
@@ -102,25 +100,21 @@ const plugin: Plugin = function (this: Unified.Processor) {
           backlinksToPublish.map((mdLink) => {
             let alias;
 
-            let note: NoteProps | undefined;
+            const notes = NoteDictsUtils.findByFname(
+              mdLink.from.fname!,
+              noteCacheForRenderDict!,
+              VaultUtils.getVaultByName({
+                vaults,
+                vname: mdLink.from.vaultName!,
+              })
+            );
 
-            if (engine) {
-              note = NoteUtils.getNoteByFnameFromEngine({
-                fname: mdLink.from.fname!,
-                vault: VaultUtils.getVaultByName({
-                  vaults: engine.vaults,
-                  vname: mdLink.from.vaultName!,
-                })!,
-                engine,
-              });
-            } else {
-              note = noteToRender;
-            }
+            const note = notes[0];
 
             if (note) {
               alias =
                 note.title +
-                (engine.vaults.length > 1
+                (vaults && vaults.length > 1
                   ? ` (${mdLink.from.vaultName!})`
                   : "");
             } else {

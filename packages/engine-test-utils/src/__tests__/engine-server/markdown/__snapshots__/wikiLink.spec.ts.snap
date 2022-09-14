@@ -7,7 +7,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -20,13 +19,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ALIAS_APOSTROPHE" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"kb.note.20211011124050\\">Coulomb's Constant</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><a href=\\"kb.note.20211011124050\\">Coulomb's Constant</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -41,7 +34,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -58,7 +50,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -75,7 +66,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -92,7 +82,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -121,13 +110,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_SAME_FILE_BLOCK_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"/\\">Root</a></p>
-<hr>
-<strong>Children</strong>
-<ol>
-<li><a href=\\"bar\\">Bar</a></li>
-<li><a href=\\"foo\\">Foo</a></li>
-</ol>",
+<p><a href=\\"/\\">Root</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -153,7 +136,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -170,7 +152,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -187,7 +168,6 @@ VFile {
 <hr>
 <strong>Children</strong>
 <ol>
-<li><a href=\\"bar\\">Bar</a></li>
 <li><a href=\\"foo\\">Foo</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
@@ -597,7 +577,7 @@ Object {
         },
         Object {
           "data": Object {
-            "alias": "foo bar",
+            "alias": undefined,
             "anchorHeader": undefined,
             "sameFile": false,
             "vaultName": undefined,

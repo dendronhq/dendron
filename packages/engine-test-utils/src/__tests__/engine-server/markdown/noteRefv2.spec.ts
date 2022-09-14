@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   DendronASTDest,
   IntermediateDendronConfig,
+  NoteDictsUtils,
   NoteProps,
   ProcFlavor,
   WorkspaceOpts,
@@ -13,7 +14,7 @@ import {
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/common-server";
-import { MDUtilsV5 } from "@dendronhq/unified";
+import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS, ENGINE_SERVER } from "../../../presets";
@@ -61,6 +62,18 @@ export const modifyNote = async (
   );
 };
 
+const TARGET_BODY: string = [
+  "## head 1",
+  "",
+  "content 1",
+  "### head 1.1",
+  "",
+  "content 1.1",
+  "## head 2",
+  "",
+  "content 2",
+].join("\n");
+
 describe("noteRefV2", () => {
   const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
@@ -97,6 +110,12 @@ describe("noteRefV2", () => {
           setup: async (opts) => {
             const text = "# Foo Bar\n![[foo#header-1]]";
             const { proc } = getOpts(opts);
+
+            const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+              (await opts.engine.getNote("foo")).data!,
+            ]);
+            MDUtilsV5.setProcData(proc, { noteCacheForRenderDict });
+
             const resp = await proc.process(text);
             return { resp, proc };
           },
@@ -122,6 +141,12 @@ describe("noteRefV2", () => {
           setup: async (opts) => {
             const text = "# Foo Bar\n![[foo#header-2]]";
             const { proc } = getOpts(opts);
+
+            const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+              (await opts.engine.getNote("foo")).data!,
+            ]);
+            MDUtilsV5.setProcData(proc, { noteCacheForRenderDict });
+
             const resp = await proc.process(text);
             return { resp, proc };
           },
@@ -147,6 +172,12 @@ describe("noteRefV2", () => {
           setup: async (opts) => {
             const text = "# Foo Bar\n![[foo#header-3]]";
             const { proc } = getOpts(opts);
+
+            const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+              (await opts.engine.getNote("foo")).data!,
+            ]);
+            MDUtilsV5.setProcData(proc, { noteCacheForRenderDict });
+
             const resp = await proc.process(text);
             return { resp, proc };
           },
@@ -192,6 +223,12 @@ describe("noteRefV2", () => {
           setup: async (opts) => {
             const text = "![[foo#^begin]]";
             const { proc } = getOpts(opts);
+
+            const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+              (await opts.engine.getNote("foo")).data!,
+            ]);
+            MDUtilsV5.setProcData(proc, { noteCacheForRenderDict });
+
             const resp = await proc.process(text);
             return { resp, proc };
           },
@@ -254,6 +291,12 @@ describe("noteRefV2", () => {
           setup: async (opts) => {
             const text = "![[foo#^begin]]";
             const { proc } = getOpts(opts);
+
+            const noteCacheForRenderDict = NoteDictsUtils.createNoteDicts([
+              (await opts.engine.getNote("foo")).data!,
+            ]);
+            MDUtilsV5.setProcData(proc, { noteCacheForRenderDict });
+
             const resp = await proc.process(text);
             return { resp, proc };
           },
@@ -306,6 +349,7 @@ describe("noteRefV2", () => {
     describe("AND WHEN try parse #^end anchor as start anchor", () => {
       runTestCases(
         createProcCompileTests({
+          parsingDependenciesByFname: ["foo"],
           name: "THEN show error",
           fname: "foo",
           setup: async (opts) => {
@@ -351,6 +395,7 @@ describe("noteRefV2", () => {
             },
           },
           preSetupHook: preSetupHookForHeaders,
+          parsingDependenciesByFname: ["foo"],
         })
       );
     });
@@ -393,6 +438,7 @@ describe("noteRefV2", () => {
               return note;
             });
           },
+          parsingDependenciesByFname: ["foo"],
         })
       );
     });
@@ -405,8 +451,19 @@ describe("noteRefV2", () => {
       name: "regular",
       setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
         const config = DConfig.readConfigSync(wsRoot);
-        const proc2 = MDUtilsV5.procRemarkFull({
+        const noteToRender = (
+          await engine.findNotes({ fname: "foo", vault: vaults[0] })
+        )[0];
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
+          noteToRender,
           engine,
+          config,
+          vaults
+        );
+        NoteDictsUtils.add(noteToRender, noteCacheForRenderDict);
+        const proc2 = MDUtilsV5.procRemarkFull({
+          noteToRender,
+          noteCacheForRenderDict,
           fname: "foo",
           wikiLinksOpts: { useId: true },
           dest: extra.dest,
@@ -482,6 +539,7 @@ describe("noteRefV2", () => {
           text,
           fname: "foo",
           vault: opts.vaults[0],
+          parsingDependenciesByFname: ["foo"],
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
@@ -628,6 +686,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo"],
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
@@ -667,6 +726,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo"],
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
@@ -706,6 +766,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo"],
         });
       },
       preSetupHook: WITH_ANCHOR_PRE_SETUP,
@@ -739,13 +800,20 @@ describe("noteRefV2", () => {
     const WITH_START_AND_END_ANCHOR = createProcTests({
       name: "WITH_START_AND_END_ANCHOR",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, vaults, wsRoot } = opts;
+        const target = await NoteTestUtilsV4.createNote({
+          fname: "target",
+          vault: vaults[0],
+          wsRoot,
+          body: TARGET_BODY,
+        });
         return processTextV2({
           text: "# header\n![[target#head-1:#head-2]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByNoteProps: [target],
         });
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -754,17 +822,7 @@ describe("noteRefV2", () => {
           fname: "target",
           vault,
           wsRoot,
-          body: [
-            "## head 1",
-            "",
-            "content 1",
-            "### head 1.1",
-            "",
-            "content 1.1",
-            "## head 2",
-            "",
-            "content 2",
-          ].join("\n"),
+          body: TARGET_BODY,
         });
         await NoteTestUtilsV4.createNote({
           fname: "foo",
@@ -802,13 +860,20 @@ describe("noteRefV2", () => {
     const WITH_START_AND_END_WILDCARD_ANCHOR = createProcTests({
       name: "WITH_START_AND_END_WILDCARD_ANCHOR",
       setupFunc: async (opts) => {
-        const { engine, vaults } = opts;
+        const { engine, vaults, wsRoot } = opts;
+        const target = await NoteTestUtilsV4.createNote({
+          fname: "target",
+          vault: vaults[0],
+          wsRoot,
+          body: TARGET_BODY,
+        });
         return processTextV2({
           text: "# header\n![[target#head-1:#*]]",
           dest: opts.extra.dest,
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByNoteProps: [target],
         });
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -817,17 +882,7 @@ describe("noteRefV2", () => {
           fname: "target",
           vault,
           wsRoot,
-          body: [
-            "## head 1",
-            "",
-            "content 1",
-            "### head 1.1",
-            "",
-            "content 1.1",
-            "## head 2",
-            "",
-            "content 2",
-          ].join("\n"),
+          body: TARGET_BODY,
         });
         await NoteTestUtilsV4.createNote({
           fname: "foo",
@@ -864,10 +919,28 @@ describe("noteRefV2", () => {
 
     const RECURSIVE_TEST_CASES = createProcTests({
       name: "recursive",
-      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
+      setupFunc: async ({ wsRoot, extra, vaults, engine }) => {
         const config = DConfig.readConfigSync(wsRoot);
-        const resp = await MDUtilsV5.procRemarkFull({
+        const noteToRender = (
+          await engine.findNotes({ fname: "root", vault: vaults[0] })
+        )[0];
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
+          noteToRender,
           engine,
+          config,
+          vaults
+        );
+        NoteDictsUtils.add(
+          (await engine.getNote("foo.one-id")).data!,
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (await engine.getNote("foo.two")).data!,
+          noteCacheForRenderDict
+        );
+        const resp = await MDUtilsV5.procRemarkFull({
+          noteToRender,
+          noteCacheForRenderDict,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -928,8 +1001,83 @@ describe("noteRefV2", () => {
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["id.journal"];
         const config = DConfig.readConfigSync(wsRoot);
-        const resp = await MDUtilsV5.procRemarkFull({
+        const noteToRender = (
+          await engine.findNotes({ fname: "root", vault: vaults[0] })
+        )[0];
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
+          noteToRender,
           engine,
+          config,
+          vaults
+        );
+        NoteDictsUtils.add(noteToRender, noteCacheForRenderDict);
+        NoteDictsUtils.add(
+          (await engine.findNotes({ fname: "journal", vault: vaults[0] }))[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({ fname: "journal.2020", vault: vaults[0] })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.07",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.07.01",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.08",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.08.01",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.08.02",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        NoteDictsUtils.add(
+          (
+            await engine.findNotes({
+              fname: "journal.2020.08.03",
+              vault: vaults[0],
+            })
+          )[0],
+          noteCacheForRenderDict
+        );
+        const resp = await MDUtilsV5.procRemarkFull({
+          noteToRender,
+          noteCacheForRenderDict,
           config,
           dest: extra.dest,
           vault: vaults[0],
@@ -943,6 +1091,7 @@ describe("noteRefV2", () => {
               useId: false,
             },
           },
+          wsRoot,
         }).process(note.body);
         return { resp };
       },
@@ -979,8 +1128,15 @@ describe("noteRefV2", () => {
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["one"];
         const config = DConfig.readConfigSync(wsRoot);
-        const resp = await MDUtilsV5.procRemarkFull({
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
+          note,
           engine,
+          config,
+          vaults
+        );
+        const resp = await MDUtilsV5.procRemarkFull({
+          noteToRender: note,
+          noteCacheForRenderDict,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -1045,8 +1201,18 @@ describe("noteRefV2", () => {
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = engine.notes["foo"];
         const config = DConfig.readConfigSync(wsRoot);
-        const resp = await MDUtilsV5.procRemarkFull({
+        const noteToRender = (
+          await engine.findNotes({ fname: "root", vault: vaults[0] })
+        )[0];
+        const noteCacheForRenderDict = await getParsingDependencyDicts(
+          noteToRender,
           engine,
+          config,
+          vaults
+        );
+        const resp = await MDUtilsV5.procRemarkFull({
+          noteToRender,
+          noteCacheForRenderDict,
           dest: extra.dest,
           vault: vaults[0],
           fname: "root",
@@ -1393,6 +1559,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1434,6 +1601,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1475,6 +1643,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1519,6 +1688,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1560,6 +1730,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1605,6 +1776,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1651,6 +1823,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1700,6 +1873,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1938,6 +2112,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -1986,6 +2161,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2037,6 +2213,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2083,6 +2260,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2130,6 +2308,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2181,6 +2360,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2233,6 +2413,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {
@@ -2294,6 +2475,7 @@ describe("noteRefV2", () => {
           engine,
           vault: vaults[0],
           fname: "foo",
+          parsingDependenciesByFname: ["foo.ch1"],
         });
       },
       preSetupHook: async (opts) => {

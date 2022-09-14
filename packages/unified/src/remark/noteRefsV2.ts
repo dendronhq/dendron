@@ -4,17 +4,17 @@ import {
   ConfigUtils,
   CONSTANTS,
   DendronError,
-  DEngineClient,
   DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
   DVault,
-  ErrorFactory,
   getSlugger,
   IDendronError,
   IntermediateDendronConfig,
   isBlockAnchor,
+  NoteDicts,
+  NoteDictsUtils,
   NoteProps,
   NoteUtils,
   RespV2,
@@ -61,33 +61,36 @@ type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   note: NoteProps;
 };
 
-const createMissingNoteErrorMsg = (opts: { fname: string; vname?: string }) => {
-  const out = [`No note with name ${opts.fname} found`];
-  if (opts.vname) {
-    out.push(`in vault ${opts.vname}`);
-  }
-  return out.join(" ");
-};
+// const createMissingNoteErrorMsg = (opts: { fname: string; vname?: string }) => {
+//   const out = [`No note with name ${opts.fname} found`];
+//   if (opts.vname) {
+//     out.push(`in vault ${opts.vname}`);
+//   }
+//   return out.join(" ");
+// };
 
 function gatherNoteRefs({
   link,
-  engine,
   vault,
+  noteDicts,
 }: {
   link: DNoteRefLink;
-  engine: DEngineClient;
   vault: DVault;
+  noteDicts?: NoteDicts;
 }) {
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({
-      qs: link.from.fname,
-      originalQS: link.from.fname,
-      vault,
-    });
-    const out = _.filter(resp.data, (ent) =>
-      DUtils.minimatch(ent.fname, link.from.fname)
+    // We must have note dicts to process wildcard references.
+    if (!noteDicts) {
+      return [];
+    }
+    const out = _.filter(
+      Object.values(noteDicts.notesById),
+      (ent) =>
+        VaultUtils.isEqualV2(vault, ent.vault) &&
+        DUtils.minimatch(ent.fname, link.from.fname)
     );
+
     noteRefs = _.sortBy(
       out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
@@ -108,7 +111,7 @@ export function isEndBlockAnchorId(anchorId: string) {
 
 function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
   const procData = MDUtilsV5.getProcData(proc);
-  const { config, fname, engine, vault, dest } = procData;
+  const { config, dest, noteToRender } = procData;
 
   // pretty refs not valid for regular markdown
   if (
@@ -117,12 +120,9 @@ function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
     return false;
   }
 
-  // The note that contains this reference might override the pretty refs option for references inside it.
-  const containingNote = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    vault,
-    engine,
-  });
+  // The note that contains this reference might override the pretty refs option
+  // for references inside it.
+  const containingNote = noteToRender;
   const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
 
   let prettyRefs =
@@ -138,38 +138,6 @@ function shouldRenderPretty({ proc }: { proc: Processor }): boolean {
   }
   return prettyRefs;
 }
-
-const tryGetNotes = ({
-  fname,
-  vname,
-  vaults,
-  engine,
-}: {
-  fname: string;
-  vname?: string;
-  vaults: DVault[];
-  engine: DEngineClient;
-}) => {
-  const maybeVault = vname
-    ? VaultUtils.getVaultByName({
-        vaults,
-        vname,
-      })
-    : undefined;
-  const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
-    fname,
-    engine,
-    vault: maybeVault,
-  });
-  if (maybeNotes.length === 0) {
-    return {
-      error: ErrorFactory.createInvalidStateError({
-        message: createMissingNoteErrorMsg({ fname, vname }),
-      }),
-    };
-  }
-  return { error: undefined, data: maybeNotes };
-};
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const procOptsV5 = MDUtilsV5.getProcOpts(this);
@@ -290,7 +258,8 @@ export function convertNoteRefASTV2(
         !SiteUtils.canPublish({
           note,
           config: config!,
-          engine,
+          wsRoot,
+          vaults,
         })
       ) {
         // TODO: in the future, add 403 pages
@@ -332,7 +301,7 @@ export function convertNoteRefASTV2(
           if (!MDUtilsV5.isV5Active(proc)) {
             suffix = ".html";
           }
-          if (note.custom.permalink === "/") {
+          if (note.custom?.permalink === "/") {
             href = "";
             suffix = "";
           }
@@ -349,7 +318,8 @@ export function convertNoteRefASTV2(
             isPublished = SiteUtils.isPublished({
               note,
               config: config!,
-              engine,
+              wsRoot,
+              vaults,
             });
           }
         }
@@ -374,7 +344,6 @@ export function convertNoteRefASTV2(
   const { link, proc, compilerOpts, procOpts } = opts;
   const procData = MDUtilsV5.getProcData(proc);
   const { noteRefLvl: refLvl } = procData;
-  const engine = procData.engine;
 
   // prevent infinite nesting.
   if (refLvl >= MAX_REF_LVL) {
@@ -385,7 +354,14 @@ export function convertNoteRefASTV2(
   }
 
   // figure out configs that change how we process the note reference
-  const { dest, config, vault: vaultFromProc } = procData;
+  const {
+    dest,
+    config,
+    vault: vaultFromProc,
+    vaults,
+    wsRoot,
+    noteCacheForRenderDict,
+  } = procData;
   const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
   const { wikiLinkOpts } = compilerOpts;
 
@@ -396,7 +372,11 @@ export function convertNoteRefASTV2(
   // process note references.
   // let noteRefs: DNoteLoc[] = [];
   const vault = procData.vault;
-  const noteRefs: DNoteLoc[] = gatherNoteRefs({ link, engine, vault });
+  const noteRefs: DNoteLoc[] = gatherNoteRefs({
+    link,
+    vault,
+    noteDicts: noteCacheForRenderDict,
+  });
   if (link.from.fname.endsWith("*")) {
     if (noteRefs.length === 0) {
       const msg = `Error rendering note reference. There are no matches for \`${link.from.fname}\`.`;
@@ -406,17 +386,23 @@ export function convertNoteRefASTV2(
     const processedRefs = noteRefs.map((ref) => {
       const fname = ref.fname;
       const npath = DNodeUtils.getFullPath({
-        wsRoot: engine.wsRoot,
+        wsRoot,
         vault: vault as DVault,
         basename: fname + ".md",
       });
       let note: NoteProps;
       try {
         // TODO: Get rid of these legacy engine.noteFnames, engine.notes references
-        const noteIds = engine.noteFnames[fname];
+        const noteIds = noteCacheForRenderDict?.notesByFname[fname];
+
+        if (!noteIds) {
+          throw new DendronError({
+            message: `Unable to find note with fname ${fname} and vault ${vault.fsPath} for note reference`,
+          });
+        }
 
         const noteCandidates = noteIds
-          .map((id) => engine.notes[id])
+          .map((id) => noteCacheForRenderDict.notesById[id])
           .filter((props) => VaultUtils.isEqualV2(props.vault, vault));
 
         if (noteCandidates.length !== 1) {
@@ -435,25 +421,27 @@ export function convertNoteRefASTV2(
   } else {
     // single reference case.
     let note: NoteProps;
-    const { vaultName: vname } = link.data;
+    // const { vaultName: vname } = link.data;
     const { fname } = link.from;
-    const resp = tryGetNotes({
-      fname,
-      vname,
-      vaults: engine.vaults,
-      engine,
-    });
 
-    // check for edge cases
-    if (resp.error) {
+    let data;
+    if (noteCacheForRenderDict) {
+      data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict);
+      // data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict, vault);
+    }
+    if (!data || data.length === 0) {
       return {
         error: undefined,
-        data: [MdastUtils.genMDErrorMsg(resp.error.message)],
+        data: [
+          MdastUtils.genMDErrorMsg(
+            `No note with name ${fname} found in cache during parsing.`
+          ),
+        ],
       };
     }
 
     // multiple results
-    if (resp.data.length > 1) {
+    if (data.length > 1) {
       // applying publish rules but no behavior defined for duplicate notes
       if (shouldApplyPublishRules && _.isUndefined(duplicateNoteConfig)) {
         return {
@@ -468,40 +456,41 @@ export function convertNoteRefASTV2(
 
       // apply publish rules and do duplicate
       if (shouldApplyPublishRules && !_.isUndefined(duplicateNoteConfig)) {
-        const maybeNote = SiteUtils.handleDup({
-          allowStubs: false,
-          dupBehavior: duplicateNoteConfig,
-          engine,
-          config,
-          fname: link.from.fname,
-          noteCandidates: resp.data,
-          noteDict: engine.notes,
-        });
-        if (!maybeNote) {
-          return {
-            error: undefined,
-            data: [
-              MdastUtils.genMDErrorMsg(
-                `Error rendering note reference for ${link.from.fname}`
-              ),
-            ],
-          };
-        }
-        note = maybeNote;
+        // JYTODO: Add back Handle Dup Logic
+        // const maybeNote = SiteUtils.handleDup({
+        //   allowStubs: false,
+        //   dupBehavior: duplicateNoteConfig,
+        //   engine,
+        //   config,
+        //   fname: link.from.fname,
+        //   noteCandidates: resp.data,
+        //   noteDict: engine.notes,
+        // });
+        // if (!maybeNote) {
+        //   return {
+        //     error: undefined,
+        //     data: [
+        //       MdastUtils.genMDErrorMsg(
+        //         `Error rendering note reference for ${link.from.fname}`
+        //       ),
+        //     ],
+        //   };
+        // }
+        // note = maybeNote;
       } else {
         // no need to apply publish rules, try to pick the one that is in same vault
 
-        const _note = _.find(resp.data, (note) =>
-          VaultUtils.isEqual(note.vault, vaultFromProc, engine.wsRoot)
-        );
+        const _note = _.find(data, (note) => {
+          return VaultUtils.isEqual(note.vault, vaultFromProc, wsRoot);
+        });
         if (_note) {
           note = _note;
         } else {
-          note = resp.data[0];
+          note = data[0];
         }
       }
     } else {
-      note = resp.data[0];
+      note = data[0];
     }
 
     const processedRefs = noteRefs.map((ref) => {
@@ -730,7 +719,7 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   let noteRefProc: Processor;
-  const { engine } = MDUtilsV5.getProcData(proc);
+  const { config, noteCacheForRenderDict } = MDUtilsV5.getProcData(proc);
 
   // Create a new proc to parse the reference; set the fname accordingly.
   // NOTE: a new proc is created here instead of using the proc() copy
@@ -742,7 +731,8 @@ function convertNoteRefHelperAST(
       insideNoteRef: true,
       fname: note.fname,
       vault: note.vault,
-      engine,
+      noteCacheForRenderDict,
+      config,
     },
     MDUtilsV5.getProcOpts(proc)
   );

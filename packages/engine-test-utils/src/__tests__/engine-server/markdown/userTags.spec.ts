@@ -139,11 +139,12 @@ describe("user tags", () => {
 
     const SIMPLE = createProcTests({
       name: "simple",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
+          config: DConfig.readConfigSync(wsRoot),
         });
         const resp = await proc2.process(userTag);
         return { resp };
@@ -186,11 +187,12 @@ describe("user tags", () => {
 
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
-      setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = createProcForTest({
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
+          config: DConfig.readConfigSync(wsRoot),
         });
         const resp = await proc2.process(
           "[@dendronhq](https://twitter.com/dendronhq)"
@@ -220,7 +222,9 @@ describe("user tags", () => {
         async ({ engine, wsRoot, vaults }) => {
           const proc = MDUtilsV5.procRehypeFull(
             {
-              engine,
+              noteToRender: (
+                await engine.findNotes({ fname: "root", vault: vaults[0] })
+              )[0]!,
               vault: vaults[0],
               config: DConfig.readConfigSync(wsRoot),
               fname: "root",

@@ -49,7 +49,7 @@ export class TextDocumentService implements ITextDocumentService {
     this._textDocumentEventHandle.dispose();
   }
 
-  private updateNoteContents(opts: {
+  private async updateNoteContents(opts: {
     oldNote: NoteProps;
     content: string;
     fmChangeOnly: boolean;
@@ -75,7 +75,7 @@ export class TextDocumentService implements ITextDocumentService {
         keepBackLinks: true,
       },
     });
-    EngineUtils.refreshNoteLinksAndAnchors({
+    await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       fmChangeOnly,
       engine: this._extension.getEngine(),
@@ -133,7 +133,7 @@ export class TextDocumentService implements ITextDocumentService {
       return noteHydrated;
     }
 
-    const props = this.updateNoteContents({
+    const props = await this.updateNoteContents({
       oldNote: noteHydrated,
       content,
       fmChangeOnly: false,

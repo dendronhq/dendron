@@ -2446,15 +2446,6 @@
     compare-func "^2.0.0"
     q "^1.5.1"
 
-"@dendronhq/remark-mermaid@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/@dendronhq/remark-mermaid/-/remark-mermaid-0.3.0.tgz#5e943020fbfbce4ae4c9cc7cba25a93e5a880fb6"
-  integrity sha512-CL2DbhBHAXXPN+0GNoW2xi8jl4YkslZLY3ElGUB+F5v12on58jjAbnkvKo3JLgMTuaSXw1KNz2crJuPo43UJOA==
-  dependencies:
-    fs-extra "^4.0.1"
-    unist-util-visit "^1.1.3"
-    which "^1.3.0"
-
 "@dendronhq/remark-mermaid@^0.4.0":
   version "0.4.0"
   resolved "https://registry.npmjs.org/@dendronhq/remark-mermaid/-/remark-mermaid-0.4.0.tgz#d9158e9e12343472c929e9ba0c90748ebdda65eb"
@@ -12606,15 +12597,6 @@ fs-extra@^10.0.0:
     graceful-fs "^4.2.0"
     jsonfile "^6.0.1"
     universalify "^2.0.0"
-
-fs-extra@^4.0.1:
-  version "4.0.3"
-  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-4.0.3.tgz#0d852122e5bc5beb453fb028e9c0c9bf36340c94"
-  integrity sha512-q6rbdDd1o2mAnQreO7YADIxf/Whx4AHBiRf6d+/cVT8h44ss+lHgxf1FemcqDnQt9X3ct4McHr+JMGlYSsK7Cg==
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^4.0.0"
-    universalify "^0.1.0"
 
 fs-extra@^7.0.0:
   version "7.0.1"
@@ -26880,7 +26862,7 @@ which-typed-array@^1.1.2:
     has-tostringtag "^1.0.0"
     is-typed-array "^1.1.9"
 
-which@1.3.1, which@^1.2.14, which@^1.2.9, which@^1.3.0, which@^1.3.1:
+which@1.3.1, which@^1.2.14, which@^1.2.9, which@^1.3.1:
   version "1.3.1"
   resolved "https://registry.npmjs.org/which/-/which-1.3.1.tgz#a45043d54f5805316da8d62f9f50918d3da70b0a"
   integrity sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==

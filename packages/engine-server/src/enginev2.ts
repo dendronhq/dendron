@@ -72,6 +72,7 @@ import {
   ProcFlavor,
   runAllDecorators,
   RemarkUtils,
+  getParsingDependencyDicts,
 } from "@dendronhq/unified";
 import { HookUtils } from "./topics/hooks";
 
@@ -593,24 +594,38 @@ export class DendronEngineV2 implements DEngine {
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
     const config = DConfig.readConfigSync(this.wsRoot);
+
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
+      this,
+      config,
+      this.vaults
+    );
+
     if (dest === DendronASTDest.HTML) {
       proc = MDUtilsV5.procRehypeFull(
         {
-          engine: this,
+          noteToRender: note,
+          noteCacheForRenderDict,
           fname: note.fname,
           vault: note.vault,
           config,
+          vaults: this._vaults,
+          wsRoot: this.wsRoot,
         },
         { flavor }
       );
     } else {
       proc = MDUtilsV5.procRemarkFull(
         {
-          engine: this,
+          noteToRender: note,
+          noteCacheForRenderDict,
           fname: note.fname,
           vault: note.vault,
           dest,
           config,
+          vaults: this._vaults,
+          wsRoot: this.wsRoot,
         },
         { flavor }
       );
@@ -629,7 +644,7 @@ export class DendronEngineV2 implements DEngine {
             notesByFname: this.noteFnames,
           });
         } else {
-          EngineUtils.refreshNoteLinksAndAnchors({
+          await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
             config: DConfig.readConfigSync(this.wsRoot),
@@ -668,7 +683,7 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    EngineUtils.refreshNoteLinksAndAnchors({
+    await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
       config: DConfig.readConfigSync(this.wsRoot),
@@ -694,7 +709,6 @@ export class DendronEngineV2 implements DEngine {
         });
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        engine: this,
         config: DConfig.readConfigSync(this.wsRoot, true),
       });
       if (opts.filterByAnchorType) {

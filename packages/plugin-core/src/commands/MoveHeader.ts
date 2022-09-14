@@ -98,7 +98,7 @@ export class MoveHeaderCommand extends BasicCommand<
 
   private getProc = (engine: IEngineAPIService, note: NoteProps) => {
     return MDUtilsV5.procRemarkFull({
-      engine,
+      noteToRender: note,
       fname: note.fname,
       vault: note.vault,
       dest: DendronASTDest.MD_DENDRON,
@@ -133,6 +133,7 @@ export class MoveHeaderCommand extends BasicCommand<
     }
 
     // parse selection and get the target header node
+    // JYTODO: Add header target information into the render cache
     const proc = this.getProc(engine, maybeNote);
 
     // TODO: shoudl account for line number
@@ -378,14 +379,12 @@ export class MoveHeaderCommand extends BasicCommand<
    */
   private findLinksToUpdate(
     note: NoteProps,
-    engine: IEngineAPIService,
     origin: NoteProps,
     anchorNamesToUpdate: string[],
     config: IntermediateDendronConfig
   ) {
     const links = LinkUtils.findLinksFromBody({
       note,
-      engine,
       config,
     }).filter((link) => {
       return (
@@ -505,7 +504,6 @@ export class MoveHeaderCommand extends BasicCommand<
         const _note = resp.data;
         const linksToUpdate = this.findLinksToUpdate(
           _note,
-          engine,
           origin,
           anchorNamesToUpdate,
           config

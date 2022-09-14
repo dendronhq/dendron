@@ -6,7 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, ProcFlavor } from "@dendronhq/unified";
+import { DendronASTDest, MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../../config";
 import { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "../../../../presets";
 import { checkNotInVFile, checkVFile, createProcCompileTests } from "../utils";
@@ -199,7 +199,12 @@ describe("GIVEN dendron.yml default", () => {
         name: "THEN private backlinks not added",
         fname: "one",
         setup: async (opts) => {
+          const vaults = opts.vaults;
           const { proc } = getOpts(opts);
+          const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
+          bvault!.visibility = DVaultVisibility.PRIVATE;
+
+          MDUtilsV5.setProcData(proc, { vaults });
           const resp = await proc.process("");
           return { resp, proc };
         },
@@ -221,6 +226,7 @@ describe("GIVEN dendron.yml default", () => {
         },
         preSetupHook: async (opts: any) => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+
           TestConfigUtils.withConfig(
             (config) => {
               const vaults = ConfigUtils.getVaults(config);

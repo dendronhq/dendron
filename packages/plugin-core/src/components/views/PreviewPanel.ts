@@ -328,11 +328,13 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   private rewriteImageUrls = memoize({
     fn: (note: NoteProps, panel: vscode.WebviewPanel) => {
       const parser = MDUtilsV5.procRemarkFull({
+        noteToRender: note,
         dest: DendronASTDest.MD_DENDRON,
-        engine: this._ext.getEngine(),
         fname: note.fname,
         vault: note.vault,
         config: DConfig.readConfigSync(this._ext.getDWorkspace().wsRoot, true),
+        wsRoot: this._ext.getDWorkspace().wsRoot,
+        vaults: this._ext.getDWorkspace().vaults,
       });
       const tree = parser.parse(note.body);
       // ^preview-rewrites-images

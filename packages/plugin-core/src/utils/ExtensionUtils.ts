@@ -471,25 +471,11 @@ export class ExtensionUtils {
     }
 
     // NOTE: this will not be accurate in dev mode
-    try {
-      // infer install path from extension path.
-      // this assumes the user installs all extensions in one place.
-      // that should be the case for almost all cases, but vscode provides a way to
-      // customize install location so this might not be the case in those rare cases.
-      const installPath = Utils.dirname(
-        Utils.dirname(URI.file(ext.context.extensionPath))
-      ).fsPath;
-      const fd = fs.openSync(installPath, "r");
-      const stat = fs.fstatSync(fd);
-      // some file systems don't track birth times.
-      // in this case the value may be ctime (time of inode change), or 0
-      const { birthtimeMs } = stat;
-      if (birthtimeMs) {
-        _.set(trackProps, "codeFolderCreated", birthtimeMs);
-      }
-    } catch (error: any) {
-      // something went wrong. don't track. Send to sentry silently.
-      Sentry.captureException(error);
+    const codeFolderCreated = ExtensionUtils.getCodeFolderCreated({
+      context: ext.context,
+    });
+    if (codeFolderCreated) {
+      _.set(trackProps, "codeFolderCreated", codeFolderCreated);
     }
 
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
@@ -517,5 +503,32 @@ export class ExtensionUtils {
       Logger.info("sendSavedAnalytics"); // TODO
       AnalyticsUtils.sendSavedAnalytics();
     }, DELAY_TO_SEND_SAVED_TELEMETRY);
+  }
+
+  /**
+   * Try to infer install code instance age from extension path
+   * this will not be accurate in dev mode because the extension install path is the monorepo.
+   */
+  static getCodeFolderCreated(opts: { context: vscode.ExtensionContext }) {
+    const { context } = opts;
+    try {
+      // infer install path from extension path.
+      // this assumes the user installs all extensions in one place.
+      // that should be the case for almost all cases, but vscode provides a way to
+      // customize install location so this might not be the case in those rare cases.
+      const installPath = Utils.dirname(
+        Utils.dirname(URI.file(context.extensionPath))
+      ).fsPath;
+      const fd = fs.openSync(installPath, "r");
+      const stat = fs.fstatSync(fd);
+      // some file systems don't track birth times.
+      // in this case the value may be ctime (time of inode change), or 0
+      const { birthtimeMs } = stat;
+      return birthtimeMs;
+    } catch (error: any) {
+      // something went wrong. don't track. Send to sentry silently.
+      Sentry.captureException(error);
+      return;
+    }
   }
 }

@@ -399,6 +399,7 @@ export async function _activate(
         previousExtensionVersion: previousWorkspaceVersionFromState,
         start: startActivate,
         assetUri,
+        context,
       });
     }
 
@@ -448,6 +449,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion,
   start,
   assetUri,
+  context,
 }: {
   extensionInstallStatus: InstallStatus;
   isSecondaryInstall: boolean;
@@ -455,6 +457,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion: string;
   start: [number, number];
   assetUri: vscode.Uri;
+  context: vscode.ExtensionContext;
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
@@ -474,12 +477,15 @@ async function showWelcomeOrWhatsNew({
       // well, since Amplitude may not have the user props splitTest setup in time
       // before this install event reaches their backend.
       const group = TutorialInitializer.getTutorialType();
-
+      const codeFolderCreated = ExtensionUtils.getCodeFolderCreated({
+        context,
+      });
       // track how long install process took ^e8itkyfj2rn3
       AnalyticsUtils.track(VSCodeEvents.Install, {
         duration: getDurationMilliseconds(start),
         isSecondaryInstall,
         tutorialGroup: group,
+        codeFolderCreated,
       });
 
       metadataService.setGlobalVersion(version);

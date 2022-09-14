@@ -106,7 +106,10 @@ export type DNoteLink<TData extends DNoteLinkData = DNoteLinkData> = {
   data: TData;
 };
 
-export type DNoteLinkRaw<TData = any> = Omit<DNoteLink<TData>, "from"> & {
+export type DNoteLinkRaw<TData extends DNoteLinkData = any> = Omit<
+  DNoteLink<TData>,
+  "from"
+> & {
   from?: DNoteLoc;
 };
 
@@ -251,7 +254,7 @@ export type RespV3ErrorResp = {
   data?: never;
 };
 
-type RespV3SuccessResp<T> = {
+export type RespV3SuccessResp<T> = {
   error?: never;
   data: T;
 };

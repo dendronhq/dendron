@@ -6,6 +6,7 @@ import path from "path";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { ISchemaSyncService } from "./SchemaSyncServiceInterface";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { WriteSchemaResp } from "@dendronhq/common-all";
 
 /** Currently responsible for keeping the engine in sync with schema
  *  changes on disk. */
@@ -21,7 +22,7 @@ export class SchemaSyncService implements ISchemaSyncService {
 
     Logger.info({
       ctx: "SchemaSyncService:onDidChange",
-      msg: "updating schema.",
+      msg: "updating schema",
     });
 
     await this.saveSchema({ uri });
@@ -33,7 +34,7 @@ export class SchemaSyncService implements ISchemaSyncService {
   }: {
     uri: Uri;
     isBrandNewFile?: boolean;
-  }) {
+  }): Promise<WriteSchemaResp[] | undefined> {
     const schemaParser = new SchemaParser({
       wsRoot: this.extension.getDWorkspace().wsRoot,
       logger: Logger,
@@ -46,9 +47,9 @@ export class SchemaSyncService implements ISchemaSyncService {
     );
 
     if (_.isEmpty(parsedSchema.errors)) {
-      await Promise.all(
+      const resp = await Promise.all(
         _.map(parsedSchema.schemas, async (schema) => {
-          await engineClient.writeSchema(schema, { metaOnly: true });
+          return engineClient.writeSchema(schema, { metaOnly: true });
         })
       );
 
@@ -61,6 +62,7 @@ export class SchemaSyncService implements ISchemaSyncService {
       // data when the error message closes (if they use 'Go to schema' button) so we
       // should overwrite the status bar with a 'happy' message as well.
       vscode.window.setStatusBarMessage(msg);
+      return resp;
     } else {
       const navigateButtonText = "Go to schema.";
       const msg = `Failed to update '${path.basename(
@@ -81,6 +83,7 @@ export class SchemaSyncService implements ISchemaSyncService {
       if (userAction === navigateButtonText) {
         await VSCodeUtils.openFileInEditor(uri);
       }
+      return;
     }
   }
 }

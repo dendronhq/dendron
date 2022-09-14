@@ -19,6 +19,10 @@ import {
   RespV3,
   Theme,
   TreeUtils,
+  processSidebar,
+  parseSidebarConfig,
+  DisabledSidebar,
+  DefaultSidebar,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -234,6 +238,26 @@ export class NextjsExportPodUtils {
     const out = $$(cmdDev, { cwd: nextPath, windowsHide });
     out.stdout?.pipe(process.stdout);
     return out.pid;
+  }
+
+  static async loadSidebarsFile(
+    sidebarFilePath: string | false | undefined | null
+  ): Promise<unknown> {
+    if (sidebarFilePath === false) {
+      return DisabledSidebar;
+    }
+
+    if (_.isNil(sidebarFilePath)) {
+      return DefaultSidebar;
+    }
+
+    // Non-existent sidebars file: no sidebars
+    if (!(await fs.pathExists(sidebarFilePath))) {
+      throw new Error(`no sidebar file found at ${sidebarFilePath}`);
+    }
+
+    /* eslint-disable-next-line import/no-dynamic-require, global-require */
+    return require(path.resolve(sidebarFilePath));
   }
 }
 
@@ -491,6 +515,18 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       throw error;
     }
 
+    const sidebarPath =
+      "sidebarPath" in siteConfig ? siteConfig.sidebarPath : undefined;
+    const sidebarConfigInput = await NextjsExportPodUtils.loadSidebarsFile(
+      sidebarPath
+    );
+    const sidebarConfig = parseSidebarConfig(sidebarConfigInput);
+
+    // fail early, before computing `SiteUtils.filterByConfig`.
+    if (sidebarConfig.error) {
+      throw sidebarConfig.error;
+    }
+
     await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
@@ -502,6 +538,22 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       config: engineConfig,
       noExpandSingleDomain: true,
     });
+
+    const duplicateNoteBehavior =
+      "duplicateNoteBehavior" in siteConfig
+        ? siteConfig.duplicateNoteBehavior
+        : undefined;
+
+    const sidebarResp = processSidebar(sidebarConfig, {
+      notes: publishedNotes,
+      duplicateNoteBehavior,
+    });
+
+    // fail if sidebar could not be created
+    if (sidebarResp.error) {
+      throw sidebarResp.error;
+    }
+
     const siteNotes = SiteUtils.createSiteOnlyNotes({
       engine,
     });
@@ -543,7 +595,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const podConfigDstPath = path.join(podDstDir, "dendron.json");
 
     const treeDstPath = path.join(podDstDir, "tree.json");
-    const tree = TreeUtils.generateTreeData(payload.notes, payload.domains);
+
+    const sidebar = sidebarResp.data;
+    const tree = TreeUtils.generateTreeData(payload.notes, sidebar);
 
     // Generate full text search data
     const fuseDstPath = path.join(podDstDir, "fuse.json");

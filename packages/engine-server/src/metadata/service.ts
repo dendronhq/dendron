@@ -25,6 +25,7 @@ export enum ShowcaseEntry {
   BacklinksPanelHover = "BacklinksPanelHover",
   ObsidianImport = "ObsidianImport",
   SettingsUI = "SettingsUI",
+  CreateScratchNoteKeybindingTip = "CreateScratchNoteKeybindingTip",
 }
 
 /**
@@ -49,6 +50,10 @@ type Metadata = Partial<{
    * When was dendron first installed
    */
   firstInstall: number;
+  /**
+   * What was the version of the first install?
+   */
+  firstInstallVersion: string;
   /**
    * When the first workspace was initialized
    */
@@ -288,6 +293,10 @@ export class MetadataService {
     return this.getMeta().v100ReleaseMessageShown;
   }
 
+  get firstInstallVersion(): string | undefined {
+    return this.getMeta().firstInstallVersion;
+  }
+
   /**
    * Set first install logic
    *  ^o4y7ijuvi5nv
@@ -295,6 +304,10 @@ export class MetadataService {
   setInitialInstall(time?: number) {
     time ||= Time.now().toSeconds();
     this.setMeta("firstInstall", time);
+  }
+
+  setInitialInstallVersion(version: string) {
+    this.setMeta("firstInstallVersion", version);
   }
 
   setFirstWsInitialize() {

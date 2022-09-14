@@ -2,8 +2,9 @@ import _ from "lodash";
 import { DendronError, NoteUtils } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
-import { isNotUndefined, PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
+import { assertUnreachable } from "../error";
+import type { Sidebar, SidebarItem } from "../sidebar";
 
 export enum TreeMenuNodeIcon {
   bookOutlined = "bookOutlined",
@@ -17,7 +18,6 @@ export type TreeMenuNode = {
   icon: TreeMenuNodeIcon | null;
   hasTitleNumberOutlined: boolean;
   vaultName: string;
-  navExclude: boolean;
   children?: TreeMenuNode[];
   contextValue?: string;
 };
@@ -25,6 +25,7 @@ export type TreeMenuNode = {
 export type TreeMenu = {
   roots: TreeMenuNode[];
   child2parent: { [key: string]: string | null };
+  notesLabelById: { [key: string]: string }; // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
 };
 
 export enum TreeViewItemLabelTypeEnum {
@@ -39,25 +40,103 @@ export type TreeNode = {
 
 export class TreeUtils {
   static generateTreeData(
-    allNotes: NotePropsByIdDict,
-    domains: NoteProps[]
+    noteDict: NotePropsByIdDict,
+    sidebar: Sidebar
   ): TreeMenu {
-    // --- Calc
-    const roots = domains
-      .map((note) => {
-        return TreeUtils.note2Tree({
-          noteId: note.id,
-          noteDict: allNotes,
-        });
-      })
-      .filter((ent): ent is TreeMenuNode => !_.isUndefined(ent));
+    function itemToNoteId(item: SidebarItem) {
+      const { type } = item;
+      switch (type) {
+        case "category": {
+          return item.link?.id;
+        }
+        case "note": {
+          return item.id;
+        }
+        default:
+          assertUnreachable(type);
+      }
+    }
+
+    function itemToTreeMenuNode(
+      sidebarItem: SidebarItem,
+      opts: {
+        child2parent: Record<string, string | null>;
+        parent: string | null;
+        notesLabelById: Record<string, string>;
+      }
+    ): TreeMenuNode | undefined {
+      const { child2parent, parent, notesLabelById } = opts;
+
+      const noteId = itemToNoteId(sidebarItem);
+      const note = noteDict[noteId] as NoteProps | undefined; // explicitly casting since `noUncheckedIndexedAccess` is currently not enabled
+
+      if (_.isUndefined(note)) {
+        return undefined;
+      }
+
+      let icon = null;
+
+      if (note.schema) {
+        icon = TreeMenuNodeIcon.bookOutlined;
+      } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
+        icon = TreeMenuNodeIcon.numberOutlined;
+      } else if (note.stub) {
+        icon = TreeMenuNodeIcon.plusOutlined;
+      }
+      const title = sidebarItem.label ?? note.title;
+
+      notesLabelById[note.id] = title;
+
+      const treeMenuNode: TreeMenuNode = {
+        key: note.id,
+        title,
+        icon,
+        hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
+        vaultName: VaultUtils.getName(note.vault),
+        children: [],
+      };
+
+      if (child2parent[note.id] === undefined) {
+        child2parent[note.id] = parent;
+      }
+
+      if (sidebarItem.type === "category") {
+        treeMenuNode.children = sidebarItem.items
+          .map((item) =>
+            itemToTreeMenuNode(item, {
+              child2parent,
+              parent: note.id,
+              notesLabelById,
+            })
+          )
+          .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
+            Boolean(maybeTreeMenuNode)
+          );
+      }
+
+      return treeMenuNode;
+    }
 
     const child2parent: { [key: string]: string | null } = {};
-    Object.entries(allNotes).forEach(([noteId, note]) => {
-      child2parent[noteId] = note.parent;
-    });
+    const notesLabelById: { [key: string]: string } = {};
 
-    return { roots, child2parent };
+    const roots = sidebar
+      .map((sidebarItem) =>
+        itemToTreeMenuNode(sidebarItem, {
+          child2parent,
+          parent: null,
+          notesLabelById,
+        })
+      )
+      .filter((maybeTreeMenuNode): maybeTreeMenuNode is TreeMenuNode =>
+        Boolean(maybeTreeMenuNode)
+      );
+
+    return {
+      roots,
+      child2parent,
+      notesLabelById,
+    };
   }
 
   static getAllParents = ({
@@ -67,7 +146,7 @@ export class TreeUtils {
     child2parent: { [key: string]: string | null };
     noteId: string;
   }) => {
-    const activeNoteIds: string[] = [noteId];
+    const activeNoteIds: string[] = [];
     let parent = child2parent[noteId];
     while (parent) {
       activeNoteIds.unshift(parent);
@@ -76,62 +155,6 @@ export class TreeUtils {
 
     return activeNoteIds;
   };
-
-  static note2Tree({
-    noteId,
-    noteDict,
-  }: {
-    noteId: string;
-    noteDict: NotePropsByIdDict;
-  }): TreeMenuNode | undefined {
-    const note = noteDict[noteId];
-
-    // return children of the current note
-    const getChildren = () => {
-      if (fm.nav_exclude_children || fm.has_collection) {
-        return [];
-      }
-
-      const { data } = this.sortNotesAtLevel({
-        noteIds: note.children,
-        noteDict,
-        reverse: fm.sort_order === "reverse",
-      });
-
-      return data
-        .map((noteId) =>
-          TreeUtils.note2Tree({
-            noteId,
-            noteDict,
-          })
-        )
-        .filter(isNotUndefined);
-    };
-
-    if (_.isUndefined(note)) {
-      return undefined;
-    }
-
-    let icon: TreeMenuNodeIcon | null = null;
-    if (note.schema) {
-      icon = TreeMenuNodeIcon.bookOutlined;
-    } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-      icon = TreeMenuNodeIcon.numberOutlined;
-    } else if (note.stub) {
-      icon = TreeMenuNodeIcon.plusOutlined;
-    }
-    const fm = PublishUtils.getPublishFM(note);
-
-    return {
-      key: note.id,
-      title: note.title,
-      icon,
-      hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
-      vaultName: VaultUtils.getName(note.vault),
-      navExclude: fm.nav_exclude || false,
-      children: getChildren(),
-    };
-  }
 
   static sortNotesAtLevel = ({
     noteIds,

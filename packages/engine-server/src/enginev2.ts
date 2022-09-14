@@ -14,6 +14,7 @@ import {
   DNodeType,
   DStore,
   DVault,
+  EngineSchemaWriteOpts,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineWriteOptsV2,
@@ -692,8 +693,8 @@ export class DendronEngineV2 implements DEngine {
     return out;
   }
 
-  async writeSchema(schema: SchemaModuleProps) {
-    const out = this.store.writeSchema(schema);
+  async writeSchema(schema: SchemaModuleProps, opts?: EngineSchemaWriteOpts) {
+    const out = this.store.writeSchema(schema, opts);
     await this.updateIndex("schema");
     return out;
   }

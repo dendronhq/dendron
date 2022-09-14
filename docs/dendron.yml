@@ -18,7 +18,8 @@ commands:
         enableMultiSelect: false
     insertNoteIndex:
         enableMarker: false
-    copyNoteLink: {}
+    copyNoteLink:
+        aliasMode: title
     templateHierarchy: template
 workspace:
     dendronVersion: 0.83.0
@@ -89,7 +90,6 @@ workspace:
             - x
     enableEditorDecorations: true
     enableFullHierarchyNoteTitle: false
-    enableHandlebarTemplates: true
     enableSmartRefs: false
 preview:
     enableFMTitle: true

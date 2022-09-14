@@ -249,6 +249,7 @@ export const DEPRECATED_PATHS = [
   "site.generateChangelog",
   "dev.enableWebUI",
   "workspace.enableHandlebarTemplates",
+  "workspace.enableSmartRefs",
 ];
 
 export class MigrationUtils {

@@ -414,3 +414,87 @@ export function isTSError(err: any): err is Error {
     (err as Error).message !== undefined && (err as Error).name !== undefined
   );
 }
+
+/** Utility class for helping with dataflow of RespV3 objects. */
+export class ErrorFuncUtils {
+  /**
+   * Unwrap the RespV3SuccessResp value, or throw if there is an RespV3ErrorResp.
+   */
+  static unwrap<T>(value: RespV3<T>): T {
+    if (value.error) {
+      throw value.error;
+    }
+    return value.data;
+  }
+
+  /**
+   * Unwrap the RespV3SuccessResp value, or return the default if there is an RespV3ErrorResp.
+   */
+  static unwrapOr<T, TT>(value: RespV3<T>, or: TT): T | TT {
+    if (value.error) {
+      return or;
+    }
+    return value.data;
+  }
+
+  /**
+   * Map the data containt inside `RespV3` object to another value.
+   */
+  static map<T, R>(resp: RespV3<T>, fn: (value: T) => R): RespV3<R> {
+    if (resp.error) {
+      return resp;
+    } else {
+      return {
+        data: fn(resp.data),
+      };
+    }
+  }
+
+  /**
+   * Same as map. Except you need to return a new `RespV3`.
+   */
+  static andThen<T, R>(
+    resp: RespV3<T>,
+    fn: (value: T) => RespV3<R>
+  ): RespV3<R> {
+    if (resp.error) {
+      return resp;
+    } else {
+      return fn(resp.data);
+    }
+  }
+
+  /**
+   * Takes an array of `RespV3` objects and converts it into a single `RespV3`.
+   */
+  static combine<T>(respList: RespV3<T>[]) {
+    return respList.reduce<RespV3<T[]>>(
+      (acc, current) => {
+        if (acc.error) {
+          return acc;
+        }
+        if (current.error) {
+          return current;
+        }
+        acc.data.push(current.data);
+        return acc;
+      },
+      { data: [] }
+    );
+  }
+
+  /**
+   * Wraps a throwable function and returns an higher-order function that returns a `RespV3` object.
+   */
+  static encase<T, A extends any[]>(fn: (...args: A) => T) {
+    return (...args: A): RespV3<T> => {
+      try {
+        return { data: fn(...args) };
+      } catch (error) {
+        return {
+          error: ErrorFactory.wrapIfNeeded(error),
+        };
+      }
+    };
+  }
+}

@@ -71,13 +71,11 @@ const DendronNotePreview: DendronComponent = (props) => {
   const ctx = "DendronNotePreview";
   const logger = createLogger("DendronNotePreview");
   const noteProps = props.ide.noteActive;
-  const config = props.engine.config!;
 
   logger.info({
     ctx,
     msg: "enter",
     noteProps: noteProps ? noteProps.id : "no notes found",
-    config,
   });
 
   const [noteRenderedBody] = useRenderedNoteBody({
@@ -93,7 +91,7 @@ const DendronNotePreview: DendronComponent = (props) => {
 
   useClickHandler(noteProps?.id);
   const { currentTheme: themeType } = useCurrentTheme();
-  useMermaid({ config, themeType, mermaid, noteRenderedBody });
+  useMermaid({ themeType, mermaid, noteRenderedBody });
 
   if (props.engine.error) {
     return (
@@ -126,7 +124,7 @@ const DendronNotePreview: DendronComponent = (props) => {
 
   return (
     <>
-      <DendronNote noteContent={noteRenderedBody} config={config} />
+      <DendronNote noteContent={noteRenderedBody} />
       <Button
         shape="circle"
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}

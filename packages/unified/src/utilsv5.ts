@@ -344,7 +344,7 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-          if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
+          if (ConfigUtils.getEnableMermaid(config)) {
             proc = proc.use(mermaid, { simple: true });
           }
           // Add remaining flavor specific plugins
@@ -385,7 +385,7 @@ export class MDUtilsV5 {
           proc = proc.use(math);
         }
 
-        if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
+        if (ConfigUtils.getEnableMermaid(config)) {
           proc = proc.use(mermaid, { simple: true });
         }
         break;

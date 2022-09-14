@@ -81,7 +81,6 @@ workspace:
 preview:
   enableFMTitle: true
   enableNoteTitleForLink: true
-  enableMermaid: true
   enablePrettyRefs: true
   enableKatex: true
   automaticallyShowPreview: false

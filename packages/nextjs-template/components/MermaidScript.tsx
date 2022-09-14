@@ -12,7 +12,7 @@ export const MermaidScript: React.FC<MermaidScriptProps> = (props) => {
   const [loadMermaid, setLoadMermaid] = React.useState(false);
   const engine = useEngineAppSelector((state) => state.engine);
   const config = engine.config;
-  const enableMermaid = config && ConfigUtils.getEnableMermaid(config, true);
+  const enableMermaid = config && ConfigUtils.getEnableMermaid(config);
   const { noteBody } = props;
 
   useEffect(() => {

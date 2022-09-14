@@ -184,6 +184,7 @@ function MenuView({
           onTitleClick={(event) => {
             const target = event.domEvent.target as HTMLElement;
             const isAnchor = target.nodeName === "A";
+            // only expand SubMenu when not an anchor, which means that a page transition will occur.
             if (!isAnchor) {
               onExpand(event.key);
             }
@@ -248,7 +249,9 @@ function MenuItemTitle(
         passHref
       >
         <a
-          href="dummy"
+          href={
+            "dummy" /* a way to dodge eslint warning that conflicts with `next/link`. see https://github.com/vercel/next.js/discussions/32233#discussioncomment-1766768*/
+          }
           onClick={() => {
             props.onSubMenuSelect(props.menu.key as string);
           }}

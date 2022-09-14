@@ -896,7 +896,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   OPEN_LINK: {
     key: "dendron.openLink",
     title: `${CMD_PREFIX} Open Link`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+    when: `false`,
   },
   PASTE_LINK: {
     key: "dendron.pasteLink",

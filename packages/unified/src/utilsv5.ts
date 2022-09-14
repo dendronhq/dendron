@@ -444,11 +444,13 @@ export class MDUtilsV5 {
     // apply plugins enabled by config
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
+
+    const { insideNoteRef } = data;
     if (ConfigUtils.getEnableKatex(data.config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
     // apply publishing specific things
-    if (shouldApplyPublishRules) {
+    if (shouldApplyPublishRules && !insideNoteRef) {
       pRehype = pRehype.use(link, {
         properties: {
           "aria-hidden": "true",

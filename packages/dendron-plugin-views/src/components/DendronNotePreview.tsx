@@ -126,7 +126,7 @@ const DendronNotePreview: DendronComponent = (props) => {
 
   return (
     <>
-      <DendronNote noteContent={noteRenderedBody} config={config} />
+      <DendronNote noteContent={noteRenderedBody} />
       <Button
         shape="circle"
         icon={isLocked ? <LockFilled /> : <UnlockOutlined />}

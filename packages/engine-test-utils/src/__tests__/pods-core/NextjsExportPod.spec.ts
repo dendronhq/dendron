@@ -826,4 +826,119 @@ describe("nextjs export", () => {
       }
     );
   });
+
+  test("WHEN note ref is the root of a hierarchy, link should be / not /notes/", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const dest = await setupExport({
+          engine,
+          wsRoot,
+          vaults,
+        });
+
+        await checkFile(
+          {
+            fpath: path.join(dest, "data", "refs", "public---0.html"),
+            snapshot: true,
+            nomatch: ["/notes/"],
+          },
+          `href="/"`
+        );
+
+        await checkFile(
+          {
+            fpath: path.join(dest, "data", "refs", "publicsubnote-2---0.html"),
+            snapshot: true,
+          },
+          "notes/subnote-2"
+        );
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const vault = opts.vaults[0];
+          const wsRoot = opts.wsRoot;
+          await NoteTestUtilsV4.createNote({
+            fname: "public",
+            vault,
+            wsRoot,
+            body: ["I'm the homepage, my url as a ref should be /"].join("\n"),
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "public.subnote-2",
+            vault,
+            wsRoot,
+            body: ["I should be /notes/subnote-2"].join("\n"),
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "public.subnote",
+            vault,
+            wsRoot,
+            body: [
+              "Reference to the root of the siteHierarchy:",
+              "![[public]]",
+              "![[public.subnote-2]]",
+            ].join("\n"),
+          });
+          TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "siteHierarchies", ["public"]);
+              ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
+
+  test("WHEN a noteref has a header, it should not have a .anchor-heading a tag", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const dest = await setupExport({
+          engine,
+          wsRoot,
+          vaults,
+        });
+
+        await checkFile({
+          fpath: path.join(dest, "data", "refs", "public---0.html"),
+          snapshot: true,
+          nomatch: ["anchor-heading"],
+        });
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const vault = opts.vaults[0];
+          const wsRoot = opts.wsRoot;
+          await NoteTestUtilsV4.createNote({
+            fname: "public",
+            vault,
+            wsRoot,
+            body: ["# My header tag", "should not have an anchor tag"].join(
+              "\n"
+            ),
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "public.subnote",
+            vault,
+            wsRoot,
+            body: [
+              "I reference public so that refs/public---0.html renders",
+              "![[public]]",
+            ].join("\n"),
+          });
+          TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
 });

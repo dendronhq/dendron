@@ -1001,7 +1001,8 @@ const genRefAsIFrame = ({
   const refId = getRefId({ id: noteId, link });
   MDUtilsV5.serializeRefId(proc, { refId: { id: noteId, link }, content });
 
-  let assetsPrefix = ConfigUtils.getPublishingConfig(config).assetsPrefix ?? "";
+  const assetsPrefix =
+    ConfigUtils.getPublishingConfig(config).assetsPrefix ?? "";
 
   return paragraph(
     html(
@@ -1010,12 +1011,30 @@ const genRefAsIFrame = ({
   );
 };
 
+/**
+ *  Replace /notes/ with /
+ * ... unless /notes/notes
+ */
+function fixLinkIfRoot(link?: string): string | undefined {
+  if (!link) {
+    return link;
+  }
+  const indexOfNotes = link.indexOf("/notes/");
+  const lastIndexOfNotes = link.lastIndexOf("/notes/");
+  if (indexOfNotes === lastIndexOfNotes && indexOfNotes !== -1) {
+    return link.substring(0, indexOfNotes) + `/"`;
+  }
+  return link;
+}
+
 function renderPrettyAST(opts: {
   content: Parent;
   title: string;
   link?: string;
 }) {
-  const { content, title, link } = opts;
+  const { content, title } = opts;
+  let { link } = opts;
+  link = fixLinkIfRoot(link);
   const linkLine = _.isUndefined(link)
     ? ""
     : `<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`;

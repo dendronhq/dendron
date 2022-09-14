@@ -917,11 +917,11 @@
         },
         {
           "command": "dendron.togglePreview",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.togglePreviewLock",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.pasteFile",
@@ -1105,7 +1105,7 @@
         },
         {
           "command": "dendron.togglePreview",
-          "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
+          "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "navigation"
         }
       ],
@@ -1119,14 +1119,14 @@
       "editor/title": [
         {
           "command": "dendron.togglePreview",
-          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && shellExecutionSupported",
+          "when": "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
           "command": "dendron.togglePreview",
-          "when": "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
+          "when": "resourceLangId == markdown && dendron:pluginActive",
           "group": "1_open"
         }
       ],

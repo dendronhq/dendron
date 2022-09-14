@@ -1,8 +1,6 @@
 import {
   DendronError,
   NoteChangeEntry,
-  NoteProps,
-  TreeUtils,
   TreeViewItemLabelTypeEnum,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -10,8 +8,7 @@ import { NoteTestUtilsV4, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { MetadataService } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS_MULTI } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
-import { describe, after, before } from "mocha";
-import sinon from "sinon";
+import { describe, after } from "mocha";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { EngineNoteProvider } from "../../common/EngineNoteProvider";
@@ -168,46 +165,6 @@ suite("EngineNoteProvider Tests", function testSuite() {
         },
       });
     };
-
-    describe("drift in engine state", function () {
-      describeMultiWS(
-        "GIVEN note id that is not in noteDict",
-        {
-          preSetupHook: async (opts) => preSetupHookFunc(opts),
-        },
-        () => {
-          let sortNotesAtLevelSpy: sinon.SinonSpy;
-
-          before(() => {
-            sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
-          });
-
-          after(() => {
-            sortNotesAtLevelSpy.restore();
-          });
-
-          test.skip("THEN omit rendering note id that can't be found and render the rest.", async () => {
-            const provider = container.resolve(EngineNoteProvider);
-
-            const props = await (provider.getChildren() as Promise<
-              NoteProps[]
-            >);
-
-            const vault1RootProps = props[0];
-
-            vault1RootProps.children.push("fake-id");
-
-            const resp = await (provider.getChildren(
-              vault1RootProps.id
-            ) as Promise<string[]>);
-            const sortResp = sortNotesAtLevelSpy.lastCall.returnValue;
-            expect(sortResp.error !== undefined);
-            expect(sortResp.error.payload).toEqual('{"omitted":["fake-id"]}');
-            expect(resp).toBeTruthy();
-          });
-        }
-      );
-    });
 
     describe("sort / label config", function () {
       describeMultiWS(

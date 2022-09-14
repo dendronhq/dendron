@@ -1,15 +1,9 @@
-import {
-  DendronError,
-  NoteProps,
-  NotePropsMeta,
-  TreeUtils,
-} from "@dendronhq/common-all";
+import { NoteProps, NotePropsMeta } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { after, before, beforeEach, describe } from "mocha";
+import { beforeEach, describe } from "mocha";
 import path from "path";
-import sinon from "sinon";
 import { container } from "tsyringe";
 import { Uri } from "vscode";
 import { DeleteCommand } from "../../commands/DeleteCommand";
@@ -1832,69 +1826,6 @@ suite("NativeTreeView tests", function () {
           ],
         });
       });
-    });
-
-    describe.skip("error handling", function () {
-      describeMultiWS(
-        "GIVEN note id that is not in noteDict",
-        {
-          preSetupHook: async (opts) => {
-            const { wsRoot, vaults } = opts;
-            await NoteTestUtilsV4.createNote({
-              wsRoot,
-              vault: vaults[0],
-              fname: "foo",
-            });
-          },
-        },
-        () => {
-          let sortNotesAtLevelSpy: sinon.SinonSpy;
-
-          before(() => {
-            sortNotesAtLevelSpy = sinon.spy(TreeUtils, "sortNotesAtLevel");
-          });
-
-          after(() => {
-            sortNotesAtLevelSpy.restore();
-          });
-
-          test("THEN gracefully render only the available notes and log omitted note id.", async () => {
-            const provider = container.resolve(EngineNoteProvider);
-            const engine = ExtensionProvider.getEngine();
-            const props = await (provider.getChildren() as Promise<string[]>);
-
-            const vault1RootProps = props[0];
-            const vault1Root = await (
-              await engine.getNote(vault1RootProps)
-            ).data!;
-            vault1Root.children.push("fake-id");
-
-            const fullTree = await getFullTree({
-              root: vault1RootProps,
-              provider,
-            });
-
-            const sortResps = sortNotesAtLevelSpy.returnValues;
-            const sortRespWithError = sortResps.find((sortResp) => {
-              return sortResp.error instanceof DendronError;
-            });
-            expect(fullTree).toEqual({
-              fname: "root",
-              childNodes: [
-                {
-                  fname: "foo",
-                  childNodes: [],
-                },
-              ],
-            });
-
-            expect(sortRespWithError !== undefined);
-            expect(sortRespWithError.error.payload).toEqual(
-              '{"omitted":["fake-id"]}'
-            );
-          });
-        }
-      );
     });
   });
 });

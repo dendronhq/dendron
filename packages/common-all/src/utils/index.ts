@@ -1286,6 +1286,93 @@ export class ConfigUtils {
   static getConfigDescription = (conf: string) => {
     return _.get(DENDRON_CONFIG, conf)?.desc;
   };
+
+  /**
+   * Given an config object and an optional array of lodash property path,
+   * omit the properties from the object and flatten it
+   * The result will be a flat array of path-value pairs
+   *
+   * Each pair will contain a path and a value.
+   * The value is either a primitive value, or a stringified array.
+   *
+   * If comparing the array value of a config is unnecessary,
+   * make sure to add it to the omit path.
+   */
+  static flattenConfigObject(opts: { obj: Object; omitPaths?: string[] }) {
+    const { obj, omitPaths } = opts;
+    if (omitPaths && omitPaths.length > 0) {
+      omitPaths.forEach((path) => {
+        _.unset(obj, path);
+      });
+    }
+
+    const accumulator: { path: string; value: any }[] = [];
+    const flattenToPathValuePairs = (opts: {
+      obj: Object;
+      parent?: string;
+    }) => {
+      const { obj, parent } = opts;
+      const entries = _.entries(obj);
+      entries.forEach((entry) => {
+        const [key, value] = entry;
+        const pathSoFar = `${parent ? `${parent}.` : ""}`;
+        if (_.isObject(value) && !_.isArrayLikeObject(value)) {
+          flattenToPathValuePairs({
+            obj: _.get(obj, key),
+            parent: `${pathSoFar}${key}`,
+          });
+        } else if (_.isArrayLikeObject(value)) {
+          accumulator.push({
+            path: `${pathSoFar}${key}`,
+            value: JSON.stringify(value),
+          });
+        } else {
+          accumulator.push({
+            path: `${pathSoFar}${key}`,
+            value,
+          });
+        }
+      });
+    };
+    flattenToPathValuePairs({ obj });
+    return accumulator;
+  }
+
+  /**
+   * Given a config, find the difference compared to the default.
+   *
+   * This is used to track changes from the default during activation.
+   */
+  static findDifference(opts: { config: IntermediateDendronConfig }) {
+    const { config } = opts;
+    if (configIsV4(config)) {
+      // don't track diff if V4. we are deprecating it soon.
+      return [];
+    }
+
+    const defaultConfig = ConfigUtils.genDefaultConfig();
+    const omitPaths = [
+      "workspace.workspaces",
+      "workspace.vaults",
+      "workspace.seeds",
+      "dev",
+    ];
+
+    const flatConfigObject = ConfigUtils.flattenConfigObject({
+      obj: config,
+      omitPaths,
+    });
+    const flatDefaultConfigObject = ConfigUtils.flattenConfigObject({
+      obj: defaultConfig,
+      omitPaths,
+    });
+    const diff = _.differenceWith(
+      flatConfigObject,
+      flatDefaultConfigObject,
+      _.isEqual
+    );
+    return diff;
+  }
 }
 
 /**

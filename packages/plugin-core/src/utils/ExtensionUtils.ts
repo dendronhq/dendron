@@ -401,6 +401,9 @@ export class ExtensionUtils {
     const { workspaceFile, workspaceFolders } = vscode.workspace;
     const configVersion = ConfigUtils.getVersion(dendronConfig);
 
+    const configDiff = ConfigUtils.findDifference({ config: dendronConfig });
+    const dendronConfigChanged = configDiff.length > 0;
+
     const trackProps = {
       duration: durationReloadWorkspace,
       noCaching: dendronConfig.noCaching || false,
@@ -434,7 +437,17 @@ export class ExtensionUtils {
         : workspaceFolders.length,
       hasLocalConfig: false,
       numLocalConfigVaults: 0,
+      dendronConfigChanged,
     };
+
+    if (dendronConfigChanged) {
+      _.set(
+        trackProps,
+        "changedDendronConfigs",
+        configDiff.map((item) => item.path)
+      );
+    }
+
     if (siteUrl !== undefined) {
       _.set(trackProps, "siteUrl", siteUrl);
     }

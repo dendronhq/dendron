@@ -1,10 +1,11 @@
-import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
+import { DVault, NoteUtils, ReducedDEngine } from "@dendronhq/common-all";
+import assert from "assert";
+import sinon, { stubInterface } from "ts-sinon";
 import * as vscode from "vscode";
+import { DummyTelemetryClient } from "../../../../telemetry/common/DummyTelemetryClient";
+import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { SiteUtilsWeb } from "../../../utils/SiteUtilsWeb";
 import { WSUtilsWeb } from "../../../utils/WSUtils";
-import { DVault, NoteUtils, ReducedDEngine } from "@dendronhq/common-all";
-import sinon, { stubInterface } from "ts-sinon";
-import assert from "assert";
 
 require("mocha/mocha");
 
@@ -46,7 +47,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       .stub(wsUtils, "getVaultFromDocument")
       .returns(vault[0]);
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const cmd = new CopyNoteURLCmd(
+      wsUtils,
+      new DummyTelemetryClient(),
+      siteUtils
+    );
     const activeTextEditorStub = sinon
       .stub(cmd, "getActiveTextEditor")
       .returns("fakeEditor");
@@ -71,7 +76,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       .stub(wsUtils, "getVaultFromDocument")
       .returns(vault[0]);
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const cmd = new CopyNoteURLCmd(
+      wsUtils,
+      new DummyTelemetryClient(),
+      siteUtils
+    );
     const activeTextEditorStub = sinon
       .stub(cmd, "getActiveTextEditor")
       .returns("fakeEditor");
@@ -96,7 +105,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       .stub(wsUtils, "getVaultFromDocument")
       .returns(vault[0]);
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const cmd = new CopyNoteURLCmd(
+      wsUtils,
+      new DummyTelemetryClient(),
+      siteUtils
+    );
     const activeTextEditorStub = sinon
       .stub(cmd, "getActiveTextEditor")
       .returns("fakeEditor");
@@ -120,7 +133,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       .stub(wsUtils, "getVaultFromDocument")
       .returns(vault[0]);
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const cmd = new CopyNoteURLCmd(
+      wsUtils,
+      new DummyTelemetryClient(),
+      siteUtils
+    );
     const activeTextEditorStub = sinon
       .stub(cmd, "getActiveTextEditor")
       .returns("fakeEditor");
@@ -145,7 +162,11 @@ suite("GIVEN a CopyNoteURLCmd", () => {
       .stub(wsUtils, "getVaultFromDocument")
       .returns(vault[0]);
     const NoteStub = sinon.stub(wsUtils, "getNoteFromDocument").resolves([foo]);
-    const cmd = new CopyNoteURLCmd(wsUtils, siteUtils);
+    const cmd = new CopyNoteURLCmd(
+      wsUtils,
+      new DummyTelemetryClient(),
+      siteUtils
+    );
     const activeTextEditorStub = sinon
       .stub(cmd, "getActiveTextEditor")
       .returns("fakeEditor");

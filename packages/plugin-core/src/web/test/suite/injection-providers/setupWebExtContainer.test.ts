@@ -4,6 +4,7 @@ import sinon from "sinon";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { ITelemetryClient } from "../../../../telemetry/common/ITelemetryClient";
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
@@ -66,6 +67,15 @@ suite(
     test("WHEN NativeTreeView is constructed THEN valid objects are returned without exceptions", async () => {
       try {
         const obj = container.resolve(NativeTreeView);
+        assert(!_.isUndefined(obj));
+      } catch (error) {
+        assert.fail(error as Error);
+      }
+    });
+
+    test("WHEN ITelemetryClient is resolved THEN valid objects are returned without exceptions", async () => {
+      try {
+        const obj = container.resolve<ITelemetryClient>("ITelemetryClient");
         assert(!_.isUndefined(obj));
       } catch (error) {
         assert.fail(error as Error);

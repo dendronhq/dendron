@@ -4,6 +4,7 @@ import {
   CONSTANTS,
   DWorkspaceV2,
   getStage,
+  GLOBAL_STATE_KEYS,
   GraphEvents,
   GraphThemeEnum,
   GraphThemeTestGroups,
@@ -170,6 +171,14 @@ export async function _activate(
       sessionId: AnalyticsUtils.getSessionId(),
       release: AnalyticsUtils.getVSCodeSentryRelease(),
     });
+
+    // Temp: store the user's anonymous ID into global state so that we can link
+    // local ext users to web ext users:
+    context.globalState.setKeysForSync([GLOBAL_STATE_KEYS.ANONYMOUS_ID]);
+    context.globalState.update(
+      GLOBAL_STATE_KEYS.ANONYMOUS_ID,
+      SegmentClient.instance().anonymousId
+    );
   }
 
   try {

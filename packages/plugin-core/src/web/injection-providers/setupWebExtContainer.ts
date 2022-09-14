@@ -12,6 +12,8 @@ import {
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
 import { PreviewProxy } from "../../components/views/PreviewProxy";
+import { ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
+import { WebTelemetryClient } from "../../telemetry/web/WebTelemetryClient";
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
@@ -40,6 +42,11 @@ import { TextDocumentService } from "../../services/web/TextDocumentService";
 import { Event, TextDocument, workspace } from "vscode";
 import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
+import { VersionProvider } from "../../telemetry/common/VersionProvider";
+import { VSCodeGlobalStateStore } from "../../storage/common/VSCodeGlobalStateStore";
+import { getAnonymousId } from "../../telemetry/web/getAnonymousId";
+import { getStageFromPkgJson } from "../../utils/common/getStageFromPkgJson";
+import { DummyTelemetryClient } from "../../telemetry/common/DummyTelemetryClient";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension
@@ -122,9 +129,15 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
     { frequency: "Once" }
   );
 
+  container.register<IDataStore<string, any>>("GlobalState", {
+    useValue: new VSCodeGlobalStateStore(context),
+  });
+
   container.register<ITreeViewConfig>("ITreeViewConfig", {
     useClass: TreeViewDummyConfig,
   });
+
+  await setupTelemetry(context);
 
   container.register<PreviewProxy>("PreviewProxy", {
     useClass: PreviewPanel,
@@ -168,4 +181,38 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   container.register<IntermediateDendronConfig>("IntermediateDendronConfig", {
     useValue: config as IntermediateDendronConfig,
   });
+}
+
+async function setupTelemetry(context: vscode.ExtensionContext) {
+  const version = new VersionProvider(context).version;
+
+  container.register<string>("extVersion", {
+    useValue: version,
+  });
+
+  const globalState =
+    container.resolve<IDataStore<string, string>>("GlobalState");
+
+  const anonymousId = await getAnonymousId(globalState);
+
+  container.register<string>("anonymousId", {
+    useValue: anonymousId,
+  });
+
+  const stage = getStageFromPkgJson(context.extension.packageJSON);
+
+  switch (stage) {
+    case "prod": {
+      container.register<ITelemetryClient>("ITelemetryClient", {
+        useClass: WebTelemetryClient,
+      });
+      break;
+    }
+    default: {
+      container.register<ITelemetryClient>("ITelemetryClient", {
+        useClass: DummyTelemetryClient,
+      });
+      break;
+    }
+  }
 }

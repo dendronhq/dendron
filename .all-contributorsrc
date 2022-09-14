@@ -2139,6 +2139,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "swithun-liu",
+      "name": "Swithun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42160297?v=4",
+      "profile": "https://github.com/swithun-liu",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

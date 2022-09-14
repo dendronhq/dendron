@@ -9,6 +9,64 @@ function getConfig(
 }
 
 describe("ConfigUtils", () => {
+  describe("GIVEN findDifference", () => {
+    describe("WHEN config has no difference", () => {
+      test("THEN correctly outputs no change", () => {
+        const config = getConfig();
+        const output = ConfigUtils.findDifference({ config });
+        expect(output.length).toEqual(0);
+      });
+    });
+    describe("WHEN v4 config is given", () => {
+      test("THEN return empty list", () => {
+        const config = ConfigUtils.genDefaultV4Config();
+        const output = ConfigUtils.findDifference({ config });
+        expect(output.length).toEqual(0);
+      });
+    });
+    describe("WHEN changed config is given", () => {
+      test("THEN correctly output list of changes", () => {
+        const config = getConfig({
+          commands: {
+            lookup: {
+              note: {
+                selectionMode: "link",
+                leaveTrace: true,
+              },
+            },
+          },
+          workspace: {
+            journal: {
+              dailyDomain: "dailys",
+            },
+            task: {
+              taskCompleteStatus: ["x", "finished"],
+            },
+          },
+        });
+        const output = ConfigUtils.findDifference({ config });
+        expect(output.length).toEqual(4);
+        expect(output).toEqual([
+          {
+            path: "commands.lookup.note.selectionMode",
+            value: "link",
+          },
+          {
+            path: "commands.lookup.note.leaveTrace",
+            value: true,
+          },
+          {
+            path: "workspace.journal.dailyDomain",
+            value: "dailys",
+          },
+          {
+            path: "workspace.task.taskCompleteStatus",
+            value: JSON.stringify(["x", "finished"]),
+          },
+        ]);
+      });
+    });
+  });
   describe("GIVEN getSiteLogoUrl", () => {
     describe("WHEN logo is not defined", () => {
       test("THEN logo is undefined", () => {

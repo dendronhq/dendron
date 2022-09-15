@@ -893,7 +893,7 @@
         },
         {
           "command": "dendron.openLink",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "false"
         },
         {
           "command": "dendron.pasteLink",

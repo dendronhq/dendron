@@ -169,7 +169,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Workspace: {
-        payload = this.getPropsForWorkspaceScope();
+        payload = await this.getPropsForWorkspaceScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get workspace payload.");
@@ -370,9 +370,9 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the workspace
    */
-  private getPropsForWorkspaceScope(): DNodeProps[] | undefined {
+  private async getPropsForWorkspaceScope(): Promise<DNodeProps[]> {
     const engine = this.extension.getEngine();
-    return Object.values(engine.notes).filter((notes) => notes.stub !== true);
+    return engine.findNotes({ excludeStub: true });
   }
 
   /**

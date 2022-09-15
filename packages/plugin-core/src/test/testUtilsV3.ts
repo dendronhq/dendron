@@ -426,9 +426,6 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
 }
 
 class FakeEngine {
-  get notes() {
-    return getDWorkspace().engine.notes;
-  }
   get schemas() {
     return getDWorkspace().engine.schemas;
   }
@@ -512,7 +509,7 @@ export function runSuiteButSkipForWindows() {
  *   () => {
  *     test("THEN initializes correctly", (done) => {
  *       const { engine, _wsRoot, _vaults } = getDWorkspace();
- *       const testNote = engine.notes["foo"];
+ *       const testNote = await engine.getNote("foo").data!;
  *       expect(testNote).toBeTruthy();
  *       done();
  *     });

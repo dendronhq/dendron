@@ -166,7 +166,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     data: NoteViewMessage["data"];
     engine: DEngineClient;
   }): Promise<{
-    note: NoteProps | undefined | null;
+    note: NoteProps | undefined;
     anchor: DNoteAnchorBasic | undefined;
   }> {
     // wiki links will have the following format
@@ -203,7 +203,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     const anchor = AnchorUtils.string2anchor(
       vscode.Uri.parse(data.href).fragment
     );
-    let note: NoteProps | undefined | null = engine.notes[noteId];
+    let note = (await engine.getNote(noteId)).data;
 
     if (note === undefined) {
       // If we could not find the note by the extracted id (when the note is within the same
@@ -222,7 +222,6 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
         // We have more than one candidate hence lets as the user which candidate they would like
         // to navigate to
         note = await QuickPickUtil.showChooseNote(candidates);
-        if (note === undefined) note = null;
       }
     }
 

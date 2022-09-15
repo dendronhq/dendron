@@ -238,24 +238,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    * See {@link DStore.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
-    const { fname, vault } = opts;
-    if (fname) {
-      return _.cloneDeep(
-        NoteDictsUtils.findByFname(
-          fname,
-          { notesById: this.notes, notesByFname: this.noteFnames },
-          vault
-        )
-      );
-    } else if (vault) {
-      return _.cloneDeep(
-        _.values(this.notes).filter((note) =>
-          VaultUtils.isEqualV2(note.vault, vault)
-        )
-      );
-    } else {
-      return [];
-    }
+    const resp = await this.api.noteFind({ ...opts, ws: this.ws });
+    return resp.data!;
   }
 
   /**

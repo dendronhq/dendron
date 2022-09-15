@@ -1060,7 +1060,7 @@ suite("NoteLookupCommand", function () {
             }) as Thenable<vscode.QuickPickItem>
           );
           const cmd = new NoteLookupCommand();
-          cmd
+          await cmd
             .run({
               initialValue: "food.ch2",
               noConfirm: true,
@@ -1132,7 +1132,7 @@ suite("NoteLookupCommand", function () {
           // Escape out, leading to undefined note
           showQuickPick.onFirstCall().returns(Promise.resolve(undefined));
           const cmd = new NoteLookupCommand();
-          cmd
+          await cmd
             .run({
               initialValue: "food.ch2",
               noConfirm: true,

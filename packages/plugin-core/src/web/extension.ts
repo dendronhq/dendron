@@ -70,6 +70,16 @@ async function setupCommands(context: vscode.ExtensionContext) {
       )
     );
   }
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_CREATE_NOTE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TREEVIEW_CREATE_NOTE.key,
+        async (_args: any) => {
+          await container.resolve(NoteLookupCmd).run();
+        }
+      )
+    );
+  }
 }
 
 async function setupViews(context: vscode.ExtensionContext) {

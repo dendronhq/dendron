@@ -166,6 +166,11 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "dendron.treeView.createNote",
+        "title": "Create Note",
+        "icon": "$(new-file)"
+      },
+      {
         "command": "dendron.graph-panel.increaseDepth",
         "title": "Increase Depth",
         "icon": "$(arrow-up)"
@@ -1045,6 +1050,11 @@
         {
           "command": "dendron.treeView.expandAll",
           "when": "view == dendron.treeView && dendron:devMode",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dendron.treeView.createNote",
+          "when": "view == dendron.treeView",
           "group": "navigation@2"
         },
         {

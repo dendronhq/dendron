@@ -43,6 +43,7 @@ import { DendronCodeWorkspace } from "./codeWorkspace";
 import { DendronNativeWorkspace } from "./nativeWorkspace";
 import { WorkspaceInitFactory } from "./WorkspaceInitFactory";
 import { WorkspaceInitializer } from "./workspaceInitializer";
+import { CreateNoteCommand } from "../commands/CreateNoteCommand";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -70,6 +71,15 @@ function _setupTreeViewCommands(
         treeView.updateLabelType({
           labelType: TreeViewItemLabelTypeEnum.filename,
         });
+      })
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_CREATE_NOTE.key)) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_CREATE_NOTE.key,
+      sentryReportingCallback(async (opts) => {
+        await new CreateNoteCommand().run(opts);
       })
     );
   }

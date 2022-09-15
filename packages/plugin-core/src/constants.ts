@@ -255,6 +255,11 @@ export const DENDRON_MENUS = {
       group: "navigation@2",
     },
     {
+      command: "dendron.treeView.createNote",
+      when: `view == dendron.treeView`,
+      group: "navigation@2",
+    },
+    {
       command: "dendron.graph-panel.increaseDepth",
       when: "view == dendron.graph-panel",
       group: "navigation@2",
@@ -391,6 +396,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: "Expand All",
     icon: "$(expand-all)",
     when: DendronContext.DEV_MODE,
+  },
+  TREEVIEW_CREATE_NOTE: {
+    key: "dendron.treeView.createNote",
+    title: "Create Note",
+    icon: "$(new-file)",
   },
   // graph panel buttons
   GRAPH_PANEL_INCREASE_DEPTH: {

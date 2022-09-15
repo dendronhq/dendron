@@ -441,11 +441,15 @@ export class ExtensionUtils {
     };
 
     if (dendronConfigChanged) {
-      _.set(
-        trackProps,
-        "changedDendronConfigs",
-        configDiff.map((item) => item.path)
-      );
+      _.set(trackProps, "numConfigChanged", configDiff.length);
+      /**
+       * This is a separate event because {@link VSCodeEvents.InitializeWorkspace} is getting a little crowded.
+       * The payload will be stored in a _single column_ with a `text` type, and there is no to the length.
+       * There is a hard limit of 1GB per field, but not a concern here.
+       */
+      AnalyticsUtils.track(ConfigEvents.ConfigChangeDetected, {
+        changed: JSON.stringify(configDiff),
+      });
     }
 
     if (siteUrl !== undefined) {

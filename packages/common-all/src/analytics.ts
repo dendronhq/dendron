@@ -146,6 +146,7 @@ export enum ConfigEvents {
   MissingSelfContainedVaultsMessageAccept = "MissingSelfContainedVaultsMessageAccept",
   OutdatedSeedVaultMessageShow = "OutdatedSeedVaultMessageShow",
   OutdatedSeedVaultMessageAccept = "OutdatedSeedVaultMessageAccept",
+  ConfigChangeDetected = "ConfigChangeDetected",
 }
 
 export enum MigrationEvents {

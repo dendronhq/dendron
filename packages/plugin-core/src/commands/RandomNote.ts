@@ -57,6 +57,7 @@ export class RandomNoteCommand extends BasicCommand<
 
       return isMatch;
     };
+    // TODO: Potentially expensive call. Consider deferring to engine
     const notesToPick = await engine.findNotesMeta({ excludeStub: true });
     const noteSet = _.filter(notesToPick, (ent) => searchPredicate(ent));
 

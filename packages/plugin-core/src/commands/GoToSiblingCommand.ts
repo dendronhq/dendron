@@ -155,12 +155,21 @@ export class GoToSiblingCommand extends BasicCommand<
     engine: ReducedDEngine,
     currNote: NoteProps
   ): Promise<NotePropsMeta[]> => {
-    const monthNote = await engine.getNoteMeta(currNote.parent!);
+    if (!currNote.parent) {
+      return [];
+    }
+    const monthNote = await engine.getNoteMeta(currNote.parent);
     if (!monthNote.data) {
       return [];
     }
-    const yearNote = await engine.getNoteMeta(monthNote.data.parent!);
+    if (!monthNote.data.parent) {
+      return [];
+    }
+    const yearNote = await engine.getNoteMeta(monthNote.data.parent);
     if (!yearNote.data) {
+      return [];
+    }
+    if (!yearNote.data.parent) {
       return [];
     }
     const parentNote = await engine.getNoteMeta(yearNote.data.parent!);

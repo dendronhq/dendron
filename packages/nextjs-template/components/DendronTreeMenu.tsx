@@ -177,7 +177,7 @@ function MenuView({
           title={
             <MenuItemTitle
               menu={menu}
-              noteIndex={noteIndex!}
+              noteIndex={noteIndex}
               onSubMenuSelect={onSubMenuSelect}
             />
           }
@@ -200,7 +200,7 @@ function MenuView({
       <MenuItem key={menu.key} icon={menu.icon}>
         <MenuItemTitle
           menu={menu}
-          noteIndex={noteIndex!}
+          noteIndex={noteIndex}
           onSubMenuSelect={onSubMenuSelect}
         />
       </MenuItem>
@@ -244,7 +244,7 @@ function MenuItemTitle(
     <Typography.Text ellipsis={{ tooltip: props.menu.title }}>
       <Link
         href={getNoteUrl(props.menu.key as string, {
-          noteIndex: props.noteIndex!,
+          noteIndex: props.noteIndex,
         })}
         passHref
       >

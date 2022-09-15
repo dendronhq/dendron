@@ -26,6 +26,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
     reportActivationTelemetry();
   } catch (error) {
+    // TODO: properly detect if we're in a Dendron workspace or not (instead of
+    // relying on getWSRoot throwing).
     vscode.window.showErrorMessage(
       `Something went wrong during initialization.`
     );

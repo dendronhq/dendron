@@ -8,6 +8,7 @@ import {
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
+  Stage,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
@@ -42,10 +43,8 @@ import { TextDocumentService } from "../../services/web/TextDocumentService";
 import { Event, TextDocument, workspace } from "vscode";
 import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
-import { VersionProvider } from "../../telemetry/common/VersionProvider";
 import { VSCodeGlobalStateStore } from "../../storage/common/VSCodeGlobalStateStore";
 import { getAnonymousId } from "../../telemetry/web/getAnonymousId";
-import { getStageFromPkgJson } from "../../utils/common/getStageFromPkgJson";
 import { DummyTelemetryClient } from "../../telemetry/common/DummyTelemetryClient";
 
 /**
@@ -184,7 +183,7 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
 }
 
 async function setupTelemetry(context: vscode.ExtensionContext) {
-  const version = new VersionProvider(context).version;
+  const version = context.extension.packageJSON.version ?? "0.0.0";
 
   container.register<string>("extVersion", {
     useValue: version,
@@ -215,4 +214,18 @@ async function setupTelemetry(context: vscode.ExtensionContext) {
       break;
     }
   }
+}
+
+/**
+ * Extrapolates the stage from the 'name' property in the package.json manifest.
+ * TODO: Replace with a webpack bundling methodology to distinguish between prod and dev
+ */
+function getStageFromPkgJson(packageJSON: any): Stage {
+  // TODO: make 'nightly' return as dev. Temporarily set it as 'prod' so we can
+  // test telemetry flows in web ext in nightly.
+  if (packageJSON.name === "dendron" || packageJSON.name === "nightly") {
+    return "prod";
+  }
+
+  return "dev";
 }

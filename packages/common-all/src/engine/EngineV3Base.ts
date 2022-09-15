@@ -29,6 +29,7 @@ import {
   RenameNoteResp,
   RespV3,
   WriteNoteResp,
+  GetNoteMetaResp,
 } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
@@ -50,6 +51,13 @@ export abstract class EngineV3Base implements ReducedDEngine {
    */
   async getNote(id: string): Promise<GetNoteResp> {
     return this.noteStore.get(id);
+  }
+
+  /**
+   * See {@link DEngine.getNoteMeta}
+   */
+  async getNoteMeta(id: string): Promise<GetNoteMetaResp> {
+    return this.noteStore.getMetadata(id);
   }
 
   /**

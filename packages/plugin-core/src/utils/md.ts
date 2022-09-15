@@ -488,7 +488,7 @@ export async function findReferencesById(id: string) {
 
   const engine = ExtensionProvider.getEngine();
 
-  const note = engine.notes[id];
+  const note = (await engine.getNote(id)).data;
 
   if (!note) {
     return;

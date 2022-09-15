@@ -1,4 +1,4 @@
-import { ConfigUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { ConfigUtils, NotePropsMeta, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -10,7 +10,7 @@ type CommandOpts = {};
 
 type CommandInput = {};
 
-type CommandOutput = NoteProps | undefined;
+type CommandOutput = NotePropsMeta | undefined;
 
 export class RandomNoteCommand extends BasicCommand<
   CommandOpts,
@@ -29,7 +29,7 @@ export class RandomNoteCommand extends BasicCommand<
     const randomNoteConfig = ConfigUtils.getCommands(config).randomNote;
     const includeSet: string[] = randomNoteConfig.include ?? [""];
 
-    const searchPredicate = function (note: NoteProps) {
+    const searchPredicate = function (note: NotePropsMeta) {
       if (note.stub === true) {
         return false;
       }
@@ -57,10 +57,10 @@ export class RandomNoteCommand extends BasicCommand<
 
       return isMatch;
     };
+    const notesToPick = await engine.findNotesMeta({ excludeStub: true });
+    const noteSet = _.filter(notesToPick, (ent) => searchPredicate(ent));
 
-    const noteSet = _.filter(engine.notes, (ent) => searchPredicate(ent));
-
-    const noteCount = Object.keys(noteSet).length;
+    const noteCount = noteSet.length;
     if (noteCount === 0) {
       window.showInformationMessage(
         "No notes match the search pattern. Adjust the patterns with the Dendron:Configure (yaml) command"
@@ -69,7 +69,7 @@ export class RandomNoteCommand extends BasicCommand<
     }
 
     const index = Math.floor(Math.random() * noteCount);
-    const note = Object.values(noteSet)[index];
+    const note = noteSet[index];
 
     const npath = NoteUtils.getFullPath({
       note,

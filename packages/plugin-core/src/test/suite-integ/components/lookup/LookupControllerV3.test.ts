@@ -81,7 +81,11 @@ describe(`GIVEN a LookupControllerV3`, () => {
         test(`THEN the contents of the quick pick update with 'journal'`, async () => {
           const engine = ExtensionProvider.getEngine();
 
-          await WSUtilsV2.instance().openNote(engine.notes["foo"]);
+          await WSUtilsV2.instance().openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           const provider = new NoteLookupProviderFactory(
             ExtensionProvider.getExtension()
@@ -112,7 +116,11 @@ describe(`GIVEN a LookupControllerV3`, () => {
         test(`THEN the contents of the quick pick update with 'scratch'`, async () => {
           const engine = ExtensionProvider.getEngine();
 
-          await WSUtilsV2.instance().openNote(engine.notes["foo"]);
+          await WSUtilsV2.instance().openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           const provider = new NoteLookupProviderFactory(
             ExtensionProvider.getExtension()
@@ -143,7 +151,11 @@ describe(`GIVEN a LookupControllerV3`, () => {
         test(`THEN the contents of the quick pick update with 'task.'`, async () => {
           const engine = ExtensionProvider.getEngine();
 
-          await WSUtilsV2.instance().openNote(engine.notes["foo"]);
+          await WSUtilsV2.instance().openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           const provider = new NoteLookupProviderFactory(
             ExtensionProvider.getExtension()
@@ -210,7 +222,9 @@ describe(`GIVEN a LookupControllerV3`, () => {
           const engine = ExtensionProvider.getEngine();
 
           const fooNoteEditor = await WSUtilsV2.instance().openNote(
-            engine.notes["foo"]
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
           );
 
           // selects "foo body"

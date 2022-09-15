@@ -46,7 +46,7 @@ suite("pasteLink", function () {
       test("THEN gets link with metadata", async () => {
         // You can access the workspace inside the test like this:
         const { engine } = getDWorkspace();
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");
         sinon
@@ -69,7 +69,7 @@ suite("pasteLink", function () {
       test("THEN trims link title", async () => {
         // You can access the workspace inside the test like this:
         const { engine } = getDWorkspace();
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");
         sinon
@@ -92,7 +92,7 @@ suite("pasteLink", function () {
       test("THEN gets raw link", async () => {
         // You can access the workspace inside the test like this:
         const { engine } = getDWorkspace();
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");
         sinon

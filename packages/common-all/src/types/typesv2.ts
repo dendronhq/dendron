@@ -541,6 +541,10 @@ export type DEngine = DCommonProps &
      */
     getNote: (id: string) => Promise<GetNoteResp>;
     /**
+     * Get NoteProps metadata by id. If note doesn't exist, return error
+     */
+    getNoteMeta: (id: string) => Promise<GetNoteMetaResp>;
+    /**
      * Bulk get NoteProps by list of ids
      */
     bulkGetNotes: (ids: string[]) => Promise<BulkGetNoteResp>;

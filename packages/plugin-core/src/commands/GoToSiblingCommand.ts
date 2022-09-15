@@ -4,8 +4,9 @@ import {
   DWorkspaceV2,
   isNumeric,
   NoteProps,
-  NotePropsByIdDict,
+  NotePropsMeta,
   NoteUtils,
+  ReducedDEngine,
   RespV3,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -61,11 +62,11 @@ export class GoToSiblingCommand extends BasicCommand<
       };
     }
 
-    let siblingNote: NoteProps;
+    let siblingNote: NotePropsMeta;
     // If the active note is a journal note, get the sibling note based on the chronological order
     if (await this.canBeHandledAsJournalNote(note, workspace.wsRoot)) {
       const resp = await this.getSiblingForJournalNote(
-        workspace.engine.notes,
+        workspace.engine,
         note,
         opts.direction
       );
@@ -75,7 +76,7 @@ export class GoToSiblingCommand extends BasicCommand<
       }
       siblingNote = resp.data.sibling;
     } else {
-      const resp = this.getSibling(workspace, note, opts.direction, ctx);
+      const resp = await this.getSibling(workspace, note, opts.direction, ctx);
       if (resp.error) {
         VSCodeUtils.showMessage(MessageSeverity.WARN, resp.error.message, {});
         return { msg: "other_error" } as CommandOutput;
@@ -112,11 +113,11 @@ export class GoToSiblingCommand extends BasicCommand<
   }
 
   private async getSiblingForJournalNote(
-    allNotes: NotePropsByIdDict,
+    engine: ReducedDEngine,
     currNote: NoteProps,
     direction: Direction
-  ): Promise<RespV3<{ sibling: NoteProps }>> {
-    const journalNotes = this.getSiblingsForJournalNote(allNotes, currNote);
+  ): Promise<RespV3<{ sibling: NotePropsMeta }>> {
+    const journalNotes = await this.getSiblingsForJournalNote(engine, currNote);
     // If the active note is the only journal note in the workspace, there is no sibling
     if (journalNotes.length === 1) {
       return {
@@ -133,7 +134,7 @@ export class GoToSiblingCommand extends BasicCommand<
     ]);
     const currNoteIdx = _.findIndex(sortedJournalNotes, { id: currNote.id });
     // Get the sibling based on the direction.
-    let sibling: NoteProps;
+    let sibling: NotePropsMeta;
     if (direction === "next") {
       sibling =
         currNoteIdx !== sortedJournalNotes.length - 1
@@ -150,37 +151,57 @@ export class GoToSiblingCommand extends BasicCommand<
     return { data: { sibling } };
   }
 
-  private getSiblingsForJournalNote = (
-    notes: NotePropsByIdDict,
+  private getSiblingsForJournalNote = async (
+    engine: ReducedDEngine,
     currNote: NoteProps
-  ): NoteProps[] => {
-    const monthNote = notes[currNote.parent!];
-    const yearNote = notes[monthNote.parent!];
-    const parentNote = notes[yearNote.parent!];
+  ): Promise<NotePropsMeta[]> => {
+    const monthNote = await engine.getNoteMeta(currNote.parent!);
+    if (!monthNote.data) {
+      return [];
+    }
+    const yearNote = await engine.getNoteMeta(monthNote.data.parent!);
+    if (!yearNote.data) {
+      return [];
+    }
+    const parentNote = await engine.getNoteMeta(yearNote.data.parent!);
+    if (!parentNote.data) {
+      return [];
+    }
 
-    const siblings: NoteProps[] = [];
-    parentNote.children.forEach((yearNoteId) => {
-      const yearNote = notes[yearNoteId];
-      yearNote.children.forEach((monthNoteId) => {
-        const monthNote = notes[monthNoteId];
-        monthNote.children.forEach((dateNoteId) => {
-          const dateNote = notes[dateNoteId];
-          siblings.push(dateNote);
-        });
-      });
-    });
+    const siblings = await Promise.all(
+      parentNote.data.children.flatMap(async (yearNoteId) => {
+        const yearNote = await engine.getNoteMeta(yearNoteId);
+        if (yearNote.data) {
+          const children = await engine.bulkGetNotesMeta(
+            yearNote.data.children
+          );
+          const results = await Promise.all(
+            children.data.flatMap(async (monthNote) => {
+              const monthChildren = await engine.bulkGetNotesMeta(
+                monthNote.children
+              );
+
+              return monthChildren.data;
+            })
+          );
+          return results.flat();
+        } else {
+          return [];
+        }
+      })
+    );
     // Filter out stub notes
-    return siblings.filter((note) => !note.stub);
+    return siblings.flat().filter((note) => !note.stub);
   };
 
-  private getSibling(
+  private async getSibling(
     workspace: DWorkspaceV2,
     note: NoteProps,
     direction: Direction,
     ctx: string
-  ): RespV3<{ sibling: NoteProps }> {
+  ): Promise<RespV3<{ sibling: NotePropsMeta }>> {
     // Get sibling notes
-    const siblingNotes = this.getSiblings(workspace.engine.notes, note);
+    const siblingNotes = await this.getSiblings(workspace.engine, note);
     // Check if there is any sibling notes
     if (siblingNotes.length <= 1) {
       return {
@@ -199,7 +220,7 @@ export class GoToSiblingCommand extends BasicCommand<
       throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);
     }
     // Get sibling based on the direction
-    let sibling: NoteProps;
+    let sibling: NotePropsMeta;
     if (direction === "next") {
       sibling =
         idx !== siblingNotes.length - 1
@@ -212,23 +233,25 @@ export class GoToSiblingCommand extends BasicCommand<
     return { data: { sibling } };
   }
 
-  private getSiblings(
-    notes: NotePropsByIdDict,
-    currNote: NoteProps
-  ): NoteProps[] {
+  private async getSiblings(
+    engine: ReducedDEngine,
+    currNote: NotePropsMeta
+  ): Promise<NotePropsMeta[]> {
     if (currNote.parent === null) {
-      return currNote.children
-        .map((id) => notes[id])
-        .filter((note) => !note.stub)
-        .concat(currNote);
+      const children = await engine.bulkGetNotesMeta(currNote.children);
+      return children.data.filter((note) => !note.stub).concat(currNote);
     } else {
-      return notes[currNote.parent].children
-        .map((id) => notes[id])
-        .filter((note) => !note.stub);
+      const parent = await engine.getNoteMeta(currNote.parent);
+      if (parent.data) {
+        const children = await engine.bulkGetNotesMeta(parent.data.children);
+        return children.data.filter((note) => !note.stub);
+      } else {
+        return [];
+      }
     }
   }
 
-  private sortNotes(notes: NoteProps[]) {
+  private sortNotes(notes: NotePropsMeta[]) {
     // check if there are numeric-only nodes
     const numericNodes = _.filter(notes, (o) => {
       const leafName = DNodeUtils.getLeafName(o);
@@ -256,7 +279,7 @@ export class GoToSiblingCommand extends BasicCommand<
     });
   }
 
-  private getDateFromJournalNote(note: NoteProps): Date {
+  private getDateFromJournalNote(note: NotePropsMeta): Date {
     const [year, month, date] = note.fname
       .split("")
       .slice(-3)

@@ -1,4 +1,9 @@
-import { ConfigUtils, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  NoteProps,
+  NoteUtils,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -50,8 +55,11 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const engine = ExtensionProvider.getEngine();
-        const testNote = engine.notes["foo"];
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        const testNote = NoteUtils.create({
+          fname: "foo",
+          vault: vaults[0],
+        });
         // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
         const disposable = vscode.workspace.onDidSaveTextDocument(
           (textDocument) => {
@@ -304,8 +312,11 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const engine = ExtensionProvider.getEngine();
-        const testNote = engine.notes["foo"];
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        const testNote = NoteUtils.create({
+          fname: "foo",
+          vault: vaults[0],
+        });
         // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
         const disposable = vscode.workspace.onDidSaveTextDocument(
           (textDocument) => {

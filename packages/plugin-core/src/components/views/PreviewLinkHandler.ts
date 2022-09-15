@@ -5,7 +5,6 @@ import {
   isVSCodeCommandUri,
   isWebUri,
   NoteProps,
-  NoteUtils,
   NoteViewMessage,
   TutorialEvents,
 } from "@dendronhq/common-all";
@@ -211,10 +210,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       // of the note was in place of the id in the HREF (as in case of navigating to a note
       // in a different vault without explicit vault specification). Hence we will attempt
       // to find the note by file name.
-      const candidates = NoteUtils.getNotesByFnameFromEngine({
-        fname: noteId,
-        engine,
-      });
+      const candidates = await engine.findNotes({ fname: noteId });
 
       if (candidates.length === 1) {
         note = candidates[0];

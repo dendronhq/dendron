@@ -651,12 +651,12 @@ suite("BacklinksTreeDataProvider", function () {
     () => {
       test("THEN BacklinksTreeDataProvider calculates correct number of links", async () => {
         const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
-        const alpha = engine.notes["tags.my.test-0.tag"];
+        const alpha = (await engine.getNote("tags.my.test-0.tag")).data!;
         await ExtensionProvider.getWSUtils().openNote(alpha);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
         const expectedPath = vscode.Uri.file(
           NoteUtils.getFullPath({
-            note: engine.notes["test"],
+            note: (await engine.getNote("test")).data!,
             wsRoot,
           })
         ).path;

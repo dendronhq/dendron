@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/unified",
-  "version": "0.112.0",
+  "version": "0.112.1",
   "description": "Unified parser utilities for Dendron",
   "license": "GPLv3",
   "repository": {
@@ -31,7 +31,7 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.112.0",
+    "@dendronhq/common-all": "^0.112.1",
     "@dendronhq/remark-mermaid": "^0.4.0",
     "hast-util-parse-selector": "^2.2.4",
     "hast-util-select": "^4.0.0",

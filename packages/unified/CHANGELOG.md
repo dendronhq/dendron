@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.112.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.112.1) (2022-09-15)
+
+
+### Bug Fixes
+
+* **publish:** correctly handle asset prefix in markdown link ([#3497](https://github.com/dendronhq/dendron/issues/3497)) ([d73668b](https://github.com/dendronhq/dendron/commit/d73668b9c6875d2860af3368085bd848b34a7921))
+* **publish:** restores inconsistent layout on mobile ([#3346](https://github.com/dendronhq/dendron/issues/3346)) ([0abb017](https://github.com/dendronhq/dendron/commit/0abb0173d0ef046e93d601e2242fb58f11a6fbf5)), closes [#13](https://github.com/dendronhq/dendron/issues/13)
+* giscuss integration ([#3474](https://github.com/dendronhq/dendron/issues/3474)) ([b9cffec](https://github.com/dendronhq/dendron/commit/b9cffecd6fa4ce423b0f415fb20f0a8d1111bdd4))
+
+
+### Features Dendron
+
+* **refactor:** Add `Move Selection To` command ([#3440](https://github.com/dendronhq/dendron/issues/3440)) ([2ccf3e3](https://github.com/dendronhq/dendron/commit/2ccf3e32b1e5cf0133670e2396b098df715dc00f))
+* **workspace:** preview for web extension ([#3462](https://github.com/dendronhq/dendron/issues/3462)) ([88f38ed](https://github.com/dendronhq/dendron/commit/88f38ed9b4f28f949ee8b30384b6bdf62352d4cd))
+
+
+
+
+
 # 0.112.0 (2022-09-13)
 
 **Note:** Version bump only for package @dendronhq/unified

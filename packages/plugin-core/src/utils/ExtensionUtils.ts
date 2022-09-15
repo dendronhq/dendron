@@ -35,6 +35,7 @@ import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { URI, Utils } from "vscode-uri";
 import { VersionProvider } from "../versionProvider";
+import { Duration } from "luxon";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -488,25 +489,15 @@ export class ExtensionUtils {
     }
 
     // NOTE: this will not be accurate in dev mode
-    try {
-      // infer install path from extension path.
-      // this assumes the user installs all extensions in one place.
-      // that should be the case for almost all cases, but vscode provides a way to
-      // customize install location so this might not be the case in those rare cases.
-      const installPath = Utils.dirname(
-        Utils.dirname(URI.file(ext.context.extensionPath))
-      ).fsPath;
-      const fd = fs.openSync(installPath, "r");
-      const stat = fs.fstatSync(fd);
-      // some file systems don't track birth times.
-      // in this case the value may be ctime (time of inode change), or 0
-      const { birthtimeMs } = stat;
-      if (birthtimeMs) {
-        _.set(trackProps, "codeFolderCreated", birthtimeMs);
-      }
-    } catch (error: any) {
-      // something went wrong. don't track. Send to sentry silently.
-      Sentry.captureException(error);
+    const { codeFolderCreated, ageOfCodeInstallInWeeks } =
+      ExtensionUtils.getCodeFolderCreated({
+        context: ext.context,
+      });
+    if (codeFolderCreated) {
+      _.set(trackProps, "codeFolderCreated", codeFolderCreated);
+    }
+    if (ageOfCodeInstallInWeeks) {
+      _.set(trackProps, "ageOfCodeInstallInWeeks", ageOfCodeInstallInWeeks);
     }
 
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
@@ -534,5 +525,42 @@ export class ExtensionUtils {
       Logger.info("sendSavedAnalytics"); // TODO
       AnalyticsUtils.sendSavedAnalytics();
     }, DELAY_TO_SEND_SAVED_TELEMETRY);
+  }
+
+  /**
+   * Try to infer install code instance age from extension path
+   * this will not be accurate in dev mode because the extension install path is the monorepo.
+   * return the creation time and lapsed time in weeks
+   */
+  static getCodeFolderCreated(opts: { context: vscode.ExtensionContext }) {
+    const { context } = opts;
+    try {
+      // infer install path from extension path.
+      // this assumes the user installs all extensions in one place.
+      // that should be the case for almost all cases, but vscode provides a way to
+      // customize install location so this might not be the case in those rare cases.
+      const installPath = Utils.dirname(
+        Utils.dirname(URI.file(context.extensionPath))
+      ).fsPath;
+      const fd = fs.openSync(installPath, "r");
+      const stat = fs.fstatSync(fd);
+      // some file systems don't track birth times.
+      // in this case the value may be ctime (time of inode change), or 0
+      const { birthtimeMs } = stat;
+
+      const currentTime = Duration.fromMillis(Time.now().toMillis());
+      const birthTime = Duration.fromMillis(birthtimeMs);
+      const ageOfCodeInstallInWeeks = Math.round(
+        currentTime.minus(birthTime).as("weeks")
+      );
+      return {
+        codeFolderCreated: birthtimeMs,
+        ageOfCodeInstallInWeeks,
+      };
+    } catch (error: any) {
+      // something went wrong. don't track. Send to sentry silently.
+      Sentry.captureException(error);
+      return {};
+    }
   }
 }

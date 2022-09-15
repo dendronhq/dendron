@@ -73,6 +73,7 @@ import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
 import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 import semver from "semver";
+import _ from "lodash";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -399,6 +400,7 @@ export async function _activate(
         previousExtensionVersion: previousWorkspaceVersionFromState,
         start: startActivate,
         assetUri,
+        context,
       });
     }
 
@@ -448,6 +450,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion,
   start,
   assetUri,
+  context,
 }: {
   extensionInstallStatus: InstallStatus;
   isSecondaryInstall: boolean;
@@ -455,6 +458,7 @@ async function showWelcomeOrWhatsNew({
   previousExtensionVersion: string;
   start: [number, number];
   assetUri: vscode.Uri;
+  context: vscode.ExtensionContext;
 }) {
   const ctx = "showWelcomeOrWhatsNew";
   Logger.info({ ctx, version, previousExtensionVersion });
@@ -474,13 +478,27 @@ async function showWelcomeOrWhatsNew({
       // well, since Amplitude may not have the user props splitTest setup in time
       // before this install event reaches their backend.
       const group = TutorialInitializer.getTutorialType();
-
-      // track how long install process took ^e8itkyfj2rn3
-      AnalyticsUtils.track(VSCodeEvents.Install, {
+      const installTrackProps = {
         duration: getDurationMilliseconds(start),
         isSecondaryInstall,
         tutorialGroup: group,
-      });
+      };
+      const { codeFolderCreated, ageOfCodeInstallInWeeks } =
+        ExtensionUtils.getCodeFolderCreated({
+          context,
+        });
+      if (codeFolderCreated) {
+        _.set(installTrackProps, "codeFolderCreated", codeFolderCreated);
+      }
+      if (ageOfCodeInstallInWeeks) {
+        _.set(
+          installTrackProps,
+          "ageOfCodeInstallInWeeks",
+          ageOfCodeInstallInWeeks
+        );
+      }
+      // track how long install process took ^e8itkyfj2rn3
+      AnalyticsUtils.track(VSCodeEvents.Install, installTrackProps);
 
       metadataService.setGlobalVersion(version);
 

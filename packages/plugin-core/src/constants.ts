@@ -314,7 +314,7 @@ export const DENDRON_MENUS = {
     {
       command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
-      when: "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
+      when: "resourceLangId == markdown && dendron:pluginActive",
       group: "navigation",
     },
   ],
@@ -329,14 +329,14 @@ export const DENDRON_MENUS = {
     {
       command: "dendron.togglePreview",
       // when is the same as the built-in preview, plus pluginActive
-      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive && shellExecutionSupported",
+      when: "editorLangId == markdown && !notebookEditorFocused && dendron:pluginActive",
       group: "navigation",
     },
   ],
   "editor/title/context": [
     {
       command: "dendron.togglePreview",
-      when: "resourceLangId == markdown && dendron:pluginActive && shellExecutionSupported",
+      when: "resourceLangId == markdown && dendron:pluginActive",
       group: "1_open",
     },
   ],
@@ -937,13 +937,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       mac: "cmd+ctrl+p",
       when: "dendron:pluginActive",
     },
-    when: "dendron:pluginActive && shellExecutionSupported",
+    when: "dendron:pluginActive",
   },
   TOGGLE_PREVIEW_LOCK: {
     key: "dendron.togglePreviewLock",
     title: `${CMD_PREFIX} Toggle Preview Lock`,
     icon: `$(lock)`,
-    when: "dendron:pluginActive && shellExecutionSupported",
+    when: "dendron:pluginActive",
   },
   PASTE_FILE: {
     key: "dendron.pasteFile",

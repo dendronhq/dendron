@@ -100,7 +100,7 @@
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
     "ci:test:plugin-web": "npx lerna run compile-web --scope @dendronhq/plugin-core && npx lerna run test-in-browser --scope @dendronhq/plugin-core",
     "ci:test:template": "yarn --cwd packages/nextjs-template run test",
-    "ci:test:template:docker": "docker run -it --rm --ipc=host -v \"$(pwd):/test\" mcr.microsoft.com/playwright:v1.25.0-focal /bin/bash -c 'cd /test; npx playwright install; yarn ci:test:template'",
+    "ci:test:template:docker": "docker run -it --rm --ipc=host -v \"$(pwd):/test\" -u \"$(id -u ${USER}):$(id -g ${USER})\" mcr.microsoft.com/playwright:v1.25.0-focal /bin/bash -c 'cd /test; npx playwright install; yarn ci:test:template'",
     "template:build": "yarn --cwd packages/nextjs-template run build",
     "template:export": "yarn --cwd packages/nextjs-template run export",
     "template:start": "yarn --cwd packages/nextjs-template run start",

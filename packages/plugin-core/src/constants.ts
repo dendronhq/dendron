@@ -256,7 +256,7 @@ export const DENDRON_MENUS = {
     },
     {
       command: "dendron.treeView.createNote",
-      when: `view == dendron.treeView && shellExecutionSupported`,
+      when: `view == dendron.treeView`,
       group: "navigation@2",
     },
     {

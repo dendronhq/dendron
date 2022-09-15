@@ -66,6 +66,47 @@ describe("ConfigUtils", () => {
         ]);
       });
     });
+    describe("WHEN config with changes only in omitted paths is given", () => {
+      test("THEN return empty list", () => {
+        const config = ConfigUtils.genDefaultConfig();
+        config.workspace.vaults = [
+          {
+            fsPath: "some.vault",
+            name: "some vault",
+          },
+          {
+            fsPath: "some.vault2",
+            name: "some vault2",
+          },
+          {
+            fsPath: "some.vault3",
+            name: "some vault3",
+          },
+        ];
+        config.workspace.workspaces = {
+          foo: {
+            remote: {
+              type: "git",
+              url: "foo",
+            },
+          },
+        };
+        config.workspace.seeds = {
+          "dendron.dendron-site": {
+            branch: "dev",
+            site: {
+              url: "https://wiki.dendron.son",
+              index: "dendron",
+            },
+          },
+        };
+        config.dev = {
+          enableSelfContainedVaults: false,
+        };
+        const output = ConfigUtils.findDifference({ config });
+        expect(output.length).toEqual(0);
+      });
+    });
   });
   describe("GIVEN getSiteLogoUrl", () => {
     describe("WHEN logo is not defined", () => {

@@ -1300,9 +1300,10 @@ export class ConfigUtils {
    */
   static flattenConfigObject(opts: { obj: Object; omitPaths?: string[] }) {
     const { obj, omitPaths } = opts;
+    const objDeepCopy = _.cloneDeep(obj);
     if (omitPaths && omitPaths.length > 0) {
       omitPaths.forEach((path) => {
-        _.unset(obj, path);
+        _.unset(objDeepCopy, path);
       });
     }
 
@@ -1334,7 +1335,7 @@ export class ConfigUtils {
         }
       });
     };
-    flattenToPathValuePairs({ obj });
+    flattenToPathValuePairs({ obj: objDeepCopy });
     return accumulator;
   }
 

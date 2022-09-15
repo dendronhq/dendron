@@ -73,6 +73,7 @@ import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
 import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 import semver from "semver";
+import _ from "lodash";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -477,16 +478,27 @@ async function showWelcomeOrWhatsNew({
       // well, since Amplitude may not have the user props splitTest setup in time
       // before this install event reaches their backend.
       const group = TutorialInitializer.getTutorialType();
-      const codeFolderCreated = ExtensionUtils.getCodeFolderCreated({
-        context,
-      });
-      // track how long install process took ^e8itkyfj2rn3
-      AnalyticsUtils.track(VSCodeEvents.Install, {
+      const installTrackProps = {
         duration: getDurationMilliseconds(start),
         isSecondaryInstall,
         tutorialGroup: group,
-        codeFolderCreated,
-      });
+      };
+      const { codeFolderCreated, ageOfCodeInstallInWeeks } =
+        ExtensionUtils.getCodeFolderCreated({
+          context,
+        });
+      if (codeFolderCreated) {
+        _.set(installTrackProps, "codeFolderCreated", codeFolderCreated);
+      }
+      if (ageOfCodeInstallInWeeks) {
+        _.set(
+          installTrackProps,
+          "ageOfCodeInstallInWeeks",
+          ageOfCodeInstallInWeeks
+        );
+      }
+      // track how long install process took ^e8itkyfj2rn3
+      AnalyticsUtils.track(VSCodeEvents.Install, installTrackProps);
 
       metadataService.setGlobalVersion(version);
 

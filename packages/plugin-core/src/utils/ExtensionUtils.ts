@@ -35,6 +35,7 @@ import { MarkdownUtils } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { URI, Utils } from "vscode-uri";
 import { VersionProvider } from "../versionProvider";
+import { Duration } from "luxon";
 
 /** Before sending saved telemetry events, wait this long (in ms) to make sure
  * the workspace will likely remain open long enough for us to send everything.
@@ -471,11 +472,15 @@ export class ExtensionUtils {
     }
 
     // NOTE: this will not be accurate in dev mode
-    const codeFolderCreated = ExtensionUtils.getCodeFolderCreated({
-      context: ext.context,
-    });
+    const { codeFolderCreated, ageOfCodeInstallInWeeks } =
+      ExtensionUtils.getCodeFolderCreated({
+        context: ext.context,
+      });
     if (codeFolderCreated) {
       _.set(trackProps, "codeFolderCreated", codeFolderCreated);
+    }
+    if (ageOfCodeInstallInWeeks) {
+      _.set(trackProps, "ageOfCodeInstallInWeeks", ageOfCodeInstallInWeeks);
     }
 
     const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
@@ -508,6 +513,7 @@ export class ExtensionUtils {
   /**
    * Try to infer install code instance age from extension path
    * this will not be accurate in dev mode because the extension install path is the monorepo.
+   * return the creation time and lapsed time in weeks
    */
   static getCodeFolderCreated(opts: { context: vscode.ExtensionContext }) {
     const { context } = opts;
@@ -524,11 +530,20 @@ export class ExtensionUtils {
       // some file systems don't track birth times.
       // in this case the value may be ctime (time of inode change), or 0
       const { birthtimeMs } = stat;
-      return birthtimeMs;
+
+      const currentTime = Duration.fromMillis(Time.now().toMillis());
+      const birthTime = Duration.fromMillis(birthtimeMs);
+      const ageOfCodeInstallInWeeks = Math.round(
+        currentTime.minus(birthTime).as("weeks")
+      );
+      return {
+        codeFolderCreated: birthtimeMs,
+        ageOfCodeInstallInWeeks,
+      };
     } catch (error: any) {
       // something went wrong. don't track. Send to sentry silently.
       Sentry.captureException(error);
-      return;
+      return {};
     }
   }
 }

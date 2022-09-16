@@ -1,6 +1,7 @@
 import {
   DLogger,
   EngineEventEmitter,
+  getStage,
   IDataStore,
   IFileStore,
   INoteStore,
@@ -8,44 +9,41 @@ import {
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
-  Stage,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
+import * as vscode from "vscode";
+import { Event, TextDocument, workspace } from "vscode";
+import { URI } from "vscode-uri";
+import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
 import { PreviewProxy } from "../../components/views/PreviewProxy";
+import { ITextDocumentService } from "../../services/ITextDocumentService";
+import { TextDocumentService } from "../../services/web/TextDocumentService";
+import { DummyTelemetryClient } from "../../telemetry/common/DummyTelemetryClient";
 import { ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { WebTelemetryClient } from "../../telemetry/web/WebTelemetryClient";
+import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
+import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
+import { INoteRenderer } from "../engine/INoteRenderer";
+import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
+import { ConsoleLogger } from "../utils/ConsoleLogger";
+import {
+  DummyPreviewPanelConfig,
+  IPreviewPanelConfig,
+} from "../views/preview/IPreviewPanelConfig";
+import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
 import { PreviewPanel } from "../views/preview/PreviewPanel";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getSiteIndex } from "./getSiteIndex";
 import { getSiteUrl } from "./getSiteUrl";
 import { getVaults } from "./getVaults";
-import { getWSRoot } from "./getWSRoot";
-import * as vscode from "vscode";
-import { URI } from "vscode-uri";
-import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
-import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
-import { ITextDocumentService } from "../../services/ITextDocumentService";
-import { ConsoleLogger } from "../utils/ConsoleLogger";
-import {
-  DummyPreviewPanelConfig,
-  IPreviewPanelConfig,
-} from "../views/preview/IPreviewPanelConfig";
-import { INoteRenderer } from "../engine/INoteRenderer";
-import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
-import { TextDocumentService } from "../../services/web/TextDocumentService";
-import { Event, TextDocument, workspace } from "vscode";
-import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
-import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
-import { VSCodeGlobalStateStore } from "../../storage/common/VSCodeGlobalStateStore";
-import { getAnonymousId } from "../../telemetry/web/getAnonymousId";
-import { DummyTelemetryClient } from "../../telemetry/common/DummyTelemetryClient";
+import { getWSRoot } from "./getWSRoot";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension
@@ -64,6 +62,10 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   const enablePrettyLinks = await getEnablePrettlyLinks(wsRoot);
   const siteUrl = await getSiteUrl(wsRoot);
   const siteIndex = await getSiteIndex(wsRoot);
+
+  container.register<vscode.ExtensionContext>("extensionContext", {
+    useValue: context,
+  });
 
   // The EngineEventEmitter is also DendronEngineV3Web, so reuse the same token
   // to supply any emitter consumers. This ensures the same engine singleton
@@ -99,14 +101,14 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   container.register("siteUrl", { useValue: siteUrl });
   container.register("siteIndex", { useValue: siteIndex });
 
-  // TODO: Get rid of this in favor or using DI in Note Store / common-all package.
-  const fs = container.resolve<IFileStore>("IFileStore");
-  const ds = container.resolve<IDataStore<string, NotePropsMeta>>("IDataStore");
-
-  const noteStore = new NoteStore(fs, ds, wsRoot);
-
   container.register<INoteStore<string>>("INoteStore", {
-    useValue: noteStore,
+    useFactory: (container) => {
+      const fs = container.resolve<IFileStore>("IFileStore");
+      const ds =
+        container.resolve<IDataStore<string, NotePropsMeta>>("IDataStore");
+
+      return new NoteStore(fs, ds, wsRoot);
+    },
   });
 
   container.register<ILookupProvider>("NoteProvider", {
@@ -128,15 +130,11 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
     { frequency: "Once" }
   );
 
-  container.register<IDataStore<string, any>>("GlobalState", {
-    useValue: new VSCodeGlobalStateStore(context),
-  });
-
   container.register<ITreeViewConfig>("ITreeViewConfig", {
     useClass: TreeViewDummyConfig,
   });
 
-  await setupTelemetry(context);
+  setupTelemetry();
 
   container.register<PreviewProxy>("PreviewProxy", {
     useClass: PreviewPanel,
@@ -182,23 +180,8 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   });
 }
 
-async function setupTelemetry(context: vscode.ExtensionContext) {
-  const version = context.extension.packageJSON.version ?? "0.0.0";
-
-  container.register<string>("extVersion", {
-    useValue: version,
-  });
-
-  const globalState =
-    container.resolve<IDataStore<string, string>>("GlobalState");
-
-  const anonymousId = await getAnonymousId(globalState);
-
-  container.register<string>("anonymousId", {
-    useValue: anonymousId,
-  });
-
-  const stage = getStageFromPkgJson(context.extension.packageJSON);
+function setupTelemetry() {
+  const stage = getStage();
 
   switch (stage) {
     case "prod": {
@@ -214,18 +197,4 @@ async function setupTelemetry(context: vscode.ExtensionContext) {
       break;
     }
   }
-}
-
-/**
- * Extrapolates the stage from the 'name' property in the package.json manifest.
- * TODO: Replace with a webpack bundling methodology to distinguish between prod and dev
- */
-function getStageFromPkgJson(packageJSON: any): Stage {
-  // TODO: make 'nightly' return as dev. Temporarily set it as 'prod' so we can
-  // test telemetry flows in web ext in nightly.
-  if (packageJSON.name === "dendron" || packageJSON.name === "nightly") {
-    return "prod";
-  }
-
-  return "dev";
 }

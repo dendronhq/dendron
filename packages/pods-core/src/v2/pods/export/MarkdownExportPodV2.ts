@@ -249,6 +249,8 @@ export class MarkdownExportPodV2
       },
       fname: note.fname,
       vault: note.vault,
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
     });
     if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
       remark = remark.use(

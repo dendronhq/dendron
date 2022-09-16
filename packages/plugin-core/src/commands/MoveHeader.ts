@@ -133,7 +133,6 @@ export class MoveHeaderCommand extends BasicCommand<
     }
 
     // parse selection and get the target header node
-    // JYTODO: Add header target information into the render cache
     const proc = this.getProc(engine, maybeNote);
 
     // TODO: shoudl account for line number

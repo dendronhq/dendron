@@ -17,7 +17,6 @@ import { DendronError } from "./error";
 import { Time } from "./time";
 import {
   DEngineClient,
-  DLink,
   DNodeExplicitPropsEnum,
   DNodeImplicitPropsEnum,
   DNodeOpts,

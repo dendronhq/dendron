@@ -31,17 +31,6 @@ const findCreated = (changed: NoteChangeEntry[]) => {
   return created;
 };
 
-const findByName = (
-  fname: string,
-  changed: NoteChangeEntry[]
-): NoteChangeEntry => {
-  const created = _.find(changed, (ent) => ent.note.fname === fname);
-  if (!created) {
-    throw Error("not found");
-  }
-  return created;
-};
-
 const runRename = async ({
   engine,
   vaults,
@@ -543,7 +532,7 @@ const NOTES = {
           expected: 7,
         },
         {
-          actual: _.trim(findByName("alpha", changed.data!).note.body),
+          actual: _.trim(changed.data![3].note.body),
           expected: "[[gamma]]",
         },
         {
@@ -611,7 +600,7 @@ const NOTES = {
           expected: 7,
         },
         {
-          actual: _.trim(findByName("alpha", changed.data!).note.body),
+          actual: _.trim(changed.data![3].note.body),
           expected: "[[gamma]]",
         },
         {
@@ -942,15 +931,15 @@ const NOTES = {
         {
           actual: updated,
           expected: [
-            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
           ],
         },
         {
-          actual: _.trim(changed![0].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -1004,16 +993,16 @@ const NOTES = {
         {
           actual: updated,
           expected: [
-            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
+            { status: "update", fname: "bar" },
             // this is a diff vault
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
           ],
         },
         {
-          actual: _.trim(changed![0].note.body),
+          actual: _.trim(changed![2].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
         },
         {
@@ -1071,10 +1060,10 @@ const NOTES = {
         {
           actual: updated,
           expected: [
-            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "update", fname: "beta" },
             { status: "delete", fname: "alpha" },
+            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "update", fname: "beta" },
             { status: "create", fname: "gamma" },

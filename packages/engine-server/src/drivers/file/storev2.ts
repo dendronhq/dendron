@@ -1,6 +1,5 @@
 import {
   assert,
-  asyncLoopOneAtATime,
   BacklinkUtils,
   BulkWriteNotesOpts,
   ConfigUtils,
@@ -64,7 +63,6 @@ import {
   vault2Path,
 } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
-import { timeStamp } from "console";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -1000,43 +998,6 @@ export class FileStorage implements DStore {
     }
 
     let notesChangedEntries: NoteChangeEntry[] = [];
-    const notesWithLinkTo = _.uniq(
-      oldNote.links
-        .filter((link) => link.type === "backlink")
-        .map((link) => {
-          if (link.from.id) return this.notes[link.from.id];
-          else return undefined;
-        })
-        .filter(isNotUndefined)
-    );
-
-    this.logger.info({
-      ctx,
-      msg: "notesWithLinkTo:gather",
-      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
-    });
-
-    // update note body of all notes that have changed
-    await asyncLoopOneAtATime(notesWithLinkTo, async (n) => {
-      const out = await this.processNoteChangedByRename({
-        note: n,
-        oldLoc,
-        newLoc,
-      });
-      if (out !== undefined) {
-        notesChangedEntries.push(out);
-        // If note being renamed has references to itself, make sure to update those as well
-        if (out.note.id === oldNote.id) {
-          oldNote.body = out.note.body;
-          oldNote.tags = out.note.tags;
-        }
-      }
-    });
-
-    // update all new notes
-    await this.bulkWriteNotes({
-      notes: notesChangedEntries.map((ent) => ent.note),
-    });
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
@@ -1062,8 +1023,6 @@ export class FileStorage implements DStore {
       msg: "deleteNote:meta:pre",
       note: NoteUtils.toLogObj(oldNote),
     });
-    let changedFromDelete: NoteChangeEntry[] = [];
-    let changeFromWrite: NoteChangeEntry[] | undefined;
     if (
       oldNote.fname.toLowerCase() === newNote.fname.toLowerCase() &&
       VaultUtils.isEqual(oldNote.vault, newNote.vault, wsRoot)
@@ -1074,16 +1033,14 @@ export class FileStorage implements DStore {
       // we remove the children [[here|../packages/engine-server/src/drivers/file/storev2.ts#^pojmz0g80gds]],
       // but we don't want that in this case. we need to add the old note's children back in
       newNote.children = oldNote.children;
-
-      const out = await this.writeNote(newNote, { metaOnly: opts.metaOnly });
-      changeFromWrite = out.data;
     } else {
       // The file is being renamed to a new file.
       this.logger.info({ ctx, msg: "Renaming the file to a new name" });
       try {
-        changedFromDelete = await this.deleteNote(oldNote.id, {
+        const changedFromDelete = await this.deleteNote(oldNote.id, {
           metaOnly: opts.metaOnly,
         });
+        notesChangedEntries = notesChangedEntries.concat(changedFromDelete);
       } catch (err) {
         throw new DendronError({
           message:
@@ -1095,22 +1052,58 @@ export class FileStorage implements DStore {
           payload: err,
         });
       }
-      this.logger.info({
-        ctx,
-        msg: "writeNewNote:pre",
-        note: NoteUtils.toLogObj(newNote),
-      });
-      const out = await this.writeNote(newNote, {
-        metaOnly: opts.metaOnly,
-      });
-      changeFromWrite = out.data;
     }
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
+    const notesWithLinkTo = _.uniq(
+      oldNote.links
+        .filter((link) => link.type === "backlink")
+        .map((link) => {
+          if (link.from.id) return this.notes[link.from.id];
+          else return undefined;
+        })
+        .filter(isNotUndefined)
+    );
+
+    this.logger.info({
+      ctx,
+      msg: "notesWithLinkTo:gather",
+      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
+    });
+
+    // update note body of all notes that have changed
+    const notesToUpdate = (
+      await Promise.all(
+        notesWithLinkTo.map(async (note) => {
+          const out = await this.processNoteChangedByRename({
+            note,
+            oldLoc,
+            newLoc,
+          });
+          // If note being renamed has references to itself, make sure to update those as well
+          if (out && out.note.id === oldNote.id) {
+            oldNote.body = out.note.body;
+            oldNote.tags = out.note.tags;
+          }
+          return out?.note;
+        })
+      )
+    ).filter(isNotUndefined);
+
+    // update all new notes
+    const writeResp = await this.bulkWriteNotes({ notes: notesToUpdate });
+    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
+
+    this.logger.info({
+      ctx,
+      msg: "writeNewNote:pre",
+      note: NoteUtils.toLogObj(newNote),
+    });
+    const out = await this.writeNote(newNote, {
+      metaOnly: opts.metaOnly,
+    });
+    const changeFromWrite = out.data;
 
     // create needs to be very last element added
-
-    notesChangedEntries = notesChangedEntries.concat(changedFromDelete);
-
     if (changeFromWrite) {
       notesChangedEntries = notesChangedEntries.concat(changeFromWrite);
     }
@@ -1409,6 +1402,39 @@ export class FileStorage implements DStore {
     );
 
     if (maybeNote && maybeNote.id === note.id) {
+      /**
+       * Calculate diff of links with the `to` prop that have changed.
+       * For links that have been removed, delete those backlinks from the toNotes.
+       * For links that have been added, create backlinks for the toNotes
+       */
+      const deletedLinks = maybeNote.links.filter(
+        (link) =>
+          link.to?.fname &&
+          !note.links.some((linkToCompare) =>
+            LinkUtils.isEquivalent(link, linkToCompare)
+          )
+      );
+      const addedLinks = note.links.filter(
+        (link) =>
+          link.to?.fname &&
+          !maybeNote.links.some((linkToCompare) =>
+            LinkUtils.isEquivalent(link, linkToCompare)
+          )
+      );
+
+      const addedChanges = await Promise.all(
+        addedLinks.map((link) => {
+          return this.addBacklink(link);
+        })
+      );
+
+      const removedChanges = await Promise.all(
+        deletedLinks.map((link) => {
+          return this.removeBacklink(link);
+        })
+      );
+      changedEntries = changedEntries.concat(addedChanges.flat());
+      changedEntries = changedEntries.concat(removedChanges.flat());
       changedEntries.push({ prevNote: maybeNote, note, status: "update" });
     } else {
       // If this is a new note, add backlinks if applicable to referenced notes

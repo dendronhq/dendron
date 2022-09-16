@@ -92,6 +92,8 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       noteToRender: note,
       noteCacheForRenderDict,
       vault: note.vault,
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
       fname,
       config: overrideConfig,
       wikiLinksOpts: { convertLinks },

@@ -479,11 +479,13 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
           const proc = MDUtilsV5.procRemarkFull({
-            noteToRender: (await engine.getNote(note.fname)).data!, // JYTODO: check !
+            noteToRender: note,
             fname: note.fname,
             vault: note.vault,
+            vaults: engine.vaults,
             dest: DendronASTDest.MD_DENDRON,
             config: DConfig.readConfigSync(engine.wsRoot),
+            wsRoot: engine.wsRoot,
           });
 
           const tree = proc.parse(note.body) as DendronASTNode;
@@ -558,7 +560,6 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
     let remark = MDUtilsV5.procRemarkFull({
       noteToRender: note,
       noteCacheForRenderDict,
-      vaults: engine.vaults,
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...DConfig.readConfigSync(engine.wsRoot),
@@ -566,6 +567,8 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       },
       fname: note.fname,
       vault: note.vault,
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
     });
     if (wikiLinkToURL && !_.isUndefined(dendronConfig)) {
       remark = remark.use(

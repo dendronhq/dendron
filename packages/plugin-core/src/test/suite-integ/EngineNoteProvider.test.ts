@@ -12,7 +12,7 @@ import { describe, after } from "mocha";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { EngineNoteProvider } from "../../common/EngineNoteProvider";
-import { TreeViewDummyConfig } from "../../common/TreeViewDummyConfig";
+import { TreeViewConfig } from "../../views/TreeViewConfig";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import {
@@ -42,7 +42,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               vault: vaults[0],
               wsRoot,
             });
-            const treeViewConfig = new TreeViewDummyConfig();
+            const treeViewConfig = new TreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),
@@ -78,7 +78,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               wsRoot,
             });
 
-            const treeViewConfig = new TreeViewDummyConfig();
+            const treeViewConfig = new TreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),
@@ -115,7 +115,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               wsRoot,
             });
 
-            const treeViewConfig = new TreeViewDummyConfig();
+            const treeViewConfig = new TreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),

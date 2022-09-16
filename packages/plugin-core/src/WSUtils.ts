@@ -1,6 +1,7 @@
 import {
   DVault,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   SchemaModuleProps,
   VaultUtils,
@@ -177,7 +178,7 @@ export class WSUtils {
   /**
     @deprecated. Use same method in {@link WSUtilsV2}
   **/
-  static async openNote(note: NoteProps) {
+  static async openNote(note: NotePropsMeta) {
     const { vault, fname } = note;
     const fnameWithExtension = `${fname}.md`;
     return this.openFileInEditorUsingFullFname(vault, fnameWithExtension);

@@ -50,8 +50,8 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
    * See {@link IDataStore.find}
    */
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
-    const { fname, vault } = opts;
-    if (!fname && !vault) {
+    const { fname, vault, excludeStub } = opts;
+    if (!fname && !vault && _.isUndefined(excludeStub)) {
       return { data: [] };
     }
     let noteMetadata: NotePropsMeta[];
@@ -75,6 +75,9 @@ export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
       );
     }
 
+    if (excludeStub) {
+      noteMetadata = noteMetadata.filter((note) => note.stub !== true);
+    }
     return { data: _.cloneDeep(noteMetadata) };
   }
 

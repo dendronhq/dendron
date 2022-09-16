@@ -16,7 +16,7 @@ suite("GoUpCommand", function () {
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine }) => {
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         await new GoUpCommand().run();
         expect(
@@ -34,7 +34,7 @@ suite("GoUpCommand", function () {
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine }) => {
-        const note = engine.notes["foo.ch1"];
+        const note = (await engine.getNoteMeta("foo.ch1")).data!;
         await WSUtils.openNote(note);
         await new GoUpCommand().run();
         expect(

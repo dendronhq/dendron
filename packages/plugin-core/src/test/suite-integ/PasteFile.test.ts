@@ -42,7 +42,7 @@ suite("PasteFile", function () {
         const fakeAsset = path.join(tmpRoot, "apples.pdf");
         fs.writeFileSync(fakeAsset, "data");
         clipboard.writeText(fakeAsset);
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 8, 12);
 
@@ -77,7 +77,7 @@ suite("PasteFile", function () {
         const fakeAsset = path.join(tmpRoot, `${fname}.pdf`);
         fs.writeFileSync(fakeAsset, "data");
         clipboard.writeText(fakeAsset);
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         const editor = await WSUtils.openNote(note);
         editor.selection = new vscode.Selection(8, 0, 8, 12);
 

@@ -87,8 +87,8 @@ suite("DefinitionProvider", function () {
       () => {
         test("THEN provide correct definitions", async () => {
           const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
-          const note = engine.notes["alpha"];
-          const beta = engine.notes["beta"];
+          const note = (await engine.getNoteMeta("alpha")).data!;
+          const beta = (await engine.getNoteMeta("beta")).data!;
           const editor = await WSUtils.openNote(note);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath.toLowerCase()).toEqual(
@@ -115,7 +115,7 @@ suite("DefinitionProvider", function () {
       () => {
         test("THEN provide correct definitions", async () => {
           const { engine } = ExtensionProvider.getDWorkspace();
-          const note = engine.notes["beta"];
+          const note = (await engine.getNoteMeta("beta")).data!;
           const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
@@ -183,7 +183,7 @@ suite("DefinitionProvider", function () {
       () => {
         test("THEN provide correct definitions", async () => {
           const { engine } = ExtensionProvider.getDWorkspace();
-          const note = engine.notes["beta"];
+          const note = (await engine.getNoteMeta("beta")).data!;
           const editor = await WSUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
@@ -211,7 +211,7 @@ suite("DefinitionProvider", function () {
     () => {
       test("THEN provide correct definitions", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const note = engine.notes["alpha"];
+        const note = (await engine.getNoteMeta("alpha")).data!;
         const editor = await WSUtils.openNote(note);
 
         const doc = editor?.document as vscode.TextDocument;
@@ -242,7 +242,7 @@ suite("DefinitionProvider", function () {
     () => {
       test("THEN provide correct definitions", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const note = engine.notes["alpha"];
+        const note = (await engine.getNoteMeta("alpha")).data!;
         const editor = await WSUtils.openNote(note);
 
         const doc = editor?.document as vscode.TextDocument;

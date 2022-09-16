@@ -48,7 +48,7 @@ suite("GotoNote", function () {
         test("THEN goto note", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
-          const note = engine.notes["foo"];
+          const note = (await engine.getNoteMeta("foo")).data!;
           const { note: out } = (await createGoToNoteCmd().run({
             qs: "foo",
             vault,
@@ -561,7 +561,9 @@ suite("GotoNote", function () {
           await ENGINE_HOOKS_MULTI.setupLinksMulti(opts);
         },
         onInit: async ({ engine, vaults }) => {
-          const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
+          const note = (
+            await engine.getNoteMeta(NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname)
+          ).data!;
           const editor = await WSUtils.openNote(note);
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
@@ -731,7 +733,9 @@ suite("GotoNote", function () {
           sinon
             .stub(PickerUtilsV2, "promptVault")
             .returns(Promise.resolve(vaults[1]));
-          const note = engine.notes[NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname];
+          const note = (
+            await engine.getNoteMeta(NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname)
+          ).data!;
           const editor = await WSUtils.openNote(note);
           const linkPos = LocationTestUtils.getPresetWikiLinkPosition();
           editor.selection = new vscode.Selection(linkPos, linkPos);
@@ -765,7 +769,7 @@ suite("GotoNote", function () {
           );
         },
         onInit: async ({ engine, vaults }) => {
-          const note = engine.notes["foo"];
+          const note = (await engine.getNoteMeta("foo")).data!;
           const editor = await WSUtils.openNote(note);
           // put cursor in location on 48
           editor.selection = new vscode.Selection(

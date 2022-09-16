@@ -32,9 +32,7 @@ describeSingleWS(
       );
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const resp = await cmd.execute({});
-      expect(resp).toContain(
-        "https://github.dev/dendronhq/dendron/blob/master"
-      );
+      expect(resp).toContain("https://github.dev/dendronhq/dendron/blob/");
     });
   }
 );

@@ -42,7 +42,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
             const link = await new CopyNoteRefCommand().run();
@@ -60,7 +60,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 4);
             const link = await new CopyNoteRefCommand().run();
@@ -90,7 +90,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
             const link = await new CopyNoteRefCommand().run();
@@ -128,7 +128,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(8, 0, 8, 0);
             const link = await new CopyNoteRefCommand().run();
@@ -166,7 +166,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(8, 0, 11, 0);
             const link = await new CopyNoteRefCommand().run();
@@ -250,7 +250,7 @@ suite("CopyNoteRef", function () {
       () => {
         test("THEN generate note to note", async () => {
           const engine = ExtensionProvider.getEngine();
-          const note = engine.notes["foo"];
+          const note = (await engine.getNoteMeta("foo")).data!;
           await WSUtils.openNote(note);
           const link = await new CopyNoteRefCommand().run();
           expect(link).toEqual("![[foo]]");
@@ -279,7 +279,7 @@ suite("CopyNoteRef", function () {
         () => {
           test("THEN generate note ref", async () => {
             const engine = ExtensionProvider.getEngine();
-            const note = engine.notes["bar"];
+            const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
             const link = await new CopyNoteRefCommand().run();

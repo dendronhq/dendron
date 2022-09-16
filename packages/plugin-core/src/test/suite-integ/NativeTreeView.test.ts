@@ -1,4 +1,9 @@
-import { DendronError, NoteProps, TreeUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  NoteProps,
+  NotePropsMeta,
+  TreeUtils,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -15,7 +20,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
 
-function getNoteUri(opts: { note: NoteProps; wsRoot: string }) {
+function getNoteUri(opts: { note: NotePropsMeta; wsRoot: string }) {
   const { note, wsRoot } = opts;
   const { fname, vault } = note;
   const notePath = fname + ".md";
@@ -28,7 +33,7 @@ async function runRenameNote(opts: { noteId: string; newName: string }) {
   const { wsRoot } = engine;
 
   const { noteId, newName } = opts;
-  const noteToRename = engine.notes[noteId];
+  const noteToRename = (await engine.getNoteMeta(noteId)).data!;
   const noteToRenameVaultPath = vault2Path({
     wsRoot,
     vault: noteToRename.vault,
@@ -57,7 +62,7 @@ async function runDeleteNote(opts: { noteId: string }) {
 
   const { wsRoot } = engine;
   const { noteId } = opts;
-  const noteToDelete = engine.notes[noteId];
+  const noteToDelete = (await engine.getNoteMeta(noteId)).data!;
   const fsPath = getNoteUri({ note: noteToDelete, wsRoot }).fsPath;
   const deleteCmd = new DeleteCommand();
   const deleteOpts = {
@@ -190,7 +195,8 @@ suite("NativeTreeView tests", function () {
           });
 
           const engine = ExtensionProvider.getEngine();
-          const vault1RootPropsAfter = engine.notes[vaultOneRootId];
+          const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const childrenAfter = await (provider.getChildren(
             vault1RootPropsAfter
           ) as Promise<NoteProps[]>);
@@ -457,7 +463,8 @@ suite("NativeTreeView tests", function () {
           });
 
           const engine = ExtensionProvider.getEngine();
-          const vault1RootPropsAfter = engine.notes[vaultOneRootId];
+          const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const childrenAfter = await (provider.getChildren(
             vault1RootPropsAfter
           ) as Promise<NoteProps[]>);
@@ -529,7 +536,8 @@ suite("NativeTreeView tests", function () {
             newName: "fooz",
           });
 
-          const vault1RootPropsAfter = engine.notes[vaultOneRootId];
+          const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const childrenAfter = await (provider.getChildren(
             vault1RootPropsAfter
           ) as Promise<NoteProps[]>);
@@ -615,7 +623,8 @@ suite("NativeTreeView tests", function () {
             newName: "fooz",
           });
 
-          const vault1RootPropsAfter = engine.notes[vaultOneRootId];
+          const vault1RootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const childrenAfter = await (provider.getChildren(
             vault1RootPropsAfter
           ) as Promise<NoteProps[]>);
@@ -698,7 +707,8 @@ suite("NativeTreeView tests", function () {
             newName: "zero",
           });
 
-          const vaultOneRootPropsAfter = engine.notes[vaultOneRootId];
+          const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const fullTreeAfter = await getFullTree({
             root: vaultOneRootPropsAfter,
             provider,
@@ -760,7 +770,8 @@ suite("NativeTreeView tests", function () {
             newName: "one.two.three.foo",
           });
 
-          const vaultOneRootPropsAfter = engine.notes[vaultOneRootId];
+          const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const fullTreeAfter = await getFullTree({
             root: vaultOneRootPropsAfter,
             provider,
@@ -856,7 +867,8 @@ suite("NativeTreeView tests", function () {
             newName: "one",
           });
 
-          const vaultOneRootPropsAfter = engine.notes[vaultOneRootId];
+          const vaultOneRootPropsAfter = (await engine.getNote(vaultOneRootId))
+            .data!;
           const fullTreeAfter = await getFullTree({
             root: vaultOneRootPropsAfter,
             provider,
@@ -880,8 +892,8 @@ suite("NativeTreeView tests", function () {
               },
             ],
           });
-
-          expect(engine.notes["foo"].stub).toBeFalsy();
+          const foo = (await engine.getNoteMeta("foo")).data!;
+          expect(foo.stub).toBeFalsy();
         });
       }
     );

@@ -72,7 +72,7 @@ runSuiteButSkipForWindows()(
       () => {
         test("AND new schema is schema file saved THEN schema is updated in engine.", async () => {
           const { engine } = ExtensionProvider.getDWorkspace();
-          const testNote = engine.notes["foo"];
+          const testNote = (await engine.getNoteMeta("foo")).data!;
           expect(testNote).toBeTruthy();
 
           const opened = await WSUtils.openSchema(engine.schemas.plain_schema);
@@ -245,7 +245,7 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const fooNote = engine.notes["foo.one"];
+        const fooNote = (await engine.getNoteMeta("foo.one")).data!;
         const updatedBefore = fooNote.updated;
         const editor = await ExtensionProvider.getWSUtils().openNote(fooNote);
         const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
@@ -271,28 +271,31 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const fooNote = engine.notes["foo.one"];
-        const bodyBefore = fooNote.body;
-        const updatedBefore = fooNote.updated;
+        const { vaults } = ExtensionProvider.getDWorkspace();
+        const fooNote = NoteUtils.create({
+          fname: "foo.one",
+          vault: vaults[0],
+        });
+        const bodyBefore = "[[oldfile]]";
+        const updatedBefore = 1;
         const textToAppend = "new text here";
         ExtensionProvider.getWSUtils()
           .openNote(fooNote)
-          .then((editor) => {
-            editor.edit((editBuilder) => {
+          .then(async (editor) => {
+            await editor.edit((editBuilder) => {
               const line = editor.document.getText().split("\n").length;
               editBuilder.insert(new vscode.Position(line, 0), textToAppend);
             });
-            editor.document.save().then(() => {
+            await editor.document.save().then(async () => {
               const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
                 document: editor.document,
                 // eslint-disable-next-line no-undef
                 waitUntil: (_args: Thenable<any>) => {
-                  _args.then(() => {
+                  _args.then(async () => {
                     // Engine note body hasn't been updated yet
-                    expect(engine.notes["foo.one"].body).toEqual(bodyBefore);
-                    expect(engine.notes["foo.one"].updated).toNotEqual(
-                      updatedBefore
-                    );
+                    const foo = (await engine.getNote("foo.one")).data!;
+                    expect(foo.body).toEqual(bodyBefore);
+                    expect(foo.updated).toNotEqual(updatedBefore);
                     done();
                   });
                 },

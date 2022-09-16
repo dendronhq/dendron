@@ -440,10 +440,14 @@ suite("Create Daily Journal Suite", function () {
         const dailySchema = engine.schemas["daily"];
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
-        const numNotesBefore = _.size(engine.notes);
+        const numNotesBefore = (
+          await engine.findNotesMeta({ excludeStub: true })
+        ).length;
         const numSchemasBefore = _.size(engine.schemas);
         await cmd.run();
-        expect(numNotesBefore).toEqual(_.size(engine.notes));
+        expect(numNotesBefore).toEqual(
+          (await engine.findNotesMeta({ excludeStub: true })).length
+        );
         expect(numSchemasBefore).toEqual(_.size(engine.schemas));
       });
     }

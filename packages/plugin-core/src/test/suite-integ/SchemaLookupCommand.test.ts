@@ -112,7 +112,7 @@ suite("SchemaLookupCommand", function () {
         },
         onInit: async ({ engine }) => {
           const cmd = new SchemaLookupCommand();
-          const fooNote = engine.notes["foo"];
+          const fooNote = (await engine.getNoteMeta("foo")).data!;
           await WSUtils.openNote(fooNote);
           await cmd.run({ noConfirm: true, initialValue: "baz" });
           const editor = VSCodeUtils.getActiveTextEditor();

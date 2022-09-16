@@ -85,7 +85,7 @@ const LINK_TO_NOTE_IN_SAME_VAULT = new TestPresetEntry<{
 
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["alpha"];
+    const note = (await engine.getNote("alpha")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
       line: 7,
@@ -131,7 +131,7 @@ const LINK_IN_CODE_BLOCK = new TestPresetEntry<{
 
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["test.note"];
+    const note = (await engine.getNote("test.note")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
       line: 9,
@@ -173,7 +173,7 @@ const LINK_TO_NOTE_WITH_URI_HTTP = new TestPresetEntry<{
 
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["beta"];
+    const note = (await engine.getNote("beta")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
       line: 7,
@@ -203,7 +203,7 @@ const VALID_URL = new TestPresetEntry<{
   },
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["test.note"];
+    const note = (await engine.getNote("test.note")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = new Selection(8, 3, 8, 3);
   },
@@ -229,7 +229,7 @@ const PARTIAL_URL = new TestPresetEntry<{
   },
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["test.note"];
+    const note = (await engine.getNote("test.note")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = new Selection(8, 15, 8, 25);
   },
@@ -242,10 +242,10 @@ const NO_LINK = new TestPresetEntry<{
   ext: IDendronExtension;
 }>({
   label: "WHEN there is no valid link under the cursor",
-  preSetupHook: async (opts) => await ENGINE_HOOKS.setupBasic(opts),
+  preSetupHook: async (opts) => ENGINE_HOOKS.setupBasic(opts),
   beforeTestResults: async ({ ext }) => {
     const { engine } = ext.getDWorkspace();
-    const note = engine.notes["foo"];
+    const note = (await engine.getNote("foo")).data!;
     const editor = await new WSUtilsV2(ext).openNote(note);
     editor.selection = LocationTestUtils.getPresetWikiLinkSelection({
       line: 8,

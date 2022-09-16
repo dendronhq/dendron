@@ -21,11 +21,10 @@ runSuiteButSkipForWindows()(
         workspaceType: WorkspaceType.NATIVE,
       },
       () => {
-        test("THEN initializes correctly", (done) => {
+        test("THEN initializes correctly", async () => {
           const { engine } = getDWorkspace();
-          const testNote = engine.notes["foo"];
+          const testNote = (await engine.getNoteMeta("foo")).data!;
           expect(testNote).toBeTruthy();
-          done();
         });
 
         test("THEN is of NATIVE type", (done) => {
@@ -44,11 +43,10 @@ runSuiteButSkipForWindows()(
         workspaceType: WorkspaceType.CODE,
       },
       () => {
-        test("THEN initializes correctly", (done) => {
+        test("THEN initializes correctly", async () => {
           const { engine } = getDWorkspace();
-          const testNote = engine.notes["foo"];
+          const testNote = (await engine.getNoteMeta("foo")).data!;
           expect(testNote).toBeTruthy();
-          done();
         });
 
         test("THEN is of CODE type", (done) => {
@@ -66,11 +64,10 @@ runSuiteButSkipForWindows()(
         ctx,
       },
       () => {
-        test("THEN initializes correctly", (done) => {
+        test("THEN initializes correctly", async () => {
           const { engine } = getDWorkspace();
-          const testNote = engine.notes["foo"];
+          const testNote = (await engine.getNoteMeta("foo")).data!;
           expect(testNote).toBeTruthy();
-          done();
         });
 
         test("THEN is of CODE type", (done) => {

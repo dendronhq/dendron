@@ -519,10 +519,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActionsEnum.CREATE_MISSING_LINKED_NOTES: {
-        let notes;
+        let notes: NoteProps[];
         if (_.isUndefined(note)) {
-          notes = _.values(engine.notes);
-          notes = notes.filter((note) => !note.stub);
+          notes = await engine.findNotes({ excludeStub: true });
         } else {
           notes = [note];
         }
@@ -562,8 +561,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       case DoctorActionsEnum.FIND_BROKEN_LINKS: {
         let notes;
         if (_.isUndefined(note)) {
-          notes = _.values(engine.notes);
-          notes = notes.filter((note) => !note.stub);
+          notes = await engine.findNotes({ excludeStub: true });
         } else {
           notes = [note];
         }

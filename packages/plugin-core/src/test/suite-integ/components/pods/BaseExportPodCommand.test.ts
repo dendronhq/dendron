@@ -1,4 +1,4 @@
-import { assert, DVault, NoteProps } from "@dendronhq/common-all";
+import { assert, DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   NoteTestUtilsV4,
@@ -59,9 +59,12 @@ suite("BaseExportPodCommand", function () {
           const cmd = new TestExportPodCommand(
             ExtensionProvider.getExtension()
           );
-          const engine = ExtensionProvider.getEngine();
 
-          const testNote = engine.notes["foo"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const testNote = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
           const textToAppend = "BaseExportPodCommand testing";
           // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
           const disposable = vscode.workspace.onDidSaveTextDocument(
@@ -98,9 +101,12 @@ suite("BaseExportPodCommand", function () {
           const cmd = new TestExportPodCommand(
             ExtensionProvider.getExtension()
           );
-          const engine = ExtensionProvider.getEngine();
 
-          const testNote = engine.notes["foo"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const testNote = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
           const disposable = vscode.workspace.onDidSaveTextDocument(() => {
             assert(false, "Callback not expected");
           });

@@ -3,6 +3,7 @@ import {
   DNoteAnchorBasic,
   DVault,
   NoteProps,
+  NotePropsMeta,
   RespV3,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
@@ -35,7 +36,7 @@ export interface IWSUtilsV2 {
     fnameWithExtension: string
   ): Promise<vscode.TextEditor>;
 
-  openNote(note: NoteProps): Promise<vscode.TextEditor>;
+  openNote(note: NotePropsMeta): Promise<vscode.TextEditor>;
   openSchema(schema: SchemaModuleProps): Promise<vscode.TextEditor>;
 
   /**

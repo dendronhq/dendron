@@ -41,6 +41,7 @@ import {
   QuerySchemaResp,
   WriteSchemaResp,
   EngineSchemaWriteOpts,
+  GetNoteMetaResp,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -177,6 +178,13 @@ export class EngineAPIService
    */
   async getNote(id: string): Promise<GetNoteResp> {
     return this._internalEngine.getNote(id);
+  }
+
+  /**
+   * See {@link IEngineAPIService.getNote}
+   */
+  async getNoteMeta(id: string): Promise<GetNoteMetaResp> {
+    return this._internalEngine.getNoteMeta(id);
   }
 
   /**

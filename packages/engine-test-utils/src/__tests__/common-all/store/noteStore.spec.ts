@@ -156,6 +156,23 @@ describe("GIVEN NoteStore", () => {
         // Test NoteStore.getMetadata
         const noteMetadata = await noteStore.getMetadata(newNote.id);
         expect(noteMetadata.data!.fname).toEqual(newNote.fname);
+
+        // Test NoteStore.findMetadata
+        let findResp = await noteStore.findMetaData({ fname: "foobar" });
+        expect(findResp.data![0].fname).toEqual(newNote.fname);
+
+        // Test NoteStore.findMetadata excludeStub = true
+        findResp = await noteStore.findMetaData({
+          fname: "foobar",
+          excludeStub: true,
+        });
+        expect(findResp.data!.length).toEqual(0);
+
+        // Test NoteStore.findMetadata excludeStub = false
+        findResp = await noteStore.findMetaData({
+          excludeStub: false,
+        });
+        expect(findResp.data![0].fname).toEqual(newNote.fname);
       },
       {
         expect,

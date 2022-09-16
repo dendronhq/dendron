@@ -5,6 +5,7 @@ import {
 } from "@dendronhq/common-all";
 import { readMD, SegmentClient } from "@dendronhq/common-server";
 import _ from "lodash";
+import semver from "semver";
 import * as vscode from "vscode";
 import { LaunchTutorialWorkspaceCommand } from "./commands/LaunchTutorialWorkspaceCommand";
 import { LaunchTutorialCommandInvocationPoint } from "./constants";
@@ -28,8 +29,10 @@ export function showWelcome(assetUri: vscode.Uri) {
       SegmentClient.instance().anonymousId
     );
     let testgroup: string;
-    const version = Number(vscode.version.substring(0, 4)); // version: x.xx.x
-    if (ABUserGroup === VideoTutorialTestGroups.video && version > 1.71) {
+    if (
+      ABUserGroup === VideoTutorialTestGroups.video &&
+      semver.gte(vscode.version, "1.71.0")
+    ) {
       const videoUri = VSCodeUtils.joinPath(
         assetUri,
         "dendron-ws",

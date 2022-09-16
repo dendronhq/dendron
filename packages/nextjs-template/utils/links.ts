@@ -16,7 +16,7 @@ export function getAssetUrl(url: string) {
     process.env.NEXT_PUBLIC_ASSET_PREFIX
       ? process.env.NEXT_PUBLIC_ASSET_PREFIX + url
       : url;
-  return out;
+  return url;
 }
 
 /**

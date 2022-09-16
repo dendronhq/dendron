@@ -2,6 +2,7 @@ import {
   ConfigUtils,
   CONSTANTS,
   IntermediateDendronConfig,
+  NoteProps,
   Theme,
 } from "@dendronhq/common-all";
 import {
@@ -35,10 +36,13 @@ const themes: { [key in Theme]: string } = {
   custom: getAssetUrl(`/themes/${CONSTANTS.CUSTOM_THEME_CSS}`),
 };
 
-function AppContainer(appProps: AppProps) {
-  const { config } = appProps.pageProps as {
-    config: IntermediateDendronConfig;
-  };
+type PageProps = {
+  noteIndex: NoteProps
+  config: IntermediateDendronConfig;
+}
+
+function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
+  const { config } = appProps.pageProps;   
   const logger = createLogger("AppContainer");
   useEffect(() => {
     const logLevel = getLogLevel();
@@ -55,7 +59,7 @@ function AppContainer(appProps: AppProps) {
   );
 }
 
-function DendronApp({ Component, pageProps }: AppProps) {
+function DendronApp({ Component, pageProps }: AppProps & { pageProps: PageProps }) {
   const [noteData, setNoteData] = useState<NoteData>();
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();

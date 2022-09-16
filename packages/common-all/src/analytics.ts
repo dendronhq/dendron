@@ -167,6 +167,7 @@ export enum WorkspaceEvents {
   AutoFix = "AutoFix",
   DuplicateNoteFound = "DuplicateNoteFound",
   TransitiveDepsWarningShow = "TransitiveDepsWarningShow",
+  MultipleTelemetryIdsDetected = "MultipleTelemetryIdsDetected",
 }
 
 export enum NativeWorkspaceEvents {

@@ -12,6 +12,7 @@ import {
   InstallStatus,
   isDisposable,
   VSCodeEvents,
+  WorkspaceEvents,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -173,12 +174,27 @@ export async function _activate(
     });
 
     // Temp: store the user's anonymous ID into global state so that we can link
-    // local ext users to web ext users:
+    // local ext users to web ext users. If one already exists in global state,
+    // then override that one with the segment client one.
     context.globalState.setKeysForSync([GLOBAL_STATE_KEYS.ANONYMOUS_ID]);
-    context.globalState.update(
-      GLOBAL_STATE_KEYS.ANONYMOUS_ID,
-      SegmentClient.instance().anonymousId
+
+    const segmentAnonymousId = SegmentClient.instance().anonymousId;
+
+    const globalStateId = context.globalState.get<string | undefined>(
+      GLOBAL_STATE_KEYS.ANONYMOUS_ID
     );
+
+    if (globalStateId !== segmentAnonymousId) {
+      if (globalStateId) {
+        AnalyticsUtils.track(WorkspaceEvents.MultipleTelemetryIdsDetected, {
+          ids: [segmentAnonymousId, globalStateId],
+        });
+      }
+      context.globalState.update(
+        GLOBAL_STATE_KEYS.ANONYMOUS_ID,
+        SegmentClient.instance().anonymousId
+      );
+    }
   }
 
   try {

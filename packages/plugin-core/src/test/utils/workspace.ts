@@ -111,7 +111,6 @@ export class WorkspaceTestUtils {
         enableFrontmatterTags: true,
         enableHashesForFMTags: false,
         enableKatex: true,
-        enableMermaid: true,
         enableNoteTitleForLink: true,
         copyAssets: true,
         enablePrettyRefs: true,

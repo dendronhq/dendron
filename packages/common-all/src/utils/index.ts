@@ -719,16 +719,6 @@ export class ConfigUtils {
       : ConfigUtils.getPreview(config).enableNoteTitleForLink;
   }
 
-  static getEnableMermaid(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getProp(config, "mermaid")
-      : ConfigUtils.getPublishing(config).enableMermaid;
-
-    return publishRule;
-  }
-
   static getEnableKatex(
     config: IntermediateDendronConfig,
     shouldApplyPublishRules?: boolean

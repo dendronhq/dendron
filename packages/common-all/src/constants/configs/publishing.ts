@@ -14,7 +14,6 @@ import {
 import {
   ENABLE_FM_TITLE,
   ENABLE_NOTE_TITLE_FOR_LINK,
-  ENABLE_MERMAID,
   ENABLE_KATEX,
   ENABLE_PRETTY_REFS,
   ENABLE_FRONTMATTER_TAGS,
@@ -176,7 +175,6 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       desc: "Title to display for the children links block.",
     },
     enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("publishing"),
-    enableMermaid: ENABLE_MERMAID("publishing"),
     enablePrettyRefs: ENABLE_PRETTY_REFS("publishing"),
     enableKatex: ENABLE_KATEX("publishing"),
     assetsPrefix: {

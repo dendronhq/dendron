@@ -234,10 +234,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "publishing",
   },
-  "publishing.enableMermaid": {
-    type: "boolean",
-    group: "publishing",
-  },
   "publishing.enablePrettyRefs": {
     type: "boolean",
     group: "publishing",

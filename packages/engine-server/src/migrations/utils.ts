@@ -252,6 +252,7 @@ export const DEPRECATED_PATHS = [
   "workspace.enableSmartRefs",
   "preview.enableMermaid",
   "enableMermaid",
+  "publishing.enableMermaid",
 ];
 
 export class MigrationUtils {

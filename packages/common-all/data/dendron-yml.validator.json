@@ -1082,9 +1082,6 @@
         "enableNoteTitleForLink": {
           "type": "boolean"
         },
-        "enableMermaid": {
-          "type": "boolean"
-        },
         "enablePrettyRefs": {
           "type": "boolean"
         },

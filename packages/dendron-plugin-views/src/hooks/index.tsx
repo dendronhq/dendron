@@ -1,4 +1,4 @@
-import { IntermediateDendronConfig, NoteProps } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   engineHooks,
@@ -95,7 +95,6 @@ export const useMermaid = ({
   mermaid,
   noteRenderedBody,
 }: {
-  config?: IntermediateDendronConfig;
   themeType: "light" | "dark";
   mermaid: Mermaid;
   noteRenderedBody?: string;

@@ -37,12 +37,12 @@ const themes: { [key in Theme]: string } = {
 };
 
 type PageProps = {
-  noteIndex: NoteProps
+  noteIndex: NoteProps;
   config: IntermediateDendronConfig;
-}
+};
 
 function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
-  const { config } = appProps.pageProps;   
+  const { config } = appProps.pageProps;
   const logger = createLogger("AppContainer");
   useEffect(() => {
     const logLevel = getLogLevel();
@@ -59,7 +59,10 @@ function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
   );
 }
 
-function DendronApp({ Component, pageProps }: AppProps & { pageProps: PageProps }) {
+function DendronApp({
+  Component,
+  pageProps,
+}: AppProps & { pageProps: PageProps }) {
   const [noteData, setNoteData] = useState<NoteData>();
   const logger = createLogger("App");
   const dendronRouter = useDendronRouter();
@@ -93,6 +96,7 @@ function DendronApp({ Component, pageProps }: AppProps & { pageProps: PageProps 
   logger.info({ ctx: "render" });
 
   return (
+    // @ts-ignore
     <DendronProvider>
       <DendronLayout
         {...noteData}

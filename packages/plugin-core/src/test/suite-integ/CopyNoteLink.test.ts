@@ -366,7 +366,7 @@ suite("CopyNoteLink", function () {
             engine,
           });
 
-        const editor = await openNote(noteWithTarget);
+        let editor = await openNote(noteWithTarget);
         const pos = LocationTestUtils.getPresetWikiLinkPosition();
         const pos2 = LocationTestUtils.getPresetWikiLinkPosition({
           char: 12,
@@ -376,6 +376,8 @@ suite("CopyNoteLink", function () {
         expect(link).toEqual(
           `[[H1|dendron://vault1/${noteWithTarget.fname}#h1]]`
         );
+
+        editor = await openNote(noteWithTarget);
         editor.selection = new vscode.Selection(
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })

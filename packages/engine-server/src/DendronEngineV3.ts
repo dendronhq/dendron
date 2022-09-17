@@ -66,6 +66,7 @@ import {
   WriteSchemaResp,
   BacklinkUtils,
   DLinkUtils,
+  TimeUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -85,6 +86,7 @@ import { LinkUtils } from "@dendronhq/unified";
 import { NodeJSFileStore } from "./store";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { EngineUtils } from "./utils/engineUtils";
+import { SQLiteMetadataStore } from "./drivers";
 
 type DendronEngineOptsV3 = {
   wsRoot: string;
@@ -948,6 +950,39 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     let notesFname: NotePropsByFnameDict = {};
     const start = process.hrtime();
 
+    const enableSQLITE =
+      DConfig.readConfigSync(this.wsRoot).workspace.metadataStore === "sqlite";
+    if (enableSQLITE) {
+      // eslint-disable-next-line no-new
+      const store = new SQLiteMetadataStore({
+        wsRoot: this.wsRoot,
+        force: true,
+      });
+
+      // sleep until store is done
+      const output = await TimeUtils.awaitWithLimit(
+        { limitMs: 6e4 },
+        async () => {
+          while (store.status === "loading") {
+            this.logger.info({ ctx, msg: "downloading sql dependencies..." });
+            // eslint-disable-next-line no-await-in-loop
+            await TimeUtils.sleep(1000);
+          }
+          return;
+        }
+      );
+
+      this.logger.info({
+        ctx,
+        msg: "checking if sql is initialized...",
+        output,
+      });
+      if (!(await SQLiteMetadataStore.isDBInitialized())) {
+        await SQLiteMetadataStore.createAllTables();
+        await SQLiteMetadataStore.createWorkspace(this.wsRoot);
+      }
+    }
+
     const allNotesList = await Promise.all(
       this.vaults.map(async (vault) => {
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
@@ -996,6 +1031,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
             numEntries: _.size(notesById),
             numCacheUpdates: notesCache.numCacheMisses,
           });
+          if (!(await SQLiteMetadataStore.isVaultInitialized(vault))) {
+            await SQLiteMetadataStore.prisma().dVault.create({
+              data: { fsPath: vault.fsPath, wsRoot: this.wsRoot },
+            });
+          }
           return notesById;
         }
         return {};
@@ -1010,6 +1050,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       },
       notesWithLinks
     );
+
+    // TODO: OPTIMIZE
+    await SQLiteMetadataStore.deleteAllNotes();
+    await SQLiteMetadataStore.bulkInsertAllNotes({
+      notesIdDict: allNotes,
+    });
     const duration = getDurationMilliseconds(start);
     this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 

@@ -241,6 +241,11 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     return { query: fullQuery };
   }
 
+  static deleteAllNotes() {
+    const raw = `DELETE FROM Note`;
+    return getPrismaClient().$queryRawUnsafe(raw);
+  }
+
   static async search(
     query: string
   ): Promise<{ hits: NoteIndexLightProps[]; query: string }> {

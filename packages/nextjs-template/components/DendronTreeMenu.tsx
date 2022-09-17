@@ -280,9 +280,9 @@ function treeMenuNode2DataNode({
         icon,
         children: node.children
           ? treeMenuNode2DataNode({
-              roots: node.children,
-              showVaultName,
-            })
+            roots: node.children,
+            showVaultName,
+          })
           : [],
       };
     })

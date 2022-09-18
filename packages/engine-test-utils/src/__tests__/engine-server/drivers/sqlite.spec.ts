@@ -29,7 +29,7 @@ async function expectNotesAreEqual(opts: {
   expect(sortedResp).toEqual(_.sortBy(_.pick(opts.notes, "fname"), "fname"));
 }
 
-describe("GIVEN sqlite store", () => {
+describe.skip("GIVEN sqlite store", () => {
   afterEach(async () => {
     await SQLiteMetadataStore.prisma().$disconnect();
   });

@@ -1035,10 +1035,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
             numEntries: _.size(notesById),
             numCacheUpdates: notesCache.numCacheMisses,
           });
-          if (!(await SQLiteMetadataStore.isVaultInitialized(vault))) {
-            await SQLiteMetadataStore.prisma().dVault.create({
-              data: { fsPath: vault.fsPath, wsRoot: this.wsRoot },
-            });
+          if (enableSQLITE) {
+            if (!(await SQLiteMetadataStore.isVaultInitialized(vault))) {
+              await SQLiteMetadataStore.prisma().dVault.create({
+                data: { fsPath: vault.fsPath, wsRoot: this.wsRoot },
+              });
+            }
           }
           return notesById;
         }

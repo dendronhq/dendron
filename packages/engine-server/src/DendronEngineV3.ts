@@ -186,6 +186,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
+    const ctx = "DendronEngineV3:init";
     const defaultResp = {
       notes: {},
       schemas: {},
@@ -264,7 +265,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           error = new DendronCompositeError(allErrors);
       }
       this.logger.info({
-        ctx: "init:ext",
+        ctx,
         error,
         storeError: allErrors,
         hookErrors,
@@ -944,14 +945,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   private async initNotes(
     schemas: SchemaModuleDict
   ): Promise<RespWithOptError<NotePropsByIdDict>> {
-    const ctx = "DEngine:initNotes";
-    this.logger.info({ ctx, msg: "enter" });
+    const ctx = "DEngineV3:initNotes";
     let errors: IDendronError[] = [];
     let notesFname: NotePropsByFnameDict = {};
     const start = process.hrtime();
-
     const enableSQLITE =
       DConfig.readConfigSync(this.wsRoot).workspace.metadataStore === "sqlite";
+    this.logger.info({ ctx, msg: "enter", enableSQLITE });
     if (enableSQLITE) {
       // eslint-disable-next-line no-new
       const store = new SQLiteMetadataStore({
@@ -978,6 +978,10 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         output,
       });
       if (!(await SQLiteMetadataStore.isDBInitialized())) {
+        this.logger.info({
+          ctx,
+          msg: "db not initialized",
+        });
         await SQLiteMetadataStore.createAllTables();
         await SQLiteMetadataStore.createWorkspace(this.wsRoot);
       }
@@ -1051,17 +1055,26 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       notesWithLinks
     );
 
-    // TODO: OPTIMIZE
-    await SQLiteMetadataStore.deleteAllNotes();
-    await SQLiteMetadataStore.bulkInsertAllNotes({
-      notesIdDict: allNotes,
-    });
+    if (enableSQLITE) {
+      this.logger.info({ ctx, msg: "updating notes in sql" });
+      // TODO: OPTIMIZE
+      await SQLiteMetadataStore.deleteAllNotes();
+      await SQLiteMetadataStore.bulkInsertAllNotes({
+        notesIdDict: allNotes,
+      });
+
+      // const allNotes = await SQLiteetadataStore.prisma().note.findMany();
+      this.logger.info({
+        ctx,
+        msg: "post:update notes in sql",
+      });
+    }
     const duration = getDurationMilliseconds(start);
     this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 
     return {
       data: allNotes,
-      error: new DendronCompositeError(errors),
+      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
     };
   }
 

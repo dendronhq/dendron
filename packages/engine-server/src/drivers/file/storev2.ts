@@ -110,7 +110,7 @@ export class FileStorage implements DStore {
     this.anchors = [];
     this.logger = logger;
     this.config = config;
-    const ctx = "FileStorageV2";
+    const ctx = "FileStorage:constructor";
     this.logger.info({ ctx, wsRoot, vaults, level: this.logger.level });
     this.engine = props.engine;
   }
@@ -119,6 +119,7 @@ export class FileStorage implements DStore {
     const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {
+      this.logger.info({ ctx, msg: "pre:initSchema" });
       const resp = await this.initSchema();
       if (resp.error) {
         errors.push(FileStorage.createMalformedSchemaError(resp));
@@ -126,7 +127,9 @@ export class FileStorage implements DStore {
       resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
+      this.logger.info({ ctx, msg: "pre:initNotes" });
       const { errors: initErrors } = await this.initNotes();
+      this.logger.info({ ctx, msg: "post:initNotes", initErrors });
       errors = errors.concat(initErrors);
       this.logger.info({ ctx, msg: "post:initNotes", errors });
 
@@ -504,7 +507,7 @@ export class FileStorage implements DStore {
   async initNotes(): Promise<{
     errors: IDendronError[];
   }> {
-    const ctx = "initNotes";
+    const ctx = "FileStorage:initNotes";
     this.logger.info({ ctx, msg: "enter" });
 
     let notesWithLinks: NoteProps[] = [];
@@ -578,7 +581,10 @@ export class FileStorage implements DStore {
 
     this._addBacklinks({ notesWithLinks, allNotes });
     const duration = getDurationMilliseconds(start);
-    this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
+    this.logger.info({
+      ctx,
+      msg: `time to init notes: "${duration}" ms`,
+    });
 
     return { errors };
   }

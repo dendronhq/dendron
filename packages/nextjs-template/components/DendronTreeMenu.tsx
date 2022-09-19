@@ -18,7 +18,7 @@ import _ from "lodash";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { useCombinedSelector } from "../features";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
@@ -169,6 +169,7 @@ function MenuView({
     if (menu.children && menu.children.length > 0) {
       return (
         <SubMenu
+          // @ts-ignore
           icon={menu.icon}
           className={
             menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
@@ -197,6 +198,7 @@ function MenuView({
       );
     }
     return (
+      // @ts-ignore
       <MenuItem key={menu.key} icon={menu.icon}>
         <MenuItemTitle
           menu={menu}
@@ -217,6 +219,7 @@ function MenuView({
         selectedKeys: [...expandKeys, activeNote],
       })}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
+      // @ts-ignore
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
       // results in gray box otherwise when nav bar is too short for display
@@ -241,6 +244,7 @@ function MenuItemTitle(
   const { getNoteUrl } = useDendronRouter();
 
   return (
+    // @ts-ignore
     <Typography.Text ellipsis={{ tooltip: props.menu.title }}>
       <Link
         href={getNoteUrl(props.menu.key as string, {
@@ -256,6 +260,7 @@ function MenuItemTitle(
             props.onSubMenuSelect(props.menu.key as string);
           }}
         >
+          {/* @ts-ignore */}
           {props.menu.title}
         </a>
       </Link>
@@ -299,9 +304,9 @@ function treeMenuNode2DataNode({
         icon,
         children: node.children
           ? treeMenuNode2DataNode({
-              roots: node.children,
-              showVaultName,
-            })
+            roots: node.children,
+            showVaultName,
+          })
           : [],
       };
     })

@@ -48,16 +48,16 @@ function DebouncedDendronSearchComponent(props: DendronCommonProps) {
   // gets fresh results.
   const debouncedSearch: SearchFunction | undefined = fuse
     ? _.debounce<SearchFunction>((query, setResults) => {
-        if (_.isUndefined(query)) {
-          return;
-        }
+      if (_.isUndefined(query)) {
+        return;
+      }
 
-        const fuseResults = fuse
-          .search(query.substring(1))
-          .slice(0, MAX_SEARCH_RESULTS);
+      const fuseResults = fuse
+        .search(query.substring(1))
+        .slice(0, MAX_SEARCH_RESULTS);
 
-        setResults(fuseResults);
-      }, SEARCH_DELAY)
+      setResults(fuseResults);
+    }, SEARCH_DELAY)
     : undefined;
   return (
     <DendronSearchComponent {...props} {...results} search={debouncedSearch} />
@@ -152,6 +152,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   );
 
   const onSelect = useCallback(
+    // @ts-ignore
     (_selection, option) => {
       if (!noteIndex) {
         return;
@@ -362,20 +363,20 @@ const highlight: (
   indices?: Fuse.FuseResultMatch["indices"],
   value?: string
 ) => {
-  const pair = indices?.[indices.length - i];
+    const pair = indices?.[indices.length - i];
 
-  return !pair ? (
-    <>{value}</>
-  ) : (
-    <>
-      {highlight(i + 1, indices, value?.substring(0, pair[0]))}
-      <span style={{ fontWeight: "bolder" }}>
-        {value?.substring(pair[0], pair[1] + 1)}
-      </span>
-      {value?.substring(pair[1] + 1)}
-    </>
-  );
-};
+    return !pair ? (
+      <>{value}</>
+    ) : (
+      <>
+        {highlight(i + 1, indices, value?.substring(0, pair[0]))}
+        <span style={{ fontWeight: "bolder" }}>
+          {value?.substring(pair[0], pair[1] + 1)}
+        </span>
+        {value?.substring(pair[1] + 1)}
+      </>
+    );
+  };
 
 const TitleHighlight = ({
   hit,

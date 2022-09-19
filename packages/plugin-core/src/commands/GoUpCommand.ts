@@ -1,4 +1,4 @@
-import { DNodeUtils, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
@@ -24,14 +24,14 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return;
     }
     const engine = getDWorkspace().engine;
-    const nparent = DNodeUtils.findClosestParent(
+    const nparent = await DNodeUtils.findClosestParentWithEngine(
       path.basename(maybeTextEditor.document.uri.fsPath, ".md"),
-      { notesById: engine.notes, notesByFname: engine.noteFnames },
+      engine,
       {
-        noStubs: true,
+        excludeStub: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),
       }
-    ) as NoteProps;
+    );
     const nppath = NoteUtils.getFullPath({
       note: nparent,
       wsRoot: getDWorkspace().wsRoot,

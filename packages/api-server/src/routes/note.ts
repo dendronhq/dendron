@@ -10,6 +10,10 @@ import {
   RenderNoteOpts,
   WriteNoteResp,
   BulkWriteNotesResp,
+  FindNotesResp,
+  RespV3,
+  FindNoteOpts,
+  APIRequest,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -63,6 +67,16 @@ router.get(
       req.query as unknown as NoteQueryRequest
     );
     ExpressUtils.setResponse(res, resp);
+  })
+);
+
+router.post(
+  "/find",
+  asyncHandler(async (req: Request, res: Response<RespV3<FindNotesResp>>) => {
+    const { ws, ...opts } = req.body as APIRequest<FindNoteOpts>;
+    const engine = await getWSEngine({ ws: ws || "" });
+    const out = await engine.findNotes(opts);
+    ExpressUtils.setResponse(res, { data: out });
   })
 );
 

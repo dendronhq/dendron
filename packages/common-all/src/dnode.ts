@@ -42,6 +42,7 @@ import {
   NotePropsMeta,
   NoteQuickInputV2,
   RespV3,
+  ReducedDEngine,
 } from "./types";
 import {
   DefaultMap,
@@ -237,6 +238,35 @@ export class DNodeUtils {
     }
   }
 
+  static async findClosestParentWithEngine(
+    fpath: string,
+    engine: ReducedDEngine,
+    opts: {
+      excludeStub?: boolean;
+      vault: DVault;
+    }
+  ): Promise<NotePropsMeta> {
+    const { vault, excludeStub } = opts;
+    const dirname = DNodeUtils.dirName(fpath);
+    if (dirname === "") {
+      const notes = await engine.findNotesMeta({ fname: "root", vault });
+      if (notes.length === 0) {
+        throw new DendronError({ message: `no root found for ${fpath}` });
+      }
+      return notes[0];
+    }
+    const maybeNotes = await engine.findNotesMeta({
+      fname: dirname,
+      vault,
+      excludeStub,
+    });
+    if (maybeNotes.length > 0) {
+      return maybeNotes[0];
+    } else {
+      return DNodeUtils.findClosestParentWithEngine(dirname, engine, opts);
+    }
+  }
+
   /**
    * Custom props are anything that is not a reserved key in Dendron
    * @param props
@@ -281,7 +311,7 @@ export class DNodeUtils {
    * @param note DNodeProps
    * @returns name of leaf node
    */
-  static getLeafName(note: DNodeProps) {
+  static getLeafName(note: NotePropsMeta) {
     return _.split(note.fname, ".").pop();
   }
 }

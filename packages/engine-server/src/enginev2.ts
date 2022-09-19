@@ -43,7 +43,6 @@ import {
   QueryNotesOpts,
   RenameNoteOpts,
   RenderNoteOpts,
-  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
   QuerySchemaResp,
@@ -57,6 +56,8 @@ import {
   RenameNoteResp,
   RenderNoteResp,
   GetSchemaResp,
+  GetNoteMetaResp,
+  GetNoteResp,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -301,8 +302,12 @@ export class DendronEngineV2 implements DEngine {
   /**
    * See {@link DEngine.getNote}
    */
-  async getNote(id: string): Promise<RespV3<NoteProps>> {
+  async getNote(id: string): Promise<GetNoteResp> {
     return this.store.getNote(id);
+  }
+
+  async getNoteMeta(id: string): Promise<GetNoteMetaResp> {
+    return this.getNote(id);
   }
 
   async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {

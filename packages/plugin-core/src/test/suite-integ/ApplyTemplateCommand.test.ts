@@ -57,7 +57,7 @@ async function runTemplateTest({
 }) {
   const ext = ExtensionProvider.getExtension();
   const engine = ext.getEngine();
-  const targetNote = _targetNote || engine.notes["foo"];
+  const targetNote = _targetNote || (await engine.getNote("foo")).data!;
   // note needs to be open, otherwise, command will throw an error
   await WSUtilsV2.instance().openNote(targetNote);
   const { updatedTargetNote } = await executeTemplateApply({

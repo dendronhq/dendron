@@ -303,6 +303,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         vault: note.vault,
         config: engineConfig,
         vaults: engine.vaults,
+        wsRoot: engine.wsRoot,
       },
       { flavor: ProcFlavor.PUBLISHING }
     );

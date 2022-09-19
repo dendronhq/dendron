@@ -380,9 +380,7 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
         // note foo is now a stub
-        const fooNoteAfter = _.toArray(engine.notes).find((note) => {
-          return note.fname === "foo";
-        });
+        const fooNoteAfter = (await engine.findNotes({ fname: "foo" }))[0];
         expect(!_.isUndefined(fooNoteAfter) && fooNoteAfter.stub).toBeTruthy();
         // bar isn't in the first vault
         expect(
@@ -409,7 +407,6 @@ suite("MoveNoteCommand", function () {
       test("THEN do right thing", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const ext = ExtensionProvider.getExtension();
-        const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[0];
         const fname = "scratch.2020.02.03.0123";
@@ -442,12 +439,8 @@ suite("MoveNoteCommand", function () {
             path.join("vault1", "bar.md")
           )
         ).toBeTruthy();
-        expect(
-          await AssertUtils.assertInString({
-            body: _.keys(notes).join("\n"),
-            match: [fname],
-          })
-        ).toBeTruthy();
+        const note = await engine.getNote(fname);
+        expect(note.data).toBeTruthy();
       });
     }
   );
@@ -505,9 +498,7 @@ suite("MoveNoteCommand", function () {
             match: ["foo.md"],
           })
         ).toBeTruthy();
-        const fooNotes = _.toArray(engine.notes).filter((note) => {
-          return note.fname === "foo";
-        });
+        const fooNotes = await engine.findNotesMeta({ fname: "foo" });
         const vault1Foo = fooNotes.find(
           (note) => note.vault.fsPath === "vault1"
         );
@@ -589,9 +580,13 @@ suite("MoveNoteCommand", function () {
           })
         ).toBeTruthy();
 
-        const vault1Foo = _.toArray(engine.notes)
-          .filter((note) => note.fname === "foo")
-          .find((note) => note.vault.fsPath === "vault1");
+        const vault1Foo = (
+          await engine.findNotesMeta({
+            fname: "foo",
+            vault: vault1,
+          })
+        )[0];
+
         expect(!_.isUndefined(vault1Foo) && vault1Foo.stub).toBeTruthy();
         expect(
           _.isUndefined(

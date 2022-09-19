@@ -21,12 +21,12 @@ suite("InsertNoteLink", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo"]);
+          const note = (await engine.getNote("foo")).data!;
+          await WSUtils.openNote(note);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [note],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -48,12 +48,13 @@ suite("InsertNoteLink", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -78,11 +79,11 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
+          const note = (await engine.getNote("foo")).data!;
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [note],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -104,11 +105,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -133,12 +136,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [foo],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -161,12 +165,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -189,12 +194,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [foo],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -214,12 +220,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -242,12 +249,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [foo],
             })
           );
           sinon.stub(cmd, "promptForAlias").resolves("user input");
@@ -271,12 +279,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           sinon
@@ -305,12 +314,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"]],
+              notes: [foo],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -330,12 +340,13 @@ suite("InsertNoteLink", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         onInit: async ({ engine }) => {
-          const notes = engine.notes;
-          await WSUtils.openNote(notes["foo.ch1"]);
+          const foo = (await engine.getNote("foo")).data!;
+          const fooCh1 = (await engine.getNote("foo.ch1")).data!;
+          await WSUtils.openNote(fooCh1);
           const cmd = new InsertNoteLinkCommand();
           sinon.stub(cmd, "gatherInputs").returns(
             Promise.resolve({
-              notes: [notes["foo"], notes["foo.ch1"]],
+              notes: [foo, fooCh1],
             })
           );
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();

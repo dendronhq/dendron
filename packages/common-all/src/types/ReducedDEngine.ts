@@ -6,6 +6,7 @@ import { DEngine } from "./typesv2";
 export type ReducedDEngine = Pick<
   DEngine,
   | "getNote"
+  | "getNoteMeta"
   | "bulkGetNotes"
   | "bulkGetNotesMeta"
   | "findNotes"

@@ -112,7 +112,7 @@ function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
     [DendronASTTypes.WIKI_LINK],
     (wikilink: WikiLinkNoteV4, _index) => {
       renderDependencies.push({
-        fname: wikilink.value, //JYTODO: I think this is wrong for cross vault links.
+        fname: wikilink.value,
         vaultName: wikilink.data.vaultName,
       });
     }
@@ -269,8 +269,6 @@ async function getForwardLinkDependencies(
     curDependencies = newRecursiveDependencies;
     curDepth += 1;
   }
-
-  // TODO: Account for wildcard wikilink syntax. See gatherNoteRefs.
 
   let allData: NoteProps[] = [];
 

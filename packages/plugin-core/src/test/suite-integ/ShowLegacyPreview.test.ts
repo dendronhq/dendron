@@ -17,7 +17,7 @@ suite("ShowLegacyPreview", function () {
       ctx,
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({ engine }) => {
-        const note = engine.notes["foo"];
+        const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         sinon.stub(MarkdownUtils, "hasLegacyPreview").returns(true);
         const showLegacyPreview = sinon.stub(

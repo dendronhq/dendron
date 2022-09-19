@@ -5,6 +5,8 @@ import {
   DendronPublishingConfig,
   DendronSiteConfig,
   DNodeUtils,
+  DuplicateNoteActionEnum,
+  DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
   getSlugger,
@@ -12,8 +14,11 @@ import {
   IDendronError,
   IntermediateDendronConfig,
   isBlockAnchor,
+  NoteDicts,
+  NoteDictsUtils,
   NoteProps,
   NoteUtils,
+  UseVaultBehavior,
   VaultUtils,
 } from "@dendronhq/common-all";
 
@@ -489,121 +494,95 @@ export class SiteUtils {
     }`;
   }
 
-  // static handleDup(opts: {
-  //   dupBehavior?: DuplicateNoteBehavior;
-  //   allowStubs?: boolean;
-  //   fname: string;
-  //   config: IntermediateDendronConfig;
-  //   noteCandidates: NoteProps[];
-  //   noteDict: NotePropsByIdDict;
-  //   vaults: DVault[];
-  //   wsRoot: string;
-  // }) {
-  //   const {
-  //     vaults,
-  //     wsRoot,
-  //     fname,
-  //     noteCandidates,
-  //     noteDict,
-  //     config,
-  //     dupBehavior,
-  //     allowStubs,
-  //   } = _.defaults(opts, {
-  //     dupBehavior: {
-  //       action: DuplicateNoteActionEnum.useVault,
-  //       payload: [],
-  //     } as UseVaultBehavior,
-  //     allowStubs: true,
-  //   });
-  //   // const ctx = "handleDup";
-  //   let domainNote: NoteProps | undefined;
+  // TODO: Delete duplicate version in engine-server's SiteUtils.
+  static handleDup(opts: {
+    dupBehavior?: DuplicateNoteBehavior;
+    fname: string;
+    config: IntermediateDendronConfig;
+    noteCandidates: NoteProps[];
+    noteDict: NoteDicts;
+    vaults: DVault[];
+    wsRoot: string;
+  }) {
+    const {
+      vaults,
+      wsRoot,
+      fname,
+      noteCandidates,
+      noteDict,
+      config,
+      dupBehavior,
+    } = _.defaults(opts, {
+      dupBehavior: {
+        action: DuplicateNoteActionEnum.useVault,
+        payload: [],
+      } as UseVaultBehavior,
+      allowStubs: true,
+    });
+    // const ctx = "handleDup";
+    let domainNote: NoteProps | undefined;
 
-  //   if (_.isArray(dupBehavior.payload)) {
-  //     const vaultNames = dupBehavior.payload;
-  //     _.forEach(vaultNames, (vname) => {
-  //       if (domainNote) {
-  //         return;
-  //       }
-  //       const vault = VaultUtils.getVaultByNameOrThrow({
-  //         vname,
-  //         vaults: engine.vaults,
-  //       });
-  //       const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-  //         fname,
-  //         engine,
-  //         vault,
-  //       });
-  //       if (maybeNote && maybeNote.stub && !allowStubs) {
-  //         return;
-  //       }
-  //       if (
-  //         maybeNote &&
-  //         this.canPublish({
-  //           config,
-  //           note: maybeNote,
-  //           wsRoot,
-  //           vaults,
-  //         })
-  //       ) {
-  //         domainNote = maybeNote;
-  //         // const logger = createLogger(LOGGER_NAME);
-  //         // logger.info({
-  //         //   ctx,
-  //         //   status: "found",
-  //         //   note: NoteUtils.toLogObj(domainNote),
-  //         // });
-  //       }
-  //     });
-  //     if (!domainNote) {
-  //       throw new DendronError({
-  //         message: `no notes found for ${fname} in vaults ${vaultNames}`,
-  //       });
-  //     }
-  //   } else {
-  //     const vault = dupBehavior.payload.vault;
-  //     const maybeDomainNotes = noteCandidates.filter((n) =>
-  //       VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
-  //     );
-  //     // const logger = createLogger(LOGGER_NAME);
-  //     if (maybeDomainNotes.length < 1) {
-  //       // logger.error({
-  //       //   ctx: "filterByHierarchy",
-  //       //   msg: "dup-resolution: no note found",
-  //       //   vault,
-  //       // });
-  //       throw new DendronError({
-  //         message: `no notes found for ${fname} in vault ${vault.fsPath}`,
-  //       });
-  //     }
-  //     if (
-  //       !this.canPublish({
-  //         config,
-  //         note: maybeDomainNotes[0],
-  //         wsRoot,
-  //         vaults,
-  //       })
-  //     ) {
-  //       return;
-  //     }
-  //     domainNote = maybeDomainNotes[0];
-  //   }
-  //   const domainId = domainNote.id;
-  //   // merge children
-  //   domainNote.children = getUniqueChildrenIds(noteCandidates);
-  //   // update parents
-  //   domainNote.children.map((id) => {
-  //     const maybeNote = noteDict[id];
-  //     maybeNote.parent = domainId;
-  //   });
-  //   // const logger = createLogger(LOGGER_NAME);
-  //   // logger.info({
-  //   //   ctx: "filterByHierarchy",
-  //   //   msg: "dup-resolution: resolving dup",
-  //   //   parent: domainNote.id,
-  //   //   children: domainNote.children,
-  //   // });
-  //   return domainNote;
-  // }
+    if (_.isArray(dupBehavior.payload)) {
+      const vaultNames = dupBehavior.payload;
+      _.forEach(vaultNames, (vname) => {
+        if (domainNote) {
+          return;
+        }
+        const vault = VaultUtils.getVaultByNameOrThrow({
+          vname,
+          vaults,
+        });
+
+        const maybeNote = NoteDictsUtils.findByFname(fname, noteDict, vault)[0];
+        if (
+          maybeNote &&
+          this.canPublish({
+            config,
+            note: maybeNote,
+            wsRoot,
+            vaults,
+          })
+        ) {
+          domainNote = maybeNote;
+        }
+      });
+      if (!domainNote) {
+        throw new DendronError({
+          message: `no notes found for ${fname} in vaults ${vaultNames}`,
+        });
+      }
+    } else {
+      const vault = dupBehavior.payload.vault;
+      const maybeDomainNotes = noteCandidates.filter((n) =>
+        VaultUtils.isEqual(n.vault, vault, wsRoot)
+      );
+      if (maybeDomainNotes.length < 1) {
+        throw new DendronError({
+          message: `no notes found for ${fname} in vault ${vault.fsPath}`,
+        });
+      }
+      if (
+        !this.canPublish({
+          config,
+          note: maybeDomainNotes[0],
+          wsRoot,
+          vaults,
+        })
+      ) {
+        return;
+      }
+      domainNote = maybeDomainNotes[0];
+    }
+    const domainId = domainNote.id;
+    // merge children
+    domainNote.children = getUniqueChildrenIds(noteCandidates);
+    // update parents
+    domainNote.children.map((id) => {
+      const maybeNote = noteDict.notesById[id];
+      maybeNote.parent = domainId;
+    });
+    return domainNote;
+  }
 
   /**
    * Is the current note equivalent ot the index of the published site?
@@ -636,6 +615,6 @@ export class SiteUtils {
   }
 }
 
-// function getUniqueChildrenIds(notes: NoteProps[]): string[] {
-//   return _.uniq(notes.flatMap((ent) => ent.children));
-// }
+function getUniqueChildrenIds(notes: NoteProps[]): string[] {
+  return _.uniq(notes.flatMap((ent) => ent.children));
+}

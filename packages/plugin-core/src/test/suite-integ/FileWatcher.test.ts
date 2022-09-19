@@ -42,9 +42,9 @@ suite("GIVEN FileWatcher", function () {
             const notePath = path.join(wsRoot, vaults[0].fsPath, "newbar.md");
             const uri = vscode.Uri.file(notePath);
             await watcher.onDidCreate(uri.fsPath);
-            const note = engine.notes["newbar"];
+            const note = (await engine.getNoteMeta("newbar")).data!;
             const root = (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[0],
               })
@@ -88,9 +88,9 @@ suite("GIVEN FileWatcher", function () {
             const notePath = path.join(wsRoot, vaults[0].fsPath, "newbar.md");
             const uri = vscode.Uri.file(notePath);
             await watcher.onDidCreate(uri.fsPath);
-            const note = engine.notes["newbar"];
+            const note = (await engine.getNoteMeta("newbar")).data!;
             const root = (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[0],
               })

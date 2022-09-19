@@ -18,6 +18,9 @@ jobs:
     name: Setup CI Environment
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
       - name: Gather environment data
         run: |
           ${{ inputs.env }}

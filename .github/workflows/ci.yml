@@ -14,6 +14,9 @@ on:
       - "*"
       - "*/*"
 
+env:
+  binary-cache-index: 23 # Rev this if we need a new node cache
+
 jobs:
   test:
     strategy:
@@ -79,23 +82,17 @@ jobs:
         with:
           path: |
             packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-22
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ binary-cache-index }}
           restore-keys: |
-            ${{ runner.os }}-yarn-9
-
-      - name: Sets env vars for publish test
-        run: |
-          echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
-          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
-        if: runner.os == 'Linux'
+            ${{ runner.os }}-yarn-${{ binary-cache-index }}
 
       - name: Bootstrap
         run: yarn bootstrap:bootstrap
         shell: bash
 
-      - name: Build
-        run: yarn bootstrap:buildCI
-        shell: bash
+      # - name: Build
+      #   run: yarn bootstrap:buildCI
+      #   shell: bash
 
       - name: Start Xvfb
         if: runner.os == 'Linux' && (matrix.suite == 'plugin' || matrix.suite == 'plugin-web')
@@ -132,17 +129,17 @@ jobs:
         with:
           path: |
             packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-21
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ binary-cache-index }}
           restore-keys: |
-            ${{ runner.os }}-yarn-9
+            ${{ runner.os }}-yarn-${{ binary-cache-index }}
 
       - name: Bootstrap
         run: yarn bootstrap:bootstrap
         shell: bash
 
-      - name: Build
-        run: yarn bootstrap:buildCI
-        shell: bash
+      # - name: Build
+      #   run: yarn bootstrap:buildCI
+      #   shell: bash
 
       - name: Start Xvfb
         run: |
@@ -178,22 +175,23 @@ jobs:
         with:
           path: |
             packages/*/lib/*
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-21
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ binary-cache-index }}
           restore-keys: |
-            ${{ runner.os }}-yarn-9
+            ${{ runner.os }}-yarn-${{ binary-cache-index }}
 
-      - name: Bootstrap
-        run: yarn bootstrap:bootstrap
-        shell: bash
+      - name: Sets env vars for publish test
+        run: |
+          echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+        if: runner.os == 'Linux'
+
+      # - name: Bootstrap
+      #   run: yarn bootstrap:bootstrap
+      #   shell: bash
 
       - name: Build
         run: yarn bootstrap:buildCI
         shell: bash
-
-      # - name: Start Xvfb
-      #   run: |
-      #     Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-      #     echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Export test-workspace
         working-directory: ./test-workspace

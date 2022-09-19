@@ -6,12 +6,7 @@ import {
   PlusOutlined,
   NumberOutlined,
 } from "@ant-design/icons";
-import {
-  isNotUndefined,
-  TreeUtils,
-  TreeMenuNode,
-  TreeMenuNodeIcon,
-} from "@dendronhq/common-all";
+import { isNotUndefined, TreeUtils, TreeMenuNode } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
 import { Typography } from "antd";
 import _ from "lodash";
@@ -278,11 +273,11 @@ function treeMenuNode2DataNode({
   return roots
     .map((node: TreeMenuNode) => {
       let icon;
-      if (node.icon === TreeMenuNodeIcon.bookOutlined) {
+      if (node.icon === "bookOutlined") {
         icon = <BookOutlined />;
-      } else if (node.icon === TreeMenuNodeIcon.numberOutlined) {
+      } else if (node.icon === "numberOutlined") {
         icon = <NumberOutlined />;
-      } else if (node.icon === TreeMenuNodeIcon.plusOutlined) {
+      } else if (node.icon === "plusOutlined") {
         icon = <PlusOutlined />;
       }
 

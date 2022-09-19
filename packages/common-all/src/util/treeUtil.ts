@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { z } from "zod";
 import { DendronError, NoteUtils } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
@@ -6,11 +7,7 @@ import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebar, SidebarItem } from "../sidebar";
 
-export enum TreeMenuNodeIcon {
-  bookOutlined = "bookOutlined",
-  numberOutlined = "numberOutlined",
-  plusOutlined = "plusOutlined",
-}
+type TreeMenuNodeIcon = "bookOutlined" | "numberOutlined" | "plusOutlined";
 
 export type TreeMenuNode = {
   key: string;
@@ -22,11 +19,31 @@ export type TreeMenuNode = {
   contextValue?: string;
 };
 
-export type TreeMenu = {
-  roots: TreeMenuNode[];
-  child2parent: { [key: string]: string | null };
-  notesLabelById?: { [key: string]: string }; // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
-};
+const treeMenuNodeSchema: z.ZodType<TreeMenuNode> = z.lazy(() =>
+  z.object({
+    key: z.string(),
+    title: z.string(),
+    icon: z
+      .union([
+        z.literal("bookOutlined"),
+        z.literal("numberOutlined"),
+        z.literal("plusOutlined"),
+      ])
+      .nullable(),
+    hasTitleNumberOutlined: z.boolean(),
+    vaultName: z.string(),
+    children: z.array(treeMenuNodeSchema),
+    contextValue: z.string().optional(),
+  })
+);
+
+export const treeMenuSchema = z.object({
+  roots: z.array(treeMenuNodeSchema),
+  child2parent: z.record(z.string().nullable()),
+  notesLabelById: z.record(z.string()).optional(), // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
+});
+
+export type TreeMenu = z.infer<typeof treeMenuSchema>;
 
 export enum TreeViewItemLabelTypeEnum {
   title = "title",
@@ -77,11 +94,11 @@ export class TreeUtils {
       let icon = null;
 
       if (note.schema) {
-        icon = TreeMenuNodeIcon.bookOutlined;
+        icon = "bookOutlined";
       } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-        icon = TreeMenuNodeIcon.numberOutlined;
+        icon = "numberOutlined";
       } else if (note.stub) {
-        icon = TreeMenuNodeIcon.plusOutlined;
+        icon = "plusOutlined";
       }
       const title = sidebarItem.label ?? note.title;
 

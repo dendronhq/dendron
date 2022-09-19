@@ -456,27 +456,26 @@ export function convertNoteRefASTV2(
 
       // apply publish rules and do duplicate
       if (shouldApplyPublishRules && !_.isUndefined(duplicateNoteConfig)) {
-        // JYTODO: Add back Handle Dup Logic
-        // const maybeNote = SiteUtils.handleDup({
-        //   allowStubs: false,
-        //   dupBehavior: duplicateNoteConfig,
-        //   engine,
-        //   config,
-        //   fname: link.from.fname,
-        //   noteCandidates: resp.data,
-        //   noteDict: engine.notes,
-        // });
-        // if (!maybeNote) {
-        //   return {
-        //     error: undefined,
-        //     data: [
-        //       MdastUtils.genMDErrorMsg(
-        //         `Error rendering note reference for ${link.from.fname}`
-        //       ),
-        //     ],
-        //   };
-        // }
-        // note = maybeNote;
+        const maybeNote = SiteUtils.handleDup({
+          dupBehavior: duplicateNoteConfig,
+          config,
+          vaults,
+          wsRoot,
+          fname: link.from.fname,
+          noteCandidates: data,
+          noteDict: noteCacheForRenderDict!,
+        });
+        if (!maybeNote) {
+          return {
+            error: undefined,
+            data: [
+              MdastUtils.genMDErrorMsg(
+                `Error rendering note reference for ${link.from.fname}`
+              ),
+            ],
+          };
+        }
+        note = maybeNote;
       } else {
         // no need to apply publish rules, try to pick the one that is in same vault
 

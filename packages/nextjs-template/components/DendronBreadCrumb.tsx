@@ -40,7 +40,7 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
           // @ts-ignore
           <Breadcrumb.Item key={note.id}>
             <Link href={dest}>
-              {tree?.notesLabelById[note.id] ?? note.title}
+              {tree?.notesLabelById?.[note.id] ?? note.title}
             </Link>
           </Breadcrumb.Item>
         );

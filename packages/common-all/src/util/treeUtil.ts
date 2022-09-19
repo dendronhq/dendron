@@ -25,7 +25,7 @@ export type TreeMenuNode = {
 export type TreeMenu = {
   roots: TreeMenuNode[];
   child2parent: { [key: string]: string | null };
-  notesLabelById: { [key: string]: string }; // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
+  notesLabelById?: { [key: string]: string }; // cheap acces to note labels when computing breadcrumps (TODO improve `TreeMenu` datastructure so that this field is not necessary)
 };
 
 export enum TreeViewItemLabelTypeEnum {

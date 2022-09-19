@@ -74,7 +74,7 @@ suite("ApplyTemplate", function () {
     "WHEN ApplyTemplate run with regular template",
     {
       preSetupHook: basicPreset,
-      timeout,
+      timeout: 1e4,
     },
     () => {
       test("THEN apply template", async () => {

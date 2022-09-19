@@ -2,6 +2,9 @@ const path = require("path");
 const process = require("process");
 const { FRONTEND_CONSTANTS } = require("@dendronhq/common-frontend");
 
+// throws if validation fails
+require('./utils/validation')
+
 const { NEXT_PUBLIC_ASSET_PREFIX, BUILD_DIR, DATA_DIR, PUBLIC_DIR } = process.env;
 const isProd = process.env.NODE_ENV === "production";
 

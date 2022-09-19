@@ -1,9 +1,12 @@
-import fs from "fs-extra";
-import path from "path";
-import { parse, treeMenuSchema } from "@dendronhq/common-all";
-import { getDataDir } from "../utils/build";
+const fs = require("fs-extra");
+const path = require("path");
+const { FRONTEND_CONSTANTS } = require("@dendronhq/common-frontend");
+const { parse, treeMenuSchema } = require("@dendronhq/common-all");
 
-const dataDir = getDataDir();
+const dataDir = process.env.DATA_DIR ?? path.join(process.cwd(), FRONTEND_CONSTANTS.DEFAULT_DATA_DIR);
+if (!dataDir) {
+  throw new Error("DATA_DIR not set");
+}
 
 // check if `tree.json` is formated correctly
 const treeInput = fs.readJSONSync(path.join(dataDir, "tree.json"));

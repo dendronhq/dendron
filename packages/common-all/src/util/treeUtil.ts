@@ -94,11 +94,11 @@ export class TreeUtils {
       let icon = null;
 
       if (note.schema) {
-        icon = "bookOutlined";
+        icon = "bookOutlined" as const;
       } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
-        icon = "numberOutlined";
+        icon = "numberOutlined" as const;
       } else if (note.stub) {
-        icon = "plusOutlined";
+        icon = "plusOutlined" as const;
       }
       const title = sidebarItem.label ?? note.title;
 

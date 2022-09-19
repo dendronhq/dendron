@@ -3,8 +3,8 @@ import "reflect-metadata"; // This needs to be the topmost import for tsyringe t
 
 import { container } from "tsyringe";
 import * as vscode from "vscode";
-import { NativeTreeView } from "../common/NativeTreeView";
 import { DENDRON_COMMANDS } from "../constants";
+import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";

@@ -11,9 +11,9 @@ import _ from "lodash";
 import { describe, after } from "mocha";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
-import { EngineNoteProvider } from "../../common/EngineNoteProvider";
-import { TreeViewConfig } from "../../views/TreeViewConfig";
+import { EngineNoteProvider } from "../../views/common/treeview/EngineNoteProvider";
 import { ExtensionProvider } from "../../ExtensionProvider";
+import { MetadataSvcTreeViewConfig } from "../../views/node/treeview/MetadataSvcTreeViewConfig";
 import { expect } from "../testUtilsv2";
 import {
   describeMultiWS,
@@ -42,7 +42,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               vault: vaults[0],
               wsRoot,
             });
-            const treeViewConfig = new TreeViewConfig();
+            const treeViewConfig = new MetadataSvcTreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),
@@ -78,7 +78,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               wsRoot,
             });
 
-            const treeViewConfig = new TreeViewConfig();
+            const treeViewConfig = new MetadataSvcTreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),
@@ -115,7 +115,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
               wsRoot,
             });
 
-            const treeViewConfig = new TreeViewConfig();
+            const treeViewConfig = new MetadataSvcTreeViewConfig();
             const mockEvents = new MockEngineEvents();
             const provider = new EngineNoteProvider(
               vscode.Uri.file(wsRoot),

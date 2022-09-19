@@ -9,7 +9,7 @@ import { Uri } from "vscode";
 import { DeleteCommand } from "../../commands/DeleteCommand";
 import { RenameNoteV2aCommand } from "../../commands/RenameNoteV2a";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { EngineNoteProvider } from "../../common/EngineNoteProvider";
+import { EngineNoteProvider } from "../../views/common/treeview/EngineNoteProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";

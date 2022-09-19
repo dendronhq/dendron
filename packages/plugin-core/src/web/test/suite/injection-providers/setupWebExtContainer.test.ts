@@ -7,7 +7,7 @@ import { URI, Utils } from "vscode-uri";
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
-import { NativeTreeView } from "../../../../common/NativeTreeView";
+import { NativeTreeView } from "../../../../views/common/treeview/NativeTreeView";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 async function setupEnvironment() {

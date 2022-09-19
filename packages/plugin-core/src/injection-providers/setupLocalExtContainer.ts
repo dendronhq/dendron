@@ -1,10 +1,10 @@
 import "reflect-metadata";
 import { DVault, EngineEventEmitter } from "@dendronhq/common-all";
 import { container } from "tsyringe";
-import { ITreeViewConfig } from "../common/ITreeViewConfig";
-import { TreeViewConfig } from "../views/TreeViewConfig";
 import * as vscode from "vscode";
 import { EngineAPIService } from "../services/EngineAPIService";
+import { MetadataSvcTreeViewConfig } from "../views/node/treeview/MetadataSvcTreeViewConfig";
+import { ITreeViewConfig } from "../views/common/treeview/ITreeViewConfig";
 
 export async function setupLocalExtContainer(opts: {
   wsRoot: string;
@@ -19,6 +19,6 @@ export async function setupLocalExtContainer(opts: {
   container.register("ReducedDEngine", { useValue: engine });
   container.register("vaults", { useValue: vaults });
   container.register<ITreeViewConfig>("ITreeViewConfig", {
-    useClass: TreeViewConfig,
+    useClass: MetadataSvcTreeViewConfig,
   });
 }

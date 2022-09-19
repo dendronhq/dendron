@@ -17,8 +17,6 @@ import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
 import { PreviewPanel } from "../views/preview/PreviewPanel";
-import { ITreeViewConfig } from "../../common/ITreeViewConfig";
-import { TreeViewDummyConfig } from "../../common/TreeViewDummyConfig";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getSiteIndex } from "./getSiteIndex";
@@ -40,6 +38,8 @@ import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
 import { getWorkspaceConfig } from "./getWorkspaceConfig";
 import { TextDocumentService } from "../../services/web/TextDocumentService";
 import { Event, TextDocument, workspace } from "vscode";
+import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
+import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
 
 /**
  * This function prepares a TSyringe container suitable for the Web Extension

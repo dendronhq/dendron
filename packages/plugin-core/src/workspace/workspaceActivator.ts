@@ -43,8 +43,8 @@ import { DendronNativeWorkspace } from "./nativeWorkspace";
 import { WorkspaceInitFactory } from "./WorkspaceInitFactory";
 import { WorkspaceInitializer } from "./workspaceInitializer";
 import { CreateNoteCommand } from "../commands/CreateNoteCommand";
-import { NativeTreeView } from "../common/NativeTreeView";
 import { container } from "tsyringe";
+import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,

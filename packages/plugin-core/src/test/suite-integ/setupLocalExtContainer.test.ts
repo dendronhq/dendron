@@ -1,10 +1,10 @@
 import assert from "assert";
 import _ from "lodash";
 import { container } from "tsyringe";
-import { NativeTreeView } from "../../common/NativeTreeView";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { setupLocalExtContainer } from "../../injection-providers/setupLocalExtContainer";
 import { EngineAPIService } from "../../services/EngineAPIService";
+import { NativeTreeView } from "../../views/common/treeview/NativeTreeView";
 import { describeSingleWS } from "../testUtilsV3";
 
 /**

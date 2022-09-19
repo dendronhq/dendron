@@ -1,9 +1,9 @@
 const fs = require("fs-extra");
 const path = require("path");
-const { FRONTEND_CONSTANTS } = require("@dendronhq/common-frontend");
 const { parse, treeMenuSchema } = require("@dendronhq/common-all");
+const { env } = require('./env')
 
-const dataDir = process.env.DATA_DIR ?? path.join(process.cwd(), FRONTEND_CONSTANTS.DEFAULT_DATA_DIR);
+const dataDir = env.DATA_DIR
 if (!dataDir) {
   throw new Error("DATA_DIR not set");
 }

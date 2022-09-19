@@ -6,9 +6,11 @@ import {
   PodExportScope,
   PodV2Types,
 } from "@dendronhq/pods-core";
+import _ from "lodash";
 import { PodCommandFactory } from "../components/pods/PodCommandFactory";
 import { PodUIControls } from "../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../constants";
+import { VSCodeUtils } from "../vsCodeUtils";
 import { BaseCommand, CodeCommandInstance } from "./base";
 
 type CommandOutput = void;
@@ -30,6 +32,13 @@ export class CopyAsCommand extends BaseCommand<
   constructor(_name?: string) {
     super(_name);
     this.format = getAllCopyAsFormat();
+  }
+
+  async sanityCheck(_opts?: Partial<CodeCommandInstance> | undefined) {
+    if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
+      return "you must have a note open to execute this command";
+    }
+    return;
   }
 
   async gatherInputs() {

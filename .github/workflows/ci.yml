@@ -90,12 +90,12 @@ jobs:
         run: yarn bootstrap:bootstrap
         shell: bash
 
-      # - name: Build
-      #   run: yarn bootstrap:buildCI
-      #   shell: bash
+      - name: Build
+        run: yarn bootstrap:buildCI
+        shell: bash
 
       - name: Start Xvfb
-        if: runner.os == 'Linux' && (matrix.suite == 'plugin' || matrix.suite == 'plugin-web')
+        if: runner.os == 'Linux'
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
@@ -137,9 +137,9 @@ jobs:
         run: yarn bootstrap:bootstrap
         shell: bash
 
-      # - name: Build
-      #   run: yarn bootstrap:buildCI
-      #   shell: bash
+      - name: Build
+        run: yarn bootstrap:buildCI
+        shell: bash
 
       - name: Start Xvfb
         run: |
@@ -183,11 +183,11 @@ jobs:
         run: |
           echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
-        if: runner.os == 'Linux'
+        # if: runner.os == 'Linux'
 
-      # - name: Bootstrap
-      #   run: yarn bootstrap:bootstrap
-      #   shell: bash
+      - name: Bootstrap
+        run: yarn bootstrap:bootstrap
+        shell: bash
 
       - name: Build
         run: yarn bootstrap:buildCI

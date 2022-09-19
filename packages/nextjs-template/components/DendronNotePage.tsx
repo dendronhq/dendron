@@ -119,7 +119,7 @@ export default function Note({
           <Row gutter={20}>
             <Col xs={24} md={18}>
               {BannerAlert && <BannerAlert />}
-              <DendronNote noteContent={noteBody} config={config} />
+              <DendronNote noteContent={noteBody} />
               {maybeCollection}
               <DendronNoteGiscusWidget note={note} config={config} />
             </Col>

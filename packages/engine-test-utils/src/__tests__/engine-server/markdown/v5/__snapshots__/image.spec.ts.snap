@@ -2,7 +2,7 @@
 
 exports[`GIVEN image link WHEN assetPrefix is NOT set "HTML: ASSET_PREFIX_SET: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
 <p><img src=\\"/some-image-link.png\\" alt=\\"some-image\\"></p>
 <hr>
 <strong>Children</strong>
@@ -18,7 +18,7 @@ VFile {
 
 exports[`GIVEN image link WHEN assetPrefix is set and and image url is not local  "HTML: REMOTE_IMAGE: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
 <p><img src=\\"https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png\\" alt=\\"second-image\\"></p>
 <hr>
 <strong>Children</strong>
@@ -34,7 +34,7 @@ VFile {
 
 exports[`GIVEN image link WHEN assetPrefix set "HTML: ASSET_PREFIX_SET: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a>Foo</h1>
+  "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
 <p><img src=\\"/some-prefix/some-image-link.png\\" alt=\\"some-image\\"></p>
 <hr>
 <strong>Children</strong>

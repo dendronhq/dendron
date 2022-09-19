@@ -24,7 +24,7 @@ VFile {
 
 exports[`hashtag rendering WHEN hashtag with prefix "HTML: THEN hashtag has prefix: PUBLISHING" 1`] = `
 VFile {
-  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#one\\"></a>One</h1>
+  "contents": "<h1 id=\\"one\\">One<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#one\\"></a></h1>
 <p><a class=\\"color-tag\\" style=\\"--tag-color: #c95efb;\\" href=\\"/foo/notes/tags.my-hash.tag0\\">#my-hash.tag0</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

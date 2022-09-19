@@ -36,6 +36,9 @@ import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 
 const LOGGER_NAME = "SiteUtils";
 
+/**
+ * @deprecated - prefer to use methods in unified/SiteUtils if they exist.
+ */
 export class SiteUtils {
   static canPublish(opts: {
     note: NoteProps;

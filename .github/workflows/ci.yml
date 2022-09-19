@@ -51,7 +51,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: ./.github/workflows/ci-common.yml
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Setup CI Environment
+        uses: ./.github/workflows/ci-common.yml
         with:
           env: ${{ matrix.env }}
           node-version: ${{ matrix.node-version }}

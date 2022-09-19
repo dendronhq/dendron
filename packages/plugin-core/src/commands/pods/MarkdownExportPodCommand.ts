@@ -123,8 +123,10 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     config: RunnableMarkdownV2PodConfig;
   }) {
     const data = exportReturnValue.data?.exportedNotes;
+    let successMessage = "Finished running Markdown export pod.";
     if (_.isString(data) && config.destination === "clipboard") {
       vscode.env.clipboard.writeText(data);
+      successMessage += " Content is copied to the clipboard";
     }
     const count = data?.length ?? 0;
     if (ResponseUtil.hasError(exportReturnValue)) {
@@ -133,9 +135,7 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
       )}`;
       this.L.error(errorMsg);
     } else {
-      vscode.window.showInformationMessage(
-        "Finished running Markdown export pod."
-      );
+      vscode.window.showInformationMessage(successMessage);
     }
   }
 

@@ -3,6 +3,7 @@ import {
   CopyAsFormat,
   getAllCopyAsFormat,
   JSONV2PodConfig,
+  MarkdownV2PodConfig,
   PodExportScope,
   PodV2Types,
 } from "@dendronhq/pods-core";
@@ -54,6 +55,15 @@ export class CopyAsCommand extends BaseCommand<
           exportScope: PodExportScope.Note,
           podType: PodV2Types.JSONExportV2,
           podId: "copyAs.json", // dummy value, required property
+        };
+        return PodCommandFactory.createPodCommandForStoredConfig({ config });
+      }
+      case CopyAsFormat.MARKDOWN: {
+        const config: MarkdownV2PodConfig = {
+          destination: "clipboard",
+          exportScope: PodExportScope.Note,
+          podType: PodV2Types.MarkdownExportV2,
+          podId: "copyAs.markdown", // dummy value, required property
         };
         return PodCommandFactory.createPodCommandForStoredConfig({ config });
       }

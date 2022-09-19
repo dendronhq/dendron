@@ -75,10 +75,11 @@ export function getAllImportPods(): PodClassEntryV4[] {
 
 export enum CopyAsFormat {
   "JSON" = "JSON",
+  "MARKDOWN" = "Markdown",
 }
 
 export function getAllCopyAsFormat(): CopyAsFormat[] {
-  return [CopyAsFormat.JSON];
+  return [CopyAsFormat.JSON, CopyAsFormat.MARKDOWN];
 }
 
 export { JSONSchemaType, Client, Page, TitlePropertyValue };

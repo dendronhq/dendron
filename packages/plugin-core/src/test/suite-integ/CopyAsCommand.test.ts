@@ -46,5 +46,27 @@ suite("CopyAsCommand", function () {
         });
       }
     );
+    describeSingleWS(
+      "WHEN the format selected is Markdown",
+      { timeout: 5e3 },
+      () => {
+        test("THEN markdown formatted note must be copied to clipboard", async () => {
+          const { engine } = ExtensionProvider.getDWorkspace();
+          const targetNote = (await engine.findNotes({ fname: "root" }))[0];
+          await WSUtilsV2.instance().openNote(targetNote);
+          const factorySpy = sinon.spy(
+            PodCommandFactory,
+            "createPodCommandForStoredConfig"
+          );
+          const cmd = new CopyAsCommand();
+          sinon
+            .stub(PodUIControls, "promtToSelectCopyAsFormat")
+            .resolves(CopyAsFormat.MARKDOWN);
+          await cmd.run();
+          const out = factorySpy.returnValues[0];
+          expect(out.key).toEqual("dendron.markdownexportv2");
+        });
+      }
+    );
   });
 });

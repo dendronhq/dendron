@@ -73,4 +73,12 @@ export function getAllImportPods(): PodClassEntryV4[] {
   ];
 }
 
+export enum CopyAsFormat {
+  "JSON" = "JSON",
+}
+
+export function getAllCopyAsFormat(): CopyAsFormat[] {
+  return [CopyAsFormat.JSON];
+}
+
 export { JSONSchemaType, Client, Page, TitlePropertyValue };

@@ -87,6 +87,7 @@ import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
 import { CopyCodespaceURL } from "./CopyCodespaceURL";
 import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
+import { CopyAsCommand } from "./CopyAsCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -181,6 +182,7 @@ const ALL_COMMANDS = [
   MergeNoteCommand,
   CreateNoteCommand,
   CopyCodespaceURL,
+  CopyAsCommand,
 ] as CodeCommandConstructor[];
 
 export { ALL_COMMANDS };

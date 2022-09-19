@@ -245,6 +245,10 @@
         "title": "Dendron: Copy Codespace URL"
       },
       {
+        "command": "dendron.copyAs",
+        "title": "Dendron: Copy As"
+      },
+      {
         "command": "dendron.delete",
         "title": "Dendron: Delete"
       },
@@ -658,6 +662,10 @@
         },
         {
           "command": "dendron.copyCodespaceURL",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.copyAs",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

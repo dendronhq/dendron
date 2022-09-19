@@ -48,10 +48,10 @@ export class ExportPodV2Command extends BaseCommand<
 
     // If a podId is passed in, use this instead of prompting the user
     if (args?.podId) {
-      return PodCommandFactory.createPodCommandForStoredConfig(
-        { podId: args.podId },
-        args.exportScope
-      );
+      return PodCommandFactory.createPodCommandForStoredConfig({
+        configId: { podId: args.podId },
+        exportScope: args.exportScope,
+      });
     }
 
     const exportChoice = await PodUIControls.promptForExportConfigOrNewExport();
@@ -66,7 +66,9 @@ export class ExportPodV2Command extends BaseCommand<
       }
       return PodCommandFactory.createPodCommandForPodType(podType);
     } else {
-      return PodCommandFactory.createPodCommandForStoredConfig(exportChoice);
+      return PodCommandFactory.createPodCommandForStoredConfig({
+        configId: exportChoice,
+      });
     }
   }
 

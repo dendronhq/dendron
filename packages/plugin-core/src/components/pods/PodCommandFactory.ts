@@ -22,27 +22,46 @@ export class PodCommandFactory {
    * @param configId
    * @returns A pod command configured with the found configuration
    */
-  public static createPodCommandForStoredConfig(
-    configId: Pick<ExportPodConfigurationV2, "podId">,
-    exportScope?: PodExportScope
-  ): CodeCommandInstance {
-    const storedConfig = PodV2ConfigManager.getPodConfigById({
-      podsDir: path.join(getExtension().podsDir, "custom"),
-      opts: configId,
-    });
-
-    if (!storedConfig) {
+  public static createPodCommandForStoredConfig({
+    configId,
+    exportScope,
+    config,
+  }: {
+    configId?: Pick<ExportPodConfigurationV2, "podId">;
+    exportScope?: PodExportScope;
+    config?: ExportPodConfigurationV2 & { destination?: string };
+  }): CodeCommandInstance {
+    // configId is a required param for all cases except when called from CopyAsCommand. It sends a predefined config
+    if (!configId && !config) {
       throw new DendronError({
-        message: `No pod config with id ${configId.podId} found.`,
+        message: `Please provide a config id to continue.`,
       });
     }
-    // overrides the exportScope of stored config with the exportScope passed in args
-    if (exportScope) {
-      storedConfig.exportScope = exportScope;
+    let podType: PodV2Types;
+    let storedConfig: ExportPodConfigurationV2 | undefined;
+    if (config) {
+      podType = config.podType;
+      storedConfig = config;
+    } else {
+      storedConfig = PodV2ConfigManager.getPodConfigById({
+        podsDir: path.join(getExtension().podsDir, "custom"),
+        opts: configId!,
+      });
+
+      if (!storedConfig) {
+        throw new DendronError({
+          message: `No pod config with id ${configId!.podId} found.`,
+        });
+      }
+      // overrides the exportScope of stored config with the exportScope passed in args
+      if (exportScope) {
+        storedConfig.exportScope = exportScope;
+      }
+      podType = storedConfig.podType;
     }
     let cmdWithArgs: CodeCommandInstance;
     const extension = ExtensionProvider.getExtension();
-    switch (storedConfig.podType) {
+    switch (podType) {
       case PodV2Types.AirtableExportV2: {
         const airtableCmd = new AirtableExportPodCommand(extension);
         cmdWithArgs = {

@@ -999,6 +999,46 @@ export class FileStorage implements DStore {
 
     let notesChangedEntries: NoteChangeEntry[] = [];
 
+    this.logger.info({ ctx, msg: "updateAllNotes:pre" });
+    const notesWithLinkTo = _.uniq(
+      oldNote.links
+        .filter((link) => link.type === "backlink")
+        .map((link) => {
+          if (link.from.id) return this.notes[link.from.id];
+          else return undefined;
+        })
+        .filter(isNotUndefined)
+    );
+
+    this.logger.info({
+      ctx,
+      msg: "notesWithLinkTo:gather",
+      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
+    });
+
+    // update note body of all notes that have changed
+    const notesToUpdate = (
+      await Promise.all(
+        notesWithLinkTo.map(async (note) => {
+          const out = await this.processNoteChangedByRename({
+            note,
+            oldLoc,
+            newLoc,
+          });
+          // If note being renamed has references to itself, make sure to update those as well
+          if (out && out.note.id === oldNote.id) {
+            oldNote.body = out.note.body;
+            oldNote.tags = out.note.tags;
+          }
+          return out?.note;
+        })
+      )
+    ).filter(isNotUndefined);
+
+    // update all new notes
+    const writeResp = await this.bulkWriteNotes({ notes: notesToUpdate });
+    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
+
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
@@ -1053,45 +1093,6 @@ export class FileStorage implements DStore {
         });
       }
     }
-    this.logger.info({ ctx, msg: "updateAllNotes:pre" });
-    const notesWithLinkTo = _.uniq(
-      oldNote.links
-        .filter((link) => link.type === "backlink")
-        .map((link) => {
-          if (link.from.id) return this.notes[link.from.id];
-          else return undefined;
-        })
-        .filter(isNotUndefined)
-    );
-
-    this.logger.info({
-      ctx,
-      msg: "notesWithLinkTo:gather",
-      notes: notesWithLinkTo.map((n) => NoteUtils.toLogObj(n)),
-    });
-
-    // update note body of all notes that have changed
-    const notesToUpdate = (
-      await Promise.all(
-        notesWithLinkTo.map(async (note) => {
-          const out = await this.processNoteChangedByRename({
-            note,
-            oldLoc,
-            newLoc,
-          });
-          // If note being renamed has references to itself, make sure to update those as well
-          if (out && out.note.id === oldNote.id) {
-            oldNote.body = out.note.body;
-            oldNote.tags = out.note.tags;
-          }
-          return out?.note;
-        })
-      )
-    ).filter(isNotUndefined);
-
-    // update all new notes
-    const writeResp = await this.bulkWriteNotes({ notes: notesToUpdate });
-    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
 
     this.logger.info({
       ctx,
@@ -1474,6 +1475,9 @@ export class FileStorage implements DStore {
    * @param link Link potentionally referencing another note
    */
   private async addBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    if (!link.to?.fname) {
+      return [];
+    }
     const maybeBacklink = BacklinkUtils.createFromDLink(link);
     if (maybeBacklink) {
       const maybeVault = link.to?.vaultName
@@ -1483,7 +1487,7 @@ export class FileStorage implements DStore {
           })
         : undefined;
       const notes = NoteDictsUtils.findByFname(
-        link.to!.fname!,
+        link.to.fname,
         { notesById: this.notes, notesByFname: this.noteFnames },
         maybeVault
       );
@@ -1513,6 +1517,9 @@ export class FileStorage implements DStore {
    * @param link Link potentionally referencing another note
    */
   private async removeBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    if (!link.to?.fname) {
+      return [];
+    }
     const maybeBacklink = BacklinkUtils.createFromDLink(link);
     if (maybeBacklink) {
       const maybeVault = link.to?.vaultName
@@ -1522,7 +1529,7 @@ export class FileStorage implements DStore {
           })
         : undefined;
       const notes = NoteDictsUtils.findByFname(
-        link.to!.fname!,
+        link.to.fname,
         { notesById: this.notes, notesByFname: this.noteFnames },
         maybeVault
       );

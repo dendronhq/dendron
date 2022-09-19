@@ -609,6 +609,56 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
     let notesChangedEntries: NoteChangeEntry[] = [];
 
+    // Get list of notes referencing old note. We need to rename those references
+    const notesReferencingOld = _.uniq(
+      oldNote.links
+        .filter((link) => link.type === "backlink")
+        .map((link) => link.from.id)
+        .filter(isNotUndefined)
+    );
+
+    const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
+
+    // update note body of all notes that have changed
+    const config = DConfig.readConfigSync(this.wsRoot);
+    const notesToUpdate = linkNotesResp
+      .map((resp) => {
+        if (resp.error) {
+          this.logger.error({
+            ctx,
+            message: `Unable to find note linking to ${oldNote.fname}`,
+            error: stringifyError(resp.error),
+          });
+          return undefined;
+        } else {
+          const note = this.processNoteChangedByRename({
+            note: resp.data,
+            oldLoc,
+            newLoc,
+            config,
+          });
+          if (note && note.id === oldNote.id) {
+            // If note being renamed has references to itself, make sure to update those as well
+            oldNote.body = note.body;
+            oldNote.tags = note.tags;
+          }
+          return note;
+        }
+      })
+      .filter(isNotUndefined);
+
+    this.logger.info({ ctx, msg: "updateAllNotes:pre" });
+    const writeResp = await this.bulkWriteNotes({ notes: notesToUpdate });
+    if (writeResp.error) {
+      return {
+        error: new DendronError({
+          message: `Unable to update note link references`,
+          innerError: writeResp.error,
+        }),
+      };
+    }
+    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
+
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
      * delete the original files. We just update the references on onWillRenameFiles and return.
@@ -666,56 +716,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         notesChangedEntries = notesChangedEntries.concat(out.data);
       }
     }
-
-    // Get list of notes referencing old note. We need to rename those references
-    const notesReferencingOld = _.uniq(
-      oldNote.links
-        .filter((link) => link.type === "backlink")
-        .map((link) => link.from.id)
-        .filter(isNotUndefined)
-    );
-
-    const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
-
-    // update note body of all notes that have changed
-    const config = DConfig.readConfigSync(this.wsRoot);
-    const notesToUpdate = linkNotesResp
-      .map((resp) => {
-        if (resp.error) {
-          this.logger.error({
-            ctx,
-            message: `Unable to find note linking to ${oldNote.fname}`,
-            error: stringifyError(resp.error),
-          });
-          return undefined;
-        } else {
-          const note = this.processNoteChangedByRename({
-            note: resp.data,
-            oldLoc,
-            newLoc,
-            config,
-          });
-          if (note && note.id === oldNote.id) {
-            // If note being renamed has references to itself, make sure to update those as well
-            oldNote.body = note.body;
-            oldNote.tags = note.tags;
-          }
-          return note;
-        }
-      })
-      .filter(isNotUndefined);
-
-    this.logger.info({ ctx, msg: "updateAllNotes:pre" });
-    const writeResp = await this.bulkWriteNotes({ notes: notesToUpdate });
-    if (writeResp.error) {
-      return {
-        error: new DendronError({
-          message: `Unable to update note link references`,
-          innerError: writeResp.error,
-        }),
-      };
-    }
-    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
 
     this.logger.info({
       ctx,

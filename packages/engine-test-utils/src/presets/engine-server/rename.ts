@@ -72,7 +72,7 @@ const runRename = async ({
   return out.concat([
     {
       actual: changed.data!.length,
-      expected: numChanges || 5,
+      expected: numChanges || 6,
     },
     {
       actual: checkVault,
@@ -270,6 +270,7 @@ const NOTES = {
         wsRoot,
         vaults,
         engine,
+        numChanges: 7, // extra update due to extra link
         cb: ({ barChange }) => {
           return [
             {
@@ -529,10 +530,10 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         {
-          actual: _.trim(changed.data![3].note.body),
+          actual: _.trim(changed.data![1].note.body),
           expected: "[[gamma]]",
         },
         {
@@ -597,10 +598,10 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         {
-          actual: _.trim(changed.data![3].note.body),
+          actual: _.trim(changed.data![1].note.body),
           expected: "[[gamma]]",
         },
         {
@@ -761,7 +762,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 7,
+          expected: 8,
         },
         {
           actual: createdChange?.note.title,
@@ -812,7 +813,7 @@ const NOTES = {
       return [
         {
           actual: changed.data?.length,
-          expected: 5,
+          expected: 6,
         },
         {
           actual: await AssertUtils.assertInString({
@@ -931,15 +932,16 @@ const NOTES = {
         {
           actual: updated,
           expected: [
+            { status: "update", fname: "foo" },
+            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
-            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
           ],
         },
         {
-          actual: _.trim(changed![2].note.body),
+          actual: _.trim(changed![1].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[1])}/baz]]`,
         },
         {
@@ -993,16 +995,17 @@ const NOTES = {
         {
           actual: updated,
           expected: [
+            { status: "update", fname: "foo" },
+            { status: "update", fname: "bar" },
             { status: "update", fname: "root" },
             { status: "delete", fname: "foo" },
-            { status: "update", fname: "bar" },
             // this is a diff vault
             { status: "update", fname: "root" },
             { status: "create", fname: "baz" },
           ],
         },
         {
-          actual: _.trim(changed![2].note.body),
+          actual: _.trim(changed![1].note.body),
           expected: `![[dendron://${VaultUtils.getName(vaults[2])}/baz]]`,
         },
         {
@@ -1060,10 +1063,11 @@ const NOTES = {
         {
           actual: updated,
           expected: [
+            { status: "update", fname: "alpha" },
+            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "update", fname: "beta" },
             { status: "delete", fname: "alpha" },
-            { status: "update", fname: "beta" },
             { status: "update", fname: "root" },
             { status: "update", fname: "beta" },
             { status: "create", fname: "gamma" },

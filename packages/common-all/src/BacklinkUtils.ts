@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { DLink, NotePropsMeta } from "./types";
 
+type BackLink = Omit<DLink, "type"> & { type: "backlink" };
 export class BacklinkUtils {
   /**
    * Create backlink out of link if it references another note (denoted by presence of link.to field)
@@ -8,9 +9,7 @@ export class BacklinkUtils {
    * @param link Original link to create backlink out of
    * @returns backlink or none if not applicable
    */
-  static createFromDLink(
-    link: DLink
-  ): (Omit<DLink, "type"> & { type: "backlink" }) | undefined {
+  static createFromDLink(link: DLink): BackLink | undefined {
     const maybeToNoteFname = link.to?.fname;
     if (maybeToNoteFname) {
       return {
@@ -32,7 +31,7 @@ export class BacklinkUtils {
     backlink,
   }: {
     note: NotePropsMeta;
-    backlink: Omit<DLink, "type"> & { type: "backlink" };
+    backlink: BackLink;
   }): void {
     note.links.push(backlink);
   }
@@ -49,7 +48,7 @@ export class BacklinkUtils {
     backlink,
   }: {
     note: NotePropsMeta;
-    backlink: Omit<DLink, "type"> & { type: "backlink" };
+    backlink: BackLink;
   }): void {
     const filteredBacklinks = note.links.filter((link) => {
       return !_.isEqual(backlink, link);

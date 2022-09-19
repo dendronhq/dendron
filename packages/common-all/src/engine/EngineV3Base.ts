@@ -400,6 +400,9 @@ export abstract class EngineV3Base implements ReducedDEngine {
    * @param link Link potentionally referencing another note
    */
   protected async addBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    if (!link.to?.fname) {
+      return [];
+    }
     const maybeBacklink = BacklinkUtils.createFromDLink(link);
     if (maybeBacklink) {
       const maybeVault = link.to?.vaultName
@@ -409,7 +412,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
           })
         : undefined;
       const notes = await this.noteStore.findMetaData({
-        fname: link.to!.fname!,
+        fname: link.to.fname,
         vault: maybeVault,
       });
       if (notes.data) {
@@ -439,9 +442,12 @@ export abstract class EngineV3Base implements ReducedDEngine {
    * Remove backlink associated with given link that references another note (denoted by presence of link.to field)
    * from that referenced note
    *
-   * @param link Link potentionally referencing another note
+   * @param link Link potentially referencing another note
    */
   protected async removeBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    if (!link.to?.fname) {
+      return [];
+    }
     const maybeBacklink = BacklinkUtils.createFromDLink(link);
     if (maybeBacklink) {
       const maybeVault = link.to?.vaultName
@@ -451,7 +457,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
           })
         : undefined;
       const notes = await this.noteStore.findMetaData({
-        fname: link.to!.fname!,
+        fname: link.to.fname,
         vault: maybeVault,
       });
       if (notes.data) {

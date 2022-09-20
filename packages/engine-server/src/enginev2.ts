@@ -688,11 +688,6 @@ export class DendronEngineV2 implements DEngine {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    await EngineUtils.refreshNoteLinksAndAnchors({
-      note,
-      engine: this,
-      config: DConfig.readConfigSync(this.wsRoot),
-    });
     const out = await this.store.writeNote(note, opts);
     this.fuseEngine.replaceNotesIndex(this.notes);
     return out;

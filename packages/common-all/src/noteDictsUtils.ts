@@ -66,7 +66,7 @@ export class NoteDictsUtils {
     if (vault) {
       notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
     }
-    return notes;
+    return _.cloneDeep(notes);
   }
 
   /**

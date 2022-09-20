@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable no-empty-function */
 import _ from "lodash";
+import { BacklinkUtils } from "../BacklinkUtils";
 import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
@@ -30,6 +31,8 @@ import {
   RespV3,
   WriteNoteResp,
   GetNoteMetaResp,
+  DLink,
+  DVault,
 } from "../types";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
@@ -43,7 +46,8 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
   constructor(
     protected noteStore: INoteStore<string>,
-    protected logger: DLogger
+    protected logger: DLogger,
+    public vaults: DVault[]
   ) {}
 
   /**
@@ -257,6 +261,12 @@ export abstract class EngineV3Base implements ReducedDEngine {
       };
     }
 
+    // Remove backlinks if applicable
+    const backlinkChanges = await Promise.all(
+      noteToDelete.links.map((link) => this.removeBacklink(link))
+    );
+    changes = changes.concat(backlinkChanges.flat());
+
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
     await this.fuseEngine.updateNotesIndex(changes);
@@ -381,5 +391,89 @@ export abstract class EngineV3Base implements ReducedDEngine {
         }
       })
     );
+  }
+
+  /**
+   * Create backlink from given link that references another note (denoted by presence of link.to field)
+   * and add that backlink to referenced note's links
+   *
+   * @param link Link potentionally referencing another note
+   */
+  protected async addBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    const maybeBacklink = BacklinkUtils.createFromDLink(link);
+    if (maybeBacklink) {
+      const maybeVault = link.to?.vaultName
+        ? VaultUtils.getVaultByName({
+            vname: link.to?.vaultName,
+            vaults: this.vaults,
+          })
+        : undefined;
+      const notes = await this.noteStore.findMetaData({
+        fname: link.to!.fname!,
+        vault: maybeVault,
+      });
+      if (notes.data) {
+        return Promise.all(
+          notes.data.map(async (note) => {
+            const prevNote = _.merge(_.cloneDeep(note), {
+              body: "",
+            });
+            BacklinkUtils.addBacklink({ note, backlink: maybeBacklink });
+            // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
+            const updatedNote = _.merge(note, {
+              body: "",
+            });
+            return {
+              prevNote,
+              note: updatedNote,
+              status: "update",
+            };
+          })
+        );
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Remove backlink associated with given link that references another note (denoted by presence of link.to field)
+   * from that referenced note
+   *
+   * @param link Link potentionally referencing another note
+   */
+  protected async removeBacklink(link: DLink): Promise<NoteChangeEntry[]> {
+    const maybeBacklink = BacklinkUtils.createFromDLink(link);
+    if (maybeBacklink) {
+      const maybeVault = link.to?.vaultName
+        ? VaultUtils.getVaultByName({
+            vname: link.to?.vaultName,
+            vaults: this.vaults,
+          })
+        : undefined;
+      const notes = await this.noteStore.findMetaData({
+        fname: link.to!.fname!,
+        vault: maybeVault,
+      });
+      if (notes.data) {
+        return Promise.all(
+          notes.data.map(async (note) => {
+            const prevNote = _.merge(_.cloneDeep(note), {
+              body: "",
+            });
+            BacklinkUtils.removeBacklink({ note, backlink: maybeBacklink });
+            // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
+            const updatedNote = _.merge(note, {
+              body: "",
+            });
+            return {
+              prevNote,
+              note: updatedNote,
+              status: "update",
+            };
+          })
+        );
+      }
+    }
+    return [];
   }
 }

@@ -334,33 +334,6 @@ export class NoteUtils {
     return _.get(note, "traitIds", []);
   }
 
-  /** Adds a backlink by mutating the 'to' argument in place.
-   *
-   *  @param from note that the link is pointing from.
-   *  @param to note that the link is pointing to. (mutated)
-   *  @param link backlink to add. */
-  static addBacklink({
-    from,
-    to,
-    link,
-  }: {
-    from: NoteProps;
-    to: NoteProps;
-    link: DLink;
-  }): void {
-    to.links.push({
-      from: {
-        id: from.id,
-        fname: from.fname,
-        vaultName: VaultUtils.getName(from.vault),
-      },
-      type: "backlink",
-      position: link.position,
-      value: link.value,
-      alias: link.alias,
-    });
-  }
-
   /**
    * Add node to parents up the note tree, or create stubs if no direct parents exists
    *
@@ -828,12 +801,10 @@ export class NoteUtils {
     engine: DEngineClient;
     vault?: DVault;
   }): NoteProps[] {
-    return _.cloneDeep(
-      NoteDictsUtils.findByFname(
-        fname,
-        { notesById: engine.notes, notesByFname: engine.noteFnames },
-        vault
-      )
+    return NoteDictsUtils.findByFname(
+      fname,
+      { notesById: engine.notes, notesByFname: engine.noteFnames },
+      vault
     );
   }
 

@@ -212,6 +212,44 @@ const NOTES = {
       preSetupHook: setupBasic,
     }
   ),
+  NOTE_WITH_TARGET: new TestPresetEntryV4(
+    async ({ vaults, wsRoot, engine }) => {
+      const vault = vaults[0];
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
+      const betaNoteBefore = await engine.getNoteMeta("beta");
+      const betaBackLinksBefore = betaNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const note = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+        wsRoot,
+        vault: vaults[0],
+      });
+      await engine.writeNote(note);
+
+      // Alpha be deleted, leaving behind beta and 3 root notes
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
+      const betaNoteAfter = await engine.getNoteMeta("beta");
+      const betaBackLinksAfter = betaNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      return [
+        { actual: betaNoteBefore.data?.links.length, expected: 1 },
+        { actual: betaBackLinksBefore.length, expected: 0 },
+        { actual: _.size(notesInVaultBefore), expected: 2 },
+        { actual: _.size(notesInVaultAfter), expected: 3 },
+        { actual: betaNoteAfter.data?.links.length, expected: 2 },
+        { actual: betaBackLinksAfter.length, expected: 1 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+    }
+  ),
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const vault = vaults[0];
     const logger = (engine as DendronEngineClient).logger;

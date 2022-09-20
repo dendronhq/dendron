@@ -162,7 +162,6 @@ export class MDUtilsV5Web {
           //   proc = proc.use(mermaid, { simple: true });
           // }
 
-          // TODO: Re-enable config checks, for now, just use them:
           proc = proc.use(math);
           proc = proc.use(mermaid, { simple: true });
 

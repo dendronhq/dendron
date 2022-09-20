@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { DLinkUtils } from "./DLinkUtils";
 import { DLink, NotePropsMeta } from "./types";
 
 type BackLink = Omit<DLink, "type"> & { type: "backlink" };
@@ -23,6 +24,7 @@ export class BacklinkUtils {
   }
 
   /** Adds a backlink by mutating the 'note' argument in place.
+   * Check if backlink already exists before pushing
    *
    *  @param note note that the link is pointing to. (mutated)
    *  @param link backlink to add. */
@@ -33,7 +35,13 @@ export class BacklinkUtils {
     note: NotePropsMeta;
     backlink: BackLink;
   }): void {
-    note.links.push(backlink);
+    if (
+      !note.links.some((linkToCompare) =>
+        DLinkUtils.isEquivalent(backlink, linkToCompare)
+      )
+    ) {
+      note.links.push(backlink);
+    }
   }
 
   /**

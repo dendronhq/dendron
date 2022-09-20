@@ -11,6 +11,7 @@ import {
   DEngineInitResp,
   DHookEntry,
   DLink,
+  DLinkUtils,
   DNodeUtils,
   DNoteAnchorPositioned,
   DNoteLoc,
@@ -1412,14 +1413,14 @@ export class FileStorage implements DStore {
         (link) =>
           link.to?.fname &&
           !note.links.some((linkToCompare) =>
-            LinkUtils.isEquivalent(link, linkToCompare)
+            DLinkUtils.isEquivalent(link, linkToCompare)
           )
       );
       const addedLinks = note.links.filter(
         (link) =>
           link.to?.fname &&
           !maybeNote.links.some((linkToCompare) =>
-            LinkUtils.isEquivalent(link, linkToCompare)
+            DLinkUtils.isEquivalent(link, linkToCompare)
           )
       );
 

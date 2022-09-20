@@ -65,6 +65,7 @@ import {
   GetSchemaResp,
   WriteSchemaResp,
   BacklinkUtils,
+  DLinkUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -509,14 +510,14 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         (link) =>
           link.to?.fname &&
           !note.links.some((linkToCompare) =>
-            LinkUtils.isEquivalent(link, linkToCompare)
+            DLinkUtils.isEquivalent(link, linkToCompare)
           )
       );
       const addedLinks = note.links.filter(
         (link) =>
           link.to?.fname &&
           !existingNote.links.some((linkToCompare) =>
-            LinkUtils.isEquivalent(link, linkToCompare)
+            DLinkUtils.isEquivalent(link, linkToCompare)
           )
       );
 

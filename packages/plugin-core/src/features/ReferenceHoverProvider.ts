@@ -33,7 +33,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
   }: {
     refAtPos: NonNullable<getReferenceAtPositionResp>;
     vault?: DVault;
-  }): Promise<string> {
+  }): Promise<string | MarkdownString> {
     const { wsRoot, config } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({
       vault: PickerUtilsV2.getVaultForOpenEditor(),
@@ -65,14 +65,27 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     }
 
     // Otherwise, this is a note link, but the note doesn't exist (otherwise `provideHover` wouldn't call this function).
+    // Also let the user know if the file name is valid
+    const validationResp = NoteUtils.validateFname(refAtPos.ref);
     const vaultName = refAtPos.vaultName
       ? ` in vault "${refAtPos.vaultName}"`
       : "";
-
-    const autoCreateOnDefinition =
-      ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
-    const ctrlClickToCreate = autoCreateOnDefinition ? "Ctrl+Click or " : "";
-    return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Go to Note" command to create it.`;
+    if (validationResp.isValid) {
+      const autoCreateOnDefinition =
+        ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
+      const ctrlClickToCreate = autoCreateOnDefinition ? "Ctrl+Click or " : "";
+      return `Note ${refAtPos.ref}${vaultName} is missing, ${ctrlClickToCreate}use "Dendron: Go to Note" command to create it.`;
+    } else {
+      return new MarkdownString(
+        `Note \`${
+          refAtPos.ref
+        }${vaultName}\` is missing, and the filename is invalid for the following reason:\n\n \`${
+          validationResp.reason
+        }\`.\n\n Maybe you meant \`${NoteUtils.cleanFname({
+          fname: refAtPos.ref,
+        })}\`?`
+      );
+    }
   }
 
   /** Returns a message if this is a non-dendron URI. */

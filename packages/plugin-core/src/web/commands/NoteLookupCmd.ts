@@ -2,10 +2,13 @@ import {
   type ReducedDEngine,
   NoteUtils,
   VaultUtils,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { DENDRON_COMMANDS } from "../../constants";
+import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
 import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
 
@@ -16,12 +19,13 @@ export class NoteLookupCmd {
     @inject("wsRoot") private wsRoot: URI,
     @inject("ReducedDEngine")
     private engine: ReducedDEngine,
-    @inject("NoteProvider") private noteProvider: ILookupProvider
+    @inject("NoteProvider") private noteProvider: ILookupProvider,
+    @inject("ITelemetryClient") private _analytics: ITelemetryClient
   ) {}
 
-  static key = "dendron.lookupNote";
-
   public async run() {
+    this._analytics.track(DENDRON_COMMANDS.LOOKUP_NOTE.key);
+
     const result = await this.factory.showLookup({
       provider: this.noteProvider,
     });
@@ -30,9 +34,12 @@ export class NoteLookupCmd {
       return;
     }
 
+    let isNew = false;
+
     await Promise.all(
       result.items.map(async (value) => {
         if (value.label === "Create New") {
+          isNew = true;
           const newNote = NoteUtils.create({
             fname: value.fname,
             vault: value.vault,
@@ -80,5 +87,7 @@ export class NoteLookupCmd {
         await vscode.window.showTextDocument(doc);
       })
     );
+
+    this._analytics.track(VSCodeEvents.NoteLookup_Accept, { isNew });
   }
 }

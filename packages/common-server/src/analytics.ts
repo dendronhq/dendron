@@ -1,11 +1,15 @@
 import {
   AppNames,
+  CLIIdentifyProps,
+  CLIProps,
   CONSTANTS,
   DendronError,
   env,
   genUUID,
   RespV2,
   RuntimeUtils,
+  VSCodeIdentifyProps,
+  VSCodeProps,
 } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
 import fs from "fs-extra";
@@ -551,74 +555,6 @@ export class SegmentClient {
     return this._anonymousId;
   }
 }
-
-/**
- * User Profile.
- */
-type UserProfileProps = {
-  /**
-   * The number of notes in the workspace
-   */
-  numNotes?: number;
-  /**
-   * The current A/B test groups the user is participating in
-   */
-  splitTests?: string[];
-  /**
-   * The role of user. Retrieved from initial survey.
-   */
-  role?: string;
-  /**
-   * The use case of Dendron for the user. Retrieved from initial survey.
-   */
-  useCases?: string[];
-  /**
-   * The context Dendron is used for the user. Retrieved from initial survey.
-   */
-  useContext?: string;
-  /**
-   * Whether the user has intent for publishing. If so, how. Retrieved from initial survey.
-   */
-  publishingUseCase?: string;
-  /**
-   * Prior tools the user has used before Dendron. Retrieved from initial survey.
-   */
-  priorTools?: string[];
-  /**
-   * Email of user. Retrieved from initial survey.
-   */
-  email?: string;
-
-  /**
-   * Did the user express interest in using Dendron for a team?
-   */
-  teamIntent?: boolean;
-};
-
-// platform props
-type VSCodeProps = {
-  type: AppNames.CODE;
-  ideVersion: string;
-  ideFlavor: string;
-} & UserProfileProps;
-
-type CLIProps = {
-  type: AppNames.CLI;
-  cliVersion: string;
-} & UserProfileProps;
-
-// platform identify props
-export type VSCodeIdentifyProps = {
-  appVersion: string;
-  userAgent: string;
-  isNewAppInstall: boolean;
-  isTelemetryEnabled: boolean;
-  language: string;
-  machineId: string;
-  shell: string;
-} & VSCodeProps;
-
-export type CLIIdentifyProps = CLIProps;
 
 export class SegmentUtils {
   private static _trackCommon({

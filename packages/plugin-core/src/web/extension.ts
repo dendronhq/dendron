@@ -1,9 +1,10 @@
-import { TreeViewItemLabelTypeEnum } from "@dendronhq/common-all";
 import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
 
+import { TreeViewItemLabelTypeEnum, VSCodeEvents } from "@dendronhq/common-all";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { ITelemetryClient } from "../telemetry/common/ITelemetryClient";
 import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
@@ -22,7 +23,11 @@ export async function activate(context: vscode.ExtensionContext) {
     setupCommands(context);
 
     setupViews(context);
+
+    reportActivationTelemetry();
   } catch (error) {
+    // TODO: properly detect if we're in a Dendron workspace or not (instead of
+    // relying on getWSRoot throwing).
     vscode.window.showErrorMessage(
       `Something went wrong during initialization.`
     );
@@ -104,4 +109,13 @@ async function setupTreeView(context: vscode.ExtensionContext) {
       labelType: TreeViewItemLabelTypeEnum.filename,
     });
   });
+}
+
+async function reportActivationTelemetry() {
+  const telemetryClient =
+    container.resolve<ITelemetryClient>("ITelemetryClient");
+
+  await telemetryClient.identify();
+  // TODO: Add workspace properties later.
+  await telemetryClient.track(VSCodeEvents.InitializeWorkspace);
 }

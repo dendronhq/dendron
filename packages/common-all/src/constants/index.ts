@@ -129,3 +129,11 @@ export enum DENDRON_EMOJIS {
 export enum DENDRON_VSCODE_CONFIG_KEYS {
   ENABLE_SELF_CONTAINED_VAULTS_WORKSPACE = "dendron.enableSelfContainedVaultWorkspace",
 }
+
+/**
+ * Keys to a global state store. Global here means across a single user's
+ * different access platforms.
+ */
+export enum GLOBAL_STATE_KEYS {
+  ANONYMOUS_ID = "telemetry.anonymousId",
+}

@@ -1034,7 +1034,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
             );
 
             notes.forEach((noteTo: NoteProps) => {
-              BacklinkUtils.addBacklink({
+              BacklinkUtils.addBacklinkInPlace({
                 note: noteTo,
                 backlink: maybeBacklink,
               });

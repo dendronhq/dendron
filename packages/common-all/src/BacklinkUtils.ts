@@ -28,7 +28,7 @@ export class BacklinkUtils {
    *
    *  @param note note that the link is pointing to. (mutated)
    *  @param link backlink to add. */
-  static addBacklink({
+  static addBacklinkInPlace({
     note,
     backlink,
   }: {
@@ -51,7 +51,7 @@ export class BacklinkUtils {
    * @param note Note to update backlinks for.
    * @param backlink Backlink to remove
    */
-  static removeBacklink({
+  static removeBacklinkInPlace({
     note,
     backlink,
   }: {

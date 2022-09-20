@@ -421,7 +421,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
             const prevNote = _.merge(_.cloneDeep(note), {
               body: "",
             });
-            BacklinkUtils.addBacklink({ note, backlink: maybeBacklink });
+            BacklinkUtils.addBacklinkInPlace({ note, backlink: maybeBacklink });
             // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
             const updatedNote = _.merge(note, {
               body: "",
@@ -466,7 +466,10 @@ export abstract class EngineV3Base implements ReducedDEngine {
             const prevNote = _.merge(_.cloneDeep(note), {
               body: "",
             });
-            BacklinkUtils.removeBacklink({ note, backlink: maybeBacklink });
+            BacklinkUtils.removeBacklinkInPlace({
+              note,
+              backlink: maybeBacklink,
+            });
             // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
             const updatedNote = _.merge(note, {
               body: "",

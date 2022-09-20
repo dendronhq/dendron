@@ -614,7 +614,7 @@ export class FileStorage implements DStore {
 
             notes.forEach((noteTo: NoteProps) => {
               _noteToForErrorLog = noteTo;
-              BacklinkUtils.addBacklink({
+              BacklinkUtils.addBacklinkInPlace({
                 note: noteTo,
                 backlink: maybeBacklink,
               });
@@ -1495,7 +1495,7 @@ export class FileStorage implements DStore {
       return Promise.all(
         notes.map(async (note) => {
           const prevNote = _.cloneDeep(note);
-          BacklinkUtils.addBacklink({ note, backlink: maybeBacklink });
+          BacklinkUtils.addBacklinkInPlace({ note, backlink: maybeBacklink });
           NoteDictsUtils.add(note, {
             notesById: this.notes,
             notesByFname: this.noteFnames,
@@ -1537,7 +1537,10 @@ export class FileStorage implements DStore {
       return Promise.all(
         notes.map(async (note) => {
           const prevNote = _.cloneDeep(note);
-          BacklinkUtils.removeBacklink({ note, backlink: maybeBacklink });
+          BacklinkUtils.removeBacklinkInPlace({
+            note,
+            backlink: maybeBacklink,
+          });
           NoteDictsUtils.add(note, {
             notesById: this.notes,
             notesByFname: this.noteFnames,

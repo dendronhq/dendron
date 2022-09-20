@@ -3,6 +3,7 @@ import {
   Awaited,
   DNoteAnchorBasic,
   getSlugger,
+  InvalidFilenameReason,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -317,8 +318,7 @@ export class GotoNoteCommand extends BasicCommand<
           } else {
             // should not create note if fname is invalid.
             // let the user know and exit early.
-            const message = `Cannot create note ${fname}: ${validationResp.reason}`;
-            window.showErrorMessage(message);
+            this.displayInvalidFilenameError({ fname, validationResp });
             return;
           }
         } else {
@@ -362,5 +362,17 @@ export class GotoNoteCommand extends BasicCommand<
     };
     const payload = { ...getAnalyticsPayload(source), fileType: type };
     return payload;
+  }
+
+  private displayInvalidFilenameError(opts: {
+    fname: string;
+    validationResp: {
+      isValid: boolean;
+      reason: InvalidFilenameReason;
+    };
+  }) {
+    const { fname, validationResp } = opts;
+    const message = `Cannot create note ${fname}: ${validationResp.reason}`;
+    window.showErrorMessage(message);
   }
 }

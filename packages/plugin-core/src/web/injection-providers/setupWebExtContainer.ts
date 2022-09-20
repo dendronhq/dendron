@@ -24,6 +24,7 @@ import { ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { WebTelemetryClient } from "../../telemetry/web/WebTelemetryClient";
 import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
 import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
+
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";

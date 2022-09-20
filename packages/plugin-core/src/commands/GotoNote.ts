@@ -285,31 +285,42 @@ export class GotoNoteCommand extends BasicCommand<
 
         // If note doesn't exist, create note with schema
         if (notes.length === 0) {
-          const newNote = NoteUtils.createWithSchema({
-            noteOpts: {
-              fname: qs,
-              vault,
-            },
-            engine: client,
-          });
-          await TemplateUtils.findAndApplyTemplate({
-            note: newNote,
-            engine: client,
-            pickNote: async (choices: NoteProps[]) => {
-              return WSUtilsV2.instance().promptForNoteAsync({
-                notes: choices,
-                quickpickTitle:
-                  "Select which template to apply or press [ESC] to not apply a template",
-                nonStubOnly: true,
-              });
-            },
-          });
-          note = _.merge(newNote, overrides || {});
-          await client.writeNote(note);
+          const fname = qs;
+          // validate fname before creating new note
+          const validationResp = NoteUtils.validateFname(fname);
+          if (validationResp.isValid) {
+            const newNote = NoteUtils.createWithSchema({
+              noteOpts: {
+                fname,
+                vault,
+              },
+              engine: client,
+            });
+            await TemplateUtils.findAndApplyTemplate({
+              note: newNote,
+              engine: client,
+              pickNote: async (choices: NoteProps[]) => {
+                return WSUtilsV2.instance().promptForNoteAsync({
+                  notes: choices,
+                  quickpickTitle:
+                    "Select which template to apply or press [ESC] to not apply a template",
+                  nonStubOnly: true,
+                });
+              },
+            });
+            note = _.merge(newNote, overrides || {});
+            await client.writeNote(note);
 
-          // check if we should send meeting note telemetry.
-          const type = qs.startsWith("user.") ? "userTag" : "general";
-          maybeSendMeetingNoteTelemetry(type);
+            // check if we should send meeting note telemetry.
+            const type = qs.startsWith("user.") ? "userTag" : "general";
+            maybeSendMeetingNoteTelemetry(type);
+          } else {
+            // should not create note if fname is invalid.
+            // let the user know and exit early.
+            const message = `Cannot create note ${fname}: ${validationResp.reason}`;
+            window.showErrorMessage(message);
+            return;
+          }
         } else {
           note = notes[0];
           // If note exists and its a stub note, delete stub and create new note

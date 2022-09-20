@@ -13,7 +13,6 @@ import { MarkdownString } from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import ReferenceHoverProvider from "../../features/ReferenceHoverProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import {
@@ -1254,7 +1253,7 @@ suite("GIVEN ReferenceHoverProvider", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults } = getDWorkspace();
+            const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
             await fs.writeFile(
               path.join(wsRoot, "test.txt"),
               "Et nam velit laboriosam."

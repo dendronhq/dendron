@@ -208,7 +208,6 @@ function DendronApp(props: DendronAppProps) {
       <Layout
         style={{
           padding: props.opts.padding,
-          backgroundColor: "var(--vscode-editor-background)",
         }}
       >
         <Content>

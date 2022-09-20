@@ -80,7 +80,7 @@ export class WebViewCommonUtils {
           list-style-type: disc;
         }
 
-        body {
+        body, .ant-layout {
           background-color: var(--vscode-editor-background);
         }
 

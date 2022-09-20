@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.113.1 (2022-09-20)
+
+
+### Bug Fixes
+
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([fe07e60](https://github.com/dendronhq/dendron/commit/fe07e60fc44432d95184c0a6d0cf2ea6a2e22c6d))
+
+
+
+
+
 # 0.113.0 (2022-09-20)
 
 

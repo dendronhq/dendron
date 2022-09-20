@@ -154,7 +154,7 @@ describe("GIVEN dendronPub", () => {
   const fnameAlpha = "alpha";
   const fnameBeta = "beta";
 
-  describe("WHEN note contains markdown link to a non-web uri (asset path)", () => {
+  describe("WHEN note contains markdown link to an assetPath", () => {
     let resp: VFile;
     describe("AND assetsPrefix is set", () => {
       const config = genPublishConfigWithAllPublicHierarchies();
@@ -223,6 +223,35 @@ describe("GIVEN dendronPub", () => {
           `<a href="/assets/dummy-pdf2.pdf">some pdf</a>`
         );
       });
+    });
+  });
+
+  describe("WHEN note contains markdown link to header on the same page", () => {
+    let resp: VFile;
+    const config = genPublishConfigWithAllPublicHierarchies();
+    beforeAll(async () => {
+      await runEngineTestV5(
+        async (opts) => {
+          resp = await createProc({
+            noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
+            ...opts,
+            config,
+            fname: fnameAlpha,
+            linkText: "[header one](#header-1)",
+          });
+        },
+        {
+          preSetupHook: ENGINE_HOOKS.setupLinks,
+          expect,
+        }
+      );
+    });
+
+    test("THEN the href value of the link is untouched", () => {
+      checkString(
+        resp.contents as string,
+        `<a href="#header-1">header one</a>`
+      );
     });
   });
 

@@ -125,13 +125,6 @@ type DendronUnifiedHandlerHandleOpts<T = any> = {
 
 type DendronUnifiedHandlerNextAction = undefined | number;
 
-abstract class DendronNodeHander {
-  static match: (
-    node: Node | any,
-    { pData }: DendronUnifiedHandlerMatchOpts
-  ) => boolean;
-}
-
 /**
  * Handles AST nodes that contain urls (i.e images, extended images, and links)
  *
@@ -140,7 +133,14 @@ abstract class DendronNodeHander {
  *
  * Handler takes the node and correct / resolves the url properly.
  */
-class NodeUrlHandler extends DendronNodeHander {
+class NodeUrlHandler {
+  // Detects if its a link to a header on the same page (this is valid in Github
+  // flavored markdown). If we need this elsewhere, we can pull this function
+  // out into a util.
+  private static isSamePageHeaderUrl(url: string): boolean {
+    return url.startsWith("#");
+  }
+
   static match(node: Node | any, { pData }: DendronUnifiedHandlerMatchOpts) {
     return (
       (node.type === DendronASTTypes.IMAGE ||
@@ -154,19 +154,18 @@ class NodeUrlHandler extends DendronNodeHander {
     node: Image | Link,
     { proc, cOpts }: DendronUnifiedHandlerHandleOpts<PluginOpts>
   ): { node: Image | Link; nextAction?: DendronUnifiedHandlerNextAction } {
-    const { config } = MDUtilsV5.getProcData(proc);
-    //handle assetPrefix
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
-    const assetsPrefix = MDUtilsV5.isV5Active(proc)
-      ? publishingConfig.assetsPrefix
-      : cOpts?.assetsPrefix;
-    const NodeToHandle = node;
+    if (!isWebUri(node.url) && !NodeUrlHandler.isSamePageHeaderUrl(node.url)) {
+      const { config } = MDUtilsV5.getProcData(proc);
+      //handle assetPrefix
+      const publishingConfig = ConfigUtils.getPublishingConfig(config);
+      const assetsPrefix = MDUtilsV5.isV5Active(proc)
+        ? publishingConfig.assetsPrefix
+        : cOpts?.assetsPrefix;
 
-    if (!isWebUri(NodeToHandle.url)) {
-      const url = _.trim(NodeToHandle.url, "/");
-      NodeToHandle.url = (assetsPrefix ? assetsPrefix + "/" : "/") + url;
+      const url = _.trim(node.url, "/");
+      node.url = (assetsPrefix ? assetsPrefix + "/" : "/") + url;
     }
-    return { node: NodeToHandle };
+    return { node };
   }
 }
 

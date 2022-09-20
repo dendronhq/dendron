@@ -6,8 +6,8 @@ const { parse } = require("@dendronhq/common-all");
 const serverSchema = z.object({
   DATA_DIR: z
     .string()
-    .default(path.join(process.cwd(), FRONTEND_CONSTANTS.DEFAULT_DATA_DIR)),
-  PUBLIC_DIR: z.string().default(path.join(process.cwd(), "public")),
+    .default(path.join(__dirname, "..", FRONTEND_CONSTANTS.DEFAULT_DATA_DIR)),
+  PUBLIC_DIR: z.string().default(path.join(__dirname, "..", "public")),
 });
 
 const clientSchema = z.object({

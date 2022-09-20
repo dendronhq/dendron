@@ -7,7 +7,6 @@ import {
   DendronError,
   DEngineClient,
   DLink,
-  DLoc,
   DNodeProps,
   DNoteAnchor,
   DNoteAnchorBasic,

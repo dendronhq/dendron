@@ -39,7 +39,6 @@ import {
   WriteNoteResp,
   FindNoteOpts,
   NotePropsMeta,
-  RespV3,
   ERROR_STATUS,
   EngineEventEmitter,
   NoteIndexProps,
@@ -49,6 +48,8 @@ import {
   GetSchemaResp,
   WriteSchemaResp,
   EngineSchemaWriteOpts,
+  GetNoteMetaResp,
+  GetNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -198,7 +199,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   /**
    * See {@link DStore.getNote}
    */
-  async getNote(id: string): Promise<RespV3<NoteProps>> {
+  async getNote(id: string): Promise<GetNoteResp> {
     const maybeNote = this.notes[id];
 
     if (maybeNote) {
@@ -212,6 +213,10 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         }),
       };
     }
+  }
+
+  async getNoteMeta(id: string): Promise<GetNoteMetaResp> {
+    return this.getNote(id);
   }
 
   /**
@@ -238,24 +243,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    * See {@link DStore.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
-    const { fname, vault } = opts;
-    if (fname) {
-      return _.cloneDeep(
-        NoteDictsUtils.findByFname(
-          fname,
-          { notesById: this.notes, notesByFname: this.noteFnames },
-          vault
-        )
-      );
-    } else if (vault) {
-      return _.cloneDeep(
-        _.values(this.notes).filter((note) =>
-          VaultUtils.isEqualV2(note.vault, vault)
-        )
-      );
-    } else {
-      return [];
-    }
+    const resp = await this.api.noteFind({ ...opts, ws: this.ws });
+    return resp.data!;
   }
 
   /**

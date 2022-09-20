@@ -54,7 +54,7 @@ export class TreeNote extends vscode.TreeItem {
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
-
+    this.contextValue = this.note.stub ? "stub" : "note";
     const vaultPath = vault2Path({
       vault: this.note.vault,
       wsRoot,

@@ -8,10 +8,10 @@ import {
 import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import _ from "lodash";
 import { window } from "vscode";
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { AnalyticsUtils } from "../utils/analytics";
+import { ExtensionProvider } from "../ExtensionProvider";
 
-type CommandOpts = NoteProps & {};
+type CommandOpts = string & {};
 
 type CommandOutput = {
   lookup: Promise<NoteLookupOutput | undefined>;
@@ -29,10 +29,12 @@ export class CreateNoteCommand extends InputArgCommand<
     const args: NoteLookupRunOpts = {};
     /**
      * If the command is ran from Tree View, update the initial value in lookup to
-     * selected tree item's fname
+     * selected tree item's fname. The opts passed is the id of note
      */
-    if (NoteUtils.isNoteProps(opts)) {
-      args.initialValue = opts.fname;
+    const engine = ExtensionProvider.getEngine();
+    if (_.isString(opts)) {
+      const resp = await engine.getNote(opts);
+      args.initialValue = resp.data?.fname || "";
       AnalyticsUtils.track(this.key, { source: "TreeView" });
     }
     window.showInformationMessage(

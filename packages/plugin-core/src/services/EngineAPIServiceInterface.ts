@@ -34,6 +34,7 @@ import {
   GetSchemaResp,
   QuerySchemaResp,
   WriteSchemaResp,
+  GetNoteMetaResp,
 } from "@dendronhq/common-all";
 
 export interface IEngineAPIService {
@@ -58,6 +59,10 @@ export interface IEngineAPIService {
    * Get NoteProps by id. If note doesn't exist, return undefined
    */
   getNote: (id: string) => Promise<GetNoteResp>;
+  /**
+   * Get NoteProps metadata by id. If note doesn't exist, return error
+   */
+  getNoteMeta: (id: string) => Promise<GetNoteMetaResp>;
   /**
    * Bulk get NoteProps by list of ids
    */

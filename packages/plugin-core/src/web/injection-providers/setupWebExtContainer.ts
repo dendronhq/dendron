@@ -35,8 +35,6 @@ import {
 } from "../views/preview/IPreviewPanelConfig";
 import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
 import { PreviewPanel } from "../views/preview/PreviewPanel";
-import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
-import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getSiteIndex } from "./getSiteIndex";

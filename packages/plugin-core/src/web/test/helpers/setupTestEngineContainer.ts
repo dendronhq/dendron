@@ -17,8 +17,8 @@ import { ILookupProvider } from "../../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../../engine/DendronEngineV3Web";
 import { VSCodeFileStore } from "../../engine/store/VSCodeFileStore";
-import { ITreeViewConfig } from "../../views/treeView/ITreeViewConfig";
-import { TreeViewDummyConfig } from "../../views/treeView/TreeViewDummyConfig";
+import { ITreeViewConfig } from "../../../views/common/treeview/ITreeViewConfig";
+import { TreeViewDummyConfig } from "../../../views/common/treeview/TreeViewDummyConfig";
 
 import _ from "lodash";
 import { URI } from "vscode-uri";

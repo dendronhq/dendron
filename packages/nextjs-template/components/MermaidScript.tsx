@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Script from "next/script";
 import { useEngineAppSelector } from "../features/engine/hooks";
-import { ConfigUtils } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-frontend";
 
 interface MermaidScriptProps {
@@ -11,13 +10,11 @@ interface MermaidScriptProps {
 export const MermaidScript: React.FC<MermaidScriptProps> = (props) => {
   const [loadMermaid, setLoadMermaid] = React.useState(false);
   const engine = useEngineAppSelector((state) => state.engine);
-  const config = engine.config;
-  const enableMermaid = config && ConfigUtils.getEnableMermaid(config, true);
   const { noteBody } = props;
 
   useEffect(() => {
     const isMermaidOnWindow = window.mermaid !== undefined;
-    if (isMermaidOnWindow || !enableMermaid) {
+    if (isMermaidOnWindow) {
       return;
     }
     // semi expensive?
@@ -25,7 +22,7 @@ export const MermaidScript: React.FC<MermaidScriptProps> = (props) => {
     if (noteHasMermaid) {
       setLoadMermaid(true);
     }
-  }, [noteBody, enableMermaid]);
+  }, [noteBody]);
 
   if (loadMermaid) {
     const logger = createLogger("MermaidScript");

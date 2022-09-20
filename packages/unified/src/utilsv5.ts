@@ -323,9 +323,7 @@ export class MDUtilsV5 {
           if (ConfigUtils.getEnableKatex(config, shouldApplyPublishRules)) {
             proc = proc.use(math);
           }
-          if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
-            proc = proc.use(mermaid, { simple: true });
-          }
+          proc = proc.use(mermaid, { simple: true });
           // Add remaining flavor specific plugins
           if (opts.flavor === ProcFlavor.PUBLISHING) {
             const prefix = assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
@@ -361,9 +359,8 @@ export class MDUtilsV5 {
           proc = proc.use(math);
         }
 
-        if (ConfigUtils.getEnableMermaid(config, shouldApplyPublishRules)) {
-          proc = proc.use(mermaid, { simple: true });
-        }
+        proc = proc.use(mermaid, { simple: true });
+
         break;
       }
       case ProcMode.NO_DATA:

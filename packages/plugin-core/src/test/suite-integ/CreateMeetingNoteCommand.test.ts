@@ -21,6 +21,7 @@ suite("GIVEN CreateMeetingNoteCommand in a basic workspace", function () {
           body: TEMPLATE_BODY,
         });
       },
+      timeout: 5e3,
     },
     () => {
       test("THEN meeting note with correct name created.", async () => {

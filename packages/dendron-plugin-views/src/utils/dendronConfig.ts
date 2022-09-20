@@ -201,10 +201,6 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "preview",
   },
-  "preview.enableMermaid": {
-    type: "boolean",
-    group: "preview",
-  },
   "preview.enablePrettyRefs": {
     type: "boolean",
     group: "preview",
@@ -235,10 +231,6 @@ export const dendronConfig: { [key: string]: Config } = {
     group: "publishing",
   },
   "publishing.enableHashesForFMTags": {
-    type: "boolean",
-    group: "publishing",
-  },
-  "publishing.enableMermaid": {
     type: "boolean",
     group: "publishing",
   },

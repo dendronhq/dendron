@@ -7,6 +7,7 @@ import {
   LookupNoteTypeEnum,
   LookupSelectionModeEnum,
   LookupSelectionTypeEnum,
+  NoteProps,
   NoteQuickInput,
   NoteUtils,
   SchemaTemplate,
@@ -330,7 +331,7 @@ suite("NoteLookupCommand", function () {
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
           const actualNote = WSUtils.getNoteFromDocument(editor!.document);
-          const expectedNote = engine.notes["foo"];
+          const expectedNote = (await engine.getNote("foo")).data!;
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
             moduleId: "foo",
@@ -357,7 +358,7 @@ suite("NoteLookupCommand", function () {
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
           const actualNote = WSUtils.getNoteFromDocument(editor!.document);
-          const expectedNote = engine.notes["foo.ch1"];
+          const expectedNote = (await engine.getNote("foo.ch1")).data!;
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
             moduleId: "foo",
@@ -416,7 +417,7 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           const opts = (await cmd.run({ noConfirm: true }))!;
           expect(opts.quickpick.value).toEqual("foo");
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
@@ -698,13 +699,12 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
             initialValue: "bar",
           })!;
-          const barFromEngine = engine.notes["bar"];
+          const barFromEngine = (await engine.getNote("bar")).data!;
           const editor = VSCodeUtils.getActiveTextEditor()!;
           const activeNote = WSUtils.getNoteFromDocument(editor.document);
           expect(activeNote).toEqual(barFromEngine);
-          expect(
-            DNodeUtils.isRoot(engine.notes[barFromEngine.parent as string])
-          );
+          const parent = (await engine.getNote(barFromEngine.parent!)).data!;
+          expect(DNodeUtils.isRoot(parent));
           done();
         },
       });
@@ -1060,7 +1060,7 @@ suite("NoteLookupCommand", function () {
             }) as Thenable<vscode.QuickPickItem>
           );
           const cmd = new NoteLookupCommand();
-          cmd
+          await cmd
             .run({
               initialValue: "food.ch2",
               noConfirm: true,
@@ -1132,7 +1132,7 @@ suite("NoteLookupCommand", function () {
           // Escape out, leading to undefined note
           showQuickPick.onFirstCall().returns(Promise.resolve(undefined));
           const cmd = new NoteLookupCommand();
-          cmd
+          await cmd
             .run({
               initialValue: "food.ch2",
               noConfirm: true,
@@ -1456,7 +1456,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.journal,
             noConfirm: true,
@@ -1498,7 +1498,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.scratch,
             noConfirm: true,
@@ -1531,7 +1531,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
 
           const createScratch = async () => {
             const out = (await cmd.run({
@@ -1565,7 +1565,7 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           // with scratch note modifier enabled,
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.task,
             noConfirm: true,
@@ -1590,7 +1590,7 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           const out = (await cmd.run({
             noteType: LookupNoteTypeEnum.journal,
             initialValue: "gamma",
@@ -1626,7 +1626,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1656,7 +1656,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1686,7 +1686,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ vaults, engine }) => {
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
 
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
@@ -1789,7 +1789,11 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
@@ -1820,7 +1824,7 @@ suite("NoteLookupCommand", function () {
           // event firing. However, NoteSyncService is currently not exposed in
           // the test infrastructure.
 
-          // const oldNote = engine.notes["foo"];
+          // const oldNote = (await engine.getNoteMeta("foo")).data!;
           // expect(oldNote.links.length).toEqual(1);
           // expect(oldNote.links[0].value).toEqual("foo.foo-body");
           cmd.cleanUp();
@@ -1848,7 +1852,9 @@ suite("NoteLookupCommand", function () {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const fooNoteEditor = await ExtensionProvider.getWSUtils().openNote(
-            engine.notes["multi-line"]
+            (
+              await engine.getNoteMeta("multi-line")
+            ).data!
           );
 
           // selects "test \n ing \n"
@@ -1887,7 +1893,11 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -1919,8 +1929,11 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+          const fooNoteEditor = await WSUtils.openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -1962,8 +1975,11 @@ suite("NoteLookupCommand", function () {
           );
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+          const fooNoteEditor = await WSUtils.openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
           // selects "foo body"
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -2041,7 +2057,11 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
-          const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
+          const fooNoteEditor = await WSUtils.openNote(
+            (
+              await engine.getNoteMeta("foo")
+            ).data!
+          );
 
           fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
           const { text } = VSCodeUtils.getSelection();
@@ -2076,7 +2096,7 @@ suite("NoteLookupCommand", function () {
           // close all editors before running.
           VSCodeUtils.closeAllEditors();
 
-          await WSUtils.openNote(engine.notes["foo"]);
+          await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
           await cmd.run({
             initialValue: "bar",
             splitType: "horizontal",
@@ -2155,8 +2175,11 @@ suite("NoteLookupCommand", function () {
       const cmd = new NoteLookupCommand();
       stubVaultPick(vaults);
 
-      const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+      const fooNoteEditor = await WSUtils.openNote(
+        (
+          await engine.getNoteMeta("foo")
+        ).data!
+      );
       // selects "foo body"
       fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
       const { text } = VSCodeUtils.getSelection();
@@ -2211,8 +2234,11 @@ suite("NoteLookupCommand", function () {
         const cmd = new NoteLookupCommand();
         stubVaultPick(vaults);
 
-        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+        const fooNoteEditor = await WSUtils.openNote(
+          (
+            await engine.getNoteMeta("foo")
+          ).data!
+        );
         // selects "foo body"
         fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
         const { text } = VSCodeUtils.getSelection();
@@ -2267,8 +2293,11 @@ suite("NoteLookupCommand", function () {
         const cmd = new NoteLookupCommand();
         stubVaultPick(vaults);
 
-        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+        const fooNoteEditor = await WSUtils.openNote(
+          (
+            await engine.getNoteMeta("foo")
+          ).data!
+        );
         // selects "foo body"
         fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
         const { text } = VSCodeUtils.getSelection();
@@ -2320,8 +2349,11 @@ suite("NoteLookupCommand", function () {
         const cmd = new NoteLookupCommand();
         stubVaultPick(vaults);
 
-        const fooNoteEditor = await WSUtils.openNote(engine.notes["foo"]);
-
+        const fooNoteEditor = await WSUtils.openNote(
+          (
+            await engine.getNoteMeta("foo")
+          ).data!
+        );
         // selects "foo body"
         fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
         const { text } = VSCodeUtils.getSelection();
@@ -2404,9 +2436,9 @@ suite("NoteLookupCommand", function () {
         opts,
       }: any) => {
         const cmd = new NoteLookupCommand();
-        const notesToSelect = ["foo.ch1", "bar", "lorem", "ipsum"].map(
-          (fname) => engine.notes[fname]
-        );
+        const notesToSelect: NoteProps[] = (
+          await engine.bulkGetNotes(["foo.ch1", "bar", "lorem", "ipsum"])
+        ).data;
         const selectedItems = notesToSelect.map((note) => {
           return DNodeUtils.enhancePropForQuickInputV3({
             props: note,
@@ -2467,7 +2499,7 @@ suite("NoteLookupCommand", function () {
             // make clean slate.
             VSCodeUtils.closeAllEditors();
 
-            await WSUtils.openNote(engine.notes["foo"]);
+            await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
             const { cmd } = await prepareCommandFunc({
               wsRoot,
               vaults,
@@ -2511,8 +2543,7 @@ suite("NoteLookupCommand", function () {
             // make clean slate.
             VSCodeUtils.closeAllEditors();
 
-            await WSUtils.openNote(engine.notes["foo"]);
-
+            await WSUtils.openNote((await engine.getNoteMeta("foo")).data!);
             const { cmd } = await prepareCommandFunc({
               wsRoot,
               vaults,

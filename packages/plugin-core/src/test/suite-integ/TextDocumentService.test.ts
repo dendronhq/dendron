@@ -5,6 +5,7 @@ import {
   NoteChangeUpdateEntry,
   extractNoteChangeEntriesByType,
   VaultUtils,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
@@ -27,7 +28,7 @@ import {
 
 async function openAndEdit(fname: string) {
   const engine = ExtensionProvider.getEngine();
-  const testNoteProps = engine.notes[fname];
+  const testNoteProps = (await engine.getNote(fname)).data!;
   const editor = await ExtensionProvider.getWSUtils().openNote(testNoteProps);
 
   const textToAppend = "new text here";
@@ -85,7 +86,11 @@ suite("TextDocumentService", function testSuite() {
           );
           const textToAppend = "new text here";
           const engine = ExtensionProvider.getEngine();
-          const alphaNote = engine.notes["alpha"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const note = NoteUtils.create({
+            fname: "alpha",
+            vault: vaults[0],
+          });
 
           onDidChangeTextDocumentHandler =
             vscode.workspace.onDidChangeTextDocument(async (event) => {
@@ -96,12 +101,13 @@ suite("TextDocumentService", function testSuite() {
                   );
                 expect(maybeNote?.body).toEqual("First Line\n" + textToAppend);
                 // Make sure updated has not changed
+                const alphaNote = (await engine.getNoteMeta("alpha")).data!;
                 expect(maybeNote?.updated).toEqual(alphaNote.updated);
                 done();
               }
             });
           ExtensionProvider.getWSUtils()
-            .openNote(alphaNote)
+            .openNote(note)
             .then((editor) => {
               editor.edit((editBuilder) => {
                 const line = editor.document.getText().split("\n").length;
@@ -136,8 +142,11 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const engine = ExtensionProvider.getEngine();
-          const foo = engine.notes["foo"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const foo = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
 
           onDidChangeTextDocumentHandler =
             vscode.workspace.onDidChangeTextDocument(async (event) => {
@@ -183,8 +192,11 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const engine = ExtensionProvider.getEngine();
-          const currentNote = engine.notes["beta"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const currentNote = NoteUtils.create({
+            fname: "beta",
+            vault: vaults[0],
+          });
 
           onDidChangeTextDocumentHandler =
             vscode.workspace.onDidChangeTextDocument(() => {
@@ -225,13 +237,19 @@ suite("TextDocumentService", function testSuite() {
           );
 
           const engine = ExtensionProvider.getEngine();
-          const currentNote = engine.notes["beta"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const note = NoteUtils.create({
+            fname: "beta",
+            vault: vaults[0],
+          });
 
           onDidChangeTextDocumentHandler =
             vscode.workspace.onDidChangeTextDocument(async (event) => {
               if (event.document.isDirty) {
                 // Set content hash to be same as event to enter content no change logic
+                const currentNote = (await engine.getNote("beta")).data!;
                 currentNote.contentHash = genHash(event.document.getText());
+                await engine.writeNote(currentNote, { metaOnly: true });
 
                 const maybeNote =
                   await textDocumentService?.processTextDocumentChangeEvent(
@@ -242,7 +260,7 @@ suite("TextDocumentService", function testSuite() {
               }
             });
           ExtensionProvider.getWSUtils()
-            .openNote(currentNote)
+            .openNote(note)
             .then((editor) => {
               editor.edit((editBuilder) => {
                 const line = editor.document.getText().split("\n").length;
@@ -278,11 +296,11 @@ suite("TextDocumentService", function testSuite() {
             });
         });
 
-        expect(engine.notes["blahblah123"]).toBeFalsy();
-
         onDidChangeTextDocumentHandler =
           vscode.workspace.onDidChangeTextDocument(async (event) => {
             if (event.document.isDirty) {
+              const noteProp = (await engine.getNote("blahblah123")).data;
+              expect(noteProp).toBeFalsy();
               const maybeNote =
                 await textDocumentService?.processTextDocumentChangeEvent(
                   event
@@ -310,7 +328,8 @@ suite("TextDocumentService", function testSuite() {
           );
           const updatedNote = await onDidSave(editor.document);
           expect(updatedNote?.body).toEqual(note.body + textToAppend);
-          expect(engine.notes[fname].body).toEqual(note.body + textToAppend);
+          const noteProp = (await engine.getNote(fname)).data!;
+          expect(noteProp.body).toEqual(note.body + textToAppend);
         });
       }
     );
@@ -327,7 +346,11 @@ suite("TextDocumentService", function testSuite() {
             vscode.workspace.onDidSaveTextDocument
           );
           const engine = ExtensionProvider.getEngine();
-          const testNoteProps = engine.notes["foo"];
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const testNoteProps = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
           const textToAppend = "new text here";
 
           const disposable = subscribeToEngineStateChange(
@@ -347,7 +370,7 @@ suite("TextDocumentService", function testSuite() {
                 "update"
               ) as NoteChangeUpdateEntry[];
 
-              testAssertsInsideCallback(() => {
+              testAssertsInsideCallback(async () => {
                 expect(createEntries.length).toEqual(0);
                 expect(updateEntries.length).toEqual(1);
                 expect(deleteEntries.length).toEqual(0);
@@ -355,9 +378,11 @@ suite("TextDocumentService", function testSuite() {
                 const updateEntry = updateEntries[0];
 
                 expect(updateEntry.note.fname).toEqual("foo");
-                expect(updateEntry.note.body).toEqual(
-                  testNoteProps.body + textToAppend
-                );
+                const testNoteProps = (await engine.getNote("foo")).data!;
+                expect(updateEntry.note.body).toEqual(testNoteProps.body);
+                expect(
+                  updateEntry.note.body.includes(textToAppend)
+                ).toBeTruthy();
                 disposable.dispose();
               }, done);
             }
@@ -389,7 +414,8 @@ suite("TextDocumentService", function testSuite() {
           const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote?.links).toEqual(note.links);
-          expect(engine.notes[fname].links).toEqual(note.links);
+          const testNote = (await engine.getNoteMeta(fname)).data!;
+          expect(testNote.links).toEqual(note.links);
           expect(updatedNote?.links.length).toEqual(2);
           expect(updatedNote?.links[0].value).toEqual("beta");
           expect(updatedNote?.links[0].type).toEqual("wiki");
@@ -439,7 +465,8 @@ suite("TextDocumentService", function testSuite() {
           const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote?.links).toEqual(note.links);
-          expect(engine.notes[fname].links).toEqual(note.links);
+          const testNote = (await engine.getNoteMeta(fname)).data!;
+          expect(testNote.links).toEqual(note.links);
           expect(updatedNote?.links[0].value).toEqual("simple-note-ref.one");
           expect(updatedNote?.links[0].position).toEqual({
             end: {
@@ -476,7 +503,8 @@ suite("TextDocumentService", function testSuite() {
           const updatedNote = await onDidSave(editor.document);
 
           expect(updatedNote?.links).toEqual(note.links);
-          expect(engine.notes[fname].links).toEqual(note.links);
+          const testNote = (await engine.getNoteMeta(fname)).data!;
+          expect(testNote.links).toEqual(note.links);
           expect(updatedNote?.links).toEqual([
             {
               alias: "foo",
@@ -509,7 +537,7 @@ suite("TextDocumentService", function testSuite() {
             vscode.workspace.onDidSaveTextDocument
           );
           const engine = ExtensionProvider.getEngine();
-          const testNoteProps = engine.notes["foo"];
+          const testNoteProps = (await engine.getNote("foo")).data!;
           const editor = await ExtensionProvider.getWSUtils().openNote(
             testNoteProps
           );
@@ -520,7 +548,8 @@ suite("TextDocumentService", function testSuite() {
 
           expect(updatedNote).toBeTruthy();
           expect(updatedNote).toEqual(testNoteProps);
-          expect(engine.notes["foo"].body).toEqual(testNoteProps.body);
+          const foo = (await engine.getNote("foo")).data!;
+          expect(foo.body).toEqual(testNoteProps.body);
         });
       }
     );
@@ -547,7 +576,8 @@ suite("TextDocumentService", function testSuite() {
             testNoteProps
           );
 
-          expect(engine.notes["blahblah123"]).toBeFalsy();
+          const noteProp = (await engine.getNote("blahblah123")).data;
+          expect(noteProp).toBeFalsy();
           const { onDidSave } =
             textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
           const updatedNote = await onDidSave(editor.document);
@@ -574,7 +604,7 @@ suite("TextDocumentService", function testSuite() {
     () => {
       test("WHEN the note has frontmatter, THEN getFrontmatterPosition should return true", async () => {
         const engine = ExtensionProvider.getEngine();
-        const alphaNote = engine.notes["alpha"];
+        const alphaNote = (await engine.getNoteMeta("alpha")).data!;
         const editor = await ExtensionProvider.getWSUtils().openNote(alphaNote);
         const hasFrontmatter = TextDocumentService.containsFrontmatter(
           editor.document
@@ -584,7 +614,7 @@ suite("TextDocumentService", function testSuite() {
 
       test("WHEN frontmatter is removed, THEN getFrontmatterPosition should return false", async () => {
         const engine = ExtensionProvider.getEngine();
-        const alphaNote = engine.notes["alpha"];
+        const alphaNote = (await engine.getNoteMeta("alpha")).data!;
 
         const editor = await ExtensionProvider.getWSUtils().openNote(alphaNote);
         editor.edit((editBuilder) => {

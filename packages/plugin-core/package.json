@@ -1104,7 +1104,7 @@
           "group": "2_workspace"
         },
         {
-          "when": "resourceExtname == .md && dendron:pluginActive || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
+          "when": "resourceExtname == .md && dendron:pluginActive && shellExecutionSupported || resourceExtname == .yml && dendron:pluginActive && shellExecutionSupported",
           "command": "dendron.delete",
           "group": "2_workspace"
         },
@@ -1143,11 +1143,11 @@
       "view/item/context": [
         {
           "command": "dendron.delete",
-          "when": "view == dendron.treeView && viewItem == note"
+          "when": "view == dendron.treeView && viewItem == note && shellExecutionSupported"
         },
         {
           "command": "dendron.createNote",
-          "when": "view == dendron.treeView"
+          "when": "view == dendron.treeView && shellExecutionSupported"
         }
       ]
     },

@@ -15,6 +15,8 @@ export type FindNoteOpts = {
   fname?: string;
   // If vault is provided, filter results so that only notes with matching vault is returned
   vault?: DVault;
+  // If true, exclude stubs from results. Otherwise, include stub notes
+  excludeStub?: boolean;
 };
 
 export type WriteNoteOpts<K> = {

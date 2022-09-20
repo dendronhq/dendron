@@ -89,7 +89,6 @@ export const ENABLE_BACK_LINKS = (
 export const GLOBAL: DendronConfigEntryCollection<DendronGlobalConfig> = {
   enableFMTitle: ENABLE_FM_TITLE("global"), // TODO: split implementation to respect non-global config
   enableNoteTitleForLink: ENABLE_NOTE_TITLE_FOR_LINK("global"), // TODO: split
-  enableMermaid: ENABLE_MERMAID("global"),
   enablePrettyRefs: ENABLE_PRETTY_REFS("global"),
   enableKatex: ENABLE_KATEX("global"),
   enableChildLinks: ENABLE_CHILD_LINKS("global"),

@@ -215,7 +215,8 @@ suite("GIVEN SetupWorkspace Command", function () {
           const meta = openWSMetaFile({ fpath });
           expect(meta.version).toEqual("0.0.1");
           expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
-          expect(_.values(engine.notes).length).toEqual(1);
+          const notes = await engine.findNotesMeta({ excludeStub: true });
+          expect(notes.length).toEqual(1);
           const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
 
           const settings = fs.readJSONSync(

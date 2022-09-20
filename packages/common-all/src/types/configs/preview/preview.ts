@@ -8,7 +8,6 @@ export type DendronPreviewConfig = {
   enableNoteTitleForLink: boolean; // TODO: split
   enableFrontmatterTags: boolean;
   enableHashesForFMTags: boolean;
-  enableMermaid: boolean;
   enablePrettyRefs: boolean;
   enableKatex: boolean;
   automaticallyShowPreview: boolean;
@@ -25,7 +24,6 @@ export function genDefaultPreviewConfig(): DendronPreviewConfig {
     enableNoteTitleForLink: true,
     enableFrontmatterTags: true,
     enableHashesForFMTags: false,
-    enableMermaid: true,
     enablePrettyRefs: true,
     enableKatex: true,
     automaticallyShowPreview: false,

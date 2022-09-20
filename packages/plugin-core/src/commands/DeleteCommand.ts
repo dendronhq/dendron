@@ -1,7 +1,9 @@
 import {
   DeleteNoteResp,
+  DendronError,
   DLink,
   DVault,
+  ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
   Position,
@@ -180,10 +182,22 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
   async execute(opts?: CommandOpts): Promise<CommandOutput> {
     const engine = ExtensionProvider.getEngine();
     const ctx = "DeleteNoteCommand";
-
-    if (NoteUtils.isNoteProps(opts)) {
+    if (_.isString(opts)) {
       AnalyticsUtils.track(this.key, { source: "TreeView" });
-      const out = this.deleteNote({ note: opts, opts, engine, ctx });
+      const response = await engine.getNote(opts);
+      if (response.error) {
+        throw new DendronError({
+          message: `Cannot find note with id: ${opts}`,
+          payload: response.error,
+          severity: ERROR_SEVERITY.MINOR,
+        });
+      }
+      const out = await this.deleteNote({
+        note: response.data,
+        opts,
+        engine,
+        ctx,
+      });
       return out;
     } else {
       const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;

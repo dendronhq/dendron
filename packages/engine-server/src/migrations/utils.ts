@@ -250,6 +250,9 @@ export const DEPRECATED_PATHS = [
   "dev.enableWebUI",
   "workspace.enableHandlebarTemplates",
   "workspace.enableSmartRefs",
+  "preview.enableMermaid",
+  "enableMermaid",
+  "publishing.enableMermaid",
 ];
 
 export class MigrationUtils {

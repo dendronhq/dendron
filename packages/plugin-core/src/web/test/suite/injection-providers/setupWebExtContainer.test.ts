@@ -8,7 +8,7 @@ import { ITelemetryClient } from "../../../../telemetry/common/ITelemetryClient"
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
-import { NativeTreeView } from "../../../views/treeView/NativeTreeView";
+import { NativeTreeView } from "../../../../views/common/treeview/NativeTreeView";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 async function setupEnvironment() {

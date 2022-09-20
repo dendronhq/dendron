@@ -78,7 +78,7 @@ suite("Delete Command", function () {
         const deleteCmd = new DeleteCommand();
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
         const note = (await engine.findNotes({ fname: "bar" }))[0];
-        const resp = await deleteCmd.execute(note);
+        const resp = await deleteCmd.execute(note.id);
         expect(resp?.error).toEqual(undefined);
         const noteAfterDelete = await engine.findNotes({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);

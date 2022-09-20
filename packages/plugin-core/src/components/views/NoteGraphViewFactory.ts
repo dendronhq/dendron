@@ -91,7 +91,14 @@ export class NoteGraphPanelFactory {
         ).graph.createStub;
         switch (msg.type) {
           case GraphViewMessageEnum.onSelect: {
-            const note: NoteProps = this._ext.getEngine().notes[msg.data.id];
+            const resp = await this._ext.getEngine().getNote(msg.data.id);
+            if (resp.error) {
+              throw new DendronError({
+                message: `Note not found for ${msg.data.id}`,
+                innerError: resp.error,
+              });
+            }
+            const note = resp.data;
             if (note.stub && !createStub) {
               this.refresh(note, createStub);
             } else {

@@ -18,7 +18,7 @@ import _ from "lodash";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { DataNode } from "rc-tree/lib/interface";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { useCombinedSelector } from "../features";
 import { DENDRON_STYLE_CONSTANTS } from "../styles/constants";
 import { useDendronRouter } from "../utils/hooks";
@@ -169,18 +169,24 @@ function MenuView({
     if (menu.children && menu.children.length > 0) {
       return (
         <SubMenu
+          // @ts-ignore
           icon={menu.icon}
           className={
             menu.key === activeNote ? "dendron-ant-menu-submenu-selected" : ""
           }
           key={menu.key}
-          title={<MenuItemTitle menu={menu} noteIndex={noteIndex!} />}
+          title={
+            <MenuItemTitle
+              menu={menu}
+              noteIndex={noteIndex}
+              onSubMenuSelect={onSubMenuSelect}
+            />
+          }
           onTitleClick={(event) => {
             const target = event.domEvent.target as HTMLElement;
-            const isArrow = target.dataset.expandedicon;
-            if (!isArrow) {
-              onSubMenuSelect(event.key);
-            } else {
+            const isAnchor = target.nodeName === "A";
+            // only expand SubMenu when not an anchor, which means that a page transition will occur.
+            if (!isAnchor) {
               onExpand(event.key);
             }
           }}
@@ -192,8 +198,13 @@ function MenuView({
       );
     }
     return (
+      // @ts-ignore
       <MenuItem key={menu.key} icon={menu.icon}>
-        <MenuItemTitle menu={menu} noteIndex={noteIndex!} />
+        <MenuItemTitle
+          menu={menu}
+          noteIndex={noteIndex}
+          onSubMenuSelect={onSubMenuSelect}
+        />
       </MenuItem>
     );
   };
@@ -208,6 +219,7 @@ function MenuView({
         selectedKeys: [...expandKeys, activeNote],
       })}
       inlineIndent={DENDRON_STYLE_CONSTANTS.SIDER.INDENT}
+      // @ts-ignore
       expandIcon={ExpandIcon}
       inlineCollapsed={collapsed}
       // results in gray box otherwise when nav bar is too short for display
@@ -223,17 +235,34 @@ function MenuView({
   );
 }
 
-function MenuItemTitle(props: Partial<NoteData> & { menu: DataNode }) {
+function MenuItemTitle(
+  props: Partial<NoteData> & {
+    menu: DataNode;
+    onSubMenuSelect: (noteId: string) => void;
+  }
+) {
   const { getNoteUrl } = useDendronRouter();
 
   return (
+    // @ts-ignore
     <Typography.Text ellipsis={{ tooltip: props.menu.title }}>
       <Link
         href={getNoteUrl(props.menu.key as string, {
-          noteIndex: props.noteIndex!,
+          noteIndex: props.noteIndex,
         })}
+        passHref
       >
-        {props.menu.title}
+        <a
+          href={
+            "dummy" /* a way to dodge eslint warning that conflicts with `next/link`. see https://github.com/vercel/next.js/discussions/32233#discussioncomment-1766768*/
+          }
+          onClick={() => {
+            props.onSubMenuSelect(props.menu.key as string);
+          }}
+        >
+          {/* @ts-ignore */}
+          {props.menu.title}
+        </a>
       </Link>
     </Typography.Text>
   );
@@ -275,9 +304,9 @@ function treeMenuNode2DataNode({
         icon,
         children: node.children
           ? treeMenuNode2DataNode({
-              roots: node.children,
-              showVaultName,
-            })
+            roots: node.children,
+            showVaultName,
+          })
           : [],
       };
     })

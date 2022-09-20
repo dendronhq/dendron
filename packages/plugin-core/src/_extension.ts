@@ -1,3 +1,5 @@
+import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
+
 import {
   CONSTANTS,
   DWorkspaceV2,
@@ -57,6 +59,7 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
 import { KeybindingUtils } from "./KeybindingUtils";
+import { setupLocalExtContainer } from "./injection-providers/setupLocalExtContainer";
 import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
@@ -319,6 +322,12 @@ export async function _activate(
       }
       const wsImpl: DWorkspaceV2 = resp.data.workspace;
 
+      // setup extension container
+      setupLocalExtContainer({
+        wsRoot: maybeWsRoot,
+        vaults: wsImpl.vaults,
+        engine: resp.data.engine,
+      });
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 

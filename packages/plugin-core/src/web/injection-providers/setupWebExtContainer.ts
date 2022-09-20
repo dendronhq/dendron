@@ -22,6 +22,9 @@ import { TextDocumentService } from "../../services/web/TextDocumentService";
 import { DummyTelemetryClient } from "../../telemetry/common/DummyTelemetryClient";
 import { ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { WebTelemetryClient } from "../../telemetry/web/WebTelemetryClient";
+import { ITreeViewConfig } from "../../views/common/treeview/ITreeViewConfig";
+import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyConfig";
+
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
@@ -35,8 +38,6 @@ import {
 } from "../views/preview/IPreviewPanelConfig";
 import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
 import { PreviewPanel } from "../views/preview/PreviewPanel";
-import { ITreeViewConfig } from "../views/treeView/ITreeViewConfig";
-import { TreeViewDummyConfig } from "../views/treeView/TreeViewDummyConfig";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getSiteIndex } from "./getSiteIndex";

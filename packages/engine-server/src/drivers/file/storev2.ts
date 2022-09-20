@@ -216,24 +216,32 @@ export class FileStorage implements DStore {
    * See {@link DStore.findNotes}
    */
   async findNotes(opts: FindNoteOpts): Promise<NoteProps[]> {
-    const { fname, vault } = opts;
-    if (fname) {
-      return _.cloneDeep(
-        NoteDictsUtils.findByFname(
-          fname,
-          { notesById: this.notes, notesByFname: this.noteFnames },
-          vault
-        )
-      );
-    } else if (vault) {
-      return _.cloneDeep(
-        _.values(this.notes).filter((note) =>
-          VaultUtils.isEqualV2(note.vault, vault)
-        )
-      );
-    } else {
+    const { fname, vault, excludeStub } = opts;
+    if (!fname && !vault && _.isUndefined(excludeStub)) {
       return [];
     }
+
+    let notes: NoteProps[];
+
+    if (fname) {
+      notes = NoteDictsUtils.findByFname(
+        fname,
+        { notesById: this.notes, notesByFname: this.noteFnames },
+        vault
+      );
+    } else if (vault) {
+      notes = _.values(this.notes).filter((note) =>
+        VaultUtils.isEqualV2(note.vault, vault)
+      );
+    } else {
+      notes = _.values(this.notes);
+    }
+
+    if (excludeStub) {
+      notes = notes.filter((note) => note.stub !== true);
+    }
+
+    return _.cloneDeep(notes);
   }
 
   /**

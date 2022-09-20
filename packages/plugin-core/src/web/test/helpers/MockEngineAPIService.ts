@@ -75,6 +75,10 @@ export class MockEngineAPIService implements ReducedDEngine {
     return this.store.get(id) as Promise<RespV3<NoteProps>>;
   }
 
+  async getNoteMeta(id: string): Promise<RespV3<NotePropsMeta>> {
+    return this.store.get(id);
+  }
+
   bulkGetNotes(_ids: string[]): Promise<BulkGetNoteResp> {
     throw new Error("Not Implemented");
   }

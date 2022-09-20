@@ -17,7 +17,7 @@ export const decorateReference: Decorator<
     vaultName: reference.data.link.data.vaultName,
     engine,
     note,
-    vaults: config.vaults ?? [],
+    vaults: config.workspace?.vaults ?? config.vaults ?? [],
   });
   const decoration: DecorationWikilink = {
     type,

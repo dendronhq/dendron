@@ -18,6 +18,7 @@ const payload = {
     PUBLIC_DIR: PUBLIC_DIR || path.join(__dirname, "public"),
   },
   distDir: BUILD_DIR || '.next',
+  swcMinify: true,
 };
 
 if (!isProd && process.env.ANALYZE) {

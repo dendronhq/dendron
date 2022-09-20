@@ -1034,9 +1034,6 @@
         "enableHashesForFMTags": {
           "type": "boolean"
         },
-        "enableMermaid": {
-          "type": "boolean"
-        },
         "enablePrettyRefs": {
           "type": "boolean"
         },
@@ -1055,7 +1052,6 @@
         "enableNoteTitleForLink",
         "enableFrontmatterTags",
         "enableHashesForFMTags",
-        "enableMermaid",
         "enablePrettyRefs",
         "enableKatex",
         "automaticallyShowPreview"
@@ -1084,9 +1080,6 @@
           "type": "string"
         },
         "enableNoteTitleForLink": {
-          "type": "boolean"
-        },
-        "enableMermaid": {
           "type": "boolean"
         },
         "enablePrettyRefs": {

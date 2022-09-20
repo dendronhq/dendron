@@ -160,7 +160,7 @@ export abstract class BaseExportPodCommand<
           vscode.window.showErrorMessage("Unable to get vault payload.");
           return;
         }
-        payload = this.getPropsForVaultScope(vault);
+        payload = await this.getPropsForVaultScope(vault);
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get vault payload.");
@@ -169,7 +169,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Workspace: {
-        payload = this.getPropsForWorkspaceScope();
+        payload = await this.getPropsForWorkspaceScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get workspace payload.");
@@ -243,26 +243,17 @@ export abstract class BaseExportPodCommand<
    * Gets notes matching the selected hierarchy(for a specefic vault)
    * @returns
    */
-  private async getPropsForHierarchyScope(): Promise<
-    DNodeProps<any, any>[] | undefined
-  > {
-    return new Promise<DNodeProps<any, any>[] | undefined>((resolve) => {
-      this.hierarchySelector.getHierarchy().then((selection) => {
-        if (!selection) {
-          return resolve(undefined);
-        }
-        const { hierarchy, vault } = selection;
-        const notes = this.extension.getEngine().notes;
+  private async getPropsForHierarchyScope(): Promise<NoteProps[] | undefined> {
+    return this.hierarchySelector.getHierarchy().then(async (selection) => {
+      if (!selection) {
+        return undefined;
+      }
+      const { hierarchy, vault } = selection;
+      const notes = await this.extension
+        .getEngine()
+        .findNotes({ excludeStub: true, vault });
 
-        resolve(
-          Object.values(notes).filter(
-            (value) =>
-              value.fname.startsWith(hierarchy) &&
-              value.stub !== true &&
-              VaultUtils.isEqualV2(value.vault, vault)
-          )
-        );
-      });
+      return notes.filter((value) => value.fname.startsWith(hierarchy));
     });
   }
 
@@ -370,20 +361,18 @@ export abstract class BaseExportPodCommand<
    *
    * @returns all notes in the workspace
    */
-  private getPropsForWorkspaceScope(): DNodeProps[] | undefined {
+  private async getPropsForWorkspaceScope(): Promise<DNodeProps[]> {
     const engine = this.extension.getEngine();
-    return Object.values(engine.notes).filter((notes) => notes.stub !== true);
+    return engine.findNotes({ excludeStub: true });
   }
 
   /**
    *
    * @returns all notes in the vault
    */
-  private getPropsForVaultScope(vault: DVault): DNodeProps[] | undefined {
+  private async getPropsForVaultScope(vault: DVault): Promise<DNodeProps[]> {
     const engine = this.extension.getEngine();
-    return Object.values(engine.notes).filter(
-      (note) => note.stub !== true && VaultUtils.isEqualV2(note.vault, vault)
-    );
+    return engine.findNotes({ excludeStub: true, vault });
   }
 
   addAnalyticsPayload(opts: { config: Config; payload: NoteProps[] }) {

@@ -13,6 +13,6 @@ const treeInput = fs.readJSONSync(path.join(dataDir, "tree.json"));
 const treeMenuResp = parse(treeMenuSchema, treeInput);
 if (treeMenuResp.error) {
   throw new Error(
-    "The version of `dendron-cli` you have is out of date and not compatible with the latest nextjs-template. Please upgrade you `dendron-cli` by running `npm install @dendron-cli@latest` in the root of your workspace (where your dendron.yml file is located"
+    "The version of `dendron-cli` you have is out of date and not compatible with the latest nextjs-template. Please upgrade you `dendron-cli` by running `npm install @dendron-cli@latest` in the root of your workspace (where your dendron.yml file is located)."
   );
 }

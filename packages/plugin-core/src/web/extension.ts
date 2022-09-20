@@ -9,6 +9,7 @@ import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
+import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 
 /**
  * This is the entry point for the web extension variant of Dendron

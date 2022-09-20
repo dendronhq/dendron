@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.113.0 (2022-09-20)
+
+
+### Bug Fixes
+
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([7a2aafc](https://github.com/dendronhq/dendron/commit/7a2aafce71000c636285f456f7d8f315a3aeb02f))
+
+
+
+
+
 ## [0.112.1](https://github.com/dendronhq/dendron/compare/v0.53.0...v0.112.1) (2022-09-15)
 
 

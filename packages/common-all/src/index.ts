@@ -34,6 +34,7 @@ export * from "./engine";
 export * from "./drivers";
 export * from "./DLogger";
 export * from "./sidebar";
+export * from "./parse";
 
 export { axios, AxiosError };
 export { DateTime };

@@ -2,7 +2,7 @@ import { TreeViewItemLabelTypeEnum } from "@dendronhq/common-all";
 import assert from "assert";
 import { container } from "tsyringe";
 import { DendronEngineV3Web } from "../../../../engine/DendronEngineV3Web";
-import { EngineNoteProvider } from "../../../../views/treeView/EngineNoteProvider";
+import { EngineNoteProvider } from "../../../../../views/common/treeview/EngineNoteProvider";
 import { setupTestEngineContainer } from "../../../helpers/setupTestEngineContainer";
 
 async function initializeEngineNoteProviderTest() {

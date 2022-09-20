@@ -1,9 +1,11 @@
 import {
   ConsoleLogger,
+  DeleteNoteResp,
   DendronCompositeError,
   DendronError,
   DNodeUtils,
   DVault,
+  EngineDeleteOpts,
   EngineEventEmitter,
   EngineV3Base,
   EngineWriteOptsV2,
@@ -345,6 +347,26 @@ export class DendronEngineV3Web
 
   async writeSchema() {
     throw Error("writeSchema not implemented");
+  }
+
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOpts | undefined
+  ): Promise<DeleteNoteResp> {
+    const ctx = "DendronEngineV3Web:delete";
+    const changes = await super.deleteNote(id, opts);
+    if (changes.error) {
+      return changes;
+    }
+    if (changes.data) this._onNoteChangedEmitter.fire(changes.data);
+
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changes.data?.map((n) => NoteUtils.toLogObj(n.note)),
+    });
+
+    return changes;
   }
 
   private async initNotesNew(

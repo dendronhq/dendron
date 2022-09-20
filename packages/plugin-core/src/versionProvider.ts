@@ -4,6 +4,9 @@ import vscode from "vscode";
 import { extensionQualifiedId } from "./constants";
 import _ from "lodash";
 
+/**
+ * @deprecated - use vscode.ExtensionContext.extension.packageJSON.version instead.
+ */
 export class VersionProvider {
   static version() {
     let version: string | undefined;

@@ -46,7 +46,6 @@ const webExtensionConfig = {
       {
         test: /\.ts$/,
         exclude: /node_modules/,
-        // include: path.resolve(__dirname, "src/web/"),
         use: [
           {
             loader: "ts-loader",

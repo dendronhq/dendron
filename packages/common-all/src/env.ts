@@ -40,7 +40,7 @@ export function getStage(): Stage {
     stage ||
     STAGE ||
     NODE_ENV ||
-    process.env.NODE_ENV ||
+    process.env.NODE_ENV || // Webpack will do a direct text substitution on this value. See https://webpack.js.org/configuration/mode/
     overrideStage;
   // TODO
   if (stageOut === "development") {

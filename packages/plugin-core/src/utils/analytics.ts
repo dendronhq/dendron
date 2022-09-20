@@ -7,12 +7,9 @@ import {
   genUUID,
   getStage,
   Time,
-} from "@dendronhq/common-all";
-import {
-  SegmentClient,
-  SegmentUtils,
   VSCodeIdentifyProps,
-} from "@dendronhq/common-server";
+} from "@dendronhq/common-all";
+import { SegmentClient, SegmentUtils } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
@@ -42,6 +39,7 @@ export class AnalyticsUtils {
   static getVSCodeIdentifyProps(): VSCodeIdentifyProps {
     const {
       appName,
+      appHost,
       isNewAppInstall,
       language,
       machineId,
@@ -54,6 +52,7 @@ export class AnalyticsUtils {
       ideVersion: vscode.version,
       ideFlavor: appName,
       appVersion: VersionProvider.version(),
+      appHost,
       userAgent: appName,
       isNewAppInstall,
       isTelemetryEnabled,

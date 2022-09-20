@@ -2,20 +2,27 @@ import _ from "lodash";
 import { env, window } from "vscode";
 import { WSUtilsWeb } from "../utils/WSUtils";
 import { SiteUtilsWeb } from "../utils/SiteUtilsWeb";
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { DENDRON_COMMANDS } from "../../constants";
+import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 
 @injectable()
 export class CopyNoteURLCmd {
-  constructor(private wsUtils: WSUtilsWeb, private siteUtils?: SiteUtilsWeb) {}
-
   static key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
+
+  constructor(
+    private wsUtils: WSUtilsWeb,
+    @inject("ITelemetryClient") private _analytics: ITelemetryClient,
+    private siteUtils?: SiteUtilsWeb
+  ) {}
 
   async showFeedback(link: string) {
     window.showInformationMessage(`${link} copied`);
   }
 
   async run() {
+    this._analytics.track(CopyNoteURLCmd.key);
+
     const maybeTextEditor = this.getActiveTextEditor();
 
     if (_.isUndefined(maybeTextEditor)) {

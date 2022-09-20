@@ -472,7 +472,7 @@ export class DendronEngineV3Web
             );
 
             notes.forEach((noteTo: NoteProps) => {
-              BacklinkUtils.addBacklink({
+              BacklinkUtils.addBacklinkInPlace({
                 note: noteTo,
                 backlink: maybeBacklink,
               });

@@ -2157,6 +2157,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ghanvik",
+      "name": "Vikram G",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38922566?v=4",
+      "profile": "https://ghanvik.github.io/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

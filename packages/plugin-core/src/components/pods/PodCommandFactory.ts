@@ -43,14 +43,19 @@ export class PodCommandFactory {
       podType = config.podType;
       storedConfig = config;
     } else {
+      if (!configId) {
+        throw new DendronError({
+          message: `Please provide a config id`,
+        });
+      }
       storedConfig = PodV2ConfigManager.getPodConfigById({
         podsDir: path.join(getExtension().podsDir, "custom"),
-        opts: configId!,
+        opts: configId,
       });
 
       if (!storedConfig) {
         throw new DendronError({
-          message: `No pod config with id ${configId!.podId} found.`,
+          message: `No pod config with id ${configId.podId} found.`,
         });
       }
       // overrides the exportScope of stored config with the exportScope passed in args

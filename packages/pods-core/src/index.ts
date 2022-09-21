@@ -79,7 +79,7 @@ export enum CopyAsFormat {
 }
 
 export function getAllCopyAsFormat(): CopyAsFormat[] {
-  return [CopyAsFormat.JSON, CopyAsFormat.MARKDOWN];
+  return Object.values(CopyAsFormat);
 }
 
 export { JSONSchemaType, Client, Page, TitlePropertyValue };

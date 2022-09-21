@@ -12,7 +12,7 @@ import { PodCommandFactory } from "../components/pods/PodCommandFactory";
 import { PodUIControls } from "../components/pods/PodControls";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { BaseCommand, CodeCommandInstance } from "./base";
+import { BasicCommand, CodeCommandInstance } from "./base";
 
 type CommandOutput = void;
 type CommandInput = CodeCommandInstance;
@@ -22,7 +22,7 @@ type CommandOpts = CodeCommandInstance;
  * Command that will find the appropriate export command to run, and then run
  * it. This is the UI entry point for all export pod functionality.
  */
-export class CopyAsCommand extends BaseCommand<
+export class CopyAsCommand extends BasicCommand<
   CommandOpts,
   CommandOutput,
   CommandInput
@@ -70,13 +70,6 @@ export class CopyAsCommand extends BaseCommand<
       default:
         assertUnreachable(format);
     }
-  }
-
-  /**
-   * no-op
-   */
-  async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
-    return inputs;
   }
 
   async execute(opts: CommandOpts) {

@@ -387,6 +387,39 @@ describe("GIVEN NextExport pod", () => {
       });
     });
   });
+  describe("WHEN assetsPrefix is set AND favicon path exists", () => {
+    test("THEN favicon is copied in $assetPrefix/favicon.ico", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const dest = await setupExport({ engine, wsRoot, vaults });
+          await verifyExport(dest);
+          await checkDir(
+            { fpath: path.join(dest, "test-prefix") },
+            "favicon.ico"
+          );
+        },
+        {
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            const siteFaviconPath = path.join(
+              opts.vaults[0].fsPath,
+              "favicon",
+              "favicon.ico"
+            );
+            await fs.ensureFile(path.join(opts.wsRoot, siteFaviconPath));
+            setupConfig({
+              ...opts,
+              siteConfig: {
+                siteFaviconPath,
+                assetsPrefix: "/test-prefix",
+              },
+            });
+          },
+        }
+      );
+    });
+  });
 });
 
 describe("GIVEN nextjs export", () => {

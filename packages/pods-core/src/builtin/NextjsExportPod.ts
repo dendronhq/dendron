@@ -398,13 +398,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         PublishUtils.getCustomSiteBannerPathToPublish(dest)
       );
     }
-
     // get favicon
     const siteFaviconPath = publishingConfig.siteFaviconPath;
     if (siteFaviconPath) {
       const faviconPath = path.join(wsRoot, siteFaviconPath);
+      const assetsPrefix = publishingConfig.assetsPrefix;
+      let destFaviconPath = destPublicPath;
+      if (assetsPrefix) {
+        destFaviconPath = path.join(dest, assetsPrefix.replace(/\//g, ""));
+        fs.ensureDirSync(destFaviconPath);
+      }
+
       if (fs.existsSync(faviconPath)) {
-        fs.copySync(faviconPath, path.join(destPublicPath, "favicon.ico"));
+        fs.copySync(faviconPath, path.join(destFaviconPath, "favicon.ico"));
       }
     }
     // get logo

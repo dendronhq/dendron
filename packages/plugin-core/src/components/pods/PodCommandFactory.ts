@@ -13,7 +13,6 @@ import { JSONExportPodCommand } from "../../commands/pods/JSONExportPodCommand";
 import { MarkdownExportPodCommand } from "../../commands/pods/MarkdownExportPodCommand";
 import { NotionExportPodCommand } from "../../commands/pods/NotionExportPodCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { getExtension } from "../../workspace";
 
 export class PodCommandFactory {
   /**
@@ -48,8 +47,9 @@ export class PodCommandFactory {
           message: `Please provide a config id`,
         });
       }
+
       storedConfig = PodV2ConfigManager.getPodConfigById({
-        podsDir: path.join(getExtension().podsDir, "custom"),
+        podsDir: path.join(ExtensionProvider.getPodsDir(), "custom"),
         opts: configId,
       });
 

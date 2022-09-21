@@ -391,9 +391,11 @@ export class MDUtilsV5 {
     if (ConfigUtils.getEnableKatex(data.config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
+
     // apply publishing specific things
     if (shouldApplyPublishRules) {
       pRehype = pRehype.use(link, {
+        behavior: "append",
         properties: {
           "aria-hidden": "true",
           class: "anchor-heading icon-link",

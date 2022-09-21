@@ -214,6 +214,7 @@ export class MDUtilsV5Web {
     // apply publishing specific things
     if (shouldApplyPublishRules) {
       pRehype = pRehype.use(link, {
+        behavior: "append",
         properties: {
           "aria-hidden": "true",
           class: "anchor-heading icon-link",

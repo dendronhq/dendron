@@ -26,7 +26,7 @@ describe("GIVEN mermaid", () => {
               expect(resp).toMatchSnapshot();
               await checkString(
                 resp.contents,
-                `<h1 id="mermaid-code-block"><a aria-hidden="true" class="anchor-heading icon-link" href="#mermaid-code-block"></a>mermaid code block</h1>`
+                `<h1 id="mermaid-code-block">mermaid code block<a aria-hidden="true" class="anchor-heading icon-link" href="#mermaid-code-block"></a></h1>`
               );
             },
             // [ProcFlavor.PREVIEW]: ProcFlavor.REGULAR,

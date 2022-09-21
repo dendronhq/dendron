@@ -90,6 +90,28 @@ export const _2022_09_VIDEO_TUTORIAL_TEST = new ABTest(
 );
 
 /**
+ * Experiment to test highlights in quickpick labels
+ */
+export enum QuickPickLabelHighlightTestGroups {
+  "none" = "none",
+  "label" = "label",
+}
+
+export const _2022_09_QUICKPICK_LABEL_HIGHLIGHT_TEST = new ABTest(
+  "2022-09-QuickPickLabelHighlightTest",
+  [
+    {
+      name: QuickPickLabelHighlightTestGroups.none,
+      weight: 1,
+    },
+    {
+      name: QuickPickLabelHighlightTestGroups.label,
+      weight: 1,
+    },
+  ]
+);
+
+/**
  * Tutorial type of our ever-running / up to date main tutorial.
  * This should never change.
  *

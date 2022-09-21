@@ -15,7 +15,6 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand, CodeCommandInstance } from "./base";
 
 type CommandOutput = void;
-type CommandInput = CodeCommandInstance;
 type CommandOpts = CodeCommandInstance;
 
 /**
@@ -25,7 +24,7 @@ type CommandOpts = CodeCommandInstance;
 export class CopyAsCommand extends BasicCommand<
   CommandOpts,
   CommandOutput,
-  CommandInput
+  CopyAsFormat
 > {
   public format: CopyAsFormat[];
   key = DENDRON_COMMANDS.COPY_AS.key;
@@ -35,15 +34,16 @@ export class CopyAsCommand extends BasicCommand<
     this.format = getAllCopyAsFormat();
   }
 
-  async sanityCheck(_opts?: Partial<CodeCommandInstance> | undefined) {
+  async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "you must have a note open to execute this command";
     }
     return;
   }
 
-  async gatherInputs() {
-    const format = await PodUIControls.promtToSelectCopyAsFormat();
+  async gatherInputs(copyAsFormat?: CopyAsFormat) {
+    const format =
+      copyAsFormat || (await PodUIControls.promptToSelectCopyAsFormat());
 
     if (!format) {
       return;

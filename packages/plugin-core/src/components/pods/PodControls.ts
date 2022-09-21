@@ -410,7 +410,9 @@ export class PodUIControls {
       } catch (e: any) {
         if (
           e.message &&
-          e.message.includes(KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT)
+          e.message.includes(
+            KeybindingUtils.getMultipleKeybindingsMsgFormat("pod")
+          )
         ) {
           keybinding = "Multiple Keybindings";
         }
@@ -558,12 +560,28 @@ export class PodUIControls {
   /**
    * Prompt user to select the copy as format
    */
-  public static async promtToSelectCopyAsFormat(): Promise<
+  public static async promptToSelectCopyAsFormat(): Promise<
     CopyAsFormat | undefined
   > {
     const items = getAllCopyAsFormat().map<QuickPickItem>((value) => {
+      let keybinding;
+
+      try {
+        keybinding =
+          KeybindingUtils.getKeybindingsForCopyAsIfExists(value) || "";
+      } catch (e: any) {
+        if (
+          e.message &&
+          e.message.includes(
+            KeybindingUtils.getMultipleKeybindingsMsgFormat("copy as")
+          )
+        ) {
+          keybinding = "Multiple Keybindings";
+        }
+      }
       return {
         label: value,
+        description: keybinding,
         detail: `Format Dendron note to ${value} and copy it to the clipboard`,
       };
     });

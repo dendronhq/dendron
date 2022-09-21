@@ -10,7 +10,7 @@ import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
-import { NoteLookupAutoCompleteCommand } from "./commands/lookup/NoteLookupAutoCompleteCommand";
+import { NoteLookupAutoCompleteCommand } from "../commands/common/NoteLookupAutoCompleteCommand";
 
 /**
  * This is the entry point for the web extension variant of Dendron

@@ -16,9 +16,12 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { QuickPick, QuickPickItem } from "vscode";
+import { DendronContext } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { KeybindingUtils } from "../../KeybindingUtils";
+import { AutoCompleter } from "../../utils/autoCompleter";
 import { launchGoogleOAuthFlow } from "../../utils/pods";
+import { AutoCompletableRegistrar } from "../../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MultiSelectBtn, Selection2ItemsBtn } from "../lookup/buttons";
 import { LookupControllerV3CreateOpts } from "../lookup/LookupControllerV3Interface";
@@ -336,16 +339,17 @@ export class PodUIControls {
     };
 
     const extension = ExtensionProvider.getExtension();
-    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const lc = extension.lookupControllerFactory.create(lcOpts);
     const provider = extension.noteLookupProviderFactory.create(key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
 
     return new Promise((resolve) => {
+      let disposable: vscode.Disposable;
       NoteLookupProviderUtils.subscribe({
         id: key,
-        controller,
+        controller: lc,
         logger,
         onDone: (event: HistoryEvent) => {
           const data = event.data as NoteLookupProviderSuccessResp;
@@ -353,16 +357,34 @@ export class PodUIControls {
             resolve(undefined);
           }
           resolve(data);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onHide: () => {
           resolve(undefined);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
-      controller.show({
+      lc.show({
         title: "Select notes to export.",
         placeholder: "Lookup notes.",
         provider,
         selectAll: true,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

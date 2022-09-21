@@ -9,8 +9,10 @@ import {
   ScratchBtn,
   Selection2LinkBtn,
 } from "../components/lookup/buttons";
-import { CommandRunOpts as NoteLookupRunOpts } from "./NoteLookupCommand";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
+import {
+  CommandRunOpts as NoteLookupRunOpts,
+  NoteLookupCommand,
+} from "./NoteLookupCommand";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
@@ -62,7 +64,7 @@ export class CreateScratchNoteCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "CreateScratchNote";
     Logger.info({ ctx, msg: "enter" });
-    const lookupCmd = AutoCompletableRegistrar.getNoteLookupCmd();
+    const lookupCmd = new NoteLookupCommand();
     lookupCmd.controller = this.createLookupController();
     await lookupCmd.run(opts);
 

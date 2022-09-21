@@ -65,9 +65,7 @@ import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
-import { isAutoCompletable } from "./utils/AutoCompletable";
 import { ExtensionUtils } from "./utils/ExtensionUtils";
-import { AutoCompletableRegistrar } from "./utils/registers/AutoCompletableRegistrar";
 import { StartupPrompts } from "./utils/StartupPrompts";
 import { StartupUtils } from "./utils/StartupUtils";
 import { VSCodeUtils } from "./vsCodeUtils";
@@ -612,12 +610,6 @@ async function _setupCommands({
     const cmd = new Cmd(ext);
     if (isDisposable(cmd)) {
       context.subscriptions.push(cmd);
-    }
-
-    // Register commands that implement on `onAutoComplete` with AutoCompletableRegister
-    // to be able to be invoked with auto completion action.
-    if (isAutoCompletable(cmd)) {
-      AutoCompletableRegistrar.register(cmd.key, cmd);
     }
 
     if (!existingCommands.includes(cmd.key))

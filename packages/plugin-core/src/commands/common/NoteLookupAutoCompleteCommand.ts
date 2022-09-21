@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { EventEmitter } from "vscode";
-import { DENDRON_COMMANDS } from "../../../constants";
+import { DENDRON_COMMANDS } from "../../constants";
 
 @injectable()
 export class NoteLookupAutoCompleteCommand {

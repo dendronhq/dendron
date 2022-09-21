@@ -4,8 +4,8 @@ import { InputArgCommand } from "./base";
 import {
   CommandOutput as NoteLookupOutput,
   CommandRunOpts as NoteLookupRunOpts,
+  NoteLookupCommand,
 } from "./NoteLookupCommand";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import _ from "lodash";
 import { window } from "vscode";
 import { AnalyticsUtils } from "../utils/analytics";
@@ -41,7 +41,7 @@ export class CreateNoteCommand extends InputArgCommand<
       "💡 Tip: Enter `Ctrl+L` / `Cmd+L` to open the lookup bar!"
     );
     return {
-      lookup: AutoCompletableRegistrar.getNoteLookupCmd().run(args),
+      lookup: new NoteLookupCommand().run(args),
     };
   }
 }

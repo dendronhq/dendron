@@ -34,7 +34,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import visit from "unist-util-visit";
-import { Location } from "vscode";
+import { Disposable, Location } from "vscode";
 import {
   ILookupControllerV3,
   LookupControllerV3CreateOpts,
@@ -44,12 +44,14 @@ import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProvider
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { PickerUtilsV2 } from "../components/lookup/utils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
+import { AutoCompleter } from "../utils/autoCompleter";
 import { findReferences, FoundRefT, hasAnchorsToUpdate } from "../utils/md";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 
@@ -265,6 +267,7 @@ export class MoveHeaderCommand extends BasicCommand<
     const lc =
       ExtensionProvider.getExtension().lookupControllerFactory.create(lcOpts);
     return new Promise((resolve) => {
+      let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
         id: this.key,
         controller: lc,
@@ -283,9 +286,25 @@ export class MoveHeaderCommand extends BasicCommand<
             nodesToMove,
             engine,
           });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       this.promptForDestination(lc, opts);
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
+      });
     });
   }
 

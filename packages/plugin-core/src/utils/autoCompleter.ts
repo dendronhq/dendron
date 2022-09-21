@@ -3,7 +3,6 @@
  * */
 import { FuseEngine } from "@dendronhq/common-all";
 import * as _ from "lodash";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { CREATE_NEW_DETAIL_LIST } from "../components/lookup/constants";
 import { QuickPick, QuickPickItem } from "vscode";
 

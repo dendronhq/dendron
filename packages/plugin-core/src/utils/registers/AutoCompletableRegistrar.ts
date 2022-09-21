@@ -1,49 +1,32 @@
-import { AutoCompletable } from "../AutoCompletable";
-import { DendronError, ErrorFactory } from "@dendronhq/common-all";
-import { CodeCommandInstance } from "../../commands/base";
-import { DENDRON_COMMANDS } from "../../constants";
-import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
+import { Event, EventEmitter } from "vscode";
 
 /**
- * Populated during initialization with commands that implement function: cmd.onAutoComplete
- * */
+ * Singleton - TODO get rid of singleton in favor of injection in local ext -
+ * this requires us to be able to construct local commands via injection first
+ */
 export class AutoCompletableRegistrar {
-  static _UI_AUTOCOMPLETE_COMMANDS = new Map<
-    string,
-    CodeCommandInstance & AutoCompletable
-  >();
+  private static _eventEmitter: EventEmitter<void> | undefined;
 
-  static register = (
-    key: string,
-    cmd: CodeCommandInstance & AutoCompletable
-  ) => {
-    this._UI_AUTOCOMPLETE_COMMANDS.set(key, cmd);
-  };
-
-  static getNoteLookupCmd(): NoteLookupCommand {
-    const isNoteLookup = (cmd: any): cmd is NoteLookupCommand => {
-      return (cmd as NoteLookupCommand).run !== undefined;
-    };
-
-    const noteLookupCmd = this.getCmd(DENDRON_COMMANDS.LOOKUP_NOTE.key);
-
-    if (isNoteLookup(noteLookupCmd)) {
-      return noteLookupCmd;
-    } else {
-      throw new DendronError({ message: `Could not get note lookup command.` });
+  /**
+   * Event that fires when 'Tab' is pressed when the
+   * DendronContext.NOTE_LOOK_UP_ACTIVE context is set to true.
+   */
+  public static get OnAutoComplete(): Event<void> {
+    if (!this._eventEmitter) {
+      this._eventEmitter = new EventEmitter();
     }
+
+    return this._eventEmitter.event;
   }
 
-  /** Retrieve command instance that is used by UI. */
-  static getCmd = (key: string): CodeCommandInstance & AutoCompletable => {
-    const cmd = this._UI_AUTOCOMPLETE_COMMANDS.get(key);
-
-    if (cmd === undefined) {
-      throw ErrorFactory.createInvalidStateError({
-        message: `AutoCompletable command is not registered for '${key}'`,
-      });
+  /**
+   * NOTE: ONLY NoteLookupAutoCompleteCommand should call this method.
+   */
+  public static fire(): void {
+    if (!this._eventEmitter) {
+      this._eventEmitter = new EventEmitter();
     }
 
-    return cmd;
-  };
+    this._eventEmitter.fire();
+  }
 }

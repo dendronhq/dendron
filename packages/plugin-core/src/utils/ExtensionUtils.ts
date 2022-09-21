@@ -313,7 +313,8 @@ export class ExtensionUtils {
       type: workspaceType,
       config: dendronConfig,
     } = workspace;
-    let numNotes = _.size(engine.notes);
+    const notes = await engine.findNotes({ excludeStub: false });
+    let numNotes = notes.length;
 
     let numNoteRefs = 0;
     let numWikilinks = 0;
@@ -347,7 +348,7 @@ export class ExtensionUtils {
     ]);
 
     // Takes about ~10 ms to compute in org-workspace
-    Object.values(engine.notes).forEach((val) => {
+    notes.forEach((val) => {
       val.links.forEach((link) => {
         switch (link.type) {
           case "ref":

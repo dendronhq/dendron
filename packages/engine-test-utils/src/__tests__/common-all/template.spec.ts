@@ -32,7 +32,7 @@ describe(`WHEN running applyTemplate tests`, () => {
 
     await runEngineTestV5(
       async ({ engine }) => {
-        const templateNote: NoteProps = engine.notes["foo"];
+        const templateNote: NoteProps = (await engine.getNote("foo")).data!;
         templateNote.body = opts.templateNoteBody;
         templateNote.custom = opts.fm;
         TemplateUtils.applyTemplate({

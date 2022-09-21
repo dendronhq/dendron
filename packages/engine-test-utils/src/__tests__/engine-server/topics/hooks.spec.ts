@@ -51,7 +51,7 @@ const writeNote = async ({
 }) => {
   const note = NoteUtils.create(noteOpts);
   await engine.writeNote(note);
-  const out = engine.notes[note.id];
+  const out = (await engine.getNote(note.id)).data!;
   return { note: out };
 };
 
@@ -87,7 +87,7 @@ describe("engine", () => {
         vault,
       });
       await engine.writeNote(note);
-      const ent = engine.notes["hooked"];
+      const ent = (await engine.getNote("hooked")).data!;
       expect(
         await AssertUtils.assertInString({
           body: ent.body,
@@ -130,7 +130,7 @@ describe("engine", () => {
         vault,
       });
       await engine.writeNote(note);
-      const ent = engine.notes["hooked"];
+      const ent = (await engine.getNote("hooked")).data!;
       expect(
         await AssertUtils.assertInString({
           body: ent.body,
@@ -179,7 +179,7 @@ describe("engine", () => {
         vault,
       });
       await engine.writeNote(note);
-      const ent = engine.notes["hooked"];
+      const ent = (await engine.getNote("hooked")).data!;
       expect(
         await AssertUtils.assertInString({
           body: ent.body,
@@ -225,7 +225,7 @@ describe("engine", () => {
         vault,
       });
       await engine.writeNote(note);
-      const ent = engine.notes["hooked"];
+      const ent = (await engine.getNote("hooked")).data!;
       expect(
         await AssertUtils.assertInString({
           body: ent.body,
@@ -327,7 +327,7 @@ describe("engine", () => {
           vault,
         });
         await engine.writeNote(note, { runHooks: false });
-        const ent = engine.notes["hooked"];
+        const ent = (await engine.getNote("hooked")).data!;
         expect(
           await AssertUtils.assertInString({
             body: ent.body,

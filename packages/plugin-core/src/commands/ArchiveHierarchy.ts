@@ -66,7 +66,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
     const { match } = _.defaults(opts, {});
     const replace = `archive.${match}`;
     const engine = ExtensionProvider.getEngine();
-    const capturedNotes = this.refactorCmd.getCapturedNotes({
+    const capturedNotes = await this.refactorCmd.getCapturedNotes({
       scope: undefined,
       matchRE: new RegExp(match),
       engine,

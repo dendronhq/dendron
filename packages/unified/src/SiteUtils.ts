@@ -148,7 +148,6 @@ export class SiteUtils {
   // }): Promise<{ notes: NotePropsByIdDict; domains: NoteProps[] }> {
   //   const logger = createLogger(LOGGER_NAME);
   //   const { engine, config } = opts;
-  //   const notes = _.clone(engine.notes);
 
   //   const cleanPublishingConfig = configIsV4(config)
   //     ? DConfig.cleanSiteConfig(

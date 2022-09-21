@@ -17,7 +17,7 @@ export class DumpStateCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute() {
     const ctx = "DumpStateCommand";
     const { engine } = getDWorkspace();
-    const notes = _.mapValues(engine.notes, (val) => _.omit(val, "body"));
+    const notes = await engine.findNotesMeta({ excludeStub: false });
     const schemas = engine.schemas;
     Logger.info({ ctx, notes, schemas });
     await new OpenLogsCommand().execute();

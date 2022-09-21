@@ -823,9 +823,9 @@ export class NoteUtils {
     notes,
   }: {
     note: NoteProps;
-    notes: NotePropsByIdDict;
+    notes: NoteProps[];
   }): NoteProps[] {
-    const maybe = _.values(notes).map((ent) => {
+    const maybe = notes.map((ent) => {
       if (
         _.find(ent.links, (l) => {
           return l.to?.fname?.toLowerCase() === note.fname.toLowerCase();
@@ -908,10 +908,6 @@ export class NoteUtils {
 
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
-  }
-
-  static getRoots(notes: NotePropsByIdDict): NoteProps[] {
-    return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
   /**
@@ -1184,8 +1180,7 @@ export class NoteUtils {
 
   /** Generate a random color for `note`, but allow the user to override that color selection.
    *
-   * @param note The fname of note that you want to get the color of.
-   * @param notes: All notes in `engine.notes`, used to check the ancestors of `note`.
+   * @param fname The fname of note that you want to get the color of.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
   static color(opts: { fname: string; vault?: DVault }): {
@@ -1208,7 +1203,7 @@ export class NoteUtils {
    * will find `foo`.
    *
    * ```ts
-   * const ancestorNotes = NoteUtils.ancestors({ fname, notes: engine.notes });
+   * const ancestorNotes = NoteUtils.ancestors({ fname });
    * for (const ancestor of ancestorNotes) { }
    * // or
    * const allAncestors = [...ancestorNotes];

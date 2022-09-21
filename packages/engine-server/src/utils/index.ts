@@ -5,8 +5,8 @@ import {
   DNoteRefLink,
   getSlugger,
   NoteProps,
-  NotePropsByIdDict,
   NotesCacheEntry,
+  ReducedDEngine,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -224,20 +224,26 @@ export class HierarchyUtils {
    * @param opts.skipLevels: how many levels to skip for child
    * @returns
    */
-  static getChildren = (opts: {
+  static getChildren = async (opts: {
     skipLevels: number;
     note: NoteProps;
-    notes: NotePropsByIdDict;
+    engine: ReducedDEngine;
   }) => {
-    const { skipLevels, note, notes } = opts;
-    let children = note.children
-      .map((id) => notes[id])
-      .filter((ent) => !_.isUndefined(ent));
+    const { skipLevels, note, engine } = opts;
+
+    let children = (await engine.bulkGetNotes(note.children)).data;
+
     let acc = 0;
     while (acc !== skipLevels) {
-      children = children
-        .flatMap((ent) => ent.children.map((id) => notes[id]))
-        .filter((ent) => !_.isUndefined(ent));
+      // eslint-disable-next-line no-await-in-loop
+      const descendants = await Promise.all(
+        children
+          .flatMap(
+            async (ent) => (await engine.bulkGetNotes(ent.children)).data
+          )
+          .filter((ent) => !_.isUndefined(ent))
+      );
+      children = descendants.flat();
       acc += 1;
     }
     return children;

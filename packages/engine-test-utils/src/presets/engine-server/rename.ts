@@ -1511,7 +1511,6 @@ const NOTES = {
   // DOMAIN_NO_CHILDREN_V3: new TestPresetEntryV4(
   //   async ({ vaults, engine }) => {
   //     const vault = vaults[0];
-  //     const notes = engine.notes;
   //     const alphaFname = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
   //     const noteOrig = (
   //      await engine.findNotes({

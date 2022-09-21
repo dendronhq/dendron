@@ -75,14 +75,6 @@ export class NoteLookupUtils {
     return roots.concat(childrenOfRootNotes.data);
   };
 
-  static fetchRootResults = (notes: NotePropsByIdDict) => {
-    const roots: NoteProps[] = NoteUtils.getRoots(notes);
-
-    const childrenOfRoot = roots.flatMap((ent) => ent.children);
-    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
-    return roots.concat(childrenOfRootNotes);
-  };
-
   /**
    * The core of Dendron lookup logic
    */

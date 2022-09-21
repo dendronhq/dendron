@@ -23,9 +23,9 @@ describe("GIVEN NoteStore", () => {
           URI.file(wsRoot)
         );
 
-        _.values(engine.notes).forEach(async (note) => {
-          const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
-          await noteStore.writeMetadata({ key: note.id, noteMeta });
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        engineNotes.forEach(async (noteMeta) => {
+          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
         });
 
         // Test NoteStore.find
@@ -71,6 +71,31 @@ describe("GIVEN NoteStore", () => {
           vault: vaults[0],
         });
         expect(metadataResp.data!.length).toEqual(4);
+
+        // Write stub note to note store
+        const newNote = await NoteTestUtilsV4.createNote({
+          fname: "foobar",
+          body: "",
+          vault: vaults[0],
+          wsRoot,
+          stub: true,
+        });
+
+        note = (await noteStore.get(newNote.id)).data!;
+        expect(note).toBeFalsy();
+        await noteStore.write({ key: newNote.id, note: newNote });
+
+        // Test NoteStore.findMetadata excludeStub = true
+        metadataResp = await noteStore.findMetaData({
+          excludeStub: true,
+        });
+        expect(metadataResp.data!.length).toEqual(6);
+
+        // Test NoteStore.findMetadata excludeStub = false
+        metadataResp = await noteStore.findMetaData({
+          excludeStub: false,
+        });
+        expect(metadataResp.data!.length).toEqual(7);
       },
       {
         expect,
@@ -469,9 +494,9 @@ describe("GIVEN NoteStore", () => {
           URI.file(wsRoot)
         );
 
-        _.values(engine.notes).forEach(async (note) => {
-          const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
-          await noteStore.writeMetadata({ key: note.id, noteMeta });
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        engineNotes.forEach(async (noteMeta) => {
+          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
         });
 
         // Test NoteStore.get

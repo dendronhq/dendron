@@ -494,9 +494,10 @@ export async function findReferencesById(id: string) {
     return;
   }
 
+  const engineNotes = await engine.findNotes({ excludeStub: true });
   const notesWithRefs = NoteUtils.getNotesWithLinkTo({
     note,
-    notes: engine.notes,
+    notes: engineNotes,
   });
 
   _.forEach(notesWithRefs, (noteWithRef) => {

@@ -264,18 +264,17 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     panel.webview.html = md.render(content);
   }
 
-  getCapturedNotes(opts: {
+  async getCapturedNotes(opts: {
     scope: NoteLookupProviderSuccessResp | undefined;
     matchRE: RegExp;
     engine: DEngineClient;
   }) {
     const { scope, matchRE, engine } = opts;
-    const { notes } = engine;
 
     const scopedItems =
       _.isUndefined(scope) ||
       scope.selectedItems[0] === this.entireWorkspaceQuickPickItem
-        ? _.toArray(notes)
+        ? await engine.findNotes({ excludeStub: false })
         : scope.selectedItems.map(
             (item) =>
               _.omit(item, ["label", "detail", "alwaysShow"]) as DNodeProps
@@ -423,7 +422,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const ext = ExtensionProvider.getExtension();
     const { engine } = ExtensionProvider.getDWorkspace();
     const matchRE = new RegExp(match);
-    const capturedNotes = this.getCapturedNotes({
+    const capturedNotes = await this.getCapturedNotes({
       scope,
       matchRE,
       engine,

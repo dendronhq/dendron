@@ -8,14 +8,13 @@ describe("GIVEN setupEngine", () => {
   describe("WHEN --attach option", () => {
     test("THEN attach to running engine", (done) => {
       runEngineTestV5(
-        async ({ wsRoot, engine, port }) => {
+        async ({ wsRoot, port }) => {
           const resp = await setupEngine({
             wsRoot,
             noWritePort: true,
             attach: true,
             target: "cli",
           });
-          expect(resp.engine.notes).toEqual(engine.notes);
           expect(resp.port).toEqual(port);
           resp.server.close(() => {
             done();

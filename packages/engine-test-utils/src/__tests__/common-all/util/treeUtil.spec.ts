@@ -1,4 +1,4 @@
-import { DendronError, TreeUtils } from "@dendronhq/common-all";
+import { NoteDictsUtils, TreeUtils } from "@dendronhq/common-all";
 import type { Sidebar } from "@dendronhq/common-all";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
@@ -26,31 +26,12 @@ describe("GIVEN sidebar", () => {
     test("THEN return regular tree", async () => {
       await runEngineTestV5(
         async ({ engine }) => {
-          const treeData = TreeUtils.generateTreeData(engine.notes, sidebar);
+          const engineNotes = await engine.findNotes({ excludeStub: false });
+          const treeData = TreeUtils.generateTreeData(
+            NoteDictsUtils.createNotePropsByIdDict(engineNotes),
+            sidebar
+          );
           expect(treeData.roots).toMatchSnapshot();
-        },
-        {
-          expect,
-          preSetupHook: ENGINE_HOOKS.setupBasic,
-        }
-      );
-    });
-  });
-});
-
-describe("sortNotesAtLevel", () => {
-  describe("GIVEN noteIds that do not exist in noteDict", () => {
-    test("THEN gracefully process only available notes and return error payload", async () => {
-      await runEngineTestV5(
-        async ({ engine }) => {
-          const noteDict = engine.notes;
-          const noteIds = _.toArray(noteDict).map((props) => props.id);
-          noteIds.push("dummy");
-
-          const resp = TreeUtils.sortNotesAtLevel({ noteIds, noteDict });
-          expect(resp.data.includes("dummy")).toBeFalsy();
-          expect(resp.error instanceof DendronError).toBeTruthy();
-          expect(resp.error?.payload).toEqual('{"omitted":["dummy"]}');
         },
         {
           expect,
@@ -71,8 +52,9 @@ describe("GIVEN basic workspace", () => {
             vault: vaults[0],
           })
         )[0];
+        const engineNotes = await engine.findNotes({ excludeStub: false });
         const engineTree = TreeUtils.createTreeFromEngine(
-          engine.notes,
+          NoteDictsUtils.createNotePropsByIdDict(engineNotes),
           rootNote.id
         );
         expect(engineTree).toMatchSnapshot();

@@ -114,11 +114,11 @@ describe("engine, cache", () => {
           }),
         };
         engine.vaults = [newVault];
-        engine.notes = {};
         await engine.init();
+        const engineNotes = await engine.findNotes({ excludeStub: false });
         expect(
           _.uniqBy(
-            _.map(_.values(engine.notes), (ent) => ent.vault),
+            _.map(_.values(engineNotes), (ent) => ent.vault),
             "fsPath"
           )
         ).toEqual([newVault]);

@@ -25,7 +25,8 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        expect(_.size(engine.notes)).toEqual(notes.length);
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        expect(engineNotes.length).toEqual(notes.length);
       },
       {
         expect,
@@ -45,7 +46,8 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        expect(_.size(engine.notes)).toEqual(notes.length);
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        expect(engineNotes.length).toEqual(notes.length);
 
         const { error } = await engine.init();
         expect(error).toBeFalsy();
@@ -70,7 +72,8 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        expect(_.size(engine.notes)).toEqual(notes.length);
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        expect(engineNotes.length).toEqual(notes.length);
         const newNote = NoteUtils.create({
           id: "new-note",
           fname: "new-note",

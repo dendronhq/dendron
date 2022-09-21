@@ -16,6 +16,7 @@ export type FindNoteOpts = {
   // If vault is provided, filter results so that only notes with matching vault is returned
   vault?: DVault;
   // If true, exclude stubs from results. Otherwise, include stub notes
+  // WARNING: If false and no other parameters are set, this will return all notes in the engine
   excludeStub?: boolean;
 };
 

@@ -1,8 +1,4 @@
-import {
-  DEngineClient,
-  VaultUtils,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { DEngineClient, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   ExportPod,
   ExportPodConfig,
@@ -55,8 +51,11 @@ describe("GIVEN export", () => {
     test("THEN export everything", async () => {
       await runEngineTestV5(async (opts) => {
         const resp = await runExport({ opts });
+        const engineNotes = await opts.engine.findNotesMeta({
+          excludeStub: false,
+        });
         expect(resp.notes.map((ent) => ent.id).sort()).toEqual(
-          _.keys(opts.engine.notes).sort()
+          engineNotes.map((ent) => ent.id).sort()
         );
       }, defaultTestOpts);
     });
@@ -73,10 +72,10 @@ describe("GIVEN export", () => {
             },
           },
         });
-        const expected = _.values(opts.engine.notes)
-          .filter((ent) => VaultUtils.getName(ent.vault) === "vault1")
-          .map((ent) => ent.id)
-          .sort();
+        const vaultNotes = await opts.engine.findNotesMeta({
+          vault: opts.vaults[0],
+        });
+        const expected = vaultNotes.map((ent) => ent.id).sort();
         expect(resp.notes.map((ent) => ent.id).sort()).toEqual(expected);
       }, defaultTestOpts);
     });
@@ -91,10 +90,10 @@ describe("GIVEN export", () => {
             vaults: { include: ["vault1"] },
           },
         });
-        const expected = _.values(opts.engine.notes)
-          .filter((ent) => VaultUtils.getName(ent.vault) === "vault1")
-          .map((ent) => ent.id)
-          .sort();
+        const vaultNotes = await opts.engine.findNotesMeta({
+          vault: opts.vaults[0],
+        });
+        const expected = vaultNotes.map((ent) => ent.id).sort();
         expect(resp.notes.map((ent) => ent.id).sort()).toEqual(expected);
       }, defaultTestOpts);
     });

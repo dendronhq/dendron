@@ -163,9 +163,10 @@ const setupTestFactoryForNotes = (opts: {
   return _setupTestFactoryCommon({
     ...opts,
     cb: async ({ engine, pod }) => {
-      const notes = _.values(engine.notes).filter(
-        (ent) => !DNodeUtils.isRoot(ent)
-      );
+      const engineNotes = await engine.findNotes({
+        excludeStub: false,
+      });
+      const notes = engineNotes.filter((ent) => !DNodeUtils.isRoot(ent));
       return pod.exportNotes(notes);
     },
   });

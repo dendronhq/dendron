@@ -293,7 +293,7 @@ suite("RefactorHierarchy", function () {
           onInit: async () => {
             const cmd = new RefactorHierarchyCommandV2();
             const engine = getEngine();
-            const capturedNotes = cmd.getCapturedNotes({
+            const capturedNotes = await cmd.getCapturedNotes({
               scope: undefined,
               matchRE: new RegExp("dendron.ref"),
               engine,

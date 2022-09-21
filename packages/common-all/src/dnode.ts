@@ -822,9 +822,9 @@ export class NoteUtils {
     note,
     notes,
   }: {
-    note: NoteProps;
-    notes: NoteProps[];
-  }): NoteProps[] {
+    note: NotePropsMeta;
+    notes: NotePropsMeta[];
+  }): NotePropsMeta[] {
     const maybe = notes.map((ent) => {
       if (
         _.find(ent.links, (l) => {
@@ -836,7 +836,7 @@ export class NoteUtils {
         return;
       }
     });
-    return _.reject(maybe, _.isUndefined) as NoteProps[];
+    return _.reject(maybe, _.isUndefined) as NotePropsMeta[];
   }
 
   static getFullPath({

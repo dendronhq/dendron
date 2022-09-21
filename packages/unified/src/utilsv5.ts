@@ -6,7 +6,7 @@ import {
   ERROR_STATUS,
   IntermediateDendronConfig,
   NoteDicts,
-  NoteProps,
+  NotePropsMeta,
   OptionalExceptFor,
   ProcFlavor,
 } from "@dendronhq/common-all";
@@ -107,7 +107,7 @@ export type ProcDataFullOptsV5 = {
   publishOpts?: DendronPubOpts;
   backlinkHoverOpts?: BacklinkOpts;
   wsRoot?: string;
-  noteToRender: NoteProps;
+  noteToRender: NotePropsMeta;
   noteCacheForRenderDict?: NoteDicts;
 };
 
@@ -133,7 +133,7 @@ export type ProcDataFullV5 = {
    */
   noteRefLvl: number;
 
-  noteToRender: NoteProps;
+  noteToRender: NotePropsMeta;
   noteCacheForRenderDict?: NoteDicts;
 };
 
@@ -195,7 +195,7 @@ export class MDUtilsV5 {
     );
   }
 
-  static getFM(opts: { note: NoteProps }) {
+  static getFM(opts: { note: NotePropsMeta }) {
     const { note } = opts;
     const custom = note.custom ? note.custom : undefined;
     return {

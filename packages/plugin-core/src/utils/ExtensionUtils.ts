@@ -313,7 +313,7 @@ export class ExtensionUtils {
       type: workspaceType,
       config: dendronConfig,
     } = workspace;
-    const notes = await engine.findNotes({ excludeStub: false });
+    const notes = await engine.findNotesMeta({ excludeStub: false });
     let numNotes = notes.length;
 
     let numNoteRefs = 0;

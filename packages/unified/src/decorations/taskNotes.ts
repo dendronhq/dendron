@@ -35,7 +35,7 @@ export async function decorateTaskNote({
       ? VaultUtils.getVaultByName({ vname: vaultName, vaults: config.vaults })
       : undefined;
 
-  const note = (await engine.findNotes({ fname, vault }))[0];
+  const note = (await engine.findNotesMeta({ fname, vault }))[0];
   if (!note || !TaskNoteUtils.isTaskNote(note)) return;
 
   // Determines whether the task link is preceded by an empty or full checkbox

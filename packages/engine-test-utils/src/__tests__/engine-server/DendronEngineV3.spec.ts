@@ -10,24 +10,12 @@ import _ from "lodash";
 import path from "path";
 import { createEngineV3FromEngine, runEngineTestV5 } from "../../engine";
 import {
-  getPreset,
   ENGINE_HOOKS,
   ENGINE_V3_PRESETS,
   ENGINE_V3_PRESETS_MULTI,
 } from "../../presets";
 
 const createEngine = createEngineV3FromEngine;
-
-test.skip("bond", async () => {
-  const preset = getPreset({
-    key: "DOMAIN_NO_CHILDREN",
-    nodeType: "NOTES",
-    presetName: "rename",
-    presets: ENGINE_V3_PRESETS,
-  });
-  const { testFunc, ...opts } = preset;
-  await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
-});
 
 describe("engine, notes/", () => {
   const nodeType = "NOTES";
@@ -177,7 +165,7 @@ describe("engine, cache", () => {
         };
         engine.vaults = [newVault];
         await engine.init();
-        const engineNotes = await engine.findNotes({ excludeStub: false });
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
         expect(
           _.uniqBy(
             _.map(_.values(engineNotes), (ent) => ent.vault),

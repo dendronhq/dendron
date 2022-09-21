@@ -1,6 +1,6 @@
 import {
   DVault,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
   SchemaCreationUtils,
   SchemaInMaking,
@@ -111,7 +111,7 @@ export class Hierarchy {
 }
 
 export type SchemaCandidate = {
-  note: NoteProps;
+  note: NotePropsMeta;
   label: string;
   detail: string;
 };
@@ -499,7 +499,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
     hierarchyLevel: HierarchyLevel
   ): Promise<SchemaCandidate[]> {
     const { engine } = ExtensionProvider.getDWorkspace();
-    const engineNotes = await engine.findNotes({ excludeStub: false });
+    const engineNotes = await engine.findNotesMeta({ excludeStub: false });
     const noteCandidates = _.filter(engineNotes, (n) =>
       hierarchyLevel.isCandidateNote(n.fname)
     );
@@ -522,7 +522,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
   }
 
   formatSchemaCandidates(
-    noteCandidates: NoteProps[],
+    noteCandidates: NotePropsMeta[],
     hierarchyLevel: HierarchyLevel
   ): SchemaCandidate[] {
     return noteCandidates

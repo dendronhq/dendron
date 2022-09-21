@@ -6,7 +6,7 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache, VaultUtils } from "..";
+import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
 import { COLORS_LIST } from "../colors";
 import SparkMD5 from "spark-md5";
 import {
@@ -875,7 +875,7 @@ export class ConfigUtils {
   static getEnablePrettyRefs(
     config: IntermediateDendronConfig,
     opts?: {
-      note?: NoteProps;
+      note?: NotePropsMeta;
       shouldApplyPublishRules?: boolean;
     }
   ): boolean | undefined {
@@ -897,7 +897,7 @@ export class ConfigUtils {
    */
   static getEnableChildLinks(
     _config: IntermediateDendronConfig,
-    opts?: { note?: NoteProps }
+    opts?: { note?: NotePropsMeta }
   ): boolean {
     if (
       opts &&
@@ -912,7 +912,7 @@ export class ConfigUtils {
   }
   static getEnableBackLinks(
     _config: IntermediateDendronConfig,
-    opts?: { note?: NoteProps; shouldApplyPublishingRules?: boolean }
+    opts?: { note?: NotePropsMeta; shouldApplyPublishingRules?: boolean }
   ): boolean {
     // check if note has override. takes precedence
     if (

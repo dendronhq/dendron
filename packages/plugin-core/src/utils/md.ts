@@ -7,6 +7,7 @@ import {
   isBlockAnchor,
   isLineAnchor,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
@@ -49,7 +50,7 @@ export type FoundRefT = {
   matchText: string;
   isCandidate?: boolean;
   isFrontmatterTag?: boolean;
-  note: NoteProps;
+  note: NotePropsMeta;
 };
 
 const markdownExtRegex = /\.md$/i;
@@ -494,7 +495,7 @@ export async function findReferencesById(id: string) {
     return;
   }
 
-  const engineNotes = await engine.findNotes({ excludeStub: true });
+  const engineNotes = await engine.findNotesMeta({ excludeStub: true });
   const notesWithRefs = NoteUtils.getNotesWithLinkTo({
     note,
     notes: engineNotes,

@@ -3,8 +3,6 @@ import {
   DEngineClient,
   FuseExtendedSearchConstants,
   NoteProps,
-  NotePropsByIdDict,
-  NoteUtils,
   ReducedDEngine,
 } from "..";
 

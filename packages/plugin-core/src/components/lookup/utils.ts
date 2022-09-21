@@ -30,6 +30,7 @@ import {
   CREATE_NEW_DETAIL_LIST,
   CREATE_NEW_LABEL,
   CREATE_NEW_NOTE_DETAIL,
+  CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
   MORE_RESULTS_LABEL,
 } from "./constants";
 import type { CreateQuickPickOpts } from "./LookupControllerV3Interface";
@@ -430,6 +431,15 @@ export class PickerUtilsV2 {
     } else {
       return false;
     }
+  }
+
+  static isCreateNewNoteWithTemplatePick(
+    node: DNodePropsQuickInputV2
+  ): boolean {
+    return (
+      this.isCreateNewNotePick(node) &&
+      node.detail === CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL
+    );
   }
 
   static isInputEmpty(value?: string): value is undefined {

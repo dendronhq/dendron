@@ -1,21 +1,32 @@
 import {
+  DateTime,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
+  LabelUtils,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
+  QuickPickLabelHighlightTestGroups,
   TransformedQueryString,
+  _2022_09_QUICKPICK_LABEL_HIGHLIGHT_TEST,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  SegmentClient,
+} from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
+import {
+  CREATE_NEW_NOTE_DETAIL,
+  CREATE_NEW_LABEL,
+  CREATE_NEW_WITH_TEMPLATE_LABEL,
+} from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
 
@@ -78,6 +89,46 @@ export class NotePickerUtils {
     return {
       ...props,
       label: CREATE_NEW_LABEL,
+      detail,
+      alwaysShow: true,
+    };
+  }
+
+  static createNewWithTemplateItem({
+    fname,
+    detail,
+  }: {
+    fname: string;
+    detail: string;
+  }): DNodePropsQuickInputV2 {
+    const props = DNodeUtils.create({
+      id: CREATE_NEW_WITH_TEMPLATE_LABEL,
+      fname,
+      type: "note",
+      // @ts-ignore
+      vault: {},
+    });
+    const ABUserGroup = _2022_09_QUICKPICK_LABEL_HIGHLIGHT_TEST.getUserGroup(
+      SegmentClient.instance().anonymousId
+    );
+
+    let label: string;
+    if (ABUserGroup === QuickPickLabelHighlightTestGroups.label) {
+      label = LabelUtils.createLabelWithHighlight({
+        value: CREATE_NEW_WITH_TEMPLATE_LABEL,
+        highlight: {
+          value: "$(smiley) [New!] ",
+          location: "prefix",
+          expirationTime: DateTime.fromISO("2022-10-01"),
+        },
+      });
+    } else {
+      label = CREATE_NEW_WITH_TEMPLATE_LABEL;
+    }
+
+    return {
+      ...props,
+      label,
       detail,
       alwaysShow: true,
     };

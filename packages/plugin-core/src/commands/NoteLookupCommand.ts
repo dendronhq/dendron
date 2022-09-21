@@ -20,7 +20,11 @@ import {
   getDurationMilliseconds,
   TemplateUtils,
 } from "@dendronhq/common-server";
-import { HistoryService, MetadataService } from "@dendronhq/engine-server";
+import {
+  HistoryEvent,
+  HistoryService,
+  MetadataService,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import {
@@ -46,6 +50,7 @@ import {
   NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
+import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
 import {
   DendronQuickPickerV2,
@@ -470,8 +475,15 @@ export class NoteLookupCommand extends BaseCommand<
     let result: Promise<OnDidAcceptReturn | undefined>;
     const start = process.hrtime();
     const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+
     if (isNew) {
-      result = this.acceptNewItem(item);
+      const isNewWithTemplate =
+        PickerUtilsV2.isCreateNewNoteWithTemplatePick(item);
+      if (isNewWithTemplate) {
+        result = this.acceptNewWithTemplateItem(item);
+      } else {
+        result = this.acceptNewItem(item);
+      }
     } else {
       result = this.acceptExistingItem(item);
     }
@@ -608,6 +620,52 @@ export class NoteLookupCommand extends BaseCommand<
     return { uri, node: nodeNew, resp };
   }
 
+  async acceptNewWithTemplateItem(
+    item: NoteQuickInput
+  ): Promise<OnDidAcceptReturn | undefined> {
+    const ctx = "acceptNewWithTemplateItem";
+    const picker = this.controller.quickPick;
+    const fname = this.getFNameForNewItem(item);
+
+    const engine = ExtensionProvider.getEngine();
+    let nodeNew: NoteProps = item;
+    const vault = await this.getVaultForNewNote({ fname, picker });
+    if (vault === undefined) {
+      return;
+    }
+    nodeNew = NoteUtils.create({
+      fname,
+      vault,
+      title: item.title,
+    });
+    const templateNote = await this.getTemplateForNewNote();
+    if (templateNote) {
+      TemplateUtils.applyTemplate({
+        templateNote,
+        targetNote: nodeNew,
+        engine,
+      });
+    }
+    if (picker.selectionProcessFunc !== undefined) {
+      nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
+    }
+    if (picker.onCreate) {
+      const nodeModified = await picker.onCreate(nodeNew);
+      if (nodeModified) nodeNew = nodeModified;
+    }
+    const resp = await engine.writeNote(nodeNew);
+    if (resp.error) {
+      Logger.error({ ctx, error: resp.error });
+      return;
+    }
+
+    const uri = NoteUtils.getURI({
+      note: nodeNew,
+      wsRoot: engine.wsRoot,
+    });
+    return { uri, node: nodeNew, resp };
+  }
+
   /**
    * TODO: align note creation file name choosing for follow a single path when accepting new item.
    *
@@ -673,6 +731,44 @@ export class NoteLookupCommand extends BaseCommand<
     }
 
     return vault;
+  }
+
+  private async getTemplateForNewNote(): Promise<NoteProps | undefined> {
+    const extension = ExtensionProvider.getExtension();
+    const lc = extension.lookupControllerFactory.create({
+      nodeType: "note",
+      buttons: [],
+    });
+
+    const lp = extension.noteLookupProviderFactory.create(
+      "createNewWithTemplate",
+      {
+        allowNewNote: false,
+      }
+    );
+
+    const config = extension.getDWorkspace().config;
+
+    const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
+    const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
+
+    return new Promise((resolve) => {
+      NoteLookupProviderUtils.subscribe({
+        id: "createNewWithTemplate",
+        controller: lc,
+        logger: this.L,
+        onDone: (event: HistoryEvent) => {
+          const templateNote = event.data.selectedItems[0] as NoteProps;
+          resolve(templateNote);
+        },
+      });
+      lc.show({
+        title: "Select template to apply",
+        placeholder: "template",
+        provider: lp,
+        initialValue,
+      });
+    });
   }
 
   private isJournalButtonPressed() {

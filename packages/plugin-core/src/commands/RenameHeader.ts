@@ -163,6 +163,7 @@ export class RenameHeaderCommand extends BasicCommand<
         anchorHeader: slugger.slug(newAnchorHeader),
         alias: newAnchorHeader,
       },
+      metaOnly: true,
     });
     return out;
   }

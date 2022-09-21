@@ -121,7 +121,7 @@ suite("RenameProvider", function () {
           expect(newTarget).toBeTruthy();
         });
         test("THEN references to target note is correctly updated", async () => {
-          expect(executeOut?.changed.length).toEqual(7);
+          expect(executeOut?.changed.length).toEqual(13);
           const { vaults, engine } = getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
@@ -250,7 +250,7 @@ suite("RenameProvider", function () {
           expect(newTarget).toBeTruthy();
         });
         test("THEN references to target note is correctly updated", async () => {
-          expect(executeOut?.changed.length).toEqual(7);
+          expect(executeOut?.changed.length).toEqual(12);
           const { vaults, engine } = getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
@@ -348,7 +348,7 @@ suite("RenameProvider", function () {
           expect(newTarget).toBeTruthy();
         });
         test("THEN references to target note is correctly updated", async () => {
-          expect(executeOut?.changed.length).toEqual(8);
+          expect(executeOut?.changed.length).toEqual(10);
           const { vaults, engine } = getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
@@ -434,7 +434,7 @@ suite("RenameProvider", function () {
           expect(newTarget).toBeTruthy();
         });
         test("THEN references to target note is correctly updated", async () => {
-          expect(executeOut?.changed.length).toEqual(8);
+          expect(executeOut?.changed.length).toEqual(10);
           const { vaults, engine } = getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
@@ -524,7 +524,7 @@ suite("RenameProvider", function () {
           expect(newTarget).toBeTruthy();
         });
         test("THEN references to target note is correctly updated", async () => {
-          expect(executeOut?.changed.length).toEqual(8);
+          expect(executeOut?.changed.length).toEqual(10);
           const { vaults, engine } = getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({

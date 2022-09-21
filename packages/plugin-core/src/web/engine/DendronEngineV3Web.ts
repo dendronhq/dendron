@@ -1,4 +1,5 @@
 import {
+  BacklinkUtils,
   ConsoleLogger,
   DeleteNoteResp,
   DendronCompositeError,
@@ -50,11 +51,11 @@ export class DendronEngineV3Web
 
   constructor(
     @inject("wsRoot") private wsRoot: URI,
-    @inject("vaults") private vaults: DVault[],
+    @inject("vaults") vaults: DVault[],
     @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
-    super(noteStore, new ConsoleLogger());
+    super(noteStore, new ConsoleLogger(), vaults);
 
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
@@ -463,17 +464,19 @@ export class DendronEngineV3Web
     notesWithLinks.forEach((noteFrom) => {
       try {
         noteFrom.links.forEach((link) => {
-          const fname = link.to?.fname;
-          // Note referencing itself does not count as backlink
-          if (fname && fname !== noteFrom.fname) {
-            const notes = NoteDictsUtils.findByFname(fname, noteDicts);
+          const maybeBacklink = BacklinkUtils.createFromDLink(link);
+          if (maybeBacklink) {
+            const notes = NoteDictsUtils.findByFname(
+              link.to!.fname!,
+              noteDicts
+            );
 
             notes.forEach((noteTo: NoteProps) => {
-              NoteUtils.addBacklink({
-                from: noteFrom,
-                to: noteTo,
-                link,
+              BacklinkUtils.addBacklinkInPlace({
+                note: noteTo,
+                backlink: maybeBacklink,
               });
+              NoteDictsUtils.add(noteTo, noteDicts);
             });
           }
         });

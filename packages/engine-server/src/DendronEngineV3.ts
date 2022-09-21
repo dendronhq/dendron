@@ -64,6 +64,8 @@ import {
   RenderNoteResp,
   GetSchemaResp,
   WriteSchemaResp,
+  BacklinkUtils,
+  DLinkUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -99,7 +101,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   public store: DStore;
   public fuseEngine: FuseEngine;
   public hooks: DHookDict;
-  private _vaults: DVault[];
   private _fileStore: IFileStore;
   private _noteStore: INoteStore<string>;
   private _schemaStore: ISchemaStore<string>;
@@ -107,12 +108,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   static _instance: DendronEngineV3 | undefined;
 
   constructor(props: DendronEngineOptsV3) {
-    super(props.noteStore, props.logger);
+    super(props.noteStore, props.logger, props.vaults);
     this.wsRoot = props.wsRoot;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
     });
-    this._vaults = props.vaults;
     const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
     };
@@ -178,14 +178,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    */
   get schemas(): SchemaModuleDict {
     return this.store.schemas;
-  }
-
-  get vaults(): DVault[] {
-    return this._vaults;
-  }
-
-  set vaults(vaults: DVault[]) {
-    this._vaults = vaults;
   }
 
   /**
@@ -316,7 +308,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     });
 
     // Update links/anchors based on note body
-    // TODO: update backlinks as well
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
@@ -508,10 +499,48 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       }
     }
 
+    // If a note exist with the same id, then we treat this as an update
     if (existingNote && existingNote.id === note.id) {
-      // If a note exist with the same id, then we treat this as an update
+      /**
+       * Calculate diff of links with the `to` prop that have changed.
+       * For links that have been removed, delete those backlinks from the toNotes.
+       * For links that have been added, create backlinks for the toNotes
+       */
+      const deletedLinks = existingNote.links.filter(
+        (link) =>
+          link.to?.fname &&
+          !note.links.some((linkToCompare) =>
+            DLinkUtils.isEquivalent(link, linkToCompare)
+          )
+      );
+      const addedLinks = note.links.filter(
+        (link) =>
+          link.to?.fname &&
+          !existingNote.links.some((linkToCompare) =>
+            DLinkUtils.isEquivalent(link, linkToCompare)
+          )
+      );
+
+      const addedChanges = await Promise.all(
+        addedLinks.map((link) => {
+          return this.addBacklink(link);
+        })
+      );
+
+      const removedChanges = await Promise.all(
+        deletedLinks.map((link) => {
+          return this.removeBacklink(link);
+        })
+      );
+      changes = changes.concat(addedChanges.flat());
+      changes = changes.concat(removedChanges.flat());
       changes.push({ prevNote: existingNote, note, status: "update" });
     } else {
+      // If this is a new note, add backlinks if applicable to referenced notes
+      const backlinkChanges = await Promise.all(
+        note.links.map((link) => this.addBacklink(link))
+      );
+      changes = changes.concat(backlinkChanges.flat());
       changes.push({ note, status: "create" });
     }
 
@@ -579,16 +608,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       newLoc.alias = newNoteTitle;
     }
 
+    let notesChangedEntries: NoteChangeEntry[] = [];
+
     // Get list of notes referencing old note. We need to rename those references
     const notesReferencingOld = _.uniq(
       oldNote.links
-        .map((link) => {
-          if (link.type === "backlink") {
-            return link.from.id;
-          } else {
-            return undefined;
-          }
-        })
+        .filter((link) => link.type === "backlink")
+        .map((link) => link.from.id)
         .filter(isNotUndefined)
     );
 
@@ -606,12 +632,18 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           });
           return undefined;
         } else {
-          return this.processNoteChangedByRename({
+          const note = this.processNoteChangedByRename({
             note: resp.data,
             oldLoc,
             newLoc,
             config,
           });
+          if (note && note.id === oldNote.id) {
+            // If note being renamed has references to itself, make sure to update those as well
+            oldNote.body = note.body;
+            oldNote.tags = note.tags;
+          }
+          return note;
         }
       })
       .filter(isNotUndefined);
@@ -626,7 +658,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         }),
       };
     }
-    let notesChangedEntries = writeResp.data;
+    notesChangedEntries = notesChangedEntries.concat(writeResp.data);
 
     /**
      * If the event source is not engine(ie: vscode rename context menu), we do not want to
@@ -682,7 +714,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         };
       }
       if (out.data) {
-        notesChangedEntries = out.data.concat(notesChangedEntries);
+        notesChangedEntries = notesChangedEntries.concat(out.data);
       }
     }
 
@@ -994,17 +1026,19 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     notesWithLinks.forEach((noteFrom) => {
       try {
         noteFrom.links.forEach((link) => {
-          const fname = link.to?.fname;
-          // Note referencing itself does not count as backlink
-          if (fname && fname !== noteFrom.fname) {
-            const notes = NoteDictsUtils.findByFname(fname, noteDicts);
+          const maybeBacklink = BacklinkUtils.createFromDLink(link);
+          if (maybeBacklink) {
+            const notes = NoteDictsUtils.findByFname(
+              link.to!.fname!,
+              noteDicts
+            );
 
             notes.forEach((noteTo: NoteProps) => {
-              NoteUtils.addBacklink({
-                from: noteFrom,
-                to: noteTo,
-                link,
+              BacklinkUtils.addBacklinkInPlace({
+                note: noteTo,
+                backlink: maybeBacklink,
               });
+              NoteDictsUtils.add(noteTo, noteDicts);
             });
           }
         });

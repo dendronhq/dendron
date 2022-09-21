@@ -48,7 +48,7 @@ suite("RenameNoteCommand", function () {
       });
 
       // note `.foo` is renamed to `foo`, `some-note`'s reference to `.foo` is updated to `foo`
-      expect(out.changed.length).toEqual(5);
+      expect(out.changed.length).toEqual(6);
       const foo = (
         await engine.findNotes({
           vault: vaults[0],

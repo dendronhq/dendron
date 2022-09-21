@@ -119,9 +119,17 @@ suite("MergeNote", function () {
             "[[dest]]\n[[dendron://vault1/dest]]\n![[dest]]\n![[dendron://vault1/dest]]"
           );
 
-          expect(runOut?.changed.length).toEqual(4);
+          expect(runOut?.changed.length).toEqual(12);
           expect(runOut?.changed.map((change) => change.status)).toEqual([
             "update", // dest updated
+            "update", // dest updated
+            "update", // dest updated
+            "update", // dest updated
+            "update", // dest updated
+            "update", // source updated
+            "update", // source updated
+            "update", // source updated
+            "update", // source updated
             "update", // ref updated
             "update", // root updated
             "delete", // source deleted

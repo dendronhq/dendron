@@ -212,6 +212,191 @@ const NOTES = {
       preSetupHook: setupBasic,
     }
   ),
+  NOTE_WITH_TARGET: new TestPresetEntryV4(
+    async ({ vaults, wsRoot, engine }) => {
+      const vault = vaults[0];
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
+      const betaNoteBefore = await engine.getNoteMeta("beta");
+      const betaBackLinksBefore = betaNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const note = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+        wsRoot,
+        vault: vaults[0],
+      });
+      await engine.writeNote(note);
+
+      // Alpha is written, updating backlinks for beta
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
+      const betaNoteAfter = await engine.getNoteMeta("beta");
+      const betaBackLinksAfter = betaNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      return [
+        { actual: betaNoteBefore.data?.links.length, expected: 1 },
+        { actual: betaBackLinksBefore.length, expected: 0 },
+        { actual: _.size(notesInVaultBefore), expected: 2 },
+        { actual: _.size(notesInVaultAfter), expected: 3 },
+        { actual: betaNoteAfter.data?.links.length, expected: 2 },
+        { actual: betaBackLinksAfter.length, expected: 1 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+    }
+  ),
+  UPDATE_NOTE_ADD_BACKLINK: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
+      const betaNoteBefore = await engine.getNoteMeta("beta");
+      const betaBackLinksBefore = betaNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const fooNote = (await engine.getNote("foo")).data!;
+      fooNote.body = "[[beta]]";
+      await engine.writeNote(fooNote);
+
+      // Foo is updated, updating backlinks for beta
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
+      const betaNoteAfter = await engine.getNoteMeta("beta");
+      const betaBackLinksAfter = betaNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      return [
+        { actual: betaNoteBefore.data?.links.length, expected: 2 },
+        { actual: betaBackLinksBefore.length, expected: 1 },
+        { actual: _.size(notesInVaultBefore), expected: 4 },
+        { actual: _.size(notesInVaultAfter), expected: 4 },
+        { actual: betaNoteAfter.data?.links.length, expected: 3 },
+        { actual: betaBackLinksAfter.length, expected: 2 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+    }
+  ),
+  UPDATE_NOTE_REMOVE_BACKLINK: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
+      const betaNoteBefore = await engine.getNoteMeta("beta");
+      const betaBackLinksBefore = betaNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const alphaNote = (await engine.getNote("alpha")).data!;
+      alphaNote.body = "test";
+      await engine.writeNote(alphaNote);
+
+      // Alpha is updated, updating backlinks for beta
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
+      const betaNoteAfter = await engine.getNoteMeta("beta");
+      const betaBackLinksAfter = betaNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      return [
+        { actual: betaNoteBefore.data?.links.length, expected: 2 },
+        { actual: betaBackLinksBefore.length, expected: 1 },
+        { actual: _.size(notesInVaultBefore), expected: 4 },
+        { actual: _.size(notesInVaultAfter), expected: 4 },
+        { actual: betaNoteAfter.data?.links.length, expected: 1 },
+        { actual: betaBackLinksAfter.length, expected: 0 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+    }
+  ),
+  UPDATE_NOTE_UPDATE_BACKLINK: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
+      const betaNoteBefore = await engine.getNoteMeta("beta");
+      const betaBackLinksBefore = betaNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const fooNoteBefore = await engine.getNoteMeta("foo");
+      const fooBackLinksBefore = fooNoteBefore.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const alphaNote = (await engine.getNote("alpha")).data!;
+      alphaNote.body = "[[foo]]";
+      await engine.writeNote(alphaNote);
+
+      // Alpha is updated, updating backlinks for beta and foo
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
+      const betaNoteAfter = await engine.getNoteMeta("beta");
+      const betaBackLinksAfter = betaNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      const fooNoteAfter = await engine.getNoteMeta("foo");
+      const fooBackLinksAfter = fooNoteAfter.data!.links.filter(
+        (link) => link.type === "backlink"
+      );
+      return [
+        { actual: betaNoteBefore.data?.links.length, expected: 2 },
+        { actual: betaBackLinksBefore.length, expected: 1 },
+        { actual: fooNoteBefore.data?.links.length, expected: 0 },
+        { actual: fooBackLinksBefore.length, expected: 0 },
+        { actual: _.size(notesInVaultBefore), expected: 4 },
+        { actual: _.size(notesInVaultAfter), expected: 4 },
+        { actual: betaNoteAfter.data?.links.length, expected: 1 },
+        { actual: betaBackLinksAfter.length, expected: 0 },
+        { actual: fooNoteAfter.data?.links.length, expected: 1 },
+        { actual: fooBackLinksAfter.length, expected: 1 },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+    }
+  ),
   CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
     const vault = vaults[0];
     const logger = (engine as DendronEngineClient).logger;

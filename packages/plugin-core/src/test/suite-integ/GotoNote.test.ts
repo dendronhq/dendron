@@ -18,7 +18,6 @@ import { PickerUtilsV2 } from "../../components/lookup/utils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { PluginFileUtils } from "../../utils/files";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
@@ -32,7 +31,7 @@ import {
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 
 function createGoToNoteCmd() {
-  return new GotoNoteCommand(getExtension());
+  return new GotoNoteCommand(ExtensionProvider.getExtension());
 }
 
 suite("GotoNote", function () {
@@ -109,6 +108,31 @@ suite("GotoNote", function () {
             fname: "foo.ch2",
           });
           expect(getActiveEditorBasename()).toEqual("foo.ch2.md");
+        });
+      }
+    );
+
+    describeMultiWS(
+      "WHEN goto new note with invalid filename",
+      {
+        preSetupHook,
+      },
+      () => {
+        test("THEN note is not created, and error toast is displayed", async () => {
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vault = vaults[0];
+          const cmd = createGoToNoteCmd();
+          const errorSpy = sinon.spy(
+            cmd,
+            "displayInvalidFilenameError" as keyof GotoNoteCommand
+          );
+          const out = await cmd.run({
+            qs: "foo..bar",
+            vault,
+          });
+          expect(out).toEqual(undefined);
+          expect(errorSpy.called).toBeTruthy();
+          errorSpy.restore();
         });
       }
     );
@@ -789,7 +813,7 @@ suite("GotoNote", function () {
     describe("GIVEN non-note files", () => {
       describeMultiWS("WHEN used on a link to a non-note file", { ctx }, () => {
         before(async () => {
-          const { wsRoot, vaults } = getDWorkspace();
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           await fs.writeFile(
             path.join(wsRoot, "test.txt"),
             "Et voluptatem autem sunt."
@@ -809,7 +833,7 @@ suite("GotoNote", function () {
         });
 
         test("THEN opens the non-note file", async () => {
-          const { vaults, wsRoot, engine } = getDWorkspace();
+          const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
           const note = await NoteTestUtilsV4.createNoteWithEngine({
             wsRoot,
             vault: vaults[0],
@@ -831,7 +855,8 @@ suite("GotoNote", function () {
 
         describe("AND the link doesn't include a slash", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } = getDWorkspace();
+            const { vaults, wsRoot, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -856,7 +881,8 @@ suite("GotoNote", function () {
 
         describe("AND the link starts with assets", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } = getDWorkspace();
+            const { vaults, wsRoot, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -885,7 +911,8 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } = getDWorkspace();
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -929,7 +956,8 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } = getDWorkspace();
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -974,7 +1002,8 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } = getDWorkspace();
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1047,7 +1076,8 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } = getDWorkspace();
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],

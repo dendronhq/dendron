@@ -266,11 +266,19 @@ export class NoteLookupCommand extends BaseCommand<
         enableLookupView: true,
       });
     }
-    this._provider = extension.noteLookupProviderFactory.create("lookup", {
-      allowNewNote: true,
-      noHidePickerOnAccept: false,
-      forceAsIsPickerValueUsage: copts.noteType === LookupNoteTypeEnum.scratch,
-    });
+    if (this._provider === undefined) {
+      // hack. we need to do this because
+      // moveSelectionTo sets a custom provider instead of the
+      // one that lookup creates.
+      // TODO: fix moveSelectionTo so that it doesn't rely on this.
+      this._provider = extension.noteLookupProviderFactory.create("lookup", {
+        allowNewNote: true,
+        allowNewNoteWithTemplate: true,
+        noHidePickerOnAccept: false,
+        forceAsIsPickerValueUsage:
+          copts.noteType === LookupNoteTypeEnum.scratch,
+      });
+    }
     const lc = this.controller;
     if (copts.fuzzThreshold) {
       lc.fuzzThreshold = copts.fuzzThreshold;

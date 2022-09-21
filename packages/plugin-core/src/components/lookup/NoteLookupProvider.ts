@@ -430,12 +430,17 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           fname: queryOrig,
           detail: CREATE_NEW_NOTE_DETAIL,
         });
-
-        const entryCreateNewWithTemplate =
-          NotePickerUtils.createNewWithTemplateItem({
-            fname: queryOrig,
-            detail: CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
-          });
+        const newItems = [entryCreateNew];
+        const shouldAddCreateNewWithTemplate =
+          this.opts.allowNewNoteWithTemplate;
+        if (shouldAddCreateNewWithTemplate) {
+          const entryCreateNewWithTemplate =
+            NotePickerUtils.createNewWithTemplateItem({
+              fname: queryOrig,
+              detail: CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
+            });
+          newItems.push(entryCreateNewWithTemplate);
+        }
 
         const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
           .bubbleUpCreateNew;
@@ -446,17 +451,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             bubbleUpCreateNew,
           })
         ) {
-          updatedItems = [
-            entryCreateNew,
-            entryCreateNewWithTemplate,
-            ...updatedItems,
-          ];
+          updatedItems = newItems.concat(updatedItems);
         } else {
-          updatedItems = [
-            ...updatedItems,
-            entryCreateNew,
-            entryCreateNewWithTemplate,
-          ];
+          updatedItems = updatedItems.concat(newItems);
         }
       }
 

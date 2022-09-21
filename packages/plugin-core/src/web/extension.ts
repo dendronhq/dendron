@@ -10,6 +10,7 @@ import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
 import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
+import { NoteLookupAutoCompleteCommand } from "./commands/lookup/NoteLookupAutoCompleteCommand";
 
 /**
  * This is the entry point for the web extension variant of Dendron
@@ -50,6 +51,21 @@ async function setupCommands(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand(key, async (_args: any) => {
         await noteLookupCmd.run();
       })
+    );
+
+  const TabAutoCompleteCommand = container.resolve(
+    NoteLookupAutoCompleteCommand
+  );
+  const tabAutoCompletekey = DENDRON_COMMANDS.LOOKUP_NOTE_AUTO_COMPLETE.key;
+
+  if (!existingCommands.includes(tabAutoCompletekey))
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        tabAutoCompletekey,
+        async (_args: any) => {
+          await TabAutoCompleteCommand.run();
+        }
+      )
     );
 
   const togglePreviewCmd = container.resolve(TogglePreviewCmd);

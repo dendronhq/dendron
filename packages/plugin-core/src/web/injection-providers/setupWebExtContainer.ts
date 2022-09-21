@@ -13,7 +13,7 @@ import {
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
 import * as vscode from "vscode";
-import { Event, TextDocument, workspace } from "vscode";
+import { Event, EventEmitter, TextDocument, workspace } from "vscode";
 import { URI } from "vscode-uri";
 import { IPreviewLinkHandler } from "../../components/views/IPreviewLinkHandler";
 import { PreviewProxy } from "../../components/views/PreviewProxy";
@@ -178,6 +178,8 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   container.register<IntermediateDendronConfig>("IntermediateDendronConfig", {
     useValue: config as IntermediateDendronConfig,
   });
+
+  setupTabAutoComplete(context);
 }
 
 function setupTelemetry() {
@@ -197,4 +199,18 @@ function setupTelemetry() {
       break;
     }
   }
+}
+
+function setupTabAutoComplete(context: vscode.ExtensionContext) {
+  const emitter = new vscode.EventEmitter<void>();
+
+  // Add to extension disposables for auto-cleanup:
+  context.subscriptions.push(emitter);
+
+  container.registerInstance<EventEmitter<void>>(
+    "AutoCompleteEventEmitter",
+    emitter
+  );
+
+  container.registerInstance<Event<void>>("AutoCompleteEvent", emitter.event);
 }

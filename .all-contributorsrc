@@ -2166,6 +2166,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ericthomas1",
+      "name": "ericthomas1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42788729?v=4",
+      "profile": "https://github.com/ericthomas1",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

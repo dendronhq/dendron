@@ -49,3 +49,5 @@ dist
 custom/*
 !custom/NoOp.tsx
 builds
+test-results/
+tests/

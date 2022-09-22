@@ -1,4 +1,3 @@
-Only in ./packages/common-assets/styles/scss/: seeds.module.scss
 diff '--color=auto' -rw ./packages/common-assets/styles/scss/utilities/_typography.scss ./packages/nextjs-template/styles/scss/utilities/_typography.scss
 91a92
 >  

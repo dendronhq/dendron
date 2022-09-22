@@ -43,6 +43,7 @@ suite(
       await setupEnvironment();
       await setupWebExtContainer({
         extensionUri: URI.parse("dummy"),
+        subscriptions: [] as vscode.Disposable[],
       } as vscode.ExtensionContext);
 
       try {

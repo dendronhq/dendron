@@ -186,7 +186,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vaults: engine.vaults,
           vname,
         });
-        const note = (await engine.findNotes({ fname, vault }))[0];
+        const note = (await engine.findNotesMeta({ fname, vault }))[0];
         items = [note];
       } else {
         items = [];

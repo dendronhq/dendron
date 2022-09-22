@@ -329,7 +329,7 @@ export class NoteUtils {
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
-  static getNoteTraits(note: NoteProps): string[] {
+  static getNoteTraits(note: NotePropsMeta): string[] {
     return _.get(note, "traitIds", []);
   }
 
@@ -946,7 +946,7 @@ export class NoteUtils {
     return minimatch(notePath, pattern);
   }
 
-  static isDefaultTitle(props: NoteProps) {
+  static isDefaultTitle(props: NotePropsMeta) {
     return props.title === NoteUtils.genTitle(props.fname);
   }
 

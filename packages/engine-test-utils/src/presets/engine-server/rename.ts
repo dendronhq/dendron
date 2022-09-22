@@ -572,7 +572,7 @@ const NOTES = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
       const beta = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
-      const alphaBefore = await engine.getNote(
+      const alphaBefore = await engine.getNoteMeta(
         NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname
       );
       const alphaBackLinksBefore = alphaBefore.data!.links.filter(
@@ -582,7 +582,7 @@ const NOTES = {
         oldLoc: { fname: beta, vaultName: VaultUtils.getName(vault) },
         newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
-      const alphaAfter = await engine.getNote(
+      const alphaAfter = await engine.getNoteMeta(
         NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname
       );
       const alphaBackLinksAfter = alphaAfter.data!.links.filter(
@@ -699,12 +699,12 @@ const NOTES = {
       const vault = vaults[0];
       const alpha = "scratch.2020.02.03.0123";
       //const alpha = NOTE_PRESETS_V4.NOTE_WITH_LINK.fname;
-      const notesInVaultBefore = await engine.findNotes({ vault });
+      const notesInVaultBefore = await engine.findNotesMeta({ vault });
       const changed = await engine.renameNote({
         oldLoc: { fname: alpha, vaultName: VaultUtils.getName(vault) },
         newLoc: { fname: "gamma", vaultName: VaultUtils.getName(vault) },
       });
-      const notesInVaultAfter = await engine.findNotes({ vault });
+      const notesInVaultAfter = await engine.findNotesMeta({ vault });
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
         vault,
@@ -1215,7 +1215,7 @@ const NOTES = {
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1260,7 +1260,7 @@ const NOTES = {
         newLoc: { fname: "user.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1304,7 +1304,7 @@ const NOTES = {
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1354,7 +1354,7 @@ const NOTES = {
         newLoc: { fname: "tags.bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1404,7 +1404,7 @@ const NOTES = {
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1458,7 +1458,7 @@ const NOTES = {
         newLoc: { fname: "bar", vaultName: VaultUtils.getName(vaults[0]) },
       });
       const note = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "primary",
           vault: vaults[0],
         })
@@ -1626,13 +1626,13 @@ const NOTES = {
         return entry.status === "create" && entry.note.fname === "foo";
       })?.note;
       const root = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "root",
           vault: vaults[0],
         })
       )[0];
       const fooChild = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "foo.bar",
           vault: vaults[0],
         })
@@ -1644,7 +1644,7 @@ const NOTES = {
           expected: true,
         },
         {
-          actual: (await engine.getNote("foo")).data!.fname,
+          actual: (await engine.getNoteMeta("foo")).data!.fname,
           expected: "foo1",
         },
         {

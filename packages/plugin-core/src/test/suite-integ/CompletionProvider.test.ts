@@ -45,7 +45,7 @@ suite("completionProvider", function () {
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })
@@ -132,7 +132,7 @@ suite("completionProvider", function () {
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })
@@ -186,7 +186,7 @@ suite("completionProvider", function () {
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })
@@ -241,7 +241,7 @@ suite("completionProvider", function () {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[1],
               })
@@ -277,7 +277,7 @@ suite("completionProvider", function () {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[1],
               })
@@ -310,7 +310,7 @@ suite("completionProvider", function () {
         const { vaults, engine } = getDWorkspace();
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })
@@ -361,7 +361,7 @@ suite("completionProvider", function () {
           // Open a note, add [[]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[0],
               })
@@ -406,7 +406,7 @@ suite("completionProvider", function () {
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "test",
                 vault: vaults[0],
               })
@@ -456,7 +456,7 @@ suite("completionProvider", function () {
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "test",
                 vault: vaults[0],
               })
@@ -484,7 +484,7 @@ suite("completionProvider", function () {
           // Open a note, add [[test2#]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "test",
                 vault: vaults[0],
               })
@@ -566,7 +566,7 @@ suite("completionProvider", function () {
           // Open a note, add [[test2#^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "test",
                 vault: vaults[0],
               })
@@ -635,7 +635,7 @@ suite("completionProvider", function () {
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "test",
                 vault: vaults[0],
               })

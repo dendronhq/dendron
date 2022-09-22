@@ -383,7 +383,7 @@ describe("SiteUtils", () => {
             config,
           });
           const root = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[0],
             })
@@ -729,7 +729,7 @@ describe("SiteUtils", () => {
             config: DConfig.readConfigSync(wsRoot),
           });
           const root = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[0],
             })

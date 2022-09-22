@@ -108,7 +108,7 @@ describe("GithubIssuePod import pod", () => {
           },
         });
         const note = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname,
             vault: vaults[0],
           })
@@ -148,7 +148,7 @@ describe("GithubIssuePod import pod", () => {
           },
         });
         const note = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname,
             vault: vaults[0],
           })

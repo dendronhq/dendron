@@ -23,7 +23,7 @@ const NOTES = {
     });
     const rootNote = (await engine.findNotes({ fname: "root", vault }))[0];
     await engine.bulkWriteNotes({ notes: [note1, note2] });
-    const barNote = (await engine.getNote("bar1")).data!;
+    const barNote = (await engine.getNoteMeta("bar1")).data!;
     return [
       {
         actual: _.size(await engine.findNotesMeta({ vault })),

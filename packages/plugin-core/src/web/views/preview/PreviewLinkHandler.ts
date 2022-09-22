@@ -4,7 +4,7 @@ import {
   ErrorFactory,
   isVSCodeCommandUri,
   isWebUri,
-  NoteProps,
+  NotePropsMeta,
   NoteViewMessage,
   ReducedDEngine,
   URI,
@@ -131,7 +131,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     data: NoteViewMessage["data"];
     // engine: DEngineClient;
   }): Promise<{
-    note: NoteProps | undefined | null;
+    note: NotePropsMeta | undefined;
     anchor: DNoteAnchorBasic | undefined;
   }> {
     // wiki links will have the following format
@@ -169,7 +169,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       vscode.Uri.parse(data.href).fragment
     );
 
-    const resp = await this.engine.getNote(noteId);
+    const resp = await this.engine.getNoteMeta(noteId);
 
     let note;
     if (resp.data) {
@@ -180,7 +180,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       // of the note was in place of the id in the HREF (as in case of navigating to a note
       // in a different vault without explicit vault specification). Hence we will attempt
       // to find the note by file name.
-      const candidates = await this.engine.findNotes({ fname: noteId });
+      const candidates = await this.engine.findNotesMeta({ fname: noteId });
 
       note = candidates[0];
       // TODO: Add back quickpicker functionality in case there are multiple candidates:

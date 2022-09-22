@@ -223,7 +223,7 @@ describe("user tags", () => {
           const proc = MDUtilsV5.procRehypeFull(
             {
               noteToRender: (
-                await engine.findNotes({ fname: "root", vault: vaults[0] })
+                await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
               )[0]!,
               vault: vaults[0],
               config: DConfig.readConfigSync(wsRoot),

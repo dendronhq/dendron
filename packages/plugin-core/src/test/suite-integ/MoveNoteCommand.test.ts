@@ -78,11 +78,26 @@ const createEngine = createEngineFactory({
     };
     return findNotes;
   },
+  findNotesMeta: () => {
+    const findNotesMeta: DendronEngineV2["findNotesMeta"] = async ({
+      fname,
+      vault,
+    }) => {
+      return ExtensionProvider.getEngine().findNotesMeta({ fname, vault });
+    };
+    return findNotesMeta;
+  },
   getNote: () => {
     const getNote: DendronEngineV2["getNote"] = async (id) => {
       return ExtensionProvider.getEngine().getNote(id);
     };
     return getNote;
+  },
+  getNoteMeta: () => {
+    const getNoteMeta: DendronEngineV2["getNoteMeta"] = async (id) => {
+      return ExtensionProvider.getEngine().getNoteMeta(id);
+    };
+    return getNoteMeta;
   },
 });
 

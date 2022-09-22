@@ -113,3 +113,13 @@ hr {
     white-space: normal;
   }
 }
+
+// portal.scss
+
+.portal-container {
+  .portal-parent {
+    .portal-parent-fader-top {
+      height: 36px;
+    }
+  }
+}

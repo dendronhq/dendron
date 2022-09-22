@@ -1191,6 +1191,9 @@
               "const": false
             }
           ]
+        },
+        "searchDefaultBehavior": {
+          "$ref": "#/definitions/SearchMode"
         }
       },
       "required": [
@@ -1493,6 +1496,13 @@
         "mapping"
       ],
       "additionalProperties": false
+    },
+    "SearchMode": {
+      "type": "string",
+      "enum": [
+        "search",
+        "lookup"
+      ]
     }
   }
 }

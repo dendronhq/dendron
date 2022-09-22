@@ -9,6 +9,11 @@ export enum Theme {
   CUSTOM = "custom",
 }
 
+export enum SearchMode {
+  SEARCH = "search",
+  LOOKUP = "lookup",
+}
+
 /**
  * Namespace for all publishing related configurations
  */
@@ -51,6 +56,7 @@ export type DendronPublishingConfig = {
   siteBanner?: string;
   giscus?: GiscusConfig;
   sidebarPath?: string | false;
+  searchDefaultBehavior?: SearchMode;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &
@@ -109,5 +115,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableRandomlyColoredTags: true,
     enableTaskNotes: true,
     enablePrettyLinks: true,
+    searchDefaultBehavior: SearchMode.SEARCH,
   };
 }

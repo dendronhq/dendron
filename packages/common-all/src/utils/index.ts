@@ -23,6 +23,7 @@ import {
   DuplicateNoteBehavior,
   genDefaultPublishingConfig,
   HierarchyConfig,
+  SearchMode,
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import {
@@ -960,6 +961,16 @@ export class ConfigUtils {
     return config.version;
   }
 
+  static getSearchDefaultBehavior(
+    config: IntermediateDendronConfig
+  ): SearchMode {
+    const isConfigV4 = configIsV4(config);
+    const defaultMode = ConfigUtils.getPublishing(config).searchDefaultBehavior;
+    if (!isConfigV4 && defaultMode) {
+      return defaultMode;
+    }
+    return SearchMode.SEARCH;
+  }
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

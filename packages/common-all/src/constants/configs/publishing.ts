@@ -279,4 +279,8 @@ export const PUBLISHING: DendronConfigEntryCollection<DendronPublishingConfig> =
       desc: "Define custom sidebar",
       value: undefined,
     },
+    searchDefaultBehavior: {
+      label: "Default search mode for publishing",
+      desc: "Default behavior of search bar in published site",
+    },
   };

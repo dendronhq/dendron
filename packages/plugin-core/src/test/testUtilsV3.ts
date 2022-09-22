@@ -427,7 +427,7 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
 
 class FakeEngine {
   get schemas() {
-    return getDWorkspace().engine.schemas;
+    return {};
   }
 }
 

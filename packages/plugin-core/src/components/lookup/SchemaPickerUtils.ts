@@ -22,7 +22,9 @@ export class SchemaPickerUtils {
           DNodeUtils.enhancePropForQuickInputV3({
             wsRoot,
             props: node,
-            schemas: engine.schemas,
+            schema: node.schema
+              ? (await engine.getSchema(node.schema.moduleId)).data
+              : undefined,
             vaults,
           }),
         ];
@@ -63,7 +65,11 @@ export class SchemaPickerUtils {
         DNodeUtils.enhancePropForQuickInputV3({
           wsRoot,
           props: ent,
-          schemas: engine.schemas,
+          schema: ent.schema
+            ? (
+                await engine.getSchema(ent.schema.moduleId)
+              ).data
+            : undefined,
           vaults,
           alwaysShow: picker.alwaysShowAll,
         })

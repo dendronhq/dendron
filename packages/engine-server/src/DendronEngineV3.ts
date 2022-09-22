@@ -208,9 +208,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         schemaDict[schema.root.id] = schema;
       });
 
-      const { data: notes, error: noteErrors } = await this.initNotes(
-        schemaDict
-      );
+      const { data: notes, error: noteErrors } = await this.initNotes();
       if (_.isUndefined(notes)) {
         return {
           data: defaultResp,
@@ -939,9 +937,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * For every vault on the filesystem, get list of files and convert each file to NoteProp
    * @returns NotePropsByIdDict
    */
-  private async initNotes(
-    schemas: SchemaModuleDict
-  ): Promise<RespWithOptError<NotePropsByIdDict>> {
+  private async initNotes(): Promise<RespWithOptError<NotePropsByIdDict>> {
     const ctx = "DEngine:initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
@@ -982,7 +978,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           cache: notesCache,
           engine: this,
           logger: this.logger,
-        }).parseFiles(maybeFiles.data, vault, schemas);
+        }).parseFiles(maybeFiles.data, vault);
         if (error) {
           errors = errors.concat(error);
         }

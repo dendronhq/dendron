@@ -1,6 +1,5 @@
 import { URI, Utils } from "vscode-uri";
 import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
-import { SchemaUtils } from "../dnode";
 import { DendronError } from "../error";
 import {
   Disposable,
@@ -8,6 +7,7 @@ import {
   SchemaModuleProps,
   WriteSchemaOpts,
 } from "../types";
+import { SchemaUtils } from "../utils/SchemaUtils";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";

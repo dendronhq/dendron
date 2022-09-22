@@ -35,15 +35,23 @@ export class QuickPickUtil {
   static async showChooseNote(
     notes: NoteProps[]
   ): Promise<NoteProps | undefined> {
-    const inputItems = notes.map((ent) => {
-      const workspace = ExtensionProvider.getDWorkspace();
-      return DNodeUtils.enhancePropForQuickInputV3({
-        wsRoot: workspace.wsRoot,
-        props: ent,
-        schemas: workspace.engine.schemas,
-        vaults: workspace.vaults,
-      });
-    });
+    const inputItems = await Promise.all(
+      notes.map(async (ent) => {
+        const workspace = ExtensionProvider.getDWorkspace();
+        return DNodeUtils.enhancePropForQuickInputV3({
+          wsRoot: workspace.wsRoot,
+          props: ent,
+          schema: ent.schema
+            ? (
+                await ExtensionProvider.getEngine().getSchema(
+                  ent.schema.moduleId
+                )
+              ).data
+            : undefined,
+          vaults: workspace.vaults,
+        });
+      })
+    );
 
     const chosen = await VSCodeUtils.showQuickPick(inputItems);
     if (chosen === undefined) {

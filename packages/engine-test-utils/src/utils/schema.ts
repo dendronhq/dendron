@@ -41,10 +41,10 @@ export function makeSchemaTests({
     return {
       testCase: async ({ engine }) => {
         const { schema } =
-          SchemaUtils.matchPath({
+          (await SchemaUtils.matchPath({
             notePath,
-            schemaModDict: engine.schemas,
-          }) || {};
+            engine,
+          })) || {};
         if (!expected) {
           expect(schema).toBeUndefined();
         } else if (_.isString(expected)) {

@@ -29,6 +29,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { MockPreviewProxy } from "../MockPreviewProxy";
+import { PluginSchemaUtils } from "../pluginSchemaUtils";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -53,13 +54,13 @@ const UNSAFE_getWorkspaceWatcherPropsForTesting = (
   return watcher.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
 };
 
-const doesSchemaExist = (schemaId: string) => {
-  const { engine } = ExtensionProvider.getDWorkspace();
+// const doesSchemaExist = (schemaId: string) => {
+//   const { engine } = ExtensionProvider.getDWorkspace();
 
-  return _.values(engine.schemas).some((schObj) => {
-    return !_.isUndefined(schObj.schemas[schemaId]);
-  });
-};
+//   return _.values(engine.schemas).some((schObj) => {
+//     return !_.isUndefined(schObj.schemas[schemaId]);
+//   });
+// };
 
 runSuiteButSkipForWindows()(
   "WorkspaceWatcher schema update tests",
@@ -77,7 +78,7 @@ runSuiteButSkipForWindows()(
 
           const opened = await WSUtils.openSchema(engine.schemas.plain_schema);
 
-          expect(doesSchemaExist("new_schema")).toBeFalsy();
+          expect(PluginSchemaUtils.doesSchemaExist("new_schema")).toBeFalsy();
 
           await opened.edit((editBuilder) => {
             const line = opened.document.getText().split("\n").length;
@@ -98,7 +99,7 @@ runSuiteButSkipForWindows()(
             document: opened.document,
           });
 
-          expect(doesSchemaExist("new_schema")).toBeTruthy();
+          expect(PluginSchemaUtils.doesSchemaExist("new_schema")).toBeTruthy();
         });
       }
     );

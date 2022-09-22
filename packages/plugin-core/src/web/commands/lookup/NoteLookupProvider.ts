@@ -1,16 +1,10 @@
 import {
   DNodeUtils,
-  type ReducedDEngine,
   NoteLookupUtils,
-  NoteProps,
   NoteQuickInputV2,
-  NoteUtils,
-  SchemaModuleDict,
-  SchemaUtils,
   TransformedQueryString,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
-import _ from "lodash";
-import stringSimilarity from "string-similarity";
 import { inject, injectable } from "tsyringe";
 import { window } from "vscode";
 import {
@@ -37,17 +31,15 @@ export class NoteLookupProvider implements ILookupProvider {
 
     const queryOrig = NoteLookupUtils.slashToDot(pickerValue);
 
-    const queryUpToLastDot =
-      queryOrig.lastIndexOf(".") >= 0
-        ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
-        : undefined;
+    // const queryUpToLastDot =
+    //   queryOrig.lastIndexOf(".") >= 0
+    //     ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
+    //     : undefined;
 
     try {
       // if empty string, show all 1st level results
       if (transformedQuery.queryString === "") {
-        return this.fetchRootQuickPickResults({
-          schemas: workspaceState.schemas,
-        });
+        return this.fetchRootQuickPickResults();
       }
 
       // const items: NoteQuickInput[] = [...picker.items];
@@ -56,7 +48,7 @@ export class NoteLookupProvider implements ILookupProvider {
         return [];
       }
 
-      let updatedItems = await this.fetchPickerResults({
+      const updatedItems = await this.fetchPickerResults({
         transformedQuery,
         originalQS: queryOrig,
         workspaceState,
@@ -81,62 +73,61 @@ export class NoteLookupProvider implements ILookupProvider {
 
       // TODO: Clean up Schema Section
       // add schema completions
-      if (
-        !_.isUndefined(queryUpToLastDot) &&
-        !transformedQuery.wasMadeFromWikiLink
-      ) {
-        const results = SchemaUtils.matchPath({
-          notePath: queryUpToLastDot,
-          schemaModDict: workspaceState.schemas,
-        });
-        // since namespace matches everything, we don't do queries on that
-        if (results && !results.namespace) {
-          const { schema, schemaModule } = results;
-          const dirName = queryUpToLastDot;
-          const candidates = schema.children
-            .map((ent) => {
-              const mschema = schemaModule.schemas[ent];
-              if (
-                SchemaUtils.hasSimplePattern(mschema, {
-                  isNotNamespace: true,
-                })
-              ) {
-                const pattern = SchemaUtils.getPattern(mschema, {
-                  isNotNamespace: true,
-                });
-                const fname = [dirName, pattern].join(".");
-                return NoteUtils.fromSchema({
-                  schemaModule,
-                  schemaId: ent,
-                  fname,
-                  vault: workspaceState.vaults[0], // TODO: Fix
-                  // vault: PickerUtilsV2.getVaultForOpenEditor(),
-                });
-              }
-              return;
-            })
-            .filter(Boolean) as NoteProps[];
-          let candidatesToAdd = _.differenceBy(
-            candidates,
-            updatedItems,
-            (ent) => ent.fname
-          );
+      // if (
+      //   !_.isUndefined(queryUpToLastDot) &&
+      //   !transformedQuery.wasMadeFromWikiLink
+      // ) {
+      //   const results = SchemaUtils.matchPath({
+      //     notePath: queryUpToLastDot,
+      //     schemaModDict: workspaceState.schemas,
+      //   });
+      //   // since namespace matches everything, we don't do queries on that
+      //   if (results && !results.namespace) {
+      //     const { schema, schemaModule } = results;
+      //     const dirName = queryUpToLastDot;
+      //     const candidates = schema.children
+      //       .map((ent) => {
+      //         const mschema = schemaModule.schemas[ent];
+      //         if (
+      //           SchemaUtils.hasSimplePattern(mschema, {
+      //             isNotNamespace: true,
+      //           })
+      //         ) {
+      //           const pattern = SchemaUtils.getPattern(mschema, {
+      //             isNotNamespace: true,
+      //           });
+      //           const fname = [dirName, pattern].join(".");
+      //           return NoteUtils.fromSchema({
+      //             schemaModule,
+      //             schemaId: ent,
+      //             fname,
+      //             vault: workspaceState.vaults[0], // TODO: Fix
+      //             // vault: PickerUtilsV2.getVaultForOpenEditor(),
+      //           });
+      //         }
+      //         return;
+      //       })
+      //       .filter(Boolean) as NoteProps[];
+      //     let candidatesToAdd = _.differenceBy(
+      //       candidates,
+      //       updatedItems,
+      //       (ent) => ent.fname
+      //     );
 
-          candidatesToAdd = this.sortBySimilarity(
-            candidatesToAdd,
-            transformedQuery.originalQuery
-          );
+      //     candidatesToAdd = this.sortBySimilarity(
+      //       candidatesToAdd,
+      //       transformedQuery.originalQuery
+      //     );
 
-          updatedItems = updatedItems.concat(
-            candidatesToAdd.map((ent) => {
-              return DNodeUtils.enhancePropForQuickInputV4({
-                props: ent,
-                schemas: workspaceState.schemas,
-              });
-            })
-          );
-        }
-      }
+      //     updatedItems = updatedItems.concat(
+      //       candidatesToAdd.map((ent) => {
+      //         return DNodeUtils.enhancePropForQuickInputV4({
+      //           props: ent,
+      //         });
+      //       })
+      //     );
+      //   }
+      // }
 
       // We do NOT want quick pick to filter out items since it does not match with FuseJS.
       updatedItems.forEach((item) => {
@@ -150,17 +141,12 @@ export class NoteLookupProvider implements ILookupProvider {
     }
   }
 
-  private fetchRootQuickPickResults = async ({
-    schemas,
-  }: {
-    schemas: SchemaModuleDict;
-  }) => {
+  private fetchRootQuickPickResults = async () => {
     const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(this.engine);
 
     return nodes.map((ent) => {
       return DNodeUtils.enhancePropForQuickInputV4({
         props: ent,
-        schemas,
       });
     });
   };
@@ -187,29 +173,28 @@ export class NoteLookupProvider implements ILookupProvider {
       nodes.map(async (ent) =>
         DNodeUtils.enhancePropForQuickInputV4({
           props: ent,
-          schemas: opts.workspaceState.schemas,
         })
       )
     );
   }
 
-  /**
-   * Sorts the given candidates notes by similarity to the query string in
-   * descending order (the most similar come first) */
-  private sortBySimilarity(candidates: NoteProps[], query: string) {
-    return (
-      candidates
-        // To avoid duplicate similarity score calculation we will first map
-        // to have the similarity score cached and then sort using cached value.
-        .map((cand) => ({
-          cand,
-          similarityScore: stringSimilarity.compareTwoStrings(
-            cand.fname,
-            query
-          ),
-        }))
-        .sort((a, b) => b.similarityScore - a.similarityScore)
-        .map((v) => v.cand)
-    );
-  }
+  // /**
+  //  * Sorts the given candidates notes by similarity to the query string in
+  //  * descending order (the most similar come first) */
+  // private sortBySimilarity(candidates: NoteProps[], query: string) {
+  //   return (
+  //     candidates
+  //       // To avoid duplicate similarity score calculation we will first map
+  //       // to have the similarity score cached and then sort using cached value.
+  //       .map((cand) => ({
+  //         cand,
+  //         similarityScore: stringSimilarity.compareTwoStrings(
+  //           cand.fname,
+  //           query
+  //         ),
+  //       }))
+  //       .sort((a, b) => b.similarityScore - a.similarityScore)
+  //       .map((v) => v.cand)
+  //   );
+  // }
 }

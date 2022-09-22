@@ -517,14 +517,14 @@ export class NoteLookupCommand extends BaseCommand<
    * This removes the `stub` frontmatter
    * and applies schema if there is one that matches
    */
-  prepareStubItem(opts: {
+  async prepareStubItem(opts: {
     item: NoteQuickInput;
     engine: IEngineAPIService;
-  }): NoteProps {
+  }): Promise<NoteProps> {
     const { item, engine } = opts;
 
     const noteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
-    const preparedNote = NoteUtils.updateStubWithSchema({
+    const preparedNote = await NoteUtils.updateStubWithSchema({
       stubNote: noteFromItem,
       engine,
     });
@@ -542,7 +542,7 @@ export class NoteLookupCommand extends BaseCommand<
     let nodeNew: NoteProps;
     if (item.stub) {
       Logger.info({ ctx, msg: "create stub" });
-      nodeNew = this.prepareStubItem({
+      nodeNew = await this.prepareStubItem({
         item,
         engine,
       });
@@ -553,7 +553,7 @@ export class NoteLookupCommand extends BaseCommand<
         // are going to cancel the creation of the note.
         return;
       }
-      nodeNew = NoteUtils.createWithSchema({
+      nodeNew = await NoteUtils.createWithSchema({
         noteOpts: {
           fname,
           vault,

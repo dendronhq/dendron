@@ -198,7 +198,7 @@ export class TemplateUtils {
     engine: DEngineClient;
     pickNote: (choices: NoteProps[]) => Promise<RespV3<NoteProps | undefined>>;
   }): Promise<RespV3<boolean>> {
-    const maybeSchema = SchemaUtils.getSchemaFromNote({
+    const maybeSchema = await SchemaUtils.getSchemaFromNote({
       note,
       engine,
     });

@@ -30,7 +30,6 @@ import { DevTriggerCommand } from "./DevTriggerCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
 import { DoctorCommand } from "./Doctor";
-import { DumpStateCommand } from "./DumpStateCommand";
 import { EnableTelemetryCommand } from "./EnableTelemetry";
 import { ExportPodCommand } from "./ExportPod";
 import { GoDownCommand } from "./GoDownCommand";
@@ -120,7 +119,6 @@ const ALL_COMMANDS = [
   DevTriggerCommand,
   EnableTelemetryCommand,
   DoctorCommand,
-  DumpStateCommand,
   ExportPodCommand,
   ExportPodV2Command,
   GoDownCommand,

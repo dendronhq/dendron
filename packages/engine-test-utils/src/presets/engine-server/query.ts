@@ -8,30 +8,6 @@ import _ from "lodash";
 import { setupBasic, setupEmpty } from "./utils";
 
 const SCHEMAS = {
-  // TODO: multi-vault, this gets overwritten
-  // EMPTY_QS: new TestPresetEntryV4(
-  //   async ({ vaults, engine, wsRoot }) => {
-  //     const vault = vaults[0];
-  //     const schemas = engine.schemas;
-  //     const { data } = await engine.querySchema("");
-  //
-  //     const expectedNote = SchemaUtils.getSchemaModuleByFnameV4({
-  //       fname: "root",
-  //       schemas,
-  //       wsRoot,
-  //       vault,
-  //     });
-  //     return [
-  //       {
-  //         actual: data[0],
-  //         expected: expectedNote,
-  //       },
-  //     ];
-  //   },
-  //   {
-  //     preSetupHook: setupBasic,
-  //   }
-  // ),
   STAR_QUERY: new TestPresetEntryV4(
     async ({ engine }) => {
       const { data } = await engine.querySchema("*");

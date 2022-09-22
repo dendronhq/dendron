@@ -1378,9 +1378,9 @@ export class FileStorage implements DStore {
     if (maybeNote) {
       note.schema = maybeNote.schema;
     } else {
-      const schemaMatch = SchemaUtils.matchPath({
+      const schemaMatch = await SchemaUtils.matchPath({
         notePath: note.fname,
-        schemaModDict: this.schemas,
+        engine: this.engine,
       });
       if (schemaMatch) {
         this.logger.info({

@@ -23,7 +23,6 @@ import {
   cleanName,
   DendronCompositeError,
   SchemaUtils,
-  SchemaModuleDict,
   string2Note,
   globMatch,
   IntermediateDendronConfig,
@@ -92,8 +91,7 @@ export class NoteParserV2 {
    */
   async parseFiles(
     allPaths: string[],
-    vault: DVault,
-    schemas: SchemaModuleDict
+    vault: DVault
   ): Promise<RespWithOptError<NoteDicts>> {
     const ctx = "parseFiles";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
@@ -264,7 +262,7 @@ export class NoteParserV2 {
     );
     await Promise.all(
       domains.map(async (domain) => {
-        return SchemaUtils.matchDomain(domain, notesById, schemas);
+        return SchemaUtils.matchDomain(domain, notesById, this.engine);
       })
     );
 

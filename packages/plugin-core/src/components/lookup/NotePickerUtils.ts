@@ -26,7 +26,7 @@ export class NotePickerUtils {
     DNodePropsQuickInputV2[] | undefined
   > {
     const engine = ExtensionProvider.getEngine();
-    const { vaults, schemas, wsRoot } = engine;
+    const { vaults, wsRoot } = engine;
 
     // get selection
     const { text } = VSCodeUtils.getSelection();
@@ -49,14 +49,19 @@ export class NotePickerUtils {
       wikiLinks: uniqueWikiLinks,
       engine,
     });
-    const pickerItemsFromSelection = notesFromWikiLinks.map(
-      (note: DNodeProps) =>
+    const pickerItemsFromSelection = await Promise.all(
+      notesFromWikiLinks.map(async (note: DNodeProps) =>
         DNodeUtils.enhancePropForQuickInputV3({
           props: note,
-          schemas,
+          schema: note.schema
+            ? (
+                await engine.getSchema(note.schema.moduleId)
+              ).data
+            : undefined,
           vaults,
           wsRoot,
         })
+      )
     );
     return pickerItemsFromSelection;
   }
@@ -102,14 +107,18 @@ export class NotePickerUtils {
   }) => {
     const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
     const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(engine);
-    return nodes.map((ent) => {
-      return DNodeUtils.enhancePropForQuickInput({
-        wsRoot,
-        props: ent,
-        schemas: engine.schemas,
-        vaults,
-      });
-    });
+    return Promise.all(
+      nodes.map(async (ent) => {
+        return DNodeUtils.enhancePropForQuickInput({
+          wsRoot,
+          props: ent,
+          schema: ent.schema
+            ? (await engine.getSchema(ent.schema.moduleId)).data
+            : undefined,
+          vaults,
+        });
+      })
+    );
   };
 
   /**
@@ -131,7 +140,7 @@ export class NotePickerUtils {
       const note = resp[0];
       const isPerfectMatch = note.fname === picker.value;
       if (isPerfectMatch) {
-        return [this.enhanceNoteForQuickInput({ note, engine })];
+        return [await this.enhanceNoteForQuickInput({ note, engine })];
       }
     }
     return [
@@ -142,7 +151,7 @@ export class NotePickerUtils {
     ];
   }
 
-  private static enhanceNoteForQuickInput(input: {
+  private static async enhanceNoteForQuickInput(input: {
     note: NoteProps;
     engine: DEngineClient;
   }) {
@@ -150,7 +159,9 @@ export class NotePickerUtils {
     return DNodeUtils.enhancePropForQuickInputV3({
       wsRoot,
       props: input.note,
-      schemas: input.engine.schemas,
+      schema: input.note.schema
+        ? (await input.engine.getSchema(input.note.schema.moduleId)).data
+        : undefined,
       vaults,
     });
   }
@@ -196,7 +207,11 @@ export class NotePickerUtils {
         DNodeUtils.enhancePropForQuickInputV3({
           wsRoot,
           props: ent,
-          schemas: engine.schemas,
+          schema: ent.schema
+            ? (
+                await engine.getSchema(ent.schema.moduleId)
+              ).data
+            : undefined,
           vaults,
           alwaysShow: picker.alwaysShowAll,
         })

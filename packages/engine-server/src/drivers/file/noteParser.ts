@@ -271,10 +271,9 @@ export class NoteParser extends ParserBase {
     const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
     );
-    const schemas = this.opts.store.schemas;
     await Promise.all(
       domains.map(async (d) => {
-        return SchemaUtils.matchDomain(d, notesById, schemas);
+        return SchemaUtils.matchDomain(d, notesById, this.engine);
       })
     );
     // Remove stale entries from cache

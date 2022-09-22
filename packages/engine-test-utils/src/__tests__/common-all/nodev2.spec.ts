@@ -108,9 +108,9 @@ describe("matchPath", () => {
   it("match path on domain, reg", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const resp = SchemaUtils.matchPath({
+        const resp = await SchemaUtils.matchPath({
           notePath: "foo",
-          schemaModDict: engine.schemas,
+          engine,
         });
         expect(resp?.schema.id).toEqual("foo");
         return [];
@@ -122,9 +122,9 @@ describe("matchPath", () => {
   it("match path on domain as namespace", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const resp = SchemaUtils.matchPath({
+        const resp = await SchemaUtils.matchPath({
           notePath: "bond",
-          schemaModDict: engine.schemas,
+          engine,
         });
         expect(resp?.schema.id).toEqual("bond");
         expect(resp?.namespace).toBeTruthy();
@@ -150,9 +150,9 @@ describe("matchPath", () => {
   it("match path on domain as namespace, child", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const resp = SchemaUtils.matchPath({
+        const resp = await SchemaUtils.matchPath({
           notePath: "bond.foo",
-          schemaModDict: engine.schemas,
+          engine,
         });
         expect(resp?.schema.id).toEqual("bond");
         expect(resp?.namespace).toBeFalsy();

@@ -590,11 +590,10 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               engine: opts.engine,
               dendronConfig: opts.dendronConfig!,
             });
-            const notes = Object.values(opts.engine.notes).filter(
-              (note) =>
-                note.stub !== true &&
-                VaultUtils.isEqualV2(note.vault, opts.vaults[0])
-            );
+            const notes = await opts.engine.findNotes({
+              excludeStub: true,
+              vault: opts.vaults[0],
+            });
             await pod.exportNotes(notes);
             const [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
               path.join(exportDest, "vault1"),
@@ -622,9 +621,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               engine: opts.engine,
               dendronConfig: opts.dendronConfig!,
             });
-            const notes = Object.values(opts.engine.notes).filter(
-              (note) => note.stub !== true
-            );
+            const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);
             let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
               exportDest,
@@ -661,9 +658,7 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
               engine: opts.engine,
               dendronConfig: opts.dendronConfig!,
             });
-            const notes = Object.values(opts.engine.notes).filter(
-              (note) => note.stub !== true
-            );
+            const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);
             let [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
               path.join(exportDest, "vault1"),

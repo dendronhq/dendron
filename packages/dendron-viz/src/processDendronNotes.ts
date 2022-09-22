@@ -42,11 +42,6 @@ export const processDir = async ({
     return note[0];
   }
 
-  /* Given a note, get its child notes */
-  function getChildren(note: NoteProps): NoteProps[] {
-    return note.children.map((id) => engine.notes[id]);
-  }
-
   /* Given a note, get file stats needed for Tree React component */
   const getFileStats = async (note: NoteProps) => {
     const suffix = isDir(note) ? "" : ".md";
@@ -69,7 +64,7 @@ export const processDir = async ({
     const stats = await getFileStats(note);
 
     /* Recursively process child notes */
-    const notes = getChildren(note);
+    const notes = (await engine.bulkGetNotes(note.children)).data;
     const children = [];
     for (const cnote of notes) {
       // eslint-disable-next-line no-await-in-loop

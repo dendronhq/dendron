@@ -1,4 +1,4 @@
-import { NoteProps, NotePropsByIdDict } from "@dendronhq/common-all";
+import { NotePropsByIdDict, NotePropsMeta } from "@dendronhq/common-all";
 import _ from "lodash";
 
 export class HierarchyUtils {
@@ -9,7 +9,7 @@ export class HierarchyUtils {
    */
   static getChildren = (opts: {
     skipLevels: number;
-    note: NoteProps;
+    note: NotePropsMeta;
     notes: NotePropsByIdDict;
   }) => {
     const { skipLevels, note, notes } = opts;

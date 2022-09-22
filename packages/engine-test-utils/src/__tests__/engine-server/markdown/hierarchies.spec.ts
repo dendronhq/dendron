@@ -70,7 +70,7 @@ describe("hierarchies", () => {
           noteToRender,
           noteCacheForRenderDict,
           fname: "foo",
-          noteIndex: engine.notes["foo"],
+          noteIndex: (await engine.getNote("foo")).data!,
           vault: vaults[0],
           config,
         });
@@ -113,7 +113,7 @@ describe("hierarchies", () => {
           noteToRender: (await engine.getNote("foo")).data!,
           config,
           fname: "foo",
-          noteIndex: engine.notes["foo"],
+          noteIndex: (await engine.getNote("foo")).data!,
           vault: vaults[0],
         });
         const resp = await proc.process(BASIC_TEXT);
@@ -151,7 +151,7 @@ describe("hierarchies", () => {
         const proc = procDendronForPublish({
           noteToRender: (await engine.getNote("foo")).data!,
           fname: "foo",
-          noteIndex: engine.notes["foo"],
+          noteIndex: (await engine.getNote("foo")).data!,
           vault: vaults[0],
           config,
         });
@@ -213,7 +213,7 @@ describe("hierarchies", () => {
           noteToRender,
           noteCacheForRenderDict,
           fname: "foo",
-          noteIndex: engine.notes["foo"],
+          noteIndex: (await engine.getNote("foo")).data!,
           vault: vaults[0],
           config,
         });
@@ -322,7 +322,7 @@ describe("hierarchies", () => {
           noteToRender,
           noteCacheForRenderDict,
           fname: "daily",
-          noteIndex: engine.notes["daily"],
+          noteIndex: (await engine.getNote("daily")).data!,
           vault: vaults[0],
           config,
         });

@@ -156,12 +156,15 @@ export class NotionUtils {
         if (_.isUndefined(record)) return;
         const { notionId, dendronId } = record;
         if (!dendronId) return;
-        const note = engine.notes[dendronId];
-        note.custom = {
-          ...note.custom,
-          notionId,
-        };
-        await engine.writeNote(note);
+        const resp = await engine.getNote(dendronId);
+        if (resp.data) {
+          const note = resp.data;
+          note.custom = {
+            ...note.custom,
+            notionId,
+          };
+          await engine.writeNote(note, { metaOnly: true });
+        }
       })
     );
   };

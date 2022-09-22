@@ -183,7 +183,7 @@ export class FileWatcher {
         wsRoot,
       });
       this.L.debug({ ctx, fsPath, msg: "preparing to delete" });
-      const nodeToDelete = (await engine.findNotes({ fname, vault }))[0];
+      const nodeToDelete = (await engine.findNotesMeta({ fname, vault }))[0];
       if (_.isUndefined(nodeToDelete)) {
         throw new Error(`${fname} not found`);
       }

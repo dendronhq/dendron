@@ -180,7 +180,7 @@ describe("matchDomain", () => {
   it("match path on domain, reg", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const schema = engine.notes["foo"].schema;
+        const schema = (await engine.getNote("foo")).data!.schema;
         expect(schema).toEqual({ moduleId: "foo", schemaId: "foo" });
         return [];
       },
@@ -205,7 +205,7 @@ describe("matchDomain", () => {
   it("match path on domain as namespace", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const schema = engine.notes["bond"].schema;
+        const schema = (await engine.getNote("bond")).data!.schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
         return [];
       },
@@ -234,7 +234,7 @@ describe("matchDomain", () => {
   it("match path on domain as namespace", async () => {
     await runEngineTestV5(
       async ({ engine }) => {
-        const schema = engine.notes["bond.ch1"].schema;
+        const schema = (await engine.getNote("bond.ch1")).data!.schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
         return [];
       },

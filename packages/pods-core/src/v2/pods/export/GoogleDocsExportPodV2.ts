@@ -352,7 +352,11 @@ export class GoogleDocsUtils {
         if (_.isUndefined(record)) return;
         const { documentId, revisionId, dendronId } = record;
         if (!dendronId) return;
-        const note = engine.notes[dendronId];
+        const resp = await engine.getNote(dendronId);
+        if (!resp.data) {
+          return;
+        }
+        const note = resp.data;
         note.custom = {
           ...note.custom,
           documentId,

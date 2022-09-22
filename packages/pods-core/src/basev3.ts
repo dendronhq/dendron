@@ -229,9 +229,10 @@ export abstract class ExportPod<
     const destURL = URI.file(resolvePath(dest, engine.wsRoot));
 
     // parse notes into NoteProps
+    const engineNotes = await engine.findNotes({ excludeStub: false });
     const notes = this.prepareNotesForExport({
       config,
-      notes: _.values(engine.notes),
+      notes: engineNotes,
     });
 
     try {

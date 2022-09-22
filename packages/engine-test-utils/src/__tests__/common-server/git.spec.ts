@@ -23,7 +23,7 @@ describe("GitUtils", () => {
       );
       ConfigUtils.setGithubProp(config, "editBranch", "main");
       ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
-      const note = engine.notes["foo"];
+      const note = (await engine.getNote("foo")).data!;
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/vault1/foo.md"
       );
@@ -38,7 +38,7 @@ describe("GitUtils", () => {
       );
       ConfigUtils.setGithubProp(config, "editBranch", "main");
       ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
-      const note = engine.notes["foo"];
+      const note = (await engine.getNote("foo")).data!;
       const vault = _.find(
         engine.vaults,
         (ent) => ent.fsPath === note.vault.fsPath
@@ -59,7 +59,7 @@ describe("GitUtils", () => {
       );
       ConfigUtils.setGithubProp(config, "editBranch", "main");
       ConfigUtils.setGithubProp(config, "editRepository", gitUrl);
-      const note = engine.notes["foo.ch1"];
+      const note = (await engine.getNote("foo.ch1")).data!;
       note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHierarchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/dendronhq/dendron-site/edit/main/foo/ch1.md"

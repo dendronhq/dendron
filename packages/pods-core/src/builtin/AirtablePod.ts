@@ -434,7 +434,11 @@ export class AirtableUtils {
       records.map(async (ent) => {
         const airtableId = ent.id;
         const dendronId = ent.fields["DendronId"] as string;
-        const note = engine.notes[dendronId] as NotePropsWithOptionalCustom;
+        const resp = await engine.getNote(dendronId);
+        if (!resp.data) {
+          return undefined;
+        }
+        const note = resp.data as NotePropsWithOptionalCustom;
         let pods: AirtablePodMetadata = _.get(note.custom, "pods");
         // return if the note is already exported for this pod Id
         if (pods && pods.airtable && pods.airtable[podId]) return undefined;

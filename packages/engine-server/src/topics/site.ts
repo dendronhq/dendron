@@ -163,7 +163,6 @@ export class SiteUtils {
   }): Promise<{ notes: NotePropsByIdDict; domains: NoteProps[] }> {
     const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
-    const notes = _.clone(engine.notes);
 
     const cleanPublishingConfig = configIsV4(config)
       ? DConfig.cleanSiteConfig(
@@ -215,7 +214,7 @@ export class SiteUtils {
       const rootDomain = domains[0];
       // special case, check if any of these children were supposed to be hidden
       domains = domains
-        .concat(rootDomain.children.map((id) => notes[id]))
+        .concat((await engine.bulkGetNotes(rootDomain.children)).data)
         .filter((note) => this.canPublish({ note, config, engine }));
     }
     logger.info({
@@ -251,13 +250,9 @@ export class SiteUtils {
       config,
       noteOrName: domain,
     });
-    const notesForHierarchy = _.clone(engine.notes);
 
     // get the domain notes
-    const notes = NoteUtils.getNotesByFnameFromEngine({
-      fname: domain,
-      engine,
-    });
+    const notes = await engine.findNotes({ fname: domain });
     logger.info({
       ctx: "filterByHierarchy:candidates",
       domain,
@@ -270,14 +265,13 @@ export class SiteUtils {
     const duplicateNoteBehavior = publishingConfig.duplicateNoteBehavior;
     // duplicate notes found with same name, need to intelligently resolve
     if (notes.length > 1) {
-      domainNote = SiteUtils.handleDup({
+      domainNote = await SiteUtils.handleDup({
         allowStubs: false,
         dupBehavior: duplicateNoteBehavior,
         engine,
         config,
         fname: domain,
         noteCandidates: notes,
-        noteDict: notesForHierarchy,
       });
       // no note found
     } else if (notes.length < 1) {
@@ -349,10 +343,11 @@ export class SiteUtils {
 
       // if `skipLevels` is enabled, the children of the current note are descendants
       // further down
-      let children = HierarchyUtils.getChildren({
+      // eslint-disable-next-line no-await-in-loop
+      let children = await HierarchyUtils.getChildren({
         skipLevels: siteFM.skipLevels || 0,
         note,
-        notes: notesForHierarchy,
+        engine,
       });
       if (siteFM.skipLevels && siteFM.skipLevels > 0) {
         note.children = children.map((ent) => ent.id);
@@ -525,30 +520,22 @@ export class SiteUtils {
     }`;
   }
 
-  static handleDup(opts: {
+  static async handleDup(opts: {
     dupBehavior?: DuplicateNoteBehavior;
     allowStubs?: boolean;
     engine: DEngineClient;
     fname: string;
     config: IntermediateDendronConfig;
     noteCandidates: NoteProps[];
-    noteDict: NotePropsByIdDict;
   }) {
-    const {
-      engine,
-      fname,
-      noteCandidates,
-      noteDict,
-      config,
-      dupBehavior,
-      allowStubs,
-    } = _.defaults(opts, {
-      dupBehavior: {
-        action: DuplicateNoteActionEnum.useVault,
-        payload: [],
-      } as UseVaultBehavior,
-      allowStubs: true,
-    });
+    const { engine, fname, noteCandidates, config, dupBehavior, allowStubs } =
+      _.defaults(opts, {
+        dupBehavior: {
+          action: DuplicateNoteActionEnum.useVault,
+          payload: [],
+        } as UseVaultBehavior,
+        allowStubs: true,
+      });
     const ctx = "handleDup";
     let domainNote: NoteProps | undefined;
 
@@ -622,11 +609,12 @@ export class SiteUtils {
     const domainId = domainNote.id;
     // merge children
     domainNote.children = getUniqueChildrenIds(noteCandidates);
-    // update parents
-    domainNote.children.map((id) => {
-      const maybeNote = noteDict[id];
-      maybeNote.parent = domainId;
+    // update children's parent field
+    const children = (await engine.bulkGetNotes(domainNote.children)).data;
+    children.map((note) => {
+      note.parent = domainId;
     });
+    await engine.bulkWriteNotes({ notes: children, opts: { metaOnly: true } });
     const logger = createLogger(LOGGER_NAME);
     logger.info({
       ctx: "filterByHierarchy",

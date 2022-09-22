@@ -1,9 +1,11 @@
-import { CONSTANTS } from "@dendronhq/common-all";
+import { CONSTANTS, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronEngineClient,
   NotesFileSystemCache,
 } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { createEngineV3FromEngine, runEngineTestV5 } from "../../engine";
@@ -143,6 +145,42 @@ describe("engine, cache", () => {
         expect,
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupLinks(opts);
+        },
+      }
+    );
+  });
+
+  test("cache after moving vaults", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const vault1 = _.find(vaults, { fsPath: "vault1" })!;
+        const newVault1 = FileTestUtils.tmpDir();
+        const vpath = vault2Path({ vault: vault1, wsRoot });
+        fs.copySync(vpath, newVault1.name);
+        const newVault = {
+          fsPath: VaultUtils.normPathByWsRoot({
+            fsPath: newVault1.name,
+            wsRoot,
+          }),
+        };
+        engine.vaults = [newVault];
+        await engine.init();
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        expect(
+          _.uniqBy(
+            _.map(_.values(engineNotes), (ent) => ent.vault),
+            "fsPath"
+          )
+        ).toEqual([newVault]);
+      },
+      {
+        expect,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
+            vault: _.find(vaults, { fsPath: "vault1" })!,
+            fname: "gamma.bar",
+          });
         },
       }
     );

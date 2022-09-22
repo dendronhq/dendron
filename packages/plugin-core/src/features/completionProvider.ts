@@ -242,17 +242,10 @@ export const provideCompletionItems = sentryReportingCallback(
     const range = new Range(position.line, start, position.line, end);
 
     const engine = ExtensionProvider.getEngine();
-    const { notes, wsRoot } = engine;
+    const { wsRoot } = engine;
     let completionItems: CompletionItem[];
     const completionsIncomplete = true;
     const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
-    Logger.debug({
-      ctx,
-      range,
-      notesLength: notes.length,
-      currentVault,
-      wsRoot,
-    });
 
     if (found?.groups?.hashTag) {
       completionItems = await provideCompletionsForTag({

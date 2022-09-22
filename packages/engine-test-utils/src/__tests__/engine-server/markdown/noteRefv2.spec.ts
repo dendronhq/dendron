@@ -999,7 +999,7 @@ describe("noteRefV2", () => {
     const WILDCARD_CASE = createProcTests({
       name: "wildcard",
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
-        const note = engine.notes["id.journal"];
+        const note = (await engine.getNote("id.journal")).data!;
         const config = DConfig.readConfigSync(wsRoot);
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
@@ -1097,7 +1097,7 @@ describe("noteRefV2", () => {
       },
       verifyFuncDict: {
         [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
-          const note = engine.notes["id.journal"];
+          const note = (await engine.getNote("id.journal")).data!;
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
           expect(
@@ -1126,7 +1126,7 @@ describe("noteRefV2", () => {
     const XVAULT_CASE = createProcTests({
       name: "XVAULT_CASE",
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
-        const note = engine.notes["one"];
+        const note = (await engine.getNote("one")).data!;
         const config = DConfig.readConfigSync(wsRoot);
         const noteCacheForRenderDict = await getParsingDependencyDicts(
           note,
@@ -1146,7 +1146,7 @@ describe("noteRefV2", () => {
       },
       verifyFuncDict: {
         [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
-          const note = engine.notes["one"];
+          const note = (await engine.getNote("one")).data!;
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
           expect(
@@ -1199,7 +1199,7 @@ describe("noteRefV2", () => {
     const WITH_PUBLISHING = createProcTests({
       name: "WITH_PUBLISHING",
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
-        const note = engine.notes["foo"];
+        const note = (await engine.getNote("foo")).data!;
         const config = DConfig.readConfigSync(wsRoot);
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
@@ -1222,7 +1222,7 @@ describe("noteRefV2", () => {
       },
       verifyFuncDict: {
         [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
-          const note = engine.notes["foo"];
+          const note = (await engine.getNote("foo")).data!;
           const { resp } = extra;
           expect(resp).toMatchSnapshot();
           expect(

@@ -2,6 +2,7 @@ import {
   DendronError,
   DEngineClient,
   ErrorFactory,
+  NoteDictsUtils,
   RespV3,
   TreeUtils,
   URI,
@@ -19,11 +20,14 @@ export class StateValidator {
   static validateEngineState(engine: DEngineClient): Promise<RespV3<void>[]> {
     return Promise.all(
       engine.vaults.map(async (vault) => {
-        const rootNote = (await engine.findNotes({ fname: "root", vault }))[0];
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault })
+        )[0];
         try {
           if (rootNote) {
+            const engineNotes = await engine.findNotes({ excludeStub: true });
             const engineTreeNode = TreeUtils.createTreeFromEngine(
-              engine.notes,
+              NoteDictsUtils.createNotePropsByIdDict(engineNotes),
               rootNote.id
             );
 

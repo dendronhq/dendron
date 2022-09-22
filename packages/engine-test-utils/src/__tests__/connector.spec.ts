@@ -9,7 +9,10 @@ describe.skip("connector", () => {
       async ({ wsRoot }) => {
         const connector = EngineConnector.getOrCreate({ wsRoot, force: true });
         await connector.init();
-        expect(_.size(connector.engine.notes)).toEqual(5);
+        const engineNotes = await connector.engine.findNotes({
+          excludeStub: false,
+        });
+        expect(engineNotes.length).toEqual(5);
       },
       {
         expect,
@@ -23,10 +26,13 @@ describe.skip("connector", () => {
   test("basic: wait for init", async (done) => {
     let connector: EngineConnector;
     await runEngineTestV5(
-      async ({}) => {
+      async () => {
         connector.init({
           onReady: async () => {
-            expect(_.size(connector.engine.notes)).toEqual(5);
+            const engineNotes = await connector.engine.findNotes({
+              excludeStub: false,
+            });
+            expect(engineNotes.length).toEqual(5);
             done();
           },
         });

@@ -2,6 +2,7 @@ import {
   DEngineInitResp,
   error2PlainObject,
   ERROR_SEVERITY,
+  NoteDictsUtils,
   WorkspaceInitRequest,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
@@ -43,23 +44,18 @@ export class WorkspaceController {
     }
     const payload = {
       error: error2,
-      data: {
-        notes: engine.notes,
-        schemas: engine.schemas,
-        config: DConfig.readConfigSync(engine.wsRoot),
-        vaults: engine.vaults,
-        wsRoot: engine.wsRoot,
-      },
+      data,
     };
     return payload;
   }
 
   async sync({ ws }: WorkspaceSyncRequest): Promise<DEngineInitResp> {
     const engine = await getWSEngine({ ws });
-    const { notes, schemas } = engine;
+    const { schemas } = engine;
+    const notes = await engine.findNotes({ excludeStub: false });
     return {
       data: {
-        notes,
+        notes: NoteDictsUtils.createNotePropsByIdDict(notes),
         schemas,
         config: DConfig.readConfigSync(engine.wsRoot),
         vaults: engine.vaults,

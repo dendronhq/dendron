@@ -1,6 +1,6 @@
 import {
   DVault,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
   SchemaCreationUtils,
   SchemaInMaking,
@@ -111,7 +111,7 @@ export class Hierarchy {
 }
 
 export type SchemaCandidate = {
-  note: NoteProps;
+  note: NotePropsMeta;
   label: string;
   detail: string;
 };
@@ -462,7 +462,9 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
       return { isHappy: false, stopReason: hierLvlOpts.stopReason };
     }
 
-    const candidates = this.getHierarchyCandidates(hierLvlOpts.hierarchyLevel);
+    const candidates = await this.getHierarchyCandidates(
+      hierLvlOpts.hierarchyLevel
+    );
     const patternsOpts =
       await UserQueries.promptUserToPickPatternsFromCandidates(candidates);
     if (_.isUndefined(patternsOpts.pickedCandidates)) {
@@ -493,12 +495,12 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
     return commandOpts;
   }
 
-  private getHierarchyCandidates(
+  private async getHierarchyCandidates(
     hierarchyLevel: HierarchyLevel
-  ): SchemaCandidate[] {
+  ): Promise<SchemaCandidate[]> {
     const { engine } = ExtensionProvider.getDWorkspace();
-    const notes = engine.notes;
-    const noteCandidates = _.filter(notes, (n) =>
+    const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+    const noteCandidates = _.filter(engineNotes, (n) =>
       hierarchyLevel.isCandidateNote(n.fname)
     );
 
@@ -520,7 +522,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
   }
 
   formatSchemaCandidates(
-    noteCandidates: NoteProps[],
+    noteCandidates: NotePropsMeta[],
     hierarchyLevel: HierarchyLevel
   ): SchemaCandidate[] {
     return noteCandidates

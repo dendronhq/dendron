@@ -1,1 +1,23 @@
 @import "./main";
+
+// content.scss
+
+.main-content {
+  font-size: $root-font-size;
+
+  ul {
+    > li {
+      &::before {
+        content: "•";
+      }
+    }
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px;
+  }
+
+}

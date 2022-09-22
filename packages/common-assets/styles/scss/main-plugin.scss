@@ -13,3 +13,19 @@ hr {
   // set its height instead. Setting explicitly so we don't depend on the default.
   border-width: 1px;
 }
+
+
+// content.scss
+
+.main-content {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    white-space: pre-wrap;
+  }
+
+}

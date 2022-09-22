@@ -3,6 +3,7 @@ import {
   InsertNoteLinkAliasModeEnum,
   LegacyLookupSelectionType,
   NoteAddBehaviorEnum,
+  SearchMode,
   StrictConfigV5,
 } from "@dendronhq/common-all";
 
@@ -117,6 +118,7 @@ export class WorkspaceTestUtils {
         siteHierarchies: ["root"],
         writeStubs: false,
         siteRootDir: "docs",
+        searchDefaultBehavior: SearchMode.SEARCH,
         seo: {
           title: "Dendron",
           description: "Personal Knowledge Space",

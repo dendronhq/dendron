@@ -52,6 +52,7 @@ import {
 } from "../components/lookup/LookupProviderV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
+import { QuickPickTemplateSelector } from "../components/lookup/TemplateSelector";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -742,41 +743,14 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   private async getTemplateForNewNote(): Promise<NoteProps | undefined> {
-    const extension = ExtensionProvider.getExtension();
-    const lc = extension.lookupControllerFactory.create({
-      nodeType: "note",
-      buttons: [],
+    const selector = new QuickPickTemplateSelector();
+
+    const templateNote = await selector.getTemplate({
+      logger: this.L,
+      providerId: "createNewWithTemplate",
     });
 
-    const lp = extension.noteLookupProviderFactory.create(
-      "createNewWithTemplate",
-      {
-        allowNewNote: false,
-      }
-    );
-
-    const config = extension.getDWorkspace().config;
-
-    const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
-    const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
-
-    return new Promise((resolve) => {
-      NoteLookupProviderUtils.subscribe({
-        id: "createNewWithTemplate",
-        controller: lc,
-        logger: this.L,
-        onDone: (event: HistoryEvent) => {
-          const templateNote = event.data.selectedItems[0] as NoteProps;
-          resolve(templateNote);
-        },
-      });
-      lc.show({
-        title: "Select template to apply",
-        placeholder: "template",
-        provider: lp,
-        initialValue,
-      });
-    });
+    return templateNote;
   }
 
   private isJournalButtonPressed() {

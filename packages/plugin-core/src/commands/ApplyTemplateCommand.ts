@@ -1,14 +1,12 @@
 import {
-  ConfigUtils,
   DendronError,
   EngagementEvents,
   NoteProps,
 } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
-import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Disposable } from "vscode";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
+import { QuickPickTemplateSelector } from "../components/lookup/TemplateSelector";
 import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
@@ -60,57 +58,18 @@ export class ApplyTemplateCommand extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const lc = this.createLookup();
-    const extension = ExtensionProvider.getExtension();
-    const provider = extension.noteLookupProviderFactory.create(
-      APPLY_TEMPLATE_LOOKUP_ID,
-      {
-        allowNewNote: false,
-      }
-    );
-    const config = extension.getDWorkspace().config;
-    const targetNote = await WSUtilsV2.instance().getActiveNote();
+    const targetNote = WSUtilsV2.instance().getActiveNote();
     if (!targetNote) {
       throw new DendronError({ message: "No Dendron note open" });
     }
 
-    const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
-    const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
-
-    return new Promise((resolve) => {
-      let disposable: Disposable;
-      NoteLookupProviderUtils.subscribe({
-        id: APPLY_TEMPLATE_LOOKUP_ID,
-        controller: lc,
-        logger: this.L,
-        onDone: (event: HistoryEvent) => {
-          const templateNote = event.data.selectedItems[0] as NoteProps;
-          resolve({ templateNote, targetNote });
-          disposable?.dispose();
-          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
-        },
-      });
-      lc.show({
-        title: "Template Apply",
-        placeholder: "template",
-        provider,
-        initialValue,
-      });
-
-      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
-
-      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
-        if (lc.quickPick) {
-          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
-            lc.quickPick
-          );
-
-          lc.provider.onUpdatePickerItems({
-            picker: lc.quickPick,
-          });
-        }
-      });
+    const selector = new QuickPickTemplateSelector();
+    const templateNote = await selector.getTemplate({
+      logger: this.L,
+      providerId: APPLY_TEMPLATE_LOOKUP_ID,
     });
+
+    return { templateNote, targetNote };
   }
 
   async execute(opts: CommandOpts) {

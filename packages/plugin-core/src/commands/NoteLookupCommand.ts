@@ -20,11 +20,7 @@ import {
   getDurationMilliseconds,
   TemplateUtils,
 } from "@dendronhq/common-server";
-import {
-  HistoryEvent,
-  HistoryService,
-  MetadataService,
-} from "@dendronhq/engine-server";
+import { HistoryService, MetadataService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import {
@@ -50,7 +46,6 @@ import {
   NoteLookupProviderChangeStateResp,
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
-import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
 import { QuickPickTemplateSelector } from "../components/lookup/TemplateSelector";
 import {

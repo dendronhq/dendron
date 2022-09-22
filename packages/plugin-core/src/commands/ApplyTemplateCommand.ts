@@ -49,14 +49,6 @@ export class ApplyTemplateCommand extends BasicCommand<
     return;
   }
 
-  private createLookup() {
-    const lc = ExtensionProvider.getExtension().lookupControllerFactory.create({
-      nodeType: "note",
-      buttons: [],
-    });
-    return lc;
-  }
-
   async gatherInputs(): Promise<CommandInput | undefined> {
     const targetNote = WSUtilsV2.instance().getActiveNote();
     if (!targetNote) {

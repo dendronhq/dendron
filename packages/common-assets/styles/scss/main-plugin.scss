@@ -1,1 +1,15 @@
 @import "./main";
+
+
+// base.scss
+
+body {
+  padding: 0;
+}
+
+hr {
+  // `border-width` is already this by default (browser default style), but Ant
+  // design's stylesheet overrides the height and hr depends on `border-width` to
+  // set its height instead. Setting explicitly so we don't depend on the default.
+  border-width: 1px;
+}

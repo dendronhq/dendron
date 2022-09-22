@@ -1,11 +1,3 @@
-diff '--color=auto' -rw ./packages/common-assets/styles/scss/base.scss ./packages/nextjs-template/styles/scss/base.scss
-26d25
-<   padding: 0;
-107,110d105
-<   // `border-width` is already this by default (browser default style), but Ant
-<   // design's stylesheet overrides the height and hr depends on `border-width` to
-<   // set its height instead. Setting explicitly so we don't depend on the default.
-<   border-width: 1px;
 diff '--color=auto' -rw ./packages/common-assets/styles/scss/content.scss ./packages/nextjs-template/styles/scss/content.scss
 9a10
 >   font-size: $root-font-size;

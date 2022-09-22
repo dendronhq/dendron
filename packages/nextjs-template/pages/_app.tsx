@@ -23,7 +23,7 @@ import DendronProvider from "../context/DendronProvider";
 import { combinedStore, useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import "../public/assets-dendron/css/light.css";
-import "../styles/scss/main.scss";
+import "../styles/scss/main-nextjs.scss";
 import { getLogLevel } from "../utils/etc";
 import { fetchConfig, fetchNotes, fetchTreeMenu } from "../utils/fetchers";
 import { useDendronRouter } from "../utils/hooks";

@@ -26,18 +26,6 @@ const fetchBaseStyles = (dst) => {
 };
 
 /**
- * Copy scss styles from common-assets
- * This is all Dendron customizations
- * - how blockquotes are rendered
- * - table borders
- * - etc
- */
-const fetchCustomStyles = (dst) => {
-  const nextRoot = path.join("..", "common-assets", "styles", "scss");
-  fs.copySync(nextRoot, dst);
-};
-
-/**
  * Concatenates themes
  * @param {*} themeMaps
  * @returns
@@ -79,11 +67,6 @@ const buildAll = async () => {
   console.log("fetching...");
   // these are the main style. ant.d styles
   fetchBaseStyles(path.join(cssRoot, "main"));
-
-  // these are our custom styles
-  // NOTE: we copy styles directly into the `src/` directory because
-  // it gets imported in the `DendronAppComponent`
-  fetchCustomStyles(path.join("src", "styles", "scss"));
 
   // --- Read
   // Read all stylesheets and builds theme map

@@ -963,7 +963,7 @@ export class ConfigUtils {
 
   static getSearchMode(config: IntermediateDendronConfig): SearchMode {
     const isConfigV4 = configIsV4(config);
-    const defaultMode = ConfigUtils.getPublishing(config).searchModes;
+    const defaultMode = ConfigUtils.getPublishing(config).searchMode;
     if (!isConfigV4 && defaultMode) {
       return defaultMode;
     }

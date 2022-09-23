@@ -870,10 +870,6 @@ export class NoteUtils {
   }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
-
-  static getRoots(notes: NotePropsByIdDict): NoteProps[] {
-    return _.filter(_.values(notes), DNodeUtils.isRoot);
-  }
   /**
    * Get a list that has all the parents of the current note with the current note
    */

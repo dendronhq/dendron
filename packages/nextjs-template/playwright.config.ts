@@ -1,7 +1,11 @@
+import path from "path";
 import { PlaywrightTestConfig, devices } from "@playwright/test";
 
+const testDir = path.join(__dirname, "e2e");
+
 const config: PlaywrightTestConfig = {
-  globalSetup: require.resolve("./tests/global-setup"),
+  testDir,
+  globalSetup: require.resolve(path.join(testDir, "global-setup")),
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   // Limit the number of workers on CI, use default locally

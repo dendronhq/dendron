@@ -162,7 +162,7 @@ suite("selection2Items", () => {
       },
     },
     () => {
-      test.only("THEN quickpick is populated with notes that were selected.", async () => {
+      test("THEN quickpick is populated with notes that were selected.", async () => {
         const editor = await WSUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 

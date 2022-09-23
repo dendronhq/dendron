@@ -1,9 +1,4 @@
-import {
-  DendronError,
-  DVault,
-  NoteProps,
-  NoteUtils,
-} from "@dendronhq/common-all";
+import { DendronError, DVault, NoteProps } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   PreSetupHookFunction,
@@ -131,11 +126,12 @@ suite("MoveHeader", function () {
                 nonInteractive: true,
               });
               const { engine, vaults } = ExtensionProvider.getDWorkspace();
-              const newNote = NoteUtils.getNoteByFnameFromEngine({
-                fname: "new-note",
-                engine,
-                vault: vaults[0],
-              });
+              const newNote = (
+                await engine.findNotesMeta({
+                  fname: "new-note",
+                  vault: vaults[0],
+                })
+              )[0];
 
               expect(!_.isUndefined(newNote)).toBeTruthy();
               expect(out!.origin.body.includes("## Foo header")).toBeFalsy();

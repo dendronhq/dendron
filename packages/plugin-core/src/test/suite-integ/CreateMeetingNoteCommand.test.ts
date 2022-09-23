@@ -1,4 +1,3 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { CreateMeetingNoteCommand } from "../../commands/CreateMeetingNoteCommand";
@@ -28,13 +27,9 @@ suite("GIVEN CreateMeetingNoteCommand in a basic workspace", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateMeetingNoteCommand(ext, true);
-        const { vaults, engine } = ext.getDWorkspace();
+        const { engine } = ext.getDWorkspace();
 
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const note = (await engine.getNoteMeta("foo")).data!;
 
         await wsUtils.openNote(note);
         await cmd.run();
@@ -46,13 +41,9 @@ suite("GIVEN CreateMeetingNoteCommand in a basic workspace", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateMeetingNoteCommand(ext, true);
-        const { vaults, engine } = ext.getDWorkspace();
+        const { engine } = ext.getDWorkspace();
 
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const note = (await engine.getNoteMeta("foo")).data!;
 
         await wsUtils.openNote(note);
         await cmd.run();
@@ -70,13 +61,9 @@ suite("GIVEN CreateMeetingNoteCommand in a basic workspace", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateMeetingNoteCommand(ext, true);
-        const { vaults, engine } = ext.getDWorkspace();
+        const { engine } = ext.getDWorkspace();
 
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const note = (await engine.getNoteMeta("foo")).data!;
 
         await wsUtils.openNote(note);
         await cmd.run();

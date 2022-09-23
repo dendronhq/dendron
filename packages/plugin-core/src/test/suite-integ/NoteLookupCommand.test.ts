@@ -9,7 +9,6 @@ import {
   LookupSelectionTypeEnum,
   NoteProps,
   NoteQuickInput,
-  NoteUtils,
   SchemaTemplate,
   SchemaUtils,
   Time,
@@ -873,11 +872,9 @@ suite("NoteLookupCommand", function () {
           });
           const { engine, vaults } = ExtensionProvider.getDWorkspace();
 
-          const newNote = NoteUtils.getNoteByFnameFromEngine({
-            fname: "food.ch2",
-            engine,
-            vault: vaults[0],
-          });
+          const newNote = (
+            await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
+          )[0];
           expect(_.trim(newNote?.body)).toEqual("food ch2 template");
 
           cmd.cleanUp();
@@ -928,11 +925,9 @@ suite("NoteLookupCommand", function () {
           });
           const { engine, vaults } = ExtensionProvider.getDWorkspace();
 
-          const newNote = NoteUtils.getNoteByFnameFromEngine({
-            fname: "food.ch2",
-            engine,
-            vault: vaults[0],
-          });
+          const newNote = (
+            await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
+          )[0];
           expect(_.trim(newNote?.body)).toEqual(
             "food ch2 template in vaultThree"
           );
@@ -993,11 +988,9 @@ suite("NoteLookupCommand", function () {
           });
           const { engine, vaults } = ExtensionProvider.getDWorkspace();
 
-          const newNote = NoteUtils.getNoteByFnameFromEngine({
-            fname: "food.ch2",
-            engine,
-            vault: vaults[0],
-          });
+          const newNote = (
+            await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
+          )[0];
           expect(showQuickPick.calledOnce).toBeFalsy();
           expect(_.trim(newNote?.body)).toEqual("food ch2 template");
           cmd.cleanUp();
@@ -1065,12 +1058,10 @@ suite("NoteLookupCommand", function () {
               initialValue: "food.ch2",
               noConfirm: true,
             })
-            .then(() => {
-              const newNote = NoteUtils.getNoteByFnameFromEngine({
-                fname: "food.ch2",
-                engine,
-                vault: vaults[0],
-              });
+            .then(async () => {
+              const newNote = (
+                await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
+              )[0];
               expect(showQuickPick.calledOnce).toBeTruthy();
               expect(_.trim(newNote?.body)).toEqual(
                 "food ch2 template in vault 2"
@@ -1137,12 +1128,10 @@ suite("NoteLookupCommand", function () {
               initialValue: "food.ch2",
               noConfirm: true,
             })
-            .then(() => {
-              const newNote = NoteUtils.getNoteByFnameFromEngine({
-                fname: "food.ch2",
-                engine,
-                vault: vaults[0],
-              });
+            .then(async () => {
+              const newNote = (
+                await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
+              )[0];
               expect(showQuickPick.calledOnce).toBeTruthy();
               expect(_.trim(newNote?.body)).toEqual("");
             });

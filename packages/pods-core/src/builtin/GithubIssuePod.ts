@@ -254,15 +254,14 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
   /**
    * method to get notes that are not already present in the vault
    */
-  getNewNotes(notes: NoteProps[], engine: DEngineClient, vault: DVault) {
-    return notes.filter((note) => {
-      const n = NoteUtils.getNoteByFnameFromEngine({
-        fname: note.fname,
-        engine,
-        vault,
-      });
-      return _.isUndefined(n);
-    });
+  async getNewNotes(notes: NoteProps[], engine: DEngineClient, vault: DVault) {
+    const engineNotes = await Promise.all(
+      notes.map(async (note) => {
+        return (await engine.findNotesMeta({ fname: note.fname, vault }))[0];
+      })
+    );
+    const engineSet = new Set(engineNotes);
+    return notes.filter((note) => !engineSet.has(note));
   }
 
   /**
@@ -276,11 +275,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
     let updatedNotes: NoteProps[] = [];
 
     asyncLoopOneAtATime(notes, async (note) => {
-      const n = NoteUtils.getNoteByFnameFromEngine({
-        fname: note.fname,
-        engine,
-        vault,
-      });
+      const n = (await engine.findNotes({ fname: note.fname, vault }))[0];
       if (
         !_.isUndefined(n) &&
         (n.custom.issueID === undefined ||
@@ -351,7 +346,7 @@ export class GithubIssueImportPod extends ImportPod<GithubIssueImportPodConfig> 
       concatenate,
       fnameAsId,
     });
-    const newNotes = this.getNewNotes(notes, engine, vault);
+    const newNotes = await this.getNewNotes(notes, engine, vault);
     const updatedNotes = await this.getUpdatedNotes(notes, engine, vault);
 
     await engine.bulkWriteNotes({ notes: newNotes, skipMetadata: true });

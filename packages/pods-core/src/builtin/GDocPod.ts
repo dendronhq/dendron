@@ -339,11 +339,9 @@ export class GDocImportPod extends ImportPod<GDocImportPodConfig> {
   }) => {
     const { note, engine, vault, confirmOverwrite, onPrompt, importComments } =
       opts;
-    const existingNote = NoteUtils.getNoteByFnameFromEngine({
-      fname: note.fname,
-      engine,
-      vault,
-    });
+    const existingNote = (
+      await engine.findNotes({ fname: note.fname, vault })
+    )[0];
     if (!_.isUndefined(existingNote)) {
       if (
         (importComments?.enable &&

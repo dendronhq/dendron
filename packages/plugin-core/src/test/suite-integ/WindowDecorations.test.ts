@@ -32,11 +32,7 @@ async function getNote(opts: { fname: string }) {
   const { engine, vaults } = ExtensionProvider.getDWorkspace();
   const { fname } = opts;
 
-  const note = NoteUtils.getNoteByFnameFromEngine({
-    fname,
-    engine,
-    vault: vaults[0],
-  })!;
+  const note = (await engine.findNotesMeta({ fname, vault: vaults[0] }))[0];
   const editor = await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
     note
   );

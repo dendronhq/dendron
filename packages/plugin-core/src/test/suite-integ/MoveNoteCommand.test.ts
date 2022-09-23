@@ -1,7 +1,6 @@
 import {
   DNodeUtils,
   NoteProps,
-  NoteUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -358,11 +357,9 @@ suite("MoveNoteCommand", function () {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
-        const fooNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaultFrom,
-          engine,
-        }) as NoteProps;
+        const fooNote = (
+          await engine.findNotesMeta({ fname: "foo", vault: vaultFrom })
+        )[0];
         const extension = ExtensionProvider.getExtension();
         await extension.wsUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand(extension);
@@ -400,11 +397,7 @@ suite("MoveNoteCommand", function () {
         // bar isn't in the first vault
         expect(
           _.isUndefined(
-            NoteUtils.getNoteByFnameFromEngine({
-              fname: "bar",
-              vault: vaultFrom,
-              engine,
-            })
+            (await engine.findNotesMeta({ fname: "bar", vault: vaultFrom }))[0]
           )
         ).toBeFalsy();
       });

@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NoteProps, VaultUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe, test, before } from "mocha";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
@@ -39,11 +39,9 @@ suite("GIVEN PreviewPanel", function () {
     let previewPanel: PreviewPanel;
     before(async () => {
       const { engine, vaults } = ExtensionProvider.getDWorkspace();
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: "root",
-        vault: vaults[0],
-        engine,
-      });
+      const note = (
+        await engine.findNotes({ fname: "root", vault: vaults[0] })
+      )[0];
       expect(note).toBeTruthy();
       await ExtensionProvider.getWSUtils().openNote(note!);
       previewPanel = PreviewPanelFactory.create(

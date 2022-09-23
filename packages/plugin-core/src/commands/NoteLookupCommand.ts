@@ -177,6 +177,16 @@ export class NoteLookupCommand extends BaseCommand<
     return this._provider;
   }
 
+  /**
+   * @deprecated
+   *
+   * This is not a good pattern and causes a lot of problems with state.
+   * This will be deprecated so that we never have to swap out the provider
+   * of an already existing instance of a lookup command.
+   *
+   * In the meantime, if you absolutely _have_ to provide a custom provider to an instance of
+   * a lookup command, make sure the provider's id is `lookup`.
+   */
   public set provider(provider: ILookupProviderV3 | undefined) {
     this._provider = provider;
   }
@@ -312,7 +322,6 @@ export class NoteLookupCommand extends BaseCommand<
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
     const ctx = "NoteLookupCommand:enrichInputs";
-
     let promiseResolve: (
       value: CommandOpts | undefined
     ) => PromiseLike<CommandOpts | undefined>;
@@ -369,7 +378,6 @@ export class NoteLookupCommand extends BaseCommand<
         }
       },
     });
-
     const promise = new Promise<CommandOpts | undefined>((resolve) => {
       promiseResolve = resolve as typeof promiseResolve;
       opts.controller.showQuickPick({

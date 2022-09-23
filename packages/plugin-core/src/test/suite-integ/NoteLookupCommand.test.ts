@@ -594,10 +594,17 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
             initialValue: "foobar",
           }))!;
-          expect(opts.quickpick.selectedItems.length).toEqual(1);
-          const lastItem = _.last(opts.quickpick.selectedItems);
-          expect(_.pick(lastItem, ["id", "fname"])).toEqual({
+          expect(opts.quickpick.selectedItems.length).toEqual(2);
+          const createNewItem = _.first(opts.quickpick.selectedItems);
+          const createNewWithTemplateItem = _.last(
+            opts.quickpick.selectedItems
+          );
+          expect(_.pick(createNewItem, ["id", "fname"])).toEqual({
             id: "Create New",
+            fname: "foobar",
+          });
+          expect(_.pick(createNewWithTemplateItem, ["id", "fname"])).toEqual({
+            id: "Create New with Template",
             fname: "foobar",
           });
           expect(
@@ -626,13 +633,20 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
             initialValue: "learn.mdone.test",
           }))!;
-          expect(opts.quickpick.selectedItems.length).toEqual(1);
-          const lastItem = _.last(opts.quickpick.selectedItems);
-          expect(_.pick(lastItem, ["id", "fname"])).toEqual({
+          expect(opts.quickpick.selectedItems.length).toEqual(2);
+          const createNewItem = _.first(opts.quickpick.selectedItems);
+          const createNewWithTemplateItem = _.last(
+            opts.quickpick.selectedItems
+          );
+          expect(_.pick(createNewItem, ["id", "fname"])).toEqual({
             id: "Create New",
             fname: "learn.mdone.test",
           });
-          const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
+          expect(_.pick(createNewWithTemplateItem, ["id", "fname"])).toEqual({
+            id: "Create New with Template",
+            fname: "learn.mdone.test",
+          });
+          const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
             VSCodeUtils.getActiveTextEditorOrThrow().document
           );
           expect(note?.fname).toEqual("learn.mdone.test");
@@ -775,9 +789,9 @@ suite("NoteLookupCommand", function () {
           }))!;
           // should have next pick
           expect(_.isUndefined(quickpick?.nextPicker)).toBeFalsy();
-          // One item for our file name and the other for 'CreateNew' since there
+          // One item for our file name and one each for `Create New`, `Create New with Template`
           // are multiple vaults in this test.
-          expect(quickpick.selectedItems.length).toEqual(2);
+          expect(quickpick.selectedItems.length).toEqual(3);
           expect(_.pick(quickpick.selectedItems[0], ["id", "vault"])).toEqual({
             id: fname,
             vault,

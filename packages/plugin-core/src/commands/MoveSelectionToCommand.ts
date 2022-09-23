@@ -112,7 +112,10 @@ export class MoveSelectionToCommand extends BasicCommand<
 
   private createLookupProvider(opts: { activeNote: NoteProps | undefined }) {
     const { activeNote } = opts;
-    return this.extension.noteLookupProviderFactory.create(this.key, {
+    // the id here should be "lookup" as long as we are supplying this
+    // to the lookup command.
+    // TODO: give it its own id once we refactor.
+    return this.extension.noteLookupProviderFactory.create("lookup", {
       allowNewNote: true,
       allowNewNoteWithTemplate: false,
       noHidePickerOnAccept: false,

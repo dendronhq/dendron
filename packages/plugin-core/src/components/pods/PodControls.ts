@@ -2,10 +2,12 @@ import { assertUnreachable, DVault, VaultUtils } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import {
+  CopyAsFormat,
   ExportPodConfigurationV2,
   ExternalConnectionManager,
   ExternalService,
   ExternalTarget,
+  getAllCopyAsFormat,
   PodExportScope,
   PodUtils,
   PodV2ConfigManager,
@@ -28,7 +30,7 @@ import { NoteLookupProviderUtils } from "../lookup/NoteLookupProviderUtils";
  */
 export class PodUIControls {
   /**
-   * Prompts the user with a quick-pick to select a {@link PodConfigurationV2}
+   * Prompts the user with a quick-pick to select a {@link ExportPodConfigurationV2}
    * by its podId. Furthermore, there is an option to create a new export
    * configuration intead.
    * @returns
@@ -408,7 +410,9 @@ export class PodUIControls {
       } catch (e: any) {
         if (
           e.message &&
-          e.message.includes(KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT)
+          e.message.includes(
+            KeybindingUtils.getMultipleKeybindingsMsgFormat("pod")
+          )
         ) {
           keybinding = "Multiple Keybindings";
         }
@@ -551,5 +555,40 @@ export class PodUIControls {
       ignoreFocusOut: true,
     });
     return podIdQuickPick?.label;
+  }
+
+  /**
+   * Prompt user to select the copy as format
+   */
+  public static async promptToSelectCopyAsFormat(): Promise<
+    CopyAsFormat | undefined
+  > {
+    const items = getAllCopyAsFormat().map<QuickPickItem>((value) => {
+      let keybinding;
+
+      try {
+        keybinding =
+          KeybindingUtils.getKeybindingsForCopyAsIfExists(value) || "";
+      } catch (e: any) {
+        if (
+          e.message &&
+          e.message.includes(
+            KeybindingUtils.getMultipleKeybindingsMsgFormat("copy as")
+          )
+        ) {
+          keybinding = "Multiple Keybindings";
+        }
+      }
+      return {
+        label: value,
+        description: keybinding,
+        detail: `Format Dendron note to ${value} and copy it to the clipboard`,
+      };
+    });
+    const formatQuickPick = await VSCodeUtils.showQuickPick(items, {
+      title: "Pick the format to convert",
+      ignoreFocusOut: true,
+    });
+    return formatQuickPick?.label as CopyAsFormat;
   }
 }

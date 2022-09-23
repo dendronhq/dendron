@@ -110,9 +110,11 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
     exportReturnValue: JSONExportReturnType;
     config: RunnableJSONV2PodConfig;
   }) {
+    let successMessage = "Finished running JSON export pod.";
     const data = exportReturnValue.data?.exportedNotes;
     if (_.isString(data) && config.destination === "clipboard") {
       vscode.env.clipboard.writeText(data);
+      successMessage += " Content is copied to the clipboard";
     }
     if (ResponseUtil.hasError(exportReturnValue)) {
       const errorMsg = `Finished JSON Export. Error encountered: ${ErrorFactory.safeStringify(
@@ -120,7 +122,7 @@ export class JSONExportPodCommand extends BaseExportPodCommand<
       )}`;
       this.L.error(errorMsg);
     } else {
-      vscode.window.showInformationMessage("Finished running JSON export pod.");
+      vscode.window.showInformationMessage(successMessage);
     }
   }
 

@@ -116,6 +116,7 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
+    const ctx = "Store:init";
     let errors: IDendronError<any>[] = [];
     try {
       const resp = await this.initSchema();
@@ -127,11 +128,13 @@ export class FileStorage implements DStore {
       });
       const { errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
+      this.logger.info({ ctx, msg: "post:initNotes", errors });
 
       // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
       if (this.config.dev?.enableLinkCandidates) {
         const ctx = "_addLinkCandidates";
         const start = process.hrtime();
+        this.logger.info({ ctx, msg: "pre:addLinkCandidates" });
         // this mutates existing note objects so we don't need to reset the notes
         await this._addLinkCandidates(_.values(this.notes));
         const duration = getDurationMilliseconds(start);
@@ -143,6 +146,7 @@ export class FileStorage implements DStore {
       if (errors.length > 1) {
         error = new DendronCompositeError(errors);
       }
+      this.logger.info({ ctx, msg: "exit" });
       return {
         data: {
           notes,

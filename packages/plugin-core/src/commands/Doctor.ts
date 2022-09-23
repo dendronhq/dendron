@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  DNodeUtils,
   DVault,
   ExtensionEvents,
   extractNoteChangeEntryCounts,
@@ -11,7 +12,6 @@ import {
   NoteDictsUtils,
   NoteFnameDictUtils,
   NoteProps,
-  NoteUtils,
   Position,
   ValidateFnameResp,
   VaultUtils,
@@ -252,14 +252,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         vaults,
         vname: ent.vault,
       }) as DVault;
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: ent.file,
-        engine,
-        vault,
-      }) as NoteProps;
-      const fsPath = NoteUtils.getFullPath({
-        note,
+      const fsPath = DNodeUtils.getFullPath({
         wsRoot,
+        vault,
+        basename: ent.file + ".md",
       });
       const fileContent = fs.readFileSync(fsPath).toString();
       const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(

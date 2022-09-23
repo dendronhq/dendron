@@ -137,7 +137,7 @@ export abstract class BaseExportPodCommand<
         break;
       }
       case PodExportScope.Note: {
-        payload = this.getPropsForNoteScope();
+        payload = await this.getPropsForNoteScope();
 
         if (!payload) {
           vscode.window.showErrorMessage("Unable to get note payload.");
@@ -325,7 +325,7 @@ export abstract class BaseExportPodCommand<
     });
   }
 
-  private getPropsForNoteScope(): DNodeProps[] | undefined {
+  private async getPropsForNoteScope(): Promise<DNodeProps[] | undefined> {
     //TODO: Switch this to a lookup controller, allow multiselect
     const fsPath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!fsPath) {
@@ -345,11 +345,7 @@ export abstract class BaseExportPodCommand<
 
     const fname = path.basename(fsPath, ".md");
 
-    const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    }) as NoteProps;
+    const maybeNote = (await engine.findNotes({ fname, vault }))[0];
 
     if (!maybeNote) {
       vscode.window.showErrorMessage("couldn't find the note somehow");

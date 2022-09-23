@@ -103,7 +103,7 @@ suite("selection2Items", () => {
   let active: NoteProps;
   let activeWithAmbiguousLink: NoteProps;
   let activeWithNonUniqueLinks: NoteProps;
-  describeMultiWS(
+  describeMultiWS.only(
     "GIVEN an active note with selection that contains wikilinks",
     {
       ctx,
@@ -162,7 +162,7 @@ suite("selection2Items", () => {
       },
     },
     () => {
-      test("THEN quickpick is populated with notes that were selected.", async () => {
+      test.only("THEN quickpick is populated with notes that were selected.", async () => {
         const editor = await WSUtils.openNote(active);
         editor.selection = new Selection(7, 0, 10, 0);
 
@@ -174,7 +174,6 @@ suite("selection2Items", () => {
         });
 
         const enrichOut = await cmd.enrichInputs(gatherOut);
-
         expect(
           !_.isUndefined(gatherOut.quickpick.itemsFromSelection)
         ).toBeTruthy();

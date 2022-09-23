@@ -114,11 +114,7 @@ export class TextDocumentService implements ITextDocumentService {
       wsRoot,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    const noteHydrated = (await engine.findNotes({ fname, vault }))[0];
     if (_.isUndefined(noteHydrated)) {
       return;
     }
@@ -198,11 +194,7 @@ export class TextDocumentService implements ITextDocumentService {
       wsRoot: this._extension.getEngine().wsRoot,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    const noteHydrated = (await engine.findNotes({ fname, vault }))[0];
     if (_.isUndefined(noteHydrated)) {
       return;
     }

@@ -2,11 +2,10 @@ import {
   DeleteNoteResp,
   DendronError,
   DLink,
+  DNodeUtils,
   DVault,
   ERROR_SEVERITY,
-  NoteProps,
   NotePropsMeta,
-  NoteUtils,
   Position,
   SchemaUtils,
   VaultUtils,
@@ -51,18 +50,21 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     wsRoot: string;
   }) {
     const { link, vaults, wsRoot } = opts;
+    if (!link.from.fname || !link.from.vaultName) {
+      throw new DendronError({
+        message: `Link from location does not contain fname or vaultName: ${link.from}`,
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
     const vault = VaultUtils.getVaultByName({
       vaults,
-      vname: link.from.vaultName as string,
+      vname: link.from.vaultName,
     }) as DVault;
-    const noteWithLink = NoteUtils.getNoteByFnameFromEngine({
-      fname: link.from.fname as string,
-      vault,
-      engine: ExtensionProvider.getEngine(),
-    }) as NoteProps;
-    const fsPath = NoteUtils.getFullPath({
-      note: noteWithLink,
+
+    const fsPath = DNodeUtils.getFullPath({
       wsRoot,
+      vault,
+      basename: link.from.fname + ".md",
     });
     const fileContent = fs.readFileSync(fsPath).toString();
     const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(

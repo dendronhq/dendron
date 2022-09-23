@@ -41,6 +41,7 @@ import {
   SchemaPropsDict,
   SchemaRaw,
 } from "./types";
+import { DVault } from "./types/DVault";
 import {
   DefaultMap,
   getSlugger,
@@ -50,8 +51,6 @@ import {
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
-import { NoteDictsUtils } from "./noteDictsUtils";
-import { DVault } from "./types/DVault";
 
 import YAML, { JSON_SCHEMA } from "js-yaml";
 

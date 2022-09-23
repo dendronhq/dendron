@@ -653,6 +653,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           note,
         });
       };
+      Object.defineProperty(quickPick.selectionProcessFunc, "name", {
+        value: "selectionExtract",
+        writable: false,
+      });
     } else {
       quickPick.selectionProcessFunc = undefined;
     }
@@ -667,6 +671,10 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           note,
         });
       };
+      Object.defineProperty(quickPick.selectionProcessFunc, "name", {
+        value: "selection2link",
+        writable: false,
+      });
 
       quickPick.prevValue = quickPick.value;
       const { text } = VSCodeUtils.getSelection();

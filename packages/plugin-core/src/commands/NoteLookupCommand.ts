@@ -659,7 +659,12 @@ export class NoteLookupCommand extends BaseCommand<
         engine,
       });
     }
-    if (picker.selectionProcessFunc !== undefined) {
+
+    // only enable selection 2 link
+    if (
+      picker.selectionProcessFunc !== undefined &&
+      picker.selectionProcessFunc.name === "selection2link"
+    ) {
       nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
     }
     if (picker.onCreate) {

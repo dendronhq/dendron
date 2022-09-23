@@ -667,10 +667,6 @@ export class NoteLookupCommand extends BaseCommand<
     ) {
       nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
     }
-    if (picker.onCreate) {
-      const nodeModified = await picker.onCreate(nodeNew);
-      if (nodeModified) nodeNew = nodeModified;
-    }
     const resp = await engine.writeNote(nodeNew);
     if (resp.error) {
       Logger.error({ ctx, error: resp.error });

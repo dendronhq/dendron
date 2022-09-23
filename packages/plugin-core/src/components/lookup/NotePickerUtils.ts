@@ -22,9 +22,9 @@ import { filterPickerResults, PickerUtilsV2 } from "./utils";
 export const PAGINATE_LIMIT = 50;
 
 export class NotePickerUtils {
-  static createItemsFromSelectedWikilinks():
-    | DNodePropsQuickInputV2[]
-    | undefined {
+  static async createItemsFromSelectedWikilinks(): Promise<
+    DNodePropsQuickInputV2[] | undefined
+  > {
     const engine = ExtensionProvider.getEngine();
     const { vaults, schemas, wsRoot } = engine;
 
@@ -42,7 +42,7 @@ export class NotePickerUtils {
       ExtensionProvider.getWSUtils().getActiveNote() as DNodeProps;
 
     // make a list of picker items from wikilinks
-    const notesFromWikiLinks = LinkUtils.getNotesFromWikiLinks({
+    const notesFromWikiLinks = await LinkUtils.getNotesFromWikiLinks({
       activeNote,
       wikiLinks: uniqueWikiLinks,
       engine,

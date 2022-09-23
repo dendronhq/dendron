@@ -103,7 +103,7 @@ suite("selection2Items", () => {
   let active: NoteProps;
   let activeWithAmbiguousLink: NoteProps;
   let activeWithNonUniqueLinks: NoteProps;
-  describeMultiWS.only(
+  describeMultiWS(
     "GIVEN an active note with selection that contains wikilinks",
     {
       ctx,

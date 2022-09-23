@@ -284,7 +284,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
         this._viewModel.selectionState.bind(async (newValue, prevValue) => {
           switch (prevValue) {
             case LookupSelectionTypeEnum.selection2Items: {
-              this.onSelect2ItemsBtnToggled(false);
+              await this.onSelect2ItemsBtnToggled(false);
               break;
             }
             case LookupSelectionTypeEnum.selection2link: {
@@ -301,7 +301,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
 
           switch (newValue) {
             case LookupSelectionTypeEnum.selection2Items: {
-              this.onSelect2ItemsBtnToggled(true);
+              await this.onSelect2ItemsBtnToggled(true);
               break;
             }
             case LookupSelectionTypeEnum.selection2link: {
@@ -609,11 +609,11 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
-  private onSelect2ItemsBtnToggled(enabled: boolean) {
+  private async onSelect2ItemsBtnToggled(enabled: boolean) {
     const quickPick = this._quickPick!;
     if (enabled) {
       const pickerItemsFromSelection =
-        NotePickerUtils.createItemsFromSelectedWikilinks();
+        await NotePickerUtils.createItemsFromSelectedWikilinks();
       quickPick.prevValue = quickPick.value;
       quickPick.value = "";
       quickPick.itemsFromSelection = pickerItemsFromSelection;

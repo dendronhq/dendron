@@ -82,7 +82,6 @@ export class NoteLookupUtils {
     const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
     return roots.concat(childrenOfRootNotes);
   };
-
   /**
    * The core of Dendron lookup logic
    */

@@ -870,7 +870,6 @@ export class NoteUtils {
   }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
-
   /**
    * Get a list that has all the parents of the current note with the current note
    */

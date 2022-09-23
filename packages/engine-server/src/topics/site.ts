@@ -21,6 +21,7 @@ import {
   isBlockAnchor,
   getSlugger,
   IDendronError,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -541,7 +542,7 @@ export class SiteUtils {
 
     if (_.isArray(dupBehavior.payload)) {
       const vaultNames = dupBehavior.payload;
-      _.forEach(vaultNames, (vname) => {
+      await asyncLoopOneAtATime(vaultNames, async (vname) => {
         if (domainNote) {
           return;
         }
@@ -549,11 +550,7 @@ export class SiteUtils {
           vname,
           vaults: engine.vaults,
         });
-        const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          engine,
-          vault,
-        });
+        const maybeNote = (await engine.findNotes({ fname, vault }))[0];
         if (maybeNote && maybeNote.stub && !allowStubs) {
           return;
         }

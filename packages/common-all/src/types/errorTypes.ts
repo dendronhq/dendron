@@ -1,8 +1,8 @@
 import { ERROR_SEVERITY } from "../constants";
 import { DendronError, DendronErrorProps, IDendronError } from "../error";
 import { VaultUtils } from "../vault";
+import { DVault } from "./DVault";
 import { NoteProps } from "./foundation";
-import { DVault } from "./workspace";
 
 /** The error codes of errors that can occur during engine init. */
 export enum EngineInitErrorType {

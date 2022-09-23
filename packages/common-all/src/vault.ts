@@ -3,7 +3,8 @@ import path from "path";
 import { FOLDERS, normalizeUnixPath } from ".";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
-import { DVault, WorkspaceFolderRaw } from "./types";
+import { WorkspaceFolderRaw } from "./types";
+import { DVault } from "./types/DVault";
 import { NonOptional } from "./utils";
 
 export type SelfContainedVault = Omit<DVault, "selfContained"> & {

@@ -3,7 +3,7 @@
  * Holds part of both old and new configs
  * During the migration period.
  */
-import { DendronConfig as DendronConfigV1 } from "./workspace";
+import { DendronConfig as DendronConfigV1 } from "./configs/dendronConfigLegacy";
 import { DendronConfig as DendronConfigV2 } from "./configs/dendronConfig";
 import _ from "lodash";
 

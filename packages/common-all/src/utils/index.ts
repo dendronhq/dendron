@@ -16,15 +16,7 @@ import {
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
 import { DendronError, ErrorMessages } from "../error";
-import {
-  DendronSiteConfig,
-  DHookDict,
-  DVault,
-  LegacyDuplicateNoteBehavior,
-  LegacyHierarchyConfig,
-  NoteChangeEntry,
-  NoteProps,
-} from "../types";
+import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
@@ -52,6 +44,12 @@ import {
   StrictConfigV5,
 } from "../types/intermediateConfigs";
 import { isWebUri } from "../util/regex";
+import {
+  DendronSiteConfig,
+  LegacyDuplicateNoteBehavior,
+  LegacyHierarchyConfig,
+} from "../types/configs/dendronConfigLegacy";
+import { DVault } from "../types/DVault";
 
 export * from "./lookup";
 export * from "./publishUtils";

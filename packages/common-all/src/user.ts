@@ -1,4 +1,5 @@
-import { DendronUserSpecial, DVault } from "./types";
+import { DendronUserSpecial } from "./types";
+import { DVault } from "./types/DVault";
 
 export class DUser {
   public username: string;

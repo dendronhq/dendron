@@ -1,184 +1,8 @@
-import { URI } from "vscode-uri";
-import { DHookDict } from "./hooks";
-import { SeedSite } from "./seed";
-import { DEngineClient } from "./typesv2";
-import { IntermediateDendronConfig } from "./intermediateConfigs";
-
-// === Primitives
-export type DPermission = {
-  read: string[];
-  write: string[];
-};
-
-// === Vaults
-export type RemoteEndpoint = {
-  type: "git";
-  url: string;
-};
-export enum DVaultVisibility {
-  PRIVATE = "private",
-}
-
-export enum DVaultSync {
-  SKIP = "skip",
-  NO_PUSH = "noPush",
-  NO_COMMIT = "noCommit",
-  SYNC = "sync",
-}
-
-export type DVault = {
-  /** Name of vault */
-  name?: string;
-  visibility?: DVaultVisibility;
-  /** Filesystem path to vault */
-  fsPath: string;
-  /**
-   * Indicate the workspace that this vault is part of
-   */
-  workspace?: string;
-  remote?: RemoteEndpoint;
-  // TODO
-  userPermission?: DPermission;
-  /**
-   * If this is enabled, don't apply workspace push commands
-   */
-  noAutoPush?: boolean;
-  /**
-   * How the vault should be handled when using "add and commit" and "sync" commands.
-   *
-   * Options are:
-   * * skip: Skip them entirely. You must manage the repository manually.
-   * * noPush: Commit any changes and pull updates, but don't push. You can watch the repository and make local changes without sharing them back.
-   * * noCommit: Pull and push updates if the workspace is clean, but don't commit. You manually commit your local changes, but automatically share them once you committed.
-   * * sync: Commit changes, and pull and push updates. Treats workspace vaults like regular vaults.
-   *
-   * This setting overrides the `workspaceVaultSync` setting for the vault, even if the vault is a workspace vault.
-   *
-   * Defaults to `sync`.
-   */
-  sync?: DVaultSync;
-  /**
-   * Id of a seed this vault belongs to
-   */
-  seed?: string;
-  /** Marks the vault as a self-contained vault. This is (hopefully) temporary until we eventually drop support for non-self contained vaults. */
-  selfContained?: boolean;
-  /**
-   * Published URL endpoint for the vault.
-   * When wikilinks are exported from this vault, they will be converted with url defined here
-   */
-  siteUrl?: string;
-  /**
-   * Index page for the vault
-   */
-  siteIndex?: string;
-};
-
-export type DWorkspace = {
-  name: string;
-  vaults: DVault[];
-  remote: RemoteEndpoint;
-};
-
-export type DWorkspaceEntry = Omit<DWorkspace, "name" | "vaults">;
-
-export enum WorkspaceType {
-  NATIVE = "NATIVE",
-  CODE = "CODE",
-  NONE = "NONE",
-}
-
-export type DWorkspaceV2 = {
-  /**
-   * Absolute path to the workspace directory
-   */
-  wsRoot: string;
-  type: WorkspaceType;
-  config: IntermediateDendronConfig;
-  vaults: DVault[];
-  engine: DEngineClient;
-  /**
-   * Where are assets stored (eg. tutorial workspace)
-   */
-  assetUri: URI;
-  /**
-   * Log storage
-   */
-  logUri: URI;
-};
-
-export type SeedEntry = {
-  /**
-   * Specific branch to pull from
-   */
-  branch?: string;
-  /**
-   * When in this seed, what url to use
-   */
-  site?: SeedSite;
-};
-
-/**
- * Extension Install Status
- */
-export enum InstallStatus {
-  NO_CHANGE = "NO_CHANGE",
-  INITIAL_INSTALL = "INITIAL_INSTALL",
-  UPGRADED = "UPGRADED",
-}
-
-export enum LegacyNoteAddBehavior {
-  "childOfDomain" = "childOfDomain",
-  "childOfDomainNamespace" = "childOfDomainNamespace",
-  "childOfCurrent" = "childOfCurrent",
-  "asOwnDomain" = "asOwnDomain",
-}
-
-export enum LegacyLookupSelectionType {
-  "selection2link" = "selection2link",
-  "selectionExtract" = "selectionExtract",
-  "none" = "none",
-}
-
-export type LegacyNoteLookupConfig = {
-  selectionType: LegacyLookupSelectionType;
-  leaveTrace: boolean;
-};
-
-export type LegacyLookupConfig = {
-  note: LegacyNoteLookupConfig;
-};
-
-export enum LegacyInsertNoteLinkAliasMode {
-  "snippet" = "snippet",
-  "selection" = "selection",
-  "title" = "title",
-  "prompt" = "prompt",
-  "none" = "none",
-}
-
-export type LegacyInsertNoteLinkConfig = {
-  aliasMode: LegacyInsertNoteLinkAliasMode;
-  multiSelect: boolean;
-};
-
-export type LegacyJournalConfig = {
-  dailyDomain: string;
-  /**
-   * If set, add all daily journals to specified vault
-   */
-  dailyVault?: string;
-  name: string;
-  dateFormat: string;
-  addBehavior: LegacyNoteAddBehavior;
-  /** 0 is Sunday, 1 is Monday, ... */
-  firstDayOfWeek: number;
-};
-
-export type LegacyScratchConfig = Pick<
-  LegacyJournalConfig,
-  "name" | "dateFormat" | "addBehavior"
->;
+import { DVault, DVaultSync } from "../DVault";
+import { DHookDict } from "../hooks";
+import { SeedEntry } from "../SeedEntry";
+import { DendronWorkspaceEntry } from "../DendronWorkspaceEntry";
+import { DendronDevConfig } from "./dev/DendronDevConfig";
 
 export type DendronConfig = {
   /**
@@ -223,7 +47,7 @@ export type DendronConfig = {
   /**
    * Workspaces
    */
-  workspaces?: { [key: string]: DWorkspaceEntry | undefined };
+  workspaces?: { [key: string]: DendronWorkspaceEntry | undefined };
   seeds?: { [key: string]: SeedEntry | undefined };
   /**
    * Dendron vaults in workspace.
@@ -375,6 +199,59 @@ export type DendronConfig = {
   noRandomlyColoredTags?: boolean;
 };
 
+export enum LegacyNoteAddBehavior {
+  "childOfDomain" = "childOfDomain",
+  "childOfDomainNamespace" = "childOfDomainNamespace",
+  "childOfCurrent" = "childOfCurrent",
+  "asOwnDomain" = "asOwnDomain",
+}
+
+export enum LegacyLookupSelectionType {
+  "selection2link" = "selection2link",
+  "selectionExtract" = "selectionExtract",
+  "none" = "none",
+}
+
+export type LegacyNoteLookupConfig = {
+  selectionType: LegacyLookupSelectionType;
+  leaveTrace: boolean;
+};
+
+export type LegacyLookupConfig = {
+  note: LegacyNoteLookupConfig;
+};
+
+export enum LegacyInsertNoteLinkAliasMode {
+  "snippet" = "snippet",
+  "selection" = "selection",
+  "title" = "title",
+  "prompt" = "prompt",
+  "none" = "none",
+}
+
+export type LegacyInsertNoteLinkConfig = {
+  aliasMode: LegacyInsertNoteLinkAliasMode;
+  multiSelect: boolean;
+};
+
+export type LegacyJournalConfig = {
+  dailyDomain: string;
+  /**
+   * If set, add all daily journals to specified vault
+   */
+  dailyVault?: string;
+  name: string;
+  dateFormat: string;
+  addBehavior: LegacyNoteAddBehavior;
+  /** 0 is Sunday, 1 is Monday, ... */
+  firstDayOfWeek: number;
+};
+
+export type LegacyScratchConfig = Pick<
+  LegacyJournalConfig,
+  "name" | "dateFormat" | "addBehavior"
+>;
+
 export type LegacyRandomNoteConfig = {
   /**
    * Hiearchies to include
@@ -392,45 +269,6 @@ export type LegacyInsertNoteIndexConfig = {
    * Include marker when inserting note index.
    */
   marker?: boolean;
-};
-
-export type DendronDevConfig = {
-  /**
-   * Custom next server
-   */
-  nextServerUrl?: string;
-  /**
-   * Static assets for next
-   */
-  nextStaticRoot?: string;
-  /**
-   * What port to use for engine server. Default behavior is to create at startup
-   */
-  engineServerPort?: number;
-  /**
-   * Enable displaying and indexing link candidates. Default is false
-   */
-  enableLinkCandidates?: boolean;
-  /**
-   * Enable new preview as default
-   */
-  enablePreviewV2?: boolean;
-  /** Force the use of a specific type of watcher.
-   *
-   * - plugin: Uses VSCode's builtin watcher
-   * - engine: Uses the engine watcher, watching the files directly without VSCode
-   */
-  forceWatcherType?: "plugin" | "engine";
-  /**
-   * Enable export pod v2
-   */
-  enableExportPodV2?: boolean;
-  /**
-   * Sets self contained vaults as the default vault type. Dendron can read
-   * self-contained vaults even if this option is not enabled, but it will only
-   * create self contained vaults if this option is enabled.
-   */
-  enableSelfContainedVaults?: boolean;
 };
 
 export type DendronSiteConfig = {

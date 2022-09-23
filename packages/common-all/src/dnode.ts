@@ -23,7 +23,6 @@ import {
   DNodeProps,
   DNodePropsQuickInputV2,
   DNoteLoc,
-  DVault,
   NoteChangeEntry,
   NoteLocalConfig,
   NoteOpts,
@@ -53,6 +52,7 @@ import {
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 import { NoteDictsUtils } from "./noteDictsUtils";
+import { DVault } from "./types/DVault";
 
 export type ValidateFnameResp =
   | {

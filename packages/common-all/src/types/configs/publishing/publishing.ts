@@ -1,4 +1,4 @@
-import { DVault } from "../../workspace";
+import { DVault } from "../../DVault";
 import { GiscusConfig } from "./giscus";
 import { GithubConfig, genDefaultGithubConfig } from "./github";
 import { SEOConfig, genDefaultSEOConfig } from "./seo";

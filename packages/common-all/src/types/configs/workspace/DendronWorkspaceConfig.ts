@@ -1,11 +1,12 @@
-import { DVault, RemoteEndpoint } from "../../workspace";
 import { genDefaultJournalConfig, JournalConfig } from "./journal";
 import { genDefaultScratchConfig, ScratchConfig } from "./scratch";
-import { genDefaultGraphConfig, DendronGraphConfig } from "../workspace/graph";
+import { genDefaultGraphConfig, DendronGraphConfig } from "./graph";
 import { SeedSite } from "../../seed";
 import { DHookDict } from "../../hooks";
 import { VaultSyncMode, VaultSyncModeEnum } from "../base";
 import { genDefaultTaskConfig, TaskConfig } from "./task";
+import { DVault } from "../../DVault";
+import { DendronWorkspaceEntry } from "../../DendronWorkspaceEntry";
 
 /**
  * Namespace for configurations that affect the workspace
@@ -40,14 +41,6 @@ export type DendronWorkspaceConfig = {
   apiEndpoint?: string;
   metadataStore?: "sqlite" | "json";
 };
-
-export type DendronWorkspace = {
-  name: string;
-  vaults: DVault[];
-  remote: RemoteEndpoint;
-};
-
-export type DendronWorkspaceEntry = Omit<DendronWorkspace, "name" | "vaults">;
 
 export type DendronSeedEntry = {
   branch?: string;

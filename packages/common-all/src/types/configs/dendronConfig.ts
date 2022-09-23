@@ -5,7 +5,7 @@ import {
 import {
   DendronWorkspaceConfig,
   genDefaultWorkspaceConfig,
-} from "./workspace/workspace";
+} from "./workspace/DendronWorkspaceConfig";
 import {
   DendronPreviewConfig,
   genDefaultPreviewConfig,
@@ -15,7 +15,7 @@ import {
   genDefaultPublishingConfig,
 } from "./publishing/publishing";
 import { DendronGlobalConfig, genDefaultGlobalConfig } from "./global/global";
-import { DendronDevConfig, genDefaultDevConfig } from "./dev/dev";
+import { DendronDevConfig, genDefaultDevConfig } from "./dev/DendronDevConfig";
 
 /**
  * DendronConfig

@@ -2,11 +2,11 @@ import _ from "lodash";
 import {
   NotePropsByIdDict,
   NotePropsByFnameDict,
-  DVault,
   NoteProps,
   NoteDicts,
   NotePropsMeta,
 } from "./types";
+import { DVault } from "./types/DVault";
 import { cleanName, isNotUndefined } from "./utils";
 import { VaultUtils } from "./vault";
 

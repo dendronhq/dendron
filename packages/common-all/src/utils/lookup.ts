@@ -3,6 +3,8 @@ import {
   DEngineClient,
   FuseExtendedSearchConstants,
   NoteProps,
+  NotePropsByIdDict,
+  NoteUtils,
   ReducedDEngine,
 } from "..";
 
@@ -71,6 +73,14 @@ export class NoteLookupUtils {
     const childrenOfRoot = roots.flatMap((ent) => ent.children);
     const childrenOfRootNotes = await engine.bulkGetNotes(childrenOfRoot);
     return roots.concat(childrenOfRootNotes.data);
+  };
+
+  static fetchRootResults = (notes: NotePropsByIdDict) => {
+    const roots: NoteProps[] = NoteUtils.getRoots(notes);
+
+    const childrenOfRoot = roots.flatMap((ent) => ent.children);
+    const childrenOfRootNotes = _.map(childrenOfRoot, (ent) => notes[ent]);
+    return roots.concat(childrenOfRootNotes);
   };
 
   /**

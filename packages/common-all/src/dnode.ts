@@ -910,6 +910,10 @@ export class NoteUtils {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
 
+  static getRoots(notes: NotePropsByIdDict): NoteProps[] {
+    return _.filter(_.values(notes), DNodeUtils.isRoot);
+  }
+
   /**
    * Add derived metadata from `noteHydrated` to `noteRaw`
    * By default, include the following properties:

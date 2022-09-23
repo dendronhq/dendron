@@ -35,6 +35,7 @@ export class WorkspaceController {
       logger.error({ ctx, msg: "fatal error initializing notes", error });
       return { data, error };
     }
+    logger.info({ ctx, msg: "pre:addURIToEngine", uri });
     await putWS({ ws: uri, engine });
     const duration = getDurationMilliseconds(start);
     logger.info({ ctx, msg: "finish init", duration, uri, error });

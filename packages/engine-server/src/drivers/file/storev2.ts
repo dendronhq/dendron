@@ -544,6 +544,7 @@ export class FileStorage implements DStore {
 
     const out = await Promise.all(
       (this.vaults as DVault[]).map(async (vault) => {
+        this.logger.info({ ctx, msg: "initializing vault", vault });
         const {
           notesById,
           cacheUpdates,
@@ -556,6 +557,7 @@ export class FileStorage implements DStore {
 
         this.logger.info({
           ctx,
+          msg: "finish initializing vault",
           vault,
           numEntries: _.size(notesById),
           numCacheUpdates: _.size(cacheUpdates),
@@ -578,7 +580,11 @@ export class FileStorage implements DStore {
 
     this._addBacklinks({ notesWithLinks, allNotes });
     const duration = getDurationMilliseconds(start);
-    this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
+    this.logger.info({
+      ctx,
+      msg: `time to init notes: "${duration}" ms`,
+      errors,
+    });
 
     return { errors };
   }

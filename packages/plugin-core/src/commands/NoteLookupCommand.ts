@@ -488,9 +488,9 @@ export class NoteLookupCommand extends BaseCommand<
     const start = process.hrtime();
     const isNew = PickerUtilsV2.isCreateNewNotePick(item);
 
+    const isNewWithTemplate =
+      PickerUtilsV2.isCreateNewNoteWithTemplatePick(item);
     if (isNew) {
-      const isNewWithTemplate =
-        PickerUtilsV2.isCreateNewNoteWithTemplatePick(item);
       if (isNewWithTemplate) {
         result = this.acceptNewWithTemplateItem(item);
       } else {
@@ -503,6 +503,7 @@ export class NoteLookupCommand extends BaseCommand<
     AnalyticsUtils.track(VSCodeEvents.NoteLookup_Accept, {
       duration: profile,
       isNew,
+      isNewWithTemplate,
     });
     const metaData = MetadataService.instance().getMeta();
     if (_.isUndefined(metaData.firstLookupTime)) {

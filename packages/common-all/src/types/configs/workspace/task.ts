@@ -1,5 +1,6 @@
 import _ from "lodash";
-import { LegacyLookupSelectionType, NoteProps, NotePropsMeta } from "../..";
+import { NoteProps, NotePropsMeta } from "../..";
+import { LegacyLookupSelectionType } from "../dendronConfigLegacy";
 import { JournalConfig } from "./journal";
 import { NoteAddBehaviorEnum } from "./types";
 

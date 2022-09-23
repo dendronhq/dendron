@@ -1,5 +1,5 @@
 import { URI, Utils } from "vscode-uri";
-import { DVault } from "../types";
+import { DVault } from "../types/DVault";
 import { VaultUtils } from "../vault";
 
 /** Returns the path to where the notes are stored inside the vault.

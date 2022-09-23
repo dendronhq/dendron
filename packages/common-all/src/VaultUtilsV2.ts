@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { URI, Utils } from "vscode-uri";
 import { FOLDERS } from "./constants";
-import { DVault } from "./types";
+import { DVault } from "./types/DVault";
 import { VaultUtils } from "./vault";
 
 /**

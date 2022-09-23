@@ -1,7 +1,6 @@
-import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
-import { DVault } from "./workspace";
 import { DendronGlobalConfig } from ".";
+import { DVault } from "./DVault";
 
 export interface Point {
   /**
@@ -258,4 +257,61 @@ export type SEOProps = {
   canonicalUrl?: string;
   noindex?: boolean;
   twitter?: string;
+};
+
+export type DNoteLoc = {
+  fname: string;
+  alias?: string;
+  id?: string;
+  vaultName?: string;
+  anchorHeader?: string;
+};
+
+export type DNoteAnchor =
+  | DNoteBlockAnchor
+  | DNoteHeaderAnchor
+  | DNoteLineAnchor;
+
+/**
+ * Anchor without {@link DNoteHeaderAnchor.depth} info
+ * @todo see migration [[DNoteAnchorBasic|dendron://dendron.docs/dev.changelog#dnoteanchorbasic]]
+ */
+export type DNoteAnchorBasic =
+  | DNoteBlockAnchor
+  | Omit<DNoteHeaderAnchor, "depth">
+  | DNoteLineAnchor;
+
+export type DNoteBlockAnchor = {
+  type: "block";
+  text?: string; //original text for the anchor
+  value: string;
+};
+
+/**
+ * This represents a markdown header
+ * ```md
+ * # H1
+ * ```
+ */
+export type DNoteHeaderAnchor = {
+  type: "header";
+  text?: string; //original text for the anchor
+  value: string;
+  depth: number;
+};
+
+/** An anchor referring to a specific line in a file. These don't exist inside of files, they are implied by the link containing the anchor.
+ *
+ * Lines are indexed starting at 1, which is similar to how you refer to specific lines on Github.
+ */
+export type DNoteLineAnchor = {
+  type: "line";
+  /** 1-indexed line number. */
+  line: number;
+  value: string;
+};
+
+export type DNoteAnchorPositioned = (DNoteBlockAnchor | DNoteHeaderAnchor) & {
+  line: number;
+  column: number;
 };

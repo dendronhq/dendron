@@ -1,15 +1,11 @@
 import path from "path";
-import {
-  DendronSiteConfig,
-  DendronSiteFM,
-  NoteProps,
-  SEOProps,
-} from "../types";
+import { ConfigUtils } from ".";
+import { DendronSiteFM, NoteProps, SEOProps } from "../types";
+import { DendronSiteConfig } from "../types/configs/dendronConfigLegacy";
 import {
   configIsV4,
   IntermediateDendronConfig,
 } from "../types/intermediateConfigs";
-import { ConfigUtils } from "./index";
 
 export class PublishUtils {
   static getPublishFM(note: NoteProps): DendronSiteFM {

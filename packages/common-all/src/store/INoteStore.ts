@@ -1,12 +1,12 @@
 import {
   DNoteLoc,
-  FindNoteOpts,
   NoteProps,
   NotePropsMeta,
   RespV3,
   WriteNoteMetaOpts,
   WriteNoteOpts,
 } from "../types";
+import { FindNoteOpts } from "../types/FindNoteOpts";
 
 /**
  * Interface responsible for interacting with NoteProps storage layer

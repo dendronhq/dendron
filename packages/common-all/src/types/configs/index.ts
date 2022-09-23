@@ -3,4 +3,5 @@ export * from "./workspace";
 export * from "./preview";
 export * from "./global/global";
 export * from "./publishing";
-// export * from "./dev";
+export * from "./dev/DendronDevConfig";
+export * from "./dendronConfigLegacy";

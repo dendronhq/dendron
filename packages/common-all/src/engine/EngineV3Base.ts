@@ -6,7 +6,7 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { FuseEngine } from "../fuse";
+import { FuseEngine } from "../FuseEngine";
 import { INoteStore } from "../store";
 import {
   BulkGetNoteMetaResp,
@@ -16,7 +16,6 @@ import {
   DeleteNoteResp,
   EngineDeleteOpts,
   EngineWriteOptsV2,
-  FindNoteOpts,
   FindNotesMetaResp,
   FindNotesResp,
   GetNoteResp,
@@ -32,8 +31,9 @@ import {
   WriteNoteResp,
   GetNoteMetaResp,
   DLink,
-  DVault,
 } from "../types";
+import { DVault } from "../types/DVault";
+import { FindNoteOpts } from "../types/FindNoteOpts";
 import { isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 

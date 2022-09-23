@@ -6,13 +6,13 @@ import { DendronError } from "../error";
 import {
   Disposable,
   DNoteLoc,
-  FindNoteOpts,
   NoteProps,
   NotePropsMeta,
   RespV3,
   WriteNoteMetaOpts,
   WriteNoteOpts,
 } from "../types";
+import { FindNoteOpts } from "../types/FindNoteOpts";
 import { genHash, isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";

@@ -138,7 +138,7 @@ export class FileStorage implements DStore {
         // this mutates existing note objects so we don't need to reset the notes
         await this._addLinkCandidates(_.values(this.notes));
         const duration = getDurationMilliseconds(start);
-        this.logger.info({ ctx, duration });
+        this.logger.info({ ctx, msg: "post:addLinkCandidates", duration });
       }
 
       const { notes, schemas, config } = this;

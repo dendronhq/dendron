@@ -12,6 +12,7 @@ import {
   VaultUtils,
   milliseconds,
   FIFOQueue,
+  NotePropsMeta,
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { message } from "antd";
@@ -37,7 +38,7 @@ const DEFAULT_NODE_CLASSES = `${DEFAULT_CLASSES}`; //color-fill
 const DEFAULT_EDGE_CLASSES = `${DEFAULT_CLASSES}`;
 
 type QueueData = {
-  note: NoteProps;
+  note: NotePropsMeta;
   /**
    * How far (in the graph) away is this note from the original note?
    */
@@ -243,9 +244,10 @@ function computeLinkedElements({
       const noteVaultClass = getVaultClass(note.vault);
       if (showBacklinks) {
         // setup inward links for note
+
         const connectedNotes = NoteUtils.getNotesWithLinkTo({
           note,
-          notes,
+          notes: Object.values(notes),
         });
         connectedNotes.forEach((connectedNote) => {
           // return if it is a self-referential link or there's already an outward link for this set of nodes
@@ -373,7 +375,7 @@ function getOutwardLinkedConnections({
   noteVaultClass,
   linkedEdgesMap,
 }: {
-  note: NoteProps;
+  note: NotePropsMeta;
   vaults: DVault[] | undefined;
   notes: NotePropsByIdDict;
   fNameDict: NotePropsByFnameDict;

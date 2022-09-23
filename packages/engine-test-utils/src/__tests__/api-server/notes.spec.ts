@@ -2,7 +2,7 @@ import {
   APIUtils,
   DendronAPI,
   DVault,
-  NoteProps,
+  NotePropsMeta,
   RenderNoteResp,
 } from "@dendronhq/common-all";
 import { createServer, runEngineTestV5 } from "../../engine";
@@ -65,7 +65,7 @@ describe("api/note/render tests", () => {
           const vault1 = vaults[0];
 
           const fooNote = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "foo",
               vault: vault1,
             })
@@ -124,8 +124,8 @@ describe("api/note/render tests", () => {
   });
 
   describe(`GIVEN notes with recursive reference relationship: foo-->![[foo.one]]-->![[foo.two]]`, () => {
-    let fooNote: NoteProps;
-    let fooTwo: NoteProps;
+    let fooNote: NotePropsMeta;
+    let fooTwo: NotePropsMeta;
     let api: DendronAPI;
     let wsRoot: string;
     beforeAll(async () => {
@@ -135,14 +135,14 @@ describe("api/note/render tests", () => {
           const vault1 = vaults[0];
 
           fooNote = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "foo",
               vault: vault1,
             })
           )[0];
 
           fooTwo = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "foo.two",
               vault: vault1,
             })

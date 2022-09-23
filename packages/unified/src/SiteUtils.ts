@@ -17,6 +17,7 @@ import {
   NoteDicts,
   NoteDictsUtils,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   UseVaultBehavior,
   VaultUtils,
@@ -592,7 +593,7 @@ export class SiteUtils {
     note,
   }: {
     indexNote?: string;
-    note: NoteProps;
+    note: NotePropsMeta;
   }): boolean {
     return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }

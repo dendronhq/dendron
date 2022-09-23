@@ -54,7 +54,7 @@ suite("GIVEN TaskStatus", function () {
     test("THEN updates the task status", async () => {
       const { engine } = ExtensionProvider.getDWorkspace();
       const task = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "task.test",
           vault: taskNote.vault,
         })

@@ -559,7 +559,7 @@ export class DoctorService implements Disposable {
           );
         }
         //finding candidate notes
-        notes = Object.values(notes).filter(
+        notes = notes.filter(
           (value) =>
             value.fname.startsWith(selectedHierarchy) &&
             value.stub !== true &&

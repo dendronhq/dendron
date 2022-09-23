@@ -500,7 +500,7 @@ const NOTES = {
       },
       {
         actual: DNodeUtils.isRoot(
-          (await engine.getNote(note.parent as string)).data!
+          (await engine.getNoteMeta(note.parent as string)).data!
         ),
         expected: true,
       },
@@ -853,7 +853,7 @@ const NOTES_MULTI = {
       },
       {
         actual: DNodeUtils.isRoot(
-          (await engine.getNote(note.parent as string)).data!
+          (await engine.getNoteMeta(note.parent as string)).data!
         ),
         expected: true,
       },
@@ -887,7 +887,7 @@ const NOTES_MULTI = {
         },
         {
           actual: DNodeUtils.isRoot(
-            (await engine.getNote(note.parent as string)).data!
+            (await engine.getNoteMeta(note.parent as string)).data!
           ),
           expected: true,
         },
@@ -903,8 +903,8 @@ const NOTES_MULTI = {
         overrideExisting: true,
       });
 
-      const deletedFooNote = (await engine.getNote("foo")).data;
-      const newFooNote = (await engine.getNote("updatedID")).data;
+      const deletedFooNote = (await engine.getNoteMeta("foo")).data;
+      const newFooNote = (await engine.getNoteMeta("updatedID")).data;
       const createEntries = extractNoteChangeEntriesByType(
         changes.data!,
         "create"

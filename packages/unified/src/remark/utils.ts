@@ -27,6 +27,7 @@ import {
   NoteBlock,
   NoteChangeEntry,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   parseDendronURI,
   Point,
@@ -320,9 +321,11 @@ const getLinkCandidates = async ({
       const value = textNode.value as string;
       await Promise.all(
         value.split(/\s+/).map(async (word) => {
-          const possibleCandidates = (
-            await engine.findNotes({ fname: word, vault: note.vault })
-          ).filter((note) => note.stub !== true);
+          const possibleCandidates = await engine.findNotesMeta({
+            fname: word,
+            vault: note.vault,
+            excludeStub: true,
+          });
 
           linkCandidates.push(
             ...possibleCandidates.map((candidate): DLink => {
@@ -869,7 +872,7 @@ export class LinkUtils {
 
         // see if we have more than one note with same fname as destination
         // if so, we need to specify the vault in the link.
-        const notesWithSameName = await engine.findNotes({
+        const notesWithSameName = await engine.findNotesMeta({
           fname: destNote.fname,
         });
         // there are more than one note with same name, or the link we are updating
@@ -1333,7 +1336,7 @@ export class RemarkUtils {
             });
           }
           const existingNote = (
-            await engine.findNotes({ fname: linkNode.value, vault })
+            await engine.findNotesMeta({ fname: linkNode.value, vault })
           )[0];
           if (existingNote) {
             const publishingConfig =
@@ -1632,7 +1635,7 @@ export class RemarkUtils {
   // Copied from WorkspaceUtils:
   static getNoteUrl(opts: {
     config: IntermediateDendronConfig;
-    note: NoteProps;
+    note: NotePropsMeta;
     vault: DVault;
     urlRoot?: string;
     anchor?: string;

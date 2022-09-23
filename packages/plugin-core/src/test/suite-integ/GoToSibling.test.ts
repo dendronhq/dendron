@@ -391,7 +391,7 @@ const openNote = async (
   vault?: DVault
 ) => {
   const { engine } = ext.getDWorkspace();
-  const hitNotes = await engine.findNotes({ fname, vault });
+  const hitNotes = await engine.findNotesMeta({ fname, vault });
   if (hitNotes.length === 0) throw Error("Cannot find the active note");
   await new WSUtilsV2(ext).openNote(hitNotes[0]);
 };

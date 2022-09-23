@@ -72,7 +72,7 @@ suite("GotoNote", function () {
         test("THEN get note", async () => {
           const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const vault = vaults[0];
-          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
+          const note = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
           expect(_.pick(note, ["fname", "stub"])).toEqual({
             fname: "foo",
             stub: true,

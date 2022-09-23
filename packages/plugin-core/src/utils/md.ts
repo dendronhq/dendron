@@ -489,7 +489,7 @@ export async function findReferencesById(id: string) {
 
   const engine = ExtensionProvider.getEngine();
 
-  const note = (await engine.getNote(id)).data;
+  const note = (await engine.getNoteMeta(id)).data;
 
   if (!note) {
     return;

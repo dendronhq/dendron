@@ -222,9 +222,9 @@ const NOTES = {
           fname: "foo",
         })
       )[0];
-      const rootNotes = await engine.findNotes({ fname: "root" });
+      const rootNotes = await engine.findNotesMeta({ fname: "root" });
       const rootNote = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "root",
           vault: vaults[0],
         })
@@ -258,8 +258,8 @@ const NOTES = {
   ),
   NOTE_TOO_LONG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = (await engine.getNote("one")).data!;
-      const two = (await engine.getNote("two")).data!;
+      const one = (await engine.getNoteMeta("one")).data!;
+      const two = (await engine.getNoteMeta("two")).data!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },
@@ -292,8 +292,8 @@ const NOTES = {
   ),
   NOTE_TOO_LONG_CONFIG: new TestPresetEntryV4(
     async ({ engine }) => {
-      const one = (await engine.getNote("one")).data!;
-      const two = (await engine.getNote("two")).data!;
+      const one = (await engine.getNoteMeta("one")).data!;
+      const two = (await engine.getNoteMeta("two")).data!;
       return [
         // Links in one didn't get parsed since it's too long, but two did
         { actual: one.links.length, expected: 1 },
@@ -374,7 +374,7 @@ const NOTES = {
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
       const noteAlpha = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "alpha",
           vault: vaults[0],
         })
@@ -449,7 +449,7 @@ const NOTES = {
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const noteRoot = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "root",
           vault: vaults[0],
         })
@@ -490,7 +490,7 @@ const NOTES = {
   NOTE_WITH_CUSTOM_ATT: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const noteRoot = (
-        await engine.findNotes({
+        await engine.findNotesMeta({
           fname: "foo",
           vault: vaults[0],
         })

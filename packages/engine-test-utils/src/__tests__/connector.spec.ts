@@ -9,7 +9,7 @@ describe.skip("connector", () => {
       async ({ wsRoot }) => {
         const connector = EngineConnector.getOrCreate({ wsRoot, force: true });
         await connector.init();
-        const engineNotes = await connector.engine.findNotes({
+        const engineNotes = await connector.engine.findNotesMeta({
           excludeStub: false,
         });
         expect(engineNotes.length).toEqual(5);
@@ -29,7 +29,7 @@ describe.skip("connector", () => {
       async () => {
         connector.init({
           onReady: async () => {
-            const engineNotes = await connector.engine.findNotes({
+            const engineNotes = await connector.engine.findNotesMeta({
               excludeStub: false,
             });
             expect(engineNotes.length).toEqual(5);

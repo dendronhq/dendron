@@ -70,7 +70,7 @@ describe("WHEN run 'dendron note lookup'", () => {
           });
           expect(notesOutput).toEqual([]);
           const note = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "gamma",
               vault,
             })
@@ -371,7 +371,7 @@ describe("WHEN run 'dendron note lookup_legacy'", () => {
             output: NoteCLIOutput.JSON,
           });
           const note = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "gamma",
               vault,
             })
@@ -467,7 +467,7 @@ describe("WHEN run 'dendron note lookup_legacy'", () => {
           });
           expect(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "gamma",
                 vault,
               })
@@ -614,7 +614,7 @@ describe("WHEN run 'dendron note move'", () => {
           });
           expect(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "moved-note",
                 vault,
               })
@@ -645,7 +645,7 @@ describe("WHEN run 'dendron note move'", () => {
           });
           expect(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "moved-note",
                 vault,
               })
@@ -678,7 +678,7 @@ describe("WHEN run 'dendron note move'", () => {
           });
           expect(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "car",
                 vault: otherVault,
               })

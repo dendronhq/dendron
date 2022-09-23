@@ -5,6 +5,7 @@ import {
   getSlugger,
   InvalidFilenameReason,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -37,7 +38,7 @@ import {
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;
-  note: NoteProps;
+  note: NotePropsMeta;
 }): Position => {
   const { anchor: findAnchor, note } = opts;
   let key: string;

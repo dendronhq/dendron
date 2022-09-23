@@ -181,7 +181,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           // Open a note
           await WSUtils.openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[0],
               })
@@ -220,7 +220,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher!.activate();
           // Open a note
           const first = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[0],
             })
@@ -236,7 +236,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           checkPosition(3);
           // Switch to another note
           const second = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })

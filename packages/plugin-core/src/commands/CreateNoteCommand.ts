@@ -33,7 +33,7 @@ export class CreateNoteCommand extends InputArgCommand<
      */
     const engine = ExtensionProvider.getEngine();
     if (_.isString(opts)) {
-      const resp = await engine.getNote(opts);
+      const resp = await engine.getNoteMeta(opts);
       args.initialValue = resp.data?.fname || "";
       AnalyticsUtils.track(this.key, { source: "TreeView" });
     }

@@ -678,7 +678,7 @@ suite("NoteLookupCommand", function () {
           }))!;
           expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
           const fooNote = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "foo",
               vault,
             })

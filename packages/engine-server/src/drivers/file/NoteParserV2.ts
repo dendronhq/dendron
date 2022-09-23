@@ -310,7 +310,7 @@ export class NoteParserV2 {
       },
     });
     const { fpath, noteDicts, vault, config } = cleanOpts;
-    const ctx = "parseNoteProps";
+    const ctx = "NoteParserV2:parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fpath });
     const wsRoot = this.engine.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });

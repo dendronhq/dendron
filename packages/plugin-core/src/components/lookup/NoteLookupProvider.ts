@@ -19,10 +19,7 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { NotePickerUtils } from "./NotePickerUtils";
 import { IDendronQuickInputButton } from "./ButtonTypes";
-import {
-  CREATE_NEW_NOTE_DETAIL,
-  CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
-} from "./constants";
+import { CREATE_NEW_NOTE_DETAIL } from "./constants";
 import {
   ILookupProviderOptsV3,
   ILookupProviderV3,
@@ -437,7 +434,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           const entryCreateNewWithTemplate =
             NotePickerUtils.createNewWithTemplateItem({
               fname: queryOrig,
-              detail: CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
             });
           newItems.push(entryCreateNewWithTemplate);
         }

@@ -26,6 +26,7 @@ import {
   CREATE_NEW_NOTE_DETAIL,
   CREATE_NEW_LABEL,
   CREATE_NEW_WITH_TEMPLATE_LABEL,
+  CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
 } from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
@@ -96,10 +97,8 @@ export class NotePickerUtils {
 
   static createNewWithTemplateItem({
     fname,
-    detail,
   }: {
     fname: string;
-    detail: string;
   }): DNodePropsQuickInputV2 {
     const props = DNodeUtils.create({
       id: CREATE_NEW_WITH_TEMPLATE_LABEL,
@@ -129,7 +128,7 @@ export class NotePickerUtils {
     return {
       ...props,
       label,
-      detail,
+      detail: CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
       alwaysShow: true,
     };
   }

@@ -615,6 +615,58 @@ suite("NoteLookupCommand", function () {
             )?.fname
           ).toEqual("foobar");
         });
+
+        test("AND create new with template", async () => {
+          const extension = ExtensionProvider.getExtension();
+          const { vaults, engine } = extension.getDWorkspace();
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const mockQuickPick = createMockQuickPick({
+            value: "foobarbaz",
+            selectedItems: [
+              NotePickerUtils.createNewWithTemplateItem({
+                fname: "foobarbaz",
+              }),
+            ],
+          });
+          const lc = extension.lookupControllerFactory.create({
+            nodeType: "note",
+          });
+          const lp = extension.noteLookupProviderFactory.create("lookup", {
+            allowNewNote: true,
+            allowNewNoteWithTemplate: true,
+            noHidePickerOnAccept: false,
+          });
+          await lc.prepareQuickPick({
+            initialValue: "foobarbaz",
+            provider: lp,
+            placeholder: "",
+          });
+          cmd.controller = lc;
+          cmd.provider = lp;
+
+          const fooNote = (await engine.getNote("foo")).data;
+          const getTemplateStub = sinon
+            .stub(cmd, "getTemplateForNewNote" as keyof NoteLookupCommand)
+            .returns(Promise.resolve(fooNote));
+          mockQuickPick.showNote = async (uri) => {
+            return vscode.window.showTextDocument(uri);
+          };
+
+          await cmd.execute({
+            quickpick: mockQuickPick,
+            controller: lc,
+            provider: lp,
+            selectedItems: mockQuickPick.selectedItems,
+          });
+          const document = VSCodeUtils.getActiveTextEditorOrThrow().document;
+          const newNote = extension.wsUtils.getNoteFromDocument(document);
+          expect(newNote?.fname).toEqual("foobarbaz");
+          expect(newNote?.body).toEqual(fooNote?.body);
+          cmd.cleanUp();
+          getTemplateStub.restore();
+        });
       }
     );
 

@@ -55,7 +55,6 @@ import { DVault } from "../types/DVault";
 export * from "./lookup";
 export * from "./publishUtils";
 export * from "./vscode-utils";
-export * from "./SchemaUtils";
 
 /**
  * Dendron utilities

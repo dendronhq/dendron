@@ -370,11 +370,7 @@ export const resolveCompletionItem = sentryReportingCallback(
       return;
     }
 
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    const note = (await engine.findNotesMeta({ fname, vault }))[0];
 
     if (_.isUndefined(note)) {
       Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });

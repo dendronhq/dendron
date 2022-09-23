@@ -6,7 +6,6 @@ import {
   extractNoteChangeEntryCounts,
   NoteChangeEntry,
   NoteProps,
-  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DLogger, vault2Path } from "@dendronhq/common-server";
@@ -32,7 +31,7 @@ export default class RenameProvider implements vscode.RenameProvider {
     this._targetNote = value;
   }
 
-  private getRangeForReference(opts: {
+  private async getRangeForReference(opts: {
     reference: getReferenceAtPositionResp;
     document: vscode.TextDocument;
   }) {
@@ -49,11 +48,9 @@ export default class RenameProvider implements vscode.RenameProvider {
       });
     } else {
       const fname = ref;
-      const targetNote = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        engine,
-        vault: targetVault,
-      });
+      const targetNote = (
+        await engine.findNotes({ fname, vault: targetVault })
+      )[0];
       if (targetNote === undefined) {
         throw new DendronError({
           message: `Cannot rename note ${ref} that doesn't exist.`,
@@ -235,8 +232,7 @@ export default class RenameProvider implements vscode.RenameProvider {
     });
     if (reference !== null) {
       this.refAtPos = reference;
-      const range = this.getRangeForReference({ reference, document });
-      return range;
+      return this.getRangeForReference({ reference, document });
     } else {
       throw new DendronError({
         message: "Rename is not supported for this symbol",

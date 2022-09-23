@@ -1333,6 +1333,12 @@
         "when": "editorFocus && dendron:pluginActive"
       },
       {
+        "command": "dendron.copyAs",
+        "key": "ctrl+k ctrl+c",
+        "mac": "cmd+k cmd+c",
+        "when": "dendron:pluginActive"
+      },
+      {
         "command": "dendron.delete",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",

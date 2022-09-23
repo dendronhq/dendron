@@ -516,6 +516,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   COPY_AS: {
     key: "dendron.copyAs",
     title: `${CMD_PREFIX} Copy As`,
+    keybindings: {
+      key: "ctrl+k ctrl+c",
+      mac: "cmd+k cmd+c",
+      when: "dendron:pluginActive",
+    },
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   DELETE: {

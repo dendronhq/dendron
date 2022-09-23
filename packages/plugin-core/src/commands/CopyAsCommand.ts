@@ -1,4 +1,4 @@
-import { assertUnreachable } from "@dendronhq/common-all";
+import { DendronError } from "@dendronhq/common-all";
 import {
   CopyAsFormat,
   getAllCopyAsFormat,
@@ -68,7 +68,9 @@ export class CopyAsCommand extends BasicCommand<
         return PodCommandFactory.createPodCommandForStoredConfig({ config });
       }
       default:
-        assertUnreachable(format);
+        throw new DendronError({
+          message: `${format} is not a valid copy as format. If you are using a keybinding, make sure the argument is one of the following values: ${getAllCopyAsFormat()}`,
+        });
     }
   }
 

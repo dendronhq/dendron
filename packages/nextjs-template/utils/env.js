@@ -8,6 +8,7 @@ const serverSchema = z.object({
     .string()
     .default(path.join(__dirname, "..", FRONTEND_CONSTANTS.DEFAULT_DATA_DIR)),
   PUBLIC_DIR: z.string().default(path.join(__dirname, "..", "public")),
+  NODE_ENV: z.enum(["development", "test", "production"]),
 });
 
 const clientSchema = z.object({

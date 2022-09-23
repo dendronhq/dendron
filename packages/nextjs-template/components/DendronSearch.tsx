@@ -78,7 +78,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
 
   const engine = useEngineAppSelector((state) => state.engine);
   const defaultSearchMode = engine.config
-    ? ConfigUtils.getSearchDefaultBehavior(engine.config)
+    ? ConfigUtils.getSearchMode(engine.config)
     : SearchMode.SEARCH;
   const [searchResults, setSearchResults] =
     React.useState<SearchResults>(undefined);
@@ -253,7 +253,10 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       );
     });
   }
-
+  const placeholder =
+    searchMode === SearchMode.SEARCH
+      ? "For lookup please use the '/' prefix. e.g. /root"
+      : "For full text search please use the '?' prefix. e.g. ? Onboarding";
   return (
     <AutoComplete
       size="large"
@@ -268,7 +271,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       }
       // @ts-ignore
       onSelect={onSelect}
-      placeholder="For full text search please use the '?' prefix. e.g. ? Onboarding"
+      placeholder={placeholder}
     >
       {autocompleteChildren}
     </AutoComplete>

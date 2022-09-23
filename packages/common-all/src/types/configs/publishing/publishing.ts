@@ -56,7 +56,7 @@ export type DendronPublishingConfig = {
   siteBanner?: string;
   giscus?: GiscusConfig;
   sidebarPath?: string | false;
-  searchDefaultBehavior?: SearchMode;
+  searchMode?: SearchMode;
 };
 
 export type CleanDendronPublishingConfig = DendronPublishingConfig &
@@ -115,6 +115,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableRandomlyColoredTags: true,
     enableTaskNotes: true,
     enablePrettyLinks: true,
-    searchDefaultBehavior: SearchMode.SEARCH,
+    searchMode: SearchMode.SEARCH,
   };
 }

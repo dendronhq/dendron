@@ -119,7 +119,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -275,7 +275,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -413,7 +413,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
 "
 `;
 
@@ -523,7 +523,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -650,7 +650,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -785,7 +785,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:
@@ -905,7 +905,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchDefaultBehavior: search
+    searchMode: search
     duplicateNoteBehavior:
         action: useVault
         payload:

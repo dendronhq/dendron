@@ -1192,7 +1192,7 @@
             }
           ]
         },
-        "searchDefaultBehavior": {
+        "searchMode": {
           "$ref": "#/definitions/SearchMode"
         }
       },

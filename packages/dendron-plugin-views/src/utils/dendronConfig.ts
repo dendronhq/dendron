@@ -374,7 +374,7 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "object",
     group: "publishing",
   },
-  "publishing.searchDefaultBehavior": {
+  "publishing.searchMode": {
     type: "select",
     enum: [SearchMode.LOOKUP, SearchMode.SEARCH],
     group: "publishing",

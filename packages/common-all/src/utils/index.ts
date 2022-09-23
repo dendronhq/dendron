@@ -961,11 +961,9 @@ export class ConfigUtils {
     return config.version;
   }
 
-  static getSearchDefaultBehavior(
-    config: IntermediateDendronConfig
-  ): SearchMode {
+  static getSearchMode(config: IntermediateDendronConfig): SearchMode {
     const isConfigV4 = configIsV4(config);
-    const defaultMode = ConfigUtils.getPublishing(config).searchDefaultBehavior;
+    const defaultMode = ConfigUtils.getPublishing(config).searchModes;
     if (!isConfigV4 && defaultMode) {
       return defaultMode;
     }

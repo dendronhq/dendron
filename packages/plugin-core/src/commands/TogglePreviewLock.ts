@@ -30,7 +30,7 @@ export class TogglePreviewLockCommand extends BasicCommand<
 
   async execute(_opts?: CommandOpts) {
     if (this._panel) {
-      const note = ExtensionProvider.getWSUtils().getActiveNote();
+      const note = await ExtensionProvider.getWSUtils().getActiveNote();
       if (this._panel.isLocked()) {
         this._panel.unlock();
         if (note) {

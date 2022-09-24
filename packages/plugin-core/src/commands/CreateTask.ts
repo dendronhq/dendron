@@ -39,7 +39,7 @@ export class CreateTaskCommand extends BasicCommand<
     const { createTaskSelectionType, addBehavior } =
       ConfigUtils.getTask(config);
 
-    maybeSendMeetingNoteTelemetry("task");
+    await maybeSendMeetingNoteTelemetry("task");
 
     return {
       lookup: AutoCompletableRegistrar.getNoteLookupCmd().run({

@@ -568,7 +568,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
-  private onTaskButtonToggled(enabled: boolean) {
+  private async onTaskButtonToggled(enabled: boolean) {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
@@ -585,7 +585,8 @@ export class LookupControllerV3 implements ILookupControllerV3 {
       // If the lookup value ends up being identical to the current note, this will be confusing for the user because
       // they won't be able to create a new note. This can happen with the default settings of Task notes.
       // In that case, we add a trailing dot to suggest that they need to type something more.
-      const activeName = ExtensionProvider.getWSUtils().getActiveNote()?.fname;
+      const activeName = (await ExtensionProvider.getWSUtils().getActiveNote())
+        ?.fname;
       if (quickPick.value === activeName)
         quickPick.value = `${quickPick.value}.`;
       // Add default task note props to the created note
@@ -707,7 +708,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     const engine = ExtensionProvider.getEngine();
     // parse text in range, update potential backlinks to it
     // so that it points to the destination instead of the source.
-    const sourceNote = wsUtils.getActiveNote();
+    const sourceNote = await wsUtils.getActiveNote();
     if (sourceNote) {
       const { anchors: sourceAnchors } = sourceNote;
       if (sourceAnchors) {
@@ -859,5 +860,12 @@ export class LookupControllerV3 implements ILookupControllerV3 {
         return note;
       }
     }
+  }
+
+  // eslint-disable-next-line camelcase
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
+    return {
+      onSelect2ItemsBtnToggled: this.onSelect2ItemsBtnToggled.bind(this),
+    };
   }
 }

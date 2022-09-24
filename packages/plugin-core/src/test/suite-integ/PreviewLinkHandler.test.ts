@@ -1,9 +1,4 @@
-import {
-  NoteProps,
-  NotePropsMeta,
-  NoteUtils,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { NoteProps, NotePropsMeta, VaultUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { before, beforeEach, describe, it } from "mocha";
 import path from "path";

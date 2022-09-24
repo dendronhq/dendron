@@ -13,15 +13,15 @@ import { AnalyticsUtils } from "./analytics";
  * @param type - will be attached to the telemetry data payload
  * @returns
  */
-export function maybeSendMeetingNoteTelemetry(type: string) {
+export async function maybeSendMeetingNoteTelemetry(type: string) {
   const maybeEditor = VSCodeUtils.getActiveTextEditor()!;
   if (_.isUndefined(maybeEditor)) {
     return;
   }
 
-  const activeNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+  const activeNote = (await ExtensionProvider.getWSUtils().getNoteFromDocument(
     maybeEditor.document
-  ) as NoteProps & { traitIds?: string[] };
+  )) as NoteProps & { traitIds?: string[] };
 
   if (_.isUndefined(activeNote)) {
     return;

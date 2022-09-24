@@ -38,8 +38,10 @@ export class NotePickerUtils {
     // dedupe wikilinks by value
     const uniqueWikiLinks = _.uniqBy(wikiLinks, "value");
 
-    const activeNote =
-      ExtensionProvider.getWSUtils().getActiveNote() as DNodeProps;
+    const activeNote = await ExtensionProvider.getWSUtils().getActiveNote();
+    if (!activeNote) {
+      return;
+    }
 
     // make a list of picker items from wikilinks
     const notesFromWikiLinks = await LinkUtils.getNotesFromWikiLinks({

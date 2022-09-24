@@ -245,7 +245,7 @@ export const provideCompletionItems = sentryReportingCallback(
     const { wsRoot } = engine;
     let completionItems: CompletionItem[];
     const completionsIncomplete = true;
-    const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
+    const currentVault = WSUtils.getVaultFromDocument(document);
 
     if (found?.groups?.hashTag) {
       completionItems = await provideCompletionsForTag({
@@ -497,7 +497,7 @@ export async function provideBlockCompletionItems(
     otherFile = true;
   } else {
     // This anchor is to the same file, e.g. [[#
-    note = WSUtils.getNoteFromDocument(document);
+    note = await WSUtils.getNoteFromDocument(document);
   }
 
   if (_.isUndefined(note) || token?.isCancellationRequested) return;

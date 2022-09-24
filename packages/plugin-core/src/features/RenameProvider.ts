@@ -57,7 +57,7 @@ export default class RenameProvider implements vscode.RenameProvider {
         });
       }
       this._targetNote = targetNote;
-      const currentNote = WSUtils.getNoteFromDocument(document);
+      const currentNote = await WSUtils.getNoteFromDocument(document);
       if (_.isEqual(currentNote, targetNote)) {
         throw new DendronError({
           message: `Cannot rename symbol that references current note.`,

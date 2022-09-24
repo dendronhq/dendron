@@ -113,12 +113,12 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param engine
    * @returns {}
    */
-  private validateAndProcessInput(engine: IEngineAPIService): {
+  private async validateAndProcessInput(engine: IEngineAPIService): Promise<{
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
     targetHeaderIndex: number;
-  } {
+  }> {
     const { editor, selection } = VSCodeUtils.getSelection();
 
     // basic input validation
@@ -126,7 +126,7 @@ export class MoveHeaderCommand extends BasicCommand<
     if (!selection) throw this.headerNotSelectedError;
 
     const line = editor.document.lineAt(selection.start.line).text;
-    const maybeNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
+    const maybeNote = await ExtensionProvider.getWSUtils().getNoteFromDocument(
       editor.document
     );
     if (!maybeNote) {
@@ -240,7 +240,7 @@ export class MoveHeaderCommand extends BasicCommand<
     // validate and process input
     const engine = ExtensionProvider.getEngine();
     const { proc, origin, targetHeader, targetHeaderIndex } =
-      this.validateAndProcessInput(engine);
+      await this.validateAndProcessInput(engine);
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);

@@ -7,7 +7,6 @@ import {
   DVault,
   NoteProps,
   NotePropsMeta,
-  NoteUtils,
   RespV3,
   SchemaModuleProps,
   VaultUtils,
@@ -43,7 +42,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     });
   }
 
-  getNoteFromPath(fsPath: string): NoteProps | undefined {
+  async getNoteFromPath(fsPath: string): Promise<NoteProps | undefined> {
     const { engine } = this.extension.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
@@ -53,11 +52,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    return (await engine.findNotes({ fname, vault }))[0];
   }
 
   /**
@@ -84,7 +79,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     return vault;
   }
 
-  getNoteFromDocument(document: vscode.TextDocument) {
+  async getNoteFromDocument(document: vscode.TextDocument) {
     const { engine } = this.extension.getDWorkspace();
     const txtPath = document.uri.fsPath;
     const fname = path.basename(txtPath, ".md");
@@ -95,11 +90,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    return (await engine.findNotes({ fname, vault }))[0];
   }
 
   /**
@@ -172,7 +163,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     return vault;
   }
 
-  tryGetNoteFromDocument(document: vscode.TextDocument): NoteProps | undefined {
+  async tryGetNoteFromDocument(
+    document: vscode.TextDocument
+  ): Promise<NoteProps | undefined> {
     const { wsRoot, vaults } = this.extension.getDWorkspace();
     if (
       !WorkspaceUtils.isPathInWorkspace({
@@ -188,7 +181,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
       return;
     }
     try {
-      const note = this.getNoteFromDocument(document);
+      const note = await this.getNoteFromDocument(document);
       return note;
     } catch (err) {
       Logger.info({
@@ -226,7 +219,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     }
   }
 
-  getActiveNote() {
+  async getActiveNote() {
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) return this.getNoteFromDocument(editor.document);
     return;

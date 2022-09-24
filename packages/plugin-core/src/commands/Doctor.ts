@@ -457,7 +457,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (
         isNotUndefined(document) &&
-        isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
+        isNotUndefined(
+          await this.extension.wsUtils.getNoteFromDocument(document)
+        )
       ) {
         await document.save();
       }
@@ -472,7 +474,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         if (_.isUndefined(document)) {
           throw new DendronError({ message: "No note open." });
         }
-        note = this.extension.wsUtils.getNoteFromDocument(document);
+        note = await this.extension.wsUtils.getNoteFromDocument(document);
       }
     }
 

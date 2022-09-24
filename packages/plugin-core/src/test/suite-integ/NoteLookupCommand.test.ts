@@ -329,7 +329,9 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = WSUtils.getNoteFromDocument(editor!.document);
+          const actualNote = await WSUtils.getNoteFromDocument(
+            editor!.document
+          );
           const expectedNote = (await engine.getNote("foo")).data!;
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
@@ -356,7 +358,9 @@ suite("NoteLookupCommand", function () {
             initialValue: "foo.ch1",
           })!;
           const editor = VSCodeUtils.getActiveTextEditor();
-          const actualNote = WSUtils.getNoteFromDocument(editor!.document);
+          const actualNote = await WSUtils.getNoteFromDocument(
+            editor!.document
+          );
           const expectedNote = (await engine.getNote("foo.ch1")).data!;
           expect(actualNote).toEqual(expectedNote);
           expect(actualNote!.schema).toEqual({
@@ -597,8 +601,10 @@ suite("NoteLookupCommand", function () {
             fname: "foobar",
           });
           expect(
-            WSUtils.getNoteFromDocument(
-              VSCodeUtils.getActiveTextEditorOrThrow().document
+            (
+              await WSUtils.getNoteFromDocument(
+                VSCodeUtils.getActiveTextEditorOrThrow().document
+              )
             )?.fname
           ).toEqual("foobar");
         });
@@ -626,7 +632,7 @@ suite("NoteLookupCommand", function () {
             id: "Create New",
             fname: "learn.mdone.test",
           });
-          const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+          const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
             VSCodeUtils.getActiveTextEditorOrThrow().document
           );
           expect(note?.fname).toEqual("learn.mdone.test");
@@ -700,7 +706,7 @@ suite("NoteLookupCommand", function () {
           })!;
           const barFromEngine = (await engine.getNote("bar")).data!;
           const editor = VSCodeUtils.getActiveTextEditor()!;
-          const activeNote = WSUtils.getNoteFromDocument(editor.document);
+          const activeNote = await WSUtils.getNoteFromDocument(editor.document);
           expect(activeNote).toEqual(barFromEngine);
           const parent = (await engine.getNote(barFromEngine.parent!)).data!;
           expect(DNodeUtils.isRoot(parent));
@@ -805,7 +811,7 @@ suite("NoteLookupCommand", function () {
           });
 
           const editor = VSCodeUtils.getActiveTextEditor()!;
-          const activeNote = WSUtilsV2.instance().getNoteFromDocument(
+          const activeNote = await WSUtilsV2.instance().getNoteFromDocument(
             editor.document
           );
 
@@ -828,7 +834,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = WSUtils.getNoteFromDocument(document!);
+          const newNote = await WSUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("ch1 template");
           expect(newNote?.tags).toEqual("tag-foo");
 
@@ -1280,7 +1286,7 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = WSUtils.getNoteFromDocument(document!);
+          const newNote = await WSUtils.getNoteFromDocument(document!);
           expect(newNote?.fname).toEqual("foo.ch1");
 
           cmd.cleanUp();
@@ -1318,7 +1324,7 @@ suite("NoteLookupCommand", function () {
             quickpick: mockQuickPick,
           });
           const document = VSCodeUtils.getActiveTextEditor()?.document;
-          const newNote = WSUtils.getNoteFromDocument(document!);
+          const newNote = await WSUtils.getNoteFromDocument(document!);
           expect(_.trim(newNote!.body)).toEqual("Template text");
 
           cmd.cleanUp();
@@ -1461,7 +1467,7 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value).toEqual(noteName);
 
           // note title should be overriden.
-          const note = WSUtils.getNoteFromDocument(
+          const note = await WSUtils.getNoteFromDocument(
             VSCodeUtils.getActiveTextEditor()!.document
           );
 
@@ -1596,7 +1602,7 @@ suite("NoteLookupCommand", function () {
           expect(out.quickpick.value).toEqual(noteName);
 
           // note title should be overriden.
-          const note = WSUtils.getNoteFromDocument(
+          const note = await WSUtils.getNoteFromDocument(
             VSCodeUtils.getActiveTextEditor()!.document
           );
           const titleOverride = today.split(".").join("-");
@@ -1797,7 +1803,9 @@ suite("NoteLookupCommand", function () {
           // should create foo.foo-body.md with an empty body.
           expect(getActiveEditorBasename().endsWith("foo.foo-body.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = await WSUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body).toEqual("");
 
           // should change selection to link with alais.
@@ -1859,9 +1867,10 @@ suite("NoteLookupCommand", function () {
           // should create foo.foo-body.md with an empty body.
           expect(getActiveEditorBasename().endsWith("multi-line.testing.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = ExtensionProvider.getWSUtils().getNoteFromDocument(
-            newNoteEditor.document
-          );
+          const newNote =
+            await ExtensionProvider.getWSUtils().getNoteFromDocument(
+              newNoteEditor.document
+            );
           expect(newNote?.body).toEqual("");
 
           // should change selection to link with alais.
@@ -1937,7 +1946,9 @@ suite("NoteLookupCommand", function () {
           // should create foo.extracted.md with an selected text as body.
           expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = await WSUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body.trim()).toEqual("foo body");
 
           // should remove selection
@@ -1983,7 +1994,9 @@ suite("NoteLookupCommand", function () {
           // should create foo.extracted.md with an selected text as body.
           expect(getActiveEditorBasename().endsWith("foo.extracted.md"));
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = await WSUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body.trim()).toEqual("foo body");
           // should remove selection
           const changedText = fooNoteEditor.document.getText();
@@ -2024,7 +2037,9 @@ suite("NoteLookupCommand", function () {
           });
 
           const newNoteEditor = VSCodeUtils.getActiveTextEditorOrThrow();
-          const newNote = WSUtils.getNoteFromDocument(newNoteEditor.document);
+          const newNote = await WSUtils.getNoteFromDocument(
+            newNoteEditor.document
+          );
           expect(newNote?.body.trim()).toEqual("non vault content");
 
           const nonVaultFileEditor = (await VSCodeUtils.openFileInEditor(

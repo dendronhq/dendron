@@ -42,7 +42,7 @@ export class TaskStatusCommand extends BasicCommand<
 
     if (!selection) {
       // Then they are changing the status for the current note
-      selectedNote = this._ext.wsUtils.getActiveNote();
+      selectedNote = await this._ext.wsUtils.getActiveNote();
       if (!selectedNote || !TaskNoteUtils.isTaskNote(selectedNote)) {
         // No active note either
         VSCodeUtils.showMessage(

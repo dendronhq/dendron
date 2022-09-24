@@ -182,8 +182,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   /**
    * If the Preview is locked and the active note does not match the locked note.
    */
-  isLockedAndDirty(): boolean {
-    const note = this._ext.wsUtils.getActiveNote();
+  async isLockedAndDirty(): Promise<boolean> {
+    const note = await this._ext.wsUtils.getActiveNote();
     return this.isLocked() && note?.id !== this._lockedEditorNoteId;
   }
   dispose() {
@@ -218,7 +218,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
               note: NoteUtils.toLogObj(note),
             });
           } else {
-            note = wsUtils.getActiveNote();
+            note = await wsUtils.getActiveNote();
             if (note) {
               Logger.debug({
                 ctx,
@@ -241,7 +241,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           Logger.debug({ ctx, "msg.type": "onGetActiveEditor" });
           const activeTextEditor = VSCodeUtils.getActiveTextEditor();
           const maybeNote = !_.isUndefined(activeTextEditor)
-            ? this._ext.wsUtils.tryGetNoteFromDocument(
+            ? await this._ext.wsUtils.tryGetNoteFromDocument(
                 activeTextEditor?.document
               )
             : undefined;
@@ -279,7 +279,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
               !editor ||
               editor.document.uri.fsPath !==
                 vscode.window.activeTextEditor?.document.uri.fsPath ||
-              this.isLockedAndDirty()
+              (await this.isLockedAndDirty())
             ) {
               return;
             }
@@ -296,7 +296,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
               return;
             }
 
-            const maybeNote = this._ext.wsUtils.tryGetNoteFromDocument(
+            const maybeNote = await this._ext.wsUtils.tryGetNoteFromDocument(
               editor.document
             );
 
@@ -439,7 +439,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     if (textDocument.document.isDirty === false) {
       return;
     }
-    if (this.isVisible() && !this.isLockedAndDirty()) {
+    if (this.isVisible() && !(await this.isLockedAndDirty())) {
       const note =
         await this._textDocumentService.processTextDocumentChangeEvent(
           textDocument

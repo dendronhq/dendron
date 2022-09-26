@@ -2,7 +2,7 @@ import test from "./next-fixture";
 import { expect } from "@playwright/test";
 
 test.describe("GIVEN default viewport", () => {
-  test("THEN should displayed heading anchor pleasantly ", async ({
+  test("THEN should display heading anchor pleasantly ", async ({
     page,
     port,
   }) => {

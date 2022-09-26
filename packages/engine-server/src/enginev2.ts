@@ -225,6 +225,7 @@ export class DendronEngineV2 implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
+    const ctx = "Engine:init";
     const defaultResp = {
       notes: {},
       schemas: {},
@@ -233,8 +234,10 @@ export class DendronEngineV2 implements DEngine {
       config: ConfigUtils.genDefaultConfig(),
     };
     try {
+      this.logger.info({ ctx, msg: "enter" });
       const { data, error: storeError } = await this.store.init();
       if (_.isUndefined(data)) {
+        this.logger.error({ ctx, msg: "store init error", error: storeError });
         return {
           data: defaultResp,
           error: DendronError.createFromStatus({
@@ -246,6 +249,7 @@ export class DendronEngineV2 implements DEngine {
       const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
+      this.logger.error({ ctx, msg: "updated index" });
       const hookErrors: DendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
         const { valid, error } = HookUtils.validateHook({
@@ -258,6 +262,7 @@ export class DendronEngineV2 implements DEngine {
         }
         return valid;
       });
+      this.logger.error({ ctx, msg: "initialize hooks" });
       const allErrors = (_.isUndefined(storeError) ? [] : [storeError]).concat(
         hookErrors
       );
@@ -285,6 +290,11 @@ export class DendronEngineV2 implements DEngine {
         },
       };
     } catch (error: any) {
+      this.logger.error({
+        ctx,
+        msg: "caught error",
+        error: error2PlainObject(error),
+      });
       const { message, stack, status } = error;
       const payload = { message, stack };
       return {

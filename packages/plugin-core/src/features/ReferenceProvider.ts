@@ -24,7 +24,7 @@ export default class ReferenceProvider implements vscode.ReferenceProvider {
       // provide reference to header if selection is header.
       const header = EditorUtils.getHeaderAt({ document, position });
       if (!_.isUndefined(header)) {
-        const note = new WSUtilsV2(
+        const note = await new WSUtilsV2(
           ExtensionProvider.getExtension()
         ).getNoteFromDocument(document);
         const references = await findReferences(note!.fname);

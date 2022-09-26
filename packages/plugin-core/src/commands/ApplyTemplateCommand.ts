@@ -66,7 +66,7 @@ export class ApplyTemplateCommand extends BasicCommand<
       }
     );
     const config = extension.getDWorkspace().config;
-    const targetNote = WSUtilsV2.instance().getActiveNote();
+    const targetNote = await WSUtilsV2.instance().getActiveNote();
     if (!targetNote) {
       throw new DendronError({ message: "No Dendron note open" });
     }

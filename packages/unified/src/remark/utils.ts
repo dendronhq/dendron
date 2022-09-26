@@ -537,7 +537,7 @@ export class LinkUtils {
     }
   }
 
-  static getNotesFromWikiLinks(opts: {
+  static async getNotesFromWikiLinks(opts: {
     activeNote: DNodeProps;
     wikiLinks: ParseLinkV2Resp[];
     engine: DEngineClient;
@@ -545,35 +545,21 @@ export class LinkUtils {
     const { activeNote, wikiLinks, engine } = opts;
     const { vaults } = engine;
 
-    let out: DNodeProps[] = [];
-    wikiLinks.forEach((wikiLink) => {
-      const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
+    const resps = await Promise.all(
+      wikiLinks.map((wikiLink) => {
+        const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
 
-      const vault = wikiLink.vaultName
-        ? (VaultUtils.getVaultByName({
-            vname: wikiLink.vaultName,
-            vaults,
-          }) as DVault)
-        : undefined;
+        const vault = wikiLink.vaultName
+          ? (VaultUtils.getVaultByName({
+              vname: wikiLink.vaultName,
+              vaults,
+            }) as DVault)
+          : undefined;
 
-      if (vault) {
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          engine,
-          vault,
-        });
-        if (note) {
-          out.push(note);
-        }
-      } else {
-        const notesWithSameFname = NoteUtils.getNotesByFnameFromEngine({
-          fname,
-          engine,
-        });
-        out = out.concat(notesWithSameFname);
-      }
-    });
-    return out;
+        return engine.findNotes({ fname, vault });
+      })
+    );
+    return resps.flat();
   }
 
   static parseLink(linkMatch: string) {

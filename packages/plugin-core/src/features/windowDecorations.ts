@@ -131,7 +131,7 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     // Only show decorations & warnings for notes
     let note: NoteProps | undefined;
     try {
-      note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+      note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
         editor.document
       );
       if (_.isUndefined(note)) return {};

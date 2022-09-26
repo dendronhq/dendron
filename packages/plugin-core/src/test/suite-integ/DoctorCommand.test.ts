@@ -714,7 +714,6 @@ suite("FIX_AIRTABLE_METADATA", function () {
       test("THEN remove airtableId from note FM and update it with pods namespace", async () => {
         const ext = ExtensionProvider.getExtension();
         const engine = ext.getEngine();
-        const { vaults } = engine;
         const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -735,11 +734,7 @@ suite("FIX_AIRTABLE_METADATA", function () {
             );
           podIdQuickPickStub.onCall(0).returns(Promise.resolve("dendron.task"));
           await cmd.run();
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: "foo.bar",
-            engine,
-            vault: vaults[0],
-          });
+          const note = (await engine.getNoteMeta("foo.bar")).data!;
           expect(note?.custom.airtableId).toBeFalsy();
           expect(note?.custom.pods.airtable["dendron.task"]).toEqual(
             "airtableId-one"

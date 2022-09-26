@@ -202,10 +202,10 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       case GraphViewMessageEnum.onSelect: {
         const note = this._ext.getEngine().notes[msg.data.id];
         if (note.stub && !createStub) {
-          this.refresh(note, createStub);
+          await this.refresh(note, createStub);
         } else {
-          if (this._ext.wsUtils.getActiveNote()?.fname === note.fname) {
-            this.refresh(note);
+          if ((await this._ext.wsUtils.getActiveNote())?.fname === note.fname) {
+            await this.refresh(note);
             break;
           }
           await new GotoNoteCommand(this._ext).execute({
@@ -225,7 +225,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       }
       case DMessageEnum.MESSAGE_DISPATCHER_READY: {
         // if ready, get current note
-        const note = this._ext.wsUtils.getActiveNote();
+        const note = await this._ext.wsUtils.getActiveNote();
         if (note) {
           Logger.debug({
             ctx,
@@ -234,7 +234,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
           });
         }
         if (note) {
-          this.refresh(note);
+          await this.refresh(note);
         }
         break;
       }
@@ -281,7 +281,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     }
   }
 
-  onOpenTextDocument(editor: vscode.TextEditor | undefined) {
+  async onOpenTextDocument(editor: vscode.TextEditor | undefined) {
     const document = editor?.document;
     if (_.isUndefined(document) || _.isUndefined(this._view)) {
       return;
@@ -305,18 +305,18 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       });
       return;
     }
-    const note = this._ext.wsUtils.getNoteFromDocument(document);
+    const note = await this._ext.wsUtils.getNoteFromDocument(document);
     if (note) {
       Logger.info({
         ctx,
         msg: "refresh note",
         note: NoteUtils.toLogObj(note),
       });
-      this.refresh(note);
+      await this.refresh(note);
     }
   }
 
-  public refresh(note?: NoteProps, createStub?: boolean) {
+  public async refresh(note?: NoteProps, createStub?: boolean) {
     if (this._view) {
       if (note) {
         this._view.show?.(true);
@@ -329,7 +329,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
           activeNote:
             note?.stub && !createStub
               ? note
-              : this._ext.wsUtils.getActiveNote(),
+              : await this._ext.wsUtils.getActiveNote(),
         },
         source: "vscode",
       } as OnDidChangeActiveTextEditorMsg);

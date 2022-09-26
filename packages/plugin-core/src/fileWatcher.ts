@@ -123,11 +123,7 @@ export class FileWatcher {
       note = resp.data;
 
       // check if note exist as
-      const maybeNote = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        vault,
-        engine,
-      });
+      const maybeNote = (await engine.findNotesMeta({ fname, vault }))[0];
       if (maybeNote) {
         note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
         delete note["stub"];

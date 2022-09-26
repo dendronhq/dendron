@@ -2,6 +2,7 @@ import { ImportPod, ImportPodConfig, ImportPodPlantOpts } from "../basev3";
 import { JSONSchemaType } from "ajv";
 import { ConflictHandler, PodUtils } from "../utils";
 import {
+  asyncLoopOneAtATime,
   cleanName,
   Conflict,
   DendronError,
@@ -146,7 +147,7 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
     const conflicts: Conflict[] = [];
     const create: NoteProps[] = [];
     const notesToUpdate: UpdateNotesOpts[] = [];
-    members.map((member) => {
+    await asyncLoopOneAtATime(members, async (member) => {
       const { github, discord, twitter } = member;
       const { name, email, orbitId, ...social } = member;
 
@@ -162,11 +163,9 @@ export class OrbitImportPod extends ImportPod<OrbitImportPodConfig> {
         noteName = cleanName(noteName);
         this.L.debug({ ctx: "membersToNotes", msg: "enter", member });
         let fname;
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: `people.${noteName}`,
-          engine,
-          vault,
-        });
+        const note = (
+          await engine.findNotes({ fname: `people.${noteName}`, vault })
+        )[0];
 
         if (!_.isUndefined(note)) {
           const conflictData = this.getConflictedData({ note, social });

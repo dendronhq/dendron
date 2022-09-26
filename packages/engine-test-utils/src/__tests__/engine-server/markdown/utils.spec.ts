@@ -2,7 +2,6 @@ import {
   ConfigUtils,
   NoteDictsUtils,
   NoteProps,
-  NoteUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -106,14 +105,9 @@ const WITH_TITLE = createProcTests({
 const WITH_VARIABLE = createProcTests({
   name: "WITH_VARIABLE",
   setupFunc: async (opts) => {
-    const { vaults, engine } = opts;
+    const { engine } = opts;
     const proc = await createProc(opts);
-    //const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      vault: vaults[0],
-      fname: "foo",
-      engine,
-    });
+    const note = (await engine.getNote("foo")).data!;
     return readAndProcessNote({ note: note!, proc });
   },
   verifyFuncDict: {

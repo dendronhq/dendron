@@ -105,7 +105,7 @@ export class SchemaGraphViewFactory {
     });
 
     this._vsCodeCallback = vscode.window.onDidChangeActiveTextEditor(
-      sentryReportingCallback((editor: vscode.TextEditor | undefined) => {
+      sentryReportingCallback(async (editor: vscode.TextEditor | undefined) => {
         if (
           SchemaGraphViewFactory._panel &&
           SchemaGraphViewFactory._panel.visible
@@ -114,7 +114,7 @@ export class SchemaGraphViewFactory {
             return;
           }
 
-          const note = ext.wsUtils.getNoteFromDocument(editor.document);
+          const note = await ext.wsUtils.getNoteFromDocument(editor.document);
 
           SchemaGraphViewFactory._panel.webview.postMessage({
             type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,

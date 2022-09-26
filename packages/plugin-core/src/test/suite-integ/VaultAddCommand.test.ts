@@ -497,11 +497,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           vname: vaultName,
         });
         expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
-        });
+        const note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
         expect(note).toBeTruthy();
         expect(note?.vault.name).toEqual(vaultName);
       });
@@ -569,11 +565,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           vname: vaultName,
         });
         expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
-        });
+        const note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
         expect(note).toBeTruthy();
         expect(note?.vault.name).toEqual(vaultName);
       });
@@ -674,11 +666,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           vname: vaultName,
         });
         expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
-        });
+        const note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
         expect(note).toBeTruthy();
         expect(note?.vault.name).toEqual(vaultName);
       });
@@ -758,11 +746,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
             vname: vaultName,
           });
           expect(vault).toBeTruthy();
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vault!,
-            engine,
-          });
+          const note = (
+            await engine.findNotesMeta({ fname: "root", vault })
+          )[0];
           expect(note).toBeTruthy();
           expect(note?.vault.name).toEqual(vaultName);
         });
@@ -832,11 +818,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           (vault) => vault.workspace === vaultName
         );
         expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
-        });
+        const note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
         expect(note).toBeTruthy();
         expect(note?.vault.workspace).toEqual(vaultName);
       });
@@ -905,11 +887,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
           vname: vaultName,
         });
         expect(vault).toBeTruthy();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vault!,
-          engine,
-        });
+        const note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
         expect(note).toBeTruthy();
         expect(note?.vault.name).toEqual(vaultName);
       });

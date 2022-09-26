@@ -18,9 +18,12 @@ import { AddressInfo } from "net";
  */
 
 // Extend base test with our fixtures.
-const test = base.extend<{
-  port: string;
-}>({
+const test = base.extend<
+  {},
+  {
+    port: string;
+  }
+>({
   port: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
@@ -49,7 +52,6 @@ const test = base.extend<{
       await use(port);
     },
     {
-      //@ts-ignore
       scope: "worker",
     },
   ],

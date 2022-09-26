@@ -116,7 +116,7 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
-    const ctx = "Store:init";
+    const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {
       const resp = await this.initSchema();

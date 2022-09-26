@@ -76,7 +76,7 @@ suite("Scratch Notes", function () {
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
-          expect(scratchNote.fname.startsWith("pro.scratch")).toBeTruthy();
+          expect(scratchNote.fname.startsWith("pro.foo.scratch")).toBeTruthy();
           done();
         },
       });
@@ -143,7 +143,7 @@ suite("Scratch Notes", function () {
             noConfirm: true,
           });
           const scratchNote = getNoteFromTextEditor();
-          expect(scratchNote.fname.startsWith("pro.scratch")).toBeTruthy();
+          expect(scratchNote.fname.startsWith("pro.foo.scratch")).toBeTruthy();
           done();
         },
       });

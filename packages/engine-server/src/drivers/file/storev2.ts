@@ -130,7 +130,7 @@ export class FileStorage implements DStore {
         const ctx = "_addLinkCandidates";
         const start = process.hrtime();
         // this mutates existing note objects so we don't need to reset the notes
-        await this._addLinkCandidates(_.values(this.notes));
+        this._addLinkCandidates();
         const duration = getDurationMilliseconds(start);
         this.logger.info({ ctx, duration });
       }
@@ -617,35 +617,36 @@ export class FileStorage implements DStore {
     });
   }
 
-  _addLinkCandidates(allNotes: NoteProps[]) {
-    return Promise.all(
-      _.map(allNotes, async (noteFrom: NoteProps) => {
-        try {
-          const maxNoteLength = ConfigUtils.getWorkspace(
-            this.config
-          ).maxNoteLength;
-          if (
-            noteFrom.body.length <
-            (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-          ) {
-            const linkCandidates = await LinkUtils.findLinkCandidates({
-              note: noteFrom,
-              engine: this.engine,
-              config: this.config,
-            });
-            noteFrom.links = noteFrom.links.concat(linkCandidates);
-          }
-        } catch (err: any) {
-          const error = error2PlainObject(err);
-          this.logger.error({
-            error,
-            noteFrom,
-            message: "issue with link candidates",
+  private _addLinkCandidates() {
+    return _.map(this.notes, (noteFrom: NoteProps) => {
+      try {
+        const maxNoteLength = ConfigUtils.getWorkspace(
+          this.config
+        ).maxNoteLength;
+        if (
+          noteFrom.body.length <
+          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+        ) {
+          const linkCandidates = LinkUtils.findLinkCandidatesSync({
+            note: noteFrom,
+            noteDicts: {
+              notesById: this.notes,
+              notesByFname: this.noteFnames,
+            },
+            config: this.config,
           });
-          return;
+          noteFrom.links = noteFrom.links.concat(linkCandidates);
         }
-      })
-    );
+      } catch (err: any) {
+        const error = error2PlainObject(err);
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
+        return;
+      }
+    });
   }
 
   async _initNotes(vault: DVault): Promise<{

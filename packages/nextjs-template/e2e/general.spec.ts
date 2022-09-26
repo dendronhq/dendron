@@ -10,35 +10,29 @@ test.describe("GIVEN default viewport", () => {
 
     const case1 = page.locator("#start-code-end");
     await case1.hover();
-    expect(await case1.screenshot()).toMatchSnapshot([
+    await expect(case1).toHaveScreenshot([
       "heading-anchor",
       "start-code-end.png",
     ]);
 
     const case2 = page.locator("#start---end");
     await case2.hover();
-    expect(await case2.screenshot()).toMatchSnapshot([
-      "heading-anchor",
-      "start---end.png",
-    ]);
+    await expect(case2).toHaveScreenshot(["heading-anchor", "start---end.png"]);
 
     const case3 = page.locator("#start-_-end");
     await case3.hover();
-    expect(await case3.screenshot()).toMatchSnapshot([
-      "heading-anchor",
-      "start-_-end.png",
-    ]);
+    await expect(case3).toHaveScreenshot(["heading-anchor", "start-_-end.png"]);
 
     const case4 = page.locator("#start-test-end");
     await case4.hover();
-    expect(await case4.screenshot()).toMatchSnapshot([
+    await expect(case4).toHaveScreenshot([
       "heading-anchor",
       "start-test-end.png",
     ]);
 
     const case5 = page.locator("#start-exampleusername-private-end");
     await case5.hover();
-    expect(await case5.screenshot()).toMatchSnapshot([
+    await expect(case5).toHaveScreenshot([
       "heading-anchor",
       "start-exampleusername-private-end.png",
     ]);

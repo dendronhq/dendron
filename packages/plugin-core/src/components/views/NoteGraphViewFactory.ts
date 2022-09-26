@@ -77,9 +77,9 @@ export class NoteGraphPanelFactory {
           Logger.info({ ctx });
           if (this._panel && this._panel.visible) {
             await Promise.all(
-              noteChangeEntry.map((changeEntry) =>
-                this.refresh(changeEntry.note)
-              )
+              noteChangeEntry.map((changeEntry) => {
+                return this.refresh(changeEntry.note);
+              })
             );
           }
         });

@@ -34,4 +34,8 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Specify the file watcher type",
     desc: "plugin: Uses VSCode's builtin watcher, engine: Uses the engine watcher, watching the files directly without VSCode",
   },
+  enableExperimentalIFrameNoteRef: {
+    label: "Enable iframe note references.",
+    desc: "Uses iframes for note references when publishing a vault using the nextjs export pod.",
+  },
 };

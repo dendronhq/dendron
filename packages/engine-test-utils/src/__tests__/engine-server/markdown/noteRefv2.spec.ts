@@ -2609,6 +2609,10 @@ describe("noteRefV2", () => {
                 "assetsPrefix",
                 "/some-prefix"
               );
+              config.dev = {
+                ...config.dev,
+                enableExperimentalIFrameNoteRef: true,
+              };
               return config;
             },
             { wsRoot: opts.wsRoot }
@@ -2675,6 +2679,10 @@ describe("noteRefV2", () => {
           TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
+              config.dev = {
+                ...config.dev,
+                enableExperimentalIFrameNoteRef: true,
+              };
               return config;
             },
             { wsRoot: opts.wsRoot }

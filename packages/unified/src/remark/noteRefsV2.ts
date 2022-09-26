@@ -339,7 +339,8 @@ export function convertNoteRefToHAST(
 
         if (
           MDUtilsV5.getProcOpts(proc).flavor === ProcFlavor.PUBLISHING &&
-          !procData.insideNoteRef
+          !procData.insideNoteRef &&
+          config.dev?.enableExperimentalIFrameNoteRef === true
         ) {
           return genRefAsIFrame({
             link,

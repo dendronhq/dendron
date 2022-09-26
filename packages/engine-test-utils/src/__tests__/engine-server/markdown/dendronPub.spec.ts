@@ -1228,6 +1228,11 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
         ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
 
+        config.dev = {
+          ...config.dev,
+          enableExperimentalIFrameNoteRef: true,
+        };
+
         const references: NoteProps[] = [
           (await engine.getNote("bar")).data!,
           (await engine.getNote("foo.ch1")).data!,
@@ -1376,6 +1381,11 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       async ({ vaults, engine }) => {
         const config = ConfigUtils.genDefaultConfig();
 
+        config.dev = {
+          ...config.dev,
+          enableExperimentalIFrameNoteRef: true,
+        };
+
         const references: NoteProps[] = [
           (await engine.getNote("bar")).data!,
           (await engine.getNote("foo.ch1")).data!,
@@ -1497,6 +1507,11 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             ]);
             ConfigUtils.setPublishProp(config, "siteRootDir", "with-override");
             ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
+
+            config.dev = {
+              ...config.dev,
+              enableExperimentalIFrameNoteRef: true,
+            };
 
             const references: NoteProps[] = [
               (await engine.getNote("bar")).data!,

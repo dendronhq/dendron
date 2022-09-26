@@ -13,7 +13,8 @@ export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
 
 export function getAssetUrl(url: string) {
   const out =
-    process.env.NODE_ENV === "production" && env.NEXT_PUBLIC_ASSET_PREFIX
+    process.env.NODE_ENV === "production" &&
+    env.NEXT_PUBLIC_ASSET_PREFIX
       ? env.NEXT_PUBLIC_ASSET_PREFIX + url
       : url;
   return out;

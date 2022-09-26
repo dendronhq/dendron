@@ -861,7 +861,7 @@ describe("GIVEN nextjs export", () => {
     );
   });
 
-  test("WHEN a noteRef has a chain of references, it should only render 3 levels deep", async () => {
+  test.skip("WHEN a noteRef has a chain of references, it should only render 3 levels deep", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const dest = await setupExport({

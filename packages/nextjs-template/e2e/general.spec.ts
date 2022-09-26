@@ -39,7 +39,7 @@ test.describe("GIVEN default viewport", () => {
   });
 
   test.describe("AND having NEXT_PUBLIC_ASSET_PREFIX set", () => {
-    test("THEN should render path to favicon", async ({ page, port }) => {
+    test.skip("THEN should render path to favicon", async ({ page, port }) => {
       await page.goto(`http://localhost:${port}/`);
       const locator = page.locator(
         `link[href*='${process.env.NEXT_PUBLIC_ASSET_PREFIX}'][rel='icon']`

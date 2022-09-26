@@ -428,10 +428,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           detail: CREATE_NEW_NOTE_DETAIL,
         });
         const newItems = [entryCreateNew];
-        const onCreateDefined = picker.onCreate !== undefined;
 
         // should not add `Create New with Template` if the quickpick
-        // has an onCreate defined (i.e. task note)
+        // 1. has an onCreate defined (i.e. task note), or
+        const onCreateDefined = picker.onCreate !== undefined;
+
         const shouldAddCreateNewWithTemplate =
           this.opts.allowNewNoteWithTemplate && !onCreateDefined;
         if (shouldAddCreateNewWithTemplate) {

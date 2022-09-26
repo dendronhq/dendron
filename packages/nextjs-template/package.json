@@ -20,8 +20,8 @@
     "build:sitemap": "next-sitemap --config sitemap.js",
     "clean": "yarn rimraf public data out",
     "rimraf": "npx rimraf",
-    "test": "playwright test",
-    "test:skipbuild": "SKIP_BUILD=1 playwright test"
+    "test": "NODE_ENV=test playwright test",
+    "test:skipbuild": "SKIP_BUILD=1 yarn test"
   },
   "overrides": {
     "trim": "0.0.3",

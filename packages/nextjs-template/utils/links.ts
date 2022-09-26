@@ -4,6 +4,7 @@ import {
   NoteProps,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { env } from "../env/client";
 
 export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
   const { note, noteIndex } = opts;
@@ -11,11 +12,9 @@ export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
 }
 
 export function getAssetUrl(url: string) {
-  const out =
-    process.env.NODE_ENV === "production" &&
-    process.env.NEXT_PUBLIC_ASSET_PREFIX
-      ? process.env.NEXT_PUBLIC_ASSET_PREFIX + url
-      : url;
+  const out = env.NEXT_PUBLIC_ASSET_PREFIX
+    ? env.NEXT_PUBLIC_ASSET_PREFIX + url
+    : url;
   return out;
 }
 

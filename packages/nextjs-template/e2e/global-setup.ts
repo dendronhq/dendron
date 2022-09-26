@@ -1,4 +1,4 @@
-export {};
+/* eslint-disable no-console */
 
 const path = require("path");
 const cli = require("next/dist/cli/next-build");

@@ -42,6 +42,12 @@ export type DendronDevConfig = {
    * create self contained vaults if this option is enabled.
    */
   enableSelfContainedVaults?: boolean;
+  /**
+   * Feature flag for iframe note references.
+   * True -> renders note references as an iframe when publishing to nextjs.
+   * False (Default) -> renders note references inline.
+   */
+  enableExperimentalIFrameNoteRef?: boolean;
 };
 
 /**

@@ -395,6 +395,10 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "dev",
   },
+  "dev.enableExperimentalIFrameNoteRef": {
+    type: "boolean",
+    group: "dev",
+  },
 };
 
 const configSortOrder = [

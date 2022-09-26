@@ -1,4 +1,4 @@
-const { env } = require('./utils/env')
+const { env } = require('./env/server')
 
 // throws if validation fails
 require('./utils/validation')

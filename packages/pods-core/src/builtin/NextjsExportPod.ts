@@ -593,19 +593,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       })
     );
 
-    // render refs
-    // const refsRoot = MDUtilsV5.getRefsRoot(wsRoot);
-    // fs.ensureDirSync(refsRoot);
-
     const noteRefs = MDUtilsV5.getRefCache();
-    //
-    // const contents = fs.readdirSync(refsRoot);
     const refIds: string[] = await Promise.all(
-      Object.keys(noteRefs!).map(async (ent: string) => {
-        // Temporarily added a '!' to bypass compiler errors
-        // const { refId } = fs.readJSONSync(
-        //   path.join(refsRoot, ent)
-        // ) as SerializedNoteRef;
+      Object.keys(noteRefs).map(async (ent: string) => {
         const { refId, prettyHAST } = noteRefs![ent];
         const noteId = refId.id;
         const noteForRef = _.get(engine.notes, noteId);

@@ -170,8 +170,8 @@ export type SerializedNoteRef = {
   prettyHAST: any;
 };
 
-type RefCache = undefined | Record<string, SerializedNoteRef>;
-let REF_CACHE: RefCache;
+type RefCache = Record<string, SerializedNoteRef>;
+let REF_CACHE: RefCache | undefined;
 
 export class MDUtilsV5 {
   static getRefsRoot = (wsRoot: string) => {
@@ -204,7 +204,7 @@ export class MDUtilsV5 {
     REF_CACHE = undefined;
   }
 
-  static getRefCache(): Readonly<RefCache> {
+  static getRefCache(): RefCache {
     if (!REF_CACHE) {
       return {};
     }

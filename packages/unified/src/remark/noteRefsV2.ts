@@ -1000,17 +1000,23 @@ const genRefAsIFrame = ({
 };
 
 /**
- *  Replace /notes/ with /
+ *  Replace /notes/ with / and /asset-prefix1234/notes/ with /
  * ... unless /notes/notes
  */
 function fixLinkIfRoot(link?: string): string | undefined {
+  // return link;
   if (!link) {
     return link;
   }
   const indexOfNotes = link.indexOf("/notes/");
   const lastIndexOfNotes = link.lastIndexOf("/notes/");
-  if (indexOfNotes === lastIndexOfNotes && indexOfNotes !== -1) {
-    return link.substring(0, indexOfNotes) + `/"`;
+  if (indexOfNotes === lastIndexOfNotes) {
+    if (link.endsWith('/notes/"')) {
+      // if (link.substring(indexOfNotes + "/notes/".length).length > 0) {
+      //   return link;
+      // }
+      return link.substring(0, indexOfNotes) + `/"`;
+    }
   }
   return link;
 }

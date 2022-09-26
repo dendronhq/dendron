@@ -523,7 +523,11 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
-        return DendronClientUtilsV2.genNoteName("JOURNAL");
+        try {
+          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.journal);
+        } catch (error) {
+          return { noteName: "", prefix: "" };
+        }
       };
 
       const { noteName, prefix } = quickPick.modifyPickerValueFunc();
@@ -549,7 +553,11 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
-        return DendronClientUtilsV2.genNoteName("SCRATCH");
+        try {
+          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.scratch);
+        } catch (error) {
+          return { noteName: "", prefix: "" };
+        }
       };
       quickPick.prevValue = quickPick.value;
       const { noteName, prefix } = quickPick.modifyPickerValueFunc();
@@ -572,7 +580,11 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
-        return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.task);
+        try {
+          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.task);
+        } catch (error) {
+          return { noteName: "", prefix: "" };
+        }
       };
       quickPick.prevValue = quickPick.value;
       const { noteName, prefix } = quickPick.modifyPickerValueFunc();
@@ -604,6 +616,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     } else {
       quickPick.modifyPickerValueFunc = undefined;
       quickPick.noteModifierValue = undefined;
+      quickPick.onCreate = undefined;
       quickPick.prevValue = quickPick.value;
       quickPick.prefix = quickPick.rawValue;
       quickPick.value = NotePickerUtils.getPickerValue(quickPick);

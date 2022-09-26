@@ -97,7 +97,10 @@ export class DendronClientUtilsV2 {
    * @returns The file name of the new note
    */
   static genNoteName(
-    type: "JOURNAL" | "SCRATCH" | LookupNoteTypeEnum.task,
+    type:
+      | LookupNoteTypeEnum.journal
+      | LookupNoteTypeEnum.scratch
+      | LookupNoteTypeEnum.task,
     opts?: CreateFnameOpts
   ): {
     noteName: string;
@@ -111,7 +114,7 @@ export class DendronClientUtilsV2 {
     let name: string;
 
     switch (type) {
-      case "SCRATCH": {
+      case LookupNoteTypeEnum.scratch: {
         dateFormat =
           ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
@@ -128,7 +131,7 @@ export class DendronClientUtilsV2 {
         });
         break;
       }
-      case "JOURNAL": {
+      case LookupNoteTypeEnum.journal: {
         const journalConfig = ConfigUtils.getJournal(config);
         dateFormat = journalConfig.dateFormat;
         addBehavior = journalConfig.addBehavior;

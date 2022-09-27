@@ -163,7 +163,7 @@ export class ProviderAcceptHooks {
     const oldFname = DNodeUtils.fname(oldUri.fsPath);
 
     const selectedItem = selectedItems[0];
-    const fname = PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)
+    const fname = PickerUtilsV2.isCreateNewNotePickedForSingle(selectedItem)
       ? quickpick.value
       : selectedItem.fname;
 
@@ -395,7 +395,7 @@ export class PickerUtilsV2 {
   ): quickpick is Required<DendronQuickPickerV2> => {
     const { selectedItems, providerId } = opts;
     const nextPicker = quickpick.nextPicker;
-    const isNewPick = PickerUtilsV2.isCreateNewNotePick(selectedItems[0]);
+    const isNewPick = PickerUtilsV2.isCreateNewNotePicked(selectedItems[0]);
     const isNewPickAllowed = ["lookup", "dendron.moveHeader"];
     return (
       !_.isUndefined(nextPicker) &&
@@ -403,7 +403,7 @@ export class PickerUtilsV2 {
     );
   };
 
-  static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
+  static isCreateNewNotePickedForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;
     }
@@ -418,7 +418,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isCreateNewNotePick(node: DNodePropsQuickInputV2): boolean {
+  static isCreateNewNotePicked(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;
     }
@@ -433,11 +433,11 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isCreateNewNoteWithTemplatePick(
+  static isCreateNewNoteWithTemplatePicked(
     node: DNodePropsQuickInputV2
   ): boolean {
     return (
-      this.isCreateNewNotePick(node) &&
+      this.isCreateNewNotePicked(node) &&
       node.detail === CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL
     );
   }

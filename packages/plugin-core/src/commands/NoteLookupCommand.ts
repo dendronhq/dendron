@@ -47,7 +47,7 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
-import { QuickPickTemplateSelector } from "../components/lookup/TemplateSelector";
+import { QuickPickTemplateSelector } from "../components/lookup/QuickPickTemplateSelector";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -486,10 +486,10 @@ export class NoteLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     let result: Promise<OnDidAcceptReturn | undefined>;
     const start = process.hrtime();
-    const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+    const isNew = PickerUtilsV2.isCreateNewNotePicked(item);
 
     const isNewWithTemplate =
-      PickerUtilsV2.isCreateNewNoteWithTemplatePick(item);
+      PickerUtilsV2.isCreateNewNoteWithTemplatePicked(item);
     if (isNew) {
       if (isNewWithTemplate) {
         result = this.acceptNewWithTemplateItem(item);

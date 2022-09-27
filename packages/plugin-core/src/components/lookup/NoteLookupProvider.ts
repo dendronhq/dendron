@@ -110,7 +110,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const { item } = opts;
     const result = NoteUtils.validateFname(item.fname);
     const shouldReject =
-      !result.isValid && PickerUtilsV2.isCreateNewNotePick(item);
+      !result.isValid && PickerUtilsV2.isCreateNewNotePicked(item);
     if (shouldReject) {
       return {
         shouldReject,

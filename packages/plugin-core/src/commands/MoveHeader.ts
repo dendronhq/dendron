@@ -219,7 +219,7 @@ export class MoveHeaderCommand extends BasicCommand<
       dest = undefined;
     } else {
       const selected = selectedItems[0];
-      const isCreateNew = PickerUtilsV2.isCreateNewNotePick(selected);
+      const isCreateNew = PickerUtilsV2.isCreateNewNotePicked(selected);
       if (isCreateNew) {
         // check if we really want to create a new note.
         // if a user selects a vault in the picker that

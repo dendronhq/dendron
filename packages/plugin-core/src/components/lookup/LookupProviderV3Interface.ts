@@ -59,7 +59,8 @@ export type ILookupProviderOptsV3 = {
   allowNewNote: boolean;
   /**
    * should provide `Create New with Template`
-   * `allowNewNote` should be true for this to take effect.
+   * `allowNewNote` must be true for this to take effect.
+   * false by default.
    */
   allowNewNoteWithTemplate?: boolean;
   noHidePickerOnAccept?: boolean;

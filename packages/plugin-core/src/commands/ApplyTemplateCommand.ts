@@ -5,14 +5,11 @@ import {
 } from "@dendronhq/common-all";
 import { TemplateUtils } from "@dendronhq/common-server";
 import _ from "lodash";
-import { Disposable } from "vscode";
-import { QuickPickTemplateSelector } from "../components/lookup/TemplateSelector";
-import { DendronContext, DENDRON_COMMANDS } from "../constants";
+import { QuickPickTemplateSelector } from "../components/lookup/QuickPickTemplateSelector";
+import { DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
-import { AutoCompleter } from "../utils/autoCompleter";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";

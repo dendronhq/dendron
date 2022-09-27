@@ -1,5 +1,4 @@
 import {
-  DateTime,
   DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
@@ -8,9 +7,9 @@ import {
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
-  QuickPickLabelHighlightTestGroups,
+  CreateNewWithTemplateQuickPickLabelHighlightTestGroups,
   TransformedQueryString,
-  _2022_09_QUICKPICK_LABEL_HIGHLIGHT_TEST,
+  _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST,
 } from "@dendronhq/common-all";
 import {
   getDurationMilliseconds,
@@ -107,18 +106,22 @@ export class NotePickerUtils {
       // @ts-ignore
       vault: {},
     });
-    const ABUserGroup = _2022_09_QUICKPICK_LABEL_HIGHLIGHT_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
+    const ABUserGroup =
+      _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
 
     let label: string;
-    if (ABUserGroup === QuickPickLabelHighlightTestGroups.label) {
+    if (
+      ABUserGroup ===
+      CreateNewWithTemplateQuickPickLabelHighlightTestGroups.label
+    ) {
       label = LabelUtils.createLabelWithHighlight({
         value: CREATE_NEW_WITH_TEMPLATE_LABEL,
         highlight: {
-          value: "$(smiley) [New!] ",
+          value: "$(beaker) [New] ",
           location: "prefix",
-          expirationTime: DateTime.fromISO("2022-10-01"),
+          expirationDate: new Date("2022-11-01"),
         },
       });
     } else {

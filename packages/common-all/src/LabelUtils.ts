@@ -1,10 +1,5 @@
 import { DateTime } from "luxon";
 
-export type DendronLabel = {
-  value: string;
-};
-export const DENDRON_LABELS = new Map<string, DendronLabel>([]);
-
 /**
  * Simple utility class for generating labels with a time constrained _highlight_
  * Use it to give a certain label that is exposed in the UI some highlighting text
@@ -21,14 +16,16 @@ export class LabelUtils {
     highlight: {
       value: string;
       location: "prefix" | "suffix";
-      expirationTime: DateTime;
+      expirationDate: Date;
     };
   }) {
     const { value, highlight } = opts;
     let prefix = "";
     let suffix = "";
     const shouldHighlight =
-      highlight.expirationTime.diffNow().as("milliseconds") > 0;
+      DateTime.fromJSDate(highlight.expirationDate)
+        .diffNow()
+        .as("milliseconds") > 0;
     if (shouldHighlight) {
       if (highlight.location === "prefix") {
         prefix = `${highlight.value} `;

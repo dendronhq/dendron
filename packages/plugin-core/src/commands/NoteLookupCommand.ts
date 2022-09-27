@@ -298,9 +298,6 @@ export class NoteLookupCommand extends BaseCommand<
       initialValue: copts.initialValue,
       nonInteractive: copts.noConfirm,
       alwaysShow: true,
-      onDidHide: () => {
-        VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
-      },
     });
     this._quickPick = quickpick;
 
@@ -479,6 +476,7 @@ export class NoteLookupCommand extends BaseCommand<
     }
     this.controller = undefined;
     HistoryService.instance().remove("lookup", "lookupProvider");
+    VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
   }
 
   async acceptItem(

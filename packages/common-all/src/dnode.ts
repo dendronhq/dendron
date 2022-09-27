@@ -1571,7 +1571,8 @@ export class SchemaUtils {
     id: string;
     engine: DEngineClient;
   }) {
-    return !_.isUndefined(await engine.getSchema(id));
+    const resp = await engine.getSchema(id);
+    return !_.isUndefined(resp.data);
   }
 
   static async getSchemaFromNote({

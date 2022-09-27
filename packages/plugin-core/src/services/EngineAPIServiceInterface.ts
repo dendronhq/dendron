@@ -1,40 +1,39 @@
 import {
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
+  DeleteNoteResp,
   DEngineInitResp,
   DHookDict,
   DVault,
-  DeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineInfoResp,
   EngineWriteOptsV2,
   FindNoteOpts,
+  FindNotesMetaResp,
+  FindNotesResp,
   GetDecorationsOpts,
   GetDecorationsResp,
   GetNoteBlocksOpts,
   GetNoteBlocksResp,
+  GetNoteMetaResp,
+  GetNoteResp,
+  GetSchemaResp,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   QueryNotesOpts,
+  QueryNotesResp,
+  QuerySchemaResp,
   RenameNoteOpts,
+  RenameNoteResp,
   RenderNoteOpts,
-  SchemaModuleDict,
+  RenderNoteResp,
   SchemaModuleProps,
   WriteNoteResp,
-  GetNoteResp,
-  FindNotesResp,
-  FindNotesMetaResp,
-  BulkGetNoteResp,
-  BulkGetNoteMetaResp,
-  BulkWriteNotesResp,
-  RenameNoteResp,
-  QueryNotesResp,
-  RenderNoteResp,
-  GetSchemaResp,
-  QuerySchemaResp,
   WriteSchemaResp,
-  GetNoteMetaResp,
 } from "@dendronhq/common-all";
 
 export interface IEngineAPIService {
@@ -50,7 +49,6 @@ export interface IEngineAPIService {
    */
   noteFnames: NotePropsByFnameDict;
   wsRoot: string;
-  schemas: SchemaModuleDict;
   vaults: DVault[];
   hooks: DHookDict;
   engineEventEmitter: EngineEventEmitter;

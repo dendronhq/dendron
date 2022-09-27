@@ -159,7 +159,7 @@ export class DendronClientUtilsV2 {
     fname: string;
     client: DEngineClient;
   }): Promise<SchemaModuleProps> => {
-    const smod = _.find(client.schemas, { fname });
+    const smod = (await client.getSchema(fname)).data;
     if (!smod) {
       throw new DendronError({ message: "no note found" });
     }

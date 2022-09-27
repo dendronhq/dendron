@@ -58,6 +58,7 @@ import {
   GetSchemaResp,
   GetNoteMetaResp,
   GetNoteResp,
+  isNotUndefined,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -143,6 +144,7 @@ export class DendronEngineV2 implements DEngine {
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
+  private schemas: SchemaModuleDict | undefined;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -198,14 +200,6 @@ export class DendronEngineV2 implements DEngine {
    */
   get noteFnames() {
     return this.store.noteFnames;
-  }
-  /**
-   * @deprecated
-   * For accessing a specific schema by id, see {@link DendronEngineV2.getSchema}.
-   * If you need all schemas, avoid modifying any schema as this will cause unintended changes on the store side
-   */
-  get schemas(): SchemaModuleDict {
-    return this.store.schemas;
   }
 
   get vaults(): DVault[] {
@@ -278,12 +272,16 @@ export class DendronEngineV2 implements DEngine {
         default:
           error = new DendronCompositeError(allErrors);
       }
+
+      // Set schemas locally in the engine:
+      this.schemas = schemas;
+
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
+
       return {
         error,
         data: {
           notes,
-          schemas,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
           config: DConfig.readConfigSync(this.wsRoot),
@@ -396,7 +394,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async getSchema(id: string): Promise<GetSchemaResp> {
-    const maybeSchema = this.schemas[id];
+    const maybeSchema = this.schemas ? this.schemas[id] : undefined;
 
     if (maybeSchema) {
       return { data: _.cloneDeep(maybeSchema) };
@@ -446,7 +444,9 @@ export class DendronEngineV2 implements DEngine {
 
     let items: SchemaModuleProps[] = [];
     const results = await this.fuseEngine.querySchema({ qs: queryString });
-    items = results.map((ent) => this.schemas[ent.id]);
+    items = results
+      .map((ent) => (this.schemas ? this.schemas[ent.id] : undefined))
+      .filter(isNotUndefined);
     // if (queryString === "") {
     //   items = [this.schemas.root];
     // } else if (queryString === "*") {
@@ -687,7 +687,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async updateIndex(mode: DNodeType) {
-    if (mode === "schema") {
+    if (mode === "schema" && this.schemas) {
       this.fuseEngine.replaceSchemaIndex(this.schemas);
     } else {
       this.fuseEngine.replaceNotesIndex(this.notes);

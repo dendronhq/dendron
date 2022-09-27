@@ -8,7 +8,6 @@ import {
   DendronCompositeError,
   DendronError,
   DEngineClient,
-  DEngineInitResp,
   DHookEntry,
   DLink,
   DLinkUtils,
@@ -44,6 +43,7 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaUtils,
+  StoreV2InitResp,
   stringifyError,
   TAGS_HIERARCHY,
   TimeUtils,
@@ -115,7 +115,7 @@ export class FileStorage implements DStore {
     this.engine = props.engine;
   }
 
-  async init(): Promise<DEngineInitResp> {
+  async init(): Promise<StoreV2InitResp> {
     const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {

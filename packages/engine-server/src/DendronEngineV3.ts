@@ -171,14 +171,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   get noteFnames() {
     return this.store.noteFnames;
   }
-  /**
-   * @deprecated
-   * For accessing a specific schema by id, see {@link DendronEngineV3.getSchema}.
-   * If you need all schemas, avoid modifying any schema as this will cause unintended changes on the store side
-   */
-  get schemas(): SchemaModuleDict {
-    return this.store.schemas;
-  }
 
   /**
    * Does not throw error but returns it
@@ -274,7 +266,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         error,
         data: {
           notes,
-          schemas: schemaDict,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
           config: DConfig.readConfigSync(this.wsRoot),

@@ -1,4 +1,3 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import { CreateJournalNoteCommand } from "../../commands/CreateJournalNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -16,12 +15,8 @@ suite("CreateJournalNoteCommand", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateJournalNoteCommand(ext);
-        const { vaults, engine } = ext.getDWorkspace();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const { engine } = ext.getDWorkspace();
+        const note = (await engine.getNoteMeta("foo")).data!;
         await wsUtils.openNote(note);
         await cmd.run({ noConfirm: true });
         const activeNote = getNoteFromTextEditor();

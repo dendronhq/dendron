@@ -19,7 +19,7 @@ suite("notes", function () {
         await WSUtils.openNote(note);
         await new GoDownCommand().run({ noConfirm: true });
         const editor = VSCodeUtils.getActiveTextEditor();
-        const activeNote = WSUtils.getNoteFromDocument(editor!.document);
+        const activeNote = await WSUtils.getNoteFromDocument(editor!.document);
         expect(activeNote?.fname).toEqual("foo.ch1");
 
         done();

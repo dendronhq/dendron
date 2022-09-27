@@ -477,11 +477,9 @@ suite("workspace sync command", function () {
         await git.push();
         // Update root note so there are tracked changes
         const fpath = NoteUtils.getFullPath({
-          note: NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vaults[0],
-            engine,
-          })!,
+          note: (
+            await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+          )[0],
           wsRoot,
         });
         await fs.appendFile(fpath, "Similique non atque");
@@ -541,11 +539,9 @@ suite("workspace sync command", function () {
         await git.push();
         // Update root note so there are tracked changes
         const fpath = NoteUtils.getFullPath({
-          note: NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vaults[0],
-            engine,
-          })!,
+          note: (
+            await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+          )[0],
           wsRoot,
         });
         await fs.appendFile(fpath, "Similique non atque");
@@ -606,11 +602,9 @@ suite("workspace sync command", function () {
         await git.addAll();
         await git.commit({ msg: "add all and commit" });
         await git.push();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const note = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         // Clone to a second location, then push a change through that
         const secondaryDir = tmpDir().name;
         const secondaryGit = new Git({
@@ -695,11 +689,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         const otherNote = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "non-conflicting",
           vault: vaults[0],
@@ -796,11 +788,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         const otherNote = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "non-conflicting",
           vault: vaults[0],
@@ -901,11 +891,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         // Add everything and push, so that there's no untracked changes
         const git = new Git({ localUrl: wsRoot });
         await git.addAll();
@@ -986,11 +974,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         // Add everything and push, so that there's no untracked changes
         const git = new Git({ localUrl: wsRoot });
         await git.addAll();
@@ -1076,11 +1062,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         // Add everything and push, so that there's no untracked changes
         const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
         await git.addAll();
@@ -1145,11 +1129,9 @@ suite("workspace sync command", function () {
         const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-        const rootNote = NoteUtils.getNoteByFnameFromEngine({
-          fname: "root",
-          vault: vaults[0],
-          engine,
-        })!;
+        const rootNote = (
+          await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+        )[0];
         // Add everything and push, so that there's no untracked changes
         const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
         await git.addAll();
@@ -1265,11 +1247,9 @@ suite("workspace sync command", function () {
         await git.push();
         // Update root note so there are tracked changes
         const fpath = NoteUtils.getFullPath({
-          note: NoteUtils.getNoteByFnameFromEngine({
-            fname: "root",
-            vault: vaults[0],
-            engine,
-          })!,
+          note: (
+            await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
+          )[0],
           wsRoot,
         });
         await fs.appendFile(fpath, "Similique non atque");

@@ -1,4 +1,3 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { CreateScratchNoteCommand } from "../../commands/CreateScratchNoteCommand";
@@ -17,12 +16,8 @@ suite("CreateScratchNoteCommand", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateScratchNoteCommand(ext);
-        const { vaults, engine } = ext.getDWorkspace();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const { engine } = ext.getDWorkspace();
+        const note = (await engine.getNoteMeta("foo")).data!;
         await wsUtils.openNote(note);
         await cmd.run({ noConfirm: true });
         const activeNote = getNoteFromTextEditor();
@@ -33,12 +28,8 @@ suite("CreateScratchNoteCommand", function () {
         const ext = ExtensionProvider.getExtension();
         const wsUtils = ext.wsUtils;
         const cmd = new CreateScratchNoteCommand(ext);
-        const { vaults, engine } = ext.getDWorkspace();
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname: "foo",
-          vault: vaults[0],
-          engine,
-        }) as NoteProps;
+        const { engine } = ext.getDWorkspace();
+        const note = (await engine.getNoteMeta("foo")).data!;
         const fooNoteEditor = await wsUtils.openNote(note);
         fooNoteEditor.selection = new vscode.Selection(7, 0, 7, 12);
         await cmd.run({ noConfirm: true });

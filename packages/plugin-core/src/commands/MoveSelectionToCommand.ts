@@ -60,7 +60,7 @@ export class MoveSelectionToCommand extends BasicCommand<
 
     // needs active text editor
     if (activeTextEditor) {
-      const activeNote = this.extension.wsUtils.getNoteFromDocument(
+      const activeNote = await this.extension.wsUtils.getNoteFromDocument(
         activeTextEditor?.document
       );
 
@@ -174,7 +174,7 @@ export class MoveSelectionToCommand extends BasicCommand<
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const lookupCmd = new NoteLookupCommand();
     const controller = this.createLookupController();
-    const activeNote = this.extension.wsUtils.getActiveNote();
+    const activeNote = await this.extension.wsUtils.getActiveNote();
     const { selection, text: selectionText } = VSCodeUtils.getSelection();
     await this.prepareProxyMetricPayload({
       sourceNote: activeNote,

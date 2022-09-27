@@ -149,7 +149,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   async promptMatchText() {
     const editor = VSCodeUtils.getActiveTextEditor();
     const value = editor?.document
-      ? WSUtils.getNoteFromDocument(editor.document)?.fname
+      ? (await WSUtils.getNoteFromDocument(editor.document))?.fname
       : "";
     const match = await VSCodeUtils.showInputBox({
       title: "Enter match text",

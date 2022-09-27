@@ -47,7 +47,7 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const vault = WSUtils.getVaultFromDocument(maybeTextEditor.document);
 
-    const note = WSUtils.getNoteFromDocument(maybeTextEditor.document);
+    const note = await WSUtils.getNoteFromDocument(maybeTextEditor.document);
     if (_.isUndefined(note)) {
       window.showErrorMessage("You need to be in a note to use this command");
       return;

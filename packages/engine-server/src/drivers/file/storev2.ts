@@ -116,6 +116,7 @@ export class FileStorage implements DStore {
   }
 
   async init(): Promise<DEngineInitResp> {
+    const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {
       const resp = await this.initSchema();
@@ -127,13 +128,15 @@ export class FileStorage implements DStore {
       });
       const { errors: initErrors } = await this.initNotes();
       errors = errors.concat(initErrors);
+      this.logger.info({ ctx, msg: "post:initNotes", errors });
 
       // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
       if (this.config.dev?.enableLinkCandidates) {
         const ctx = "_addLinkCandidates";
         const start = process.hrtime();
+        this.logger.info({ ctx, msg: "pre:addLinkCandidates" });
         // this mutates existing note objects so we don't need to reset the notes
-        await this._addLinkCandidates(_.values(this.notes));
+        this._addLinkCandidates();
         const duration = getDurationMilliseconds(start);
         this.logger.info({ ctx, duration });
       }
@@ -143,6 +146,7 @@ export class FileStorage implements DStore {
       if (errors.length > 1) {
         error = new DendronCompositeError(errors);
       }
+      this.logger.info({ ctx, msg: "exit" });
       return {
         data: {
           notes,
@@ -635,35 +639,36 @@ export class FileStorage implements DStore {
     });
   }
 
-  _addLinkCandidates(allNotes: NoteProps[]) {
-    return Promise.all(
-      _.map(allNotes, async (noteFrom: NoteProps) => {
-        try {
-          const maxNoteLength = ConfigUtils.getWorkspace(
-            this.config
-          ).maxNoteLength;
-          if (
-            noteFrom.body.length <
-            (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
-          ) {
-            const linkCandidates = await LinkUtils.findLinkCandidates({
-              note: noteFrom,
-              engine: this.engine,
-              config: this.config,
-            });
-            noteFrom.links = noteFrom.links.concat(linkCandidates);
-          }
-        } catch (err: any) {
-          const error = error2PlainObject(err);
-          this.logger.error({
-            error,
-            noteFrom,
-            message: "issue with link candidates",
+  private _addLinkCandidates() {
+    return _.map(this.notes, (noteFrom: NoteProps) => {
+      try {
+        const maxNoteLength = ConfigUtils.getWorkspace(
+          this.config
+        ).maxNoteLength;
+        if (
+          noteFrom.body.length <
+          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+        ) {
+          const linkCandidates = LinkUtils.findLinkCandidatesSync({
+            note: noteFrom,
+            noteDicts: {
+              notesById: this.notes,
+              notesByFname: this.noteFnames,
+            },
+            config: this.config,
           });
-          return;
+          noteFrom.links = noteFrom.links.concat(linkCandidates);
         }
-      })
-    );
+      } catch (err: any) {
+        const error = error2PlainObject(err);
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
+        return;
+      }
+    });
   }
 
   async _initNotes(vault: DVault): Promise<{

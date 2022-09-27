@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClient,
+  DNodeUtils,
   DVault,
   ExtensionEvents,
   extractNoteChangeEntryCounts,
@@ -11,7 +12,6 @@ import {
   NoteDictsUtils,
   NoteFnameDictUtils,
   NoteProps,
-  NoteUtils,
   Position,
   ValidateFnameResp,
   VaultUtils,
@@ -252,14 +252,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         vaults,
         vname: ent.vault,
       }) as DVault;
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname: ent.file,
-        engine,
-        vault,
-      }) as NoteProps;
-      const fsPath = NoteUtils.getFullPath({
-        note,
+      const fsPath = DNodeUtils.getFullPath({
         wsRoot,
+        vault,
+        basename: ent.file + ".md",
       });
       const fileContent = fs.readFileSync(fsPath).toString();
       const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
@@ -461,7 +457,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const document = VSCodeUtils.getActiveTextEditor()?.document;
       if (
         isNotUndefined(document) &&
-        isNotUndefined(this.extension.wsUtils.getNoteFromDocument(document))
+        isNotUndefined(
+          await this.extension.wsUtils.getNoteFromDocument(document)
+        )
       ) {
         await document.save();
       }
@@ -476,7 +474,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         if (_.isUndefined(document)) {
           throw new DendronError({ message: "No note open." });
         }
-        note = this.extension.wsUtils.getNoteFromDocument(document);
+        note = await this.extension.wsUtils.getNoteFromDocument(document);
       }
     }
 

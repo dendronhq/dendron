@@ -1,8 +1,9 @@
 import {
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
+  NoteProps,
 } from "@dendronhq/common-all";
-import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
+import { ENGINE_HOOKS, TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import {
@@ -26,6 +27,7 @@ import { WSUtilsV2 } from "../../../../../src/WSUtilsV2";
 import { VaultSelectionMode } from "../../../../components/lookup/types";
 import { expect } from "../../../testUtilsv2";
 import { describeMultiWS } from "../../../testUtilsV3";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 describe(`GIVEN a LookupControllerV3`, () => {
   const viewModel = {
@@ -258,4 +260,196 @@ describe(`GIVEN a LookupControllerV3`, () => {
       });
     }
   );
+
+  suite("selection2Items", () => {
+    let active: NoteProps;
+    let activeWithAmbiguousLink: NoteProps;
+    let activeWithNonUniqueLinks: NoteProps;
+    describeMultiWS(
+      "GIVEN a LookupControllerV3 with Selection2Items enabled at the start",
+      {
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await ENGINE_HOOKS.setupBasic({ vaults, wsRoot });
+          active = await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "active",
+            body: "[[dendron.ginger]]\n[[dendron.dragonfruit]]\n[[dendron.clementine]]",
+          });
+          activeWithAmbiguousLink = await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "active-ambiguous",
+            body: "[[pican]]",
+          });
+          activeWithNonUniqueLinks = await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "active-dedupe",
+            body: "[[dendron.ginger]]\n\n[[Ginger|dendron.ginger]]\n\n[[Lots of Ginger|dendron.ginger]]\n\n",
+          });
+          await NoteTestUtilsV4.createNote({
+            genRandomId: true,
+            vault: TestEngineUtils.vault2(vaults),
+            wsRoot,
+            fname: "pican",
+            body: "",
+          });
+          await NoteTestUtilsV4.createNote({
+            genRandomId: true,
+            vault: TestEngineUtils.vault3(vaults),
+            wsRoot,
+            fname: "pican",
+            body: "",
+          });
+          await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "dendron.ginger",
+            body: "",
+          });
+          await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "dendron.dragonfruit",
+            body: "",
+          });
+          await NoteTestUtilsV4.createNote({
+            vault: TestEngineUtils.vault1(vaults),
+            wsRoot,
+            fname: "dendron.clementine",
+            body: "",
+          });
+        },
+      },
+      () => {
+        const buttons = [
+          VaultSelectButton.create({ pressed: false }),
+          MultiSelectBtn.create({ pressed: false }),
+          CopyNoteLinkBtn.create(false),
+          DirectChildFilterBtn.create(false),
+          SelectionExtractBtn.create({ pressed: false }),
+          Selection2LinkBtn.create(false),
+          Selection2ItemsBtn.create({
+            pressed: true,
+          }),
+          JournalBtn.create({
+            pressed: false,
+          }),
+          ScratchBtn.create({
+            pressed: false,
+          }),
+          TaskBtn.create(false),
+          HorizontalSplitBtn.create(false),
+        ];
+
+        const controller = new LookupControllerV3({
+          nodeType: "note",
+          buttons,
+          title: "Test Quick Pick",
+          viewModel,
+        });
+
+        describe(`GIVEN an active note with selection that contains wikilinks`, () => {
+          test(`THEN quickpick is populated with notes that were selected.`, async () => {
+            const editor = await WSUtilsV2.instance().openNote(active);
+            editor.selection = new vscode.Selection(7, 0, 10, 0);
+
+            const provider = new NoteLookupProviderFactory(
+              ExtensionProvider.getExtension()
+            ).create("test", {
+              allowNewNote: true,
+            });
+
+            await controller.prepareQuickPick({
+              placeholder: "foo",
+              provider,
+              initialValue: "foo",
+              nonInteractive: true,
+              alwaysShow: true,
+            });
+            const { onSelect2ItemsBtnToggled } =
+              controller.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+            await onSelect2ItemsBtnToggled(true);
+
+            const expectedItemLabels = [
+              "dendron.ginger",
+              "dendron.dragonfruit",
+              "dendron.clementine",
+            ];
+            const actualItemLabels =
+              controller.quickPick.itemsFromSelection!.map(
+                (item) => item.label
+              );
+
+            expect(expectedItemLabels).toEqual(actualItemLabels);
+          });
+
+          test(`THEN if selected wikilink's vault is ambiguous, list all notes with same fname across all vaults.`, async () => {
+            const editor = await WSUtilsV2.instance().openNote(
+              activeWithAmbiguousLink
+            );
+            editor.selection = new vscode.Selection(7, 0, 8, 0);
+
+            const provider = new NoteLookupProviderFactory(
+              ExtensionProvider.getExtension()
+            ).create("test", {
+              allowNewNote: true,
+            });
+
+            await controller.prepareQuickPick({
+              placeholder: "foo",
+              provider,
+              initialValue: "foo",
+              nonInteractive: true,
+              alwaysShow: true,
+            });
+            const { onSelect2ItemsBtnToggled } =
+              controller.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+            await onSelect2ItemsBtnToggled(true);
+
+            const expectedItemLabels = ["pican", "pican"];
+            const actualItemLabels =
+              controller.quickPick.itemsFromSelection!.map(
+                (item) => item.label
+              );
+
+            expect(expectedItemLabels).toEqual(actualItemLabels);
+          });
+
+          test(`THEN if selection contains links that point to same note, correctly dedupes them`, async () => {
+            const editor = await WSUtilsV2.instance().openNote(
+              activeWithNonUniqueLinks
+            );
+            editor.selection = new vscode.Selection(7, 0, 10, 0);
+
+            const provider = new NoteLookupProviderFactory(
+              ExtensionProvider.getExtension()
+            ).create("test", {
+              allowNewNote: true,
+            });
+
+            await controller.prepareQuickPick({
+              placeholder: "foo",
+              provider,
+              initialValue: "foo",
+              nonInteractive: true,
+              alwaysShow: true,
+            });
+            const { onSelect2ItemsBtnToggled } =
+              controller.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+            await onSelect2ItemsBtnToggled(true);
+
+            const expectedItemLabels = ["dendron.ginger"];
+            const actualItemLabels =
+              controller.quickPick.itemsFromSelection!.map(
+                (item) => item.label
+              );
+
+            expect(expectedItemLabels).toEqual(actualItemLabels);
+          });
+        });
+      }
+    );
+  });
 });

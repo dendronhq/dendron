@@ -349,11 +349,9 @@ export class ConvertLinkCommand extends BasicCommand<
     if (targetVault === undefined) {
       throw ConvertLinkCommand.noVaultError();
     } else {
-      const targetNote = NoteUtils.getNoteByFnameFromEngine({
-        fname: ref,
-        engine: ExtensionProvider.getEngine(),
-        vault: targetVault,
-      });
+      const targetNote = (
+        await engine.findNotesMeta({ fname: ref, vault: targetVault })
+      )[0];
 
       if (targetNote === undefined) {
         const { option, parsedLink } =

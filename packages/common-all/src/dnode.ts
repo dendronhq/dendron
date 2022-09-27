@@ -928,7 +928,7 @@ export class NoteUtils {
     opts,
   }: {
     noteRaw: NoteProps;
-    noteHydrated: NoteProps;
+    noteHydrated: NotePropsMeta;
     opts?: Partial<{
       keepBackLinks: boolean;
     }>;

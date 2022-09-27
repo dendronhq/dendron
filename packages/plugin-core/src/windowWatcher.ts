@@ -90,7 +90,7 @@ export class WindowWatcher {
 
       // TODO: changing this to `this._extension.wsUtils.` will fails some tests that
       // mock the extension. Change once that is fixed.
-      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+      const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
         editor.document
       );
       if (_.isUndefined(note)) {
@@ -139,7 +139,7 @@ export class WindowWatcher {
   );
 
   private onDidChangeTextEditorVisibleRanges = sentryReportingCallback(
-    (e: TextEditorVisibleRangesChangeEvent | undefined) => {
+    async (e: TextEditorVisibleRangesChangeEvent | undefined) => {
       const editor = e?.textEditor;
       const ctx = "WindowWatcher:onDidChangeTextEditorVisibleRanges";
       if (!editor) {
@@ -156,7 +156,7 @@ export class WindowWatcher {
       Logger.debug({ ctx, editor: uri.fsPath });
 
       // check if its a note and we should update decorators
-      const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+      const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
         editor.document
       );
       if (_.isUndefined(note)) {
@@ -185,5 +185,12 @@ export class WindowWatcher {
     // Also, debouncing this based on the editor URI so that decoration updates in different editors don't affect each other but updates don't trigger too often for the same editor
     debouncedUpdateDecorations.debouncedFn(editor);
     return;
+  }
+
+  // eslint-disable-next-line camelcase
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
+    return {
+      onDidChangeActiveTextEditor: this.onDidChangeActiveTextEditor.bind(this),
+    };
   }
 }

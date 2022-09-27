@@ -10,7 +10,6 @@ import {
   FuseEngine,
   NoteProps,
   NoteQuickInput,
-  NoteUtils,
   OrderedMatcher,
   RenameNoteOpts,
   RespV2,
@@ -168,11 +167,7 @@ export class ProviderAcceptHooks {
       : selectedItem.fname;
 
     // get new note
-    const newNote = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      engine,
-      vault: newVault,
-    });
+    const newNote = (await engine.findNotesMeta({ fname, vault: newVault }))[0];
     const isStub = newNote?.stub;
     if (newNote && !isStub) {
       const vaultName = VaultUtils.getName(newVault);

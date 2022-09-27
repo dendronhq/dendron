@@ -177,7 +177,7 @@ export const refactorProvider: CodeActionProvider = {
 
       if (_range.isEmpty) {
         const { engine } = ext.getDWorkspace();
-        const note = new WSUtilsV2(ext).getActiveNote();
+        const note = await new WSUtilsV2(ext).getActiveNote();
         //return a code action for create note if user clicked next to a broken wikilink
         if (
           note &&

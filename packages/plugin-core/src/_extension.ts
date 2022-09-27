@@ -442,7 +442,7 @@ export async function _activate(
         action: "activate",
       });
       // If automaticallyShowPreview = true, display preview panel on start up
-      const note = WSUtils.getActiveNote();
+      const note = await WSUtils.getActiveNote();
       if (
         note &&
         ws.workspaceService?.config.preview?.automaticallyShowPreview

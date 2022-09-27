@@ -64,10 +64,10 @@ export class TogglePreviewCommand extends InputArgCommand<
 
     if (opts !== undefined && !_.isEmpty(opts)) {
       // Used a context menu to open preview for a specific note
-      note = ExtensionProvider.getWSUtils().getNoteFromPath(opts.fsPath);
+      note = await ExtensionProvider.getWSUtils().getNoteFromPath(opts.fsPath);
     } else {
       // Used the command bar or keyboard shortcut to open preview for active note
-      note = ExtensionProvider.getWSUtils().getActiveNote();
+      note = await ExtensionProvider.getWSUtils().getActiveNote();
     }
     await this._panel.show();
 

@@ -91,7 +91,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async sanityCheck(): Promise<SanityCheckResults> {
-    const note = this.extension.wsUtils.getActiveNote();
+    const note = await this.extension.wsUtils.getActiveNote();
     if (!note) {
       return "You need to have a note open to merge.";
     }
@@ -100,7 +100,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(opts: CommandOpts): Promise<CommandOpts | undefined> {
     const lc = this.createLookupController();
-    const activeNote = this.extension.wsUtils.getActiveNote();
+    const activeNote = await this.extension.wsUtils.getActiveNote();
     const provider = this.createLookupProvider({
       activeNote,
     });

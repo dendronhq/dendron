@@ -51,7 +51,7 @@ suite("GIVEN TogglePreviewLock", function () {
       });
       test("THEN preview should be locked and pristine", async () => {
         await cmd.run();
-        expect(previewPanel.isLockedAndDirty()).toBeFalsy();
+        expect(await previewPanel.isLockedAndDirty()).toBeFalsy();
       });
       describe("AND has been locked", () => {
         beforeEach(async () => {
@@ -75,8 +75,8 @@ suite("GIVEN TogglePreviewLock", function () {
             await ExtensionProvider.getWSUtils().openNote(note2);
             await previewPanel.show(note2);
           });
-          test("THEN preview should be locked and dirty", () => {
-            expect(previewPanel.isLockedAndDirty()).toBeTruthy();
+          test("THEN preview should be locked and dirty", async () => {
+            expect(await previewPanel.isLockedAndDirty()).toBeTruthy();
           });
         });
       });

@@ -57,7 +57,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     }
     const { note, pos } = out;
     return new Location(
-      Uri.file(NoteUtils.getFullPath({ note, wsRoot })),
+      NoteUtils.getURI({ note, wsRoot }),
       pos || new Position(0, 0)
     );
   }
@@ -101,9 +101,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
         engine,
         vault,
       });
-      const uris = notes.map((note) =>
-        Uri.file(NoteUtils.getFullPath({ note, wsRoot }))
-      );
+      const uris = notes.map((note) => NoteUtils.getURI({ note, wsRoot }));
       const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
       if (out.length > 1) {
         return out;

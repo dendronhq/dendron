@@ -52,7 +52,7 @@ export class SchemaGraphViewFactory {
       switch (msg.type) {
         case GraphViewMessageEnum.onSelect: {
           const engine = ext.getEngine();
-          const schema = engine.schemas[msg.data.id];
+          const schema = (await engine.getSchema(msg.data.id)).data;
 
           const wsRoot = ext.getEngine().wsRoot;
 

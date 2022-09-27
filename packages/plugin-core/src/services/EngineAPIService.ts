@@ -148,9 +148,16 @@ export class EngineAPIService
     this._internalEngine.wsRoot = arg;
   }
 
+  /**
+   * @deprecated
+   */
   public get schemas(): SchemaModuleDict {
     return this._internalEngine.schemas;
   }
+
+  /**
+   * @deprecated
+   */
   public set schemas(arg: SchemaModuleDict) {
     this._internalEngine.schemas = arg;
   }

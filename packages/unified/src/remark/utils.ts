@@ -26,6 +26,8 @@ import {
   LINK_NAME,
   NoteBlock,
   NoteChangeEntry,
+  NoteDicts,
+  NoteDictsUtils,
   NoteProps,
   NotePropsMeta,
   NoteUtils,
@@ -364,6 +366,85 @@ const getLinkCandidates = async ({
       );
     })
   );
+  return linkCandidates;
+};
+
+/**
+ * Use this version during engine initialization on the engine side, where the
+ * entire set of noteDicts is available. This version uses local data so it's
+ * much faster.
+ * @param param0
+ * @returns
+ */
+const getLinkCandidatesSync = ({
+  ast,
+  note,
+  noteDicts,
+}: {
+  ast: DendronASTNode;
+  note: NoteProps;
+  noteDicts: NoteDicts;
+}) => {
+  const textNodes: Text[] = [];
+  visit(
+    ast,
+    [DendronASTTypes.TEXT],
+    (node: Text, _index: number, parent: Parent | undefined) => {
+      if (parent?.type === "paragraph" || parent?.type === "tableCell") {
+        textNodes.push(node);
+      }
+    }
+  );
+
+  const linkCandidates: DLink[] = [];
+
+  _.map(textNodes, (textNode: Text) => {
+    const value = textNode.value as string;
+
+    value.split(/\s+/).map((word) => {
+      const possibleCandidates = NoteDictsUtils.findByFname(
+        word,
+        noteDicts,
+        note.vault
+      )
+        // await engine.findNotesMeta({ fname: word, vault: note.vault })
+        .filter((note) => note.stub !== true);
+
+      linkCandidates.push(
+        ...possibleCandidates.map((candidate): DLink => {
+          const startColumn = value.indexOf(word) + 1;
+          const endColumn = startColumn + word.length;
+
+          const position: Position = {
+            start: {
+              line: textNode.position!.start.line,
+              column: startColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + startColumn - 1
+                : undefined,
+            },
+            end: {
+              line: textNode.position!.start.line,
+              column: endColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + endColumn - 1
+                : undefined,
+            },
+          };
+          return {
+            type: "linkCandidate",
+            from: NoteUtils.toNoteLoc(note),
+            value: value.trim(),
+            position,
+            to: {
+              fname: word,
+              vaultName: VaultUtils.getName(candidate.vault),
+            },
+          };
+        })
+      );
+    });
+  });
   return linkCandidates;
 };
 
@@ -797,6 +878,43 @@ export class LinkUtils {
     const tree = remark.parse(content) as DendronASTNode;
     const linkCandidates: DLink[] = await getLinkCandidates({
       engine,
+      ast: tree,
+      note,
+    });
+    return linkCandidates;
+  }
+
+  /**
+   *  Use this version during engine initialization on the engine side, where
+   *  the entire set of noteDicts is available. This version uses local data so
+   *  it's much faster.
+   * @param param0
+   * @returns
+   */
+  static findLinkCandidatesSync({
+    note,
+    noteDicts,
+    config,
+  }: {
+    note: NoteProps;
+    noteDicts: NoteDicts;
+    config: IntermediateDendronConfig;
+  }) {
+    const content = note.body;
+
+    const remark = MDUtilsV5.procRemarkParse(
+      { mode: ProcMode.FULL },
+      {
+        noteToRender: note,
+        fname: note.fname,
+        vault: note.vault,
+        dest: DendronASTDest.MD_DENDRON,
+        config,
+      }
+    );
+    const tree = remark.parse(content) as DendronASTNode;
+    const linkCandidates: DLink[] = getLinkCandidatesSync({
+      noteDicts,
       ast: tree,
       note,
     });

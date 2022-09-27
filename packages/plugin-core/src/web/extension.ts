@@ -3,13 +3,14 @@ import "reflect-metadata"; // This needs to be the topmost import for tsyringe t
 import { TreeViewItemLabelTypeEnum, VSCodeEvents } from "@dendronhq/common-all";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
+import { NoteLookupAutoCompleteCommand } from "../commands/common/NoteLookupAutoCompleteCommand";
 import { DENDRON_COMMANDS } from "../constants";
 import { ITelemetryClient } from "../telemetry/common/ITelemetryClient";
+import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
-import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 
 /**
  * This is the entry point for the web extension variant of Dendron
@@ -49,6 +50,19 @@ async function setupCommands(context: vscode.ExtensionContext) {
     context.subscriptions.push(
       vscode.commands.registerCommand(key, async (_args: any) => {
         await noteLookupCmd.run();
+      })
+    );
+
+  const noteLookupAutoCompleteCommand = container.resolve(
+    NoteLookupAutoCompleteCommand
+  );
+
+  const noteLookupAutoCompleteCommandKey =
+    DENDRON_COMMANDS.LOOKUP_NOTE_AUTO_COMPLETE.key;
+  if (!existingCommands.includes(noteLookupAutoCompleteCommandKey))
+    context.subscriptions.push(
+      vscode.commands.registerCommand(noteLookupAutoCompleteCommandKey, () => {
+        noteLookupAutoCompleteCommand.run();
       })
     );
 

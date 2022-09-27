@@ -3,19 +3,21 @@ import { vault2Path } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { TextEditor, Uri, window } from "vscode";
+import { Disposable, TextEditor, Uri, window } from "vscode";
 import {
   OldNewLocation,
   PickerUtilsV2,
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 type CommandInput = {
   move: OldNewLocation[];
@@ -65,12 +67,15 @@ export class RenameNoteV2aCommand extends BaseCommand<
       ".md"
     );
     return new Promise((resolve) => {
+      let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
         id: "rename",
         controller: lc,
         logger: this.L,
         onDone: (event: HistoryEvent) => {
           resolve({ move: event.data.onAcceptHookResp });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       lc.show({
@@ -78,6 +83,20 @@ export class RenameNoteV2aCommand extends BaseCommand<
         placeholder: "foo",
         provider,
         initialValue,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

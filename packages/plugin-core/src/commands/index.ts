@@ -45,7 +45,7 @@ import { LaunchTutorialWorkspaceCommand } from "./LaunchTutorialWorkspaceCommand
 import { MigrateSelfContainedVaultCommand } from "./MigrateSelfContainedVault";
 import { MoveHeaderCommand } from "./MoveHeader";
 import { MoveNoteCommand } from "./MoveNoteCommand";
-import { NoteLookupAutoCompleteCommand } from "./NoteLookupAutoCompleteCommand";
+import { NoteLookupAutoCompleteCommand } from "./node/NoteLookupAutoCompleteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
 import { OpenBackupCommand } from "./OpenBackupCommand";
 import { OpenLinkCommand } from "./OpenLink";

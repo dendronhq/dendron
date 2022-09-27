@@ -6,8 +6,10 @@ import {
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { BasicCommand } from "./base";
-import { CommandOutput as NoteLookupOutput } from "./NoteLookupCommand";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
+import {
+  CommandOutput as NoteLookupOutput,
+  NoteLookupCommand,
+} from "./NoteLookupCommand";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { maybeSendMeetingNoteTelemetry } from "../utils/MeetingTelemHelper";
 
@@ -42,7 +44,7 @@ export class CreateTaskCommand extends BasicCommand<
     maybeSendMeetingNoteTelemetry("task");
 
     return {
-      lookup: AutoCompletableRegistrar.getNoteLookupCmd().run({
+      lookup: new NoteLookupCommand().run({
         noteType: LookupNoteTypeEnum.task,
         selectionType: createTaskSelectionType,
       }),

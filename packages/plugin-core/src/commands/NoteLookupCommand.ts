@@ -64,8 +64,8 @@ import { Logger } from "../logger";
 import { IEngineAPIService } from "../services/EngineAPIServiceInterface";
 import { JournalNote } from "../traits/journal";
 import { AnalyticsUtils, getAnalyticsPayload } from "../utils/analytics";
-import { AutoCompletable } from "../utils/AutoCompletable";
 import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { BaseCommand } from "./base";
@@ -124,15 +124,12 @@ export { CommandOpts as LookupCommandOptsV3 };
  * Note look up command instance that is used by the UI.
  * */
 
-export class NoteLookupCommand
-  extends BaseCommand<
-    CommandOpts,
-    CommandOutput,
-    CommandGatherOutput,
-    CommandRunOpts
-  >
-  implements AutoCompletable
-{
+export class NoteLookupCommand extends BaseCommand<
+  CommandOpts,
+  CommandOutput,
+  CommandGatherOutput,
+  CommandRunOpts
+> {
   key = DENDRON_COMMANDS.LOOKUP_NOTE.key;
   protected _controller: ILookupControllerV3 | undefined;
   protected _provider: ILookupProviderV3 | undefined;
@@ -140,6 +137,19 @@ export class NoteLookupCommand
 
   constructor() {
     super("LookupCommandV3");
+
+    //  ^1h1dr08geo6c
+    AutoCompletableRegistrar.OnAutoComplete(() => {
+      if (this._quickPick) {
+        this._quickPick.value = AutoCompleter.getAutoCompletedValue(
+          this._quickPick
+        );
+
+        this.provider.onUpdatePickerItems({
+          picker: this._quickPick,
+        });
+      }
+    });
   }
 
   public get controller(): ILookupControllerV3 {
@@ -168,19 +178,6 @@ export class NoteLookupCommand
 
   public set provider(provider: ILookupProviderV3 | undefined) {
     this._provider = provider;
-  }
-
-  //  ^1h1dr08geo6c
-  async onAutoComplete() {
-    if (this._quickPick) {
-      this._quickPick.value = AutoCompleter.getAutoCompletedValue(
-        this._quickPick
-      );
-
-      await this.provider.onUpdatePickerItems({
-        picker: this._quickPick,
-      });
-    }
   }
 
   async gatherInputs(opts?: CommandRunOpts): Promise<CommandGatherOutput> {

@@ -8,9 +8,11 @@ import {
   HorizontalSplitBtn,
   JournalBtn,
 } from "../components/lookup/buttons";
-import { CommandRunOpts as NoteLookupRunOpts } from "./NoteLookupCommand";
+import {
+  CommandRunOpts as NoteLookupRunOpts,
+  NoteLookupCommand,
+} from "./NoteLookupCommand";
 import { IDendronExtension } from "../dendronExtensionInterface";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { ConfigUtils } from "@dendronhq/common-all";
 import { VaultSelectionModeConfigUtils } from "../components/lookup/vaultSelectionModeConfigUtils";
 
@@ -56,7 +58,7 @@ export class CreateJournalNoteCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "CreateJournalNote";
     Logger.info({ ctx, msg: "enter" });
-    const lookupCmd = AutoCompletableRegistrar.getNoteLookupCmd();
+    const lookupCmd = new NoteLookupCommand();
     lookupCmd.controller = this.createLookupController();
     await lookupCmd.run(opts);
   }

@@ -2,15 +2,17 @@ import {
   DNodeUtils,
   DVault,
   FuseEngine,
-  type ReducedDEngine,
   NoteLookupUtils,
   NoteQuickInputV2,
+  type ReducedDEngine,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
-import { QuickPick, QuickPickOptions } from "vscode";
+import { Event, QuickPick, QuickPickOptions } from "vscode";
 import { Utils } from "vscode-uri";
+import { DendronContext } from "../../../constants";
+import { AutoCompleter } from "../../../utils/autoCompleter";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
@@ -30,15 +32,12 @@ export type LookupAcceptPayload = {
 
 @injectable()
 export class LookupQuickpickFactory {
-  private _engine: ReducedDEngine;
-
   constructor(
-    @inject("ReducedDEngine") engine: ReducedDEngine,
+    @inject("ReducedDEngine") private _engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[],
+    @inject("AutoCompleteEvent") private tabAutoCompleteEvent: Event<void>,
     private wsUtils: WSUtilsWeb
-  ) {
-    this._engine = engine;
-  }
+  ) {}
 
   public showLookup(
     opts: LookupQuickpickFactoryCreateOpts
@@ -53,6 +52,10 @@ export class LookupQuickpickFactory {
       buttons: [],
       provider: opts.provider,
       initialValue,
+    });
+
+    this.tabAutoCompleteEvent(() => {
+      qp.value = AutoCompleter.getAutoCompletedValue(qp);
     });
 
     // lookupPromise resolves when ALL input has been accepted or closed (file
@@ -102,7 +105,19 @@ export class LookupQuickpickFactory {
     );
 
     qp.show();
+    vscode.commands.executeCommand(
+      "setContext",
+      DendronContext.NOTE_LOOK_UP_ACTIVE,
+      true
+    );
 
+    lookupPromise.finally(() => {
+      vscode.commands.executeCommand(
+        "setContext",
+        DendronContext.NOTE_LOOK_UP_ACTIVE,
+        false
+      );
+    });
     return lookupPromise;
   }
 

@@ -275,8 +275,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    *
    * @param opts.vault - {@link DVault} to add to workspace
    * @param opts.config - if passed it, make modifications on passed in config instead of {wsRoot}/dendron.yml
-   * @param opts.writeConfig - default: true, add to dendron.yml
-   * @param opts.addToWorkspace - default: false, add to dendron.code-workspace. Make sure to keep false for Native workspaces.
+   * @param opts.updateConfig - default: true, add to dendron.yml
+   * @param opts.updateWorkspace - default: false, add to dendron.code-workspace. Make sure to keep false for Native workspaces.
    * @returns
    */
   async addVault(
@@ -285,11 +285,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       config?: IntermediateDendronConfig;
     } & AddRemoveCommonOpts
   ) {
-    const { vault, config, updateConfig, updateWorkspace } = _.defaults(opts, {
-      config: this.config,
+    const { vault, updateConfig, updateWorkspace } = _.defaults(opts, {
       updateConfig: true,
       updateWorkspace: false,
     });
+
+    // if we are updating the config, we should make sure
+    // we don't include the local overrides
+    const config = updateConfig
+      ? DConfig.readConfigSync(this.wsRoot)
+      : this.config;
 
     // Normalize the vault path to unix style (forward slashes) which is better for cross-compatibility
     vault.fsPath = normalizeUnixPath(vault.fsPath);
@@ -955,11 +960,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @param param0
    */
   async removeVault(opts: { vault: DVault } & AddRemoveCommonOpts) {
-    const config = this.config;
     const { vault, updateConfig, updateWorkspace } = _.defaults(opts, {
       updateConfig: true,
       updateWorkspace: false,
     });
+
+    // if we are updating the config, we should make sure
+    // we don't include the local overrides
+    const config = updateConfig
+      ? DConfig.readConfigSync(this.wsRoot)
+      : this.config;
 
     const vaults = ConfigUtils.getVaults(config);
     const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {

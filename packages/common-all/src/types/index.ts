@@ -7,7 +7,7 @@ export * from "./intermediateConfigs";
 export * from "./noteTrait";
 export * from "./seed";
 export * from "./typesv2";
-export * from "./workspace";
+export * from "./DWorkspaceV2";
 export * from "./foundation";
 export * from "./seed";
 export * from "./intermediateConfigs";
@@ -20,6 +20,10 @@ export * from "./cacheData";
 export * from "./errorTypes";
 export * from "./store";
 export * from "./ReducedDEngine";
+export * from "./DVault";
+export * from "./DWorkspace";
+export * from "./FindNoteOpts";
+export * from "./SeedEntry";
 
 export type Stage = "dev" | "prod" | "test";
 

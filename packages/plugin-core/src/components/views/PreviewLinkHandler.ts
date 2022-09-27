@@ -4,7 +4,7 @@ import {
   ErrorFactory,
   isVSCodeCommandUri,
   isWebUri,
-  NoteProps,
+  NotePropsMeta,
   NoteViewMessage,
   TutorialEvents,
 } from "@dendronhq/common-all";
@@ -165,7 +165,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     data: NoteViewMessage["data"];
     engine: DEngineClient;
   }): Promise<{
-    note: NoteProps | undefined;
+    note: NotePropsMeta | undefined;
     anchor: DNoteAnchorBasic | undefined;
   }> {
     // wiki links will have the following format
@@ -202,7 +202,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     const anchor = AnchorUtils.string2anchor(
       vscode.Uri.parse(data.href).fragment
     );
-    let note = (await engine.getNote(noteId)).data;
+    let note = (await engine.getNoteMeta(noteId)).data;
 
     if (note === undefined) {
       // If we could not find the note by the extracted id (when the note is within the same

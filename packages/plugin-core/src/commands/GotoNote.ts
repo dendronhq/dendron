@@ -5,6 +5,7 @@ import {
   getSlugger,
   InvalidFilenameReason,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -37,7 +38,7 @@ import {
 
 export const findAnchorPos = (opts: {
   anchor: DNoteAnchorBasic;
-  note: NoteProps;
+  note: NotePropsMeta;
 }): Position => {
   const { anchor: findAnchor, note } = opts;
   let key: string;
@@ -81,16 +82,16 @@ export class GotoNoteCommand extends BasicCommand<
     this.wsUtils = extension.wsUtils;
   }
 
-  private getQs(
+  private async getQs(
     opts: GoToNoteCommandOpts,
     link: FoundLinkSelection
-  ): GoToNoteCommandOpts {
+  ): Promise<GoToNoteCommandOpts> {
     if (link.value) {
       // Reference to another file
       opts.qs = link.value;
     } else {
       // Same file block reference, implicitly current file
-      const note = this.wsUtils.getActiveNote();
+      const note = await this.wsUtils.getActiveNote();
       if (note) {
         // Same file link within note
         opts.qs = note.fname;
@@ -189,7 +190,7 @@ export class GotoNoteCommand extends BasicCommand<
     }
 
     // Get missing opts from the selected link, if possible
-    if (!opts.qs) opts = this.getQs(opts, link);
+    if (!opts.qs) opts = await this.getQs(opts, link);
     if (!opts.vault && link.vaultName)
       opts.vault = VaultUtils.getVaultByNameOrThrow({
         vaults: this.extension.getDWorkspace().vaults,

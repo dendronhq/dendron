@@ -15,9 +15,9 @@ import {
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3Interface";
 import { SelectionExtractBtn } from "../components/lookup/buttons";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { RemarkUtils } from "@dendronhq/unified";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
+import { NoteLookupCommand } from "./NoteLookupCommand";
 
 type CommandInput = {
   initialValue?: string;
@@ -60,7 +60,7 @@ export class MoveSelectionToCommand extends BasicCommand<
 
     // needs active text editor
     if (activeTextEditor) {
-      const activeNote = this.extension.wsUtils.getNoteFromDocument(
+      const activeNote = await this.extension.wsUtils.getNoteFromDocument(
         activeTextEditor?.document
       );
 
@@ -172,9 +172,9 @@ export class MoveSelectionToCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
-    const lookupCmd = AutoCompletableRegistrar.getNoteLookupCmd();
+    const lookupCmd = new NoteLookupCommand();
     const controller = this.createLookupController();
-    const activeNote = this.extension.wsUtils.getActiveNote();
+    const activeNote = await this.extension.wsUtils.getActiveNote();
     const { selection, text: selectionText } = VSCodeUtils.getSelection();
     await this.prepareProxyMetricPayload({
       sourceNote: activeNote,

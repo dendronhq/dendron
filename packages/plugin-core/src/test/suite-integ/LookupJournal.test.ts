@@ -30,7 +30,7 @@ suite("Journal Notes", function () {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const engine = getDWorkspace().engine;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,
@@ -68,7 +68,7 @@ suite("Journal Notes", function () {
           const vault = vaults[1];
           const fname = "daily";
           const engine = getDWorkspace().engine;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({
             noteType: LookupNoteTypeEnum.journal,

@@ -513,6 +513,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy Codespace URL`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
+  COPY_AS: {
+    key: "dendron.copyAs",
+    title: `${CMD_PREFIX} Copy As`,
+    keybindings: {
+      key: "ctrl+k ctrl+c",
+      mac: "cmd+k cmd+c",
+      when: "dendron:pluginActive",
+    },
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
   DELETE: {
     key: "dendron.delete",
     title: `${CMD_PREFIX} Delete`,

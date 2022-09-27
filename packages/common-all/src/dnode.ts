@@ -23,7 +23,6 @@ import {
   DNodeProps,
   DNodePropsQuickInputV2,
   DNoteLoc,
-  DVault,
   NoteChangeEntry,
   NoteLocalConfig,
   NoteOpts,
@@ -53,6 +52,7 @@ import {
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 import { NoteDictsUtils } from "./noteDictsUtils";
+import { DVault } from "./types/DVault";
 
 export type ValidateFnameResp =
   | {
@@ -329,7 +329,7 @@ export class NoteUtils {
   static RE_FM_UPDATED_OR_CREATED =
     /^(?<beforeTimestamp>(updated|created): *)(?<timestamp>[0-9]+)$/;
 
-  static getNoteTraits(note: NoteProps): string[] {
+  static getNoteTraits(note: NotePropsMeta): string[] {
     return _.get(note, "traitIds", []);
   }
 
@@ -870,7 +870,6 @@ export class NoteUtils {
   }): URI {
     return URI.file(this.getFullPath({ note, wsRoot }));
   }
-
   /**
    * Get a list that has all the parents of the current note with the current note
    */
@@ -929,7 +928,7 @@ export class NoteUtils {
     opts,
   }: {
     noteRaw: NoteProps;
-    noteHydrated: NoteProps;
+    noteHydrated: NotePropsMeta;
     opts?: Partial<{
       keepBackLinks: boolean;
     }>;
@@ -950,7 +949,7 @@ export class NoteUtils {
     return minimatch(notePath, pattern);
   }
 
-  static isDefaultTitle(props: NoteProps) {
+  static isDefaultTitle(props: NotePropsMeta) {
     return props.title === NoteUtils.genTitle(props.fname);
   }
 

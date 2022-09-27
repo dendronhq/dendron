@@ -30,7 +30,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[0];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const engine = getDWorkspace().engine;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           const editor = await WSUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
@@ -67,7 +67,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[0];
           const { fname, selection } =
             NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           const editor = await WSUtils.openNote(note);
           editor.selection = new vscode.Selection(...selection);
           await new NoteLookupCommand().run({
@@ -97,7 +97,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const engine = getDWorkspace().engine;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           const editor = await WSUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
@@ -134,7 +134,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const { fname, selection } =
             NOTE_PRESETS_V4.NOTE_DOMAIN_NAMESPACE_CHILD;
-          const note = (await engine.findNotes({ fname, vault }))[0];
+          const note = (await engine.findNotesMeta({ fname, vault }))[0];
           const editor = await WSUtils.openNote(note);
           editor.selection = new vscode.Selection(...selection);
           await new NoteLookupCommand().run({

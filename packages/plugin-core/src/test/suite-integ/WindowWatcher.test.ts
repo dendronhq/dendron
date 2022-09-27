@@ -132,7 +132,6 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
             extension: mockExtension,
             previewProxy,
           });
-
           watcher.activate();
 
           const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
@@ -140,6 +139,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);
+          const { onDidChangeActiveTextEditor } =
+            watcher.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
+          await onDidChangeActiveTextEditor(VSCodeUtils.getActiveTextEditor());
 
           expect(previewProxy.isOpen()).toBeTruthy();
         });
@@ -181,7 +183,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           // Open a note
           await WSUtils.openNote(
             (
-              await engine.findNotes({
+              await engine.findNotesMeta({
                 fname: "root",
                 vault: vaults[0],
               })
@@ -220,7 +222,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           watcher!.activate();
           // Open a note
           const first = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[0],
             })
@@ -236,7 +238,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           checkPosition(3);
           // Switch to another note
           const second = (
-            await engine.findNotes({
+            await engine.findNotesMeta({
               fname: "root",
               vault: vaults[1],
             })

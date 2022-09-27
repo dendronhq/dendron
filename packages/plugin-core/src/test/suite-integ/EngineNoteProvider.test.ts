@@ -190,7 +190,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const engine = ExtensionProvider.getEngine();
             const titleArray: Promise<string>[] = children?.map(
               async (children) =>
-                (await engine.findNotes({ fname: children }))[0].title
+                (await engine.findNotesMeta({ fname: children }))[0].title
             )!;
             const result = await Promise.all(titleArray);
             expect(result).toEqual([
@@ -226,7 +226,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const engine = ExtensionProvider.getEngine();
             const titleArray: Promise<string>[] = children?.map(
               async (children) =>
-                (await engine.findNotes({ fname: children }))[0].title
+                (await engine.findNotesMeta({ fname: children }))[0].title
             )!;
             const result = await Promise.all(titleArray);
             expect(result).toEqual([
@@ -263,7 +263,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const engine = ExtensionProvider.getEngine();
             const titleArray: Promise<string>[] = children?.map(
               async (children) =>
-                (await engine.findNotes({ fname: children }))[0].fname
+                (await engine.findNotesMeta({ fname: children }))[0].fname
             )!;
             const result = await Promise.all(titleArray);
             expect(result.map((fname) => _.last(fname.split(".")))).toEqual([
@@ -415,7 +415,7 @@ suite("EngineNoteProvider Tests", function testSuite() {
             const engine = ExtensionProvider.getEngine();
             const titleArray: Promise<string>[] = children?.map(
               async (children) =>
-                (await engine.findNotes({ fname: children }))[0].title
+                (await engine.findNotesMeta({ fname: children }))[0].title
             )!;
             const result = await Promise.all(titleArray);
             expect(result).toEqual([

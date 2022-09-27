@@ -4,11 +4,12 @@ import sinon from "sinon";
 import { container } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { NoteLookupAutoCompleteCommand } from "../../../../commands/common/NoteLookupAutoCompleteCommand";
 import { ITelemetryClient } from "../../../../telemetry/common/ITelemetryClient";
+import { NativeTreeView } from "../../../../views/common/treeview/NativeTreeView";
 import { CopyNoteURLCmd } from "../../../commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 import { setupWebExtContainer } from "../../../injection-providers/setupWebExtContainer";
-import { NativeTreeView } from "../../../../views/common/treeview/NativeTreeView";
 import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 async function setupEnvironment() {
@@ -39,10 +40,11 @@ async function setupEnvironment() {
 suite(
   "GIVEN an injection container for the Dendron Web Extension configuration",
   () => {
-    test("WHEN command(s) are constructed THEN valid objects are returned without exceptions", async () => {
+    test("WHEN NoteLookupCmd is resolved THEN valid objects are returned without exceptions", async () => {
       await setupEnvironment();
       await setupWebExtContainer({
         extensionUri: URI.parse("dummy"),
+        subscriptions: [] as vscode.Disposable[],
       } as vscode.ExtensionContext);
 
       try {
@@ -55,7 +57,7 @@ suite(
       }
     });
 
-    test("WHEN CopyNoteURLCmd is constructed THEN valid objects are returned without exceptions", async () => {
+    test("WHEN CopyNoteURLCmd is resolved THEN valid objects are returned without exceptions", async () => {
       try {
         const cmd = container.resolve(CopyNoteURLCmd);
         assert(!_.isUndefined(cmd));
@@ -64,7 +66,16 @@ suite(
       }
     });
 
-    test("WHEN NativeTreeView is constructed THEN valid objects are returned without exceptions", async () => {
+    test("WHEN NoteLookupAutoCompleteCommand is resolved THEN valid objects are returned without exceptions", async () => {
+      try {
+        const cmd = container.resolve(NoteLookupAutoCompleteCommand);
+        assert(!_.isUndefined(cmd));
+      } catch (error) {
+        assert.fail(error as Error);
+      }
+    });
+
+    test("WHEN NativeTreeView is resolved THEN valid objects are returned without exceptions", async () => {
       try {
         const obj = container.resolve(NativeTreeView);
         assert(!_.isUndefined(obj));

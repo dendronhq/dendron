@@ -138,7 +138,7 @@ export default class BacklinksTreeDataProvider
   public async getChildren(element?: Backlink): Promise<Backlink[]> {
     try {
       // TODO: Make the backlinks panel also work when preview is the active editor.
-      const activeNote = WSUtilsV2.instance().getActiveNote();
+      const activeNote = await WSUtilsV2.instance().getActiveNote();
 
       if (!activeNote) {
         return [];
@@ -325,7 +325,10 @@ export default class BacklinksTreeDataProvider
     isLinkCandidateEnabled: boolean | undefined,
     sortOrder: BacklinkPanelSortOrder
   ): Promise<Backlink[]> {
-    const references = await findReferencesById(noteId);
+    const references = await findReferencesById({
+      id: noteId,
+      isLinkCandidateEnabled,
+    });
     const referencesByPath = _.groupBy(
       // Exclude self-references:
       _.filter(references, (ref) => ref.note?.id !== noteId),

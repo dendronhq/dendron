@@ -26,6 +26,10 @@ import { TemplateUtils } from "@dendronhq/common-server";
 import { AnalyticsUtils } from "../utils/analytics";
 import { TraitUtils } from "../traits/TraitUtils";
 import _ from "lodash";
+import { Disposable } from "vscode";
+import { DendronContext } from "../constants";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 export type CommandOpts = {
   fname: string;
@@ -307,6 +311,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
         );
+      let disposable: Disposable;
 
       NoteLookupProviderUtils.subscribe({
         id: "createNoteWithTrait",
@@ -330,6 +335,9 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
             id: "createNoteWithTrait",
             controller: lc,
           });
+
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onError: (event: HistoryEvent) => {
           const error = event.data.error as DendronError;
@@ -339,6 +347,8 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
             id: "createNoteWithTrait",
             controller: lc,
           });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       lc.show({
@@ -346,6 +356,20 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
         provider,
         initialValue: defaultNoteName,
         title: `Create Note with Trait`,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

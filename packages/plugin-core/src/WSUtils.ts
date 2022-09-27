@@ -1,8 +1,6 @@
 import {
   DVault,
-  NoteProps,
   NotePropsMeta,
-  NoteUtils,
   SchemaModuleProps,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -14,8 +12,7 @@ import { DENDRON_COMMANDS } from "./constants";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { getDWorkspace, getExtension } from "./workspace";
-import { WSUtilsV2 } from "./WSUtilsV2";
+import { getDWorkspace } from "./workspace";
 
 /**
  * Prefer to use WSUtilsV2 instead of this class to prevent circular dependencies.
@@ -94,7 +91,7 @@ export class WSUtils {
   /**
     @deprecated. Use same method in {@link WSUtilsV2}
   **/
-  static getNoteFromPath(fsPath: string) {
+  static async getNoteFromPath(fsPath: string) {
     const { engine } = ExtensionProvider.getDWorkspace();
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
@@ -104,11 +101,7 @@ export class WSUtils {
       // No vault
       return undefined;
     }
-    return NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    return (await engine.findNotes({ fname, vault }))[0];
   }
 
   /**
@@ -121,18 +114,9 @@ export class WSUtils {
   /**
     @deprecated. Use same method in {@link WSUtilsV2}
   **/
-  static getNoteFromDocument(document: vscode.TextDocument) {
+  static async getNoteFromDocument(document: vscode.TextDocument) {
     return this.getNoteFromPath(document.uri.fsPath);
   }
-
-  /**
-    @deprecated. Use same method in {@link WSUtilsV2}
-  **/
-  static tryGetNoteFromDocument = (
-    document: vscode.TextDocument
-  ): NoteProps | undefined => {
-    return new WSUtilsV2(getExtension()).tryGetNoteFromDocument(document);
-  };
 
   /**
     @deprecated. Use same method in {@link WSUtilsV2}

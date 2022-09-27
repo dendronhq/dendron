@@ -4,7 +4,7 @@ import {
   DNoteRefLink,
   getSlugger,
   isBlockAnchor,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -55,7 +55,7 @@ export class CopyNoteRefCommand extends BasicCommand<
   }
 
   async buildLink(opts: {
-    note: NoteProps;
+    note: NotePropsMeta;
     useVaultPrefix?: boolean;
     editor: TextEditor;
   }) {
@@ -103,11 +103,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const vault = PickerUtilsV2.getVaultForOpenEditor();
     const { engine } = ExtensionProvider.getDWorkspace();
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      engine,
-      vault,
-    });
+    const note = (await engine.findNotesMeta({ fname, vault }))[0];
     if (note) {
       const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
       const link = await this.buildLink({

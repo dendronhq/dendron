@@ -29,6 +29,7 @@ import {
   NoteDicts,
   NoteDictsUtils,
   NoteProps,
+  NotePropsMeta,
   NoteUtils,
   parseDendronURI,
   Point,
@@ -322,9 +323,11 @@ const getLinkCandidates = async ({
       const value = textNode.value as string;
       await Promise.all(
         value.split(/\s+/).map(async (word) => {
-          const possibleCandidates = (
-            await engine.findNotes({ fname: word, vault: note.vault })
-          ).filter((note) => note.stub !== true);
+          const possibleCandidates = await engine.findNotesMeta({
+            fname: word,
+            vault: note.vault,
+            excludeStub: true,
+          });
 
           linkCandidates.push(
             ...possibleCandidates.map((candidate): DLink => {
@@ -615,7 +618,7 @@ export class LinkUtils {
     }
   }
 
-  static getNotesFromWikiLinks(opts: {
+  static async getNotesFromWikiLinks(opts: {
     activeNote: DNodeProps;
     wikiLinks: ParseLinkV2Resp[];
     engine: DEngineClient;
@@ -623,35 +626,21 @@ export class LinkUtils {
     const { activeNote, wikiLinks, engine } = opts;
     const { vaults } = engine;
 
-    let out: DNodeProps[] = [];
-    wikiLinks.forEach((wikiLink) => {
-      const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
+    const resps = await Promise.all(
+      wikiLinks.map((wikiLink) => {
+        const fname = wikiLink.sameFile ? activeNote.fname : wikiLink.value;
 
-      const vault = wikiLink.vaultName
-        ? (VaultUtils.getVaultByName({
-            vname: wikiLink.vaultName,
-            vaults,
-          }) as DVault)
-        : undefined;
+        const vault = wikiLink.vaultName
+          ? (VaultUtils.getVaultByName({
+              vname: wikiLink.vaultName,
+              vaults,
+            }) as DVault)
+          : undefined;
 
-      if (vault) {
-        const note = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          engine,
-          vault,
-        });
-        if (note) {
-          out.push(note);
-        }
-      } else {
-        const notesWithSameFname = NoteUtils.getNotesByFnameFromEngine({
-          fname,
-          engine,
-        });
-        out = out.concat(notesWithSameFname);
-      }
-    });
-    return out;
+        return engine.findNotes({ fname, vault });
+      })
+    );
+    return resps.flat();
   }
 
   static parseLink(linkMatch: string) {
@@ -987,7 +976,7 @@ export class LinkUtils {
 
         // see if we have more than one note with same fname as destination
         // if so, we need to specify the vault in the link.
-        const notesWithSameName = await engine.findNotes({
+        const notesWithSameName = await engine.findNotesMeta({
           fname: destNote.fname,
         });
         // there are more than one note with same name, or the link we are updating
@@ -1451,7 +1440,7 @@ export class RemarkUtils {
             });
           }
           const existingNote = (
-            await engine.findNotes({ fname: linkNode.value, vault })
+            await engine.findNotesMeta({ fname: linkNode.value, vault })
           )[0];
           if (existingNote) {
             const publishingConfig =
@@ -1750,7 +1739,7 @@ export class RemarkUtils {
   // Copied from WorkspaceUtils:
   static getNoteUrl(opts: {
     config: IntermediateDendronConfig;
-    note: NoteProps;
+    note: NotePropsMeta;
     vault: DVault;
     urlRoot?: string;
     anchor?: string;

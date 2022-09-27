@@ -6,6 +6,7 @@ import {
   DVault,
   isBlockAnchor,
   isLineAnchor,
+  isNotUndefined,
   NoteProps,
   NotePropsMeta,
   NoteUtils,
@@ -484,22 +485,38 @@ export const noteLinks2Locations = (note: NoteProps) => {
   return refs;
 };
 
-export async function findReferencesById(id: string) {
+export async function findReferencesById(opts: {
+  id: string;
+  isLinkCandidateEnabled?: boolean;
+}) {
+  const { id, isLinkCandidateEnabled } = opts;
   const refs: FoundRefT[] = [];
 
   const engine = ExtensionProvider.getEngine();
 
-  const note = (await engine.getNote(id)).data;
+  const note = (await engine.getNoteMeta(id)).data;
 
   if (!note) {
     return;
   }
 
-  const engineNotes = await engine.findNotesMeta({ excludeStub: true });
-  const notesWithRefs = NoteUtils.getNotesWithLinkTo({
-    note,
-    notes: engineNotes,
-  });
+  let notesWithRefs;
+  if (isLinkCandidateEnabled) {
+    const engineNotes = await engine.findNotesMeta({ excludeStub: true });
+    notesWithRefs = NoteUtils.getNotesWithLinkTo({
+      note,
+      notes: engineNotes,
+    });
+  } else {
+    const notesRefIds = _.uniq(
+      note.links
+        .filter((link) => link.type === "backlink")
+        .map((link) => link.from.id)
+        .filter(isNotUndefined)
+    );
+
+    notesWithRefs = (await engine.bulkGetNotesMeta(notesRefIds)).data;
+  }
 
   _.forEach(notesWithRefs, (noteWithRef) => {
     const linksMatch = noteWithRef.links.filter(
@@ -591,7 +608,7 @@ export const findReferences = async (fname: string): Promise<FoundRefT[]> => {
   });
 
   const all = Promise.all(
-    notes.map((noteProps) => findReferencesById(noteProps.id))
+    notes.map((noteProps) => findReferencesById({ id: noteProps.id }))
   );
 
   return all.then((results) => {

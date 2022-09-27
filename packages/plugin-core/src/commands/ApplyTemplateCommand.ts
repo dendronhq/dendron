@@ -7,11 +7,14 @@ import {
 import { TemplateUtils } from "@dendronhq/common-server";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { Disposable } from "vscode";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { AnalyticsUtils } from "../utils/analytics";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";
@@ -66,7 +69,7 @@ export class ApplyTemplateCommand extends BasicCommand<
       }
     );
     const config = extension.getDWorkspace().config;
-    const targetNote = WSUtilsV2.instance().getActiveNote();
+    const targetNote = await WSUtilsV2.instance().getActiveNote();
     if (!targetNote) {
       throw new DendronError({ message: "No Dendron note open" });
     }
@@ -75,6 +78,7 @@ export class ApplyTemplateCommand extends BasicCommand<
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
 
     return new Promise((resolve) => {
+      let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
         id: APPLY_TEMPLATE_LOOKUP_ID,
         controller: lc,
@@ -82,6 +86,8 @@ export class ApplyTemplateCommand extends BasicCommand<
         onDone: (event: HistoryEvent) => {
           const templateNote = event.data.selectedItems[0] as NoteProps;
           resolve({ templateNote, targetNote });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       lc.show({
@@ -89,6 +95,20 @@ export class ApplyTemplateCommand extends BasicCommand<
         placeholder: "template",
         provider,
         initialValue,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

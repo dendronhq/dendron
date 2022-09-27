@@ -251,7 +251,7 @@ suite("WorkspaceWatcher", function () {
         const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
           document: editor.document,
         };
-        const changes = watcher.onWillSaveTextDocument(vscodeEvent);
+        const changes = await watcher.onWillSaveTextDocument(vscodeEvent);
         expect(changes).toBeTruthy();
         expect(changes?.changes.length).toEqual(0);
         expect(fooNote.updated).toEqual(updatedBefore);
@@ -300,7 +300,7 @@ suite("WorkspaceWatcher", function () {
                   });
                 },
               };
-              const changes = watcher.onWillSaveTextDocument(vscodeEvent);
+              const changes = await watcher.onWillSaveTextDocument(vscodeEvent);
               expect(changes).toBeTruthy();
               expect(changes?.changes.length).toEqual(1);
             });

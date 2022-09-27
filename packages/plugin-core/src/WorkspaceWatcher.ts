@@ -254,7 +254,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
+  async onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -299,18 +299,19 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  private onWillSaveNote(event: TextDocumentWillSaveEvent) {
+  private async onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
     const engine = this._extension.getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault: this._extension.wsUtils.getVaultFromUri(uri),
-      engine,
-    });
+    const note = (
+      await engine.findNotes({
+        fname,
+        vault: this._extension.wsUtils.getVaultFromUri(uri),
+      })
+    )[0];
 
     // If we can't find the note, don't do anything
     if (!note) {

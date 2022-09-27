@@ -344,12 +344,44 @@ export class KeybindingUtils {
       return result[0].key;
     } else if (result.length > 1) {
       throw new DendronError({
-        message: KeybindingUtils.MULTIPLE_KEYBINDINGS_MSG_FMT,
+        message: this.getMultipleKeybindingsMsgFormat("pod"),
       });
     }
     return undefined;
   }
 
-  static MULTIPLE_KEYBINDINGS_MSG_FMT =
-    "Multiple keybindings found for pod command shortcut.";
+  static getKeybindingsForCopyAsIfExists(format: string): string | undefined {
+    const { keybindingConfigPath } = this.getKeybindingConfigPath();
+
+    if (!fs.existsSync(keybindingConfigPath)) {
+      return undefined;
+    }
+
+    const keybindings = readJSONWithCommentsSync(keybindingConfigPath);
+
+    if (!KeybindingUtils.checkKeybindingsExist(keybindings)) {
+      return undefined;
+    }
+
+    const result = keybindings.filter((item) => {
+      return (
+        item.command &&
+        item.command === DENDRON_COMMANDS.COPY_AS.key &&
+        item.args === format
+      );
+    });
+
+    if (result.length === 1 && result[0].key) {
+      return result[0].key;
+    } else if (result.length > 1) {
+      throw new DendronError({
+        message: this.getMultipleKeybindingsMsgFormat("copy as"),
+      });
+    }
+    return undefined;
+  }
+
+  static getMultipleKeybindingsMsgFormat(cmd: string) {
+    return `Multiple keybindings found for ${cmd} command shortcut.`;
+  }
 }

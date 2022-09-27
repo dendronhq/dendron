@@ -11,7 +11,8 @@ import {
   SchemaProps,
   SchemaUtils,
 } from ".";
-import { DVault, NoteChangeEntry } from "./types";
+import { NoteChangeEntry } from "./types";
+import { DVault } from "./types/DVault";
 import { levenshteinDistance } from "./util/stringUtil";
 
 export type NoteIndexProps = {

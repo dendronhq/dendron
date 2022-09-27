@@ -1,10 +1,10 @@
 import {
   DVault,
   NoteChangeEntry,
-  NoteProps,
   NoteUtils,
   VaultUtils,
   BacklinkPanelSortOrder,
+  NotePropsMeta,
 } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
@@ -234,11 +234,9 @@ suite("BacklinksTreeDataProvider", function () {
           ?.enableLinkCandidates;
         expect(isLinkCandidateEnabled).toBeTruthy();
 
-        const noteWithTarget = NoteUtils.getNoteByFnameFromEngine({
-          fname: "alpha",
-          engine,
-          vault: vaults[0],
-        });
+        const noteWithTarget = (
+          await engine.findNotesMeta({ fname: "alpha", vault: vaults[0] })
+        )[0];
         await checkNoteBacklinks({ wsRoot, vaults, noteWithTarget });
       });
     }
@@ -282,20 +280,16 @@ suite("BacklinksTreeDataProvider", function () {
         await checkNoteBacklinks({
           wsRoot,
           vaults,
-          noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
-            fname: "alpha",
-            engine,
-            vault: vaults[0],
-          }),
+          noteWithTarget: (
+            await engine.findNotesMeta({ fname: "alpha", vault: vaults[0] })
+          )[0],
         });
         await checkNoteBacklinks({
           wsRoot,
           vaults,
-          noteWithTarget: NoteUtils.getNoteByFnameFromEngine({
-            fname: "alpha",
-            engine,
-            vault: vaults[1],
-          }),
+          noteWithTarget: (
+            await engine.findNotesMeta({ fname: "alpha", vault: vaults[1] })
+          )[0],
         });
       });
     }
@@ -761,7 +755,7 @@ async function checkNoteBacklinks({
 }: {
   wsRoot: string;
   vaults: DVault[];
-  noteWithTarget?: NoteProps;
+  noteWithTarget?: NotePropsMeta;
 }): Promise<boolean> {
   expect(noteWithTarget).toBeTruthy();
   await ExtensionProvider.getWSUtils().openNote(noteWithTarget!);

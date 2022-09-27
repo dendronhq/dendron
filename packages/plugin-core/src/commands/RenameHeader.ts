@@ -59,7 +59,7 @@ export class RenameHeaderCommand extends BasicCommand<
     const { editor, selection } = VSCodeUtils.getSelection();
     const extension = ExtensionProvider.getExtension();
     const { wsUtils } = extension;
-    const note = wsUtils.getActiveNote();
+    const note = await wsUtils.getActiveNote();
     if (_.isUndefined(note)) {
       throw new DendronError({
         message: "You must first open a note to rename a header.",
@@ -123,7 +123,7 @@ export class RenameHeaderCommand extends BasicCommand<
     const editor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(newHeader) || _.isUndefined(oldHeader) || !editor) return;
     const document = editor.document;
-    const note = WSUtils.getNoteFromDocument(document);
+    const note = await WSUtils.getNoteFromDocument(document);
     if (!note) return;
 
     const noteLoc = {

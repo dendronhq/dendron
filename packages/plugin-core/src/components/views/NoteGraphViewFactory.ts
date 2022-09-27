@@ -72,12 +72,14 @@ export class NoteGraphPanelFactory {
       );
 
       this._onEngineNoteStateChangedDisposable =
-        this._engineEvents.onEngineNoteStateChanged((noteChangeEntry) => {
+        this._engineEvents.onEngineNoteStateChanged(async (noteChangeEntry) => {
           const ctx = "NoteGraphViewFactoryEngineNoteStateChanged";
           Logger.info({ ctx });
           if (this._panel && this._panel.visible) {
-            noteChangeEntry.map((changeEntry) =>
-              this.refresh(changeEntry.note)
+            await Promise.all(
+              noteChangeEntry.map((changeEntry) => {
+                return this.refresh(changeEntry.note);
+              })
             );
           }
         });
@@ -100,10 +102,12 @@ export class NoteGraphPanelFactory {
             }
             const note = resp.data;
             if (note.stub && !createStub) {
-              this.refresh(note, createStub);
+              await this.refresh(note, createStub);
             } else {
-              if (this._ext.wsUtils.getActiveNote()?.fname === note.fname) {
-                this.refresh(note);
+              if (
+                (await this._ext.wsUtils.getActiveNote())?.fname === note.fname
+              ) {
+                await this.refresh(note);
                 break;
               }
               await new GotoNoteCommand(this._ext).execute({
@@ -166,7 +170,7 @@ export class NoteGraphPanelFactory {
                 note: NoteUtils.toLogObj(note),
               });
             } else {
-              note = this._ext.wsUtils.getActiveNote();
+              note = await this._ext.wsUtils.getActiveNote();
               if (note) {
                 Logger.debug({
                   ctx,
@@ -176,7 +180,7 @@ export class NoteGraphPanelFactory {
               }
             }
             if (note) {
-              this.refresh(note);
+              await this.refresh(note);
             }
             break;
           }
@@ -241,7 +245,7 @@ export class NoteGraphPanelFactory {
    * Post message to the webview content.
    * @param note
    */
-  static refresh(note: NoteProps, createStub?: boolean): any {
+  static async refresh(note: NoteProps, createStub?: boolean): Promise<any> {
     if (this._panel) {
       this._panel.webview.postMessage({
         type: DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR,
@@ -249,7 +253,9 @@ export class NoteGraphPanelFactory {
           note,
           syncChangedNote: true,
           activeNote:
-            note.stub && !createStub ? note : this._ext.wsUtils.getActiveNote(),
+            note.stub && !createStub
+              ? note
+              : await this._ext.wsUtils.getActiveNote(),
         },
         source: DMessageSource.vscode,
       } as OnDidChangeActiveTextEditorMsg);
@@ -275,9 +281,9 @@ export class NoteGraphPanelFactory {
       return;
     }
     if (basename.endsWith(".md")) {
-      const note = this._ext.wsUtils.getNoteFromDocument(editor.document);
+      const note = await this._ext.wsUtils.getNoteFromDocument(editor.document);
       if (note) {
-        this.refresh(note);
+        await this.refresh(note);
       }
     }
   }

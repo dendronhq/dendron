@@ -8,16 +8,18 @@ import {
 import { HistoryEvent } from "@dendronhq/engine-server";
 import { LinkUtils, ParseLinkV2Resp } from "@dendronhq/unified";
 import _ from "lodash";
-import { QuickPickItem, Range, TextEditor } from "vscode";
+import { Disposable, QuickPickItem, Range, TextEditor } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { ExtensionProvider } from "../ExtensionProvider";
+import { AutoCompleter } from "../utils/autoCompleter";
 import {
   getReferenceAtPosition,
   getReferenceAtPositionResp,
 } from "../utils/md";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
@@ -130,15 +132,17 @@ export class ConvertLinkCommand extends BasicCommand<
       vaultSelectCanToggle: false,
     };
     const extension = ExtensionProvider.getExtension();
-    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const lc = extension.lookupControllerFactory.create(lcOpts);
     const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
     return new Promise((resolve) => {
+      let disposable: Disposable;
+
       NoteLookupProviderUtils.subscribe({
         id: this.key,
-        controller,
+        controller: lc,
         logger: this.L,
         onDone: (event: HistoryEvent) => {
           const data = event.data as NoteLookupProviderSuccessResp;
@@ -146,15 +150,32 @@ export class ConvertLinkCommand extends BasicCommand<
             resolve(undefined);
           }
           resolve(data);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onHide: () => {
           resolve(undefined);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
-      controller.show({
+      lc.show({
         title: "Select new note for link destination",
         placeholder: "new note",
         provider,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }
@@ -328,11 +349,9 @@ export class ConvertLinkCommand extends BasicCommand<
     if (targetVault === undefined) {
       throw ConvertLinkCommand.noVaultError();
     } else {
-      const targetNote = NoteUtils.getNoteByFnameFromEngine({
-        fname: ref,
-        engine: ExtensionProvider.getEngine(),
-        vault: targetVault,
-      });
+      const targetNote = (
+        await engine.findNotesMeta({ fname: ref, vault: targetVault })
+      )[0];
 
       if (targetNote === undefined) {
         const { option, parsedLink } =

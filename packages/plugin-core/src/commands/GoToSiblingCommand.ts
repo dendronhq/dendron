@@ -3,7 +3,6 @@ import {
   DNodeUtils,
   DWorkspaceV2,
   isNumeric,
-  NoteProps,
   NotePropsMeta,
   NoteUtils,
   ReducedDEngine,
@@ -91,14 +90,14 @@ export class GoToSiblingCommand extends BasicCommand<
   async getActiveNote(
     engine: DEngineClient,
     fname: string
-  ): Promise<NoteProps | null> {
+  ): Promise<NotePropsMeta | null> {
     const vault = PickerUtilsV2.getVaultForOpenEditor();
-    const hitNotes = await engine.findNotes({ fname, vault });
+    const hitNotes = await engine.findNotesMeta({ fname, vault });
     return hitNotes.length !== 0 ? hitNotes[0] : null;
   }
 
   private async canBeHandledAsJournalNote(
-    note: NoteProps,
+    note: NotePropsMeta,
     wsRoot: string
   ): Promise<boolean> {
     const markedAsJournalNote =
@@ -114,7 +113,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
   private async getSiblingForJournalNote(
     engine: ReducedDEngine,
-    currNote: NoteProps,
+    currNote: NotePropsMeta,
     direction: Direction
   ): Promise<RespV3<{ sibling: NotePropsMeta }>> {
     const journalNotes = await this.getSiblingsForJournalNote(engine, currNote);
@@ -153,7 +152,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
   private getSiblingsForJournalNote = async (
     engine: ReducedDEngine,
-    currNote: NoteProps
+    currNote: NotePropsMeta
   ): Promise<NotePropsMeta[]> => {
     if (!currNote.parent) {
       return [];
@@ -205,7 +204,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
   private async getSibling(
     workspace: DWorkspaceV2,
-    note: NoteProps,
+    note: NotePropsMeta,
     direction: Direction,
     ctx: string
   ): Promise<RespV3<{ sibling: NotePropsMeta }>> {

@@ -20,7 +20,7 @@ export * from "./user";
 export * from "./analytics";
 export * from "./types";
 export * from "./themes";
-export * from "./fuse";
+export * from "./FuseEngine";
 export * from "./util";
 export * from "./timing";
 export * from "./config";

@@ -1,7 +1,9 @@
 import {
+  ConfigUtils,
   NoteIndexProps,
   NoteLookupUtils,
   NoteProps,
+  SearchMode,
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
@@ -15,6 +17,7 @@ import DendronSpinner from "./DendronSpinner";
 import { useDendronLookup, useNoteActive, useNoteBodies } from "../utils/hooks";
 import FileTextOutlined from "@ant-design/icons/lib/icons/FileTextOutlined";
 import _ from "lodash";
+import { useEngineAppSelector } from "../features/engine/hooks";
 
 /** For notes where nothing in the note body matches, only show this many characters for the note body snippet. */
 const MAX_NOTE_SNIPPET_LENGTH = 30;
@@ -51,9 +54,9 @@ function DebouncedDendronSearchComponent(props: DendronCommonProps) {
         if (_.isUndefined(query)) {
           return;
         }
-
+        const searchQuery = query.startsWith("?") ? query.substring(1) : query;
         const fuseResults = fuse
-          .search(query.substring(1))
+          .search(searchQuery)
           .slice(0, MAX_SEARCH_RESULTS);
 
         setResults(fuseResults);
@@ -70,20 +73,21 @@ type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
   search: SearchFunction | undefined;
 };
 
-enum SearchMode {
-  LOOKUP_MODE = "lookupMode",
-  SEARCH_MODE = "searchMode",
-}
-
 function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   const { noteIndex, dendronRouter, search, error, loading, notes } = props;
 
+  const engine = useEngineAppSelector((state) => state.engine);
+  const defaultSearchMode = engine.config
+    ? ConfigUtils.getSearchMode(engine.config)
+    : SearchMode.SEARCH;
   const [searchResults, setSearchResults] =
     React.useState<SearchResults>(undefined);
   const [lookupResults, setLookupResults] = React.useState<NoteIndexProps[]>(
     []
   );
-  const [results, setResults] = React.useState<SearchMode>();
+  const [searchMode, setSearchMode] =
+    React.useState<SearchMode>(defaultSearchMode);
+
   const dispatch = useCombinedDispatch();
   const { noteBodies, requestNotes } = useNoteBodies();
   const lookup = useDendronLookup(props.notes);
@@ -103,21 +107,24 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
 
   useEffect(() => {
     if (searchQueryValue?.startsWith("?")) {
-      setResults(SearchMode.SEARCH_MODE);
+      setSearchMode(SearchMode.SEARCH);
+    } else if (searchQueryValue?.startsWith("/")) {
+      setSearchMode(SearchMode.LOOKUP);
     } else {
-      setResults(SearchMode.LOOKUP_MODE);
+      setSearchMode(defaultSearchMode);
     }
   }, [searchQueryValue]);
 
   const onLookup = useCallback(
-    (qs: string) => {
+    async (qs: string) => {
       if (_.isUndefined(qs) || !notes || !verifyNoteData({ notes })) {
         return;
       }
+      const lookupQuery = qs.startsWith("/") ? qs.substring(1) : qs;
       const out =
         qs === ""
-          ? NoteLookupUtils.fetchRootResults(notes)
-          : lookup?.queryNote({ qs, originalQS: qs });
+          ? await NoteLookupUtils.fetchRootResults(notes)
+          : lookup?.queryNote({ qs: lookupQuery, originalQS: lookupQuery });
 
       setLookupResults(_.isUndefined(out) ? [] : out);
     },
@@ -126,7 +133,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
 
   // This is needed to make sure the lookup results are updated when notes are fetched
   useEffect(() => {
-    if (results === SearchMode.LOOKUP_MODE) {
+    if (searchMode === SearchMode.LOOKUP) {
       onLookup(searchQueryValue);
     }
   }, [notes]); // intentionally not including searchQueryValue, so that it triggers only when notes are fetched
@@ -185,7 +192,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
         <DendronSpinner />
       </AutoComplete.Option>
     );
-  } else if (results === SearchMode.SEARCH_MODE) {
+  } else if (searchMode === SearchMode.SEARCH) {
     autocompleteChildren = searchResults?.map(({ item: note, matches }) => {
       return (
         <AutoComplete.Option key={note.id} value={note.fname}>
@@ -246,7 +253,10 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       );
     });
   }
-
+  const placeholder =
+    searchMode === SearchMode.SEARCH
+      ? "For lookup please use the '/' prefix. e.g. /root"
+      : "For full text search please use the '?' prefix. e.g. ? Onboarding";
   return (
     <AutoComplete
       size="large"
@@ -255,13 +265,13 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       value={searchQueryValue}
       getPopupContainer={(trigger) => trigger.parentElement}
       // @ts-ignore
-      onClick={results === SearchMode.SEARCH_MODE ? () => null : onClickLookup}
+      onClick={searchMode === SearchMode.SEARCH ? () => null : onClickLookup}
       onChange={
-        results === SearchMode.SEARCH_MODE ? onChangeSearch : onChangeLookup
+        searchMode === SearchMode.SEARCH ? onChangeSearch : onChangeLookup
       }
       // @ts-ignore
       onSelect={onSelect}
-      placeholder="For full text search please use the '?' prefix. e.g. ? Onboarding"
+      placeholder={placeholder}
     >
       {autocompleteChildren}
     </AutoComplete>

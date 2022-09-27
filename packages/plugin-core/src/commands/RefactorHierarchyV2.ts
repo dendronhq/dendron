@@ -15,10 +15,10 @@ import _ from "lodash";
 import _md from "markdown-it";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import path from "path";
-import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
+import { Disposable, ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
@@ -31,6 +31,8 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { LinkUtils } from "@dendronhq/unified";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 const md = _md();
 
@@ -94,16 +96,17 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       ],
     };
     const extension = ExtensionProvider.getExtension();
-    const controller = extension.lookupControllerFactory.create(lcOpts);
+    const lc = extension.lookupControllerFactory.create(lcOpts);
 
     const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
     });
     return new Promise((resolve) => {
+      let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
         id: this.key,
-        controller,
+        controller: lc,
         logger: this.L,
         onDone: (event: HistoryEvent) => {
           const data = event.data as NoteLookupProviderSuccessResp;
@@ -111,16 +114,34 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
             resolve(undefined);
           }
           resolve(data);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onHide: () => {
           resolve(undefined);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
-      controller.show({
+      lc.show({
         title: "Decide the scope of refactor",
         placeholder: "Query for scope.",
         provider,
         selectAll: true,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }
@@ -128,7 +149,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   async promptMatchText() {
     const editor = VSCodeUtils.getActiveTextEditor();
     const value = editor?.document
-      ? WSUtils.getNoteFromDocument(editor.document)?.fname
+      ? (await WSUtils.getNoteFromDocument(editor.document))?.fname
       : "";
     const match = await VSCodeUtils.showInputBox({
       title: "Enter match text",

@@ -8,7 +8,7 @@ import {
   JournalConfig,
 } from "../../types/configs/workspace/journal";
 import { TaskConfig } from "../../types/configs/workspace/task";
-import { DendronWorkspaceConfig } from "../../types/configs/workspace/workspace";
+import { DendronWorkspaceConfig } from "../../types/configs/workspace/DendronWorkspaceConfig";
 import { DendronGraphConfig } from "../../types/configs/workspace/graph";
 import { ScratchConfig } from "../../types/configs/workspace/scratch";
 import { VAULT_SYNC_MODES } from "./base";

@@ -3,7 +3,6 @@ import {
   DEngineClient,
   ERROR_SEVERITY,
   NoteProps,
-  NoteUtils,
   RespV3,
   URI,
   VaultUtils,
@@ -163,7 +162,7 @@ export async function enrichPodArgs(
       payload = await getPropsForVaultScope({ engine, vaultName: args.vault });
       break;
     case PodExportScope.Note:
-      payload = getPropsForNoteScope({
+      payload = await getPropsForNoteScope({
         engine,
         vaultName: args.vault,
         fname: args.fname,
@@ -214,11 +213,11 @@ const getPropsForVaultScope = async (opts: {
   return engine.findNotes({ excludeStub: true, vault });
 };
 
-const getPropsForNoteScope = (opts: {
+const getPropsForNoteScope = async (opts: {
   engine: DEngineClient;
   vaultName?: string;
   fname?: string;
-}): NoteProps[] => {
+}): Promise<NoteProps[]> => {
   const { engine, fname, vaultName } = opts;
   const vault = checkVaultArgs({ engine, vaultName });
 
@@ -227,7 +226,7 @@ const getPropsForNoteScope = (opts: {
       message: "Please provide fname of note in --fname arg",
     });
   }
-  const note = NoteUtils.getNoteByFnameFromEngine({ fname, vault, engine });
+  const note = (await engine.findNotes({ fname, vault }))[0];
   if (!note)
     throw new DendronError({
       message: `Cannot find note with fname ${fname} in vault ${vault}`,

@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
+import { NotePropsMeta, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorActionsEnum } from "@dendronhq/engine-server";
@@ -108,7 +108,7 @@ suite("DoctorCommandTest", function () {
     }
   );
 
-  let note: NoteProps;
+  let note: NotePropsMeta;
   describeMultiWS(
     "GIVEN bad note id",
     {
@@ -137,7 +137,9 @@ suite("DoctorCommandTest", function () {
           })
         );
         await cmd.run();
-        note = (await engine.findNotes({ fname: "test", vault: vaults[0] }))[0];
+        note = (
+          await engine.findNotesMeta({ fname: "test", vault: vaults[0] })
+        )[0];
         expect(note.id === "-bad-id").toBeFalsy();
       });
     }
@@ -484,7 +486,7 @@ suite("REGENERATE_NOTE_ID", function () {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const oldNote = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname: "foo",
             vault,
           })
@@ -508,7 +510,7 @@ suite("REGENERATE_NOTE_ID", function () {
               Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
             );
           await cmd.run();
-          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
+          const note = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
           expect(note?.id).toNotEqual(oldId);
         } finally {
           gatherInputsStub.restore();
@@ -528,19 +530,19 @@ suite("REGENERATE_NOTE_ID", function () {
         const { vaults, engine } = ExtensionProvider.getDWorkspace();
         const vault = vaults[0];
         const oldRootId = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname: "root",
             vault,
           })
         )[0].id;
         const oldFooId = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname: "foo",
             vault,
           })
         )[0].id;
         const oldBarId = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname: "bar",
             vault,
           })
@@ -563,9 +565,11 @@ suite("REGENERATE_NOTE_ID", function () {
               Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
             );
           await cmd.run();
-          const root = (await engine.findNotes({ fname: "root", vault }))[0];
-          const foo = (await engine.findNotes({ fname: "foo", vault }))[0];
-          const bar = (await engine.findNotes({ fname: "bar", vault }))[0];
+          const root = (
+            await engine.findNotesMeta({ fname: "root", vault })
+          )[0];
+          const foo = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
+          const bar = (await engine.findNotesMeta({ fname: "bar", vault }))[0];
           // Root should not change
           expect(root?.id).toEqual(oldRootId);
           expect(foo?.id).toNotEqual(oldFooId);
@@ -612,7 +616,7 @@ suite("REGENERATE_NOTE_ID", function () {
               Promise.resolve("proceed") as Thenable<vscode.QuickPickItem>
             );
           await cmd.run();
-          const note = (await engine.findNotes({ fname: "foo", vault }))[0];
+          const note = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
           expect(note?.id).toNotEqual(oldId);
         } finally {
           gatherInputsStub.restore();
@@ -710,7 +714,6 @@ suite("FIX_AIRTABLE_METADATA", function () {
       test("THEN remove airtableId from note FM and update it with pods namespace", async () => {
         const ext = ExtensionProvider.getExtension();
         const engine = ext.getEngine();
-        const { vaults } = engine;
         const cmd = new DoctorCommand(ext);
         const gatherInputsStub = sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
@@ -731,11 +734,7 @@ suite("FIX_AIRTABLE_METADATA", function () {
             );
           podIdQuickPickStub.onCall(0).returns(Promise.resolve("dendron.task"));
           await cmd.run();
-          const note = NoteUtils.getNoteByFnameFromEngine({
-            fname: "foo.bar",
-            engine,
-            vault: vaults[0],
-          });
+          const note = (await engine.getNoteMeta("foo.bar")).data!;
           expect(note?.custom.airtableId).toBeFalsy();
           expect(note?.custom.pods.airtable["dendron.task"]).toEqual(
             "airtableId-one"

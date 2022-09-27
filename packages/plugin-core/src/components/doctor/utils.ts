@@ -130,7 +130,7 @@ export class DoctorUtils {
     const extension = ExtensionProvider.getExtension();
     const wsUtils = extension.wsUtils;
     const filename = path.basename(document.fileName, ".md");
-    const note = wsUtils.getNoteFromDocument(document);
+    const note = await wsUtils.getNoteFromDocument(document);
 
     if (!note) return true;
 

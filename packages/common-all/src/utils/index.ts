@@ -16,21 +16,14 @@ import {
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
 import { DendronError, ErrorMessages } from "../error";
-import {
-  DendronSiteConfig,
-  DHookDict,
-  DVault,
-  LegacyDuplicateNoteBehavior,
-  LegacyHierarchyConfig,
-  NoteChangeEntry,
-  NoteProps,
-} from "../types";
+import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
   genDefaultPublishingConfig,
   HierarchyConfig,
+  SearchMode,
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import {
@@ -52,6 +45,12 @@ import {
   StrictConfigV5,
 } from "../types/intermediateConfigs";
 import { isWebUri } from "../util/regex";
+import {
+  DendronSiteConfig,
+  LegacyDuplicateNoteBehavior,
+  LegacyHierarchyConfig,
+} from "../types/configs/dendronConfigLegacy";
+import { DVault } from "../types/DVault";
 
 export * from "./lookup";
 export * from "./publishUtils";
@@ -962,6 +961,14 @@ export class ConfigUtils {
     return config.version;
   }
 
+  static getSearchMode(config: IntermediateDendronConfig): SearchMode {
+    const isConfigV4 = configIsV4(config);
+    const defaultMode = ConfigUtils.getPublishing(config).searchMode;
+    if (!isConfigV4 && defaultMode) {
+      return defaultMode;
+    }
+    return SearchMode.SEARCH;
+  }
   // set
   static setProp<K extends keyof StrictConfigV4>(
     config: IntermediateDendronConfig,

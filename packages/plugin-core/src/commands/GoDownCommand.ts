@@ -2,8 +2,10 @@ import path from "path";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
-import { CommandOutput as NoteLookupCommandOut } from "./NoteLookupCommand";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
+import {
+  CommandOutput as NoteLookupCommandOut,
+  NoteLookupCommand,
+} from "./NoteLookupCommand";
 
 type CommandOpts = {
   noConfirm?: boolean;
@@ -28,7 +30,7 @@ export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     }
 
-    const out = await AutoCompletableRegistrar.getNoteLookupCmd().run({
+    const out = await new NoteLookupCommand().run({
       initialValue: value,
       noConfirm: opts.noConfirm,
     });

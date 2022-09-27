@@ -47,7 +47,7 @@ describe("GIVEN basic workspace", () => {
     await runEngineTestV5(
       async ({ vaults, engine }) => {
         const rootNote = (
-          await engine.findNotes({
+          await engine.findNotesMeta({
             fname: "root",
             vault: vaults[0],
           })

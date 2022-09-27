@@ -1,4 +1,4 @@
-import { DEngineClient, NoteUtils } from "@dendronhq/common-all";
+import { asyncLoopOneAtATime, DEngineClient } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
@@ -40,33 +40,32 @@ async function getLastCommit(wsRoot: string) {
   return stdout.slice(1, -1);
 }
 
-function canShowDiff(opts: {
+async function canShowDiff(opts: {
   engine: DEngineClient;
   filePath: string;
-}): boolean {
+}): Promise<boolean> {
   const { engine, filePath } = opts;
   const { vaults, wsRoot } = engine;
   const config = DConfig.readConfigSync(wsRoot);
-  return vaults.some((vault) => {
-    if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
-      const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
-      const note = NoteUtils.getNoteByFnameFromEngine({
-        fname,
-        engine,
-        vault,
-      });
-      if (!note) {
+  const canPublishChecks = await Promise.all(
+    vaults.map(async (vault) => {
+      if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
+        const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
+        const note = (await engine.findNotesMeta({ fname, vault }))[0];
+        if (!note) {
+          return false;
+        }
+        return SiteUtils.canPublish({
+          note,
+          config,
+          engine,
+        });
+      } else {
         return false;
       }
-      return SiteUtils.canPublish({
-        note,
-        config,
-        engine,
-      });
-    } else {
-      return false;
-    }
-  });
+    })
+  );
+  return canPublishChecks.includes(true);
 }
 
 /**
@@ -109,79 +108,67 @@ async function getChanges(opts: { commitHash: string; engine: DEngineClient }) {
   const { engine, commitHash } = opts;
   const { wsRoot } = engine;
   let commitDate: string = "";
-  let changes: any[] = [];
-  let filesChanged: string[] = [];
+  const changes: any[] = [];
+  const filesChanged: string[] = [];
 
   // get files changed/added
-  try {
-    const { stdout } = await execa(
-      "git",
-      ["show", "--name-status", commitHash],
-      {
-        cwd: wsRoot,
-        shell: true,
+  const { stdout } = await execa("git", ["show", "--name-status", commitHash], {
+    cwd: wsRoot,
+    shell: true,
+  });
+  const status = stdout.split("\n");
+  await asyncLoopOneAtATime(status, async (result) => {
+    if (result.startsWith("M")) {
+      const filePath = result.split(" ")[0].substring(2);
+      if (await canShowDiff({ filePath, engine })) {
+        filesChanged.push(filePath);
+        changes.push({
+          action: "Modified",
+          fname: filePath,
+        });
       }
-    );
-    let status = stdout.split("\n");
-    status.map((result) => {
-      if (result.startsWith("M")) {
-        let filePath = result.split(" ")[0].substring(2);
-        if (canShowDiff({ filePath, engine })) {
-          filesChanged.push(filePath);
-          changes.push({
-            action: "Modified",
-            fname: filePath,
-          });
-        }
-      } else if (result.startsWith("A")) {
-        let filePath = result.split(" ")[0].substring(2);
-        if (canShowDiff({ filePath, engine })) {
-          filesChanged.push(filePath);
-          changes.push({
-            action: "Added",
-            fname: filePath,
-          });
-        }
+    } else if (result.startsWith("A")) {
+      const filePath = result.split(" ")[0].substring(2);
+      if (await canShowDiff({ filePath, engine })) {
+        filesChanged.push(filePath);
+        changes.push({
+          action: "Added",
+          fname: filePath,
+        });
       }
-    });
-  } catch (error) {
-    throw error;
-  }
+    }
+  });
 
   await Promise.all(
     changes.map(async (change) => {
-      try {
-        const { stdout } = await execa(
-          "git",
-          ["show", commitHash, "--", change.fname],
-          { cwd: wsRoot, shell: true }
-        );
-        change.diff = Diff2Html.html(stdout);
-        return Diff2Html.html(stdout);
-      } catch (error) {
-        throw error;
-      }
+      const { stdout } = await execa(
+        "git",
+        ["show", commitHash, "--", change.fname],
+        { cwd: wsRoot, shell: true }
+      );
+      change.diff = Diff2Html.html(stdout);
+      return Diff2Html.html(stdout);
     })
   );
 
   // get date of last commit
-  try {
-    const { stdout } = await execa("git", ["log", commitHash, "--format=%cd"], {
+  const { stdout: stdOut2 } = await execa(
+    "git",
+    ["log", commitHash, "--format=%cd"],
+    {
       cwd: wsRoot,
       shell: true,
-    });
-    let date = stdout.split(/\s+/).slice(1, 5);
-    let day = date[0];
-    let month = date[1];
-    let year = date[3];
-    commitDate = `${day} ${month} ${year}`;
-  } catch (error) {
-    throw error;
-  }
+    }
+  );
+  const date = stdOut2.split(/\s+/).slice(1, 5);
+  const day = date[0];
+  const month = date[1];
+  const year = date[3];
+  commitDate = `${day} ${month} ${year}`;
 
   return {
-    commitDate: commitDate,
-    commitHash: commitHash,
-    changes: changes,
+    commitDate,
+    commitHash,
+    changes,
   };
 }

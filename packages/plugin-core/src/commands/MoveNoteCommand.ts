@@ -14,7 +14,7 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
-import { ProgressLocation, Uri, ViewColumn, window } from "vscode";
+import { Disposable, ProgressLocation, Uri, ViewColumn, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import { LookupControllerV3CreateOpts } from "../components/lookup/LookupControllerV3Interface";
 import {
@@ -22,7 +22,7 @@ import {
   ProviderAcceptHooks,
 } from "../components/lookup/utils";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -32,6 +32,8 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { IDendronExtension } from "../dendronExtensionInterface";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
+import { AutoCompleter } from "../utils/autoCompleter";
 
 type CommandInput = any;
 
@@ -138,6 +140,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     );
 
     return new Promise((resolve) => {
+      let disposable: Disposable;
+
       NoteLookupProviderUtils.subscribe({
         id: "move",
         controller: lc,
@@ -154,11 +158,16 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             moves: this.getDesiredMoves(data),
           };
           resolve(opts);
+
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onError: (event: HistoryEvent) => {
           const error = event.data.error as DendronError;
           window.showErrorMessage(error.message);
           resolve(undefined);
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       lc.show({
@@ -167,6 +176,20 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         provider,
         initialValue: opts?.initialValue || initialValue,
         nonInteractive: opts?.nonInteractive,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

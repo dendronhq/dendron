@@ -9,11 +9,14 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { BasicCommand } from "./base";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { NoteLookupProviderSuccessResp } from "../components/lookup/LookupProviderV3Interface";
+import { Disposable } from "vscode";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 type CommandInput = {
   multiSelect?: boolean;
@@ -54,6 +57,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     });
 
     return new Promise((resolve) => {
+      let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
         id: this.key,
         controller: lc,
@@ -61,12 +65,27 @@ export class InsertNoteLinkCommand extends BasicCommand<
         onDone: (event: HistoryEvent) => {
           const data = event.data as NoteLookupProviderSuccessResp;
           resolve({ notes: data.selectedItems, ...copts });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       lc.show({
         title: "Select note to link to",
         placeholder: "note",
         provider,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
       });
     });
   }

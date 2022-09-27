@@ -159,8 +159,7 @@ export class EngineNoteProvider
 
         return;
       } else {
-        // TODO: Change to findNotesMeta
-        this.engine.findNotes({ fname: "root" }).then((values) => {
+        this.engine.findNotesMeta({ fname: "root" }).then((values) => {
           const all = Promise.all(
             values.map(async (noteProps) => {
               this._tree[noteProps.id] = await this.createTreeNoteFromProps(
@@ -237,7 +236,7 @@ export class EngineNoteProvider
   }
 
   private async createTreeNote(noteId: string) {
-    const note = await this.engine.getNote(noteId);
+    const note = await this.engine.getNoteMeta(noteId);
 
     if (!note || !note.data) {
       throw new Error(`Unable to find note ${note} for tree view!`);

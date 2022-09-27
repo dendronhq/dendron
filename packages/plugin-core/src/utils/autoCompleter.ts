@@ -3,8 +3,8 @@
  * */
 import { FuseEngine } from "@dendronhq/common-all";
 import * as _ from "lodash";
-import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { CREATE_NEW_DETAIL_LIST } from "../components/lookup/constants";
+import { QuickPick, QuickPickItem } from "vscode";
 
 export class AutoCompleter {
   /**
@@ -133,7 +133,9 @@ export class AutoCompleter {
     }
   }
 
-  static getAutoCompletedValue(_quickPick: DendronQuickPickerV2): string {
+  static getAutoCompletedValue(
+    _quickPick: QuickPick<QuickPickItem & { fname: string }>
+  ): string {
     // Keep only distinct items since that allows us to move past multiple
     // same names in a row to allow digging deeper into note hierarchy.
     // Example:

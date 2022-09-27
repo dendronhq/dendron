@@ -6,6 +6,7 @@ import {
   IDendronError,
   isNotUndefined,
   NoteProps,
+  NotePropsMeta,
   position2VSCodeRange,
   ReducedDEngine,
   VaultUtils,
@@ -144,13 +145,13 @@ export async function linkedNoteType({
       errors: [],
     };
 
-  let matchingNotes: NoteProps[];
+  let matchingNotes: NotePropsMeta[];
   // Same-file links have `fname` undefined or empty string
   if (!fname && note) {
     matchingNotes = note ? [note] : [];
   } else if (fname) {
     try {
-      matchingNotes = await engine.findNotes({ fname, vault });
+      matchingNotes = await engine.findNotesMeta({ fname, vault });
     } catch (err) {
       return {
         type: DECORATION_TYPES.brokenWikilink,

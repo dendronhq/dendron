@@ -4,7 +4,6 @@ import * as querystring from "qs";
 import {
   BulkWriteNotesOpts,
   DNodeProps,
-  DVault,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineWriteOptsV2,
@@ -20,7 +19,6 @@ import {
   DeleteSchemaResp,
   DEngineInitResp,
   EngineSchemaWriteOpts,
-  FindNoteOpts,
   FindNotesResp,
   GetDecorationsResp,
   GetNoteBlocksResp,
@@ -35,6 +33,8 @@ import {
   VSRange,
   WriteSchemaResp,
 } from "./types";
+import { DVault } from "./types/DVault";
+import { FindNoteOpts } from "./types/FindNoteOpts";
 
 // === Types
 

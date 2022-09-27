@@ -4,8 +4,8 @@ import { InputArgCommand } from "./base";
 import {
   CommandOutput as NoteLookupOutput,
   CommandRunOpts as NoteLookupRunOpts,
+  NoteLookupCommand,
 } from "./NoteLookupCommand";
-import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 import _ from "lodash";
 import { window } from "vscode";
 import { AnalyticsUtils } from "../utils/analytics";
@@ -33,7 +33,7 @@ export class CreateNoteCommand extends InputArgCommand<
      */
     const engine = ExtensionProvider.getEngine();
     if (_.isString(opts)) {
-      const resp = await engine.getNote(opts);
+      const resp = await engine.getNoteMeta(opts);
       args.initialValue = resp.data?.fname || "";
       AnalyticsUtils.track(this.key, { source: "TreeView" });
     }
@@ -41,7 +41,7 @@ export class CreateNoteCommand extends InputArgCommand<
       "💡 Tip: Enter `Ctrl+L` / `Cmd+L` to open the lookup bar!"
     );
     return {
-      lookup: AutoCompletableRegistrar.getNoteLookupCmd().run(args),
+      lookup: new NoteLookupCommand().run(args),
     };
   }
 }

@@ -26,6 +26,12 @@ export type DendronDevConfig = {
    * Enable new preview as default
    */
   enablePreviewV2?: boolean;
+  /** Force the use of a specific type of watcher.
+   *
+   * - plugin: Uses VSCode's builtin watcher
+   * - engine: Uses the engine watcher, watching the files directly without VSCode
+   */
+  forceWatcherType?: "plugin" | "engine";
   /**
    * Enable export pod v2
    */

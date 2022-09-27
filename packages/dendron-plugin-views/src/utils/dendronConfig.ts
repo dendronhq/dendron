@@ -1,3 +1,5 @@
+import { SearchMode } from "@dendronhq/common-all";
+
 export type Config = {
   type: string;
   group: string;
@@ -370,6 +372,11 @@ export const dendronConfig: { [key: string]: Config } = {
   },
   "publishing.hierarchy": {
     type: "object",
+    group: "publishing",
+  },
+  "publishing.searchMode": {
+    type: "select",
+    enum: [SearchMode.LOOKUP, SearchMode.SEARCH],
     group: "publishing",
   },
   "publishing.sidebarPath": {

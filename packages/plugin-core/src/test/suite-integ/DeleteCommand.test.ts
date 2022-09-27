@@ -21,21 +21,23 @@ suite("Delete Command", function () {
         const engine = ExtensionProvider.getEngine();
         const deleteCmd = new DeleteCommand();
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
-        const note = (await engine.findNotes({ fname: "bar" }))[0];
+        const note = (await engine.findNotesMeta({ fname: "bar" }))[0];
         await WSUtilsV2.instance().openNote(note);
         const resp = await deleteCmd.execute();
         expect(resp?.error).toEqual(undefined);
-        const noteAfterDelete = await engine.findNotes({ fname: "bar" });
+        const noteAfterDelete = await engine.findNotesMeta({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });
       test("WHEN noConfirm: true is sent via keyvinding args THEN delete the note", async () => {
         const engine = ExtensionProvider.getEngine();
         const deleteCmd = new DeleteCommand();
-        const note = (await engine.findNotes({ fname: "foo.ch1" }))[0];
+        const note = (await engine.findNotesMeta({ fname: "foo.ch1" }))[0];
         await WSUtilsV2.instance().openNote(note);
         const resp = await deleteCmd.execute({ noConfirm: true });
         expect(resp?.error).toEqual(undefined);
-        const noteAfterDelete = await engine.findNotes({ fname: "foo.ch1" });
+        const noteAfterDelete = await engine.findNotesMeta({
+          fname: "foo.ch1",
+        });
         expect(noteAfterDelete).toEqual([]);
       });
     }
@@ -58,10 +60,10 @@ suite("Delete Command", function () {
         );
         const deleteCmd = new DeleteCommand();
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
-        await engine.findNotes({ fname: "bar" });
+        await engine.findNotesMeta({ fname: "bar" });
         const resp = await deleteCmd.execute(barUri);
         expect(resp?.error).toEqual(undefined);
-        const noteAfterDelete = await engine.findNotes({ fname: "bar" });
+        const noteAfterDelete = await engine.findNotesMeta({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });
     }
@@ -77,10 +79,10 @@ suite("Delete Command", function () {
         const engine = ExtensionProvider.getEngine();
         const deleteCmd = new DeleteCommand();
         sinon.stub(deleteCmd, "promptConfirmation").resolves(true);
-        const note = (await engine.findNotes({ fname: "bar" }))[0];
+        const note = (await engine.findNotesMeta({ fname: "bar" }))[0];
         const resp = await deleteCmd.execute(note.id);
         expect(resp?.error).toEqual(undefined);
-        const noteAfterDelete = await engine.findNotes({ fname: "bar" });
+        const noteAfterDelete = await engine.findNotesMeta({ fname: "bar" });
         expect(noteAfterDelete).toEqual([]);
       });
     }

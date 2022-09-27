@@ -17,7 +17,7 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
 import { NoteLookupProviderUtils } from "../components/lookup/NoteLookupProviderUtils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DendronContext, DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { BasicCommand, SanityCheckResults } from "./base";
 import * as vscode from "vscode";
@@ -25,6 +25,8 @@ import _ from "lodash";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { LinkUtils } from "@dendronhq/unified";
+import { AutoCompleter } from "../utils/autoCompleter";
+import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegistrar";
 
 type CommandInput = {
   source?: string;
@@ -89,7 +91,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async sanityCheck(): Promise<SanityCheckResults> {
-    const note = this.extension.wsUtils.getActiveNote();
+    const note = await this.extension.wsUtils.getActiveNote();
     if (!note) {
       return "You need to have a note open to merge.";
     }
@@ -97,15 +99,16 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts: CommandOpts): Promise<CommandOpts | undefined> {
-    const controller = this.createLookupController();
-    const activeNote = this.extension.wsUtils.getActiveNote();
+    const lc = this.createLookupController();
+    const activeNote = await this.extension.wsUtils.getActiveNote();
     const provider = this.createLookupProvider({
       activeNote,
     });
     return new Promise((resolve) => {
+      let disposable: vscode.Disposable;
       NoteLookupProviderUtils.subscribe({
         id: this.key,
-        controller,
+        controller: lc,
         logger: this.L,
         onDone: async (event: HistoryEvent) => {
           const data: NoteLookupProviderSuccessResp = event.data;
@@ -117,6 +120,8 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             sourceNote: activeNote,
             destNote: data.selectedItems[0],
           });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       const showOpts: CreateQuickPickOpts & {
@@ -134,7 +139,21 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (opts?.noConfirm) {
         showOpts.nonInteractive = opts.noConfirm;
       }
-      controller.show(showOpts);
+      lc.show(showOpts);
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (lc.quickPick) {
+          lc.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            lc.quickPick
+          );
+
+          lc.provider.onUpdatePickerItems({
+            picker: lc.quickPick,
+          });
+        }
+      });
     });
   }
 

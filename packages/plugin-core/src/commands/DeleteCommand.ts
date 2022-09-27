@@ -2,10 +2,10 @@ import {
   DeleteNoteResp,
   DendronError,
   DLink,
+  DNodeUtils,
   DVault,
   ERROR_SEVERITY,
-  NoteProps,
-  NoteUtils,
+  NotePropsMeta,
   Position,
   SchemaUtils,
   VaultUtils,
@@ -50,18 +50,21 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     wsRoot: string;
   }) {
     const { link, vaults, wsRoot } = opts;
+    if (!link.from.fname || !link.from.vaultName) {
+      throw new DendronError({
+        message: `Link from location does not contain fname or vaultName: ${link.from}`,
+        severity: ERROR_SEVERITY.MINOR,
+      });
+    }
     const vault = VaultUtils.getVaultByName({
       vaults,
-      vname: link.from.vaultName as string,
+      vname: link.from.vaultName,
     }) as DVault;
-    const noteWithLink = NoteUtils.getNoteByFnameFromEngine({
-      fname: link.from.fname as string,
-      vault,
-      engine: ExtensionProvider.getEngine(),
-    }) as NoteProps;
-    const fsPath = NoteUtils.getFullPath({
-      note: noteWithLink,
+
+    const fsPath = DNodeUtils.getFullPath({
       wsRoot,
+      vault,
+      basename: link.from.fname + ".md",
     });
     const fileContent = fs.readFileSync(fsPath).toString();
     const nodePosition = RemarkUtils.getNodePositionPastFrontmatter(
@@ -78,7 +81,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
   }
 
   private async deleteNote(params: {
-    note: NoteProps;
+    note: NotePropsMeta;
     opts: CommandOpts;
     engine: IEngineAPIService;
     ctx: string;
@@ -117,7 +120,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     return out;
   }
 
-  async showNoteDeletePreview(note: NoteProps, backlinks: DLink[]) {
+  async showNoteDeletePreview(note: NotePropsMeta, backlinks: DLink[]) {
     let content = [
       "# Delete Node Preview",
       "```",
@@ -184,7 +187,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
     const ctx = "DeleteNoteCommand";
     if (_.isString(opts)) {
       AnalyticsUtils.track(this.key, { source: "TreeView" });
-      const response = await engine.getNote(opts);
+      const response = await engine.getNoteMeta(opts);
       if (response.error) {
         throw new DendronError({
           message: `Cannot find note with id: ${opts}`,
@@ -209,7 +212,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
       const fname = path.basename(fsPath, trimEnd);
       if (mode === "note") {
         const vault = PickerUtilsV2.getVaultForOpenEditor(fsPath);
-        const note = (await engine.findNotes({ fname, vault }))[0];
+        const note = (await engine.findNotesMeta({ fname, vault }))[0];
         const out = await this.deleteNote({ note, opts, engine, ctx });
         return out;
       } else {

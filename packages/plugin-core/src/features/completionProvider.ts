@@ -245,7 +245,7 @@ export const provideCompletionItems = sentryReportingCallback(
     const { wsRoot } = engine;
     let completionItems: CompletionItem[];
     const completionsIncomplete = true;
-    const currentVault = WSUtils.getNoteFromDocument(document)?.vault;
+    const currentVault = WSUtils.getVaultFromDocument(document);
 
     if (found?.groups?.hashTag) {
       completionItems = await provideCompletionsForTag({
@@ -370,11 +370,7 @@ export const resolveCompletionItem = sentryReportingCallback(
       return;
     }
 
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    });
+    const note = (await engine.findNotesMeta({ fname, vault }))[0];
 
     if (_.isUndefined(note)) {
       Logger.info({ ctx, msg: "note not found", fname, vault, wsRoot });
@@ -501,7 +497,7 @@ export async function provideBlockCompletionItems(
     otherFile = true;
   } else {
     // This anchor is to the same file, e.g. [[#
-    note = WSUtils.getNoteFromDocument(document);
+    note = await WSUtils.getNoteFromDocument(document);
   }
 
   if (_.isUndefined(note) || token?.isCancellationRequested) return;

@@ -13,10 +13,10 @@ export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
 
 export function getAssetUrl(url: string) {
   const out =
-    process.env.NODE_ENV === "production" &&
-    env.NEXT_PUBLIC_ASSET_PREFIX
+    process.env.NODE_ENV !== "development" && env.NEXT_PUBLIC_ASSET_PREFIX
       ? env.NEXT_PUBLIC_ASSET_PREFIX + url
       : url;
+  console.log("DEBUGPRINT[2]: links.ts:18 (after : url;)", out);
   return out;
 }
 
@@ -30,7 +30,7 @@ export function getRootUrl(
 ) {
   const url = siteConfig.siteUrl!;
   const out =
-    process.env.NODE_ENV === "production" &&
+    process.env.NODE_ENV !== "development" &&
     process.env.NEXT_PUBLIC_ASSET_PREFIX
       ? url + process.env.NEXT_PUBLIC_ASSET_PREFIX
       : url;

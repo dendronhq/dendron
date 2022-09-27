@@ -661,7 +661,7 @@ suite("NoteLookupCommand", function () {
             selectedItems: mockQuickPick.selectedItems,
           });
           const document = VSCodeUtils.getActiveTextEditorOrThrow().document;
-          const newNote = extension.wsUtils.getNoteFromDocument(document);
+          const newNote = await extension.wsUtils.getNoteFromDocument(document);
           expect(newNote?.fname).toEqual("foobarbaz");
           expect(newNote?.body).toEqual(fooNote?.body);
           cmd.cleanUp();
@@ -698,7 +698,7 @@ suite("NoteLookupCommand", function () {
             id: "Create New with Template",
             fname: "learn.mdone.test",
           });
-          const note = ExtensionProvider.getWSUtils().getNoteFromDocument(
+          const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
             VSCodeUtils.getActiveTextEditorOrThrow().document
           );
           expect(note?.fname).toEqual("learn.mdone.test");

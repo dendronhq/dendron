@@ -13,6 +13,7 @@ import { AnalyticsUtils } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";
+import * as vscode from "vscode";
 
 type CommandInput = any;
 
@@ -22,7 +23,7 @@ type CommandOpts = {
 };
 
 type CommandOutput = {
-  updatedTargetNote: NoteProps;
+  updatedTargetNote?: NoteProps;
 };
 
 const APPLY_TEMPLATE_LOOKUP_ID = "templateApply;";
@@ -67,6 +68,10 @@ export class ApplyTemplateCommand extends BasicCommand<
     Logger.info({ ctx });
     const { templateNote, targetNote } = opts;
     const engine = ExtensionProvider.getEngine();
+    if (templateNote === undefined) {
+      vscode.window.showInformationMessage("No template selected");
+      return { updatedTargetNote: undefined };
+    }
     const updatedTargetNote = TemplateUtils.applyTemplate({
       templateNote,
       engine,

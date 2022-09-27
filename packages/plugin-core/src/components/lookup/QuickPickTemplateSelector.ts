@@ -9,6 +9,11 @@ import { NoteLookupProviderUtils } from "./NoteLookupProviderUtils";
 import { HistoryEvent } from "@dendronhq/engine-server";
 import { Logger } from "../../logger";
 import * as vscode from "vscode";
+import { Disposable } from "vscode";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import { DendronContext } from "../../constants";
+import { AutoCompletableRegistrar } from "../../utils/registers/AutoCompletableRegistrar";
+import { AutoCompleter } from "../../utils/autoCompleter";
 
 export class QuickPickTemplateSelector {
   getTemplate(opts: {
@@ -24,12 +29,14 @@ export class QuickPickTemplateSelector {
     });
     const provider = extension.noteLookupProviderFactory.create(id, {
       allowNewNote: false,
+      forceAsIsPickerValueUsage: true,
     });
     const config = extension.getDWorkspace().config;
 
     const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
 
+    let disposable: Disposable;
     return new Promise((resolve) => {
       NoteLookupProviderUtils.subscribe({
         id,
@@ -54,6 +61,8 @@ export class QuickPickTemplateSelector {
             id,
             controller,
           });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
         onError: (event: HistoryEvent) => {
           const error = event.data.error as DendronError;
@@ -63,6 +72,8 @@ export class QuickPickTemplateSelector {
             id,
             controller,
           });
+          disposable?.dispose();
+          VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
         },
       });
       controller.show({
@@ -70,6 +81,20 @@ export class QuickPickTemplateSelector {
         placeholder: "template",
         provider,
         initialValue,
+      });
+
+      VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, true);
+
+      disposable = AutoCompletableRegistrar.OnAutoComplete(() => {
+        if (controller.quickPick) {
+          controller.quickPick.value = AutoCompleter.getAutoCompletedValue(
+            controller.quickPick
+          );
+
+          controller.provider.onUpdatePickerItems({
+            picker: controller.quickPick,
+          });
+        }
       });
     });
   }

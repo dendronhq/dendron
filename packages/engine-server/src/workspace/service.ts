@@ -289,12 +289,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       updateConfig: true,
       updateWorkspace: false,
     });
+    let { config } = opts;
 
     // if we are updating the config, we should make sure
     // we don't include the local overrides
-    const config = updateConfig
-      ? DConfig.readConfigSync(this.wsRoot)
-      : this.config;
+    if (config === undefined) {
+      config = this.config;
+      if (updateConfig) {
+        config = DConfig.readConfigSync(this.wsRoot);
+      }
+    }
 
     // Normalize the vault path to unix style (forward slashes) which is better for cross-compatibility
     vault.fsPath = normalizeUnixPath(vault.fsPath);

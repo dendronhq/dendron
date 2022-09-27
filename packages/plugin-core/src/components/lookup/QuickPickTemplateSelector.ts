@@ -10,20 +10,7 @@ import { HistoryEvent } from "@dendronhq/engine-server";
 import { Logger } from "../../logger";
 import * as vscode from "vscode";
 
-export interface TemplateSelector {
-  /**
-   * A method for selecting a template.
-   * `undefined` when no template is selected.
-   *
-   * can take in optional logger and provider id based on
-   */
-  getTemplate(opts: {
-    logger?: DLogger;
-    providerId?: string;
-  }): Promise<NoteProps | undefined>;
-}
-
-export class QuickPickTemplateSelector implements TemplateSelector {
+export class QuickPickTemplateSelector {
   getTemplate(opts: {
     logger?: DLogger;
     providerId?: string;

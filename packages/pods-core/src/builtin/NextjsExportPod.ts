@@ -593,57 +593,54 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       })
     );
 
-    const noteRefs = MDUtilsV5.getRefCache();
-    const refIds: string[] = await Promise.all(
-      Object.keys(noteRefs).map(async (ent: string) => {
-        const { refId, prettyHAST } = noteRefs![ent];
-        const noteId = refId.id;
-        const noteForRef = _.get(engine.notes, noteId);
+    let refIds: string[] = [];
+    if (config.dev?.enableExperimentalIFrameNoteRef) {
+      const noteRefs = MDUtilsV5.getRefCache();
+      refIds = await Promise.all(
+        Object.keys(noteRefs).map(async (ent: string) => {
+          const { refId, prettyHAST } = noteRefs![ent];
+          const noteId = refId.id;
+          const noteForRef = _.get(engine.notes, noteId);
 
-        // shouldn't happen
-        if (!noteForRef) {
-          throw Error(`no note found for ${JSON.stringify(refId)}`);
-        }
+          // shouldn't happen
+          if (!noteForRef) {
+            throw Error(`no note found for ${JSON.stringify(refId)}`);
+          }
 
-        const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
-          engine.notes
-        );
+          const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
+            engine.notes
+          );
 
-        const noteCacheForRenderDict = {
-          notesById: engine.notes,
-          notesByFname,
-        };
+          const noteCacheForRenderDict = {
+            notesById: engine.notes,
+            notesByFname,
+          };
 
-        const proc = MDUtilsV5.procRehypeFull(
-          {
-            // engine,
-            noteCacheForRenderDict,
-            noteToRender: noteForRef,
-            fname: noteForRef.fname,
-            vault: noteForRef.vault,
-            vaults: engine.vaults,
-            wsRoot: engine.wsRoot,
-            config,
-            insideNoteRef: true,
-          },
-          { flavor: ProcFlavor.PUBLISHING }
-        );
+          const proc = MDUtilsV5.procRehypeFull(
+            {
+              // engine,
+              noteCacheForRenderDict,
+              noteToRender: noteForRef,
+              fname: noteForRef.fname,
+              vault: noteForRef.vault,
+              vaults: engine.vaults,
+              wsRoot: engine.wsRoot,
+              config,
+              insideNoteRef: true,
+            },
+            { flavor: ProcFlavor.PUBLISHING }
+          );
 
-        // const out = data
-        //   .map((ent) => proc.stringify(proc.runSync(ent)))
-        //   .join("\n");
-
-        const out = proc.runSync(prettyHAST);
-
-        const out2 = proc.stringify(out);
-        const refIdString = getRefId(refId);
-        const dst = path.join(notesRefsDir, refIdString + ".html");
-        this.L.debug({ ctx, dst, msg: "writeNote" });
-        fs.ensureFileSync(dst);
-        fs.writeFileSync(dst, out2);
-        return refIdString;
-      })
-    );
+          const out = proc.stringify(proc.runSync(prettyHAST));
+          const refIdString = getRefId(refId);
+          const dst = path.join(notesRefsDir, refIdString + ".html");
+          this.L.debug({ ctx, dst, msg: "writeNote" });
+          fs.ensureFileSync(dst);
+          fs.writeFileSync(dst, out);
+          return refIdString;
+        })
+      );
+    }
 
     const podDstPath = path.join(podDstDir, "notes.json");
     const podConfigDstPath = path.join(podDstDir, "dendron.json");

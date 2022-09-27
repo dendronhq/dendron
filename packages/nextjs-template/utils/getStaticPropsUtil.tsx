@@ -14,10 +14,6 @@ export const getStaticProps: GetStaticProps = async (
     ? prepChildrenForCollection(note, notes)
     : null;
 
-  if (config.dev?.enableExperimentalIFrameNoteRef) {
-    console.log("12341234");
-  }
-
   const props: DendronNotePageProps = {
     body,
     note,

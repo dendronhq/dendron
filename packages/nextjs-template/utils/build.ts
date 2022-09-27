@@ -58,7 +58,13 @@ export function getRefBody(id: string) {
 export function getNoteRefs() {
   if (_.isUndefined(_REFS_CACHE)) {
     const dataDir = getDataDir();
-    _REFS_CACHE = fs.readJSONSync(path.join(dataDir, "refs.json")) as string[];
+    try {
+      _REFS_CACHE = fs.readJSONSync(
+        path.join(dataDir, "refs.json")
+      ) as string[];
+    } catch {
+      _REFS_CACHE = [];
+    }
   }
   return _REFS_CACHE;
 }

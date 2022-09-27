@@ -90,6 +90,7 @@ export enum ExtensionEvents {
   ShowKeybindingConflictRejected = "Show_Keybinding_Conflict_Rejected",
   DeprecationNoticeShow = "DeprecationNoticeShow",
   DeprecationNoticeAccept = "DeprecationNoticeAccept",
+  LocalhostBlocked = "LocalhostBlocked",
 }
 
 export enum LookupEvents {

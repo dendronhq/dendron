@@ -15,6 +15,7 @@ import { DConfig, readMD } from "@dendronhq/common-server";
 import {
   DEPRECATED_PATHS,
   DoctorActionsEnum,
+  execa,
   InactvieUserMsgStatusEnum,
   MetadataService,
   MigrationChangeSetStatus,
@@ -543,5 +544,29 @@ export class StartupUtils {
     AnalyticsUtils.track(VSCodeEvents.V100ReleaseNotesShown);
 
     MetadataService.instance().v100ReleaseMessageShown = true;
+  }
+
+  /**
+   * this method pings the localhost and checks if it is available. Incase local is blocked off,
+   * displays a toaster with a link to troubleshooting docs
+   */
+  static async showWhitelistingLocalhostDocsIfNecessary() {
+    const { failed } = await execa("ping", ["127.0.0.1"]);
+    if (failed) {
+      vscode.window
+        .showWarningMessage(
+          "Dendron is facing issues while connecting with localhost. Please ensure that you don't have anything running that can block localhost.",
+          ...["Open troubleshooting docs"]
+        )
+        .then((resp) => {
+          if (resp === "Open troubleshooting docs") {
+            vscode.commands.executeCommand(
+              "vscode.open",
+              "https://wiki.dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe/#whitelisting-localhost"
+            );
+          }
+        });
+      AnalyticsUtils.track(ExtensionEvents.LocalhostBlocked);
+    }
   }
 }

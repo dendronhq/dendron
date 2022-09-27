@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.114.0 (2022-09-27)
+
+
+### Bug Fixes
+
+* **workspace:** engine init with note candidates enabled ([8b6fe7f](https://github.com/dendronhq/dendron/commit/8b6fe7fb8367ca972d56ffde32676373bafad079))
+
+
+
+
+
 ## 0.113.1 (2022-09-20)
 
 

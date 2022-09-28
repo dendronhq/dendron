@@ -12,11 +12,13 @@ import {
 } from "@dendronhq/common-all";
 import {
   DConfig,
+  LocalConfigScope,
   note2File,
   readYAMLAsync,
   schemaModuleOpts2File,
   tmpDir,
   vault2Path,
+  writeYAML,
 } from "@dendronhq/common-server";
 import { FileTestUtils, SinonStubbedFn } from "@dendronhq/common-test-utils";
 import { Git, WorkspaceService } from "@dendronhq/engine-server";
@@ -433,6 +435,79 @@ function disableSelfContainedVaults(config: IntermediateDendronConfig) {
   config.dev!.enableSelfContainedVaults = false;
   return config;
 }
+
+describe("GIVEN a workspace with local override", function () {
+  const beforeHook = () => {
+    // prevents a ReloadWorkspace
+    sinon.stub(vscode.commands, "executeCommand").resolves({});
+  };
+  describeSingleWS(
+    "WHEN adding a vault",
+    {
+      preSetupHook: async ({ wsRoot }) => {
+        // create a vault that we are adding as override
+        const vpath = path.join(wsRoot, "vault2");
+        fs.ensureDirSync(vpath);
+        const vault = { fsPath: vpath };
+
+        const note = NoteUtils.createRoot({
+          vault: { fsPath: vpath },
+          body: ["existing note"].join("\n"),
+        });
+        await note2File({ note, vault, wsRoot });
+        const schema = SchemaUtils.createRootModule({ vault });
+        await schemaModuleOpts2File(schema, vault.fsPath, "root");
+        // add it to workspace override
+        const overridePath = DConfig.configOverridePath(
+          wsRoot,
+          LocalConfigScope.WORKSPACE
+        );
+        const overridePayload = {
+          workspace: {
+            vaults: [{ fsPath: "vault2" }],
+          },
+        };
+        writeYAML(overridePath, overridePayload);
+      },
+    },
+    () => {
+      this.beforeEach(beforeHook);
+      test("locally overriden vault is not merged into config", async () => {
+        const vaultPath = "vaultRemote";
+        const { wsRoot, config: preRunConfigWithOverride } =
+          ExtensionProvider.getDWorkspace();
+        const gitIgnore = path.join(wsRoot, ".gitignore");
+        const remoteDir = tmpDir().name;
+
+        await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
+        await fs.writeFile(gitIgnore, vaultPath);
+
+        // the config that has local override should have two vaults
+        expect(preRunConfigWithOverride.workspace.vaults.length).toEqual(2);
+
+        // dendron.yml should have one vault;
+        const preRunConfig = DConfig.readConfigSync(wsRoot);
+        expect(preRunConfig.workspace.vaults.length).toEqual(1);
+        const cmd = new VaultAddCommand();
+        stubVaultInput({
+          cmd,
+          sourceType: "remote",
+          sourcePath: vaultPath,
+          sourcePathRemote: remoteDir,
+          sourceName: "dendron",
+        });
+        await cmd.run();
+        // dendron.yml should now have two vault
+        const postRunConfig = DConfig.readConfigSync(wsRoot);
+        expect(postRunConfig.workspace.vaults.length).toEqual(2);
+        // config + override should have three vaults
+        const postRunConfigWithOverride =
+          ExtensionProvider.getDWorkspace().config;
+        expect(postRunConfigWithOverride.workspace.vaults.length).toEqual(3);
+      });
+    }
+  );
+});
 
 describe("GIVEN VaultAddCommand with self contained vaults enabled", function () {
   describeSingleWS(

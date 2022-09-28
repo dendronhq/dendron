@@ -246,7 +246,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @returns `{vaults}` that have been added
    */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
-    const config = this.config;
+    const config = DConfig.readConfigSync(this.wsRoot);
     const allWorkspaces = ConfigUtils.getWorkspace(config).workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault

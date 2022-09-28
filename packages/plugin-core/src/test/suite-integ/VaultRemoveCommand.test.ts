@@ -4,8 +4,17 @@ import {
   WorkspaceSettings,
   ConfigUtils,
   VaultUtils,
+  NoteUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
-import { DConfig, readYAML } from "@dendronhq/common-server";
+import {
+  DConfig,
+  LocalConfigScope,
+  note2File,
+  readYAML,
+  schemaModuleOpts2File,
+  writeYAML,
+} from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { setupWS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -133,6 +142,67 @@ suite("GIVEN VaultRemoveCommand", function () {
         { path: vaults[2].fsPath },
       ]);
     });
+  });
+
+  describe("WHEN removing a vault when override is present", () => {
+    describeMultiWS(
+      "WHEN removing a regular vault",
+      {
+        timeout: 1e9,
+        preSetupHook: async ({ wsRoot }) => {
+          // // create a vault that we are adding as override
+          const vpath = path.join(wsRoot, "vault4");
+          fs.ensureDirSync(vpath);
+          const vault = { fsPath: vpath };
+
+          const note = NoteUtils.createRoot({
+            vault: { fsPath: vpath },
+            body: ["existing note"].join("\n"),
+          });
+          await note2File({ note, vault, wsRoot });
+          const schema = SchemaUtils.createRootModule({ vault });
+          await schemaModuleOpts2File(schema, vault.fsPath, "root");
+          const overridePath = DConfig.configOverridePath(
+            wsRoot,
+            LocalConfigScope.WORKSPACE
+          );
+          const overridePayload = {
+            workspace: {
+              vaults: [{ fsPath: "vault4" }],
+            },
+          };
+          writeYAML(overridePath, overridePayload);
+        },
+      },
+      () => {
+        test("THEN the vault is removed from dendron.yml, and override is not merged into config", async () => {
+          const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+          const vaultToRemove = { fsPath: "vault2" };
+
+          // before remove, we have 4 vaults including the overriden one
+          expect(config.workspace.vaults.length).toEqual(4);
+          // before remove, dendron.yml has 3 vaults
+          const preRunConfig = DConfig.readConfigSync(wsRoot);
+          expect(preRunConfig.workspace.vaults.length).toEqual(3);
+
+          sinon.stub(VSCodeUtils, "showQuickPick").resolves({
+            // VaultRemoveCommand uses this internally, but TypeScript doesn't recognize it for the stub
+            // @ts-ignore
+            data: vaultToRemove,
+          });
+          await new VaultRemoveCommand().run();
+
+          // after remove, we have 2 vaults in dendron.yml
+          const postRunConfig = DConfig.readConfigSync(wsRoot);
+          expect(postRunConfig.workspace.vaults.length).toEqual(2);
+
+          // after remove, we have 3 vaults including the overriden one
+          const postRunConfigWithOverride =
+            ExtensionProvider.getDWorkspace().config;
+          expect(postRunConfigWithOverride.workspace.vaults.length).toEqual(3);
+        });
+      }
+    );
   });
 
   describeMultiWS(

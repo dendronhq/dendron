@@ -2175,6 +2175,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jeep",
+      "name": "jeep",
+      "avatar_url": "https://avatars.githubusercontent.com/u/89500?v=4",
+      "profile": "https://github.com/jeep",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

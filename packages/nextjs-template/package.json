@@ -15,7 +15,6 @@
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",
-    "sync:theme": "cp ../common-assets/public/*theme.css public/",
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json && mv dist/scripts/sitemap.js . ",
     "build:sitemap": "next-sitemap --config sitemap.js",
     "clean": "yarn rimraf public data out",
@@ -28,7 +27,6 @@
     "@types/react": "17.0.39"
   },
   "dependencies": {
-    "@chakra-ui/react": "^1.6.7",
     "@dendronhq/common-all": "^0.114.0",
     "@dendronhq/common-frontend": "^0.114.0",
     "@giscus/react": "^2.2.0",

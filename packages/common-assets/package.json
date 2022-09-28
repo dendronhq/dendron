@@ -6,11 +6,8 @@
   "license": "GPLv3",
   "scripts": {
     "watch": "echo nop",
-    "build": "node scripts/buildStyles.js && yarn setup",
-    "setup": "yarn gen:theme && yarn build:js",
-    "buildCI": "yarn build",
-    "gen:theme": "gulp less",
-    "build:js": "gulp js"
+    "build": "node scripts/buildStyles.js && gulp less js",
+    "buildCI": "yarn build"
   },
   "gitHead": "4ba39ff9fcec3bd1f0ba4fbd663cb3b49449609b",
   "devDependencies": {

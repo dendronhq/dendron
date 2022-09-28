@@ -1,24 +1,28 @@
-//
-// Base
-//
-@import "./support/support";
+@import "./main";
 
-//
-// Modules
-//
-@import "./variables";
-@import "./base";
-@import "./content";
-// @import "variables.scss";
-@import "./typography";
-@import "./utilities/utilities";
+// content.scss
 
-// Portal Start
-$base-line-height: 1 !default;
-$spacing-unit: 30px !default;
-$text-color: #111 !default;
-// Portal end
-@import "portal.scss";
+.main-content {
+  font-size: $root-font-size;
+
+  ul {
+    > li {
+      &::before {
+        content: "•";
+      }
+    }
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px;
+  }
+
+}
+
+// main.scss
 
 // TODO: new
 #__next {
@@ -110,16 +114,12 @@ hr {
   }
 }
 
-// for task links, the decorations around the links
-.task-before {
-  margin-right: 0.5rem;
-  opacity: 0.8;
-}
-.task-after {
-  margin-left: 0.5rem;
-  opacity: 0.8;
-}
-.task-status-text {
-  opacity: 0.8;
-  margin-right: 0.5rem;
+// portal.scss
+
+.portal-container {
+  .portal-parent {
+    .portal-parent-fader-top {
+      height: 36px;
+    }
+  }
 }

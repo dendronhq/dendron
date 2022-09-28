@@ -25,7 +25,7 @@ import { Layout } from "antd";
 import _ from "lodash";
 import React from "react";
 import { useWorkspaceProps } from "../hooks";
-import "../styles/scss/main.scss";
+import "../styles/scss/main-plugin.scss";
 import { DendronComponent } from "../types";
 import { postVSCodeMessage, useVSCodeMessage } from "../utils/vscode";
 

@@ -1,0 +1,83 @@
+@import "./main";
+
+
+// base.scss
+
+body {
+  padding: 0;
+}
+
+hr {
+  // `border-width` is already this by default (browser default style), but Ant
+  // design's stylesheet overrides the height and hr depends on `border-width` to
+  // set its height instead. Setting explicitly so we don't depend on the default.
+  border-width: 1px;
+}
+
+
+// content.scss
+
+.main-content {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    white-space: pre-wrap;
+  }
+
+}
+
+// main.scss
+
+.ant-picker-calendar, .ant-picker-calendar .ant-picker-panel {
+  background-color: var(--vscode-editor-background) !important,
+}
+
+// TODO_START: hardcoded
+.vscode-light {
+  .calendar {
+    table,
+    td,
+    th {
+      border: none; // added to remove border from calendar view
+    }
+  }
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px; // required for tables in preview
+  }
+}
+
+.vscode-dark {
+  .calendar {
+    table,
+    td,
+    th {
+      border: none; // added to remove border from calendar view
+    }
+  }
+  table,
+  td,
+  th {
+    border: 1px solid white;
+    padding: 10px; // required for tables in preview
+  }
+}
+
+.ant-message {
+  bottom: 5vh;
+  top: initial !important; // by-default top is 8
+}
+// TODO_END
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}

@@ -602,10 +602,7 @@ export async function findReferencesById(opts: {
 export const findReferences = async (fname: string): Promise<FoundRefT[]> => {
   const engine = ExtensionProvider.getEngine();
   // clean for anchor
-  const notes = NoteUtils.getNotesByFnameFromEngine({
-    fname,
-    engine,
-  });
+  const notes = await engine.findNotesMeta({ fname });
 
   const all = Promise.all(
     notes.map((noteProps) => findReferencesById({ id: noteProps.id }))

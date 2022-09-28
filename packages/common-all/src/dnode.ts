@@ -1052,7 +1052,7 @@ export class NoteUtils {
     };
   }
 
-  static toNoteLoc(note: NoteProps): DNoteLoc {
+  static toNoteLoc(note: NotePropsMeta): DNoteLoc {
     const { fname, id, vault } = note;
     return {
       fname,
@@ -1064,7 +1064,7 @@ export class NoteUtils {
   /**
    * Human readable note location. eg: `dendron://foo (uisdfsdfsdf)`
    */
-  static toNoteLocString(note: NoteProps): string {
+  static toNoteLocString(note: NotePropsMeta): string {
     const noteLoc = this.toNoteLoc(note);
     const out: string[] = [];
     if (noteLoc.vaultName) {
@@ -1218,48 +1218,43 @@ export class NoteUtils {
    * @param opts.includeSelf: If true, note with `fname` itself will be included in the ancestors.
    * @param opts.nonStubOnly: If true, only notes that are not stubs will be included.
    */
-  static *ancestors(opts: {
+  static async ancestors(opts: {
     fname: string;
     vault?: DVault;
     engine: DEngineClient;
     includeSelf?: boolean;
     nonStubOnly?: boolean;
-  }): Generator<NoteProps> {
+  }): Promise<NotePropsMeta | undefined> {
     const { fname, engine, includeSelf, nonStubOnly } = opts;
     let { vault } = opts;
     let parts = fname.split(".");
-    let note: NoteProps | undefined = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      vault,
-      engine,
-    })[0];
+    let note: NotePropsMeta | undefined = (
+      await engine.findNotesMeta({
+        fname,
+        vault,
+      })
+    )[0];
 
     // Check if we need this note itself
-    if (note && includeSelf && !(nonStubOnly && note.stub)) yield note;
+    if (note && includeSelf && !(nonStubOnly && note.stub)) return note;
     if (fname === "root") return;
 
     // All ancestors within the same hierarchy
     while (parts.length > 1) {
       parts = parts.slice(undefined, parts.length - 1);
-      note = NoteUtils.getNotesByFnameFromEngine({
-        fname: parts.join("."),
-        vault,
-        engine,
-      })[0];
-      if (note && !(nonStubOnly && note.stub)) yield note;
+      // eslint-disable-next-line no-await-in-loop
+      note = (await engine.findNotesMeta({ fname: parts.join("."), vault }))[0];
+      if (note && !(nonStubOnly && note.stub)) return note;
     }
 
     // The ultimate ancestor of all notes is root
     if (note) {
       // Yielded at least one note
       if (!vault) vault = note.vault;
-      note = NoteUtils.getNotesByFnameFromEngine({
-        fname: "root",
-        engine,
-        vault,
-      })[0];
-      if (note) yield note;
+      note = (await engine.findNotesMeta({ fname: "root", vault }))[0];
+      return note;
     }
+    return;
   }
 
   static isNote(uri: URI) {

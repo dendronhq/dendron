@@ -79,8 +79,8 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     // TODO: Add back functionality
     // // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
     // const currentNote = data?.id
-    //   ? this._ext.getEngine().notes[data.id]
-    //   : undefined;
+    //  ? (await this._ext.getEngine().getNoteMeta(data.id)).data
+    //  : undefined;
     // const { fullPath } =
     //   (await findNonNoteFile({
     //     fpath: path.normalize(uri.fsPath),

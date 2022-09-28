@@ -185,7 +185,7 @@ suite("GIVEN ReloadIndex", function () {
       const engine = await new ReloadIndexCommand().run();
       const { vaults } = ExtensionProvider.getDWorkspace();
       expect(engine).toBeTruthy();
-      const allNotes = await engine?.findNotes({ fname: "root" });
+      const allNotes = await engine?.findNotesMeta({ fname: "root" });
 
       const notes = _.sortBy(allNotes, (note) =>
         path.basename(note.vault.fsPath)

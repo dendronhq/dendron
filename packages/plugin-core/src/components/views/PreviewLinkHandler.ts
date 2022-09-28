@@ -113,7 +113,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
     const { wsRoot, vaults } = this._ext.getDWorkspace();
     const currentNote = data?.id
-      ? this._ext.getEngine().notes[data.id]
+      ? (await this._ext.getEngine().getNoteMeta(data.id)).data
       : undefined;
     const { fullPath } =
       (await findNonNoteFile({

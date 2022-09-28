@@ -188,10 +188,9 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
       `.${journalConfig.dailyDomain}`;
     const fileName = fname + `.md`;
 
-    const existingTemplates = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      engine: this._extension.getEngine(),
-    });
+    const existingTemplates = await this._extension
+      .getEngine()
+      .findNotesMeta({ fname });
 
     const maybeVault = journalConfig.dailyVault
       ? VaultUtils.getVaultByName({

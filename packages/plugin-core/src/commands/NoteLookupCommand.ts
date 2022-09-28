@@ -632,9 +632,7 @@ export class NoteLookupCommand extends BaseCommand<
     const engine = ExtensionProvider.getEngine();
 
     const vaultsWithMatchingFile = new Set(
-      NoteUtils.getNotesByFnameFromEngine({ fname, engine }).map(
-        (n) => n.vault.fsPath
-      )
+      (await engine.findNotesMeta({ fname })).map((n) => n.vault.fsPath)
     );
 
     // Try to get the default vault value.

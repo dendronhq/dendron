@@ -239,10 +239,7 @@ export class SiteUtils {
   //   const notesForHierarchy = _.clone(engine.notes);
 
   //   // get the domain note
-  //   const notes = NoteUtils.getNotesByFnameFromEngine({
-  //     fname: domain,
-  //     engine,
-  //   });
+  //   const notes = await engine.findNotes({ fname: domain });
   //   // logger.info({
   //   //   ctx: "filterByHierarchy:candidates",
   //   //   domain,

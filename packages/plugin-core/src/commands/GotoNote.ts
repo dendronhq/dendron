@@ -115,10 +115,7 @@ export class GotoNoteCommand extends BasicCommand<
 
   private async maybeSetOptsFromExistingNote(opts: GoToNoteCommandOpts) {
     const engine = this.extension.getEngine();
-    const notes = NoteUtils.getNotesByFnameFromEngine({
-      fname: opts.qs!,
-      engine,
-    });
+    const notes = await engine.findNotesMeta({ fname: opts.qs });
     if (notes.length === 1) {
       // There's just one note, so that's the one we'll go with.
       opts.vault = notes[0].vault;

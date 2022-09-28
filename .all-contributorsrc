@@ -2175,6 +2175,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "frstlvl",
+      "name": "frstlvl",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44060870?v=4",
+      "profile": "https://github.com/frstlvl",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

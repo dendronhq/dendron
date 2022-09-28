@@ -551,8 +551,9 @@ export class StartupUtils {
    * displays a toaster with a link to troubleshooting docs
    */
   static async showWhitelistingLocalhostDocsIfNecessary() {
-    const { failed } = await execa("ping", ["127.0.0.1"]);
+    const { failed } = await execa.command("ping 127.0.0.1");
     if (failed) {
+      AnalyticsUtils.track(ExtensionEvents.LocalhostBlockedNotified);
       vscode.window
         .showWarningMessage(
           "Dendron is facing issues while connecting with localhost. Please ensure that you don't have anything running that can block localhost.",
@@ -560,13 +561,15 @@ export class StartupUtils {
         )
         .then((resp) => {
           if (resp === "Open troubleshooting docs") {
+            AnalyticsUtils.track(ExtensionEvents.LocalhostBlockedAccepted);
             vscode.commands.executeCommand(
               "vscode.open",
               "https://wiki.dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe/#whitelisting-localhost"
             );
+          } else {
+            AnalyticsUtils.track(ExtensionEvents.LocalhostBlockedRejected);
           }
         });
-      AnalyticsUtils.track(ExtensionEvents.LocalhostBlocked);
     }
   }
 }

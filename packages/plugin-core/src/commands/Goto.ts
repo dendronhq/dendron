@@ -2,7 +2,6 @@ import {
   DendronError,
   DVault,
   ERROR_STATUS,
-  NoteUtils,
   RespV3,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -96,11 +95,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     // get note
-    const notes = NoteUtils.getNotesByFnameFromEngine({
-      fname,
-      engine,
-      vault,
-    });
+    const notes = await engine.findNotesMeta({ fname, vault });
     if (notes.length === 0) {
       return {
         error: new DendronError({ message: "selection is not a note" }),

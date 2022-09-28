@@ -426,21 +426,18 @@ export class MoveHeaderCommand extends BasicCommand<
    * @param dest Note that was the destination of move header commnad
    * @returns
    */
-  updateLinksInNote(opts: {
+  async updateLinksInNote(opts: {
     note: NoteProps;
     engine: IEngineAPIService;
     linksToUpdate: DLink[];
     dest: NoteProps;
   }) {
     const { note, engine, linksToUpdate, dest } = opts;
+    const notesWithSameName = await engine.findNotesMeta({ fname: dest.fname });
     return _.reduce(
       linksToUpdate,
       (note: NoteProps, linkToUpdate: DLink) => {
         const oldLink = LinkUtils.dlink2DNoteLink(linkToUpdate);
-        const notesWithSameName = NoteUtils.getNotesByFnameFromEngine({
-          fname: dest.fname,
-          engine,
-        });
 
         // original link had vault prefix?
         //   keep it
@@ -521,7 +518,7 @@ export class MoveHeaderCommand extends BasicCommand<
           anchorNamesToUpdate,
           config
         );
-        const modifiedNote = this.updateLinksInNote({
+        const modifiedNote = await this.updateLinksInNote({
           note: _note,
           engine,
           linksToUpdate,

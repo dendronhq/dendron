@@ -137,10 +137,11 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
   private async createTemplateFileIfNotExisting(): Promise<boolean> {
     const fname = CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME + ".md";
 
-    const existingMeetingTemplates = NoteUtils.getNotesByFnameFromEngine({
-      fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
-      engine: this._ext.getEngine(),
-    });
+    const existingMeetingTemplates = await this._extension
+      .getEngine()
+      .findNotesMeta({
+        fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
+      });
 
     const vault = PickerUtilsV2.getVaultForOpenEditor();
     const vaultPath = vault2Path({

@@ -128,7 +128,7 @@ export class AirtableExportPodV2
 
   async exportNotes(input: NoteProps[]): Promise<AirtableExportReturnType> {
     input = this.cleanNotes(input, _.get(this._config, "filters.fname"));
-    const resp = this.getPayloadForNotes(input);
+    const resp = await this.getPayloadForNotes(input);
     if (resp.error) {
       return {
         data: {},
@@ -174,13 +174,15 @@ export class AirtableExportPodV2
    * @param notes
    * @returns
    */
-  private getPayloadForNotes(notes: NoteProps[]): RespV3<{
-    create: AirtableFieldsMap[];
-    update: any[];
-  }> {
+  private async getPayloadForNotes(notes: NoteProps[]): Promise<
+    RespV3<{
+      create: AirtableFieldsMap[];
+      update: any[];
+    }>
+  > {
     const logger = createLogger("AirtablePublishPodV2");
 
-    const resp = AirtableUtils.notesToSrcFieldMap({
+    const resp = await AirtableUtils.notesToSrcFieldMap({
       notes,
       srcFieldMapping: this._config.sourceFieldMapping,
       logger,

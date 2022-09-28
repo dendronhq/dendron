@@ -200,7 +200,14 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     ).graph.createStub;
     switch (msg.type) {
       case GraphViewMessageEnum.onSelect: {
-        const note = this._ext.getEngine().notes[msg.data.id];
+        const note = (await this._ext.getEngine().getNote(msg.data.id)).data;
+        if (!note) {
+          Logger.error({
+            ctx,
+            msg: `Note ${msg.data.id} not found in engine`,
+          });
+          break;
+        }
         if (note.stub && !createStub) {
           await this.refresh(note, createStub);
         } else {

@@ -1,6 +1,5 @@
 import {
   CONSTANTS,
-  NoteUtils,
   TAGS_HIERARCHY,
   USERS_HIERARCHY,
   VaultUtils,
@@ -63,14 +62,14 @@ suite("completionProvider", function () {
         expect(compList).toBeTruthy();
         // Suggested top level notes
         expect(compList!.items.length).toEqual(6);
-        for (const item of compList!.items) {
-          // All suggested items exist
-          const found = NoteUtils.getNotesByFnameFromEngine({
-            fname: item.label as string,
-            engine,
-          });
-          expect(found.length > 0).toBeTruthy();
-        }
+        const results = await Promise.all(
+          compList!.items.map(async (item) => {
+            return engine.findNotesMeta({ fname: item.label as string });
+          })
+        );
+        results.forEach((result) => {
+          expect(result.length > 0).toBeTruthy();
+        });
         // check that same vault items are sorted before other items
         const sortedItems = _.sortBy(
           compList?.items,
@@ -150,15 +149,17 @@ suite("completionProvider", function () {
         expect(items).toBeTruthy();
         // Suggested all the notes
         expect(items!.items.length).toEqual(2);
-        for (const item of items!.items) {
-          // All suggested items exist
-          const found = NoteUtils.getNotesByFnameFromEngine({
-            fname: `${TAGS_HIERARCHY}${item.label}`,
-            engine,
-          });
-          expect(found.length > 0).toBeTruthy();
+        const results = await Promise.all(
+          items!.items.map(async (item) => {
+            return engine.findNotesMeta({
+              fname: `${TAGS_HIERARCHY}${item.label}`,
+            });
+          })
+        );
+        results.forEach((result) => {
+          expect(result.length > 0).toBeTruthy();
           expect(items?.items![0].insertText).toEqual("bar");
-        }
+        });
       });
     }
   );
@@ -205,14 +206,16 @@ suite("completionProvider", function () {
         expect(items).toBeTruthy();
         // Suggested all the notes
         expect(items!.length).toEqual(2);
-        for (const item of items!) {
-          // All suggested items exist
-          const found = NoteUtils.getNotesByFnameFromEngine({
-            fname: `${TAGS_HIERARCHY}${item.label}`,
-            engine,
-          });
-          expect(found.length > 0).toBeTruthy();
-        }
+        const results = await Promise.all(
+          items!.map(async (item) => {
+            return engine.findNotesMeta({
+              fname: `${TAGS_HIERARCHY}${item.label}`,
+            });
+          })
+        );
+        results.forEach((result) => {
+          expect(result.length > 0).toBeTruthy();
+        });
       });
     }
   );
@@ -260,15 +263,17 @@ suite("completionProvider", function () {
           expect(items).toBeTruthy();
           // Suggested all the notes
           expect(items!.length).toEqual(2);
-          for (const item of items!) {
-            // All suggested items exist
-            const found = NoteUtils.getNotesByFnameFromEngine({
-              fname: `${USERS_HIERARCHY}${item.label}`,
-              engine,
-            });
-            expect(found.length > 0).toBeTruthy();
+          const results = await Promise.all(
+            items!.map(async (item) => {
+              return engine.findNotesMeta({
+                fname: `${USERS_HIERARCHY}${item.label}`,
+              });
+            })
+          );
+          results.forEach((result) => {
+            expect(result.length > 0).toBeTruthy();
             expect(items![0].insertText).toEqual("bar");
-          }
+          });
         });
       });
 

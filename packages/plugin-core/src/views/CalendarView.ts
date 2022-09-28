@@ -59,13 +59,15 @@ export class CalendarView implements vscode.WebviewViewProvider {
           data: msg.data,
         });
         const { id, fname } = msg.data;
-        let note: NoteProps | undefined;
         // eslint-disable-next-line no-cond-assign
-        if (id && (note = this._extension.getEngine().notes[id])) {
-          await new GotoNoteCommand(this._extension).execute({
-            qs: note.fname,
-            vault: note.vault,
-          });
+        if (id) {
+          const note = (await this._extension.getEngine().getNoteMeta(id)).data;
+          if (note) {
+            await new GotoNoteCommand(this._extension).execute({
+              qs: note.fname,
+              vault: note.vault,
+            });
+          }
         } else if (fname) {
           await new CreateDailyJournalCommand(this._extension).execute({
             fname,

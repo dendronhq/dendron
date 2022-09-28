@@ -3,7 +3,7 @@ import {
   containsNonDendronUri,
   DendronError,
   DVault,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -167,11 +167,10 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       }
 
       // Check if what's being referenced is a note.
-      let note: NoteProps;
-      const maybeNotes = NoteUtils.getNotesByFnameFromEngine({
+      // If vault is specified, search only that vault. Otherwise search all vaults.
+      let note: NotePropsMeta;
+      const maybeNotes = await engine.findNotesMeta({
         fname: refAtPos.ref,
-        engine,
-        // If vault is specified, search only that vault. Otherwise search all vaults.
         vault,
       });
       if (maybeNotes.length === 0) {

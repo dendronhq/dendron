@@ -144,7 +144,7 @@ export class DendronEngineV2 implements DEngine {
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
-  private schemas: SchemaModuleDict | undefined;
+  private schemas: SchemaModuleDict;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -161,6 +161,7 @@ export class DendronEngineV2 implements DEngine {
     };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(props.config, this.logger);
+    this.schemas = {};
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -241,8 +242,11 @@ export class DendronEngineV2 implements DEngine {
         };
       }
       const { notes, schemas } = data;
-      this.updateIndex("note");
-      this.updateIndex("schema");
+      await this.updateIndex("note");
+
+      // Set schemas locally in the engine:
+      this.schemas = schemas;
+      await this.updateIndex("schema");
       this.logger.error({ ctx, msg: "updated index" });
       const hookErrors: DendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
@@ -272,9 +276,6 @@ export class DendronEngineV2 implements DEngine {
         default:
           error = new DendronCompositeError(allErrors);
       }
-
-      // Set schemas locally in the engine:
-      this.schemas = schemas;
 
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
 
@@ -394,11 +395,9 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async getSchema(id: string): Promise<GetSchemaResp> {
-    const maybeSchema = this.schemas ? this.schemas[id] : undefined;
+    const maybeSchema = await this.store.getSchema(id);
 
-    if (maybeSchema) {
-      return { data: _.cloneDeep(maybeSchema) };
-    } else {
+    if (!maybeSchema.data) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.CONTENT_NOT_FOUND,
@@ -407,6 +406,7 @@ export class DendronEngineV2 implements DEngine {
         }),
       };
     }
+    return maybeSchema;
   }
 
   async info(): Promise<EngineInfoResp> {
@@ -444,9 +444,7 @@ export class DendronEngineV2 implements DEngine {
 
     let items: SchemaModuleProps[] = [];
     const results = await this.fuseEngine.querySchema({ qs: queryString });
-    items = results
-      .map((ent) => (this.schemas ? this.schemas[ent.id] : undefined))
-      .filter(isNotUndefined);
+    items = results.map((ent) => this.schemas[ent.id]).filter(isNotUndefined);
     // if (queryString === "") {
     //   items = [this.schemas.root];
     // } else if (queryString === "*") {
@@ -687,7 +685,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async updateIndex(mode: DNodeType) {
-    if (mode === "schema" && this.schemas) {
+    if (mode === "schema") {
       this.fuseEngine.replaceSchemaIndex(this.schemas);
     } else {
       this.fuseEngine.replaceNotesIndex(this.notes);

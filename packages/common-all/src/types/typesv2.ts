@@ -555,6 +555,8 @@ export type DStore = DCommonProps &
      * Get NoteProps by id. If note doesn't exist, return error
      */
     getNote: (id: string) => Promise<GetNoteResp>;
+
+    getSchema: (id: string) => Promise<GetSchemaResp>;
     /**
      * @deprecated: Use {@link DEngine.writeNote}
      * @param note

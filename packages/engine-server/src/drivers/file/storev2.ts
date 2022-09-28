@@ -25,6 +25,7 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
+  GetSchemaResp,
   IDendronError,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -402,6 +403,10 @@ export class FileStorage implements DStore {
 
     out.push({ note: noteToDelete, status: "delete" });
     return out;
+  }
+
+  getSchema(id: string): Promise<GetSchemaResp> {
+    return Promise.resolve({ data: this.schemas[id] });
   }
 
   async deleteSchema(

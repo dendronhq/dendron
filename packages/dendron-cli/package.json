@@ -9,8 +9,8 @@
     "directory": "packages/dendron-cli"
   },
   "bin": {
-    "dendron-cli": "./lib/bin/dendron-cli.js",
-    "dendron": "./lib/bin/dendron-cli.js"
+    "dendron": "./lib/bin/dendron-cli.js",
+    "dendron-cli": "./lib/bin/dendron-cli.js"
   },
   "author": {
     "name": "Kevin Lin",

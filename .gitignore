@@ -37,3 +37,13 @@ generated-prisma-client
 packages/engine-server/prisma/dev.db
 dev.db-journal
 builds
+
+# Files to ignore when not doing zero-installs
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

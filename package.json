@@ -144,5 +144,6 @@
     "typescript": "4.6",
     "verdaccio-memory": "^10.0.1",
     "webpack": "^5.74.0"
-  }
+  },
+  "packageManager": "yarn@3.2.3"
 }

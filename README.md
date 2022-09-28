@@ -501,7 +501,7 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
       <td align="center"><a href="https://github.com/ericthomas1"><img src="https://avatars.githubusercontent.com/u/42788729?v=4?s=100" width="100px;" alt="ericthomas1"/><br /><sub><b>ericthomas1</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aericthomas1" title="Bug reports">🐛</a></td>
     </tr>
     <tr>
-      <td align="center"><a href="https://github.com/frstlvl"><img src="https://avatars.githubusercontent.com/u/44060870?v=4?s=100" width="100px;" alt="frstlvl"/><br /><sub><b>frstlvl</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afrstlvl" title="Bug reports">🐛</a></td>
+      <td align="center"><a href="https://github.com/frstlvl"><img src="https://avatars.githubusercontent.com/u/44060870?v=4?s=100" width="100px;" alt="frstlvl"/><br /><sub><b>frstlvl</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afrstlvl" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=frstlvl" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

@@ -86,6 +86,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.BINARY_CACHE_INDEX }}
 
+      - name: Install
+        run: yarn
+        shell: bash
+
       - name: Bootstrap
         run: yarn bootstrap:bootstrap
         shell: bash
@@ -127,6 +131,10 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ env.BINARY_CACHE_INDEX }}
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.BINARY_CACHE_INDEX }}
+
+      - name: Install
+        run: yarn
+        shell: bash
 
       - name: Bootstrap
         run: yarn bootstrap:bootstrap
@@ -174,6 +182,10 @@ jobs:
           echo "TEST_NEXT_TEMPLATE=1" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
         # if: runner.os == 'Linux'
+
+      - name: Install
+        run: yarn
+        shell: bash
 
       - name: Bootstrap
         run: yarn bootstrap:bootstrap

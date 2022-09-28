@@ -11,6 +11,7 @@ const config: PlaywrightTestConfig = {
   // Limit the number of workers on CI, use default locally
   workers: process.env.CI ? 3 : undefined,
   use: {
+    baseURL: "http://localhost",
     trace: "on-first-retry",
   },
   projects: [

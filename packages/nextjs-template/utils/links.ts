@@ -16,7 +16,6 @@ export function getAssetUrl(url: string) {
     process.env.NODE_ENV !== "development" && env.NEXT_PUBLIC_ASSET_PREFIX
       ? env.NEXT_PUBLIC_ASSET_PREFIX + url
       : url;
-  console.log("DEBUGPRINT[2]: links.ts:18 (after : url;)", out);
   return out;
 }
 

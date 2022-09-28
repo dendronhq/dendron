@@ -9,8 +9,8 @@ import { expect } from "@playwright/test";
  * 3. To run just this test file, `npx playwright test tests/example.spec.ts` from within the `nextjs-template` directory
  * 4. To skip build while testing this test file, `SKIP_BUILD=1 npx playwright test tests/example.spec.ts`
  */
-test("Test home page", async ({ page, port }) => {
-  await page.goto(`http://localhost:${port}/`);
+test("Test home page", async ({ page, url }) => {
+  await page.goto(url);
   const name = await page.innerText("h1");
   expect(name).toBe("Dendron");
 });

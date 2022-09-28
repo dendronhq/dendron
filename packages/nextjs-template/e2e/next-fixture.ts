@@ -1,9 +1,12 @@
+/* eslint-disable no-empty-pattern */
 import { createServer, Server } from "http";
 import { parse } from "url";
 import { test as base } from "@playwright/test";
 import next from "next";
 import path from "path";
 import { AddressInfo } from "net";
+import importFresh from "import-fresh";
+import type { env } from "../env/server";
 
 /**
  * We will use a new Playwright Test feature called Fixtures to boot one instance of our built application for each test worker.
@@ -19,12 +22,14 @@ import { AddressInfo } from "net";
 
 // Extend base test with our fixtures.
 const test = base.extend<
-  {},
   {
-    port: string;
+    url: string;
+  },
+  {
+    options: { port: string; basePath: string; env: typeof env };
   }
 >({
-  port: [
+  options: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       const app = next({
@@ -48,14 +53,28 @@ const test = base.extend<
       });
       // get the randomly assigned port from the server
       const port = String((server.address() as AddressInfo).port);
+
+      // now that nextjs has loaded env-vars through dotenv (behind the curtain) we can "fetch" them
+      // import-from allows us to request without cache
+      const { env } = importFresh("../env/server");
+      const basePath = env.NEXT_PUBLIC_ASSET_PREFIX;
+
       // provide port to tests
-      await use(port);
+      await use({ port, basePath, env });
     },
     {
       scope: "worker",
     },
   ],
+  url: [
+    async ({ options: { port, basePath }, baseURL }, use) => {
+      const url = new URL(basePath ?? "/", `${baseURL}:${port}/`);
+      await use(url.toString());
+    },
+    { scope: "test" },
+  ],
 });
+
 // this "test" can be used in multiple test files,
 // and each of them will get the fixtures.
 export default test;

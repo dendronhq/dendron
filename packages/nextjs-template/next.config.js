@@ -4,7 +4,7 @@ const { env } = require('./env/server')
 require('./utils/validation')
 
 const { NEXT_PUBLIC_ASSET_PREFIX, BUILD_DIR, DATA_DIR, PUBLIC_DIR } = env;
-const isProd = process.env.NODE_ENV === "production";
+const isProd = process.env.NODE_ENV !== "development";
 
 // NOTE: __dirname is the dirname where this configuration file is located
 const payload = {

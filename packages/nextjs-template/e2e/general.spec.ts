@@ -4,9 +4,9 @@ import { expect } from "@playwright/test";
 test.describe("GIVEN default viewport", () => {
   test("THEN should display heading anchor pleasantly ", async ({
     page,
-    port,
+    url,
   }) => {
-    await page.goto(`http://localhost:${port}/notes/FSi3bKWQeQXYTjE1PoTB0/`);
+    await page.goto(`${url}/notes/FSi3bKWQeQXYTjE1PoTB0`);
 
     const case1 = page.locator("#start-code-end");
     await case1.hover();
@@ -39,10 +39,14 @@ test.describe("GIVEN default viewport", () => {
   });
 
   test.describe("AND having NEXT_PUBLIC_ASSET_PREFIX set", () => {
-    test.skip("THEN should render path to favicon", async ({ page, port }) => {
-      await page.goto(`http://localhost:${port}/`);
+    test("THEN should render path to favicon", async ({
+      page,
+      url,
+      options: { env },
+    }) => {
+      await page.goto(url);
       const locator = page.locator(
-        `link[href*='${process.env.NEXT_PUBLIC_ASSET_PREFIX}'][rel='icon']`
+        `link[href^='${env.NEXT_PUBLIC_ASSET_PREFIX}'][rel='icon']`
       );
       expect(await locator.count()).toBe(1);
     });
@@ -51,8 +55,8 @@ test.describe("GIVEN default viewport", () => {
 
 test.describe("GIVEN mobile viewport", () => {
   test.use({ viewport: { width: 400, height: 900 } });
-  test("THEN layout should be safe", async ({ page, port }) => {
-    await page.goto(`http://localhost:${port}/notes/ufzjlbxfti6endd1o6egr6r/`);
+  test("THEN layout should be safe", async ({ page, url }) => {
+    await page.goto(`${url}/notes/ufzjlbxfti6endd1o6egr6r`);
     expect(await page.locator(".main-content").screenshot()).toMatchSnapshot([
       "layout",
       "safe-layout.png",

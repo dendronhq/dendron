@@ -38,18 +38,22 @@ test.describe("GIVEN default viewport", () => {
     ]);
   });
 
-  test.describe("AND having NEXT_PUBLIC_ASSET_PREFIX set", () => {
-    test("THEN should render path to favicon", async ({
-      page,
-      url,
-      options: { env },
-    }) => {
-      await page.goto(url);
-      const locator = page.locator(
-        `link[href^='${env.NEXT_PUBLIC_ASSET_PREFIX}'][rel='icon']`
-      );
-      expect(await locator.count()).toBe(1);
-    });
+  test("THEN `NEXT_PUBLIC_ASSET_PREFIX` control path generatoin", async ({
+    page,
+    url,
+    options: { env },
+  }) => {
+    await page.goto(url);
+
+    const faviconLinkLocator = page.locator(
+      `link[rel='icon'][href^='${env.NEXT_PUBLIC_ASSET_PREFIX}']`
+    );
+    expect(await faviconLinkLocator.count()).toBe(1);
+
+    const themeLinkLocator = page.locator(
+      `link[type='text/css'][id*='theme'][href^='${env.NEXT_PUBLIC_ASSET_PREFIX}']`
+    );
+    expect(await themeLinkLocator.count()).toBe(4);
   });
 });
 

@@ -475,7 +475,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   // ~~~ schemas
   async getSchema(id: string): Promise<GetSchemaResp> {
-    return this.api.schemaRead({ id });
+    return this.api.schemaRead({ id, ws: this.ws });
   }
 
   async querySchema(qs: string): Promise<QuerySchemaResp> {

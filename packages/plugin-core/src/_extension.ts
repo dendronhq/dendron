@@ -78,7 +78,7 @@ import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeyb
 import semver from "semver";
 import _ from "lodash";
 
-const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
+const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.]+)");
 // === Main
 
 // this method is called when your extension is activated

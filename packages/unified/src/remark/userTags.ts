@@ -13,8 +13,8 @@ import { PUNCTUATION_MARKS } from "./hashtag";
 
 /** Can have period in the middle */
 const GOOD_MIDDLE_CHARACTER = `[^#@|\\[\\]\\s${PUNCTUATION_MARKS}]`;
-/** Can't have period in the end */
-const GOOD_END_CHARACTER = `[^#@|\\[\\]\\s.${PUNCTUATION_MARKS}]`;
+/** Can have period in the end */
+const GOOD_END_CHARACTER = `[^#@|\\[\\]\\s${PUNCTUATION_MARKS}]`;
 
 /** User tags have the form @Lovelace, or @Hamilton.Margaret, or @7of9.
  *

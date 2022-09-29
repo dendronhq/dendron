@@ -288,10 +288,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   ): Promise<DeleteSchemaResp> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
-    // JYTODO: Test.
-    // if (!resp?.data?.notes || !resp?.data?.schemas) {
-    //   throw new DendronError({ message: "bad delete operation" });
-    // }
+    if (!resp?.data?.notes) {
+      throw new DendronError({ message: "bad delete operation" });
+    }
     const { notes } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);

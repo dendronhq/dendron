@@ -72,6 +72,9 @@ function genDefaultContext(targetNote: NoteProps) {
   const CURRENT_MINUTE = currentDate.toFormat("mm");
   const CURRENT_SECOND = currentDate.toFormat("ss");
   const CURRENT_DAY_OF_WEEK = currentDate.toJSDate().getDay();
+  const CURRENT_DAY_OF_WEEK_ABBR = currentDate.toFormat("ccc");
+  const CURRENT_DAY_OF_WEEK_FULL = currentDate.toFormat("cccc");
+  const CURRENT_DAY_OF_WEEK_SINGLE = currentDate.toFormat("ccccc");
   const CURRENT_QUARTER = currentDate.toFormat("q");
   return {
     CURRENT_YEAR,
@@ -84,6 +87,9 @@ function genDefaultContext(targetNote: NoteProps) {
     CURRENT_MINUTE,
     CURRENT_SECOND,
     CURRENT_DAY_OF_WEEK,
+    CURRENT_DAY_OF_WEEK_ABBR,
+    CURRENT_DAY_OF_WEEK_FULL,
+    CURRENT_DAY_OF_WEEK_SINGLE,
     CURRENT_QUARTER,
     TITLE: targetNote.title,
     FNAME: targetNote.fname,

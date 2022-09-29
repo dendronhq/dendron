@@ -44,7 +44,7 @@ import {
 } from "../utilsv5";
 import { blockAnchor2html } from "./blockAnchors";
 import { extendedImage2html } from "./extendedImage";
-import { convertNoteRefASTV2, NoteRefsOptsV2 } from "./noteRefsV2";
+import { convertNoteRefToHAST, NoteRefsOptsV2 } from "./noteRefsV2";
 import {
   addError,
   hashTag2WikiLinkNoteV4,
@@ -457,16 +457,16 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           wikiLinkOpts: opts?.wikiLinkOpts,
         };
         const procOpts = MDUtilsV5.getProcOpts(proc);
-        const { data } = convertNoteRefASTV2({
+        const { data: noteRefHAST } = convertNoteRefToHAST({
           link: ndata.link,
           proc,
           compilerOpts: copts,
           procOpts,
         });
 
-        if (data) {
+        if (noteRefHAST) {
           parent.children = replacedUnrenderedRefWithConvertedData(
-            data,
+            noteRefHAST,
             parent.children
           );
         }

@@ -99,7 +99,7 @@ describe("hashtag", () => {
       );
     });
 
-    test("doesn't parse trailing punctuation", () => {
+    test("doesn't parse trailing punctuation except period (.)", () => {
       const resp1 = proc().parse(
         "Dolorem vero sed sapiente #dolores. Et quam id maxime et ratione."
       );
@@ -107,7 +107,7 @@ describe("hashtag", () => {
         DendronASTTypes.HASHTAG
       );
       // @ts-ignore
-      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual("#dolores");
+      expect(getDescendantNode(expect, resp1, 0, 1).value).toEqual("#dolores.");
 
       const resp2 = proc().parse(
         "Dolorem vero sed sapiente #dolores, et quam id maxime et ratione."

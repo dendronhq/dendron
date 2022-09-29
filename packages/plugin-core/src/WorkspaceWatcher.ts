@@ -296,22 +296,24 @@ export class WorkspaceWatcher {
    * When saving a note, do some book keeping
    * - update the `updated` time in frontmatter
    * - update the note metadata in the engine
+   *
+   * this method needs to be sync since event.WaitUntil can be called
+   * in an asynchronous manner.
    * @param event
    * @returns
    */
-  private async onWillSaveNote(event: TextDocumentWillSaveEvent) {
+  private onWillSaveNote(event: TextDocumentWillSaveEvent) {
     const ctx = "WorkspaceWatcher:onWillSaveNote";
     const uri = event.document.uri;
     const engine = this._extension.getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
 
-    const note = (
-      await engine.findNotes({
-        fname,
-        vault: this._extension.wsUtils.getVaultFromUri(uri),
-      })
-    )[0];
+    const note = NoteUtils.getNoteByFnameFromEngine({
+      fname,
+      vault: this._extension.wsUtils.getVaultFromUri(uri),
+      engine,
+    });
 
     // If we can't find the note, don't do anything
     if (!note) {

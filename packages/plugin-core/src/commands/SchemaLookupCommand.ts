@@ -187,7 +187,7 @@ export class SchemaLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     let result: Promise<OnDidAcceptReturn | undefined>;
     const start = process.hrtime();
-    const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+    const isNew = PickerUtilsV2.isCreateNewNotePicked(item);
     if (isNew) {
       result = this.acceptNewSchemaItem();
     } else {

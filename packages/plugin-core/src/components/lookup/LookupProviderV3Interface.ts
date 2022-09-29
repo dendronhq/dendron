@@ -53,7 +53,16 @@ export type OnUpdatePickerItemsOpts = {
 };
 
 export type ILookupProviderOptsV3 = {
+  /**
+   * should provide `Create New`
+   */
   allowNewNote: boolean;
+  /**
+   * should provide `Create New with Template`
+   * `allowNewNote` must be true for this to take effect.
+   * false by default.
+   */
+  allowNewNoteWithTemplate?: boolean;
   noHidePickerOnAccept?: boolean;
   /** Forces to use picker value as is when constructing the query string. */
   forceAsIsPickerValueUsage?: boolean;

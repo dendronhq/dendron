@@ -3,19 +3,30 @@ import {
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
+  LabelUtils,
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
+  CreateNewWithTemplateQuickPickLabelHighlightTestGroups,
   TransformedQueryString,
+  _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  SegmentClient,
+} from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { CREATE_NEW_NOTE_DETAIL, CREATE_NEW_LABEL } from "./constants";
+import {
+  CREATE_NEW_NOTE_DETAIL,
+  CREATE_NEW_LABEL,
+  CREATE_NEW_WITH_TEMPLATE_LABEL,
+  CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
+} from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 import { filterPickerResults, PickerUtilsV2 } from "./utils";
 
@@ -79,6 +90,48 @@ export class NotePickerUtils {
       ...props,
       label: CREATE_NEW_LABEL,
       detail,
+      alwaysShow: true,
+    };
+  }
+
+  static createNewWithTemplateItem({
+    fname,
+  }: {
+    fname: string;
+  }): DNodePropsQuickInputV2 {
+    const props = DNodeUtils.create({
+      id: CREATE_NEW_WITH_TEMPLATE_LABEL,
+      fname,
+      type: "note",
+      // @ts-ignore
+      vault: {},
+    });
+    const ABUserGroup =
+      _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST.getUserGroup(
+        SegmentClient.instance().anonymousId
+      );
+
+    let label: string;
+    if (
+      ABUserGroup ===
+      CreateNewWithTemplateQuickPickLabelHighlightTestGroups.label
+    ) {
+      label = LabelUtils.createLabelWithHighlight({
+        value: CREATE_NEW_WITH_TEMPLATE_LABEL,
+        highlight: {
+          value: "$(beaker) [New] ",
+          location: "prefix",
+          expirationDate: new Date("2022-11-01"),
+        },
+      });
+    } else {
+      label = CREATE_NEW_WITH_TEMPLATE_LABEL;
+    }
+
+    return {
+      ...props,
+      label,
+      detail: CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL,
       alwaysShow: true,
     };
   }

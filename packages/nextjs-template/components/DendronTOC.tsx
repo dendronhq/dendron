@@ -1,7 +1,8 @@
+import React from "react";
 import { NoteProps } from "@dendronhq/common-all";
 import { Anchor } from "antd";
 import _ from "lodash";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 
 const Link = Anchor.Link;
 
@@ -22,24 +23,21 @@ export const DendronTOC = ({
   note: NoteProps;
 } & ComponentProps<typeof Anchor>) => {
   return (
-    <>
-      <Anchor style={{ zIndex: 1 }} className="dendron-toc" {...rest}>
-        {Object.entries(note?.anchors).map(([key, entry]) =>
-          entry?.type === "header" ? (
+    <Anchor style={{ zIndex: 1 }} className="dendron-toc" {...rest}>
+      {Object.entries(note?.anchors).map(([key, entry]) => (
+        <React.Fragment key={key}>
+          {entry?.type === "header" ? (
             <Link
-              key={key}
               href={`#${key}`}
               // `anchor.text` contains clean, user displayable text for
               // headings. It should always exist for exported notes, but we
               // have this fallback just in case.
               title={entry?.text ?? unslug(entry?.value)}
             />
-          ) : (
-            <></>
-          )
-        )}
-      </Anchor>
-    </>
+          ) : null}
+        </React.Fragment>
+      ))}
+    </Anchor>
   );
 };
 

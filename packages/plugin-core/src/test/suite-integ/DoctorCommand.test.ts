@@ -252,6 +252,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
       preSetupHook: async (opts) => {
         await ENGINE_HOOKS.setupBasic(opts);
       },
+      timeout: 5e3,
     },
     () => {
       test("THEN fix links", async () => {

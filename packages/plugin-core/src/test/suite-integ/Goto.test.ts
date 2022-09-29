@@ -60,6 +60,7 @@ suite("GotoNote", function () {
       "WHEN link to note with uri http",
       {
         preSetupHook: GOTO_NOTE_PRESETS.LINK_TO_NOTE_WITH_URI_HTTP.preSetupHook,
+        timeout: 5e3,
       },
       () => {
         test("THEN goto note", async () => {
@@ -74,6 +75,9 @@ suite("GotoNote", function () {
           );
           await cmd.execute();
           expect(openLinkMethod.calledOnce).toBeTruthy();
+          expect(
+            openLinkMethod.alwaysCalledWithExactly("http://example.com")
+          ).toBeTruthy();
         });
       }
     );

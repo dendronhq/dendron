@@ -28,6 +28,7 @@ import {
   globMatch,
   IntermediateDendronConfig,
   asyncLoopOneAtATime,
+  SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -84,6 +85,7 @@ export class NoteParser extends ParserBase {
   async parseFiles(
     allPaths: string[],
     vault: DVault,
+    schemas: SchemaModuleDict,
     opts?: {
       useSQLiteMetadataStore?: boolean;
     }
@@ -271,11 +273,9 @@ export class NoteParser extends ParserBase {
     const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
     );
-    await Promise.all(
-      domains.map(async (d) => {
-        return SchemaUtils.matchDomain(d, notesById, this.engine);
-      })
-    );
+    domains.map((d) => {
+      SchemaUtils.matchDomain(d, notesById, schemas);
+    });
     // Remove stale entries from cache
     unseenKeys.forEach((unseenKey) => {
       this.cache.drop(unseenKey);

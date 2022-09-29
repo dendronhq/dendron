@@ -34,6 +34,7 @@ import {
   ReducedDEngine,
   RespV3,
   SchemaData,
+  SchemaModuleDict,
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaOpts,
@@ -1597,28 +1598,28 @@ export class SchemaUtils {
   };
 
   /**
-   * Match and assign schemas to all nodes within
-   * a domain
+   * Match and assign schemas to all nodes within a domain. Note - only use this
+   * during engine init where SchemaModuleDict is available.
    *
    * @param domain
    * @param notes
    * @param schemas
    */
-  static async matchDomain(
+  static matchDomain(
     domain: NoteProps,
     notes: NotePropsByIdDict,
-    engine: DEngineClient
+    schemas: SchemaModuleDict
   ) {
-    const match = await engine.getSchema(domain.fname);
-    if (!match.data) {
+    const match = schemas[domain.fname];
+    if (!match) {
       return;
     } else {
-      const domainSchema = match.data.schemas[match.data.root.id];
+      const domainSchema = match.schemas[match.root.id];
       return SchemaUtils.matchDomainWithSchema({
         noteCandidates: [domain],
         notes,
         schemaCandidates: [domainSchema],
-        schemaModule: match.data,
+        schemaModule: match,
       });
     }
   }

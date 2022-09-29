@@ -249,7 +249,7 @@ export class DendronEngineV2 implements DEngine {
       const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
-      this.logger.error({ ctx, msg: "updated index" });
+      this.logger.info({ ctx, msg: "updated index" });
       const hookErrors: DendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
         const { valid, error } = HookUtils.validateHook({
@@ -262,7 +262,7 @@ export class DendronEngineV2 implements DEngine {
         }
         return valid;
       });
-      this.logger.error({ ctx, msg: "initialize hooks" });
+      this.logger.info({ ctx, msg: "initialize hooks" });
       const allErrors = (_.isUndefined(storeError) ? [] : [storeError]).concat(
         hookErrors
       );

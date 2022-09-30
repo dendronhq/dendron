@@ -2,7 +2,7 @@ import {
   asyncLoopOneAtATime,
   ConfigUtils,
   CONSTANTS,
-  CURRENT_CONFIG_VERSION,
+  DendronConfig,
   DendronError,
   DENDRON_VSCODE_CONFIG_KEYS,
   DEngineClient,
@@ -16,7 +16,6 @@ import {
   DWorkspaceEntry,
   FOLDERS,
   InstallStatus,
-  IntermediateDendronConfig,
   isNotUndefined,
   isWebUri,
   normalizeUnixPath,
@@ -201,7 +200,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return DConfig.getOrCreate(wsRoot);
   }
 
-  get config(): IntermediateDendronConfig {
+  get config(): DendronConfig {
     // TODO: don't read all the time but cache
     const { error, data } = DConfig.readConfigAndApplyLocalOverrideSync(
       this.wsRoot
@@ -219,7 +218,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return this.config.workspace.vaults;
   }
 
-  async setConfig(config: IntermediateDendronConfig) {
+  async setConfig(config: DendronConfig) {
     const wsRoot = this.wsRoot;
     return DConfig.writeConfig({ wsRoot, config });
   }
@@ -282,7 +281,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   async addVault(
     opts: {
       vault: DVault;
-      config?: IntermediateDendronConfig;
+      config?: DendronConfig;
     } & AddRemoveCommonOpts
   ) {
     const { vault, updateConfig, updateWorkspace } = _.defaults(opts, {
@@ -307,7 +306,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     ConfigUtils.setVaults(config, vaults);
 
     // update dup note behavior
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (!publishingConfig.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getVaults(config);
       const updatedDuplicateNoteBehavior = {
@@ -549,7 +548,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       path.join(newFolder, FOLDERS.ASSETS)
     );
     // Update the config to mark this vault as self contained
-    const config = DConfig.getRaw(this.wsRoot) as IntermediateDendronConfig;
+    const config = DConfig.getRaw(this.wsRoot) as DendronConfig;
     const configVault = ConfigUtils.getVaults(config).find((confVault) =>
       VaultUtils.isEqualV2(confVault, vault)
     );
@@ -996,7 +995,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         ConfigUtils.setWorkspaceProp(config, "workspaces", workspaces);
       }
     }
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (
       publishingConfig.duplicateNoteBehavior &&
       _.isArray(publishingConfig.duplicateNoteBehavior.payload)
@@ -1560,7 +1559,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     workspaceInstallStatus: InstallStatus;
     currentVersion: string;
     previousVersion: string;
-    dendronConfig: IntermediateDendronConfig;
+    dendronConfig: DendronConfig;
     wsConfig?: WorkspaceSettings;
   }) {
     let changes: MigrationChangeSetStatus[] = [];
@@ -1594,33 +1593,33 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * Because Dendron workspace relies on major version to be the same, we force a migration if that's not
    * the case
    */
-  async runConfigMigrationIfNecessary({
-    currentVersion,
-    dendronConfig,
-  }: {
-    currentVersion: string;
-    dendronConfig: IntermediateDendronConfig;
-  }) {
-    let changes: MigrationChangeSetStatus[] = [];
-    if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-      // NOTE: this migration will create a `migration-config` backup file in the user's home directory
-      changes = await MigrationService.applyMigrationRules({
-        currentVersion,
-        previousVersion: "0.83.0", // to force apply
-        dendronConfig,
-        wsService: this,
-        logger: this.logger,
-        migrations: [CONFIG_MIGRATIONS],
-      });
-      // if changes were made, use updated changes in subsequent configuration
-      if (!_.isEmpty(changes)) {
-        const { data } = _.last(changes)!;
-        dendronConfig = data.dendronConfig;
-      }
-    }
+  // async runConfigMigrationIfNecessary({
+  //   currentVersion,
+  //   dendronConfig,
+  // }: {
+  //   currentVersion: string;
+  //   dendronConfig: DendronConfig;
+  // }) {
+  //   let changes: MigrationChangeSetStatus[] = [];
+  //   if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
+  //     // NOTE: this migration will create a `migration-config` backup file in the user's home directory
+  //     changes = await MigrationService.applyMigrationRules({
+  //       currentVersion,
+  //       previousVersion: "0.83.0", // to force apply
+  //       dendronConfig,
+  //       wsService: this,
+  //       logger: this.logger,
+  //       migrations: [CONFIG_MIGRATIONS],
+  //     });
+  //     // if changes were made, use updated changes in subsequent configuration
+  //     if (!_.isEmpty(changes)) {
+  //       const { data } = _.last(changes)!;
+  //       dendronConfig = data.dendronConfig;
+  //     }
+  //   }
 
-    return changes;
-  }
+  //   return changes;
+  // }
 
   /**
    * Make sure all vaults are present on file system
@@ -1628,7 +1627,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @param skipPrivate skip cloning and pulling of private vaults. default: false
    */
   async syncVaults(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     progressIndicator?: () => void;
     urlTransformer?: UrlTransformerFunc;
     fetchAndPull?: boolean;

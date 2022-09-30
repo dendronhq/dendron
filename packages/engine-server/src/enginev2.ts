@@ -28,7 +28,7 @@ import {
   GetNoteBlocksOpts,
   GetNoteBlocksResp,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   LruCache,
   milliseconds,
   newRange,
@@ -87,7 +87,7 @@ type DendronEngineOptsV2 = {
   createStore?: CreateStoreFunc;
   mode?: DEngineMode;
   logger?: DLogger;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
@@ -98,12 +98,13 @@ type CachedPreview = {
 };
 
 function createRenderedCache(
-  config: IntermediateDendronConfig,
+  config: DendronConfig,
   logger: DLogger
 ): Cache<string, CachedPreview> {
   const ctx = "createRenderedCache";
 
-  if (config.noCaching) {
+  // TODO: remove null cache related logics later.
+  if (/** config.noCaching**/ false) {
     // If no caching flag is set we will use null caching object to avoid doing any
     // actual caching of rendered previews.
     logger.info({
@@ -118,7 +119,7 @@ function createRenderedCache(
     if (maxPreviewsCached && maxPreviewsCached > 0) {
       logger.info({
         ctx,
-        msg: `Creating rendered preview cache set to hold maximum of '${config.maxPreviewsCached}' items.`,
+        msg: `Creating rendered preview cache set to hold maximum of '${maxPreviewsCached}' items.`,
       });
 
       return new LruCache({ maxItems: maxPreviewsCached });

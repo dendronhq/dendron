@@ -25,7 +25,7 @@ import {
   SchemaUtils,
   string2Note,
   globMatch,
-  IntermediateDendronConfig,
+  DendronConfig,
   RespWithOptError,
   asyncLoopOneAtATime,
   SchemaModuleDict,
@@ -298,7 +298,7 @@ export class NoteParserV2 {
     noteDicts?: NoteDicts;
     addParent: boolean;
     vault: DVault;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): Promise<RespV2<NoteChangeEntry[]>> {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
@@ -366,7 +366,7 @@ export class NoteParserV2 {
   }: {
     fpath: string;
     vault: DVault;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): Promise<RespV2<NoteProps>> {
     const content = fs.readFileSync(fpath, { encoding: "utf8" });
     const { name } = path.parse(fpath);

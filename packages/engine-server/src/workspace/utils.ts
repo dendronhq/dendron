@@ -5,7 +5,7 @@ import {
   DWorkspaceV2,
   ERROR_STATUS,
   genHash,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteProps,
   RespV3,
@@ -284,7 +284,7 @@ export class WorkspaceUtils {
    *
    */
   static getNoteUrl(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     note: NoteProps;
     vault: DVault;
     urlRoot?: string;

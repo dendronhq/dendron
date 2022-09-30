@@ -29,7 +29,7 @@ import {
   IDendronError,
   IFileStore,
   INoteStore,
-  IntermediateDendronConfig,
+  DendronConfig,
   ISchemaStore,
   isNotUndefined,
   LruCache,
@@ -107,7 +107,7 @@ type DendronEngineOptsV3 = {
   noteStore: INoteStore<string>;
   schemaStore: ISchemaStore<string>;
   logger: DLogger;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 };
 
 type CachedPreview = {
@@ -1109,7 +1109,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
         const notesCache = new NotesFileSystemCache({
           cachePath,
-          noCaching: DConfig.readConfigSync(this.wsRoot).noCaching,
+          // noCaching: DConfig.readConfigSync(this.wsRoot).noCaching,
+          // TODO: clean up
+          noCaching: false,
           logger: this.logger,
         });
 
@@ -1273,7 +1275,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     note: NoteProps;
     oldLoc: DNoteLoc;
     newLoc: DNoteLoc;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): NoteProps | undefined {
     const prevNote = _.cloneDeep(note);
     const foundLinks = LinkUtils.findLinksFromBody({

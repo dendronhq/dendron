@@ -27,7 +27,7 @@ import {
   FindNoteOpts,
   GetSchemaResp,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
@@ -92,14 +92,14 @@ export class FileStorage implements DStore {
   public logger: DLogger;
   public anchors: DNoteAnchorPositioned[];
   public wsRoot: string;
-  public config: IntermediateDendronConfig;
+  public config: DendronConfig;
 
   private engine: DEngineClient;
 
   constructor(props: {
     engine: DEngineClient;
     logger: DLogger;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const { vaults, wsRoot } = props.engine;
     const { logger, config } = props;
@@ -705,7 +705,9 @@ export class FileStorage implements DStore {
     const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
-      noCaching: this.config.noCaching,
+      // TODO: remove caching logic later
+      // noCaching: this.config.noCaching,
+      noCaching: false,
       logger: this.logger,
     });
     if (!out.data) {

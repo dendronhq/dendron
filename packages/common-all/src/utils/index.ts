@@ -28,7 +28,6 @@ import {
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
 import {
-  DendronSiteConfig,
   LegacyDuplicateNoteBehavior,
   LegacyHierarchyConfig,
 } from "../types/configs/dendronConfigLegacy";
@@ -877,15 +876,6 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
-  static setSiteProp<K extends keyof DendronSiteConfig>(
-    config: DendronConfig,
-    key: K,
-    value: DendronSiteConfig[K]
-  ) {
-    const path = `site.${key}`;
-    _.set(config, path, value);
-  }
-
   static setPublishProp<K extends keyof DendronPublishingConfig>(
     config: DendronConfig,
     key: K,
@@ -915,7 +905,7 @@ export class ConfigUtils {
 
   static overridePublishingConfig(
     config: DendronConfig,
-    value: DendronSiteConfig | DendronPublishingConfig
+    value: DendronPublishingConfig
   ) {
     return {
       ...config,

@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   getStage,
   InstallStatus,
   WorkspaceSettings,
@@ -15,7 +15,7 @@ import { MigrationChangeSetStatus, Migrations } from "./types";
 type ApplyMigrationRuleOpts = {
   currentVersion: string;
   previousVersion: string;
-  dendronConfig: IntermediateDendronConfig;
+  dendronConfig: DendronConfig;
   wsConfig?: WorkspaceSettings;
   wsService: WorkspaceService;
   migrations?: Migrations[];

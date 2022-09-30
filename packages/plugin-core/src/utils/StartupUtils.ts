@@ -36,6 +36,7 @@ import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "./analytics";
 import { ConfigMigrationUtils } from "./ConfigMigration";
 import semver from "semver";
+import os from "os";
 
 export class StartupUtils {
   static shouldShowManualUpgradeMessage({
@@ -551,7 +552,9 @@ export class StartupUtils {
    * displays a toaster with a link to troubleshooting docs
    */
   static async showWhitelistingLocalhostDocsIfNecessary() {
-    const { failed } = await execa.command("ping 127.0.0.1");
+    const pingArgs =
+      os.platform() === "win32" ? "ping -n 1 127.0.0.1" : "ping -c 1 127.0.0.1";
+    const { failed } = await execa.command(pingArgs);
     if (failed) {
       AnalyticsUtils.track(ExtensionEvents.LocalhostBlockedNotified);
       vscode.window

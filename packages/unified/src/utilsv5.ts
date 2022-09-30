@@ -2,8 +2,10 @@ import {
   assertUnreachable,
   ConfigUtils,
   DendronError,
+  DNoteRefLink,
   DVault,
   ERROR_STATUS,
+  getSlugger,
   IntermediateDendronConfig,
   NoteDicts,
   NotePropsMeta,
@@ -44,7 +46,9 @@ import { hashtags } from "./remark/hashtag";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import { userTags } from "./remark/userTags";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { DendronASTDest } from "./types";
+import { DendronASTDest, UnistNode } from "./types";
+import path from "path";
+import { Parent } from "unist";
 
 export { ProcFlavor };
 
@@ -159,7 +163,54 @@ function checkProps({
   return { valid: true };
 }
 
+export type NoteRefId = { id: string; link: DNoteRefLink };
+export type SerializedNoteRef = {
+  node: UnistNode;
+  refId: NoteRefId;
+  prettyHAST: any;
+};
+
+type RefCache = Record<string, SerializedNoteRef>;
+let REF_CACHE: RefCache | undefined;
+
 export class MDUtilsV5 {
+  static getRefsRoot = (wsRoot: string) => {
+    return path.join(wsRoot, "build", "refs");
+  };
+
+  /**
+   * Write ref
+   * @param param1
+   */
+  static cacheRefId({
+    refId,
+    mdast,
+    prettyHAST,
+  }: {
+    refId: NoteRefId;
+    mdast: Parent;
+    prettyHAST: any;
+  }): void {
+    if (REF_CACHE === undefined) {
+      REF_CACHE = {};
+    }
+    const idString = getRefId(refId);
+    const payload: SerializedNoteRef = { node: mdast, refId, prettyHAST };
+
+    REF_CACHE[idString] = payload;
+  }
+
+  static clearRefCache(): void {
+    REF_CACHE = undefined;
+  }
+
+  static getRefCache(): RefCache {
+    if (!REF_CACHE) {
+      return {};
+    }
+    return REF_CACHE;
+  }
+
   static getProcOpts(proc: Processor): ProcOptsV5 {
     const _data = proc.data("dendronProcOptsv5") as ProcOptsV5;
     return _data || {};
@@ -388,12 +439,13 @@ export class MDUtilsV5 {
     // apply plugins enabled by config
     const shouldApplyPublishRules =
       MDUtilsV5.shouldApplyPublishingRules(pRehype);
+
+    const { insideNoteRef } = data;
     if (ConfigUtils.getEnableKatex(data.config, shouldApplyPublishRules)) {
       pRehype = pRehype.use(katex);
     }
-
-    // apply publishing specific things
-    if (shouldApplyPublishRules) {
+    // apply publishing specific things, don't use anchor headings in note refs
+    if (shouldApplyPublishRules && !insideNoteRef) {
       pRehype = pRehype.use(link, {
         behavior: "append",
         properties: {
@@ -479,3 +531,11 @@ export class MDUtilsV5 {
     return proc.use(rehypeStringify);
   }
 }
+
+export const getRefId = ({ link, id }: { link: DNoteRefLink; id: string }) => {
+  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+    anchorStartOffset: 0,
+  });
+  const slug = getSlugger();
+  return slug.slug([id, anchorStart, anchorEnd, anchorStartOffset].join("-"));
+};

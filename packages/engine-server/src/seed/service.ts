@@ -10,7 +10,7 @@ import {
   ConfigUtils,
   SeedVault,
 } from "@dendronhq/common-all";
-import { simpleGit, writeYAML } from "@dendronhq/common-server";
+import { DConfig, simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -118,7 +118,7 @@ export class SeedService {
     onUpdatedWorkspace?: () => Promise<void>;
   }) {
     const ws = new WorkspaceService({ wsRoot });
-    const config = ws.config;
+    const config = DConfig.readConfigSync(wsRoot);
     const id = SeedUtils.getSeedId({ ...seed });
 
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};

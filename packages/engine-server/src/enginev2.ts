@@ -260,7 +260,7 @@ export class DendronEngineV2 implements DEngine {
         }
         return valid;
       });
-      this.logger.error({ ctx, msg: "initialize hooks" });
+      this.logger.info({ ctx, msg: "initialize hooks" });
       const allErrors = (_.isUndefined(storeError) ? [] : [storeError]).concat(
         hookErrors
       );

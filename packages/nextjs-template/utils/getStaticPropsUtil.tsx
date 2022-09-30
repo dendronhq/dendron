@@ -13,6 +13,7 @@ export const getStaticProps: GetStaticProps = async (
   const collectionChildren = note.custom?.has_collection
     ? prepChildrenForCollection(note, notes)
     : null;
+
   const props: DendronNotePageProps = {
     body,
     note,

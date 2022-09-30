@@ -112,8 +112,12 @@ export class MoveSelectionToCommand extends BasicCommand<
 
   private createLookupProvider(opts: { activeNote: NoteProps | undefined }) {
     const { activeNote } = opts;
-    return this.extension.noteLookupProviderFactory.create(this.key, {
+    // the id here should be "lookup" as long as we are supplying this
+    // to the lookup command.
+    // TODO: give it its own id once we refactor.
+    return this.extension.noteLookupProviderFactory.create("lookup", {
       allowNewNote: true,
+      allowNewNoteWithTemplate: false,
       noHidePickerOnAccept: false,
       preAcceptValidators: [
         // disallow accepting the currently active note from the picker.
@@ -184,6 +188,9 @@ export class MoveSelectionToCommand extends BasicCommand<
     this.trackProxyMetrics();
     const provider = this.createLookupProvider({ activeNote });
     lookupCmd.controller = controller;
+    // TODO: don't set custom providers for NoteLookupCommand
+    // modularize the logic needed for this command
+    // so that it doesn't rely on other commands.
     lookupCmd.provider = provider;
     const runOpts = {
       initialValue: opts?.initialValue,

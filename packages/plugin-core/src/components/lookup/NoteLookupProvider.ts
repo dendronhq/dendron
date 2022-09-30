@@ -110,7 +110,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     const { item } = opts;
     const result = NoteUtils.validateFname(item.fname);
     const shouldReject =
-      !result.isValid && PickerUtilsV2.isCreateNewNotePick(item);
+      !result.isValid && PickerUtilsV2.isCreateNewNotePicked(item);
     if (shouldReject) {
       return {
         shouldReject,
@@ -430,6 +430,21 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           fname: queryOrig,
           detail: CREATE_NEW_NOTE_DETAIL,
         });
+        const newItems = [entryCreateNew];
+
+        // should not add `Create New with Template` if the quickpick
+        // 1. has an onCreate defined (i.e. task note), or
+        const onCreateDefined = picker.onCreate !== undefined;
+
+        const shouldAddCreateNewWithTemplate =
+          this.opts.allowNewNoteWithTemplate && !onCreateDefined;
+        if (shouldAddCreateNewWithTemplate) {
+          const entryCreateNewWithTemplate =
+            NotePickerUtils.createNewWithTemplateItem({
+              fname: queryOrig,
+            });
+          newItems.push(entryCreateNewWithTemplate);
+        }
 
         const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
           .bubbleUpCreateNew;
@@ -440,9 +455,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             bubbleUpCreateNew,
           })
         ) {
-          updatedItems = [entryCreateNew, ...updatedItems];
+          updatedItems = newItems.concat(updatedItems);
         } else {
-          updatedItems = [...updatedItems, entryCreateNew];
+          updatedItems = updatedItems.concat(newItems);
         }
       }
 
@@ -472,6 +487,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         msg: "exit",
         queryOrig,
         profile,
+        numItems: picker.items.length,
         cancelled: token?.isCancellationRequested,
       });
       AnalyticsUtils.track(VSCodeEvents.NoteLookup_Update, {

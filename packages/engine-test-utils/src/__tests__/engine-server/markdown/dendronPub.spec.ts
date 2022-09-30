@@ -151,8 +151,8 @@ async function createProc({
 }
 
 describe("GIVEN dendronPub", () => {
-  const fnameAlpha = "alpha";
-  const fnameBeta = "beta";
+  const FNAME_ALPHA = "alpha";
+  const FNAME_BETA = "beta";
 
   describe("WHEN note contains markdown link to an assetPath", () => {
     let resp: VFile;
@@ -163,10 +163,10 @@ describe("GIVEN dendronPub", () => {
         await runEngineTestV5(
           async (opts) => {
             resp = await createProc({
-              noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
+              noteToRender: (await opts.engine.getNote(FNAME_ALPHA)).data!,
               ...opts,
               config,
-              fname: fnameAlpha,
+              fname: FNAME_ALPHA,
               linkText: [
                 "[some pdf](assets/dummy-pdf.pdf)",
                 "[some pdf](/assets/dummy-pdf2.pdf)",
@@ -197,10 +197,10 @@ describe("GIVEN dendronPub", () => {
         await runEngineTestV5(
           async (opts) => {
             resp = await createProc({
-              noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
+              noteToRender: (await opts.engine.getNote(FNAME_ALPHA)).data!,
               ...opts,
               config,
-              fname: fnameAlpha,
+              fname: FNAME_ALPHA,
               linkText: [
                 "[some pdf](assets/dummy-pdf.pdf)",
                 "[some pdf](/assets/dummy-pdf2.pdf)",
@@ -233,10 +233,10 @@ describe("GIVEN dendronPub", () => {
       await runEngineTestV5(
         async (opts) => {
           resp = await createProc({
-            noteToRender: (await opts.engine.getNote(fnameAlpha)).data!,
+            noteToRender: (await opts.engine.getNote(FNAME_ALPHA)).data!,
             ...opts,
             config,
-            fname: fnameAlpha,
+            fname: FNAME_ALPHA,
             linkText: "[header one](#header-1)",
           });
         },
@@ -257,7 +257,7 @@ describe("GIVEN dendronPub", () => {
 
   describe("WHEN all notes are public", () => {
     const config = genPublishConfigWithAllPublicHierarchies();
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
 
     describe("AND WHEN wikilink", () => {
       let resp: VFile;
@@ -283,8 +283,8 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN all links are rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
-        await verifyPublicLink(resp, fnameAlpha);
+        await verifyPublicLink(resp, FNAME_BETA);
+        await verifyPublicLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -348,7 +348,7 @@ describe("GIVEN dendronPub", () => {
   });
 
   describe("WHEN publish and private hierarchies", () => {
-    const fname = fnameBeta;
+    const fname = FNAME_BETA;
     const config = genPublishConfigWithPublicPrivateHierarchies();
 
     describe("AND WHEN noteRef", () => {
@@ -378,10 +378,10 @@ describe("GIVEN dendronPub", () => {
           );
         });
         test("THEN published note is rendered", async () => {
-          await verifyPublicNoteRef(resp, fnameBeta);
+          await verifyPublicNoteRef(resp, FNAME_BETA);
         });
         test("THEN private link in published note is hidden", async () => {
-          await verifyPrivateLink(resp, fnameAlpha);
+          await verifyPrivateLink(resp, FNAME_ALPHA);
         });
       });
 
@@ -437,10 +437,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
 
@@ -469,10 +469,10 @@ describe("GIVEN dendronPub", () => {
         );
       });
       test("THEN public link is rendered", async () => {
-        await verifyPublicLink(resp, fnameBeta);
+        await verifyPublicLink(resp, FNAME_BETA);
       });
       test("THEN private link is hidden", async () => {
-        await verifyPrivateLink(resp, fnameAlpha);
+        await verifyPrivateLink(resp, FNAME_ALPHA);
       });
     });
   });
@@ -1305,6 +1305,49 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
   describe("enablePrettyRefs", () => {
     testWithEngine(
+      "config.publishing.enablePrettyRef: true (enableExperimentalIFrameNoteRef)",
+      async ({ vaults, engine }) => {
+        const config = ConfigUtils.genDefaultConfig();
+        ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
+        ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+        ConfigUtils.setPublishProp(config, "siteRootDir", "foo");
+        ConfigUtils.setPublishProp(config, "enablePrettyRefs", true);
+
+        config.dev = {
+          ...config.dev,
+          enableExperimentalIFrameNoteRef: true,
+        };
+
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
+        const noteCacheForRenderDict =
+          NoteDictsUtils.createNoteDicts(references);
+
+        const resp = await MDUtilsV5.procRehypeFull(
+          {
+            noteToRender: (await engine.getNote("foo")).data!,
+            fname: "foo",
+            vault: vaults[0],
+            config,
+            noteCacheForRenderDict,
+            vaults,
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        ).process(`![[bar]]`);
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: ["iframe"],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
       "config.publishing.enablePrettyRef: true",
       async ({ vaults, engine }) => {
         const config = ConfigUtils.genDefaultConfig();
@@ -1457,6 +1500,66 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
     );
 
     testWithEngine(
+      "enablePrettyRef defaults to true in both cases (enableExperimentalIFrameNoteRef)",
+      async ({ vaults, engine }) => {
+        const config = ConfigUtils.genDefaultConfig();
+
+        config.dev = {
+          ...config.dev,
+          enableExperimentalIFrameNoteRef: true,
+        };
+
+        const references: NoteProps[] = [
+          (await engine.getNote("bar")).data!,
+          (await engine.getNote("foo.ch1")).data!,
+        ];
+        const noteCacheForRenderDict =
+          NoteDictsUtils.createNoteDicts(references);
+
+        const previewResp = await MDUtilsV5.procRehypeFull(
+          {
+            noteToRender: (await engine.getNote("foo")).data!,
+            fname: "foo",
+            vault: vaults[0],
+            config,
+            noteCacheForRenderDict,
+            vaults,
+          },
+          { flavor: ProcFlavor.PREVIEW }
+        ).process(`![[bar]]`);
+        expect(previewResp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: previewResp.contents as string,
+            match: ["portal-container"],
+          })
+        ).toBeTruthy();
+
+        const publishResp = await MDUtilsV5.procRehypeFull(
+          {
+            noteToRender: (await engine.getNote("foo")).data!,
+            fname: "foo",
+            vault: vaults[0],
+            config,
+            noteCacheForRenderDict,
+            vaults,
+          },
+          { flavor: ProcFlavor.PUBLISHING }
+        ).process(`![[bar]]`);
+        expect(publishResp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: publishResp.contents as string,
+            match: [
+              `<iframe class="noteref-iframe" src="/refs/bar---0" title="Reference to the note called Bar">Your browser does not support iframes.</iframe>`,
+            ],
+          })
+        ).toBeTruthy();
+      },
+      { preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+
+    testWithEngine(
       "enablePrettyRef defaults to true in both cases",
       async ({ vaults, engine }) => {
         const config = ConfigUtils.genDefaultConfig();
@@ -1502,7 +1605,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
         expect(
           await AssertUtils.assertInString({
             body: publishResp.contents as string,
-            match: ["portal-container"],
+            match: [`portal-container`],
           })
         ).toBeTruthy();
       },
@@ -1602,7 +1705,66 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             expect(
               await AssertUtils.assertInString({
                 body: resp.contents as string,
-                match: ["portal-container"],
+                match: [`portal-container`],
+              })
+            ).toBeTruthy();
+          },
+          {
+            preSetupHook: async (opts) => {
+              await ENGINE_HOOKS.setupBasic(opts);
+              await NoteTestUtilsV4.createNote({
+                fname: "with-override",
+                vault: opts.vaults[0],
+                wsRoot: opts.wsRoot,
+                props: {
+                  config: {
+                    global: {
+                      enablePrettyRefs: true,
+                    },
+                  },
+                },
+              });
+            },
+          }
+        );
+        testWithEngine(
+          "THEN renders with pretty refs (enableExperimentalIFrameNoteRef)",
+          async ({ vaults, engine }) => {
+            const config = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setPreviewProps(config, "enablePrettyRefs", false);
+            ConfigUtils.setPublishProp(config, "siteHierarchies", [
+              "with-override",
+            ]);
+            ConfigUtils.setPublishProp(config, "siteRootDir", "with-override");
+            ConfigUtils.setPublishProp(config, "enablePrettyRefs", false);
+
+            config.dev = {
+              ...config.dev,
+              enableExperimentalIFrameNoteRef: true,
+            };
+
+            const references: NoteProps[] = [
+              (await engine.getNote("bar")).data!,
+            ];
+            const noteCacheForRenderDict =
+              NoteDictsUtils.createNoteDicts(references);
+
+            const resp = await MDUtilsV5.procRehypeFull(
+              {
+                noteToRender: (await engine.getNote("with-override")).data!,
+                fname: "with-override",
+                vault: vaults[0],
+                config,
+                noteCacheForRenderDict,
+                vaults,
+              },
+              { flavor: ProcFlavor.PUBLISHING }
+            ).process(`![[bar]]`);
+            expect(resp).toMatchSnapshot();
+            expect(
+              await AssertUtils.assertInString({
+                body: resp.contents as string,
+                match: [`iframe class="noteref-iframe" src="/refs/bar---0"`],
               })
             ).toBeTruthy();
           },

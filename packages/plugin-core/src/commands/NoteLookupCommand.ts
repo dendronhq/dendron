@@ -47,6 +47,7 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3Interface";
 import { NotePickerUtils } from "../components/lookup/NotePickerUtils";
+import { QuickPickTemplateSelector } from "../components/lookup/QuickPickTemplateSelector";
 import {
   DendronQuickPickerV2,
   DendronQuickPickState,
@@ -176,6 +177,16 @@ export class NoteLookupCommand extends BaseCommand<
     return this._provider;
   }
 
+  /**
+   * @deprecated
+   *
+   * This is not a good pattern and causes a lot of problems with state.
+   * This will be deprecated so that we never have to swap out the provider
+   * of an already existing instance of a lookup command.
+   *
+   * In the meantime, if you absolutely _have_ to provide a custom provider to an instance of
+   * a lookup command, make sure the provider's id is `lookup`.
+   */
   public set provider(provider: ILookupProviderV3 | undefined) {
     this._provider = provider;
   }
@@ -261,11 +272,19 @@ export class NoteLookupCommand extends BaseCommand<
         enableLookupView: true,
       });
     }
-    this._provider = extension.noteLookupProviderFactory.create("lookup", {
-      allowNewNote: true,
-      noHidePickerOnAccept: false,
-      forceAsIsPickerValueUsage: copts.noteType === LookupNoteTypeEnum.scratch,
-    });
+    if (this._provider === undefined) {
+      // hack. we need to do this because
+      // moveSelectionTo sets a custom provider instead of the
+      // one that lookup creates.
+      // TODO: fix moveSelectionTo so that it doesn't rely on this.
+      this._provider = extension.noteLookupProviderFactory.create("lookup", {
+        allowNewNote: true,
+        allowNewNoteWithTemplate: true,
+        noHidePickerOnAccept: false,
+        forceAsIsPickerValueUsage:
+          copts.noteType === LookupNoteTypeEnum.scratch,
+      });
+    }
     const lc = this.controller;
     if (copts.fuzzThreshold) {
       lc.fuzzThreshold = copts.fuzzThreshold;
@@ -279,9 +298,6 @@ export class NoteLookupCommand extends BaseCommand<
       initialValue: copts.initialValue,
       nonInteractive: copts.noConfirm,
       alwaysShow: true,
-      onDidHide: () => {
-        VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
-      },
     });
     this._quickPick = quickpick;
 
@@ -303,7 +319,6 @@ export class NoteLookupCommand extends BaseCommand<
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
     const ctx = "NoteLookupCommand:enrichInputs";
-
     let promiseResolve: (
       value: CommandOpts | undefined
     ) => PromiseLike<CommandOpts | undefined>;
@@ -360,7 +375,6 @@ export class NoteLookupCommand extends BaseCommand<
         }
       },
     });
-
     const promise = new Promise<CommandOpts | undefined>((resolve) => {
       promiseResolve = resolve as typeof promiseResolve;
       opts.controller.showQuickPick({
@@ -462,6 +476,7 @@ export class NoteLookupCommand extends BaseCommand<
     }
     this.controller = undefined;
     HistoryService.instance().remove("lookup", "lookupProvider");
+    VSCodeUtils.setContext(DendronContext.NOTE_LOOK_UP_ACTIVE, false);
   }
 
   async acceptItem(
@@ -469,9 +484,16 @@ export class NoteLookupCommand extends BaseCommand<
   ): Promise<OnDidAcceptReturn | undefined> {
     let result: Promise<OnDidAcceptReturn | undefined>;
     const start = process.hrtime();
-    const isNew = PickerUtilsV2.isCreateNewNotePick(item);
+    const isNew = PickerUtilsV2.isCreateNewNotePicked(item);
+
+    const isNewWithTemplate =
+      PickerUtilsV2.isCreateNewNoteWithTemplatePicked(item);
     if (isNew) {
-      result = this.acceptNewItem(item);
+      if (isNewWithTemplate) {
+        result = this.acceptNewWithTemplateItem(item);
+      } else {
+        result = this.acceptNewItem(item);
+      }
     } else {
       result = this.acceptExistingItem(item);
     }
@@ -479,6 +501,7 @@ export class NoteLookupCommand extends BaseCommand<
     AnalyticsUtils.track(VSCodeEvents.NoteLookup_Accept, {
       duration: profile,
       isNew,
+      isNewWithTemplate,
     });
     const metaData = MetadataService.instance().getMeta();
     if (_.isUndefined(metaData.firstLookupTime)) {
@@ -608,6 +631,53 @@ export class NoteLookupCommand extends BaseCommand<
     return { uri, node: nodeNew, resp };
   }
 
+  async acceptNewWithTemplateItem(
+    item: NoteQuickInput
+  ): Promise<OnDidAcceptReturn | undefined> {
+    const ctx = "acceptNewWithTemplateItem";
+    const picker = this.controller.quickPick;
+    const fname = this.getFNameForNewItem(item);
+
+    const engine = ExtensionProvider.getEngine();
+    let nodeNew: NoteProps = item;
+    const vault = await this.getVaultForNewNote({ fname, picker });
+    if (vault === undefined) {
+      return;
+    }
+    nodeNew = NoteUtils.create({
+      fname,
+      vault,
+      title: item.title,
+    });
+    const templateNote = await this.getTemplateForNewNote();
+    if (templateNote) {
+      TemplateUtils.applyTemplate({
+        templateNote,
+        targetNote: nodeNew,
+        engine,
+      });
+    }
+
+    // only enable selection 2 link
+    if (
+      picker.selectionProcessFunc !== undefined &&
+      picker.selectionProcessFunc.name === "selection2link"
+    ) {
+      nodeNew = (await picker.selectionProcessFunc(nodeNew)) as NoteProps;
+    }
+    const resp = await engine.writeNote(nodeNew);
+    if (resp.error) {
+      Logger.error({ ctx, error: resp.error });
+      return;
+    }
+
+    const uri = NoteUtils.getURI({
+      note: nodeNew,
+      wsRoot: engine.wsRoot,
+    });
+    return { uri, node: nodeNew, resp };
+  }
+
   /**
    * TODO: align note creation file name choosing for follow a single path when accepting new item.
    *
@@ -671,6 +741,17 @@ export class NoteLookupCommand extends BaseCommand<
     }
 
     return vault;
+  }
+
+  private async getTemplateForNewNote(): Promise<NoteProps | undefined> {
+    const selector = new QuickPickTemplateSelector();
+
+    const templateNote = await selector.getTemplate({
+      logger: this.L,
+      providerId: "createNewWithTemplate",
+    });
+
+    return templateNote;
   }
 
   private isJournalButtonPressed() {

@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs (enableExperimentalIFrameNoteRef) 1`] = `
+VFile {
+  "contents": "<h1 id=\\"with-override\\">With Override<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#with-override\\"></a></h1>
+<p></p><p><iframe class=\\"noteref-iframe\\" src=\\"/refs/bar---0\\" title=\\"Reference to the note called Bar\\">Your browser does not support iframes.</iframe></p><p></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs WHEN config sets enablePrettyRefs false AND note overrides to true THEN renders with pretty refs 1`] = `
 VFile {
   "contents": "<h1 id=\\"with-override\\">With Override<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#with-override\\"></a></h1>
@@ -90,6 +101,22 @@ VFile {
 }
 `;
 
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: true (enableExperimentalIFrameNoteRef) 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
+<p></p><p><iframe class=\\"noteref-iframe\\" src=\\"/refs/bar---0\\" title=\\"Reference to the note called Bar\\">Your browser does not support iframes.</iframe></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs config.publishing.enablePrettyRef: true 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
@@ -104,6 +131,48 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
 </div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"/notes/foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs enablePrettyRef defaults to true in both cases (enableExperimentalIFrameNoteRef) 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\">
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Bar</span></div>
+<a href=\\"bar\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div><p>bar body</p>
+</div></div><p></p><p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"foo.ch1\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`GIVEN dendronPub (old tests - need to be migrated) enablePrettyRefs enablePrettyRef defaults to true in both cases (enableExperimentalIFrameNoteRef) 2`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\">Foo<a aria-hidden=\\"true\\" class=\\"anchor-heading icon-link\\" href=\\"#foo\\"></a></h1>
+<p></p><p><iframe class=\\"noteref-iframe\\" src=\\"/refs/bar---0\\" title=\\"Reference to the note called Bar\\">Your browser does not support iframes.</iframe></p><p></p>
 <hr>
 <strong>Children</strong>
 <ol>

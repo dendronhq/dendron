@@ -7,7 +7,7 @@ import {
   NoteUtils,
   NoteFnameDictUtils,
   NoteDictsUtils,
-  IntermediateDendronConfig,
+  DendronConfig,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -182,7 +182,7 @@ export const engineSlice = createSlice({
       state.config = config;
       state.noteFName = NoteFnameDictUtils.createNotePropsByFnameDict(notes);
     },
-    setConfig: (state, action: PayloadAction<IntermediateDendronConfig>) => {
+    setConfig: (state, action: PayloadAction<DendronConfig>) => {
       state.config = action.payload;
     },
     setNotes: (state, action: PayloadAction<NotePropsByIdDict>) => {

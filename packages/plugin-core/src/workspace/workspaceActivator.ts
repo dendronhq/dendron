@@ -117,6 +117,7 @@ function analyzeWorkspace({ wsService }: { wsService: WorkspaceService }) {
     .catch((err) => {
       Sentry.captureException(err);
     });
+  wsService.getToplevelRepo();
 }
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {

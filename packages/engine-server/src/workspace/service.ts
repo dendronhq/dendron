@@ -876,6 +876,22 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return contributors.filter(isNotUndefined);
   }
 
+  async getToplevelRepo() {
+    // if self contained vault,
+    //   if tracked remotely, wsRoot should be a repo
+    //   else, nothing to get. undefined
+    // if not self contained,
+    //   if tracked remotely, wsRoot should be a repo
+    //   else, top level repo is ambiguous even if the vaults are remotely tracked.
+    const git = new Git({ localUrl: this.wsRoot });
+    try {
+      const remote = await git.getRemoteUrl();
+      console.log({ remote });
+    } finally {
+      console.log("foo");
+    }
+  }
+
   async commitAndAddAll({
     engine,
   }: {

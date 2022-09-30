@@ -332,7 +332,7 @@ export async function _activate(
       // show interactive elements when **extension starts**
       if (!opts?.skipInteractiveElements) {
         // check if localhost is blocked
-        await StartupUtils.showWhitelistingLocalhostDocsIfNecessary();
+        StartupUtils.showWhitelistingLocalhostDocsIfNecessary();
         // check for missing default config keys and prompt for a backfill.
         StartupUtils.showMissingDefaultConfigMessageIfNecessary({
           ext: ws,

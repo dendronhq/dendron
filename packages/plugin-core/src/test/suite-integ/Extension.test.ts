@@ -20,6 +20,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
 import * as vscode from "vscode";
+import os from "os";
 
 async function inactiveMessageTest(opts: {
   done: mocha.Done;
@@ -482,9 +483,13 @@ suite("localhost blocked on user's machine", () => {
     { timeout: 5e3 },
     () => {
       test("THEN dendron inits", async () => {
+        const pingArgs =
+          os.platform() === "win32"
+            ? "ping -n 1 127.0.0.1"
+            : "ping -c 1 127.0.0.1";
         sinon
           .stub(execa, "command")
-          .withArgs("ping 127.0.0.1")
+          .withArgs(pingArgs)
           .resolves({
             failed: false,
             stderr: Buffer.from(""),

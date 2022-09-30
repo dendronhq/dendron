@@ -208,6 +208,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         schemaDict[schema.root.id] = schema;
       });
 
+      // Write schema data prior to initializing notes, so that the schema
+      // information can correctly get applied to the notes.
+      const bulkWriteSchemaOpts = schemas.map((schema) => {
+        return { key: schema.root.id, schema };
+      });
+      this._schemaStore.bulkWriteMetadata(bulkWriteSchemaOpts);
+
       const { data: notes, error: noteErrors } = await this.initNotes(
         schemaDict
       );
@@ -230,10 +237,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         return { key: note.id, noteMeta };
       });
       this._noteStore.bulkWriteMetadata(bulkWriteOpts);
-      const bulkWriteSchemaOpts = schemas.map((schema) => {
-        return { key: schema.root.id, schema };
-      });
-      this._schemaStore.bulkWriteMetadata(bulkWriteSchemaOpts);
 
       const hookErrors: IDendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {

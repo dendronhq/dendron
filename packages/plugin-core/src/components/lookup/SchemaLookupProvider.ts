@@ -203,14 +203,18 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
             return SchemaUtils.getModuleRoot(ent);
           }
         );
-        picker.items = nodes.map((ent) => {
-          return DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot: this._extension.getDWorkspace().wsRoot,
-            props: ent,
-            schemas: engine.schemas,
-            vaults: ws.vaults,
-          });
-        });
+        picker.items = await Promise.all(
+          nodes.map(async (ent) => {
+            return DNodeUtils.enhancePropForQuickInputV3({
+              wsRoot: this._extension.getDWorkspace().wsRoot,
+              props: ent,
+              schema: ent.schema
+                ? (await engine.getSchema(ent.schema.moduleId)).data
+                : undefined,
+              vaults: ws.vaults,
+            });
+          })
+        );
         return;
       }
 

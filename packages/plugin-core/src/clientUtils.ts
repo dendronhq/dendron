@@ -14,7 +14,6 @@ import {
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { PickerUtilsV2 } from "./components/lookup/utils";
 import { _noteAddBehaviorEnum } from "./constants";
 import { ExtensionProvider } from "./ExtensionProvider";
 
@@ -33,11 +32,7 @@ type AddBehavior =
   | "childOfDomainNamespace";
 
 export class DendronClientUtilsV2 {
-  static genNotePrefix(
-    fname: string,
-    addBehavior: AddBehavior,
-    opts: { engine: DEngineClient }
-  ) {
+  static genNotePrefix(fname: string, addBehavior: AddBehavior) {
     let out: string;
     switch (addBehavior) {
       case "childOfDomain": {
@@ -45,22 +40,7 @@ export class DendronClientUtilsV2 {
         break;
       }
       case "childOfDomainNamespace": {
-        // out = "hello";
-        // const domain: NoteProps | undefined = undefined;
-        out = DNodeUtils.domainName(fname);
-        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const domain = NoteUtils.getNoteByFnameFromEngine({
-          fname,
-          engine: opts.engine,
-          vault,
-        });
-        if (domain && domain.schema) {
-          const smod = opts.engine.schemas[domain.schema.moduleId];
-          const schema = smod.schemas[domain.schema.schemaId];
-          if (schema && schema.data.namespace) {
-            out = NoteUtils.getPathUpTo(fname, 2);
-          }
-        }
+        out = NoteUtils.getPathUpTo(fname, 2);
         break;
       }
       case "childOfCurrent": {
@@ -163,13 +143,9 @@ export class DendronClientUtilsV2 {
       throw Error("Must be run from within a note");
     }
 
-    const engine = ExtensionProvider.getEngine();
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
-      addBehavior as AddBehavior,
-      {
-        engine,
-      }
+      addBehavior as AddBehavior
     );
 
     const noteDate = Time.now().toFormat(dateFormat);

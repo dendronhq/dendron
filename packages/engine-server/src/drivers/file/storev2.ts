@@ -721,7 +721,7 @@ export class FileStorage implements DStore {
       cache: notesCache,
       engine: this.engine,
       logger: this.logger,
-    }).parseFiles(noteFiles, vault, {
+    }).parseFiles(noteFiles, vault, this.schemas, {
       useSQLiteMetadataStore: this.config.workspace.metadataStore === "sqlite",
     });
 
@@ -1378,9 +1378,9 @@ export class FileStorage implements DStore {
     if (maybeNote) {
       note.schema = maybeNote.schema;
     } else {
-      const schemaMatch = SchemaUtils.matchPath({
+      const schemaMatch = await SchemaUtils.matchPath({
         notePath: note.fname,
-        schemaModDict: this.schemas,
+        engine: this.engine,
       });
       if (schemaMatch) {
         this.logger.info({

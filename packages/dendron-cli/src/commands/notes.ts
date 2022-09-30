@@ -302,7 +302,7 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
           // If note doesn't exist, create note with schema
           if (notes.length === 0) {
-            note = NoteUtils.createWithSchema({
+            note = await NoteUtils.createWithSchema({
               noteOpts: {
                 fname: query,
                 vault,

@@ -71,7 +71,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
       });
@@ -113,7 +113,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is NOT created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema).toBeFalsy();
       });
     }
@@ -156,7 +156,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is NOT created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema).toBeFalsy();
       });
     }
@@ -198,7 +198,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
 
@@ -247,7 +247,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
 
@@ -296,7 +296,7 @@ suite("Create Daily Journal Suite", function () {
         expect(traits.length === 1 && traits[0] === "journalNote").toBeTruthy();
 
         // Verify schema is created
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
 
@@ -344,7 +344,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["bar"];
+        const dailySchema = (await engine.getSchema("bar")).data!;
         expect(dailySchema.fname === "dendron.bar").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
       });
@@ -399,7 +399,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daisy"];
+        const dailySchema = (await engine.getSchema("daisy")).data!;
         expect(dailySchema.fname === "dendron.daisy").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
       });
@@ -437,7 +437,7 @@ suite("Create Daily Journal Suite", function () {
 
         // Verify schema is created
         const engine = ExtensionProvider.getEngine();
-        const dailySchema = engine.schemas["daily"];
+        const dailySchema = (await engine.getSchema("daily")).data!;
         expect(dailySchema.fname === "dendron.daily").toBeTruthy();
         expect(_.size(dailySchema.schemas) === 5).toBeTruthy();
         const numNotesBefore = (

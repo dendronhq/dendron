@@ -101,7 +101,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   ): Promise<boolean> {
     const dailyDomain = journalConfig.dailyDomain;
     if (
-      SchemaUtils.doesSchemaExist({
+      await SchemaUtils.doesSchemaExist({
         id: dailyDomain,
         engine: this._extension.getEngine(),
       })

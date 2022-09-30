@@ -336,9 +336,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         !_.isUndefined(queryUpToLastDot) &&
         !transformedQuery.wasMadeFromWikiLink
       ) {
-        const results = SchemaUtils.matchPath({
+        const results = await SchemaUtils.matchPath({
           notePath: queryUpToLastDot,
-          schemaModDict: engine.schemas,
+          engine,
         });
         // since namespace matches everything, we don't do queries on that
         if (results && !results.namespace) {
@@ -378,16 +378,19 @@ export class NoteLookupProvider implements ILookupProviderV3 {
             transformedQuery.originalQuery
           );
 
-          updatedItems = updatedItems.concat(
-            candidatesToAdd.map((ent) => {
+          const itemsToAdd = await Promise.all(
+            candidatesToAdd.map(async (ent) => {
               return DNodeUtils.enhancePropForQuickInputV3({
                 wsRoot,
                 props: ent,
-                schemas: engine.schemas,
+                schema: ent.schema
+                  ? (await engine.getSchema(ent.schema.moduleId)).data
+                  : undefined,
                 vaults,
               });
             })
           );
+          updatedItems = updatedItems.concat(itemsToAdd);
         }
       }
 

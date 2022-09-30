@@ -23,12 +23,12 @@ import {
   cleanName,
   DendronCompositeError,
   SchemaUtils,
-  SchemaModuleDict,
   string2Note,
   globMatch,
   IntermediateDendronConfig,
   RespWithOptError,
   asyncLoopOneAtATime,
+  SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -262,11 +262,9 @@ export class NoteParserV2 {
     const domains = notesById[rootNote.id].children.map(
       (ent) => notesById[ent]
     );
-    await Promise.all(
-      domains.map(async (domain) => {
-        return SchemaUtils.matchDomain(domain, notesById, schemas);
-      })
-    );
+    domains.map((domain) => {
+      SchemaUtils.matchDomain(domain, notesById, schemas);
+    });
 
     // Remove stale entries from cache
     unseenKeys.forEach((unseenKey) => {

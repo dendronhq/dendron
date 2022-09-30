@@ -2509,14 +2509,18 @@ suite("NoteLookupCommand", function () {
         const notesToSelect: NoteProps[] = (
           await engine.bulkGetNotes(["foo.ch1", "bar", "lorem", "ipsum"])
         ).data;
-        const selectedItems = notesToSelect.map((note) => {
-          return DNodeUtils.enhancePropForQuickInputV3({
-            props: note,
-            schemas: engine.schemas,
-            wsRoot,
-            vaults,
-          });
-        }) as NoteQuickInput[];
+        const selectedItems = (await Promise.all(
+          notesToSelect.map(async (note) => {
+            return DNodeUtils.enhancePropForQuickInputV3({
+              props: note,
+              schema: note.schema
+                ? (await engine.getSchema(note.schema.moduleId)).data
+                : undefined,
+              wsRoot,
+              vaults,
+            });
+          })
+        )) as NoteQuickInput[];
 
         const runOpts = {
           multiSelect: true,

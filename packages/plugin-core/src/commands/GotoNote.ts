@@ -288,7 +288,7 @@ export class GotoNoteCommand extends BasicCommand<
           // validate fname before creating new note
           const validationResp = NoteUtils.validateFname(fname);
           if (validationResp.isValid) {
-            const newNote = NoteUtils.createWithSchema({
+            const newNote = await NoteUtils.createWithSchema({
               noteOpts: {
                 fname,
                 vault,

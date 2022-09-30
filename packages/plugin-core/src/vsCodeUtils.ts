@@ -61,7 +61,14 @@ export class VSCodeUtils {
   }
 
   static closeAllEditors() {
-    return vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    const closeEditorsCmd = vscode.commands.executeCommand(
+      "workbench.action.closeAllEditors"
+    );
+    const closeGroupsCmd = vscode.commands.executeCommand(
+      "workbench.action.closeAllGroups"
+    );
+
+    return Promise.all([closeEditorsCmd, closeGroupsCmd]);
   }
 
   static createCancelSource(existingSource?: CancellationTokenSource) {

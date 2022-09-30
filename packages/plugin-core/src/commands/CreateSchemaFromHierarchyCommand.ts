@@ -221,7 +221,7 @@ export class UserQueries {
       return { stopReason: StopReason.NOTE_DID_NOT_HAVE_REQUIRED_DEPTH };
     }
 
-    if (PluginSchemaUtils.doesSchemaExist(hierarchy.topId())) {
+    if (await PluginSchemaUtils.doesSchemaExist(hierarchy.topId())) {
       // To avoid unpredictable conflicts of schemas: for now we will not allow
       // creation schemas for hierarchies that already have existing top
       // level schema id. Instead we will pop up error message with navigation

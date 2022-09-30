@@ -1,7 +1,6 @@
 /* eslint-disable no-throw-literal */
 // @ts-ignore
 import matter from "gray-matter";
-import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -14,6 +13,7 @@ import {
   TAGS_HIERARCHY,
 } from "./constants";
 import { DendronError } from "./error";
+import { NoteDictsUtils } from "./noteDictsUtils";
 import { Time } from "./time";
 import {
   DEngineClient,
@@ -24,11 +24,15 @@ import {
   DNodePropsQuickInputV2,
   DNoteLoc,
   NoteChangeEntry,
+  NoteDicts,
   NoteLocalConfig,
   NoteOpts,
   NoteProps,
   NotePropsByIdDict,
-  NoteDicts,
+  NotePropsMeta,
+  NoteQuickInputV2,
+  ReducedDEngine,
+  RespV3,
   SchemaData,
   SchemaModuleDict,
   SchemaModuleOpts,
@@ -37,11 +41,8 @@ import {
   SchemaProps,
   SchemaPropsDict,
   SchemaRaw,
-  NotePropsMeta,
-  NoteQuickInputV2,
-  RespV3,
-  ReducedDEngine,
 } from "./types";
+import { DVault } from "./types/DVault";
 import {
   DefaultMap,
   getSlugger,
@@ -51,8 +52,8 @@ import {
 } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
-import { NoteDictsUtils } from "./noteDictsUtils";
-import { DVault } from "./types/DVault";
+
+import YAML, { JSON_SCHEMA } from "js-yaml";
 
 export type ValidateFnameResp =
   | {
@@ -135,12 +136,12 @@ export class DNodeUtils {
 
   static enhancePropForQuickInput({
     props,
-    schemas,
+    schema,
     vaults,
     wsRoot,
   }: {
     props: DNodeProps;
-    schemas: SchemaModuleDict;
+    schema?: SchemaModuleProps;
     vaults: DVault[];
     wsRoot: string;
   }): DNodePropsQuickInputV2 {
@@ -156,8 +157,7 @@ export class DNodeUtils {
       const isRoot = DNodeUtils.isRoot(props);
       const label = isRoot ? "root" : props.fname;
       const detail = props.desc;
-      const sm = props.schema ? schemas[props.schema.moduleId] : undefined;
-      const description = NoteUtils.genSchemaDesc(props, sm) + vaultSuffix;
+      const description = NoteUtils.genSchemaDesc(props, schema) + vaultSuffix;
       const out = { ...props, label, detail, description };
       return out;
     } else {
@@ -170,9 +170,9 @@ export class DNodeUtils {
 
   static enhancePropForQuickInputV3(opts: {
     props: DNodeProps;
-    schemas: SchemaModuleDict;
     vaults: DVault[];
     wsRoot: string;
+    schema?: SchemaModuleProps;
     alwaysShow?: boolean;
   }): DNodePropsQuickInputV2 {
     const { alwaysShow } = _.defaults(opts, { alwaysShow: false });
@@ -187,18 +187,17 @@ export class DNodeUtils {
    */
   static enhancePropForQuickInputV4(opts: {
     props: NoteProps;
-    schemas: SchemaModuleDict;
+    schema?: SchemaModuleProps;
     alwaysShow?: boolean;
   }): NoteQuickInputV2 {
-    const { props, schemas } = opts;
+    const { props, schema } = opts;
     const vname = VaultUtils.getName(opts.props.vault);
     const vaultSuffix = `(${vname})`;
     if (opts.props.type === "note") {
       const isRoot = DNodeUtils.isRoot(props);
       const label = isRoot ? "root" : props.fname;
       const detail = props.desc;
-      const sm = props.schema ? schemas[props.schema.moduleId] : undefined;
-      const description = NoteUtils.genSchemaDesc(props, sm) + vaultSuffix;
+      const description = NoteUtils.genSchemaDesc(props, schema) + vaultSuffix;
       const out = { ...props, label, detail, description };
       return out;
     } else {
@@ -416,17 +415,17 @@ export class NoteUtils {
     return DNodeUtils.create({ ...cleanOpts, type: "note" });
   }
 
-  static createWithSchema({
+  static async createWithSchema({
     noteOpts,
     engine,
   }: {
     noteOpts: NoteOpts;
     engine: DEngineClient;
-  }): NoteProps {
+  }): Promise<NoteProps> {
     const note = NoteUtils.create(noteOpts);
-    const maybeMatch = SchemaUtils.matchPath({
+    const maybeMatch = await SchemaUtils.matchPath({
       notePath: noteOpts.fname,
-      schemaModDict: engine.schemas,
+      engine,
     });
     if (maybeMatch) {
       const { schema, schemaModule } = maybeMatch;
@@ -440,15 +439,15 @@ export class NoteUtils {
    * This is done before the stub note is accepted as a new item
    * and saved to the store
    */
-  static updateStubWithSchema(opts: {
+  static async updateStubWithSchema(opts: {
     stubNote: NoteProps;
     engine: DEngineClient;
-  }): NoteProps {
+  }): Promise<NoteProps> {
     const { stubNote, engine } = opts;
     const cleanStubNote = _.omit(stubNote, "stub");
-    const schemaMatch = SchemaUtils.matchPath({
+    const schemaMatch = await SchemaUtils.matchPath({
       notePath: cleanStubNote.fname,
-      schemaModDict: engine.schemas,
+      engine,
     });
     if (schemaMatch) {
       const { schema, schemaModule } = schemaMatch;
@@ -1566,17 +1565,18 @@ export class SchemaUtils {
     return path.join(root, fname + ".schema.yml");
   }
 
-  static doesSchemaExist({
+  static async doesSchemaExist({
     id,
     engine,
   }: {
     id: string;
     engine: DEngineClient;
   }) {
-    return !_.isUndefined(engine.schemas[id]);
+    const resp = await engine.getSchema(id);
+    return !_.isUndefined(resp.data);
   }
 
-  static getSchemaFromNote({
+  static async getSchemaFromNote({
     note,
     engine,
   }: {
@@ -1584,7 +1584,7 @@ export class SchemaUtils {
     engine: DEngineClient;
   }) {
     if (note.schema) {
-      return engine.schemas[note.schema.moduleId];
+      return (await engine.getSchema(note.schema.moduleId)).data;
     }
     return;
   }
@@ -1598,8 +1598,8 @@ export class SchemaUtils {
   };
 
   /**
-   * Matcn and assign schemas to all nodes within
-   * a domain
+   * Match and assign schemas to all nodes within a domain. Note - only use this
+   * during engine init where SchemaModuleDict is available.
    *
    * @param domain
    * @param notes
@@ -1669,30 +1669,30 @@ export class SchemaUtils {
   }
 
   //  ^dtaatxvjb4s3
-  static matchPath(opts: {
+  static async matchPath(opts: {
     notePath: string;
-    schemaModDict: SchemaModuleDict;
-  }): SchemaMatchResult | undefined {
-    const { notePath, schemaModDict } = opts;
+    engine: DEngineClient; //
+  }): Promise<SchemaMatchResult | undefined> {
+    const { notePath } = opts;
     const domainName = DNodeUtils.domainName(notePath);
-    const match = schemaModDict[domainName];
-    if (!match) {
+    const resp = await opts.engine.getSchema(domainName);
+    if (!resp.data) {
       return;
     } else {
-      const domainSchema = match.schemas[match.root.id];
+      const domainSchema = resp.data.schemas[resp.data.root.id];
       if (domainName.length === notePath.length) {
         return {
           schema: domainSchema,
           notePath,
           namespace: domainSchema.data.namespace || false,
-          schemaModule: match,
+          schemaModule: resp.data,
         };
       }
       return SchemaUtils.matchPathWithSchema({
         notePath,
         matched: "",
         schemaCandidates: [domainSchema],
-        schemaModule: match,
+        schemaModule: resp.data,
       });
     }
   }

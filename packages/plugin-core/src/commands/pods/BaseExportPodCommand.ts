@@ -283,10 +283,13 @@ export abstract class BaseExportPodCommand<
               const filteredPayload = opts.payload.filter(
                 (note) => note.fname !== savedNote.fname
               );
-              await this.executeExportNotes({
-                ...opts,
-                payload: filteredPayload.concat(savedNote),
-              });
+              // export only selection if present instead of entire body
+              const exportOpts =
+                await this.getPropsForSelectionScopeIfNecessary({
+                  ...opts,
+                  payload: filteredPayload.concat(savedNote),
+                });
+              await this.executeExportNotes(exportOpts);
             }
           }
         );
@@ -303,8 +306,9 @@ export abstract class BaseExportPodCommand<
 
       return true;
     } else {
+      const exportOpts = await this.getPropsForSelectionScopeIfNecessary(opts);
       // Save is not needed. Go straight to exporting
-      await this.executeExportNotes(opts);
+      await this.executeExportNotes(exportOpts);
       return false;
     }
   }
@@ -350,7 +354,7 @@ export abstract class BaseExportPodCommand<
     if (!maybeNote) {
       vscode.window.showErrorMessage("couldn't find the note somehow");
     }
-    return [maybeNote!];
+    return [maybeNote];
   }
 
   /**
@@ -376,5 +380,18 @@ export abstract class BaseExportPodCommand<
     return {
       exportScope: opts.config.exportScope,
     };
+  }
+
+  async getPropsForSelectionScopeIfNecessary(opts: {
+    config: Config;
+    payload: NoteProps[];
+  }) {
+    // if selection, only export the selection.
+    const activeRange = await VSCodeUtils.extractRangeFromActiveEditor();
+    const { document, range } = activeRange || {};
+    const selectedText = document ? document.getText(range).trim() : "";
+    if (selectedText || !_.isEmpty(selectedText))
+      opts.payload[0].body = selectedText;
+    return opts;
   }
 }

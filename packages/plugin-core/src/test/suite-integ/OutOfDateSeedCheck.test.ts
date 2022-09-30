@@ -12,11 +12,7 @@ import {
   detectOutOfDateSeeds,
   UPDATE_SEED_CONFIG_PROMPT,
 } from "../../commands/Sync";
-import {
-  ConfigUtils,
-  FOLDERS,
-  IntermediateDendronConfig,
-} from "@dendronhq/common-all";
+import { ConfigUtils, FOLDERS, DendronConfig } from "@dendronhq/common-all";
 import { PluginTestSeedUtils } from "../utils/TestSeedUtils";
 
 suite("GIVEN out of date seed check", function () {
@@ -67,7 +63,7 @@ suite("GIVEN out of date seed check", function () {
 
     test("THEN seed config is correctly updated", async () => {
       const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-      const conf = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+      const conf = DConfig.getRaw(wsRoot) as DendronConfig;
       const seed = ConfigUtils.getVaults(conf).find(
         (vault) => vault.seed === seedKey
       );

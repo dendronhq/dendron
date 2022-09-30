@@ -5,7 +5,7 @@ import {
   Disposable,
   DVault,
   InstallStatus,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteChangeEntry,
   NoteUtils,
@@ -145,12 +145,12 @@ export class EditorUtils {
 
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as IntermediateDendronConfig;
+  const config = readYAML(configPath) as DendronConfig;
   return config;
 };
 
 export const withConfig = (
-  func: (config: IntermediateDendronConfig) => IntermediateDendronConfig,
+  func: (config: DendronConfig) => DendronConfig,
   opts: { wsRoot: string }
 ) => {
   const config = getConfig(opts);
@@ -161,7 +161,7 @@ export const withConfig = (
 };
 
 export const writeConfig = (opts: {
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   wsRoot: string;
 }) => {
   const configPath = DConfig.configPath(opts.wsRoot);

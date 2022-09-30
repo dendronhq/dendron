@@ -1,4 +1,4 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -208,7 +208,7 @@ suite("CopyNoteRef", function () {
       "WHEN xvault link when allowed in config",
       {
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        modConfigCb: (config: IntermediateDendronConfig) => {
+        modConfigCb: (config: DendronConfig) => {
           ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
           return config;
         },
@@ -234,7 +234,7 @@ suite("CopyNoteRef", function () {
       "no xvault link when disabled in config",
       {
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        modConfigCb: (config: IntermediateDendronConfig) => {
+        modConfigCb: (config: DendronConfig) => {
           ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", false);
           return config;
         },

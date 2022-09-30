@@ -2,9 +2,9 @@ import {
   ConfigEvents,
   ConfigUtils,
   ConfirmStatus,
+  DendronConfig,
   ExtensionEvents,
   InstallStatus,
-  IntermediateDendronConfig,
   MigrationEvents,
   SurveyEvents,
   Time,
@@ -34,7 +34,7 @@ import { Logger } from "../logger";
 import { SurveyUtils } from "../survey";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { AnalyticsUtils } from "./analytics";
-import { ConfigMigrationUtils } from "./ConfigMigration";
+// import { ConfigMigrationUtils } from "./ConfigMigration";
 import semver from "semver";
 import os from "os";
 
@@ -106,7 +106,7 @@ export class StartupUtils {
     wsService: WorkspaceService;
     currentVersion: string;
     previousWorkspaceVersion: string;
-    dendronConfig: IntermediateDendronConfig;
+    dendronConfig: DendronConfig;
     maybeWsSettings?: WorkspaceSettings;
   }) {
     const workspaceInstallStatus = VSCodeUtils.getInstallStatusForWorkspace({
@@ -136,15 +136,6 @@ export class StartupUtils {
           event,
           MigrationUtils.getMigrationAnalyticProps(change)
         );
-      });
-    } else {
-      // no migration changes.
-      // see if we need to force a config migration.
-      // see [[Run Config Migration|dendron://dendron.docs/pkg.dendron-engine.t.upgrade.arch.lifecycle#run-migration]]
-      ConfigMigrationUtils.maybePromptConfigMigration({
-        dendronConfig,
-        wsService,
-        currentVersion,
       });
     }
   }

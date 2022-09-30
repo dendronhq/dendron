@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteTrait,
   OnCreateContext,
   onWillCreateProps,
@@ -12,12 +12,12 @@ export class MeetingNote implements NoteTrait {
   id: string = "meetingNote";
   getTemplateType: any;
 
-  _config: IntermediateDendronConfig;
+  _config: DendronConfig;
   _ext: IDendronExtension;
   _noConfirm: boolean = false;
 
   constructor(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     ext: IDendronExtension,
     noConfirm?: boolean
   ) {

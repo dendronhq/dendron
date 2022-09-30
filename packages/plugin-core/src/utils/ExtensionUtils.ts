@@ -4,9 +4,9 @@ import {
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
+  DendronConfig,
   getStage,
   InstallStatus,
-  IntermediateDendronConfig,
   TaskNoteUtils,
   Time,
   VaultUtils,
@@ -191,9 +191,7 @@ export class ExtensionUtils {
     return ExtensionUtils._TUTORIAL_IDS;
   }
 
-  static setWorkspaceContextOnActivate(
-    dendronConfig: IntermediateDendronConfig
-  ) {
+  static setWorkspaceContextOnActivate(dendronConfig: DendronConfig) {
     if (VSCodeUtils.isDevMode()) {
       vscode.commands.executeCommand(
         "setContext",
@@ -395,7 +393,7 @@ export class ExtensionUtils {
     const codeWorkspacePresent = await fs.pathExists(
       path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
     );
-    const publishigConfig = ConfigUtils.getPublishingConfig(dendronConfig);
+    const publishigConfig = ConfigUtils.getPublishing(dendronConfig);
     const siteUrl = publishigConfig.siteUrl;
     const publishingTheme = dendronConfig?.publishing?.theme;
     const previewTheme = dendronConfig?.preview?.theme;
@@ -408,7 +406,6 @@ export class ExtensionUtils {
 
     const trackProps = {
       duration: durationReloadWorkspace,
-      noCaching: dendronConfig.noCaching || false,
       numNotes,
       numNoteRefs,
       numWikilinks,

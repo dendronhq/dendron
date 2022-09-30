@@ -26,7 +26,15 @@ import {
   SearchMode,
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
+import { isWebUri } from "../util/regex";
 import {
+  DendronSiteConfig,
+  LegacyDuplicateNoteBehavior,
+  LegacyHierarchyConfig,
+} from "../types/configs/dendronConfigLegacy";
+import { DVault } from "../types/DVault";
+import {
+  DendronConfig,
   DendronCommandConfig,
   DendronPreviewConfig,
   DendronWorkspaceConfig,
@@ -39,15 +47,7 @@ import {
   NonNoteFileLinkAnchorType,
   NoteLookupConfig,
   ScratchConfig,
-} from "../types/intermediateConfigs";
-import { isWebUri } from "../util/regex";
-import {
-  DendronSiteConfig,
-  LegacyDuplicateNoteBehavior,
-  LegacyHierarchyConfig,
-} from "../types/configs/dendronConfigLegacy";
-import { DVault } from "../types/DVault";
-import { DendronConfig } from "../types/configs";
+} from "../types/configs";
 
 export {
   ok,
@@ -541,40 +541,6 @@ export type ConfigVaildationResp = {
 };
 
 export class ConfigUtils {
-  /**
-   * generates backwards compatible (v4) default config
-   * marking as @deprecated since this shouldn't be used anywhere
-   * other than legacy test codes
-   */
-  // static genDefaultV4Config(): StrictConfigV4 {
-  //   const common = {
-  //     useFMTitle: true,
-  //     useNoteTitleForLink: true,
-  //     mermaid: true,
-  //     useKatex: true,
-  //     dev: {
-  //       enablePreviewV2: true,
-  //     },
-  //     site: {
-  //       copyAssets: true,
-  //       siteHierarchies: ["root"],
-  //       siteRootDir: "docs",
-  //       usePrettyRefs: true,
-  //       title: "Dendron",
-  //       description: "Personal knowledge space",
-  //       siteLastModified: true,
-  //       gh_edit_branch: "main",
-  //     },
-  //   };
-  //   return {
-  //     version: 4,
-  //     ...common,
-  //     commands: genDefaultCommandConfig(),
-  //     workspace: genDefaultWorkspaceConfig(),
-  //     preview: genDefaultPreviewConfig(),
-  //   } as StrictConfigV4;
-  // }
-
   static genDefaultConfig(): DendronConfig {
     const common = {
       dev: {
@@ -649,18 +615,6 @@ export class ConfigUtils {
   static getPublishing(config: DendronConfig): DendronPublishingConfig {
     return ConfigUtils.getProp(config, "publishing");
   }
-
-  /**
-   * @deprecated This will be phased out once we fully migrate to v5 config.
-   * Use {@link ConfigUtils.getPublishing} to access publishing related configs
-   */
-  // static getSite(
-  //   config: DendronConfig
-  // ): DendronSiteConfig | undefined {
-  //   const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-  //   const configWithDefaults = _.defaultsDeep(config, v4DefaultConfig);
-  //   return configWithDefaults.site;
-  // }
 
   static getVaults(config: DendronConfig): DVault[] {
     return ConfigUtils.getWorkspace(config).vaults;

@@ -1,23 +1,19 @@
 import {
   CleanDendronPublishingConfig,
-  CleanDendronSiteConfig,
-  configIsV4,
   ConfigUtils,
   CONSTANTS,
   RespWithOptError,
   DeepPartial,
   DendronError,
   DendronPublishingConfig,
-  DendronSiteConfig,
   ErrorFactory,
   ErrorUtils,
   ERROR_STATUS,
   getStage,
   GithubEditViewModeEnum,
   IDendronError,
-  IntermediateDendronConfig,
   RespV3,
-  StrictConfigV5,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -31,7 +27,7 @@ export enum LocalConfigScope {
   GLOBAL = "GLOBAL",
 }
 
-let _dendronConfig: IntermediateDendronConfig | undefined;
+let _dendronConfig: DendronConfig | undefined;
 
 export class DConfig {
   static createSync({
@@ -39,11 +35,10 @@ export class DConfig {
     defaults,
   }: {
     wsRoot: string;
-    defaults?: DeepPartial<StrictConfigV5>;
+    defaults?: DeepPartial<DendronConfig>;
   }) {
     const configPath = DConfig.configPath(wsRoot);
-    const config: IntermediateDendronConfig =
-      ConfigUtils.genLatestConfig(defaults);
+    const config: DendronConfig = ConfigUtils.genLatestConfig(defaults);
     writeYAML(configPath, config);
     return config;
   }
@@ -67,17 +62,17 @@ export class DConfig {
     const config = readYAML(
       configPath,
       overwriteDuplcate ?? false
-    ) as Partial<IntermediateDendronConfig>;
+    ) as Partial<DendronConfig>;
     return config;
   }
 
   static getOrCreate(
     dendronRoot: string,
-    defaults?: DeepPartial<StrictConfigV5>
-  ): IntermediateDendronConfig {
+    defaults?: DeepPartial<DendronConfig>
+  ): DendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
     // Need merge here to recursively merge nested configs
-    let config: IntermediateDendronConfig = _.merge(
+    let config: DendronConfig = _.merge(
       ConfigUtils.genDefaultConfig(),
       defaults
     );
@@ -87,14 +82,12 @@ export class DConfig {
       config = {
         ...config,
         ...readYAML(configPath),
-      } as IntermediateDendronConfig;
+      } as DendronConfig;
     }
     return config;
   }
 
-  static getSiteIndex(
-    sconfig: DendronSiteConfig | DendronPublishingConfig
-  ): string {
+  static getSiteIndex(sconfig: DendronPublishingConfig): string {
     const { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
@@ -102,53 +95,6 @@ export class DConfig {
   /**
    * fill in defaults
    */
-
-  static cleanSiteConfig(config: DendronSiteConfig): CleanDendronSiteConfig {
-    const out: DendronSiteConfig = _.defaults(config, {
-      copyAssets: true,
-      usePrettyRefs: true,
-      siteNotesDir: "notes",
-      siteFaviconPath: "favicon.ico",
-      gh_edit_link: true,
-      gh_edit_link_text: "Edit this page on GitHub",
-      gh_edit_branch: "main",
-      gh_root: "docs/",
-      gh_edit_view_mode: "edit",
-      writeStubs: true,
-      description: "Personal knowledge space",
-    });
-    const { siteRootDir, siteHierarchies } = out;
-    let { siteIndex, siteUrl } = out;
-    if (process.env["SITE_URL"]) {
-      siteUrl = process.env["SITE_URL"];
-    }
-    if (!siteRootDir) {
-      throw new DendronError({ message: "siteRootDir is undefined" });
-    }
-    if (!siteUrl && getStage() === "dev") {
-      // this gets overridden in dev so doesn't matter
-      siteUrl = "https://foo";
-    }
-    if (!siteUrl) {
-      throw DendronError.createFromStatus({
-        status: ERROR_STATUS.INVALID_CONFIG,
-        message:
-          "siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl for more details",
-      });
-    }
-    if (_.size(siteHierarchies) < 1) {
-      throw DendronError.createFromStatus({
-        status: ERROR_STATUS.INVALID_CONFIG,
-        message: `siteHiearchies must have at least one hierarchy`,
-      });
-    }
-    siteIndex = this.getSiteIndex(config);
-    return {
-      ...out,
-      siteIndex,
-      siteUrl,
-    };
-  }
 
   static cleanPublishingConfig(
     config: DendronPublishingConfig
@@ -202,20 +148,17 @@ export class DConfig {
   }
 
   static setCleanPublishingConfig(opts: {
-    config: IntermediateDendronConfig;
-    cleanConfig: DendronSiteConfig | DendronPublishingConfig;
+    config: DendronConfig;
+    cleanConfig: DendronPublishingConfig;
   }) {
     const { config, cleanConfig } = opts;
-    const key = configIsV4(config) ? "site" : "publishing";
-    ConfigUtils.setProp(config, key, cleanConfig);
+    ConfigUtils.setProp(config, "publishing", cleanConfig);
   }
 
   /**
    * See if a local config file is present
    */
-  static searchLocalConfigSync(
-    wsRoot: string
-  ): RespV3<IntermediateDendronConfig> {
+  static searchLocalConfigSync(wsRoot: string): RespV3<DendronConfig> {
     const wsPath = path.join(wsRoot, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
     const globalPath = path.join(
       os.homedir(),
@@ -231,7 +174,7 @@ export class DConfig {
     }
     if (foundPath) {
       // TODO: do validation in the future
-      const data = readYAML(foundPath) as IntermediateDendronConfig;
+      const data = readYAML(foundPath) as DendronConfig;
       return { data };
     }
     return {
@@ -253,8 +196,8 @@ export class DConfig {
     }
     const configPath = DConfig.configPath(wsRoot);
     // TODO: validate
-    const config: IntermediateDendronConfig = _.defaultsDeep(
-      readYAML(configPath, true) as IntermediateDendronConfig,
+    const config: DendronConfig = _.defaultsDeep(
+      readYAML(configPath, true) as DendronConfig,
       ConfigUtils.genDefaultConfig()
     );
     _dendronConfig = config;
@@ -270,7 +213,7 @@ export class DConfig {
   static readConfigAndApplyLocalOverrideSync(
     wsRoot: string,
     useCache?: boolean
-  ): RespWithOptError<IntermediateDendronConfig> {
+  ): RespWithOptError<DendronConfig> {
     const config = this.readConfigSync(wsRoot, useCache);
     const maybeLocalConfig = this.searchLocalConfigSync(wsRoot);
 
@@ -311,7 +254,7 @@ export class DConfig {
     config,
   }: {
     wsRoot: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): Promise<void> {
     _dendronConfig = config;
     const configPath = DConfig.configPath(wsRoot);
@@ -324,7 +267,7 @@ export class DConfig {
     configScope,
   }: {
     wsRoot: string;
-    config: DeepPartial<IntermediateDendronConfig>;
+    config: DeepPartial<DendronConfig>;
     configScope: LocalConfigScope;
   }): Promise<void> {
     const configPath = DConfig.configOverridePath(wsRoot, configScope);
@@ -337,7 +280,7 @@ export class DConfig {
   static validateLocalConfig({
     config,
   }: {
-    config: DeepPartial<IntermediateDendronConfig>;
+    config: DeepPartial<DendronConfig>;
   }): RespV3<boolean> {
     if (config.workspace) {
       if (

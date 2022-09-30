@@ -104,9 +104,13 @@ export default function Note({
 
   const maybeCollection =
     note.custom?.has_collection && !_.isNull(collectionChildren)
-      ? collectionChildren.map((child: NoteProps) =>
-          DendronCollectionItem({ note: child, noteIndex })
-        )
+      ? collectionChildren.map((child: NoteProps) => (
+          <DendronCollectionItem
+            key={child.id}
+            note={child}
+            noteIndex={noteIndex}
+          />
+        ))
       : null;
 
   return (

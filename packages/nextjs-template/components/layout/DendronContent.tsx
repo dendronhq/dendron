@@ -1,6 +1,6 @@
 import React from "react";
 import { Divider } from "antd";
-import Layout, { Content, Footer } from "antd/lib/layout/layout";
+import { Content, Footer } from "antd/lib/layout/layout";
 import { DendronBreadCrumb } from "../DendronBreadCrumb";
 import { FooterText } from "../DendronNoteFooter";
 import { DENDRON_STYLE_CONSTANTS } from "../../styles/constants";

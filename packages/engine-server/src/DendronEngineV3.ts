@@ -1,16 +1,17 @@
 import {
+  BacklinkUtils,
   ConfigUtils,
   CONSTANTS,
-  RespWithOptError,
+  DeleteSchemaResp,
   DendronCompositeError,
   DendronError,
   DEngine,
   DEngineClient,
-  DeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
   DHookEntry,
   DLink,
+  DLinkUtils,
   DNodeUtils,
   DNoteLoc,
   DStore,
@@ -23,9 +24,11 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  FuseEngine,
+  FuseMetadataStore,
   GetDecorationsResp,
   GetNoteBlocksResp,
+  GetSchemaResp,
+  IDataQueryable,
   IDendronError,
   IFileStore,
   INoteStore,
@@ -36,21 +39,21 @@ import {
   NoteDicts,
   NoteDictsUtils,
   NoteFnameDictUtils,
-  NoteMetadataStore,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
-  QueryNotesResp,
   NoteStore,
   NoteUtils,
-  QueryNotesOpts,
+  QuerySchemaResp,
   RenameNoteOpts,
+  RenameNoteResp,
+  RenderNoteResp,
   RespV3,
+  RespWithOptError,
   SchemaMetadataStore,
   SchemaModuleDict,
   SchemaModuleProps,
-  QuerySchemaResp,
   SchemaStore,
   SchemaUtils,
   stringifyError,
@@ -60,12 +63,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
-  RenameNoteResp,
-  RenderNoteResp,
-  GetSchemaResp,
   WriteSchemaResp,
-  BacklinkUtils,
-  DLinkUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -75,13 +73,13 @@ import {
   NodeJSUtils,
   vault2Path,
 } from "@dendronhq/common-server";
+import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
 import { FileStorage } from "./drivers/file/storev2";
-import { LinkUtils } from "@dendronhq/unified";
 import { NodeJSFileStore } from "./store";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { EngineUtils } from "./utils/engineUtils";
@@ -92,6 +90,7 @@ type DendronEngineOptsV3 = {
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
   schemaStore: ISchemaStore<string>;
+  noteQueryEngine: IDataQueryable<string, NotePropsMeta[]>;
   logger: DLogger;
   config: IntermediateDendronConfig;
 };
@@ -99,7 +98,7 @@ type DendronEngineOptsV3 = {
 export class DendronEngineV3 extends EngineV3Base implements DEngine {
   public wsRoot: string;
   public store: DStore;
-  public fuseEngine: FuseEngine;
+  // public fuseEngine: FuseEngine;
   public hooks: DHookDict;
   private _fileStore: IFileStore;
   private _noteStore: INoteStore<string>;
@@ -108,11 +107,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   static _instance: DendronEngineV3 | undefined;
 
   constructor(props: DendronEngineOptsV3) {
-    super(props.noteStore, props.logger, props.vaults);
+    super(props.noteStore, props.noteQueryEngine, props.logger, props.vaults);
     this.wsRoot = props.wsRoot;
-    this.fuseEngine = new FuseEngine({
-      fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
-    });
+    // this.fuseEngine = new FuseEngine({
+    //   fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+    // });
     const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
     };
@@ -120,6 +119,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     this._fileStore = props.fileStore;
     this._noteStore = props.noteStore;
     this._schemaStore = props.schemaStore;
+    this._noteQueryEngine = props.noteQueryEngine;
 
     // TODO: remove after migration
     this.store = new FileStorage({
@@ -143,7 +143,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       vaults: ConfigUtils.getVaults(config),
       noteStore: new NoteStore(
         fileStore,
-        new NoteMetadataStore(),
+        new FuseMetadataStore(),
         URI.file(wsRoot)
       ),
       schemaStore: new SchemaStore(
@@ -151,6 +151,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         new SchemaMetadataStore(),
         URI.parse(wsRoot)
       ),
+      noteQueryEngine: new FuseMetadataStore(), // JYTODO: Arguments + init
       fileStore,
       logger: LOGGER,
       config,
@@ -229,8 +230,8 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         };
       }
 
-      this.fuseEngine.replaceNotesIndex(notes);
-      this.fuseEngine.replaceSchemaIndex(schemaDict);
+      // this.fuseEngine.replaceNotesIndex(notes);
+      // this.fuseEngine.replaceSchemaIndex(schemaDict);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
 
@@ -548,7 +549,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
 
     // Propragate metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
+    // await this.fuseEngine.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -767,10 +768,10 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       return { error: resp.error };
     }
     // Remove existing schema from fuse engine first
-    if (maybeSchema.data) {
-      this.fuseEngine.removeSchemaFromIndex(maybeSchema.data);
-    }
-    this.fuseEngine.addSchemaToIndex(schema);
+    // if (maybeSchema.data) {
+    //   this.fuseEngine.removeSchemaFromIndex(maybeSchema.data);
+    // }
+    // this.fuseEngine.addSchemaToIndex(schema);
     return { data: undefined };
   }
 
@@ -824,43 +825,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     this.logger.info({ ctx, msg: "exit" });
     return {
       data: schemas,
-    };
-  }
-
-  /**
-   * See {@link DEngine.queryNotes}
-   */
-  async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
-    const ctx = "DEngine:queryNotes";
-    const { qs, vault, onlyDirectChildren, originalQS } = opts;
-
-    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
-    // @ts-ignore
-    if (vault?.selfContained === "true" || vault?.selfContained === "false")
-      vault.selfContained = vault.selfContained === "true";
-
-    const noteIds = this.fuseEngine
-      .queryNote({
-        qs,
-        onlyDirectChildren,
-        originalQS,
-      })
-      .map((ent) => ent.id);
-
-    if (noteIds.length === 0) {
-      return { data: [] };
-    }
-
-    const responses = await this._noteStore.bulkGet(noteIds);
-    let notes = responses.map((resp) => resp.data).filter(isNotUndefined);
-    if (!_.isUndefined(vault)) {
-      notes = notes.filter((ent) => {
-        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
-      });
-    }
-    this.logger.info({ ctx, msg: "exit" });
-    return {
-      data: notes,
     };
   }
 

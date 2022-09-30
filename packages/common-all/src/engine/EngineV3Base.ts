@@ -6,18 +6,19 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { FuseEngine } from "../FuseEngine";
-import { INoteStore } from "../store";
+import { IDataQueryable, INoteStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
-  BulkWriteNotesResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
   DeleteNoteResp,
+  DLink,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNotesMetaResp,
   FindNotesResp,
+  GetNoteMetaResp,
   GetNoteResp,
   NoteChangeEntry,
   NoteProps,
@@ -29,8 +30,6 @@ import {
   RenameNoteResp,
   RespV3,
   WriteNoteResp,
-  GetNoteMetaResp,
-  DLink,
 } from "../types";
 import { DVault } from "../types/DVault";
 import { FindNoteOpts } from "../types/FindNoteOpts";
@@ -42,10 +41,11 @@ import { VaultUtils } from "../vault";
  * DendronEngineV3Web
  */
 export abstract class EngineV3Base implements ReducedDEngine {
-  protected abstract fuseEngine: FuseEngine;
+  // protected abstract fuseEngine: FuseEngine;
 
   constructor(
     protected noteStore: INoteStore<string>,
+    protected noteQueryEngine: IDataQueryable<string, NotePropsMeta[]>,
     protected logger: DLogger,
     public vaults: DVault[]
   ) {}
@@ -269,7 +269,6 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -291,37 +290,49 @@ export abstract class EngineV3Base implements ReducedDEngine {
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
 
-    const items = await this.fuseEngine.queryNote({
-      qs,
-      onlyDirectChildren,
-      originalQS,
-    });
+    const response = await this.noteQueryEngine.query(qs);
 
-    if (items.length === 0) {
-      return { data: [] };
-    }
+    response
+      .map(async (items) => {
+        if (items.length === 0) {
+          return { data: [] };
+        }
 
-    const notes = await Promise.all(
-      items.map((ent) => this.noteStore.get(ent.id)) // TODO: Should be using metadata instead
-    );
+        const notes = await Promise.all(
+          items.map((ent) => this.noteStore.get(ent.id)) // TODO: Should be using metadata instead
+        );
 
-    let modifiedNotes;
-    // let notes = items.map((ent) => this.notes[ent.id]);
-    // if (!_.isUndefined(vault)) {
-    modifiedNotes = notes
-      .filter((ent) => _.isUndefined(ent.error))
-      .map((resp) => resp.data!);
+        let modifiedNotes;
+        // let notes = items.map((ent) => this.notes[ent.id]);
+        // if (!_.isUndefined(vault)) {
+        modifiedNotes = notes
+          .filter((ent) => _.isUndefined(ent.error))
+          .map((resp) => resp.data!);
 
-    if (!_.isUndefined(vault)) {
-      modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqualV2(vault, ent.data!.vault)
-      );
-    }
+        if (!_.isUndefined(vault)) {
+          modifiedNotes = modifiedNotes.filter((ent) =>
+            VaultUtils.isEqualV2(vault, ent.data!.vault)
+          );
+        }
+      })
+      .mapErr((e) => {
+        // TODO: error handling
+      });
 
-    return {
-      // data: items,
-      data: modifiedNotes,
-    };
+    // const items = response.data;
+
+    // // JYTODO: filter for onlyDirectChildren
+
+    // // const items = await this.fuseEngine.queryNote({
+    // //   qs,
+    // //   onlyDirectChildren,
+    // //   originalQS,
+    // // });
+
+    // return {
+    //   // data: items,
+    //   data: modifiedNotes,
+    // };
   }
 
   /**

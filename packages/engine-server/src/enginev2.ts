@@ -221,9 +221,8 @@ export class DendronEngineV2 implements DEngine {
     this.store.vaults = vaults;
   }
 
-  /**
-   * Does not throw error but returns it
-   */
+  // Instead of explicitly exposing init here, this can be moved into the
+  // injection layer / factory method.
   async init(): Promise<DEngineInitResp> {
     const ctx = "Engine:init";
     const defaultResp = {

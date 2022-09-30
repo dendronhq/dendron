@@ -12,9 +12,8 @@ import {
   SchemaProps,
 } from "./foundation";
 import { DHookDict } from "./hooks";
-import { IntermediateDendronConfig } from "./intermediateConfigs";
 import { VSRange } from "./compat";
-import { Decoration, Diagnostic } from ".";
+import { Decoration, DendronConfig, Diagnostic } from ".";
 import { DendronASTDest, ProcFlavor } from "./unified";
 import { FindNoteOpts } from "./FindNoteOpts";
 import { DVault } from "./DVault";
@@ -262,7 +261,7 @@ export type DEngineInitPayload = {
   notes: NotePropsByIdDict;
   wsRoot: string;
   vaults: DVault[];
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 };
 export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
@@ -584,7 +583,7 @@ export type WorkspaceVault = {
 export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
-  dendronConfig?: IntermediateDendronConfig;
+  dendronConfig?: DendronConfig;
 };
 
 // === Pods
@@ -774,7 +773,7 @@ export type GraphViewMessage = DMessage<
 export type ConfigureUIMessage = DMessage<
   ConfigureUIMessageType,
   {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }
 >;
 

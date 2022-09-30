@@ -3,14 +3,12 @@
 export * from "./compat";
 export * from "./foundation";
 export * from "./hooks";
-export * from "./intermediateConfigs";
 export * from "./noteTrait";
 export * from "./seed";
 export * from "./typesv2";
 export * from "./DWorkspaceV2";
 export * from "./foundation";
 export * from "./seed";
-export * from "./intermediateConfigs";
 export * from "./compat";
 export * from "./editor";
 export * from "./lookup";
@@ -24,6 +22,7 @@ export * from "./DVault";
 export * from "./DWorkspace";
 export * from "./FindNoteOpts";
 export * from "./SeedEntry";
+export * from "./configs";
 
 export type Stage = "dev" | "prod" | "test";
 

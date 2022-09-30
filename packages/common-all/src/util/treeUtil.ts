@@ -7,7 +7,7 @@ import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebar, SidebarItem } from "../sidebar";
 
-type TreeMenuNodeIcon = "bookOutlined" | "numberOutlined" | "plusOutlined";
+type TreeMenuNodeIcon = "numberOutlined" | "plusOutlined";
 
 export type TreeMenuNode = {
   key: string;
@@ -24,11 +24,7 @@ const treeMenuNodeSchema: z.ZodType<TreeMenuNode> = z.lazy(() =>
     key: z.string(),
     title: z.string(),
     icon: z
-      .union([
-        z.literal("bookOutlined"),
-        z.literal("numberOutlined"),
-        z.literal("plusOutlined"),
-      ])
+      .union([z.literal("numberOutlined"), z.literal("plusOutlined")])
       .nullable(),
     hasTitleNumberOutlined: z.boolean(),
     vaultName: z.string(),
@@ -93,9 +89,7 @@ export class TreeUtils {
 
       let icon = null;
 
-      if (note.schema) {
-        icon = "bookOutlined" as const;
-      } else if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
+      if (note.fname.toLowerCase() === TAGS_HIERARCHY_BASE) {
         icon = "numberOutlined" as const;
       } else if (note.stub) {
         icon = "plusOutlined" as const;

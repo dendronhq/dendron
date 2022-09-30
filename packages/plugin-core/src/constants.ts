@@ -173,7 +173,6 @@ type CommandEntry = {
 const CMD_PREFIX = "Dendron:";
 export const ICONS = {
   STUB: "gist-new",
-  SCHEMA: "repo",
   LINK_CANDIDATE: "debug-disconnect",
   WIKILINK: "link",
 };

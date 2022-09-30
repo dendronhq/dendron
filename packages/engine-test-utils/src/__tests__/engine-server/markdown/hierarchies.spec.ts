@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDictsUtils,
   NoteProps,
 } from "@dendronhq/common-all";
@@ -94,7 +94,7 @@ describe("hierarchies", () => {
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const config: IntermediateDendronConfig = {
+      const config: DendronConfig = {
         ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplay: false,
       };
@@ -184,7 +184,7 @@ describe("hierarchies", () => {
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const config: IntermediateDendronConfig = {
+      const config: DendronConfig = {
         ...DConfig.readConfigSync(engine.wsRoot),
         hierarchyDisplayTitle: "Better Children",
       };

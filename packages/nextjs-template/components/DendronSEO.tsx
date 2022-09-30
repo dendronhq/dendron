@@ -1,7 +1,7 @@
 import {
   DendronSiteConfig,
   DendronPublishingConfig,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
   PublishUtils,
   SEOProps,
@@ -50,7 +50,7 @@ export default function DendronSEO({
   config,
 }: {
   note: NoteProps;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 }) {
   const dendronRouter = useDendronRouter();
   const path = dendronRouter.router.asPath;

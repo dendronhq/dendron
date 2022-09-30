@@ -6,7 +6,7 @@ import {
   DEngineClient,
   DVault,
   DWorkspace,
-  IntermediateDendronConfig,
+  DendronConfig,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
@@ -40,9 +40,7 @@ import sinon, { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
-export type ModConfigCb = (
-  config: IntermediateDendronConfig
-) => IntermediateDendronConfig;
+export type ModConfigCb = (config: DendronConfig) => DendronConfig;
 
 export type TestSetupWorkspaceOpts = {
   /**
@@ -169,7 +167,7 @@ export async function setupWS(opts: {
   const vaultsConfig = ConfigUtils.getVaults(config);
   const sortedVaultsConfig = _.sortBy(vaultsConfig, "fsPath");
   ConfigUtils.setVaults(config, sortedVaultsConfig);
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   if (publishingConfig.duplicateNoteBehavior) {
     const sortedPayload = (
       publishingConfig.duplicateNoteBehavior.payload as string[]

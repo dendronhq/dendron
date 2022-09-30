@@ -72,7 +72,7 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       note,
       engine,
       config,
-      config.vaults
+      config.workspace.vaults
     );
 
     // Also include children to render the 'children' hierarchy at the footer of the page:

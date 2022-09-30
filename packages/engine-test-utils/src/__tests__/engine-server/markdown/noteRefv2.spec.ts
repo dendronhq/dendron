@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   DendronASTDest,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDictsUtils,
   NoteProps,
   ProcFlavor,
@@ -570,7 +570,7 @@ describe("noteRefV2", () => {
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
-        const configOverride: IntermediateDendronConfig = {
+        const configOverride: DendronConfig = {
           ...DConfig.readConfigSync(wsRoot),
           useFMTitle: true,
         };
@@ -591,7 +591,7 @@ describe("noteRefV2", () => {
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
-        const configOverride: IntermediateDendronConfig = {
+        const configOverride: DendronConfig = {
           ...DConfig.readConfigSync(wsRoot),
           useNoteTitleForLink: true,
         };

@@ -2,7 +2,7 @@ import {
   ConfigUtils,
   DEngineClient,
   DVault,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDicts,
   NoteDictsUtils,
   NoteProps,
@@ -123,7 +123,7 @@ async function createProc({
 }: WorkspaceOpts & {
   linkText: string;
   fname: string;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   noteToRender: NoteProps;
   parsingDependenciesByNoteProps?: NoteProps[];
 }) {
@@ -1204,7 +1204,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             },
             noteCacheForRenderDict,
           }).process("![[dupe]]");
-          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          const publishingConfig = ConfigUtils.getPublishing(config);
           const dupNoteVaultPayload = publishingConfig.duplicateNoteBehavior
             ?.payload as string[];
           await checkVFile(out as any, `dupe in ${dupNoteVaultPayload[0]}`);

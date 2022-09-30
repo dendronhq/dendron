@@ -65,8 +65,9 @@ function footnoteDef2html(definition: FootnoteDefinition) {
 const plugin: Plugin = function (this: Unified.Processor, _opts?: PluginOpts) {
   const proc = this;
   const { config } = MDUtilsV5.getProcData(this);
-  let hierarchyDisplayTitle = config?.hierarchyDisplayTitle || "Children";
-  let hierarchyDisplay = config?.hierarchyDisplay;
+  let hierarchyDisplayTitle =
+    config?.publishing.hierarchyDisplayTitle || "Children";
+  let hierarchyDisplay = config?.publishing.enableHierarchyDisplay;
   if (MDUtilsV5.shouldApplyPublishingRules(proc)) {
     const hierarchyConfigForPublishing =
       ConfigUtils.getHierarchyDisplayConfigForPublishing(config);

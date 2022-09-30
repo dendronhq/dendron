@@ -1,8 +1,4 @@
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  URI,
-} from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig, URI } from "@dendronhq/common-all";
 import {
   PublishCLICommand,
   PublishCLICommandCLIOpts,
@@ -181,7 +177,7 @@ describe("WHEN run `dendron publish build`", () => {
           expect(fs.existsSync(dataDir)).toBeTruthy();
 
           const cpath = NextjsExportPodUtils.getDendronConfigPath(dest);
-          const config = fs.readJSONSync(cpath) as IntermediateDendronConfig;
+          const config = fs.readJSONSync(cpath) as DendronConfig;
           expect(config.publishing!.siteUrl).toEqual(siteUrlOverride);
         },
         {

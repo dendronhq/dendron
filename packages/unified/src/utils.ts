@@ -4,7 +4,7 @@ import {
   FIFOQueue,
   getSlugger,
   getStage,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -237,10 +237,7 @@ export class MdastUtils {
 }
 
 export class PublishUtils {
-  static getAbsUrlForAsset(opts: {
-    suffix?: string;
-    config: IntermediateDendronConfig;
-  }) {
+  static getAbsUrlForAsset(opts: { suffix?: string; config: DendronConfig }) {
     const suffix = opts.suffix || "";
     const { config } = opts;
     const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
@@ -256,8 +253,8 @@ export class PublishUtils {
     return out;
   }
 
-  static getSiteUrl = (config: IntermediateDendronConfig) => {
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  static getSiteUrl = (config: DendronConfig) => {
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (getStage() !== "dev") {
       const siteUrl = process.env["SITE_URL"] || publishingConfig.siteUrl;
       return siteUrl;

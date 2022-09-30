@@ -1,11 +1,9 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig } from "@dendronhq/common-all";
 import type { DeepPartial } from "@reduxjs/toolkit";
 
-function getConfig(
-  override?: DeepPartial<IntermediateDendronConfig>
-): IntermediateDendronConfig {
+function getConfig(override?: DeepPartial<DendronConfig>): DendronConfig {
   const config = ConfigUtils.genDefaultConfig();
-  return { ...config, ...override } as IntermediateDendronConfig;
+  return { ...config, ...override } as DendronConfig;
 }
 
 describe("ConfigUtils", () => {
@@ -13,13 +11,6 @@ describe("ConfigUtils", () => {
     describe("WHEN config has no difference", () => {
       test("THEN correctly outputs no change", () => {
         const config = getConfig();
-        const output = ConfigUtils.findDifference({ config });
-        expect(output.length).toEqual(0);
-      });
-    });
-    describe("WHEN v4 config is given", () => {
-      test("THEN return empty list", () => {
-        const config = ConfigUtils.genDefaultV4Config();
         const output = ConfigUtils.findDifference({ config });
         expect(output.length).toEqual(0);
       });

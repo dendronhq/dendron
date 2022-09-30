@@ -3,7 +3,7 @@ import {
   DendronError,
   DVault,
   ERROR_SEVERITY,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   isWebUri,
   NoteDictsUtils,
@@ -157,7 +157,7 @@ class NodeUrlHandler {
     if (!isWebUri(node.url) && !NodeUrlHandler.isSamePageHeaderUrl(node.url)) {
       const { config } = MDUtilsV5.getProcData(proc);
       //handle assetPrefix
-      const publishingConfig = ConfigUtils.getPublishingConfig(config);
+      const publishingConfig = ConfigUtils.getPublishing(config);
       const assetsPrefix = MDUtilsV5.isV5Active(proc)
         ? publishingConfig.assetsPrefix
         : cOpts?.assetsPrefix;
@@ -177,7 +177,7 @@ function shouldInsertTitle({ proc }: { proc: Processor }) {
   if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
     insertTitle = false;
   } else {
-    const config = data.config as IntermediateDendronConfig;
+    const config = data.config as DendronConfig;
     const shouldApplyPublishRules = MDUtilsV5.shouldApplyPublishingRules(proc);
     insertTitle = ConfigUtils.getEnableFMTitle(config, shouldApplyPublishRules);
   }
@@ -590,7 +590,7 @@ function linkExtras({
   config,
 }: {
   note?: NoteProps;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 }): {
   before: any[];
   after: any[];

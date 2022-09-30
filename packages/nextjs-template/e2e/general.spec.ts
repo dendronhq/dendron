@@ -38,7 +38,7 @@ test.describe("GIVEN default viewport", () => {
     ]);
   });
 
-  test("THEN `NEXT_PUBLIC_ASSET_PREFIX` control path generatoin", async ({
+  test("THEN check if `NEXT_PUBLIC_ASSET_PREFIX` gets considered", async ({
     page,
     url,
     options: { env },

@@ -131,6 +131,7 @@ export enum SurveyEvents {
 
 export enum GitEvents {
   ContributorsFound = "ContributorsFound",
+  TopLevelRepoFound = "TopLevelRepoFound",
 }
 
 export enum ConfigEvents {

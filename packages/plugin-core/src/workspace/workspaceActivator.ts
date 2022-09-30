@@ -15,7 +15,7 @@ import {
   VSCodeEvents,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { getDurationMilliseconds, GitUtils } from "@dendronhq/common-server";
 import {
   HistoryService,
   MetadataService,
@@ -45,6 +45,7 @@ import { WorkspaceInitializer } from "./workspaceInitializer";
 import { CreateNoteCommand } from "../commands/CreateNoteCommand";
 import { container } from "tsyringe";
 import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
+import SparkMD5 from "spark-md5";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -117,7 +118,17 @@ function analyzeWorkspace({ wsService }: { wsService: WorkspaceService }) {
     .catch((err) => {
       Sentry.captureException(err);
     });
-  wsService.getToplevelRepo();
+  wsService.getToplevelRemoteUrl().then((remoteUrl) => {
+    if (remoteUrl !== undefined) {
+      const [protocol, provider, owner, repo] = GitUtils.parseGitUrl(remoteUrl);
+      const payload = {
+        protocol: protocol.replace(":", ""),
+        provider,
+        path: SparkMD5.hash(`${owner}/${repo}.git`),
+      };
+      AnalyticsUtils.track(GitEvents.TopLevelRepoFound, payload);
+    }
+  });
 }
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {

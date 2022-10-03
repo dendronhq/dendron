@@ -15,7 +15,7 @@ import { WSUtilsV2 } from "../WSUtilsV2";
 import { BasicCommand } from "./base";
 import * as vscode from "vscode";
 
-type CommandInput = any;
+type CommandInput = CommandOpts;
 
 type CommandOpts = {
   templateNote: NoteProps;
@@ -48,8 +48,8 @@ export class ApplyTemplateCommand extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const targetNote = WSUtilsV2.instance().getActiveNote();
-    if (!targetNote) {
+    const targetNote = await WSUtilsV2.instance().getActiveNote();
+    if (_.isUndefined(targetNote)) {
       throw new DendronError({ message: "No Dendron note open" });
     }
 
@@ -58,6 +58,9 @@ export class ApplyTemplateCommand extends BasicCommand<
       logger: this.L,
       providerId: APPLY_TEMPLATE_LOOKUP_ID,
     });
+    if (_.isUndefined(templateNote)) {
+      throw new DendronError({ message: `Template not found` });
+    }
 
     return { templateNote, targetNote };
   }

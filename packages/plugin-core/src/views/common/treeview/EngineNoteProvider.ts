@@ -257,8 +257,6 @@ export class EngineNoteProvider
     });
     if (note.stub) {
       tn.iconPath = new ThemeIcon(ICONS.STUB);
-    } else if (note.schema) {
-      tn.iconPath = new ThemeIcon(ICONS.SCHEMA);
     }
 
     this._tree[note.id] = tn;

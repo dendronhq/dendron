@@ -2,7 +2,6 @@ import {
   DownOutlined,
   RightOutlined,
   UpOutlined,
-  BookOutlined,
   PlusOutlined,
   NumberOutlined,
 } from "@ant-design/icons";
@@ -273,9 +272,7 @@ function treeMenuNode2DataNode({
   return roots
     .map((node: TreeMenuNode) => {
       let icon;
-      if (node.icon === "bookOutlined") {
-        icon = <BookOutlined />;
-      } else if (node.icon === "numberOutlined") {
+      if (node.icon === "numberOutlined") {
         icon = <NumberOutlined />;
       } else if (node.icon === "plusOutlined") {
         icon = <PlusOutlined />;
@@ -299,9 +296,9 @@ function treeMenuNode2DataNode({
         icon,
         children: node.children
           ? treeMenuNode2DataNode({
-            roots: node.children,
-            showVaultName,
-          })
+              roots: node.children,
+              showVaultName,
+            })
           : [],
       };
     })

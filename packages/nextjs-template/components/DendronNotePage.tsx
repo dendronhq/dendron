@@ -128,7 +128,7 @@ export default function Note({
               <DendronNoteGiscusWidget note={note} config={config} />
             </Col>
             <Col xs={0} md={6}>
-              <DendronTOC note={note} />
+              <DendronTOC note={note} offsetTop={HEADER.HEIGHT} />
             </Col>
           </Row>
         </Col>

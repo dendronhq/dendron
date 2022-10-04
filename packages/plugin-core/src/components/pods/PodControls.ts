@@ -482,7 +482,10 @@ export class PodUIControls {
       },
     ];
     // Cannot have clipboard be the destination on a multi-note export
-    if (exportScope === PodExportScope.Note) {
+    if (
+      exportScope === PodExportScope.Note ||
+      exportScope === PodExportScope.Selection
+    ) {
       const picked = await vscode.window.showQuickPick(items);
 
       if (!picked) {
@@ -529,6 +532,9 @@ export class PodUIControls {
 
       case PodExportScope.Workspace:
         return "Exports all notes in the Dendron workspace";
+
+      case PodExportScope.Selection:
+        return "Export the selection from currently opened note";
 
       default:
         assertUnreachable(scope);

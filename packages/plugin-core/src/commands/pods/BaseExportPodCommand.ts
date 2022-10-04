@@ -89,7 +89,8 @@ export abstract class BaseExportPodCommand<
   }) {
     if (
       opts.destination === "clipboard" &&
-      opts.exportScope !== PodExportScope.Note
+      opts.exportScope !== PodExportScope.Note &&
+      opts.exportScope !== PodExportScope.Selection
     ) {
       throw new DendronError({
         message:
@@ -177,6 +178,14 @@ export abstract class BaseExportPodCommand<
         }
         break;
       }
+      case PodExportScope.Selection: {
+        payload = await this.getPropsForSelectionScope();
+
+        if (!payload) {
+          return;
+        }
+        break;
+      }
       default:
         assertUnreachable(inputs.exportScope);
     }
@@ -206,6 +215,7 @@ export abstract class BaseExportPodCommand<
 
         switch (opts.config.exportScope) {
           case PodExportScope.Note:
+          case PodExportScope.Selection:
             this.saveActiveDocumentBeforeExporting(opts);
             break;
           case PodExportScope.Vault:
@@ -283,13 +293,18 @@ export abstract class BaseExportPodCommand<
               const filteredPayload = opts.payload.filter(
                 (note) => note.fname !== savedNote.fname
               );
-              // export only selection if present instead of entire body
-              const exportOpts =
-                await this.getPropsForSelectionScopeIfNecessary({
-                  ...opts,
-                  payload: filteredPayload.concat(savedNote),
-                });
-              await this.executeExportNotes(exportOpts);
+              // if export scope is selection, export only the selection
+              if (opts.config.exportScope === PodExportScope.Selection) {
+                const selectionPayload = await this.getPropsForSelectionScope(
+                  filteredPayload.concat(savedNote)
+                );
+                if (selectionPayload) {
+                  opts.payload = selectionPayload;
+                  await this.executeExportNotes(opts);
+                }
+              } else {
+                await this.executeExportNotes(opts);
+              }
             }
           }
         );
@@ -306,9 +321,8 @@ export abstract class BaseExportPodCommand<
 
       return true;
     } else {
-      const exportOpts = await this.getPropsForSelectionScopeIfNecessary(opts);
       // Save is not needed. Go straight to exporting
-      await this.executeExportNotes(exportOpts);
+      await this.executeExportNotes(opts);
       return false;
     }
   }
@@ -382,16 +396,22 @@ export abstract class BaseExportPodCommand<
     };
   }
 
-  async getPropsForSelectionScopeIfNecessary(opts: {
-    config: Config;
-    payload: NoteProps[];
-  }) {
+  async getPropsForSelectionScope(payload?: NoteProps[]) {
+    const noteProps = payload || (await this.getPropsForNoteScope());
+    if (!noteProps) {
+      return;
+    }
     // if selection, only export the selection.
     const activeRange = await VSCodeUtils.extractRangeFromActiveEditor();
     const { document, range } = activeRange || {};
     const selectedText = document ? document.getText(range).trim() : "";
-    if (selectedText || !_.isEmpty(selectedText))
-      opts.payload[0].body = selectedText;
-    return opts;
+    if (!selectedText) {
+      vscode.window.showWarningMessage(
+        "Please select the text in note to export"
+      );
+      return;
+    }
+    noteProps[0].body = selectedText;
+    return noteProps;
   }
 }

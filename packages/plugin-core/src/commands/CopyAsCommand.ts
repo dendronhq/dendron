@@ -52,7 +52,7 @@ export class CopyAsCommand extends BasicCommand<
       case CopyAsFormat.JSON: {
         const config: JSONV2PodConfig = {
           destination: "clipboard",
-          exportScope: PodExportScope.Note,
+          exportScope: PodExportScope.Selection,
           podType: PodV2Types.JSONExportV2,
           podId: "copyAs.json", // dummy value, required property
         };
@@ -61,9 +61,10 @@ export class CopyAsCommand extends BasicCommand<
       case CopyAsFormat.MARKDOWN: {
         const config: MarkdownV2PodConfig = {
           destination: "clipboard",
-          exportScope: PodExportScope.Note,
+          exportScope: PodExportScope.Selection,
           podType: PodV2Types.MarkdownExportV2,
           podId: "copyAs.markdown", // dummy value, required property
+          addFrontmatterTitle: false,
         };
         return PodCommandFactory.createPodCommandForStoredConfig({ config });
       }

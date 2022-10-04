@@ -270,7 +270,7 @@ suite("BaseExportPodCommand", function () {
     );
 
     describeSingleWS(
-      "WHEN exporting a note with selection",
+      "WHEN exporting with selection scope",
       {
         postSetupHook: ENGINE_HOOKS.setupBasic,
       },
@@ -292,17 +292,11 @@ suite("BaseExportPodCommand", function () {
           }
 
           const payload = await cmd.enrichInputs({
-            exportScope: PodExportScope.Note,
+            exportScope: PodExportScope.Selection,
           });
           expect((payload?.payload as NoteProps[])[0].fname).toEqual("root");
           expect((payload?.payload as NoteProps[]).length).toEqual(1);
-
-          if (payload) {
-            const result = await cmd.getPropsForSelectionScopeIfNecessary(
-              payload
-            );
-            expect(result.payload[0].body).toEqual("# Welcome to Dendron");
-          }
+          expect(payload?.payload[0].body).toEqual("# Welcome to Dendron");
         });
       }
     );

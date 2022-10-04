@@ -10,7 +10,6 @@ import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -177,7 +176,10 @@ suite("GIVEN ReferenceProvider", function () {
           const links = await provideForNote(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
+              NoteUtils.getFullPath({
+                note,
+                wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+              })
             )
           );
           done();
@@ -207,7 +209,10 @@ suite("GIVEN ReferenceProvider", function () {
           const links = await provideForNote(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithTarget1, noteWithTarget2].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
+              NoteUtils.getFullPath({
+                note,
+                wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+              })
             )
           );
           done();
@@ -235,7 +240,10 @@ suite("GIVEN ReferenceProvider", function () {
           const links = await provideForNote(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
+              NoteUtils.getFullPath({
+                note,
+                wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+              })
             )
           );
           done();
@@ -264,7 +272,10 @@ suite("GIVEN ReferenceProvider", function () {
           const links = await provideForNote(editor);
           expect(links!.map((l) => l.uri.fsPath)).toEqual(
             [noteWithLink].map((note) =>
-              NoteUtils.getFullPath({ note, wsRoot: getDWorkspace().wsRoot })
+              NoteUtils.getFullPath({
+                note,
+                wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
+              })
             )
           );
           done();

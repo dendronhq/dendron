@@ -13,8 +13,8 @@ import { DENDRON_COMMANDS } from "../constants";
 import { showMessage } from "../utils";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOpts = CommandInput & { noteByName: string; config: any };
 
@@ -29,6 +29,13 @@ export class PublishPodCommand extends BaseCommand<
   CommandInput
 > {
   key = DENDRON_COMMANDS.PUBLISH_POD.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     const pods = getAllPublishPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));
@@ -41,7 +48,7 @@ export class PublishPodCommand extends BaseCommand<
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
-    const podsDir = getExtension().podsDir;
+    const podsDir = this.extension.podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (maybeConfig.error && PodUtils.hasRequiredOpts(podClass)) {
@@ -67,9 +74,14 @@ export class PublishPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const { podChoice, config, noteByName } = opts;
 
-    const { engine, wsRoot, config: dendronConfig, vaults } = getDWorkspace();
+    const {
+      engine,
+      wsRoot,
+      config: dendronConfig,
+      vaults,
+    } = this.extension.getDWorkspace();
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
-    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const vault = PickerUtilsV2.getVaultForOpenEditor();
     const utilityMethods = {
       showMessage,
     };

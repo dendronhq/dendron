@@ -11,8 +11,8 @@ import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOutput = void;
 
@@ -25,11 +25,13 @@ export class ConfigurePodCommand extends BasicCommand<
   CommandOutput
 > {
   public pods: PodClassEntryV4[];
+  private extension: IDendronExtension;
   key = DENDRON_COMMANDS.CONFIGURE_POD.key;
 
-  constructor(_name?: string) {
+  constructor(ext: IDendronExtension, _name?: string) {
     super(_name);
     this.pods = getAllExportPods();
+    this.extension = ext;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
@@ -53,7 +55,7 @@ export class ConfigurePodCommand extends BasicCommand<
     const podClass = opts.podClass;
     const ctx = { ctx: "ConfigurePod" };
     this.L.info({ ctx, opts });
-    const podsDir = getExtension().podsDir;
+    const podsDir = this.extension.podsDir;
     const configPath = PodUtils.genConfigFile({ podsDir, podClass });
     await VSCodeUtils.openFileInEditor(Uri.file(configPath));
   }

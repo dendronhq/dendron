@@ -24,9 +24,10 @@ import {
 } from "vscode";
 import { SetupWorkspaceOpts } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { createMockConfig } from "./testUtils";
 import { _activate } from "../_extension";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -124,8 +125,9 @@ export async function resetCodeWorkspace() {
 export const getNoteFromTextEditor = (): NoteProps => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };
+  const { wsRoot } = ExtensionProvider.getDWorkspace();
   const fullPath = DNodeUtils.getFullPath({
-    wsRoot: getDWorkspace().wsRoot,
+    wsRoot,
     vault,
     basename: path.basename(txtPath),
   });

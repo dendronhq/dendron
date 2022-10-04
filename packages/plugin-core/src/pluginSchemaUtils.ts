@@ -1,5 +1,5 @@
 import { SchemaUtils } from "@dendronhq/common-all";
-import { getDWorkspace } from "./workspace";
+import { ExtensionProvider } from "./ExtensionProvider";
 
 /**
  * Wrapper around SchemaUtils which can fills out values available in the
@@ -7,13 +7,14 @@ import { getDWorkspace } from "./workspace";
  */
 export class PluginSchemaUtils {
   public static doesSchemaExist(id: string) {
+    const { engine } = ExtensionProvider.getDWorkspace();
     return SchemaUtils.doesSchemaExist({
       id,
-      engine: getDWorkspace().engine,
+      engine,
     });
   }
 
   public static async getSchema(id: string) {
-    return getDWorkspace().engine.getSchema(id);
+    return ExtensionProvider.getEngine().getSchema(id);
   }
 }

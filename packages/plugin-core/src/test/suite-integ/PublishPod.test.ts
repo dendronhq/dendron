@@ -15,6 +15,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { PublishPodCommand } from "../../commands/PublishPod";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -43,7 +44,7 @@ suite("PublishV2", function () {
         // when a user runs publish pod, they are presented with a list of pods
         // to execute
         // this mocks that command so that Markdown is the only option
-        const cmd = new PublishPodCommand();
+        const cmd = new PublishPodCommand(ExtensionProvider.getExtension());
         const podChoice = podClassEntryToPodItemV4(MarkdownPublishPod);
         cmd.gatherInputs = async () => {
           return { podChoice };
@@ -66,7 +67,7 @@ suite("PublishV2", function () {
     () => {
       test("THEN show error when required arg not present", (done) => {
         // You can access the workspace inside the test like this:
-        const cmd = new PublishPodCommand();
+        const cmd = new PublishPodCommand(ExtensionProvider.getExtension());
         const podChoice = podClassEntryToPodItemV4(AirtablePublishPod);
         cmd.gatherInputs = async () => {
           return { podChoice };
@@ -104,7 +105,7 @@ suite("PublishV2", function () {
         const refTargetFname = NOTE_PRESETS_V4.NOTE_WITH_NOTE_REF_LINK.fname;
         const fpath = path.join(vpath, `${refTargetFname}.md`);
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fpath));
-        const cmd = new PublishPodCommand();
+        const cmd = new PublishPodCommand(ExtensionProvider.getExtension());
         const podChoice = podClassEntryToPodItemV4(MarkdownPublishPod);
         cmd.gatherInputs = async () => {
           return { podChoice };

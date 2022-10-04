@@ -11,6 +11,7 @@ import {
 import _ from "lodash";
 import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS, Oauth2Pods } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import {
   getGlobalState,
   launchGoogleOAuthFlow,
@@ -22,7 +23,6 @@ import {
   handleConflict,
 } from "../utils/pods";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -58,7 +58,7 @@ export class ImportPodCommand extends BaseCommand<
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
     const podClass = podChoice.podClass;
-    const podsDir = getExtension().podsDir;
+    const podsDir = ExtensionProvider.getPodsDir();
     try {
       const resp = PodUtils.getConfig({ podsDir, podClass });
       if (resp.error) {
@@ -109,7 +109,7 @@ export class ImportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, msg: "enter", podChoice: opts.podChoice.id });
-    const wsRoot = getDWorkspace().wsRoot;
+    const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
     const utilityMethods = {
       getGlobalState,
       updateGlobalState,
@@ -121,9 +121,8 @@ export class ImportPodCommand extends BaseCommand<
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
-    const { engine, vaults } = getDWorkspace();
     const pod = new opts.podChoice.podClass() as ImportPod; // eslint-disable-line new-cap
-    const fileWatcher = getExtension().fileWatcher;
+    const fileWatcher = ExtensionProvider.getExtension().fileWatcher;
     if (fileWatcher) {
       fileWatcher.pause = true;
     }

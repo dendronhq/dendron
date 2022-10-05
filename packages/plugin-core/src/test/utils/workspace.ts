@@ -118,7 +118,7 @@ export class WorkspaceTestUtils {
         siteHierarchies: ["root"],
         writeStubs: false,
         siteRootDir: "docs",
-        searchMode: SearchMode.LOOKUP,
+        searchMode: SearchMode.SEARCH,
         seo: {
           title: "Dendron",
           description: "Personal Knowledge Space",

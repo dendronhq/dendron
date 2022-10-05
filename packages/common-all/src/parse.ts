@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { ok, err } from "./utils";
+import type { Result } from "neverthrow";
 import { DendronError } from "./error";
-import { RespV3 } from "./types";
 
 const formatErrors = (
   errors: z.ZodFormattedError<Map<string, string>, string>
@@ -16,19 +17,19 @@ export const parse = <T extends z.ZodTypeAny>(
   schema: T,
   raw: unknown,
   msg?: string
-): RespV3<z.infer<T>> => {
+): Result<z.infer<T>, DendronError> => {
   const parsed = schema.safeParse(raw);
   if (parsed.success) {
-    return { data: parsed.data };
+    return ok(parsed.data);
   } else {
-    return {
-      error: new DendronError({
+    return err(
+      new DendronError({
         message: [
           ...(msg ? [msg] : []),
           JSON.stringify(formatErrors(parsed.error.format()), null, 2),
           ...(schema.description ? [`Schema:${schema.description}`] : []),
         ].join("\n"),
-      }),
-    };
+      })
+    );
   }
 };

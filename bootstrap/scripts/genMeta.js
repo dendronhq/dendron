@@ -9,7 +9,7 @@ const { getMetaPath } = require("./utils");
 async function main() {
   const PKG_ROOT = path.join(__dirname, "..", "..", "packages");
   const projects = fs.readdirSync(PKG_ROOT);
-  const exclude = [".DS_Store", "nextjs-template"];
+  const exclude = [".DS_Store", "nextjs-template", "dendron.server.log", "dendron.server.log.old"];
   const meta = await Promise.all(
     projects
       .filter((ent) => !exclude.includes(ent))

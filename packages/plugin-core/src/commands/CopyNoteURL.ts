@@ -41,7 +41,7 @@ export class CopyNoteURLCommand extends BasicCommand<
 
   async execute() {
     const { config } = this.extension.getDWorkspace();
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     const urlRoot =
       publishingConfig.siteUrl ||
       DendronExtension.configuration().get<string>(

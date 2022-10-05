@@ -4,9 +4,9 @@ import {
   DendronError,
   DEngineClient,
   DNodeUtils,
-  LegacyNoteAddBehavior,
   LookupNoteTypeEnum,
   NoteAddBehavior,
+  NoteAddBehaviorEnum,
   NoteUtils,
   SchemaModuleProps,
   Time,
@@ -25,14 +25,8 @@ type CreateFnameOpts = {
   overrides?: CreateFnameOverrides;
 };
 
-type AddBehavior =
-  | "childOfDomain"
-  | "childOfCurrent"
-  | "asOwnDomain"
-  | "childOfDomainNamespace";
-
 export class DendronClientUtilsV2 {
-  static genNotePrefix(fname: string, addBehavior: AddBehavior) {
+  static genNotePrefix(fname: string, addBehavior: NoteAddBehavior) {
     let out: string;
     switch (addBehavior) {
       case "childOfDomain": {
@@ -131,7 +125,7 @@ export class DendronClientUtilsV2 {
 
     if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
       const actual = addBehavior;
-      const choices = Object.keys(LegacyNoteAddBehavior).join(", ");
+      const choices = Object.keys(NoteAddBehaviorEnum).join(", ");
       throw Error(`${actual} must be one of: ${choices}`);
     }
 
@@ -145,7 +139,7 @@ export class DendronClientUtilsV2 {
 
     const prefix = DendronClientUtilsV2.genNotePrefix(
       currentNoteFname,
-      addBehavior as AddBehavior
+      addBehavior
     );
 
     const noteDate = Time.now().toFormat(dateFormat);

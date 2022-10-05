@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
-  LegacyInsertNoteLinkAliasMode,
+  InsertNoteLinkAliasMode,
+  InsertNoteLinkAliasModeEnum,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -20,7 +21,7 @@ import { AutoCompletableRegistrar } from "../utils/registers/AutoCompletableRegi
 
 type CommandInput = {
   multiSelect?: boolean;
-  aliasMode?: keyof typeof LegacyInsertNoteLinkAliasMode;
+  aliasMode?: InsertNoteLinkAliasMode;
 };
 
 type CommandOpts = {
@@ -115,7 +116,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
     let links: string[] = [];
     switch (opts.aliasMode) {
-      case "snippet": {
+      case InsertNoteLinkAliasModeEnum.snippet: {
         links = opts.notes.map((note, index) => {
           return NoteUtils.createWikiLink({
             note,
@@ -124,7 +125,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
         });
         break;
       }
-      case "selection": {
+      case InsertNoteLinkAliasModeEnum.selection: {
         let maybeAliasValue = "";
         const { range } =
           (await VSCodeUtils.extractRangeFromActiveEditor()) || {};
@@ -146,7 +147,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
         });
         break;
       }
-      case "prompt": {
+      case InsertNoteLinkAliasModeEnum.prompt: {
         for (const note of opts.notes) {
           // eslint-disable-next-line no-await-in-loop
           const value = await this.promptForAlias(note);
@@ -165,13 +166,13 @@ export class InsertNoteLinkCommand extends BasicCommand<
         }
         break;
       }
-      case "title": {
+      case InsertNoteLinkAliasModeEnum.title: {
         links = opts.notes.map((note) => {
           return NoteUtils.createWikiLink({ note, alias: { mode: "title" } });
         });
         break;
       }
-      case "none":
+      case InsertNoteLinkAliasModeEnum.none:
       default: {
         links = opts.notes.map((note) => {
           return NoteUtils.createWikiLink({ note, alias: { mode: "none" } });
@@ -180,7 +181,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       }
     }
     const current = editor.selection;
-    if (opts.aliasMode === "snippet") {
+    if (opts.aliasMode === InsertNoteLinkAliasModeEnum.snippet) {
       const snippet = new vscode.SnippetString(links.join("\n"));
       await editor.insertSnippet(snippet, current);
     } else {

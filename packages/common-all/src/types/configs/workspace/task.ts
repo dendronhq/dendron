@@ -1,6 +1,10 @@
 import _ from "lodash";
-import { NoteProps, NotePropsMeta } from "../..";
-import { LegacyLookupSelectionType } from "../dendronConfigLegacy";
+import {
+  LookupSelectionType,
+  LookupSelectionTypeEnum,
+  NoteProps,
+  NotePropsMeta,
+} from "../..";
 import { JournalConfig } from "./journal";
 import { NoteAddBehaviorEnum } from "./types";
 
@@ -20,7 +24,7 @@ export type TaskConfig = Pick<
   /** Add a "TODO: <note title>" entry to the frontmatter of task notes. This can simplify integration with various Todo extensions like Todo Tree. */
   todoIntegration: boolean;
   /** The default selection type to use in Create Task Note command. */
-  createTaskSelectionType: LegacyLookupSelectionType;
+  createTaskSelectionType: LookupSelectionType;
 };
 
 /**
@@ -50,7 +54,7 @@ export function genDefaultTaskConfig(): TaskConfig {
       L: "low",
     },
     todoIntegration: false,
-    createTaskSelectionType: LegacyLookupSelectionType.selection2link,
+    createTaskSelectionType: LookupSelectionTypeEnum.selection2link,
   };
 }
 

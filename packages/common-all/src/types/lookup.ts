@@ -1,8 +1,3 @@
-/**
- * @deprecated
- * This is now only used internally, and will be cleaned up.
- * Use {@link LookupSelectionModeEnum} instead
- */
 export enum LookupSelectionTypeEnum {
   "selection2link" = "selection2link",
   "selectionExtract" = "selectionExtract",
@@ -10,11 +5,6 @@ export enum LookupSelectionTypeEnum {
   "none" = "none",
 }
 
-/**
- * @deprecated
- * This is now only used internally, and will be cleaned up.
- * Use {@link LookupSelectionMode} instead
- */
 export type LookupSelectionType = keyof typeof LookupSelectionTypeEnum;
 
 export enum LookupNoteTypeEnum {

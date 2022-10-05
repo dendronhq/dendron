@@ -2,8 +2,8 @@ import { ConfigUtils, NotePropsMeta, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -17,13 +17,16 @@ export class RandomNoteCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.RANDOM_NOTE.key;
+  constructor(private _ext: IDendronExtension) {
+    super();
+  }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const { engine, config } = getDWorkspace();
+    const { engine, config } = this._ext.getDWorkspace();
 
     // If no pattern is specified for include, then include all notes for the search set.
     const randomNoteConfig = ConfigUtils.getCommands(config).randomNote;

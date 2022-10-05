@@ -22,11 +22,9 @@ export class InsertNoteIndexCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.INSERT_NOTE_INDEX.key;
-  private extension: IDendronExtension;
 
-  constructor(ext: IDendronExtension) {
+  constructor(private _ext: IDendronExtension) {
     super();
-    this.extension = ext;
   }
 
   // TODO: make this into a util once the cli version is implemented.
@@ -41,7 +39,7 @@ export class InsertNoteIndexCommand extends BasicCommand<
       const link = NoteUtils.createWikiLink({
         note,
         useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
-          this.extension.getEngine()
+          this._ext.getEngine()
         ),
         alias: { mode: "title" },
       });
@@ -73,14 +71,14 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showErrorMessage("Active file is not a Dendron note.");
       return opts;
     }
-    const engine = this.extension.getEngine();
+    const engine = this._ext.getEngine();
     const bulkResp = await engine.bulkGetNotesMeta(activeNote.children);
     const children = bulkResp.data;
     if (children.length === 0) {
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
-    const { config } = this.extension.getDWorkspace();
+    const { config } = this._ext.getDWorkspace();
 
     const insertNoteIndexConfig =
       ConfigUtils.getCommands(config).insertNoteIndex;

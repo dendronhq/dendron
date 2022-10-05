@@ -34,7 +34,7 @@ export class NextJSPublishUtils {
   static async prepareNextJSExportPod() {
     const ws = ExtensionProvider.getDWorkspace();
     const wsRoot = ws.wsRoot;
-    const cmd = new ExportPodCommand();
+    const cmd = new ExportPodCommand(ExtensionProvider.getExtension());
 
     let nextPath = NextjsExportPodUtils.getNextRoot(wsRoot);
     const podConfig: NextjsExportConfig = {

@@ -65,7 +65,7 @@ import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
@@ -317,7 +317,7 @@ export async function runLegacySingleWorkspaceTest(
     skipMigrations: true,
     skipTreeView: true,
   });
-  const engine = getDWorkspace().engine;
+  const engine = ExtensionProvider.getEngine();
   await opts.onInit({ wsRoot, vaults, engine });
 
   cleanupVSCodeContextSubscriptions(opts.ctx!);
@@ -341,7 +341,7 @@ export async function runLegacyMultiWorkspaceTest(
       : true,
     skipTreeView: true,
   });
-  const engine = getDWorkspace().engine;
+  const engine = ExtensionProvider.getEngine();
   await opts.onInit({ wsRoot, vaults, engine });
 
   cleanupVSCodeContextSubscriptions(opts.ctx!);

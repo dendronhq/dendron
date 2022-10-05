@@ -3,9 +3,9 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { commands, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -25,9 +25,12 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.VAULT_REMOVE.key;
+  constructor(private _ext: IDendronExtension) {
+    super();
+  }
   async gatherInputs(opts?: CommandOpts): Promise<any> {
-    const { vaults } = getDWorkspace();
-    const wsRoot = getDWorkspace().wsRoot as string;
+    const { vaults } = this._ext.getDWorkspace();
+    const { wsRoot } = this._ext.getDWorkspace();
     /**
      * check added for contextual-ui. If the args are passed to the gather inputs,
      * there is no need to show quickpick to select a vault
@@ -58,7 +61,7 @@ export class VaultRemoveCommand extends BasicCommand<
     const ctx = "VaultRemove";
     // NOTE: relative vault
     const { vault } = opts;
-    const wsRoot = getDWorkspace().wsRoot as string;
+    const { wsRoot } = this._ext.getDWorkspace();
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
     await wsService.removeVault({ vault, updateWorkspace: true });

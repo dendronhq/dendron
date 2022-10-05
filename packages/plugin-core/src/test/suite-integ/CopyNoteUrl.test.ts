@@ -43,7 +43,9 @@ suite("GIVEN CopyNoteUrlV2", function () {
           const fname = NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.fname;
           const editor = await WSUtils.openNoteByPath({ vault, fname });
           editor.selection = new vscode.Selection(10, 0, 10, 5);
-          const link = await new CopyNoteURLCommand().execute();
+          const link = await new CopyNoteURLCommand(
+            ExtensionProvider.getExtension()
+          ).execute();
           const url = [ROOT_URL, "notes", `${fname}#^block-id`].join("/");
           expect(link).toEqual(url);
         });
@@ -72,7 +74,9 @@ suite("GIVEN CopyNoteUrlV2", function () {
           const fname = NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.fname;
           const editor = await WSUtils.openNoteByPath({ vault, fname });
           editor.selection = new vscode.Selection(7, 0, 7, 12);
-          const link = await new CopyNoteURLCommand().run();
+          const link = await new CopyNoteURLCommand(
+            ExtensionProvider.getExtension()
+          ).run();
           const url = [ROOT_URL, "notes", `${fname}#h1`].join("/");
           expect(link).toEqual(url);
         });
@@ -96,7 +100,9 @@ suite("GIVEN CopyNoteUrlV2", function () {
           const vault = vaults[0];
           const fname = "foo";
           await WSUtils.openNoteByPath({ vault, fname });
-          const link = await new CopyNoteURLCommand().execute();
+          const link = await new CopyNoteURLCommand(
+            ExtensionProvider.getExtension()
+          ).execute();
           const url = _.join([ROOT_URL, "notes", `${fname}`], "/");
           expect(link).toEqual(url);
         });
@@ -124,7 +130,9 @@ suite("GIVEN CopyNoteUrlV2", function () {
           const vault = vaults[0];
           const fname = "foo";
           await WSUtils.openNoteByPath({ vault, fname });
-          const link = await new CopyNoteURLCommand().execute();
+          const link = await new CopyNoteURLCommand(
+            ExtensionProvider.getExtension()
+          ).execute();
           const url = _.join(
             [ROOT_URL, ASSET_PREFIX, "notes", `${fname}`],
             "/"

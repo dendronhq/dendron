@@ -111,7 +111,8 @@ export function getEngine() {
 }
 
 export function resolveRelToWSRoot(fpath: string): string {
-  return resolvePath(fpath, getDWorkspace().wsRoot as string);
+  const { wsRoot } = ExtensionProvider.getDWorkspace();
+  return resolvePath(fpath, wsRoot);
 }
 
 /** Given file uri that is within a vault within the current workspace returns the vault. */

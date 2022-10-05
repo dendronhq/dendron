@@ -18,7 +18,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { EditorUtils } from "../utils/EditorUtils";
 import { getURLAt } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 import { GoToNoteCommandOutput, TargetKind } from "./GoToNoteInterface";
@@ -137,7 +137,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       env.openExternal(Uri.parse(externalLink.replace("\\", "/"))); // make sure vscode doesn't choke on "\"s
       assetPath = externalLink;
     } else {
-      const wsRoot = getDWorkspace().wsRoot;
+      const { wsRoot } = this._ext.getDWorkspace();
 
       if (externalLink.startsWith("asset")) {
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();

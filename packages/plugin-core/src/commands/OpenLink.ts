@@ -7,9 +7,10 @@ import path from "path";
 import { env, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { ExtensionProvider } from "../ExtensionProvider";
 import { getURLAt } from "../utils/md";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -51,7 +52,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       env.openExternal(Uri.parse(text.replace("\\", "/"))); // make sure vscode doesn't choke on "\"s
       assetPath = text;
     } else {
-      const wsRoot = getDWorkspace().wsRoot;
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
 
       if (text.startsWith("asset")) {
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();

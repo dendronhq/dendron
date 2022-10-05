@@ -2,8 +2,8 @@ import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import ogs from "open-graph-scraper";
 import sinon from "sinon";
 import { PasteLinkCommand } from "../../commands/PasteLink";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import * as utils from "../../utils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
@@ -45,7 +45,7 @@ suite("pasteLink", function () {
     () => {
       test("THEN gets link with metadata", async () => {
         // You can access the workspace inside the test like this:
-        const { engine } = getDWorkspace();
+        const { engine } = ExtensionProvider.getDWorkspace();
         const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");
@@ -68,7 +68,7 @@ suite("pasteLink", function () {
     () => {
       test("THEN trims link title", async () => {
         // You can access the workspace inside the test like this:
-        const { engine } = getDWorkspace();
+        const { engine } = ExtensionProvider.getDWorkspace();
         const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");
@@ -91,7 +91,7 @@ suite("pasteLink", function () {
     () => {
       test("THEN gets raw link", async () => {
         // You can access the workspace inside the test like this:
-        const { engine } = getDWorkspace();
+        const { engine } = ExtensionProvider.getDWorkspace();
         const note = (await engine.getNoteMeta("foo")).data!;
         await WSUtils.openNote(note);
         utils.clipboard.writeText("https://dendron.so");

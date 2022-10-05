@@ -26,7 +26,9 @@ suite("InsertNoteIndex", function () {
         },
         onInit: async ({ engine }) => {
           const foo = (await engine.getNoteMeta("foo")).data!;
-          const cmd = new InsertNoteIndexCommand();
+          const cmd = new InsertNoteIndexCommand(
+            ExtensionProvider.getExtension()
+          );
 
           await WSUtils.openNote(foo);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -52,7 +54,9 @@ suite("InsertNoteIndex", function () {
         },
         onInit: async ({ engine }) => {
           const foo = (await engine.getNoteMeta("foo")).data!;
-          const cmd = new InsertNoteIndexCommand();
+          const cmd = new InsertNoteIndexCommand(
+            ExtensionProvider.getExtension()
+          );
 
           await WSUtils.openNote(foo);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -99,7 +103,9 @@ suite("InsertNoteIndex", function () {
           );
 
           const foo = (await engine.getNoteMeta("foo")).data!;
-          const cmd = new InsertNoteIndexCommand();
+          const cmd = new InsertNoteIndexCommand(
+            ExtensionProvider.getExtension()
+          );
 
           await WSUtils.openNote(foo);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -137,7 +143,9 @@ suite("InsertNoteIndex", function () {
           );
 
           const foo = (await engine.getNoteMeta("foo")).data!;
-          const cmd = new InsertNoteIndexCommand();
+          const cmd = new InsertNoteIndexCommand(
+            ExtensionProvider.getExtension()
+          );
 
           await WSUtils.openNote(foo);
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
@@ -187,7 +195,9 @@ suite("InsertNoteIndex", function () {
         const rootNote = (await engine.getNoteMeta("root")).data!;
         await ExtensionProvider.getWSUtils().openNote(rootNote);
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-        const cmd = new InsertNoteIndexCommand();
+        const cmd = new InsertNoteIndexCommand(
+          ExtensionProvider.getExtension()
+        );
         editor.selection = new vscode.Selection(9, 0, 9, 0);
         await cmd.execute({});
         const body = editor.document.getText();
@@ -231,7 +241,9 @@ suite("InsertNoteIndex", function () {
         const rootNote = (await engine.getNoteMeta("root")).data!;
         await ExtensionProvider.getWSUtils().openNote(rootNote);
         const editor = VSCodeUtils.getActiveTextEditorOrThrow();
-        const cmd = new InsertNoteIndexCommand();
+        const cmd = new InsertNoteIndexCommand(
+          ExtensionProvider.getExtension()
+        );
         editor.selection = new vscode.Selection(9, 0, 9, 0);
         await cmd.execute({});
         const body = editor.document.getText();

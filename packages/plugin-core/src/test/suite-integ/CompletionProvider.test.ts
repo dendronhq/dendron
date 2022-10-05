@@ -15,7 +15,6 @@ import {
   provideCompletionItems,
 } from "../../features/completionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { getDWorkspace } from "../../workspace";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import {
@@ -312,7 +311,7 @@ suite("completionProvider", function () {
     () => {
       let items: CompletionItem[] | undefined;
       before(async () => {
-        const { vaults, engine } = getDWorkspace();
+        const { vaults, engine } = ExtensionProvider.getDWorkspace();
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotesMeta({

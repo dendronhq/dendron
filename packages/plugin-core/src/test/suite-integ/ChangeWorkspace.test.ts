@@ -6,7 +6,7 @@ import { window } from "vscode";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { WorkspaceType } from "@dendronhq/common-all";
 import { expect } from "../testUtilsv2";
-import { getDWorkspace } from "../../workspace";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 // eslint-disable-next-line prefer-arrow-callback
 suite("GIVEN ChangeWorkspace command", function () {
@@ -33,7 +33,7 @@ suite("GIVEN ChangeWorkspace command", function () {
       let openWS: sinon.SinonStub;
       let newWSRoot: string;
       before(async () => {
-        const { wsRoot: currentWSRoot } = getDWorkspace();
+        const { wsRoot: currentWSRoot } = ExtensionProvider.getDWorkspace();
         openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
 
         const out = await setupLegacyWorkspaceMulti({
@@ -62,7 +62,7 @@ suite("GIVEN ChangeWorkspace command", function () {
       let openWS: sinon.SinonStub;
       let newWSRoot: string;
       before(async () => {
-        const { wsRoot: currentWSRoot } = getDWorkspace();
+        const { wsRoot: currentWSRoot } = ExtensionProvider.getDWorkspace();
         openWS = sinon.stub(VSCodeUtils, "openWS").resolves();
 
         const out = await setupLegacyWorkspaceMulti({

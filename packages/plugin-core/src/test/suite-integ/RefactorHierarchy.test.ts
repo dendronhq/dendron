@@ -11,9 +11,9 @@ import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 import sinon from "sinon";
-import { getEngine } from "../../workspace";
 import { DNodeProps, DVault } from "@dendronhq/common-all";
 import { NoteLookupProviderSuccessResp } from "../../components/lookup/LookupProviderV3Interface";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 suite("RefactorHierarchy", function () {
   const ctx = setupBeforeAfter(this, {
@@ -96,7 +96,7 @@ suite("RefactorHierarchy", function () {
               noConfirm: true,
             });
 
-            const engine = getEngine();
+            const engine = ExtensionProvider.getEngine();
             const { vaults, wsRoot } = engine;
             const vault = vaults[0];
             const vpath = vault2Path({ vault, wsRoot });
@@ -150,7 +150,7 @@ suite("RefactorHierarchy", function () {
               noConfirm: true,
             });
 
-            const engine = getEngine();
+            const engine = ExtensionProvider.getEngine();
             const { vaults, wsRoot } = engine;
             const vault = vaults[0];
             const vpath = vault2Path({ vault, wsRoot });
@@ -190,7 +190,7 @@ suite("RefactorHierarchy", function () {
           onInit: async () => {
             const cmd = new RefactorHierarchyCommandV2();
 
-            const engine = getEngine();
+            const engine = ExtensionProvider.getEngine();
             const { wsRoot } = engine;
 
             const capturedNotes = [note, noteOne, noteTwo];
@@ -258,7 +258,7 @@ suite("RefactorHierarchy", function () {
           onInit: async () => {
             const cmd = new RefactorHierarchyCommandV2();
 
-            const engine = getEngine();
+            const engine = ExtensionProvider.getEngine();
             const { wsRoot } = engine;
 
             const capturedNotes = [refFooTest, refBarTest, refEggTest];
@@ -292,7 +292,7 @@ suite("RefactorHierarchy", function () {
           preSetupHook,
           onInit: async () => {
             const cmd = new RefactorHierarchyCommandV2();
-            const engine = getEngine();
+            const engine = ExtensionProvider.getEngine();
             const capturedNotes = await cmd.getCapturedNotes({
               scope: undefined,
               matchRE: new RegExp("dendron.ref"),

@@ -19,7 +19,7 @@ describe("GIVEN sidebar config input", () => {
           const sidebarResp = getSidebar([], {
             notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
           });
-          expect(sidebarResp.data).toHaveLength(0);
+          expect(sidebarResp._unsafeUnwrap()).toHaveLength(0);
         },
         {
           expect,
@@ -37,11 +37,14 @@ describe("GIVEN sidebar config input", () => {
           const sidebarResp = getSidebar(DefaultSidebar, {
             notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
           });
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
           // Expect DefaultSidebar to resolve into 2 sidebarItem entries
-          expect(sidebarResp.data).toHaveLength(2);
+          expect(sidebarResp._unsafeUnwrap()).toHaveLength(2);
           // Expect `foo.md` to have the child `foo.ch1.md`
-          expect(sidebarResp.data).toHaveProperty("[1].items[0].id", "foo.ch1");
+          expect(sidebarResp._unsafeUnwrap()).toHaveProperty(
+            "[1].items[0].id",
+            "foo.ch1"
+          );
         },
         {
           expect,
@@ -62,11 +65,11 @@ describe("GIVEN sidebar config input", () => {
               notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
             }
           );
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
           // Expect to resolve into sidebar slice with two children
-          expect(sidebarResp.data).toHaveLength(2);
+          expect(sidebarResp._unsafeUnwrap()).toHaveLength(2);
           // Expect to contain deep nested note
-          expect(sidebarResp.data).toHaveProperty(
+          expect(sidebarResp._unsafeUnwrap()).toHaveProperty(
             "[0].items[0].items[0].id",
             "foo.ch1.gch1.ggch1"
           );
@@ -110,12 +113,12 @@ describe("GIVEN sidebar config input", () => {
             ],
             { notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes) }
           );
-          expect(sidebarResp.data).toMatchSnapshot();
-          expect(sidebarResp.data).toHaveProperty(
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toHaveProperty(
             "[1].items[0].items[0].id",
             "foo.ch1.gch1.ggch1"
           );
-          expect(sidebarResp.data).toHaveProperty(
+          expect(sidebarResp._unsafeUnwrap()).toHaveProperty(
             "[1].items[2].id",
             "goo.ends-with-ch1.no-ch1-by-itself"
           );
@@ -142,9 +145,9 @@ describe("GIVEN sidebar config input", () => {
               notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
             }
           );
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
           // Expect foo note to have no children
-          const fooSidebarItem = sidebarResp.data?.[1];
+          const fooSidebarItem = sidebarResp._unsafeUnwrap()?.[1];
           expect(fooSidebarItem).toHaveProperty("items", []);
         },
         {
@@ -169,9 +172,9 @@ describe("GIVEN sidebar config input", () => {
               notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
             }
           );
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
           // Expect foo note to have no children
-          const fooSidebarItem = sidebarResp.data?.[1];
+          const fooSidebarItem = sidebarResp._unsafeUnwrap()?.[1];
           expect(fooSidebarItem).toHaveProperty("items", []);
         },
         {
@@ -196,9 +199,9 @@ describe("GIVEN sidebar config input", () => {
                 notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
               }
             );
-            expect(sidebarResp.data).toMatchSnapshot();
+            expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
             // Expect foo note to have no children
-            const fooSidebarItem = sidebarResp.data?.[1];
+            const fooSidebarItem = sidebarResp._unsafeUnwrap()?.[1];
             expect(fooSidebarItem).toHaveProperty("items", []);
           },
           {
@@ -224,9 +227,9 @@ describe("GIVEN sidebar config input", () => {
               notes: NoteDictsUtils.createNotePropsByIdDict(engineNotes),
             }
           );
-          expect(sidebarResp.data).toMatchSnapshot();
+          expect(sidebarResp._unsafeUnwrap()).toMatchSnapshot();
           // Expect `foo.md` to be not part of the sidebar
-          expect(sidebarResp.data).toHaveLength(1);
+          expect(sidebarResp._unsafeUnwrap()).toHaveLength(1);
         },
         {
           expect,

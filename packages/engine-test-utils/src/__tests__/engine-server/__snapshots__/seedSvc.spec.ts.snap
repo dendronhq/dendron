@@ -523,7 +523,7 @@ publishing:
     enableRandomlyColoredTags: true
     enableTaskNotes: true
     enablePrettyLinks: true
-    searchMode: search
+    searchMode: lookup
     duplicateNoteBehavior:
         action: useVault
         payload:

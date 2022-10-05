@@ -115,6 +115,6 @@ export function genDefaultPublishingConfig(): DendronPublishingConfig {
     enableRandomlyColoredTags: true,
     enableTaskNotes: true,
     enablePrettyLinks: true,
-    searchMode: SearchMode.SEARCH,
+    searchMode: SearchMode.LOOKUP,
   };
 }

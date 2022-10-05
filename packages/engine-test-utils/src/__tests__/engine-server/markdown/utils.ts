@@ -1,7 +1,6 @@
 import {
   DendronConfig,
   DEngineClient,
-  DuplicateNoteActionEnum,
   DVault,
   NoteDictsUtils,
   NoteProps,
@@ -334,7 +333,7 @@ export const createProcCompileTests = (opts: {
 export const dupNote = (payload: DVault | string[]) => {
   const out: any = {
     duplicateNoteBehavior: {
-      action: DuplicateNoteActionEnum.useVault,
+      action: "useVault",
     },
   };
   if (_.isArray(payload)) {

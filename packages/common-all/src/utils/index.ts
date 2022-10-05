@@ -27,10 +27,6 @@ import {
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
-import {
-  LegacyDuplicateNoteBehavior,
-  LegacyHierarchyConfig,
-} from "../types/configs/dendronConfigLegacy";
 import { DVault } from "../types/DVault";
 import {
   DendronConfig,
@@ -675,10 +671,7 @@ export class ConfigUtils {
 
   static getHierarchyConfig(
     config: DendronConfig
-  ):
-    | { [key: string]: HierarchyConfig }
-    | { [key: string]: LegacyHierarchyConfig }
-    | undefined {
+  ): { [key: string]: HierarchyConfig } | undefined {
     return ConfigUtils.getPublishing(config).hierarchy;
   }
 
@@ -930,7 +923,7 @@ export class ConfigUtils {
 
   static setDuplicateNoteBehavior(
     config: DendronConfig,
-    value: DuplicateNoteBehavior | LegacyDuplicateNoteBehavior
+    value: DuplicateNoteBehavior
   ): void {
     ConfigUtils.setPublishProp(
       config,

@@ -115,7 +115,7 @@ export function getPublicDir(): string {
 
 export async function getCustomHead(): Promise<string | null> {
   const config = await getConfig();
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   const customHeadPathConfig = publishingConfig.customHeaderPath;
   if (_.isUndefined(customHeadPathConfig)) {
     return null;

@@ -8,18 +8,6 @@ exports[`markdown export pod test nested directory output: foo ch1 contents 1`] 
 foo.ch1 body"
 `;
 
-exports[`markdown export pod test wikilink conversion: note link reference 1`] = `
-"# Simple Wikilink
-
-[One](/simple-wikilink/one.md)"
-`;
-
-exports[`markdown export pod test wikilink conversion: top hierarchy note link reference 1`] = `
-"# Wikilink Top Hierarchy
-
-[Wikilink Top Hierarchy Target](/wikilink-top-hierarchy-target.md)"
-`;
-
 exports[`markdown publish pod basic 1`] = `
 "# Foo
 

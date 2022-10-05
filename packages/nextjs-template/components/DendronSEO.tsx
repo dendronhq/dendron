@@ -1,5 +1,4 @@
 import {
-  DendronSiteConfig,
   DendronPublishingConfig,
   DendronConfig,
   NoteProps,
@@ -20,7 +19,7 @@ const getCanonicalUrl = ({
 }: {
   sitePath: string;
   seoProps: SEOProps;
-  siteConfig: DendronSiteConfig | DendronPublishingConfig;
+  siteConfig: DendronPublishingConfig;
 }): string => {
   // check for note specific overrides
   if (seoProps.canonicalBaseUrl) {
@@ -71,7 +70,7 @@ export default function DendronSEO({
   const title = cleanSeoProps.title;
   const description = cleanSeoProps.description;
   const images = cleanSeoProps?.image ? [cleanSeoProps.image] : [];
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   const canonical = getCanonicalUrl({
     sitePath: path,
     seoProps: cleanSeoProps,

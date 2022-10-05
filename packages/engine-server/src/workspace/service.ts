@@ -7,7 +7,7 @@ import {
   DENDRON_VSCODE_CONFIG_KEYS,
   DEngineClient,
   Disposable,
-  DuplicateNoteActionEnum,
+  DuplicateNoteAction,
   DUser,
   DUtils,
   DVault,
@@ -310,7 +310,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     if (!publishingConfig.duplicateNoteBehavior) {
       const vaults = ConfigUtils.getVaults(config);
       const updatedDuplicateNoteBehavior = {
-        action: DuplicateNoteActionEnum.useVault,
+        action: "useVault" as DuplicateNoteAction,
         payload: vaults.map((v) => VaultUtils.getName(v)),
       };
       ConfigUtils.setDuplicateNoteBehavior(

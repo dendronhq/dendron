@@ -1,8 +1,4 @@
-import {
-  DendronSiteConfig,
-  DendronPublishingConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { DendronPublishingConfig, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import { env } from "../env/client";
 
@@ -24,9 +20,7 @@ export function getAssetUrl(url: string) {
  * @param url
  * @returns
  */
-export function getRootUrl(
-  siteConfig: DendronSiteConfig | DendronPublishingConfig
-) {
+export function getRootUrl(siteConfig: DendronPublishingConfig) {
   const url = siteConfig.siteUrl!;
   const out =
     process.env.NODE_ENV !== "development" &&

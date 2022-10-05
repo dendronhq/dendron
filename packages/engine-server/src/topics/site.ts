@@ -4,7 +4,6 @@ import {
   DendronError,
   DendronSiteFM,
   DNodeUtils,
-  DuplicateNoteActionEnum,
   DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
@@ -529,7 +528,7 @@ export class SiteUtils {
     const { engine, fname, noteCandidates, config, dupBehavior, allowStubs } =
       _.defaults(opts, {
         dupBehavior: {
-          action: DuplicateNoteActionEnum.useVault,
+          action: "useVault",
           payload: [],
         } as UseVaultBehavior,
         allowStubs: true,

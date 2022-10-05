@@ -52,6 +52,20 @@ import {
 } from "../types/configs/dendronConfigLegacy";
 import { DVault } from "../types/DVault";
 
+export {
+  ok,
+  Ok,
+  err,
+  Err,
+  Result,
+  okAsync,
+  errAsync,
+  ResultAsync,
+  fromThrowable,
+  fromPromise,
+  fromSafePromise,
+} from "neverthrow";
+
 export * from "./lookup";
 export * from "./publishUtils";
 export * from "./vscode-utils";

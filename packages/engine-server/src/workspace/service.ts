@@ -53,7 +53,7 @@ import { URI } from "vscode-uri";
 import { WorkspaceUtils } from ".";
 import { MetadataService } from "../metadata";
 import {
-  CONFIG_MIGRATIONS,
+  // CONFIG_MIGRATIONS,
   MigrationChangeSetStatus,
   MigrationService,
 } from "../migrations";

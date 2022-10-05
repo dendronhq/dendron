@@ -1,8 +1,7 @@
-import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
-import { runEngineTestV5, TestConfigUtils } from "../../..";
+import { runEngineTestV5 } from "../../..";
 
 describe("backlinks", () => {
   describe("frontmatter tags", () => {
@@ -55,17 +54,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
-            TestConfigUtils.withConfig(
-              (config) => {
-                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-                ConfigUtils.setVaults(
-                  v4DefaultConfig,
-                  ConfigUtils.getVaults(config)
-                );
-                return v4DefaultConfig;
-              },
-              { wsRoot: opts.wsRoot }
-            );
+            // TestConfigUtils.withConfig(
+            //   (config) => {
+            //     const DefaultConfig = ConfigUtils.genDefaultConfig();
+            //     ConfigUtils.setVaults(
+            //       DefaultConfig,
+            //       ConfigUtils.getVaults(config)
+            //     );
+            //     return DefaultConfig;
+            //   },
+            //   { wsRoot: opts.wsRoot }
+            // );
           },
         }
       );
@@ -132,17 +131,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
-            TestConfigUtils.withConfig(
-              (config) => {
-                const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-                ConfigUtils.setVaults(
-                  v4DefaultConfig,
-                  ConfigUtils.getVaults(config)
-                );
-                return v4DefaultConfig;
-              },
-              { wsRoot: opts.wsRoot }
-            );
+            // TestConfigUtils.withConfig(
+            //   (config) => {
+            //     const DefaultConfig = ConfigUtils.genDefaultConfig();
+            //     ConfigUtils.setVaults(
+            //       DefaultConfig,
+            //       ConfigUtils.getVaults(config)
+            //     );
+            //     return DefaultConfig;
+            //   },
+            //   { wsRoot: opts.wsRoot }
+            // );
           },
         }
       );

@@ -245,7 +245,14 @@ export class MarkdownExportPodV2
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...config,
-        usePrettyRefs: false,
+        preview: {
+          ...config.preview,
+          enablePrettyRefs: false,
+        },
+        publishing: {
+          ...config.publishing,
+          enablePrettyRefs: false,
+        },
       },
       fname: note.fname,
       vault: note.vault,

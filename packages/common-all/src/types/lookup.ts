@@ -1,8 +1,6 @@
 /**
  * @deprecated
- *
- * This should not be used in configs that are public-facing.
- * There are a few references to this remaining, but they are all internal-only and will be cleaned up.
+ * This is now only used internally, and will be cleaned up.
  * Use {@link LookupSelectionModeEnum} instead
  */
 export enum LookupSelectionTypeEnum {
@@ -14,9 +12,7 @@ export enum LookupSelectionTypeEnum {
 
 /**
  * @deprecated
- *
- * This should not be used in configs that are public-facing.
- * There are a few references to this remaining, but they are all internal-only and will be cleaned up.
+ * This is now only used internally, and will be cleaned up.
  * Use {@link LookupSelectionMode} instead
  */
 export type LookupSelectionType = keyof typeof LookupSelectionTypeEnum;

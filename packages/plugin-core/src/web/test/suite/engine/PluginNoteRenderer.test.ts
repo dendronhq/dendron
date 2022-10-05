@@ -1,8 +1,8 @@
 import {
+  DendronConfig,
   DendronPublishingConfig,
   DVault,
   NoteProps,
-  StrictConfigV5,
 } from "@dendronhq/common-all";
 import assert from "assert";
 import { container } from "tsyringe";
@@ -37,10 +37,10 @@ async function initializeTest(): Promise<PluginNoteRenderer> {
     enablePrettyLinks: false,
   };
 
-  const config: StrictConfigV5 = {
+  const config: DendronConfig = {
     version: 5,
     publishing: pubConfig,
-  } as StrictConfigV5;
+  } as DendronConfig;
 
   await setupTestEngineContainer();
 

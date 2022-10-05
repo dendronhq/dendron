@@ -1,6 +1,5 @@
 import { Server } from "@dendronhq/api-server";
 import {
-  CleanDendronSiteConfig,
   ConfigUtils,
   CONSTANTS,
   DEngineClient,
@@ -10,6 +9,8 @@ import {
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  CleanDendronPublishingConfig,
+  genDefaultPublishingConfig,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -124,14 +125,17 @@ export async function createEngineByConnectingToDebugServer(
   return { engine, port, server };
 }
 
-export function createSiteConfig(
-  opts: Partial<CleanDendronSiteConfig> &
-    Required<Pick<CleanDendronSiteConfig, "siteRootDir" | "siteHierarchies">>
-): CleanDendronSiteConfig {
+export function createPublishingConfig(
+  opts: Partial<CleanDendronPublishingConfig> &
+    Required<
+      Pick<CleanDendronPublishingConfig, "siteRootDir" | "siteHierarchies">
+    >
+): CleanDendronPublishingConfig {
+  const defaultPublishingConfig = genDefaultPublishingConfig();
   const copts = {
-    siteNotesDir: "docs",
-    siteUrl: "https://localhost:8080",
+    ...defaultPublishingConfig,
     ...opts,
+    siteUrl: "https://localhost:8080",
   };
   return {
     ...copts,

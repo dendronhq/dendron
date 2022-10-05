@@ -14,7 +14,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { TestConfigUtils } from "../../config";
-import { createSiteConfig, runEngineTestV5 } from "../../engine";
+import { createPublishingConfig, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import { checkNotInString, checkString, TestSeedUtils } from "../../utils";
 
@@ -154,20 +154,17 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
                 siteHierarchies: ["test-wikilink-to-url"],
                 siteRootDir: "docs",
               })
             );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
           },
           {
             wsRoot,
@@ -203,25 +200,22 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setWorkspaceProp(
-              v4DefaultConfig,
+              defaultConfig,
               "enableXVaultWikiLink",
               true
             );
             ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
                 siteHierarchies: ["test-wikilink-to-url"],
                 siteRootDir: "docs",
               })
             );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
           },
           {
             wsRoot,

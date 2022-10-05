@@ -319,7 +319,9 @@ runTest("init", () => {
             },
             expect
           );
-          expect(DConfig.getOrCreate(wsRoot).seeds).toEqual(undefined);
+          expect(DConfig.getOrCreate(wsRoot).workspace.seeds).toEqual(
+            undefined
+          );
         },
         {
           expect,
@@ -358,7 +360,9 @@ runTest("init", () => {
             fpath: path.join(wsRoot, "dendron.yml"),
             snapshot: true,
           });
-          expect(DConfig.getOrCreate(wsRoot).seeds).toEqual(undefined);
+          expect(DConfig.getOrCreate(wsRoot).workspace.seeds).toEqual(
+            undefined
+          );
         },
         {
           expect,

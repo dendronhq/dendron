@@ -360,10 +360,21 @@ const WITH_TITLE_FOR_LINK = createProcTests({
       (await opts.engine.getNote("foo.ch1")).data!,
     ]);
 
+    const defaultConfig = ConfigUtils.genDefaultConfig();
     const proc = await createProc(opts, {
       noteToRender,
       noteCacheForRenderDict,
-      config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
+      config: {
+        ...defaultConfig,
+        publishing: {
+          ...defaultConfig.publishing,
+          enableNoteTitleForLink: true,
+        },
+        preview: {
+          ...defaultConfig.preview,
+          enableNoteTitleForLink: true,
+        },
+      },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
     return readAndProcessFile({ npath, proc });
@@ -400,10 +411,21 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
       (await opts.engine.getNote("bar")).data!,
     ]);
 
+    const defaultConfig = ConfigUtils.genDefaultConfig();
     const proc = await createProc(opts, {
       noteToRender,
       noteCacheForRenderDict,
-      config: { ...ConfigUtils.genDefaultConfig(), useNoteTitleForLink: true },
+      config: {
+        ...defaultConfig,
+        publishing: {
+          ...defaultConfig.publishing,
+          enableNoteTitleForLink: true,
+        },
+        preview: {
+          ...defaultConfig.preview,
+          enableNoteTitleForLink: true,
+        },
+      },
     });
     const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
     return readAndProcessFile({ npath, proc });

@@ -570,9 +570,17 @@ describe("noteRefV2", () => {
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
+        const config = DConfig.readConfigSync(wsRoot);
         const configOverride: DendronConfig = {
-          ...DConfig.readConfigSync(wsRoot),
-          useFMTitle: true,
+          ...config,
+          publishing: {
+            ...config.publishing,
+            enableFMTitle: true,
+          },
+          preview: {
+            ...config.preview,
+            enableFMTitle: true,
+          },
         };
         return processTextV2({
           text: "# Foo Bar\n![[foo#header2]]",
@@ -591,9 +599,17 @@ describe("noteRefV2", () => {
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
+        const config = DConfig.readConfigSync(wsRoot);
         const configOverride: DendronConfig = {
-          ...DConfig.readConfigSync(wsRoot),
-          useNoteTitleForLink: true,
+          ...config,
+          publishing: {
+            ...config.publishing,
+            enableNoteTitleForLink: true,
+          },
+          preview: {
+            ...config.preview,
+            enableNoteTitleForLink: true,
+          },
         };
         return processTextV2({
           text: "# Foo Bar\n![[foo.ch1#header2]]",

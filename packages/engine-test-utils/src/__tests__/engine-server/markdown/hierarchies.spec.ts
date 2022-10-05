@@ -40,7 +40,7 @@ describe("hierarchies", () => {
     name: "BASIC",
     setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
       const config = DConfig.readConfigSync(wsRoot);
-      config.hierarchyDisplay = true;
+      config.publishing.enableHierarchyDisplay = true;
       const noteToRender = (
         await engine.findNotes({ fname: "foo", vault: vaults[0] })
       )[0];
@@ -94,9 +94,13 @@ describe("hierarchies", () => {
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
     setupFunc: async ({ engine, vaults, extra }) => {
+      const rawConfig = DConfig.readConfigSync(engine.wsRoot);
       const config: DendronConfig = {
-        ...DConfig.readConfigSync(engine.wsRoot),
-        hierarchyDisplay: false,
+        ...rawConfig,
+        publishing: {
+          ...rawConfig.publishing,
+          enableHierarchyDisplay: false,
+        },
       };
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
@@ -184,9 +188,13 @@ describe("hierarchies", () => {
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
     setupFunc: async ({ engine, vaults, extra }) => {
+      const rawConfig = DConfig.readConfigSync(engine.wsRoot);
       const config: DendronConfig = {
-        ...DConfig.readConfigSync(engine.wsRoot),
-        hierarchyDisplayTitle: "Better Children",
+        ...rawConfig,
+        publishing: {
+          ...rawConfig.publishing,
+          hierarchyDisplayTitle: "Better Children",
+        },
       };
       const noteToRender = (
         await engine.findNotes({ fname: "foo", vault: vaults[0] })

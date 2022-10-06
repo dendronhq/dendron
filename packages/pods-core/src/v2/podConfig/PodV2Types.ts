@@ -15,6 +15,7 @@ export enum PodV2Types {
 export enum PodExportScope {
   Note = "Note",
   Lookup = "Lookup",
+  Selection = "Selection",
   Hierarchy = "Hierarchy",
   Vault = "Vault",
   Workspace = "Workspace",

@@ -319,7 +319,8 @@ export class ExportPodV2CLICommand extends CLICommand<
   }) {
     if (
       opts.destination === "clipboard" &&
-      opts.exportScope !== PodExportScope.Note
+      opts.exportScope !== PodExportScope.Note &&
+      opts.exportScope !== PodExportScope.Selection
     ) {
       throw new DendronError({
         message:

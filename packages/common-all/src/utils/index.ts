@@ -608,6 +608,9 @@ export class ConfigUtils {
         enablePreviewV2: true,
       },
     };
+    const mergedPublishingConfig = _.merge(genDefaultPublishingConfig(), {
+      searchMode: SearchMode.SEARCH,
+    });
     return _.merge(
       {
         version: 5,
@@ -615,7 +618,7 @@ export class ConfigUtils {
         commands: genDefaultCommandConfig(),
         workspace: { ...genDefaultWorkspaceConfig() },
         preview: genDefaultPreviewConfig(),
-        publishing: genDefaultPublishingConfig(),
+        publishing: mergedPublishingConfig,
       } as StrictConfigV5,
       defaults
     );
@@ -981,7 +984,7 @@ export class ConfigUtils {
     if (!isConfigV4 && defaultMode) {
       return defaultMode;
     }
-    return SearchMode.SEARCH;
+    return SearchMode.LOOKUP;
   }
   // set
   static setProp<K extends keyof StrictConfigV4>(

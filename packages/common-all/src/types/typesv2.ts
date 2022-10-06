@@ -1,5 +1,9 @@
 import { URI } from "vscode-uri";
+import { Decoration, DendronConfig, Diagnostic } from ".";
 import { IDendronError } from "../error";
+import { VSRange } from "./compat";
+import { DVault } from "./DVault";
+import { FindNoteOpts } from "./FindNoteOpts";
 import {
   DNodeProps,
   DNodeType,
@@ -12,11 +16,7 @@ import {
   SchemaProps,
 } from "./foundation";
 import { DHookDict } from "./hooks";
-import { VSRange } from "./compat";
-import { Decoration, DendronConfig, Diagnostic } from ".";
 import { DendronASTDest, ProcFlavor } from "./unified";
-import { FindNoteOpts } from "./FindNoteOpts";
-import { DVault } from "./DVault";
 
 export type OptionalExceptFor<T, TRequired extends keyof T> = Partial<T> &
   Pick<T, TRequired>;

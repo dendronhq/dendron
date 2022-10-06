@@ -43,6 +43,7 @@ import { VaultUtils } from "../vault";
  * DendronEngineV3Web
  */
 export abstract class EngineV3Base implements ReducedDEngine {
+  // TODO: remove
   protected abstract fuseEngine: FuseEngine;
   protected noteStore;
   protected noteQueryable;
@@ -296,29 +297,28 @@ export abstract class EngineV3Base implements ReducedDEngine {
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // const ctx = "Engine:queryNotes";
     const { qs, vault, onlyDirectChildren, originalQS } = opts;
-
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
 
-    const items = await this.fuseEngine.queryNote({
-      qs,
+    const response = await this.noteQueryable.query(qs, {
       onlyDirectChildren,
       originalQS,
     });
-
+    if (response.isErr()) {
+      return {
+        error: response.error,
+      };
+    }
+    const items = response.value;
     if (items.length === 0) {
       return [];
     }
 
-    const notes = await Promise.all(
-      items.map((ent) => this.noteStore.get(ent.id)) // TODO: Should be using metadata instead
-    );
+    const notes = await this.noteStore.bulkGet(items.map((ent) => ent.id));
 
     let modifiedNotes;
-    // let notes = items.map((ent) => this.notes[ent.id]);
-    // if (!_.isUndefined(vault)) {
     modifiedNotes = notes
       .filter((ent) => _.isUndefined(ent.error))
       .map((resp) => resp.data!);

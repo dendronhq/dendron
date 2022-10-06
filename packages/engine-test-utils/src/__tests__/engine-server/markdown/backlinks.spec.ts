@@ -1,7 +1,8 @@
+import { ConfigUtils } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
-import { runEngineTestV5 } from "../../..";
+import { runEngineTestV5, TestConfigUtils } from "../../..";
 
 describe("backlinks", () => {
   describe("frontmatter tags", () => {
@@ -29,12 +30,10 @@ describe("backlinks", () => {
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents as string,
-              match: [`<a href="one.html">One (vault1)</a>`],
-            })
-          ).toBeTruthy();
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: [`<a href="one">One (vault1)</a>`],
+          });
         },
         {
           expect,
@@ -54,17 +53,17 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
-            // TestConfigUtils.withConfig(
-            //   (config) => {
-            //     const DefaultConfig = ConfigUtils.genDefaultConfig();
-            //     ConfigUtils.setVaults(
-            //       DefaultConfig,
-            //       ConfigUtils.getVaults(config)
-            //     );
-            //     return DefaultConfig;
-            //   },
-            //   { wsRoot: opts.wsRoot }
-            // );
+            TestConfigUtils.withConfig(
+              (config) => {
+                const DefaultConfig = ConfigUtils.genDefaultConfig();
+                ConfigUtils.setVaults(
+                  DefaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return DefaultConfig;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -94,15 +93,13 @@ describe("backlinks", () => {
           }).process("");
           // should be one backlink
           expect(resp).toMatchSnapshot();
-          expect(
-            await AssertUtils.assertInString({
-              body: resp.contents as string,
-              match: [
-                `<a href="one.html">One (vault1)</a>`,
-                `<a href="two.html">Two (vault1)</a>`,
-              ],
-            })
-          ).toBeTruthy();
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: [
+              `<a href="one">One (vault1)</a>`,
+              `<a href="two">Two (vault1)</a>`,
+            ],
+          });
         },
         {
           expect,

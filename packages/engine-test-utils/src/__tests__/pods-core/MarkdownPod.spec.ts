@@ -182,12 +182,9 @@ describe("markdown publish pod", () => {
             wikiLinkToURL: true,
           },
         });
-        // note id is foo.one, hence notes/foo.one.html
-        expect(resp).toContain("(https://localhost:8080/notes/foo.one.html)");
-        await checkString(
-          resp,
-          "[Link](https://localhost:8080/notes/foo.one.html)"
-        );
+        // note id is foo.one, hence notes/foo.one
+        expect(resp).toContain("(https://localhost:8080/notes/foo.one)");
+        await checkString(resp, "[Link](https://localhost:8080/notes/foo.one)");
       },
       { expect, preSetupHook: setupBasic }
     );
@@ -234,9 +231,9 @@ describe("markdown publish pod", () => {
             wikiLinkToURL: true,
           },
         });
-        // note id is foo.one, hence notes/foo.one.html
-        expect(resp).toContain("https://localhost:8080/notes/test1.html");
-        await checkNotInString(resp, "https://localhost:8080/notes/test2.html");
+        // note id is foo.one, hence notes/foo.one
+        expect(resp).toContain("https://localhost:8080/notes/test1");
+        await checkNotInString(resp, "https://localhost:8080/notes/test2");
       },
       { expect, preSetupHook: setupBasicMulti }
     );

@@ -67,12 +67,11 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const previewConfig = ConfigUtils.getPreview(overrideConfig);
     previewConfig.enablePrettyRefs = enablePrettyRefs;
-
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       engine,
       config,
-      config.workspace.vaults
+      config.vaults
     );
 
     // Also include children to render the 'children' hierarchy at the footer of the page:

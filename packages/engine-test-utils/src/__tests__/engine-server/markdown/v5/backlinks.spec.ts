@@ -214,7 +214,7 @@ describe("GIVEN dendron.yml default", () => {
               const { resp } = extra;
               await checkVFile(
                 resp,
-                `<a href="/notes/not-secret.html">Not Secret (vaultThree)</a>`
+                `<a href="/notes/not-secret">Not Secret (vaultThree)</a>`
               );
               await checkNotInVFile(
                 resp,

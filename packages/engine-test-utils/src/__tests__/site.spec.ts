@@ -102,6 +102,7 @@ describe("SiteUtils", () => {
                 createPublishingConfig({
                   siteHierarchies: ["foo", "foobar"],
                   siteRootDir,
+                  writeStubs: true,
                 })
               );
               ConfigUtils.setVaults(
@@ -223,7 +224,7 @@ describe("SiteUtils", () => {
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(1);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [{ id: "foo", parent: null, children: [] }],
@@ -274,7 +275,7 @@ describe("SiteUtils", () => {
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(2);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [{ id: "foo", parent: null }, { id: "foo.ch1" }],
@@ -388,7 +389,7 @@ describe("SiteUtils", () => {
             })
           )[0];
           expect(domains.length).toEqual(3);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [
@@ -421,7 +422,7 @@ describe("SiteUtils", () => {
                   siteHierarchies: ["root"],
                   siteRootDir,
                   ...dupNote(vaults[0]),
-                  config: {
+                  hierarchy: {
                     root: {
                       publishByDefault: false,
                     },
@@ -439,7 +440,7 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [],
@@ -484,7 +485,7 @@ describe("SiteUtils", () => {
             config,
           });
           expect(_.size(domains)).toEqual(2);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [{ id: "foo", parent: null }, { id: "foo.ch1" }],
@@ -533,7 +534,7 @@ describe("SiteUtils", () => {
             config,
           });
           expect(domains.length).toEqual(2);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [{ id: "foo-other", parent: null }, { id: "foo.ch1" }],
@@ -586,7 +587,7 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [
@@ -638,7 +639,7 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [
@@ -734,7 +735,7 @@ describe("SiteUtils", () => {
             })
           )[0];
           expect(domains.length).toEqual(2);
-          checkNotes({
+          await checkNotes({
             filteredNotes: notes,
             engine,
             match: [

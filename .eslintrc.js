@@ -10,7 +10,8 @@ module.exports = {
     "plugin:@typescript-eslint/eslint-recommended",
     "airbnb",
     "airbnb/hooks",
-    "prettier"
+    "prettier",
+    "plugin:neverthrow/recommended",
   ],
   globals: {
     Atomics: "readonly",

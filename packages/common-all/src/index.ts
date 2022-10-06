@@ -38,7 +38,6 @@ export * from "./sidebar";
 export * from "./parse";
 export * from "./BacklinkUtils";
 export * from "./DLinkUtils";
-export * from "./types/configs";
 
 export { axios, AxiosError };
 export { DateTime };

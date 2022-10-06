@@ -1,10 +1,6 @@
 import _ from "lodash";
-import {
-  LookupSelectionType,
-  LookupSelectionTypeEnum,
-  NoteProps,
-  NotePropsMeta,
-} from "../..";
+import { LookupSelectionType, LookupSelectionTypeEnum } from "../../lookup";
+import { NoteProps, NotePropsMeta } from "../../foundation";
 import { JournalConfig } from "./journal";
 import { NoteAddBehaviorEnum } from "./types";
 

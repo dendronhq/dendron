@@ -7,7 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { LoadingStatus } from "@dendronhq/common-frontend";
 import { AutoComplete, Alert, Row, Col, Typography } from "antd";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
 import { useFetchFuse } from "../utils/fuse";
@@ -73,13 +73,19 @@ type SearchProps = Omit<ReturnType<typeof useFetchFuse>, "fuse"> & {
   search: SearchFunction | undefined;
 };
 
+enum PlaceholderText {
+  SEARCH = "For lookup please use the '/' prefix. e.g. /root",
+  LOOKUP = "For full text search please use the '?' prefix. e.g. ? Onboarding",
+}
+
 function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   const { noteIndex, dendronRouter, search, error, loading, notes } = props;
 
   const engine = useEngineAppSelector((state) => state.engine);
   const defaultSearchMode = engine.config
     ? ConfigUtils.getSearchMode(engine.config)
-    : SearchMode.SEARCH;
+    : SearchMode.LOOKUP;
+
   const [searchResults, setSearchResults] =
     React.useState<SearchResults>(undefined);
   const [lookupResults, setLookupResults] = React.useState<NoteIndexProps[]>(
@@ -94,6 +100,20 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
   const { noteActive } = useNoteActive(dendronRouter.getActiveNoteId());
   const initValue = noteActive?.fname || "";
   const [searchQueryValue, setSearchQueryValue] = React.useState(initValue);
+
+  const [placeholderText, setPlaceholderText] = useState<PlaceholderText>(
+    PlaceholderText.LOOKUP
+  );
+
+  useEffect(() => {
+    if (searchMode === SearchMode.SEARCH)
+      setPlaceholderText(PlaceholderText.SEARCH);
+    else setPlaceholderText(PlaceholderText.LOOKUP);
+  }, [searchMode]);
+
+  useEffect(() => {
+    setSearchMode(defaultSearchMode);
+  }, [defaultSearchMode]);
 
   useEffect(() => {
     if (search) {
@@ -253,10 +273,6 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       );
     });
   }
-  const placeholder =
-    searchMode === SearchMode.SEARCH
-      ? "For lookup please use the '/' prefix. e.g. /root"
-      : "For full text search please use the '?' prefix. e.g. ? Onboarding";
   return (
     <AutoComplete
       size="large"
@@ -271,7 +287,7 @@ function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
       }
       // @ts-ignore
       onSelect={onSelect}
-      placeholder={placeholder}
+      placeholder={placeholderText}
     >
       {autocompleteChildren}
     </AutoComplete>

@@ -534,7 +534,7 @@ export class PodUIControls {
         return "Exports all notes in the Dendron workspace";
 
       case PodExportScope.Selection:
-        return "Export the selection from currently opened note";
+        return "Export the selected text from currently opened note";
 
       default:
         assertUnreachable(scope);

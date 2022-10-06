@@ -8,16 +8,19 @@ import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
 import { FuseEngine } from "../FuseEngine";
 import { INoteStore } from "../store";
+import { INoteQueryable } from "../store/IDataQuery";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
-  BulkWriteNotesResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
   DeleteNoteResp,
+  DLink,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNotesMetaResp,
   FindNotesResp,
+  GetNoteMetaResp,
   GetNoteResp,
   NoteChangeEntry,
   NoteProps,
@@ -29,8 +32,6 @@ import {
   RenameNoteResp,
   RespV3,
   WriteNoteResp,
-  GetNoteMetaResp,
-  DLink,
 } from "../types";
 import { DVault } from "../types/DVault";
 import { FindNoteOpts } from "../types/FindNoteOpts";
@@ -43,12 +44,22 @@ import { VaultUtils } from "../vault";
  */
 export abstract class EngineV3Base implements ReducedDEngine {
   protected abstract fuseEngine: FuseEngine;
+  protected noteStore;
+  protected noteQueryable;
+  protected logger;
+  public vaults;
 
-  constructor(
-    protected noteStore: INoteStore<string>,
-    protected logger: DLogger,
-    public vaults: DVault[]
-  ) {}
+  constructor(opts: {
+    noteStore: INoteStore<string>;
+    noteQueryable: INoteQueryable;
+    logger: DLogger;
+    vaults: DVault[];
+  }) {
+    this.noteStore = opts.noteStore;
+    this.noteQueryable = opts.noteQueryable;
+    this.logger = opts.logger;
+    this.vaults = opts.vaults;
+  }
 
   /**
    * See {@link DEngine.getNote}

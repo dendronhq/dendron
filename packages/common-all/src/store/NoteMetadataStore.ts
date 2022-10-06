@@ -7,8 +7,9 @@ import { FindNoteOpts } from "../types/FindNoteOpts";
 import { cleanName, isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
+import { INoteMetadataStore } from "./IMetadataStore";
 
-export class NoteMetadataStore implements IDataStore<string, NotePropsMeta> {
+export class NoteMetadataStore implements INoteMetadataStore {
   /**
    * Map of noteId -> noteProp metadata
    */

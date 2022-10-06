@@ -1,17 +1,20 @@
 import {
+  BacklinkUtils,
   Cache,
   ConfigUtils,
   CONSTANTS,
+  DeleteSchemaResp,
   DendronASTDest,
   DendronCompositeError,
+  DendronConfig,
   DendronError,
   DEngine,
   DEngineClient,
-  DeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
   DHookEntry,
   DLink,
+  DLinkUtils,
   DNodeUtils,
   DNoteLoc,
   DVault,
@@ -24,16 +27,22 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   FuseEngine,
+  FuseMetadataStore,
+  GetDecorationsOpts,
   GetDecorationsResp,
+  GetNoteBlocksOpts,
   GetNoteBlocksResp,
+  GetSchemaResp,
   IDendronError,
   IFileStore,
+  INoteMetadataStore,
+  INoteQueryable,
   INoteStore,
-  DendronConfig,
   ISchemaStore,
   isNotUndefined,
   LruCache,
   milliseconds,
+  newRange,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -43,19 +52,22 @@ import {
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
-  QueryNotesResp,
   NoteStore,
   NoteUtils,
   NullCache,
   ProcFlavor,
   QueryNotesOpts,
+  QueryNotesResp,
+  QuerySchemaResp,
   RenameNoteOpts,
+  RenameNoteResp,
   RenderNoteOpts,
+  RenderNoteResp,
   RespV3,
+  RespWithOptError,
   SchemaMetadataStore,
   SchemaModuleDict,
   SchemaModuleProps,
-  QuerySchemaResp,
   SchemaStore,
   SchemaUtils,
   stringifyError,
@@ -65,16 +77,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
-  RenameNoteResp,
-  RenderNoteResp,
-  GetSchemaResp,
   WriteSchemaResp,
-  BacklinkUtils,
-  DLinkUtils,
-  RespWithOptError,
-  GetDecorationsOpts,
-  newRange,
-  GetNoteBlocksOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -84,11 +87,6 @@ import {
   NodeJSUtils,
   vault2Path,
 } from "@dendronhq/common-server";
-import _ from "lodash";
-import path from "path";
-import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-import { NoteParserV2 } from "./drivers/file/NoteParserV2";
-import { SchemaParser } from "./drivers/file/schemaParser";
 import {
   getParsingDependencyDicts,
   LinkUtils,
@@ -96,6 +94,11 @@ import {
   RemarkUtils,
   runAllDecorators,
 } from "@dendronhq/unified";
+import _ from "lodash";
+import path from "path";
+import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
+import { NoteParserV2 } from "./drivers/file/NoteParserV2";
+import { SchemaParser } from "./drivers/file/schemaParser";
 import { NodeJSFileStore } from "./store";
 import { HookUtils, RequireHookResp } from "./topics/hooks";
 import { EngineUtils } from "./utils/engineUtils";
@@ -105,6 +108,8 @@ type DendronEngineOptsV3 = {
   vaults: DVault[];
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
+  noteQueryable: INoteQueryable;
+  metadataStore: INoteMetadataStore;
   schemaStore: ISchemaStore<string>;
   logger: DLogger;
   config: DendronConfig;
@@ -126,7 +131,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   private _renderedCache: Cache<string, CachedPreview>;
 
   constructor(props: DendronEngineOptsV3) {
-    super(props.noteStore, props.logger, props.vaults);
+    super(props);
     this.wsRoot = props.wsRoot;
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
@@ -148,11 +153,16 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     if (error) {
       LOGGER.error(stringifyError(error));
     }
+
+    const metadataStore = new FuseMetadataStore();
     const fileStore = new NodeJSFileStore();
+    const noteQueryable = metadataStore;
 
     return new DendronEngineV3({
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
+      metadataStore,
+      noteQueryable,
       noteStore: new NoteStore(
         fileStore,
         new NoteMetadataStore(),

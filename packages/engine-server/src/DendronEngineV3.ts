@@ -26,7 +26,6 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  FuseEngine,
   FuseMetadataStore,
   GetDecorationsOpts,
   GetDecorationsResp,
@@ -36,7 +35,6 @@ import {
   IDendronError,
   IFileStore,
   INoteMetadataStore,
-  INoteQueryable,
   INoteStore,
   ISchemaStore,
   isNotUndefined,
@@ -108,7 +106,7 @@ type DendronEngineOptsV3 = {
   vaults: DVault[];
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
-  noteQueryable: INoteQueryable;
+  queryStore: IQueryStore;
   metadataStore: INoteMetadataStore;
   schemaStore: ISchemaStore<string>;
   logger: DLogger;
@@ -124,6 +122,7 @@ type CachedPreview = {
 export class DendronEngineV3 extends EngineV3Base implements DEngine {
   public wsRoot: string;
   public fuseEngine: FuseEngine;
+  public store: DStore;
   public hooks: DHookDict;
   private _fileStore: IFileStore;
   private _noteStore: INoteStore<string>;
@@ -133,9 +132,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   constructor(props: DendronEngineOptsV3) {
     super(props);
     this.wsRoot = props.wsRoot;
-    this.fuseEngine = new FuseEngine({
-      fuzzThreshold: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
-    });
     const hooks: DHookDict = ConfigUtils.getWorkspace(props.config).hooks || {
       onCreate: [],
     };
@@ -156,13 +152,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
     const metadataStore = new FuseMetadataStore();
     const fileStore = new NodeJSFileStore();
-    const noteQueryable = metadataStore;
+    const queryStore = metadataStore as IQueryStore;
 
     return new DendronEngineV3({
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
       metadataStore,
-      noteQueryable,
+      queryStore,
       noteStore: new NoteStore(
         fileStore,
         new NoteMetadataStore(),
@@ -228,8 +224,8 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         };
       }
 
-      this.fuseEngine.replaceNotesIndex(notes);
-      this.fuseEngine.replaceSchemaIndex(schemaDict);
+      await this.queryStore.replaceNotesIndex(notes);
+      await this.queryStore.replaceSchemasIndex(schemaDict);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
 
@@ -546,7 +542,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
 
     // Propragate metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
+    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -766,9 +762,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
     // Remove existing schema from fuse engine first
     if (maybeSchema.data) {
-      this.fuseEngine.removeSchemaFromIndex(maybeSchema.data);
+      await this.queryStore.removeSchemaFromIndex(maybeSchema.data);
     }
-    this.fuseEngine.addSchemaToIndex(schema);
+    await this.queryStore.addSchemaToIndex(schema);
     return { data: undefined };
   }
 
@@ -810,10 +806,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   async querySchema(queryString: string): Promise<QuerySchemaResp> {
     const ctx = "DEngine:querySchema";
 
-    const schemaIds = this.fuseEngine
-      .querySchema({ qs: queryString })
+    const schemaIds = await this.queryStore
+      .querySchemas(queryString)
       .map((ent) => ent.id);
-    const responses = await this._schemaStore.bulkGetMetadata(schemaIds);
+    if (schemaIds.isErr()) {
+      return { error: schemaIds.error };
+    }
+    const responses = await this._schemaStore.bulkGetMetadata(schemaIds.value);
     const schemas = responses.map((resp) => resp.data).filter(isNotUndefined);
     this.logger.info({ ctx, msg: "exit" });
     return {

@@ -1,5 +1,12 @@
 import { ResultAsync } from "neverthrow";
-import { DendronError, NoteChangeEntry, NotePropsMeta } from "..";
+import {
+  DendronError,
+  NoteChangeEntry,
+  NotePropsByIdDict,
+  NotePropsMeta,
+  SchemaModuleDict,
+  SchemaModuleProps,
+} from "..";
 
 export type INoteQueryOpts = {
   /**
@@ -10,10 +17,23 @@ export type INoteQueryOpts = {
   onlyDirectChildren?: boolean;
 };
 
-export interface IDataQueryable<K, V> {
-  query(key: K, opts: INoteQueryOpts): ResultAsync<V, DendronError>;
-}
+export interface IQueryStore {
+  queryNotes(
+    qs: string,
+    opts: INoteQueryOpts
+  ): ResultAsync<NotePropsMeta[], DendronError>;
+  querySchemas(
+    qs: string,
+    opts?: INoteQueryOpts
+  ): ResultAsync<any, DendronError>;
+  updateNotesIndex(changes: NoteChangeEntry[]): ResultAsync<void, DendronError>;
+  updateSchemasIndex(): ResultAsync<void, DendronError>;
+  replaceNotesIndex(props: NotePropsByIdDict): ResultAsync<void, DendronError>;
+  replaceSchemasIndex(props: SchemaModuleDict): ResultAsync<void, DendronError>;
 
-export type INoteQueryable = IDataQueryable<string, NotePropsMeta[]> & {
-  updateIndex(changes: NoteChangeEntry[]): ResultAsync<void, DendronError>;
-};
+  removeSchemaFromIndex(
+    schema: SchemaModuleProps
+  ): ResultAsync<void, DendronError>;
+
+  addSchemaToIndex(schema: SchemaModuleProps): ResultAsync<void, DendronError>;
+}

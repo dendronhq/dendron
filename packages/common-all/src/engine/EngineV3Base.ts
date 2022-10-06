@@ -6,8 +6,7 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { INoteStore } from "../store";
-import { INoteQueryable } from "../store/IDataQuery";
+import { IQueryStore, INoteStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
@@ -43,18 +42,18 @@ import { VaultUtils } from "../vault";
  */
 export abstract class EngineV3Base implements ReducedDEngine {
   protected noteStore;
-  protected noteQueryable;
+  protected queryStore;
   protected logger;
   public vaults;
 
   constructor(opts: {
     noteStore: INoteStore<string>;
-    noteQueryable: INoteQueryable;
+    queryStore: IQueryStore;
     logger: DLogger;
     vaults: DVault[];
   }) {
     this.noteStore = opts.noteStore;
-    this.noteQueryable = opts.noteQueryable;
+    this.queryStore = opts.queryStore;
     this.logger = opts.logger;
     this.vaults = opts.vaults;
   }
@@ -278,7 +277,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
-    await this.noteQueryable.updateIndex(changes);
+    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -299,14 +298,13 @@ export abstract class EngineV3Base implements ReducedDEngine {
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
 
-    const response = await this.noteQueryable.query(qs, {
+    const response = await this.queryStore.queryNotes(qs, {
       onlyDirectChildren,
       originalQS,
     });
     if (response.isErr()) {
-      return {
-        error: response.error,
-      };
+      // TODO: need to return an error
+      return [];
     }
     const items = response.value;
     if (items.length === 0) {
@@ -322,7 +320,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     if (!_.isUndefined(vault)) {
       modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqualV2(vault, ent.data!.vault)
+        VaultUtils.isEqualV2(vault, ent.vault)
       );
     }
 

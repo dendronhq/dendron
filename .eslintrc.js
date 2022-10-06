@@ -5,7 +5,13 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: ["plugin:react/recommended", "airbnb", "airbnb/hooks", "prettier"],
+  extends: [
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "airbnb",
+    "airbnb/hooks",
+    "prettier"
+  ],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -18,6 +24,8 @@ module.exports = {
     },
     ecmaVersion: 2018,
     sourceType: "module",
+    tsconfigRootDir: __dirname,
+    project: ["./tsconfig.json"],
   },
   plugins: ["@typescript-eslint", "jest"],
   rules: {

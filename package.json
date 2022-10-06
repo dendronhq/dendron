@@ -146,6 +146,7 @@
     "webpack": "^5.74.0"
   },
   "resolutions": {
-    "trim": "0.0.3"
+    "trim": "0.0.3",
+    "d3-color": "3.1.0"
   }
 }

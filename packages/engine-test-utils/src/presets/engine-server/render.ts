@@ -91,7 +91,6 @@ const NOTES = {
       const { data } = await engine.renderNote({
         id: "alpha-id",
       });
-      expect(data).toMatchSnapshot();
       return [
         {
           actual: true,

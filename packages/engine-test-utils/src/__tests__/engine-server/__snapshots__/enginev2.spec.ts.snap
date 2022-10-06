@@ -7,15 +7,3 @@ exports[`engine, notes/ render "CUSTOM_FM" 1`] = `
 `;
 
 exports[`engine, notes/ render "EMPTY_NOTE" 1`] = `"<h1 id=\\"empty\\">Empty</h1>"`;
-
-exports[`engine, notes/ render "NOTE_REF_TO_TASK_NOTE" 1`] = `
-"<h1 id=\\"alpha\\">Alpha</h1>
-<ul>
-<li><a href=\\"task-note-id\\"><input type=\\"checkbox\\" disabled class=\\"task-before task-status\\" checked>Task Note</a></li>
-</ul>
-<hr>
-<strong>Backlinks</strong>
-<ul>
-<li><a href=\\"beta\\">Beta (vault1)</a></li>
-</ul>"
-`;

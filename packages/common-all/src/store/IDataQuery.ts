@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import { DendronError, NotePropsMeta } from "..";
+import { DendronError, NoteChangeEntry, NotePropsMeta } from "..";
 
 export type INoteQueryOpts = {
   /**
@@ -14,4 +14,6 @@ export interface IDataQueryable<K, V> {
   query(key: K, opts: INoteQueryOpts): ResultAsync<V, DendronError>;
 }
 
-export type INoteQueryable = IDataQueryable<string, NotePropsMeta[]>;
+export type INoteQueryable = IDataQueryable<string, NotePropsMeta[]> & {
+  updateIndex(changes: NoteChangeEntry[]): ResultAsync<void, DendronError>;
+};

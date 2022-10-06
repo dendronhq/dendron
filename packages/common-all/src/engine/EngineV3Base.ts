@@ -6,7 +6,6 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { FuseEngine } from "../FuseEngine";
 import { INoteStore } from "../store";
 import { INoteQueryable } from "../store/IDataQuery";
 import {
@@ -43,8 +42,6 @@ import { VaultUtils } from "../vault";
  * DendronEngineV3Web
  */
 export abstract class EngineV3Base implements ReducedDEngine {
-  // TODO: remove
-  protected abstract fuseEngine: FuseEngine;
   protected noteStore;
   protected noteQueryable;
   protected logger;
@@ -281,7 +278,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
+    await this.noteQueryable.updateIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({

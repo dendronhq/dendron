@@ -2,7 +2,7 @@ import _ from "lodash";
 import { ResultAsync } from "neverthrow";
 import { DendronError } from "../error";
 import { FuseEngine } from "../FuseEngine";
-import { NotePropsMeta, RespV3 } from "../types";
+import { NoteChangeEntry, NotePropsMeta, RespV3 } from "../types";
 import { INoteQueryable, INoteQueryOpts } from "./IDataQuery";
 import { INoteMetadataStore } from "./IMetadataStore";
 
@@ -27,6 +27,7 @@ export class FuseMetadataStore implements INoteQueryable, INoteMetadataStore {
   delete(key: string): Promise<RespV3<string>> {
     throw new Error("Method not implemented.");
   }
+
   query(
     qs: string,
     opts: INoteQueryOpts
@@ -36,5 +37,16 @@ export class FuseMetadataStore implements INoteQueryable, INoteMetadataStore {
       ...opts,
     }) as NotePropsMeta[];
     return ResultAsync.fromSafePromise(Promise.resolve(items));
+  }
+
+  updateIndex(changes: NoteChangeEntry[]): ResultAsync<void, DendronError> {
+    return ResultAsync.fromPromise(
+      this.fuseEngine.updateNotesIndex(changes),
+      (err) =>
+        new DendronError({
+          message: "issue updating index",
+          innerError: err as Error,
+        })
+    );
   }
 }

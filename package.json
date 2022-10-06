@@ -144,5 +144,8 @@
     "typescript": "4.6",
     "verdaccio-memory": "^10.0.1",
     "webpack": "^5.74.0"
+  },
+  "resolutions": {
+    "trim": "0.0.3"
   }
 }

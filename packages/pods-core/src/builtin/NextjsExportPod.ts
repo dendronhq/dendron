@@ -524,7 +524,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const sidebarConfig = parseSidebarConfig(sidebarConfigInput);
 
     // fail early, before computing `SiteUtils.filterByConfig`.
-    if (sidebarConfig.error) {
+    if (sidebarConfig.isErr()) {
       throw sidebarConfig.error;
     }
 
@@ -551,7 +551,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     });
 
     // fail if sidebar could not be created
-    if (sidebarResp.error) {
+    if (sidebarResp.isErr()) {
       throw sidebarResp.error;
     }
 
@@ -648,7 +648,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const treeDstPath = path.join(podDstDir, "tree.json");
 
-    const sidebar = sidebarResp.data;
+    const sidebar = sidebarResp.value;
     const tree = TreeUtils.generateTreeData(payload.notes, sidebar);
 
     // Generate full text search data

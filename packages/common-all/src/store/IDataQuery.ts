@@ -25,7 +25,7 @@ export interface IQueryStore {
   querySchemas(
     qs: string,
     opts?: INoteQueryOpts
-  ): ResultAsync<any, DendronError>;
+  ): ResultAsync<{ id: string }[], DendronError>;
   updateNotesIndex(changes: NoteChangeEntry[]): ResultAsync<void, DendronError>;
   updateSchemasIndex(): ResultAsync<void, DendronError>;
   replaceNotesIndex(props: NotePropsByIdDict): ResultAsync<void, DendronError>;

@@ -40,11 +40,12 @@ export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
     }) as NotePropsMeta[];
     return ResultAsync.fromSafePromise(Promise.resolve(items));
   }
+
   querySchemas(
-    key: string,
-    opts: INoteQueryOpts
-  ): ResultAsync<any, DendronError<StatusCodes | undefined>> {
-    throw new Error("Method not implemented.");
+    qs: string
+  ): ResultAsync<{ id: string }[], DendronError<StatusCodes | undefined>> {
+    const schemaIds = this.fuseEngine.querySchema({ qs });
+    return ResultAsync.fromSafePromise(Promise.resolve(schemaIds));
   }
 
   removeSchemaFromIndex(

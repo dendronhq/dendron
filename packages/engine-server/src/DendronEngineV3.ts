@@ -806,13 +806,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   async querySchema(queryString: string): Promise<QuerySchemaResp> {
     const ctx = "DEngine:querySchema";
 
-    const schemaIds = await this.queryStore
-      .querySchemas(queryString)
-      .map((ent) => ent.id);
+    const schemaIds = await this.queryStore.querySchemas(queryString);
     if (schemaIds.isErr()) {
       return { error: schemaIds.error };
     }
-    const responses = await this._schemaStore.bulkGetMetadata(schemaIds.value);
+    const responses = await this._schemaStore.bulkGetMetadata(
+      schemaIds.value.map((ent) => ent.id)
+    );
     const schemas = responses.map((resp) => resp.data).filter(isNotUndefined);
     this.logger.info({ ctx, msg: "exit" });
     return {

@@ -10,7 +10,7 @@ import { AutoComplete, Alert, Row, Col, Typography } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
-import { useFetchFuse } from "../utils/fuse";
+import { useFetchFuse } from "../utils/useFuse";
 import type Fuse from "fuse.js";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";

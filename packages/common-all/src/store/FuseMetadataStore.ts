@@ -8,14 +8,12 @@ import {
   NoteChangeEntry,
   NotePropsByIdDict,
   NotePropsMeta,
-  RespV3,
   SchemaModuleDict,
   SchemaModuleProps,
 } from "../types";
 import { INoteQueryOpts, IQueryStore } from "./IDataQuery";
-import { INoteMetadataStore } from "./IMetadataStore";
 
-export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
+export class FuseQueryStore implements IQueryStore {
   fuseEngine: FuseEngine;
 
   constructor(opts?: { fuzzThreshold: number }) {
@@ -24,10 +22,17 @@ export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
     });
   }
 
-  // @ts-ignore
   addSchemaToIndex(schema: SchemaModuleProps) {
-    this.fuseEngine.schemaIndex.add(SchemaUtils.getModuleRoot(schema));
-    return ResultAsync.fromSafePromise(Promise.resolve());
+    return ResultAsync.fromPromise(
+      Promise.resolve(
+        this.fuseEngine.schemaIndex.add(SchemaUtils.getModuleRoot(schema))
+      ),
+      (err) =>
+        new DendronError({
+          message: "issue adding schema to index",
+          innerError: err as Error,
+        })
+    );
   }
 
   queryNotes(
@@ -82,9 +87,9 @@ export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
   updateNotesIndex(
     changes: NoteChangeEntry[]
   ): ResultAsync<void, DendronError> {
-    // @ts-ignore
     return ResultAsync.fromPromise(
-      this.fuseEngine.updateNotesIndex(changes),
+      // return signature requires us to return void vs void[]
+      this.fuseEngine.updateNotesIndex(changes).then(() => {}),
       (err) =>
         new DendronError({
           message: "issue updating index",
@@ -96,19 +101,6 @@ export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
     void,
     DendronError<StatusCodes | undefined>
   > {
-    throw new Error("Method not implemented.");
-  }
-
-  get(key: string): Promise<RespV3<NotePropsMeta>> {
-    throw new Error("Method not implemented.");
-  }
-  find(opts: any): Promise<RespV3<NotePropsMeta[]>> {
-    throw new Error("Method not implemented.");
-  }
-  write(key: string, data: NotePropsMeta): Promise<RespV3<string>> {
-    throw new Error("Method not implemented.");
-  }
-  delete(key: string): Promise<RespV3<string>> {
     throw new Error("Method not implemented.");
   }
 }

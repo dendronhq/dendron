@@ -15,7 +15,7 @@ import {
   ERROR_STATUS,
   Event,
   EventEmitter,
-  FuseMetadataStore,
+  FuseQueryStore,
   IDendronError,
   IFileStore,
   INoteStore,
@@ -60,7 +60,7 @@ export class DendronEngineV3Web
       logger: new ConsoleLogger(),
       noteStore,
       vaults,
-      queryStore: new FuseMetadataStore() as IQueryStore,
+      queryStore: new FuseQueryStore() as IQueryStore,
       wsRoot: wsRootURI.fsPath,
     });
     this.wsRootURI = wsRootURI;

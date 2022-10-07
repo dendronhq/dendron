@@ -26,7 +26,7 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  FuseMetadataStore,
+  FuseQueryStore,
   GetDecorationsOpts,
   GetDecorationsResp,
   GetNoteBlocksOpts,
@@ -34,7 +34,6 @@ import {
   GetSchemaResp,
   IDendronError,
   IFileStore,
-  INoteMetadataStore,
   INoteStore,
   ISchemaStore,
   isNotUndefined,
@@ -107,7 +106,6 @@ type DendronEngineOptsV3 = {
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
   queryStore: IQueryStore;
-  metadataStore: INoteMetadataStore;
   schemaStore: ISchemaStore<string>;
   logger: DLogger;
   config: DendronConfig;
@@ -150,14 +148,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       LOGGER.error(stringifyError(error));
     }
 
-    const metadataStore = new FuseMetadataStore();
+    const queryStore = new FuseQueryStore();
     const fileStore = new NodeJSFileStore();
-    const queryStore = metadataStore as IQueryStore;
 
     return new DendronEngineV3({
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
-      metadataStore,
       queryStore,
       noteStore: new NoteStore(
         fileStore,

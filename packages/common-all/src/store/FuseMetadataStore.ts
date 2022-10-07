@@ -80,7 +80,8 @@ export class FuseMetadataStore implements IQueryStore, INoteMetadataStore {
 
   updateNotesIndex(
     changes: NoteChangeEntry[]
-  ): ResultAsync<void, DendronError<StatusCodes | undefined>> {
+  ): ResultAsync<void, DendronError> {
+    // @ts-ignore
     return ResultAsync.fromPromise(
       this.fuseEngine.updateNotesIndex(changes),
       (err) =>

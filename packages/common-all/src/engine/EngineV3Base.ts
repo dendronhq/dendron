@@ -6,7 +6,7 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { IQueryStore, INoteStore } from "../store";
+import { IQueryStore, INoteStore, FuseMetadataStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
@@ -45,17 +45,20 @@ export abstract class EngineV3Base implements ReducedDEngine {
   protected queryStore;
   protected logger;
   public vaults;
+  public wsRoot;
 
   constructor(opts: {
     noteStore: INoteStore<string>;
     queryStore: IQueryStore;
     logger: DLogger;
     vaults: DVault[];
+    wsRoot: string;
   }) {
     this.noteStore = opts.noteStore;
     this.queryStore = opts.queryStore;
     this.logger = opts.logger;
     this.vaults = opts.vaults;
+    this.wsRoot = opts.wsRoot;
   }
 
   /**
@@ -319,9 +322,9 @@ export abstract class EngineV3Base implements ReducedDEngine {
       .map((resp) => resp.data!);
 
     if (!_.isUndefined(vault)) {
-      modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqualV2(vault, ent.vault)
-      );
+      modifiedNotes = modifiedNotes.filter((ent) => {
+        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
+      });
     }
 
     return modifiedNotes;

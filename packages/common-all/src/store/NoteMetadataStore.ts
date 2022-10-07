@@ -6,7 +6,6 @@ import { NotePropsMeta, NotePropsByFnameDict, RespV3 } from "../types";
 import { FindNoteOpts } from "../types/FindNoteOpts";
 import { cleanName, isNotUndefined } from "../utils";
 import { VaultUtils } from "../vault";
-import { IDataStore } from "./IDataStore";
 import { INoteMetadataStore } from "./IMetadataStore";
 
 export class NoteMetadataStore implements INoteMetadataStore {

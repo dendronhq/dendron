@@ -25,10 +25,12 @@ export class MockEngineAPIService implements ReducedDEngine {
   // private noteProps: NoteProps[];
 
   private store: NoteMetadataStore;
+  public wsRoot: string;
 
   constructor() {
     // this.noteProps = [];
     this.store = new NoteMetadataStore();
+    this.wsRoot = "";
   }
 
   async init() {

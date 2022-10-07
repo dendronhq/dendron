@@ -6,7 +6,7 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { IQueryStore, INoteStore, FuseMetadataStore } from "../store";
+import { INoteStore, IQueryStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,

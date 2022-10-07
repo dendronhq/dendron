@@ -103,6 +103,23 @@ function _setupTreeViewCommands(
   }
 }
 
+export function trackTopLevelRepoFound(opts: { wsService: WorkspaceService }) {
+  const { wsService } = opts;
+  return wsService.getTopLevelRemoteUrl().then((remoteUrl) => {
+    if (remoteUrl !== undefined) {
+      const [protocol, provider, ...path] = GitUtils.parseGitUrl(remoteUrl);
+      const payload = {
+        protocol: protocol.replace(":", ""),
+        provider,
+        path: SparkMD5.hash(`${path[0]}/${path[1]}.git`),
+      };
+      AnalyticsUtils.track(GitEvents.TopLevelRepoFound, payload);
+      return payload;
+    }
+    return undefined;
+  });
+}
+
 function analyzeWorkspace({ wsService }: { wsService: WorkspaceService }) {
   // Track contributors to repositories, but do so in the background so
   // initialization isn't delayed.
@@ -118,17 +135,7 @@ function analyzeWorkspace({ wsService }: { wsService: WorkspaceService }) {
     .catch((err) => {
       Sentry.captureException(err);
     });
-  wsService.getToplevelRemoteUrl().then((remoteUrl) => {
-    if (remoteUrl !== undefined) {
-      const [protocol, provider, owner, repo] = GitUtils.parseGitUrl(remoteUrl);
-      const payload = {
-        protocol: protocol.replace(":", ""),
-        provider,
-        path: SparkMD5.hash(`${owner}/${repo}.git`),
-      };
-      AnalyticsUtils.track(GitEvents.TopLevelRepoFound, payload);
-    }
-  });
+  trackTopLevelRepoFound({ wsService });
 }
 
 async function getOrPromptWSRoot(workspaceFolders: string[]) {

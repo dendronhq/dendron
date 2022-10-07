@@ -885,7 +885,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    *   In this case, it is ambiguous what the top level is, and we assume the top level is not tracked remotely.
    * @returns remote url or undefined
    */
-  async getToplevelRemoteUrl(): Promise<string | undefined> {
+  async getTopLevelRemoteUrl(): Promise<string | undefined> {
     const git = new Git({ localUrl: this.wsRoot });
     const remoteUrl = await git.getRemoteUrl();
     return remoteUrl;

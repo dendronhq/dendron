@@ -675,10 +675,10 @@ suite("NoteLookupCommand", function () {
           stubVaultPick(vaults);
 
           const mockQuickPick = createMockQuickPick({
-            value: "foobarbaz",
+            value: "capers-are-not-berries",
             selectedItems: [
               NotePickerUtils.createNewWithTemplateItem({
-                fname: "foobarbaz",
+                fname: "capers-are-not-berries",
               }),
             ],
           });
@@ -691,7 +691,7 @@ suite("NoteLookupCommand", function () {
             noHidePickerOnAccept: false,
           });
           await lc.prepareQuickPick({
-            initialValue: "foobarbaz",
+            initialValue: "capers-are-not-berries",
             provider: lp,
             placeholder: "",
           });
@@ -719,7 +719,7 @@ suite("NoteLookupCommand", function () {
 
           // foobarbaz is not created if template selection is cancelled, or selection was empty.
           const maybeFooBarBazNotes = await engine.findNotes({
-            fname: "foobarbaz",
+            fname: "capers-are-not-berries",
           });
           expect(maybeFooBarBazNotes.length).toEqual(0);
           cmdSpy.restore();

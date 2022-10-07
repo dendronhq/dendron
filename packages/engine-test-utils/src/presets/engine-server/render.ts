@@ -86,6 +86,52 @@ const NOTES = {
       },
     }
   ),
+  NOTE_REF_TO_TASK_NOTE: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const { data } = await engine.renderNote({
+        id: "alpha-id",
+      });
+      return [
+        {
+          actual: true,
+          expected: await AssertUtils.assertInString({
+            body: data!,
+            match: [
+              `<li><a href="task-note-id"><input type="checkbox" disabled class="task-before task-status" checked>Task Note</a></li>`,
+            ],
+          }),
+          msg: "custom fm render",
+        },
+      ];
+    },
+    {
+      preSetupHook: async (opts) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: "- [[task-note]]",
+          vault: opts.vaults[0],
+          wsRoot: opts.wsRoot,
+          props: { id: "alpha-id" },
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: "![[alpha]]",
+          vault: opts.vaults[0],
+          wsRoot: opts.wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "task-note",
+          body: "",
+          custom: {
+            status: "done",
+          },
+          vault: opts.vaults[0],
+          wsRoot: opts.wsRoot,
+          props: { id: "task-note-id" },
+        });
+      },
+    }
+  ),
 };
 
 export const ENGINE_RENDER_PRESETS = {

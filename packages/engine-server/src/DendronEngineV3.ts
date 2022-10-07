@@ -125,8 +125,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   private _schemaStore: ISchemaStore<string>;
   private _renderedCache: Cache<string, CachedPreview>;
 
-  static _instance: DendronEngineV3 | undefined;
-
   constructor(props: DendronEngineOptsV3) {
     super(props.noteStore, props.logger, props.vaults);
     this.wsRoot = props.wsRoot;

@@ -147,8 +147,6 @@ export class DendronEngineV2 implements DEngine {
   private renderedCache: Cache<string, CachedPreview>;
   private schemas: SchemaModuleDict;
 
-  static _instance: DendronEngineV2 | undefined;
-
   constructor(props: DendronEnginePropsV2) {
     this.wsRoot = props.wsRoot;
     this.logger = props.logger;

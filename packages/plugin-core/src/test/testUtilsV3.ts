@@ -425,11 +425,7 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
   };
 }
 
-class FakeEngine {
-  get schemas() {
-    return {};
-  }
-}
+class FakeEngine {}
 
 type EngineOverride = {
   [P in keyof DendronEngineV2]: (opts: WorkspaceOpts) => DendronEngineV2[P];

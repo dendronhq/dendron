@@ -391,7 +391,7 @@ export class ExtensionUtils {
       numBacklinks = Math.max(0, numBacklinks - tutorialBacklinkCount);
     }
 
-    const numSchemas = _.size(engine.schemas);
+    const numSchemas = _.size(await (await engine.querySchema("*")).data);
     const codeWorkspacePresent = await fs.pathExists(
       path.join(wsRoot, CONSTANTS.DENDRON_WS_NAME)
     );

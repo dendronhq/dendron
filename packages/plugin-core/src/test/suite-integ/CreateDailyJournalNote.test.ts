@@ -443,12 +443,14 @@ suite("Create Daily Journal Suite", function () {
         const numNotesBefore = (
           await engine.findNotesMeta({ excludeStub: true })
         ).length;
-        const numSchemasBefore = _.size(engine.schemas);
+        const numSchemasBefore = _.size((await engine.querySchema("*")).data);
         await cmd.run();
         expect(numNotesBefore).toEqual(
           (await engine.findNotesMeta({ excludeStub: true })).length
         );
-        expect(numSchemasBefore).toEqual(_.size(engine.schemas));
+        expect(numSchemasBefore).toEqual(
+          _.size((await engine.querySchema("*")).data)
+        );
       });
     }
   );

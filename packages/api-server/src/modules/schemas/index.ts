@@ -1,8 +1,10 @@
 import {
   DeleteSchemaResp,
+  GetSchemaResp,
   QuerySchemaResp,
   SchemaDeleteRequest,
   SchemaQueryRequest,
+  SchemaReadRequest,
   SchemaWriteRequest,
   WriteSchemaResp,
 } from "@dendronhq/common-all";
@@ -16,6 +18,12 @@ export class SchemaController {
       SchemaController.singleton = new SchemaController();
     }
     return SchemaController.singleton;
+  }
+
+  async get(req: SchemaReadRequest): Promise<GetSchemaResp> {
+    const { ws, id } = req;
+    const engine = await getWSEngine({ ws: ws || "" });
+    return engine.getSchema(id);
   }
 
   async create(req: SchemaWriteRequest): Promise<WriteSchemaResp> {

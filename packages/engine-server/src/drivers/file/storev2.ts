@@ -8,7 +8,6 @@ import {
   DendronCompositeError,
   DendronError,
   DEngineClient,
-  DEngineInitResp,
   DHookEntry,
   DLink,
   DLinkUtils,
@@ -26,6 +25,7 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
+  GetSchemaResp,
   IDendronError,
   IntermediateDendronConfig,
   isNotUndefined,
@@ -44,6 +44,7 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaUtils,
+  StoreV2InitResp,
   stringifyError,
   TAGS_HIERARCHY,
   TimeUtils,
@@ -115,7 +116,7 @@ export class FileStorage implements DStore {
     this.engine = props.engine;
   }
 
-  async init(): Promise<DEngineInitResp> {
+  async init(): Promise<StoreV2InitResp> {
     const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {
@@ -402,6 +403,10 @@ export class FileStorage implements DStore {
 
     out.push({ note: noteToDelete, status: "delete" });
     return out;
+  }
+
+  getSchema(id: string): Promise<GetSchemaResp> {
+    return Promise.resolve({ data: this.schemas[id] });
   }
 
   async deleteSchema(

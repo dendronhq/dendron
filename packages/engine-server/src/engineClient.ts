@@ -1,55 +1,53 @@
 import {
   APIUtils,
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
   BulkWriteNotesOpts,
   ConfigUtils,
+  DeleteNoteResp,
+  DeleteSchemaResp,
   DendronAPI,
   DendronError,
   DEngineClient,
-  DeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
   DVault,
-  DeleteNoteResp,
   EngineDeleteOpts,
+  EngineEventEmitter,
   EngineInfoResp,
+  EngineSchemaWriteOpts,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   Event,
   EventEmitter,
+  FindNoteOpts,
   FuseEngine,
   GetDecorationsOpts,
   GetDecorationsResp,
   GetNoteBlocksOpts,
   GetNoteBlocksResp,
+  GetNoteMetaResp,
+  GetNoteResp,
+  GetSchemaResp,
   NoteChangeEntry,
-  NoteFnameDictUtils,
   NoteDictsUtils,
+  NoteFnameDictUtils,
+  NoteIndexProps,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
+  NotePropsMeta,
   NoteUtils,
   QueryNotesOpts,
-  RenameNoteOpts,
-  RenderNoteOpts,
-  SchemaModuleDict,
-  SchemaModuleProps,
   QuerySchemaResp,
-  SchemaUtils,
+  RenameNoteOpts,
+  RenameNoteResp,
+  RenderNoteOpts,
+  SchemaModuleProps,
   VaultUtils,
   WriteNoteResp,
-  FindNoteOpts,
-  NotePropsMeta,
-  ERROR_STATUS,
-  EngineEventEmitter,
-  NoteIndexProps,
-  BulkGetNoteResp,
-  BulkGetNoteMetaResp,
-  RenameNoteResp,
-  GetSchemaResp,
   WriteSchemaResp,
-  EngineSchemaWriteOpts,
-  GetNoteMetaResp,
-  GetNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -73,7 +71,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   public notes: NotePropsByIdDict;
   public noteFnames: NotePropsByFnameDict;
   public wsRoot: string;
-  public schemas: SchemaModuleDict;
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
@@ -126,7 +123,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.api = api;
     this.notes = {};
     this.noteFnames = {};
-    this.schemas = {};
     this.vaults = vaults;
     this.wsRoot = ws;
     this.ws = ws;
@@ -177,20 +173,16 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     if (!resp.data) {
       throw new DendronError({ message: "no data" });
     }
-    const { notes, schemas, config } = resp.data;
+    const { notes, config } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
-    this.schemas = schemas;
     await this.fuseEngine.replaceNotesIndex(notes);
-    await this.fuseEngine.replaceSchemaIndex(schemas);
     this.store.notes = notes;
-    this.store.schemas = schemas;
     return {
       error: resp.error,
       data: {
         notes,
         config,
-        schemas,
         wsRoot: this.wsRoot,
         vaults: this.vaults,
       },
@@ -296,16 +288,13 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   ): Promise<DeleteSchemaResp> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
-    delete this.schemas[id];
-    if (!resp?.data?.notes || !resp?.data?.schemas) {
+    if (!resp?.data?.notes) {
       throw new DendronError({ message: "bad delete operation" });
     }
-    const { notes, schemas } = resp.data;
+    const { notes } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
-    this.schemas = schemas;
     this.fuseEngine.replaceNotesIndex(notes);
-    this.fuseEngine.replaceSchemaIndex(schemas);
     return {
       data: resp.data,
     };
@@ -422,13 +411,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.fuseEngine.replaceNotesIndex(this.notes);
   }
 
-  async refreshSchemas(smods: SchemaModuleProps[]) {
-    smods.forEach((smod) => {
-      const id = SchemaUtils.getModuleRoot(smod).id;
-      this.schemas[id] = smod;
-    });
-  }
-
   /** Renames the note.
    *
    *  WARNING: When doing bulk operations. Do not invoke multiple requests to this
@@ -453,17 +435,14 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     if (!resp.data) {
       throw new DendronError({ message: "no data", payload: resp });
     }
-    const { notes, schemas, config } = resp.data;
+    const { notes, config } = resp.data;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
-    this.schemas = schemas;
     await this.fuseEngine.replaceNotesIndex(notes);
-    await this.fuseEngine.replaceSchemaIndex(schemas);
     return {
       error: resp.error,
       data: {
         notes,
-        schemas,
         vaults: this.vaults,
         wsRoot: this.wsRoot,
         config,
@@ -495,19 +474,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   // ~~~ schemas
   async getSchema(id: string): Promise<GetSchemaResp> {
-    const maybeSchema = this.schemas[id];
-
-    if (maybeSchema) {
-      return { data: _.cloneDeep(maybeSchema) };
-    } else {
-      return {
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.CONTENT_NOT_FOUND,
-          message: `SchemaModuleProps not found for key ${id}.`,
-          severity: ERROR_SEVERITY.MINOR,
-        }),
-      };
-    }
+    return this.api.schemaRead({ id, ws: this.ws });
   }
 
   async querySchema(qs: string): Promise<QuerySchemaResp> {
@@ -524,9 +491,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       schema: schema.fname,
       metaOnly: opts?.metaOnly,
     });
-    const out = await this.api.schemaWrite({ schema, ws: this.ws, opts });
-    await this.refreshSchemas([schema]);
-    return out;
+    return this.api.schemaWrite({ schema, ws: this.ws, opts });
   }
 
   async getNoteBlocks({

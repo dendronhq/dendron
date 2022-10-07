@@ -260,7 +260,6 @@ export type EngineSchemaWriteOpts = {
 
 export type DEngineInitPayload = {
   notes: NotePropsByIdDict;
-  schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
   config: IntermediateDendronConfig;
@@ -341,12 +340,6 @@ export type DCommonProps = {
    * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
    */
   noteFnames: NotePropsByFnameDict;
-  /**
-   * @deprecated
-   * For access, see {@link DEngine.getSchema}
-   * Dictionary where key is the root id.
-   */
-  schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
 };
@@ -403,6 +396,11 @@ export type EngineInfoResp = RespV3<{
 }>;
 export type RenderNoteResp = RespV3<string>;
 export type DEngineInitResp = RespWithOptError<DEngineInitPayload>;
+
+// This can be deleted as soon as store v2 is deleted.
+export type StoreV2InitResp = RespWithOptError<
+  DEngineInitPayload & { schemas: SchemaModuleDict }
+>;
 
 // SCHEMA
 export type DeleteSchemaResp = DEngineInitResp;
@@ -552,11 +550,13 @@ export type DEngineClient = Omit<DEngine, "store">;
 
 export type DStore = DCommonProps &
   DCommonMethods & {
-    init: () => Promise<DEngineInitResp>;
+    init: () => Promise<StoreV2InitResp>;
     /**
      * Get NoteProps by id. If note doesn't exist, return error
      */
     getNote: (id: string) => Promise<GetNoteResp>;
+
+    getSchema: (id: string) => Promise<GetSchemaResp>;
     /**
      * @deprecated: Use {@link DEngine.writeNote}
      * @param note

@@ -1,17 +1,20 @@
 import {
   APIUtils,
-  BulkWriteNotesResp,
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
+  DeleteNoteResp,
   DendronAPI,
   DEngineClient,
   DEngineInitResp,
   DHookDict,
   DVault,
   EngagementEvents,
-  DeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineInfoResp,
+  EngineSchemaWriteOpts,
   EngineWriteOptsV2,
   Event,
   extractNoteChangeEntriesByType,
@@ -20,28 +23,24 @@ import {
   GetDecorationsResp,
   GetNoteBlocksOpts,
   GetNoteBlocksResp,
+  GetNoteMetaResp,
+  GetNoteResp,
+  GetSchemaResp,
   NoteChangeEntry,
   NoteProps,
   NotePropsByFnameDict,
   NotePropsByIdDict,
   NotePropsMeta,
   QueryNotesOpts,
+  QueryNotesResp,
+  QuerySchemaResp,
   RenameNoteOpts,
+  RenameNoteResp,
   RenderNoteOpts,
-  SchemaModuleDict,
+  RenderNoteResp,
   SchemaModuleProps,
   WriteNoteResp,
-  BulkGetNoteResp,
-  BulkGetNoteMetaResp,
-  GetNoteResp,
-  RenameNoteResp,
-  QueryNotesResp,
-  RenderNoteResp,
-  GetSchemaResp,
-  QuerySchemaResp,
   WriteSchemaResp,
-  EngineSchemaWriteOpts,
-  GetNoteMetaResp,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -146,13 +145,6 @@ export class EngineAPIService
   }
   public set wsRoot(arg: string) {
     this._internalEngine.wsRoot = arg;
-  }
-
-  public get schemas(): SchemaModuleDict {
-    return this._internalEngine.schemas;
-  }
-  public set schemas(arg: SchemaModuleDict) {
-    this._internalEngine.schemas = arg;
   }
 
   public get vaults(): DVault[] {

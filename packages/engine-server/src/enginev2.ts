@@ -58,6 +58,7 @@ import {
   GetSchemaResp,
   GetNoteMetaResp,
   GetNoteResp,
+  isNotUndefined,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -143,6 +144,7 @@ export class DendronEngineV2 implements DEngine {
   public hooks: DHookDict;
   private _vaults: DVault[];
   private renderedCache: Cache<string, CachedPreview>;
+  private schemas: SchemaModuleDict;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -159,6 +161,7 @@ export class DendronEngineV2 implements DEngine {
     };
     this.hooks = hooks;
     this.renderedCache = createRenderedCache(props.config, this.logger);
+    this.schemas = {};
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -198,14 +201,6 @@ export class DendronEngineV2 implements DEngine {
    */
   get noteFnames() {
     return this.store.noteFnames;
-  }
-  /**
-   * @deprecated
-   * For accessing a specific schema by id, see {@link DendronEngineV2.getSchema}.
-   * If you need all schemas, avoid modifying any schema as this will cause unintended changes on the store side
-   */
-  get schemas(): SchemaModuleDict {
-    return this.store.schemas;
   }
 
   get vaults(): DVault[] {
@@ -247,9 +242,12 @@ export class DendronEngineV2 implements DEngine {
         };
       }
       const { notes, schemas } = data;
-      this.updateIndex("note");
-      this.updateIndex("schema");
-      this.logger.info({ ctx, msg: "updated index" });
+      await this.updateIndex("note");
+
+      // Set schemas locally in the engine:
+      this.schemas = schemas;
+      await this.updateIndex("schema");
+      this.logger.error({ ctx, msg: "updated index" });
       const hookErrors: DendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
         const { valid, error } = HookUtils.validateHook({
@@ -278,12 +276,13 @@ export class DendronEngineV2 implements DEngine {
         default:
           error = new DendronCompositeError(allErrors);
       }
+
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
+
       return {
         error,
         data: {
           notes,
-          schemas,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
           config: DConfig.readConfigSync(this.wsRoot),
@@ -396,11 +395,9 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async getSchema(id: string): Promise<GetSchemaResp> {
-    const maybeSchema = this.schemas[id];
+    const maybeSchema = await this.store.getSchema(id);
 
-    if (maybeSchema) {
-      return { data: _.cloneDeep(maybeSchema) };
-    } else {
+    if (!maybeSchema.data) {
       return {
         error: DendronError.createFromStatus({
           status: ERROR_STATUS.CONTENT_NOT_FOUND,
@@ -409,6 +406,7 @@ export class DendronEngineV2 implements DEngine {
         }),
       };
     }
+    return maybeSchema;
   }
 
   async info(): Promise<EngineInfoResp> {
@@ -446,7 +444,7 @@ export class DendronEngineV2 implements DEngine {
 
     let items: SchemaModuleProps[] = [];
     const results = await this.fuseEngine.querySchema({ qs: queryString });
-    items = results.map((ent) => this.schemas[ent.id]);
+    items = results.map((ent) => this.schemas[ent.id]).filter(isNotUndefined);
     // if (queryString === "") {
     //   items = [this.schemas.root];
     // } else if (queryString === "*") {

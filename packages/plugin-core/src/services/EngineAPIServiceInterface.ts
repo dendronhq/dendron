@@ -22,8 +22,6 @@ import {
   GetNoteResp,
   GetSchemaResp,
   NoteProps,
-  NotePropsByFnameDict,
-  NotePropsByIdDict,
   QueryNotesOpts,
   QueryNotesResp,
   QuerySchemaResp,
@@ -38,16 +36,6 @@ import {
 
 export interface IEngineAPIService {
   trustedWorkspace: boolean;
-  /**
-   * @deprecated
-   * For accessing a specific note by id, see {@link IEngineAPIService.getNote}
-   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
-   */
-  notes: NotePropsByIdDict;
-  /**
-   * @deprecated see {@link IEngineAPIService.findNotes}
-   */
-  noteFnames: NotePropsByFnameDict;
   wsRoot: string;
   vaults: DVault[];
   hooks: DHookDict;
@@ -106,16 +94,6 @@ export interface IEngineAPIService {
   querySchema(qs: string): Promise<QuerySchemaResp>;
 
   queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp>;
-
-  queryNotesSync({
-    qs,
-    originalQS,
-    vault,
-  }: {
-    qs: string;
-    originalQS: string;
-    vault?: DVault | undefined;
-  }): QueryNotesResp;
 
   renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp>;
 

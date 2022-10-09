@@ -106,7 +106,7 @@ export class NoteLookupUtils {
       query: qsRaw,
       onlyDirectChildren: showDirectChildrenOnly,
     });
-    const resp = await engine.queryNotes({
+    let nodes = await engine.queryNotes({
       qs: transformedQuery.queryString,
       originalQS: qsRaw,
       onlyDirectChildren: showDirectChildrenOnly,
@@ -114,8 +114,6 @@ export class NoteLookupUtils {
 
     // limit number of results. currently, this is hardcoded and we don't paginate
     // this is okay because we rely on user refining query to get more results
-    let nodes = resp.data;
-
     if (!nodes) {
       return [];
     }

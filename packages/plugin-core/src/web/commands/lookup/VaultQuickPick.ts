@@ -90,19 +90,17 @@ export class VaultQuickPick {
     let allVaults = vaults.sort(sortByPathNameFn);
 
     const vaultsWithMatchingHierarchy: VaultPickerItem[] | undefined =
-      queryResponse.data
-        ? queryResponse.data
-            .filter((value) => value.fname === newQs)
-            .map((value) => value.vault)
-            .sort(sortByPathNameFn)
-            .map((value) => {
-              return {
-                vault: value,
-                detail: this.HIERARCHY_MATCH_DETAIL,
-                label: VaultUtils.getName(value),
-              };
-            })
-        : undefined;
+      queryResponse
+        .filter((value) => value.fname === newQs)
+        .map((value) => value.vault)
+        .sort(sortByPathNameFn)
+        .map((value) => {
+          return {
+            vault: value,
+            detail: this.HIERARCHY_MATCH_DETAIL,
+            label: VaultUtils.getName(value),
+          };
+        });
 
     if (!vaultsWithMatchingHierarchy) {
       // Suggest current vault context as top suggestion

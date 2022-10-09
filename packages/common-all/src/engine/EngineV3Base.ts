@@ -298,7 +298,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
     });
 
     if (items.length === 0) {
-      return { data: [] };
+      return [];
     }
 
     const notes = await Promise.all(
@@ -318,10 +318,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
       );
     }
 
-    return {
-      // data: items,
-      data: modifiedNotes,
-    };
+    return modifiedNotes;
   }
 
   /**

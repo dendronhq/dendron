@@ -382,7 +382,7 @@ export class DendronAPI extends API {
     });
   }
 
-  noteQuery(req: NoteQueryRequest): Promise<QueryNotesResp> {
+  noteQuery(req: NoteQueryRequest): Promise<RespV3<QueryNotesResp>> {
     return this._makeRequest({
       path: "note/query",
       method: "get",

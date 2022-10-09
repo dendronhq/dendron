@@ -11,8 +11,8 @@ import path from "path";
 import { createEngineV3FromEngine, runEngineTestV5 } from "../../engine";
 import {
   ENGINE_HOOKS,
-  ENGINE_V3_PRESETS,
-  ENGINE_V3_PRESETS_MULTI,
+  ENGINE_PRESETS,
+  ENGINE_PRESETS_MULTI,
 } from "../../presets";
 
 const createEngine = createEngineV3FromEngine;
@@ -20,7 +20,7 @@ const createEngine = createEngineV3FromEngine;
 describe("engine, notes/", () => {
   const nodeType = "NOTES";
 
-  ENGINE_V3_PRESETS.forEach((pre) => {
+  ENGINE_PRESETS.forEach((pre) => {
     const { name, presets } = pre;
     describe(name, () => {
       test.each(
@@ -39,7 +39,7 @@ describe("engine, notes/", () => {
 describe("engine, notes/multi/", () => {
   const nodeType = "NOTES";
 
-  ENGINE_V3_PRESETS_MULTI.forEach((pre) => {
+  ENGINE_PRESETS_MULTI.forEach((pre) => {
     const { name, presets } = pre;
     describe(name, () => {
       test.each(
@@ -65,7 +65,7 @@ describe("engine, notes/multi/", () => {
 describe("engine, schemas/", () => {
   const nodeType = "SCHEMAS";
 
-  ENGINE_V3_PRESETS.forEach((pre) => {
+  ENGINE_PRESETS.forEach((pre) => {
     const { name, presets } = pre;
     // @ts-ignore
     const presetByNodeType = presets[nodeType];

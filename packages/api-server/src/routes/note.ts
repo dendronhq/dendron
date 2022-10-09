@@ -66,7 +66,7 @@ router.get(
     const resp = await NoteController.instance().query(
       req.query as unknown as NoteQueryRequest
     );
-    ExpressUtils.setResponse(res, resp);
+    ExpressUtils.setResponse(res, { data: resp });
   })
 );
 

@@ -45,7 +45,7 @@ const NOTES = {
   EMPTY_QS: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const { data } = await engine.queryNotes({
+      const data = await engine.queryNotes({
         qs: "",
         originalQS: "",
         vault,
@@ -71,7 +71,7 @@ const NOTES = {
   // Querying for non-existing note should return empty []
   MISSING_QUERY: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const { data } = await engine.queryNotes({
+      const data = await engine.queryNotes({
         qs: "bar",
         originalQS: "bar",
         vault: vaults[0],
@@ -91,7 +91,7 @@ const NOTES = {
   STAR_QUERY: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const { data } = await engine.queryNotes({
+      const data = await engine.queryNotes({
         qs: "*",
         originalQS: "*",
         vault,
@@ -111,7 +111,7 @@ const NOTES = {
     async ({ vaults, engine }) => {
       const vault = vaults[0];
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-      const { data } = await engine.queryNotes({
+      const data = await engine.queryNotes({
         qs: fname,
         originalQS: fname,
         vault,
@@ -144,7 +144,7 @@ const NOTES = {
     async ({ vaults, engine }) => {
       const vault = vaults[0];
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.fname;
-      const { data } = await engine.queryNotes({
+      const data = await engine.queryNotes({
         qs: fname,
         originalQS: fname,
         vault,

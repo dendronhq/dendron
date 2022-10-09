@@ -48,11 +48,11 @@ import {
   VaultUtils,
   WriteNoteResp,
   WriteSchemaResp,
+  QueryNotesResp,
 } from "@dendronhq/common-all";
 import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { FileStorage } from "./drivers/file/storev2";
 import {
   NoteIndexLightProps,
   SQLiteMetadataStore,
@@ -77,7 +77,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   public vaults: DVault[];
   public history?: HistoryService;
   public logger: DLogger;
-  public store: FileStorage;
   public hooks: DHookDict;
 
   static create({
@@ -132,11 +131,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(config).note.fuzzThreshold,
     });
-    this.store = new FileStorage({
-      engine: this,
-      logger: this.logger,
-      config,
-    });
     this.hooks = ConfigUtils.getWorkspace(config).hooks || {
       onCreate: [],
     };
@@ -177,7 +171,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     await this.fuseEngine.replaceNotesIndex(notes);
-    this.store.notes = notes;
     return {
       error: resp.error,
       data: {
@@ -305,9 +298,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     return resp;
   }
 
-  async queryNote(
-    opts: Parameters<DEngineClient["queryNotes"]>[0]
-  ): Promise<NoteProps[]> {
+  async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     const config = DConfig.readConfigSync(this.wsRoot);
@@ -337,33 +328,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       );
     }
     return noteProps;
-  }
-
-  async queryNotes(opts: QueryNotesOpts) {
-    const items = await this.queryNote(opts);
-    return {
-      data: items,
-    };
-  }
-
-  queryNotesSync({
-    qs,
-    originalQS,
-    vault,
-  }: {
-    qs: string;
-    originalQS: string;
-    vault?: DVault;
-  }) {
-    let items = this.fuseEngine.queryNote({ qs, originalQS });
-    if (vault) {
-      items = items.filter((ent) => {
-        return VaultUtils.isEqual(ent.vault, vault, this.wsRoot);
-      });
-    }
-    return {
-      data: items.map((ent) => this.notes[ent.id]),
-    };
   }
 
   async renderNote(opts: RenderNoteOpts) {

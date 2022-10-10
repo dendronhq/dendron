@@ -28,8 +28,6 @@ import {
   GetSchemaResp,
   NoteChangeEntry,
   NoteProps,
-  NotePropsByFnameDict,
-  NotePropsByIdDict,
   NotePropsMeta,
   QueryNotesOpts,
   QueryNotesResp,
@@ -116,28 +114,6 @@ export class EngineAPIService
 
   set trustedWorkspace(value: boolean) {
     this._trustedWorkspace = value;
-  }
-
-  /**
-   * @deprecated
-   * For accessing a specific note by id, see {@link EngineAPIService.getNote}
-   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
-   */
-  public get notes(): NotePropsByIdDict {
-    return this._internalEngine.notes;
-  }
-  public set notes(arg: NotePropsByIdDict) {
-    this._internalEngine.notes = arg;
-  }
-
-  /**
-   * @deprecated see {@link EngineAPIService.findNotes}
-   */
-  public get noteFnames(): NotePropsByFnameDict {
-    return this._internalEngine.noteFnames;
-  }
-  public set noteFnames(arg: NotePropsByFnameDict) {
-    this._internalEngine.noteFnames = arg;
   }
 
   public get wsRoot(): string {
@@ -265,18 +241,6 @@ export class EngineAPIService
 
   queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     return this._internalEngine.queryNotes(opts);
-  }
-
-  queryNotesSync({
-    qs,
-    originalQS,
-    vault,
-  }: {
-    qs: string;
-    originalQS: string;
-    vault?: DVault | undefined;
-  }): QueryNotesResp {
-    return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {

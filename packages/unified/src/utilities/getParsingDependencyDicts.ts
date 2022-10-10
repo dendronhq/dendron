@@ -178,7 +178,7 @@ async function getRecursiveNoteDependencies(
         // vault: data.vaultName
       });
 
-      const out = _.filter(resp.data, (ent) =>
+      const out = _.filter(resp, (ent) =>
         DUtils.minimatch(ent.fname, data.fname)
       );
 

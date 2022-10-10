@@ -132,6 +132,51 @@ const NOTES = {
       },
     }
   ),
+  // Test rendering note after a ref was updated
+  UPDATED_NOTE_REF: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const { data } = await engine.renderNote({
+        id: "omega",
+      });
+
+      // Now let's update foo note which is referenced by omega
+      const fooNote = (await engine.getNote("foo")).data!;
+      fooNote.body = "changed body";
+      fooNote.updated += 10;
+      await engine.writeNote(fooNote);
+      const { data: updated } = await engine.renderNote({
+        id: "omega",
+      });
+      return [
+        {
+          actual: true,
+          expected: await AssertUtils.assertInString({
+            body: data!,
+            match: ["<p>foo body</p>"],
+          }),
+        },
+        {
+          actual: true,
+          expected: await AssertUtils.assertInString({
+            body: updated!,
+            match: ["<p>changed body</p>"],
+          }),
+        },
+      ];
+    },
+    {
+      preSetupHook: async (opts) => {
+        const { wsRoot, vaults } = opts;
+        await NoteTestUtilsV4.createNote({
+          fname: "omega",
+          wsRoot,
+          vault: vaults[0],
+          body: "![[foo]] ",
+        });
+        return ENGINE_HOOKS.setupBasic(opts);
+      },
+    }
+  ),
 };
 
 export const ENGINE_RENDER_PRESETS = {

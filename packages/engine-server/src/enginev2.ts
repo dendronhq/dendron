@@ -33,6 +33,7 @@ import {
   milliseconds,
   newRange,
   NoteChangeEntry,
+  NoteDicts,
   NoteDictsUtils,
   NoteProps,
   NotePropsByIdDict,
@@ -146,8 +147,6 @@ export class DendronEngineV2 implements DEngine {
   private renderedCache: Cache<string, CachedPreview>;
   private schemas: SchemaModuleDict;
 
-  static _instance: DendronEngineV2 | undefined;
-
   constructor(props: DendronEnginePropsV2) {
     this.wsRoot = props.wsRoot;
     this.logger = props.logger;
@@ -205,10 +204,6 @@ export class DendronEngineV2 implements DEngine {
 
   get vaults(): DVault[] {
     return this._vaults;
-  }
-
-  set notes(notes: NotePropsByIdDict) {
-    this.store.notes = notes;
   }
 
   set vaults(vaults: DVault[]) {
@@ -426,19 +421,6 @@ export class DendronEngineV2 implements DEngine {
     };
   }
 
-  queryNotesSync({
-    qs,
-    originalQS,
-  }: {
-    qs: string;
-    originalQS: string;
-  }): ReturnType<DEngineClient["queryNotesSync"]> {
-    const items = this.fuseEngine.queryNote({ qs, originalQS });
-    return {
-      data: items.map((ent) => this.notes[ent.id]),
-    };
-  }
-
   async querySchema(queryString: string): Promise<QuerySchemaResp> {
     const ctx = "querySchema";
 
@@ -468,14 +450,14 @@ export class DendronEngineV2 implements DEngine {
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
 
-    const items = await this.fuseEngine.queryNote({
+    const items = this.fuseEngine.queryNote({
       qs,
       onlyDirectChildren,
       originalQS,
     });
 
     if (items.length === 0) {
-      return { data: [] };
+      return [];
     }
 
     this.logger.info({ ctx, msg: "exit" });
@@ -485,9 +467,7 @@ export class DendronEngineV2 implements DEngine {
         return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
       });
     }
-    return {
-      data: notes,
-    };
+    return notes;
   }
 
   async renderNote({
@@ -587,13 +567,86 @@ export class DendronEngineV2 implements DEngine {
     }
     // TODO: Add another check to see if backlinks have changed
 
-    return (
-      cachedPreview.updated >=
-      NoteUtils.getLatestUpdateTimeOfPreviewNoteTree({
-        rootNote: note,
-        notes: this.notes,
+    const visitedIds = new Set<string>();
+    return this._isCachedPreviewUpToDate({
+      note,
+      noteDicts: {
+        notesById: this.notes,
+        notesByFname: this.noteFnames,
+      },
+      visitedIds,
+      latestUpdated: cachedPreview.updated,
+    });
+  }
+
+  /**
+   * Check if there exists a note reference that is newer than the provided "latestUpdated"
+   * This is used to determine if a cached preview is up-to-date
+   *
+   * Preview note tree includes links whose content is rendered in the rootNote preview,
+   * particularly the reference links (![[ref-link-example]]).
+   */
+  private _isCachedPreviewUpToDate({
+    note,
+    latestUpdated,
+    noteDicts,
+    visitedIds,
+  }: {
+    note: NoteProps;
+    latestUpdated: number;
+    noteDicts: NoteDicts;
+    visitedIds: Set<string>;
+  }): boolean {
+    if (note.updated > latestUpdated) {
+      return false;
+    }
+
+    // Mark the visited nodes so we don't end up recursively spinning if there
+    // are cycles in our preview tree such as [[foo]] -> [[!bar]] -> [[!foo]]
+    if (visitedIds.has(note.id)) {
+      return true;
+    } else {
+      visitedIds.add(note.id);
+    }
+
+    const linkedRefNotes = note.links
+      .filter((link) => link.type === "ref")
+      .filter((link) => link.to && link.to.fname)
+      .map((link) => {
+        const pointTo = link.to!;
+        // When there is a vault specified in the link we want to respect that
+        // specification, otherwise we will map by just the file name.
+        const maybeVault = pointTo.vaultName
+          ? VaultUtils.getVaultByName({
+              vname: pointTo.vaultName,
+              vaults: this.vaults,
+            })
+          : undefined;
+
+        return NoteDictsUtils.findByFname(
+          pointTo.fname!,
+          noteDicts,
+          maybeVault
+        )[0];
       })
-    );
+      // Filter out broken links (pointing to non existent files)
+      .filter((refNote) => refNote !== undefined);
+
+    for (const linkedNote of linkedRefNotes) {
+      // Recurse into each child reference linked note.
+      if (
+        !this._isCachedPreviewUpToDate({
+          note: linkedNote,
+          noteDicts,
+          visitedIds,
+          latestUpdated,
+        })
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private async _renderNote({

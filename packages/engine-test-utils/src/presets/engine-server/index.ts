@@ -101,48 +101,27 @@ export const getPresetGroup = ({
 
 // ^iygzn9r2758w
 export const ENGINE_PRESETS = [
+  { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
   {
     name: "bulkWriteNotes",
     presets: ENGINE_SERVER.ENGINE_BULK_WRITE_NOTES_PRESETS,
   },
-  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
   { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
+  { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
+  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
+  { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
+  { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
   {
     name: "getNoteBlocks",
     presets: ENGINE_SERVER.ENGINE_GET_NOTE_BLOCKS_PRESETS,
   },
-  { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
-  { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
   { name: "render", presets: ENGINE_SERVER.ENGINE_RENDER_PRESETS },
-  { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
-  { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
 ];
 
 export const ENGINE_PRESETS_MULTI = [
-  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
-  { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
-  { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
-  { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
   { name: "write", presets: ENGINE_WRITE_PRESETS_MULTI },
-];
-
-export const ENGINE_V3_PRESETS = [
-  {
-    name: "bulkWriteNotes",
-    presets: ENGINE_SERVER.ENGINE_BULK_WRITE_NOTES_PRESETS,
-  },
-  { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
   { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
-  { name: "info", presets: ENGINE_SERVER.ENGINE_INFO_PRESETS },
-  { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
   { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
-  { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
-];
-
-export const ENGINE_V3_PRESETS_MULTI = [
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
-  { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
   { name: "query", presets: ENGINE_SERVER.ENGINE_QUERY_PRESETS },
-  { name: "rename", presets: ENGINE_SERVER.ENGINE_RENAME_PRESETS },
-  { name: "write", presets: ENGINE_WRITE_PRESETS_MULTI },
 ];

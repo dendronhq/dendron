@@ -158,16 +158,11 @@ export class NoteLookupProvider implements ILookupProvider {
   }) {
     const { transformedQuery, originalQS } = opts;
 
-    const resp = await this.engine.queryNotes({
+    const nodes = await this.engine.queryNotes({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
-    const nodes = resp.data;
-
-    if (!nodes) {
-      return [];
-    }
 
     return Promise.all(
       nodes.map(async (ent) =>

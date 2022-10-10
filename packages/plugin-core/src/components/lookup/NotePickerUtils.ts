@@ -231,14 +231,13 @@ export class NotePickerUtils {
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 
-    const resp = await engine.queryNotes({
+    let nodes = await engine.queryNotes({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
     });
-    let nodes = resp.data;
 
-    if (!nodes) {
+    if (nodes.length === 0) {
       return [];
     }
 

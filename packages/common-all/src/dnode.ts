@@ -1185,11 +1185,7 @@ export class NoteUtils {
    * @param fname The fname of note that you want to get the color of.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color(opts: {
-    fname: string;
-    vault?: DVault;
-    note?: NoteProps | NotePropsMeta;
-  }): {
+  static color(opts: { fname: string; vault?: DVault; note?: NotePropsMeta }): {
     color: string;
     type: "configured" | "generated";
   } {

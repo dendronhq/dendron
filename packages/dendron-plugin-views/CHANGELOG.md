@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* **views:** apply preview theme's backgroundColor ([#3552](https://github.com/dendronhq/dendron/issues/3552)) ([7842c15](https://github.com/dendronhq/dendron/commit/7842c15a00bf568bbe4f7f1d577f3e5436d557d9))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

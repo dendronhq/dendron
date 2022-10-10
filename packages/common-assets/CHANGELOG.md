@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

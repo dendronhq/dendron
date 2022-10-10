@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* **markdown:** same page header links ([#3543](https://github.com/dendronhq/dendron/issues/3543)) ([559a5f6](https://github.com/dendronhq/dendron/commit/559a5f610e12763dbc715f364316544579346f9f))
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

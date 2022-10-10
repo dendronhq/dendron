@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* regression in apply template command ([#3623](https://github.com/dendronhq/dendron/issues/3623)) ([16cc85e](https://github.com/dendronhq/dendron/commit/16cc85e6352e21b3035c7834fdea4be56d7943a0))
+* **build:** build errors in web classes from bad merge ([3d9e9b3](https://github.com/dendronhq/dendron/commit/3d9e9b312f03278a4a95f0fde17ae129f54a8eb3))
+* **markdown:** same page header links ([#3543](https://github.com/dendronhq/dendron/issues/3543)) ([559a5f6](https://github.com/dendronhq/dendron/commit/559a5f610e12763dbc715f364316544579346f9f))
+* **publish:** prevent "Table of content" overflowing container ([#3624](https://github.com/dendronhq/dendron/issues/3624)) ([a3c7eb4](https://github.com/dendronhq/dendron/commit/a3c7eb4333e18a2008447f84e5a8055ae6c3d705))
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* **workspace:** engine init with note candidates enabled ([#3585](https://github.com/dendronhq/dendron/issues/3585)) ([59597b4](https://github.com/dendronhq/dendron/commit/59597b476fd4b46d5b1c9a5d950af2c8e2dc15b1))
+* render favicon when assetPrefix is set ([#3571](https://github.com/dendronhq/dendron/issues/3571)) ([5a24a9e](https://github.com/dendronhq/dendron/commit/5a24a9e9e137e3fb8ca19d55a7260d90fbfa6e41))
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **views:** apply preview theme's backgroundColor ([#3552](https://github.com/dendronhq/dendron/issues/3552)) ([7842c15](https://github.com/dendronhq/dendron/commit/7842c15a00bf568bbe4f7f1d577f3e5436d557d9))
+* **workspace:** Disallow note creation through go to note if filename is invalid ([#3551](https://github.com/dendronhq/dendron/issues/3551)) ([cd337ab](https://github.com/dendronhq/dendron/commit/cd337ab479ec70b7e5897e74f332374a30dae7a8))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+* click into "empty area" on sidebar submenuitem ([#3523](https://github.com/dendronhq/dendron/issues/3523)) ([82bda25](https://github.com/dendronhq/dendron/commit/82bda25a591106ef6d9710aa0cad9988f7c6c5db))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

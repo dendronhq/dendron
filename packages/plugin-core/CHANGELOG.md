@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* regression in apply template command ([#3623](https://github.com/dendronhq/dendron/issues/3623)) ([16cc85e](https://github.com/dendronhq/dendron/commit/16cc85e6352e21b3035c7834fdea4be56d7943a0))
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* **build:** build errors in web classes from bad merge ([3d9e9b3](https://github.com/dendronhq/dendron/commit/3d9e9b312f03278a4a95f0fde17ae129f54a8eb3))
+* **workspace:** Disallow note creation through go to note if filename is invalid ([#3551](https://github.com/dendronhq/dendron/issues/3551)) ([cd337ab](https://github.com/dendronhq/dendron/commit/cd337ab479ec70b7e5897e74f332374a30dae7a8))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

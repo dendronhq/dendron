@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.114.1-alpha.0) (2022-10-10)
+
+
+### Bug Fixes
+
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+### Features Dendron
+
+* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
+
+
+
+
+
 # 0.114.0 (2022-09-27)
 
 

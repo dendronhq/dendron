@@ -1,7 +1,9 @@
+import defaultsDeep from "lodash/defaultsDeep";
 import {
   DendronConfig,
   SerializedFuseIndex,
   TreeMenu,
+  ConfigUtils,
 } from "@dendronhq/common-all";
 import { getAssetUrl } from "./links";
 import { NoteData } from "./types";
@@ -18,8 +20,10 @@ export async function fetchTreeMenu() {
 }
 
 export async function fetchConfig() {
+  const defaultConfig = ConfigUtils.genDefaultConfig();
   const resp = await fetch(getAssetUrl("/data/dendron.json"));
-  return (await resp.json()) as DendronConfig;
+  const configWithDefaults = defaultsDeep(await resp.json(), defaultConfig); // TODO move into `_app`
+  return configWithDefaults as DendronConfig;
 }
 
 /** See the helpers in `utils/fuse.ts` for your convenienance. */

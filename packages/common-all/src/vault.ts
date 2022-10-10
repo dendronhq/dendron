@@ -70,7 +70,7 @@ export class VaultUtils {
     if (VaultUtils.isSelfContained(vault)) {
       // Return the path to the notes folder inside the vault. This is for
       // compatibility with existing code.
-      return path.join(vault.fsPath, FOLDERS.NOTES);
+      return normalizeUnixPath(path.join(vault.fsPath, FOLDERS.NOTES));
     }
     if (vault.workspace) {
       return path.join(vault.workspace, vault.fsPath);

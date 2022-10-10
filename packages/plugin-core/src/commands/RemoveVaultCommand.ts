@@ -18,13 +18,13 @@ type CommandOpts = {
 
 type CommandOutput = { vault: DVault };
 
-export { CommandOpts as VaultRemoveCommandOpts };
+export { CommandOpts as RemoveVaultCommandOpts };
 
-export class VaultRemoveCommand extends BasicCommand<
+export class RemoveVaultCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.VAULT_REMOVE.key;
+  key = DENDRON_COMMANDS.REMOVE_VAULT.key;
   constructor(private _ext: IDendronExtension) {
     super();
   }
@@ -58,7 +58,7 @@ export class VaultRemoveCommand extends BasicCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const ctx = "VaultRemove";
+    const ctx = "RemoveVaultCommand";
     // NOTE: relative vault
     const { vault } = opts;
     const { wsRoot } = this._ext.getDWorkspace();

@@ -389,8 +389,8 @@
         "title": "Dendron: Vault Add"
       },
       {
-        "command": "dendron.vaultRemove",
-        "title": "Dendron: Vault Remove"
+        "command": "dendron.removeVault",
+        "title": "Dendron: Remove Vault"
       },
       {
         "command": "dendron.vaultConvert",
@@ -809,7 +809,7 @@
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
-          "command": "dendron.vaultRemove",
+          "command": "dendron.removeVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
@@ -1108,7 +1108,7 @@
         },
         {
           "when": "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
-          "command": "dendron.vaultRemove",
+          "command": "dendron.removeVault",
           "group": "2_workspace"
         },
         {

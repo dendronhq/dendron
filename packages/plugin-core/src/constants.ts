@@ -301,7 +301,7 @@ export const DENDRON_MENUS = {
     },
     {
       when: "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
-      command: "dendron.vaultRemove",
+      command: "dendron.removeVault",
       group: "2_workspace",
     },
     {
@@ -767,9 +767,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Vault Add`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_REMOVE: {
-    key: "dendron.vaultRemove",
-    title: `${CMD_PREFIX} Vault Remove`,
+  REMOVE_VAULT: {
+    key: "dendron.removeVault",
+    title: `${CMD_PREFIX} Remove Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   VAULT_CONVERT: {

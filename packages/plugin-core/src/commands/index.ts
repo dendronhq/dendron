@@ -80,13 +80,13 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { ValidateEngineCommand } from "./ValidateEngineCommand";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultConvertCommand } from "./VaultConvert";
-import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
 import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
 import { CopyCodespaceURL } from "./CopyCodespaceURL";
 import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
 import { CopyAsCommand } from "./CopyAsCommand";
+import { RemoveVaultCommand } from "./RemoveVaultCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -161,7 +161,7 @@ const ALL_COMMANDS = [
   ApplyTemplateCommand,
   UpgradeSettingsCommand,
   VaultAddCommand,
-  VaultRemoveCommand,
+  RemoveVaultCommand,
   VaultConvertCommand,
   ShowWelcomePageCommand,
   LaunchTutorialWorkspaceCommand,

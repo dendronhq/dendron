@@ -1,7 +1,6 @@
 // import pino from "pino";
 
 import { Disposable, env } from "@dendronhq/common-all";
-import _ from "lodash";
 import pino from "pino";
 
 export type LogLvl = "debug" | "info" | "error";

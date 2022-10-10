@@ -227,7 +227,8 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     const fullQuery = sqlBegin + sqlEnd;
     // eslint-disable-next-line no-useless-catch
     try {
-      await prisma.$queryRawUnsafe(fullQuery);
+      const resp = await prisma.$executeRawUnsafe(fullQuery);
+      return { query: fullQuery, resp };
     } catch (error) {
       // uncomment to log
       // console.log("---> ERROR START");
@@ -238,7 +239,11 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
       // console.log("---> ERROR END");
       throw error;
     }
-    return { query: fullQuery };
+  }
+
+  static deleteAllNotes() {
+    const raw = `DELETE FROM Note`;
+    return getPrismaClient().$queryRawUnsafe(raw);
   }
 
   static async search(

@@ -1,9 +1,13 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { DEngineClient, NotePropsMeta, NoteUtils } from "@dendronhq/common-all";
 import { SQLiteMetadataStore } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import sinon from "sinon";
-import { ENGINE_HOOKS, runEngineTestV5 } from "../../..";
+import {
+  createEngineV3FromEngine,
+  ENGINE_HOOKS,
+  runEngineTestV5,
+} from "../../..";
 // import os from "os";
 
 // current issue with windows test
@@ -11,6 +15,19 @@ import { ENGINE_HOOKS, runEngineTestV5 } from "../../..";
 // unable to open database file: D:///c%3A/Users/RUNNER~1/AppData/Local/Temp/tmp-6392-F8nMLdBlS5Ty/metadata.db\n
 // const describeSkipWindows =
 //   os.platform() === "win32" ? describe.skip : describe;
+
+const createEngine = createEngineV3FromEngine;
+
+async function expectNotesAreEqual(opts: {
+  engine: DEngineClient;
+  notes: NotePropsMeta[];
+}) {
+  const resp = await opts.engine.bulkGetNotes(
+    opts.notes.map((note: NotePropsMeta) => note.id)
+  );
+  const sortedResp = _.sortBy(_.pick(resp.data, "fname"), "fname");
+  expect(sortedResp).toEqual(_.sortBy(_.pick(opts.notes, "fname"), "fname"));
+}
 
 describe.skip("GIVEN sqlite store", () => {
   afterEach(async () => {
@@ -25,11 +42,12 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
-        expect(engineNotes.length).toEqual(notes.length);
+        expect(notes.length).toEqual(6);
+        await expectNotesAreEqual({ engine, notes });
       },
       {
         expect,
+        createEngine,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         modConfigCb: (config) => {
           config.workspace.metadataStore = "sqlite";
@@ -46,8 +64,7 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
-        expect(engineNotes.length).toEqual(notes.length);
+        await expectNotesAreEqual({ engine, notes });
 
         const { error } = await engine.init();
         expect(error).toBeFalsy();
@@ -56,6 +73,7 @@ describe.skip("GIVEN sqlite store", () => {
       },
       {
         expect,
+        createEngine,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         modConfigCb: (config) => {
           config.workspace.metadataStore = "sqlite";
@@ -72,8 +90,7 @@ describe.skip("GIVEN sqlite store", () => {
         expect(dirList).toMatchSnapshot();
         expect(dirList.includes("metadata.db")).toBeTruthy();
         const notes = await SQLiteMetadataStore.prisma().note.findMany();
-        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
-        expect(engineNotes.length).toEqual(notes.length);
+        await expectNotesAreEqual({ engine, notes });
         const newNote = NoteUtils.create({
           id: "new-note",
           fname: "new-note",
@@ -90,6 +107,7 @@ describe.skip("GIVEN sqlite store", () => {
       },
       {
         expect,
+        createEngine,
         preSetupHook: ENGINE_HOOKS.setupBasic,
         modConfigCb: (config) => {
           config.workspace.metadataStore = "sqlite";

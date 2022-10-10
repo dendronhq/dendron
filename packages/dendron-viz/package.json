@@ -34,7 +34,7 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.114.0",
     "@dendronhq/engine-server": "^0.114.0",
-    "d3": "^7.0.0",
+    "d3": "^7.6.1",
     "lodash": "^4.17.21",
     "micromatch": "^4.0.4",
     "react": "^17.0.2",

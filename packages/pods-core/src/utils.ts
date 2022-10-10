@@ -20,7 +20,6 @@ import axios from "axios";
 
 export * from "./builtin";
 export * from "./types";
-export * from "./utils";
 
 const ajv = new Ajv();
 addFormats(ajv);

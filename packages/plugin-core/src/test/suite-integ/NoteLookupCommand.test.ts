@@ -667,6 +667,65 @@ suite("NoteLookupCommand", function () {
           cmd.cleanUp();
           getTemplateStub.restore();
         });
+
+        test("AND create new with template, but cancelled or nothing selected", async () => {
+          const extension = ExtensionProvider.getExtension();
+          const { vaults, engine } = extension.getDWorkspace();
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+
+          const mockQuickPick = createMockQuickPick({
+            value: "capers-are-not-berries",
+            selectedItems: [
+              NotePickerUtils.createNewWithTemplateItem({
+                fname: "capers-are-not-berries",
+              }),
+            ],
+          });
+          const lc = extension.lookupControllerFactory.create({
+            nodeType: "note",
+          });
+          const lp = extension.noteLookupProviderFactory.create("lookup", {
+            allowNewNote: true,
+            allowNewNoteWithTemplate: true,
+            noHidePickerOnAccept: false,
+          });
+          await lc.prepareQuickPick({
+            initialValue: "capers-are-not-berries",
+            provider: lp,
+            placeholder: "",
+          });
+          cmd.controller = lc;
+          cmd.provider = lp;
+
+          const getTemplateStub = sinon
+            .stub(cmd, "getTemplateForNewNote" as keyof NoteLookupCommand)
+            .returns(Promise.resolve(undefined));
+          mockQuickPick.showNote = async (uri) => {
+            return vscode.window.showTextDocument(uri);
+          };
+
+          const cmdSpy = sinon.spy(cmd, "acceptNewWithTemplateItem");
+          await cmd.execute({
+            quickpick: mockQuickPick,
+            controller: lc,
+            provider: lp,
+            selectedItems: mockQuickPick.selectedItems,
+          });
+          const acceptNewWithTemplateItemOut = await cmdSpy.returnValues[0];
+
+          // accept result is undefined
+          expect(acceptNewWithTemplateItemOut).toEqual(undefined);
+
+          // foobarbaz is not created if template selection is cancelled, or selection was empty.
+          const maybeFooBarBazNotes = await engine.findNotes({
+            fname: "capers-are-not-berries",
+          });
+          expect(maybeFooBarBazNotes.length).toEqual(0);
+          cmdSpy.restore();
+          cmd.cleanUp();
+          getTemplateStub.restore();
+        });
       }
     );
 

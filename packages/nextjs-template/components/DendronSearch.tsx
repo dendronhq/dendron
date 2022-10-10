@@ -79,7 +79,7 @@ enum PlaceholderText {
 }
 
 function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
-  const { noteIndex, dendronRouter, search, error, loading, notes } = props;
+  const { noteIndex, dendronRouter, search, error, notes } = props;
 
   const engine = useEngineAppSelector((state) => state.engine);
   const defaultSearchMode = engine.config

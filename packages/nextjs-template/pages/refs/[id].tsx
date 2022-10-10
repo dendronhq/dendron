@@ -1,8 +1,4 @@
-import {
-  DendronError,
-  error2PlainObject,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import { DendronNote } from "@dendronhq/common-frontend";
 import _ from "lodash";
 import {
@@ -16,22 +12,12 @@ import DendronCustomHead from "../../components/DendronCustomHead";
 import { getNoteRefs, getRefBody } from "../../utils/build";
 import { DendronCommonProps } from "../../utils/types";
 
-export type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
+type NotePageProps = InferGetStaticPropsType<typeof getStaticProps> &
   DendronCommonProps & {
     customHeadContent: string | null;
-    noteIndex: NoteProps;
-    note: NoteProps;
   };
 
-export default function NoteRef({
-  note,
-  body,
-  collectionChildren,
-  noteIndex,
-  customHeadContent,
-  config,
-  ...rest
-}: NotePageProps) {
+export default function NoteRef({ body, customHeadContent }: NotePageProps) {
   return (
     <>
       {customHeadContent && <DendronCustomHead content={customHeadContent} />}

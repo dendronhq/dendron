@@ -49,3 +49,7 @@ custom/*
 !custom/NoOp.tsx
 builds
 test-results/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

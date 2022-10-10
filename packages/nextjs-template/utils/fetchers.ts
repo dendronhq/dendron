@@ -20,10 +20,8 @@ export async function fetchTreeMenu() {
 }
 
 export async function fetchConfig() {
-  const defaultConfig = ConfigUtils.genDefaultConfig();
   const resp = await fetch(getAssetUrl("/data/dendron.json"));
-  const configWithDefaults = defaultsDeep(await resp.json(), defaultConfig); // TODO move into `_app`
-  return configWithDefaults as DendronConfig;
+  return ConfigUtils.parse(await resp.json()) as DendronConfig;
 }
 
 /** See the helpers in `utils/fuse.ts` for your convenienance. */

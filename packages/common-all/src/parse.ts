@@ -13,6 +13,13 @@ const formatErrors = (
     return [];
   });
 
+/**
+ * Parse `zod` schema into `Result`
+ * @param schema ZodType
+ * @param raw unknown
+ * @param msg string
+ * @returns Result<T>
+ */
 export const parse = <T extends z.ZodTypeAny>(
   schema: T,
   raw: unknown,

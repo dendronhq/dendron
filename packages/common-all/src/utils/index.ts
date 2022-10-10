@@ -2,11 +2,12 @@
 /* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
+import { z } from "zod";
 import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
+import { DateTime, LruCache, NotePropsMeta, VaultUtils, parse } from "..";
 import { COLORS_LIST } from "../colors";
 import SparkMD5 from "spark-md5";
 import {
@@ -1197,6 +1198,21 @@ export class ConfigUtils {
       _.isEqual
     );
     return diff;
+  }
+
+  static parse(input: unknown) {
+    // TODO fill schema
+    const schema: z.ZodType<DendronConfig> = z.object({
+      version: z.number(),
+      global: z.object({}).optional(), // DendronGlobalConfig;
+      commands: z.object({}), // DendronCommandConfig;
+      workspace: z.object({}), // DendronWorkspaceConfig;
+      preview: z.object({}), // DendronPreviewConfig;
+      publishing: z.object({}), // DendronPublishingConfig;
+      dev: z.object({}).optional(), // DendronDevConfig;
+    });
+
+    return parse(schema, input);
   }
 }
 

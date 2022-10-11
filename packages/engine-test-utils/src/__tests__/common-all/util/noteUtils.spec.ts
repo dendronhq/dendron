@@ -1,5 +1,7 @@
 import { InvalidFilenameReason, NoteUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { runEngineTestV5 } from "../../..";
 
 const validFnames = ["foo", "bar", "foo.bar", "foo bar"];
 const invalidFnamesAndReasons = {
@@ -97,6 +99,36 @@ describe("NoteUtils", () => {
           });
         });
       });
+    });
+  });
+  describe("GIVEN tag color is configured in frontmatter", () => {
+    test("THEN tags should have the configured color", async () => {
+      await runEngineTestV5(
+        async ({ vaults, wsRoot }) => {
+          const note = await NoteTestUtilsV4.createNote({
+            fname: "foo",
+            vault: vaults[0],
+            wsRoot,
+          });
+          note.color = "#cc99ff";
+          const result = NoteUtils.color({ fname: "foo", note });
+          expect(result.type).toEqual("configured");
+          expect(result.color).toEqual("#cc99ff");
+        },
+        { expect }
+      );
+    });
+  });
+
+  describe("GIVEN tag color is not configured in frontmatter", () => {
+    test("THEN tags should have a random color", async () => {
+      await runEngineTestV5(
+        async () => {
+          const result = NoteUtils.color({ fname: "foo" });
+          expect(result.type).toEqual("generated");
+        },
+        { expect }
+      );
     });
   });
 });

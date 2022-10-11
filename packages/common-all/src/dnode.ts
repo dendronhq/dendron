@@ -1048,16 +1048,20 @@ export class NoteUtils {
    * @param fname The fname of note that you want to get the color of.
    * @returns The color, and whether this color was randomly generated or explicitly defined.
    */
-  static color(opts: { fname: string; vault?: DVault }): {
+  static color(opts: { fname: string; vault?: DVault; note?: NotePropsMeta }): {
     color: string;
     type: "configured" | "generated";
   } {
+    const { fname, note } = opts;
     // TODO: Re-enable the ancestor color logic later
     // const ancestors = NoteUtils.ancestors({ ...opts, includeSelf: true });
     // for (const note of ancestors) {
     //   if (note.color) return { color: note.color, type: "configured" };
     // }
-    return { color: randomColor(opts.fname), type: "generated" };
+    if (note && note.color) {
+      return { color: note.color, type: "configured" };
+    }
+    return { color: randomColor(fname), type: "generated" };
   }
 
   /** Get the ancestors of a note, in the order of the closest to farthest.

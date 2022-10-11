@@ -32,8 +32,17 @@ function checkCircularDependencies(path, threshold) {
 
 function main() {
   // Lower these each time we fix a circular dependency:
-  const PLUGIN_CORE_CIRCULAR_DEP_THRESHOLD = 1;
   const COMMON_ALL_CIRCULAR_DEP_THRESHOLD = 0;
+  const COMMON_FRONTEND_CIRCULAR_DEP_THRESHOLD = 0;
+  const COMMON_SERVER_CIRCULAR_DEP_THRESHOLD = 1;
+  const CLI_CIRCULAR_DEP_THRESHOLD = 0;
+  const PLUGIN_VIEWS_CIRCULAR_DEP_THRESHOLD = 0;
+  const NEXTJS_TEMPLATE_CIRCULAR_DEP_THRESHOLD = 3;
+  const VIZ_CIRCULAR_DEP_THRESHOLD = 0;
+  const ENGINE_SERVER_CIRCULAR_DEP_THRESHOLD = 0;
+  const PLUGIN_CORE_CIRCULAR_DEP_THRESHOLD = 1;
+  const PODS_CORE_CIRCULAR_DEP_THRESHOLD = 0;
+  const UNIFIED_CIRCULAR_DEP_THRESHOLD = 22;
 
   const rootPath = exec("git rev-parse --show-toplevel").stdout;
 
@@ -45,6 +54,51 @@ function main() {
   checkCircularDependencies(
     path.resolve(rootPath, "packages/common-all/src"),
     COMMON_ALL_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/common-server/src"),
+    COMMON_SERVER_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/common-frontend/src"),
+    COMMON_FRONTEND_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/dendron-cli/src"),
+    CLI_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/unified/src"),
+    UNIFIED_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/dendron-plugin-views/src"),
+    PLUGIN_VIEWS_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/dendron-viz/src"),
+    VIZ_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/engine-server/src"),
+    ENGINE_SERVER_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/nextjs-template"),
+    NEXTJS_TEMPLATE_CIRCULAR_DEP_THRESHOLD
+  );
+
+  checkCircularDependencies(
+    path.resolve(rootPath, "packages/pods-core/src"),
+    PODS_CORE_CIRCULAR_DEP_THRESHOLD
   );
 
   // Where we would push if we ran `git push`

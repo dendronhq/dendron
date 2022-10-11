@@ -5,8 +5,6 @@ import {
 } from "@dendronhq/common-all";
 import { WorkspaceService } from "../workspace";
 
-export * from "./service";
-
 export type MigrateFunction = (opts: {
   dendronConfig: IntermediateDendronConfig;
   wsConfig?: WorkspaceSettings;

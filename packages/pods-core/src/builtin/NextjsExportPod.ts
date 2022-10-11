@@ -11,7 +11,6 @@ import {
   getStage,
   IntermediateDendronConfig,
   isWebUri,
-  NoteFnameDictUtils,
   NoteProps,
   NotePropsByIdDict,
   NoteUtils,
@@ -30,7 +29,12 @@ import {
   SimpleGitResetMode,
 } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
-import { getRefId, MDUtilsV5, ProcFlavor } from "@dendronhq/unified";
+import {
+  getParsingDependencyDicts,
+  getRefId,
+  MDUtilsV5,
+  ProcFlavor,
+} from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -286,14 +290,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     note: NoteProps;
     engineConfig: IntermediateDendronConfig;
   }) {
-    const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
-      engine.notes
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
+      engine,
+      engineConfig,
+      engine.vaults
     );
-
-    const noteCacheForRenderDict = {
-      notesById: engine.notes,
-      notesByFname,
-    };
 
     const proc = MDUtilsV5.procRehypeFull(
       {
@@ -524,7 +526,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const sidebarConfig = parseSidebarConfig(sidebarConfigInput);
 
     // fail early, before computing `SiteUtils.filterByConfig`.
-    if (sidebarConfig.error) {
+    if (sidebarConfig.isErr()) {
       throw sidebarConfig.error;
     }
 
@@ -551,7 +553,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     });
 
     // fail if sidebar could not be created
-    if (sidebarResp.error) {
+    if (sidebarResp.isErr()) {
       throw sidebarResp.error;
     }
 
@@ -600,22 +602,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
         Object.keys(noteRefs).map(async (ent: string) => {
           const { refId, prettyHAST } = noteRefs![ent];
           const noteId = refId.id;
-          const noteForRef = _.get(engine.notes, noteId);
+          const noteForRef = (await engine.getNote(noteId)).data;
 
           // shouldn't happen
           if (!noteForRef) {
             throw Error(`no note found for ${JSON.stringify(refId)}`);
           }
 
-          const notesByFname = NoteFnameDictUtils.createNotePropsByFnameDict(
-            engine.notes
+          const noteCacheForRenderDict = await getParsingDependencyDicts(
+            noteForRef,
+            engine,
+            config,
+            engine.vaults
           );
-
-          const noteCacheForRenderDict = {
-            notesById: engine.notes,
-            notesByFname,
-          };
-
           const proc = MDUtilsV5.procRehypeFull(
             {
               // engine,
@@ -648,7 +647,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
 
     const treeDstPath = path.join(podDstDir, "tree.json");
 
-    const sidebar = sidebarResp.data;
+    const sidebar = sidebarResp.value;
     const tree = TreeUtils.generateTreeData(payload.notes, sidebar);
 
     // Generate full text search data

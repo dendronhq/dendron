@@ -3,8 +3,8 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { before, beforeEach, describe } from "mocha";
 import vscode from "vscode";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import RenameProvider from "../../features/RenameProvider";
-import { getDWorkspace } from "../../workspace";
 import { WSUtils } from "../../WSUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS } from "../testUtilsV3";
@@ -100,7 +100,7 @@ suite("RenameProvider", function () {
           executeOut = await provider.executeRename({ newName: "new-target" });
         });
         test("THEN correctly renamed at symbol position", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const active = (
             await engine.findNotes({ fname: "active", vault: vaults[0] })
           )[0];
@@ -114,7 +114,7 @@ suite("RenameProvider", function () {
         });
 
         test("AND target note is correctly renamed", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const newTarget = (
             await engine.findNotes({ fname: "new-target", vault: vaults[0] })
           )[0];
@@ -122,7 +122,7 @@ suite("RenameProvider", function () {
         });
         test("THEN references to target note is correctly updated", async () => {
           expect(executeOut?.changed.length).toEqual(13);
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
               fname: "note-with-link",
@@ -224,7 +224,7 @@ suite("RenameProvider", function () {
           executeOut = await provider.executeRename({ newName: "new-target" });
         });
         test("THEN correctly renamed at symbol position", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const active = (
             await engine.findNotes({
               fname: "active",
@@ -240,7 +240,7 @@ suite("RenameProvider", function () {
         });
 
         test("AND target note is correctly renamed", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const newTarget = (
             await engine.findNotes({
               fname: "new-target",
@@ -251,7 +251,7 @@ suite("RenameProvider", function () {
         });
         test("THEN references to target note is correctly updated", async () => {
           expect(executeOut?.changed.length).toEqual(12);
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
               fname: "note-with-link",
@@ -326,7 +326,7 @@ suite("RenameProvider", function () {
           executeOut = await provider.executeRename({ newName: "new-target" });
         });
         test("THEN correctly renamed at symbol position", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const active = (
             await engine.findNotes({
               fname: "active",
@@ -338,7 +338,7 @@ suite("RenameProvider", function () {
         });
 
         test("AND target note is correctly renamed", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const newTarget = (
             await engine.findNotes({
               fname: "tags.new-target",
@@ -349,7 +349,7 @@ suite("RenameProvider", function () {
         });
         test("THEN references to target note is correctly updated", async () => {
           expect(executeOut?.changed.length).toEqual(10);
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
               fname: "note-with-link",
@@ -413,7 +413,7 @@ suite("RenameProvider", function () {
           executeOut = await provider.executeRename({ newName: "new-target" });
         });
         test("THEN correctly renamed at symbol position", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const active = (
             await engine.findNotes({
               fname: "active",
@@ -424,7 +424,7 @@ suite("RenameProvider", function () {
         });
 
         test("AND target note is correctly renamed", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const newTarget = (
             await engine.findNotes({
               fname: "tags.new-target",
@@ -435,7 +435,7 @@ suite("RenameProvider", function () {
         });
         test("THEN references to target note is correctly updated", async () => {
           expect(executeOut?.changed.length).toEqual(10);
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
               fname: "note-with-link",
@@ -502,7 +502,7 @@ suite("RenameProvider", function () {
           executeOut = await provider.executeRename({ newName: "new-target" });
         });
         test("THEN correctly renamed at symbol position", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const active = (
             await engine.findNotes({
               fname: "active",
@@ -514,7 +514,7 @@ suite("RenameProvider", function () {
         });
 
         test("AND target note is correctly renamed", async () => {
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const newTarget = (
             await engine.findNotes({
               fname: "user.new-target",
@@ -525,7 +525,7 @@ suite("RenameProvider", function () {
         });
         test("THEN references to target note is correctly updated", async () => {
           expect(executeOut?.changed.length).toEqual(10);
-          const { vaults, engine } = getDWorkspace();
+          const { vaults, engine } = ExtensionProvider.getDWorkspace();
           const noteWithLink = (
             await engine.findNotes({
               fname: "note-with-link",

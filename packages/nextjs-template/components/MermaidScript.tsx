@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import Script from "next/script";
-import { useEngineAppSelector } from "../features/engine/hooks";
 import { createLogger } from "@dendronhq/common-frontend";
 
 interface MermaidScriptProps {
@@ -9,7 +8,6 @@ interface MermaidScriptProps {
 
 export const MermaidScript: React.FC<MermaidScriptProps> = (props) => {
   const [loadMermaid, setLoadMermaid] = React.useState(false);
-  const engine = useEngineAppSelector((state) => state.engine);
   const { noteBody } = props;
 
   useEffect(() => {

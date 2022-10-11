@@ -119,8 +119,6 @@ export class MockEngineAPIService implements ReducedDEngine {
     const resp = await this.store.get("foo");
 
     const data = resp.data as NoteProps;
-    return Promise.resolve({
-      data: [data],
-    });
+    return Promise.resolve([data]);
   }
 }

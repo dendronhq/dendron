@@ -204,7 +204,7 @@ export class DoctorService implements Disposable {
     if (_.isUndefined(candidates)) {
       notes =
         (query
-          ? engine.queryNotesSync({ qs: query, originalQS: query }).data
+          ? await engine.queryNotes({ qs: query, originalQS: query })
           : await engine.findNotes({ excludeStub: true })) ?? [];
     } else {
       notes = candidates;

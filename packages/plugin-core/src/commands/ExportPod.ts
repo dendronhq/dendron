@@ -13,8 +13,8 @@ import {
   showPodQuickPickItemsV4,
   withProgressOpts,
 } from "../utils/pods";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOutput = void;
 
@@ -29,10 +29,12 @@ export class ExportPodCommand extends BaseCommand<
 > {
   public pods: PodClassEntryV4[];
   key = DENDRON_COMMANDS.EXPORT_POD.key;
+  private extension: IDendronExtension;
 
-  constructor(_name?: string) {
+  constructor(ext: IDendronExtension, _name?: string) {
     super(_name);
     this.pods = getAllExportPods();
+    this.extension = ext;
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
@@ -47,7 +49,7 @@ export class ExportPodCommand extends BaseCommand<
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
-    const podsDir = getExtension().podsDir;
+    const podsDir = this.extension.podsDir;
     const podClass = podChoice.podClass;
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (maybeConfig.error) {
@@ -64,7 +66,7 @@ export class ExportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
-    const { wsRoot, vaults } = getDWorkspace();
+    const { wsRoot, vaults } = this.extension.getDWorkspace();
     if (!wsRoot) {
       throw Error("ws root not defined");
     }
@@ -73,7 +75,7 @@ export class ExportPodCommand extends BaseCommand<
       withProgressOpts,
     };
     const pod = new opts.podChoice.podClass(); // eslint-disable-line new-cap
-    const engine = getExtension().getEngine();
+    const engine = this.extension.getEngine();
     await pod.execute({
       config: opts.config,
       engine,

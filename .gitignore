@@ -37,3 +37,4 @@ generated-prisma-client
 packages/engine-server/prisma/dev.db
 dev.db-journal
 builds
+packages/nextjs-template/styles/scss/

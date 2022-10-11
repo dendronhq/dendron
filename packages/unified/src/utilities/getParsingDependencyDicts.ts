@@ -100,7 +100,10 @@ async function getBacklinkDependencies(
 
 /**
  * For a given AST, find all note dependencies whose data will be needed for
- * rendering.
+ * rendering. Specifically, we look for:
+ * - WIKI_LINK
+ * - HASHTAG
+ * - USERTAG
  * @param ast the syntax tree to look for dependencies
  * @returns an array of fname-vault? combinations that this tree depends on.
  */
@@ -175,7 +178,7 @@ async function getRecursiveNoteDependencies(
         // vault: data.vaultName
       });
 
-      const out = _.filter(resp.data, (ent) =>
+      const out = _.filter(resp, (ent) =>
         DUtils.minimatch(ent.fname, data.fname)
       );
 
@@ -258,7 +261,7 @@ async function getForwardLinkDependencies(
               ast,
               engine
             );
-
+            allDependencies.push(...getNoteDependencies(ast));
             allDependencies.push(...recursiveDependencies);
             newRecursiveDependencies.push(...recursiveDependencies);
           })

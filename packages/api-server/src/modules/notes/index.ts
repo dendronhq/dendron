@@ -36,14 +36,7 @@ export class NoteController {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
-    try {
-      const data = await engine.queryNotes({ ...opts, originalQS: opts.qs });
-      return data;
-    } catch (err) {
-      return {
-        error: new DendronError({ message: JSON.stringify(err) }),
-      };
-    }
+    return engine.queryNotes({ ...opts, originalQS: opts.qs });
   }
 
   async info(): Promise<EngineInfoResp> {

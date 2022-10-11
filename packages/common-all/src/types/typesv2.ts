@@ -260,7 +260,6 @@ export type EngineSchemaWriteOpts = {
 
 export type DEngineInitPayload = {
   notes: NotePropsByIdDict;
-  schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
   config: IntermediateDendronConfig;
@@ -329,24 +328,6 @@ export type BulkWriteNotesOpts = {
 // === Engine and Store Main
 
 export type DCommonProps = {
-  /**
-   * @deprecated
-   * For access, see {@link DEngine.getNote}
-   * Dictionary where key is the note id.
-   */
-  notes: NotePropsByIdDict;
-  /**
-   * @deprecated
-   * For access, see {@link DEngine.findNotes}
-   * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
-   */
-  noteFnames: NotePropsByFnameDict;
-  /**
-   * @deprecated
-   * For access, see {@link DEngine.getSchema}
-   * Dictionary where key is the root id.
-   */
-  schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
 };
@@ -396,13 +377,18 @@ export type WriteNoteResp = RespV3<NoteChangeEntry[]>;
 export type BulkWriteNotesResp = RespWithOptError<NoteChangeEntry[]>;
 export type UpdateNoteResp = RespV2<NoteChangeEntry[]>; // TODO: remove
 export type DeleteNoteResp = RespV3<NoteChangeEntry[]>;
-export type QueryNotesResp = RespV3<NoteProps[]>;
+export type QueryNotesResp = NoteProps[];
 export type RenameNoteResp = RespV3<NoteChangeEntry[]>;
 export type EngineInfoResp = RespV3<{
   version: string;
 }>;
 export type RenderNoteResp = RespV3<string>;
 export type DEngineInitResp = RespWithOptError<DEngineInitPayload>;
+
+// This can be deleted as soon as store v2 is deleted.
+export type StoreV2InitResp = RespWithOptError<
+  DEngineInitPayload & { schemas: SchemaModuleDict }
+>;
 
 // SCHEMA
 export type DeleteSchemaResp = DEngineInitResp;
@@ -476,7 +462,6 @@ export type WorkspaceExtensionSetting = {
 
 export type DEngine = DCommonProps &
   DCommonMethods & {
-    store: DStore;
     vaults: DVault[];
     hooks: DHookDict;
 
@@ -524,14 +509,6 @@ export type DEngine = DCommonProps &
      * Query for NoteProps from fuse engine
      */
     queryNotes: (opts: QueryNotesOpts) => Promise<QueryNotesResp>;
-    queryNotesSync({
-      qs,
-      originalQS,
-    }: {
-      qs: string;
-      originalQS: string;
-      vault?: DVault;
-    }): QueryNotesResp;
     /**
      * Rename note from old DNoteLoc to new DNoteLoc. New note keeps original id
      */
@@ -552,11 +529,25 @@ export type DEngineClient = Omit<DEngine, "store">;
 
 export type DStore = DCommonProps &
   DCommonMethods & {
-    init: () => Promise<DEngineInitResp>;
+    /**
+     * @deprecated
+     * For access, see {@link DEngine.getNote}
+     * Dictionary where key is the note id.
+     */
+    notes: NotePropsByIdDict;
+    /**
+     * @deprecated
+     * For access, see {@link DEngine.findNotes}
+     * Dictionary where the key is lowercase note fname, and values are ids of notes with that fname (multiple ids since there might be notes with same fname in multiple vaults).
+     */
+    noteFnames: NotePropsByFnameDict;
+    init: () => Promise<StoreV2InitResp>;
     /**
      * Get NoteProps by id. If note doesn't exist, return error
      */
     getNote: (id: string) => Promise<GetNoteResp>;
+
+    getSchema: (id: string) => Promise<GetSchemaResp>;
     /**
      * @deprecated: Use {@link DEngine.writeNote}
      * @param note

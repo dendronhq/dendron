@@ -49,4 +49,7 @@ custom/*
 !custom/NoOp.tsx
 builds
 test-results/
-# migrated from packages/dendron-cli/src/utils/build.ts
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

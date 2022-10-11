@@ -10,14 +10,12 @@ import { ensureDirSync } from "fs-extra";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
-import * as vscode from "vscode";
 import { ImportPodCommand } from "../../commands/ImportPod";
-import { getDWorkspace } from "../../workspace";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ImportPod", function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {
+  const ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
 
@@ -50,7 +48,7 @@ suite("ImportPod", function () {
           };
         };
         const pod = fakePod();
-        const engine = getDWorkspace().engine;
+        const engine = ExtensionProvider.getEngine();
         await PODS_CORE.JSON.IMPORT.BASIC.testFunc({
           engine,
           wsRoot,

@@ -1,5 +1,5 @@
 import { DVault, VaultUtils } from "@dendronhq/common-all";
-import { getDWorkspace } from "./workspace";
+import { ExtensionProvider } from "./ExtensionProvider";
 
 /**
  * Wrapper around common-all VaultUtils which provides defaults
@@ -16,10 +16,10 @@ export class PluginVaultUtils {
     vaults?: DVault[];
   }): DVault {
     if (!wsRoot) {
-      wsRoot = getDWorkspace().wsRoot;
+      wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
     }
     if (!vaults) {
-      vaults = getDWorkspace().vaults;
+      vaults = ExtensionProvider.getDWorkspace().vaults;
     }
 
     return VaultUtils.getVaultByFilePath({

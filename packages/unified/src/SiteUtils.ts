@@ -574,9 +574,11 @@ export class SiteUtils {
     // merge children
     domainNote.children = getUniqueChildrenIds(noteCandidates);
     // update parents
-    domainNote.children.map((id) => {
+    domainNote.children.forEach((id) => {
       const maybeNote = noteDict.notesById[id];
-      maybeNote.parent = domainId;
+      if (maybeNote) {
+        maybeNote.parent = domainId;
+      }
     });
     return domainNote;
   }

@@ -10,7 +10,7 @@ import { AutoComplete, Alert, Row, Col, Typography } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useCombinedDispatch } from "../features";
 import { browserEngineSlice } from "../features/engine";
-import { useFetchFuse } from "../utils/fuse";
+import { useFetchFuse } from "../utils/useFuse";
 import type Fuse from "fuse.js";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import DendronSpinner from "./DendronSpinner";
@@ -79,7 +79,7 @@ enum PlaceholderText {
 }
 
 function DendronSearchComponent(props: DendronCommonProps & SearchProps) {
-  const { noteIndex, dendronRouter, search, error, loading, notes } = props;
+  const { noteIndex, dendronRouter, search, error, notes } = props;
 
   const engine = useEngineAppSelector((state) => state.engine);
   const defaultSearchMode = engine.config

@@ -5,7 +5,7 @@ import { __String } from "typescript";
 const DevNoticeKey = "next-template-notice-slow-toggle";
 export const useToggle = (
   defaultVal: boolean = true,
-  key: string = DevNoticeKey
+  _key: string = DevNoticeKey
 ) => {
   const [val, setVal] = useState(defaultVal);
   const toggle = (override?: boolean) => setVal(!isUndefined(override) || !val);

@@ -4,6 +4,7 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import * as vscode from "vscode";
 import { RandomNoteCommand } from "../../commands/RandomNote";
 import { DENDRON_COMMANDS } from "../../constants";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -52,7 +53,7 @@ function basicTest({
         { wsRoot }
       );
 
-      await new RandomNoteCommand().run();
+      await new RandomNoteCommand(ExtensionProvider.getExtension()).run();
       validateFn();
       done();
     },
@@ -60,8 +61,7 @@ function basicTest({
 }
 
 suite(DENDRON_COMMANDS.RANDOM_NOTE.key, function () {
-  let ctx: vscode.ExtensionContext;
-  ctx = setupBeforeAfter(this, {});
+  const ctx = setupBeforeAfter(this, {});
 
   test("include pattern only", (done) => {
     const validateFn = function () {

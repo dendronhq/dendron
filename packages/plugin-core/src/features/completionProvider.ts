@@ -46,7 +46,7 @@ import { ExtensionProvider } from "../ExtensionProvider";
 import { Logger } from "../logger";
 import { sentryReportingCallback } from "../utils/analytics";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace, getExtension } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { WSUtils } from "../WSUtils";
 
 function padWithZero(n: number): string {
@@ -477,7 +477,7 @@ export async function provideBlockCompletionItems(
   Logger.debug({ ctx, found });
 
   const timestampStart = process.hrtime();
-  const engine = getDWorkspace().engine;
+  const engine = ExtensionProvider.getEngine();
 
   let otherFile = false;
   let note: NotePropsMeta | undefined;
@@ -529,9 +529,10 @@ export async function provideBlockCompletionItems(
     insertValueOnly = true;
   }
 
-  const blocks = await getExtension()
-    .getEngine()
-    .getNoteBlocks({ id: note.id, filterByAnchorType });
+  const blocks = await ExtensionProvider.getEngine().getNoteBlocks({
+    id: note.id,
+    filterByAnchorType,
+  });
   if (
     _.isUndefined(blocks.data) ||
     blocks.error?.severity === ERROR_SEVERITY.FATAL

@@ -10,11 +10,11 @@ import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 import { ProgressLocation, QuickPickItem, window } from "vscode";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { Logger } from "../logger";
 import { ReloadIndexCommand } from "./ReloadIndex";
-import { ExtensionProvider } from "../ExtensionProvider";
 import { GitUtils } from "@dendronhq/common-server";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOpts = {
   type: VaultRemoteSource;
@@ -31,9 +31,12 @@ export class VaultConvertCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.VAULT_CONVERT.key;
+  constructor(private _ext: IDendronExtension) {
+    super();
+  }
 
   async gatherVault(): Promise<DVault | undefined> {
-    const { vaults } = getDWorkspace();
+    const { vaults } = this._ext.getDWorkspace();
     return (
       await VSCodeUtils.showQuickPick(
         vaults.map((ent) => ({
@@ -152,9 +155,7 @@ export class VaultConvertCommand extends BasicCommand<
       }
     }
 
-    if (
-      ExtensionProvider.getDWorkspace().config.dev?.enableSelfContainedVaults
-    ) {
+    if (this._ext.getDWorkspace().config.dev?.enableSelfContainedVaults) {
       // If self contained vaults are enabled, we'll move the vault into the
       // `dependencies` folder. We should ask the user if they are okay with us
       // moving the folder.
@@ -176,7 +177,7 @@ export class VaultConvertCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "VaultConvertCommand";
     const { vault, type, remoteUrl } = opts;
-    const { wsRoot } = getDWorkspace();
+    const { wsRoot } = this._ext.getDWorkspace();
     if (!vault || !type)
       throw new DendronError({
         message:

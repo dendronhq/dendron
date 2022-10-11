@@ -1589,39 +1589,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   /**
-   * Check major version of configuration.
-   * Because Dendron workspace relies on major version to be the same, we force a migration if that's not
-   * the case
-   */
-  // async runConfigMigrationIfNecessary({
-  //   currentVersion,
-  //   dendronConfig,
-  // }: {
-  //   currentVersion: string;
-  //   dendronConfig: DendronConfig;
-  // }) {
-  //   let changes: MigrationChangeSetStatus[] = [];
-  //   if (dendronConfig.version !== CURRENT_CONFIG_VERSION) {
-  //     // NOTE: this migration will create a `migration-config` backup file in the user's home directory
-  //     changes = await MigrationService.applyMigrationRules({
-  //       currentVersion,
-  //       previousVersion: "0.83.0", // to force apply
-  //       dendronConfig,
-  //       wsService: this,
-  //       logger: this.logger,
-  //       migrations: [CONFIG_MIGRATIONS],
-  //     });
-  //     // if changes were made, use updated changes in subsequent configuration
-  //     if (!_.isEmpty(changes)) {
-  //       const { data } = _.last(changes)!;
-  //       dendronConfig = data.dendronConfig;
-  //     }
-  //   }
-
-  //   return changes;
-  // }
-
-  /**
    * Make sure all vaults are present on file system
    * @param fetchAndPull for repositories that exist, should we also do a fetch? default: false
    * @param skipPrivate skip cloning and pulling of private vaults. default: false

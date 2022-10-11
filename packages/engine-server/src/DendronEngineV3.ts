@@ -1109,7 +1109,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
         const notesCache = new NotesFileSystemCache({
           cachePath,
-          // noCaching: DConfig.readConfigSync(this.wsRoot).noCaching,
           // TODO: clean up
           noCaching: false,
           logger: this.logger,

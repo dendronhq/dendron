@@ -7,7 +7,8 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import { DateTime, LruCache, NotePropsMeta, VaultUtils, parse } from "..";
+import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
+import { parse } from "../parse";
 import { COLORS_LIST } from "../colors";
 import SparkMD5 from "spark-md5";
 import {

@@ -149,5 +149,24 @@ suite("workspaceActivator", function () {
         });
       }
     );
+
+    describeMultiWS(
+      "GIVEN a workspace not tracked",
+      {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      },
+      () => {
+        test("THEN top level repo info is not tracked", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const wsService = new WorkspaceService({ wsRoot });
+          const urlStub = sinon
+            .stub(wsService, "getTopLevelRemoteUrl")
+            .returns(Promise.resolve(undefined));
+          const out = await trackTopLevelRepoFound({ wsService });
+          expect(out).toEqual(undefined);
+          urlStub.restore();
+        });
+      }
+    );
   });
 });

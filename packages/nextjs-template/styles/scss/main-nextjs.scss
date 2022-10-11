@@ -1,0 +1,131 @@
+@import "./main";
+
+// content.scss
+
+.main-content {
+  font-size: $root-font-size;
+
+  ul {
+    > li {
+      &::before {
+        content: "•";
+      }
+    }
+  }
+
+  table,
+  td,
+  th {
+    border: 1px solid black;
+    padding: 10px;
+  }
+
+}
+
+// main.scss
+
+// TODO: new
+#__next {
+  height: 100%; // or min-height
+}
+
+hr {
+  // the height below is overridden by Ant design theme, we instead set
+  // `border-width` to set the height (along with `box-sizing: border-box`)
+  border-width: 1px;
+  height: 1px;
+}
+
+// Components
+
+// DendronLayout
+
+// DendronTreeMenu
+
+.dendron-tree-menu.ant-menu:not(.ant-menu-horizontal) {
+  .ant-menu-submenu-title {
+    [data-expandedicon="true"] {
+      position: absolute;
+      top: 0;
+      right: 3px;
+      height: 100%;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  &.ant-menu-inline {
+    .ant-menu-title-content:hover {
+      text-decoration: underline;
+    }
+    [data-expandedicon="true"]:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &.ant-menu-inline-collapsed {
+    [data-expandedicon="true"] {
+      // remove submenu icon in collapsed Menu for first level
+      display: none;
+    }
+  }
+
+  .ant-menu-submenu {
+    > .ant-menu-submenu-title:after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      border-right: 3px solid;
+      transform: scaleY(0.0001);
+      opacity: 0;
+      content: "";
+      pointer-events: none; // makes open/close arrows touch-area bigger by giving it "space" to the right from this after element
+    }
+  }
+
+  // We want the links to have the color of regular text, whatever that color is
+  // for the current theme.
+  .ant-menu-title-content a {
+    color: inherit;
+  }
+
+  .ant-menu-submenu.dendron-ant-menu-submenu-selected {
+    > .ant-menu-submenu-title:after {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+
+  // ant overrides the background color for these elements, which blocks the
+  // background color we set for the container element.
+  .ant-layout-sider,
+  .ant-menu {
+    background: unset;
+  }
+}
+
+// override ant design toc
+.dendron-toc.ant-anchor-wrapper {
+  .ant-anchor-link-title {
+    white-space: normal;
+  }
+}
+
+// portal.scss
+
+.portal-container {
+  .portal-parent {
+    .portal-parent-fader-top {
+      height: 36px;
+    }
+  }
+}
+
+// note references are loaded in an iframe and should be full width, else width is 300px by default;
+// more info: https://stackoverflow.com/questions/5871668/default-width-height-of-an-iframe
+iframe.noteref-iframe {
+  width: 100%;
+}

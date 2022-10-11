@@ -50,4 +50,3 @@ custom/*
 builds
 test-results/
 # migrated from packages/dendron-cli/src/utils/build.ts
-styles/scss/

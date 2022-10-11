@@ -393,6 +393,10 @@
         "title": "Dendron: Remove Vault"
       },
       {
+        "command": "dendron.createNewVault",
+        "title": "Dendron: Create New Vault"
+      },
+      {
         "command": "dendron.vaultConvert",
         "title": "Dendron: Vault Convert"
       },
@@ -806,6 +810,10 @@
         },
         {
           "command": "dendron.vaultAdd",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.createNewVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

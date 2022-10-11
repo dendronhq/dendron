@@ -87,6 +87,7 @@ import { CopyCodespaceURL } from "./CopyCodespaceURL";
 import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
 import { CopyAsCommand } from "./CopyAsCommand";
 import { RemoveVaultCommand } from "./RemoveVaultCommand";
+import { CreateNewVaultCommand } from "./CreateNewVaultCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -161,6 +162,7 @@ const ALL_COMMANDS = [
   ApplyTemplateCommand,
   UpgradeSettingsCommand,
   VaultAddCommand,
+  CreateNewVaultCommand,
   RemoveVaultCommand,
   VaultConvertCommand,
   ShowWelcomePageCommand,

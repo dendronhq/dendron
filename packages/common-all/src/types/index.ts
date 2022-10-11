@@ -7,7 +7,6 @@ export * from "./noteTrait";
 export * from "./seed";
 export * from "./typesv2";
 export * from "./DWorkspaceV2";
-export * from "./foundation";
 export * from "./seed";
 export * from "./compat";
 export * from "./editor";

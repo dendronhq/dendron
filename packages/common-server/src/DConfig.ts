@@ -3,7 +3,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   DeepPartial,
-  DendronConfig,
   DendronError,
   DendronPublishingConfig,
   ErrorFactory,
@@ -14,14 +13,16 @@ import {
   IDendronError,
   RespV3,
   RespWithOptError,
+  DendronConfig,
+  YamlUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
-import { readYAML, writeYAML, writeYAMLAsync } from "./files";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
+import { readYAML, writeYAML, writeYAMLAsync, readToString } from "./files";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
@@ -187,27 +188,34 @@ export class DConfig {
 
   /**
    * Read configuration
-   * @param wsRoot
+   * @param path
    * @param useCache: If true, read from cache instead of file system
    * @returns
    */
-  static readConfigSync(wsRoot: string, useCache?: boolean) {
+  static readConfigSync(path: string, useCache?: boolean) {
     if (_dendronConfig && useCache) {
       return _dendronConfig;
     }
-    const configPath = DConfig.configPath(wsRoot);
-    const unknownconfig = readYAML(configPath, true) as DendronConfig;
-    const cleanConfig: DendronConfig = DConfigLegacy.configIsV4(unknownconfig)
-      ? DConfigLegacy.v4ToV5(unknownconfig)
-      : (unknownconfig as DendronConfig);
+    const configPath = DConfig.configPath(path);
+    const dendronConfigResult = readToString(configPath)
+      .andThen((input) => YamlUtils.fromStr(input))
+      .andThen((unknownconfig) => {
+        const cleanConfig = DConfigLegacy.configIsV4(
+          unknownconfig
+        )
+          ? DConfigLegacy.v4ToV5(unknownconfig)
+          : (unknownconfig);
+        return ConfigUtils.parse(cleanConfig);
+      })
+      .map((dendronConfig) => {
+        _dendronConfig = dendronConfig;
+        return dendronConfig;
+      });
 
-    // TODO: validate
-    const config: DendronConfig = _.defaultsDeep(
-      cleanConfig,
-      ConfigUtils.genDefaultConfig()
-    );
-    _dendronConfig = config;
-    return config;
+    if (dendronConfigResult.isErr()) {
+      throw dendronConfigResult.error;
+    }
+    return dendronConfigResult.value;
   }
 
   /**

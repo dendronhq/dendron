@@ -32,6 +32,10 @@ export type EngineDeleteOpts = {
   noDeleteParentStub?: boolean;
 };
 
+export type AnyJson = boolean | number | string | null | JsonArray | JsonMap;
+export type JsonMap = { [key: string]: AnyJson };
+export type JsonArray = AnyJson[];
+
 // === New
 
 export type DLinkType = "wiki" | "refv2" | "hashtag" | "usertag" | "fmtag";

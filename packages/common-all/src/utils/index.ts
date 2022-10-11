@@ -7,6 +7,20 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
+import YAML from "js-yaml";
+import {
+  ok,
+  Ok,
+  err,
+  Err,
+  Result,
+  okAsync,
+  errAsync,
+  ResultAsync,
+  fromThrowable,
+  fromPromise,
+  fromSafePromise,
+} from "neverthrow";
 import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
 import { parse } from "../parse";
 import { COLORS_LIST } from "../colors";
@@ -18,7 +32,7 @@ import {
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
 import { DendronError, ErrorMessages } from "../error";
-import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
+import { DHookDict, NoteChangeEntry, NoteProps, AnyJson } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
@@ -58,7 +72,7 @@ export {
   fromThrowable,
   fromPromise,
   fromSafePromise,
-} from "neverthrow";
+};
 
 export * from "./lookup";
 export * from "./publishUtils";
@@ -1366,4 +1380,31 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
     return minimatch(fname, patterns);
   }
   return _.some(patterns, (pattern) => minimatch(fname, pattern));
+}
+
+export class YamlUtils {
+  static load = fromThrowable(YAML.load, (error) => {
+    return new DendronError({
+      message: `Error coding YAML string`,
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
+  static dump = fromThrowable(YAML.dump, (error) => {
+    return new DendronError({
+      message: `Error decoding YAML string`,
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
+
+  static fromStr(str: string, overwriteDuplicate?: boolean) {
+    return this.load(str, {
+      schema: YAML.JSON_SCHEMA,
+      json: overwriteDuplicate ?? false,
+    }) as Result<AnyJson, DendronError>;
+  }
+  static toStr(data: any) {
+    return this.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  }
 }

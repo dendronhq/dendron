@@ -1,6 +1,6 @@
 import { DendronError, error2PlainObject } from "@dendronhq/common-all";
 import _ from "lodash";
-import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import { prepChildrenForCollection } from "../../components/DendronCollection";
 import DendronNotePage, {
   DendronNotePageProps,
@@ -23,9 +23,7 @@ export const getStaticPaths: GetStaticPaths<DendronNotePageParams> =
 export const getStaticProps: GetStaticProps<
   DendronNotePageProps,
   DendronNotePageParams
-> = async (
-  { params },
-) => {
+> = async ({ params }) => {
   if (!params) {
     throw Error("params required");
   }

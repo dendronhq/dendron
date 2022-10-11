@@ -61,6 +61,7 @@ export default function DendronTreeMenu(
     });
 
     setActiveNoteIds(newActiveNoteIds);
+    return undefined;
   }, [props.noteIndex, dendronRouter.query.id, noteActiveId, tree]);
 
   const { notes, collapsed, setCollapsed } = props;

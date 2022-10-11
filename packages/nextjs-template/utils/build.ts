@@ -1,6 +1,14 @@
 import fs from "fs-extra";
 import path from "path";
-import { ConfigUtils, DendronConfig, NoteProps } from "@dendronhq/common-all";
+import {
+  ConfigUtils,
+  DendronConfig,
+  NoteProps,
+  fromPromise,
+  DendronError,
+  ErrorMessages,
+  ERROR_SEVERITY,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
 import { GetStaticPathsResult } from "next";
@@ -17,6 +25,16 @@ export function getDataDir(): string {
     throw new Error("DATA_DIR not set");
   }
   return dataDir;
+}
+
+export function fromPath(path: string) {
+  return fromPromise(fs.readJSON(path), (error) => {
+    return new DendronError({
+      message: ErrorMessages.formatShouldNeverOccurMsg(`Cannot find ${path}`),
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
 }
 
 /**
@@ -97,12 +115,24 @@ export function getNoteMeta(id: string): Promise<NoteProps> {
 }
 
 let _CONFIG_CACHE: DendronConfig | undefined;
-export function getConfig(): Promise<DendronConfig> {
+export async function getConfig(): Promise<DendronConfig> {
   if (_.isUndefined(_CONFIG_CACHE)) {
-    const dataDir = getDataDir();
-    return fs.readJSON(path.join(dataDir, "dendron.json"));
+    const dendronConfigResult = await fromPath(
+      path.join(getDataDir(), "dendron.json")
+    )
+      .andThen((input) => {
+        return ConfigUtils.parse(input);
+      })
+      .map((dendronConfig) => {
+        _CONFIG_CACHE = dendronConfig;
+        return dendronConfig;
+      });
+    if (dendronConfigResult.isErr()) {
+      throw dendronConfigResult.error;
+    }
+    return dendronConfigResult.value;
   }
-  return new Promise(() => _CONFIG_CACHE);
+  return _CONFIG_CACHE;
 }
 
 export function getPublicDir(): string {

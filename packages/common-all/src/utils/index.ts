@@ -1201,16 +1201,68 @@ export class ConfigUtils {
   }
 
   static parse(input: unknown) {
-    // TODO fill schema
-    const schema: z.ZodType<DendronConfig> = z.object({
-      version: z.number(),
-      global: z.object({}).optional(), // DendronGlobalConfig;
-      commands: z.object({}), // DendronCommandConfig;
-      workspace: z.object({}), // DendronWorkspaceConfig;
-      preview: z.object({}), // DendronPreviewConfig;
-      publishing: z.object({}), // DendronPublishingConfig;
-      dev: z.object({}).optional(), // DendronDevConfig;
-    });
+    const publishingSchema: z.ZodType<DendronPublishingConfig> = z
+      .object({
+        // enableFMTitle?: boolean;
+        // enableHierarchyDisplay?: boolean;
+        // hierarchyDisplayTitle?: string;
+        // enableNoteTitleForLink?: boolean;
+        // enablePrettyRefs?: boolean;
+        // enableBackLinks?: boolean;
+        // enableKatex?: boolean;
+        //
+        // assetsPrefix?: string;
+        copyAssets: z.boolean(),
+        //
+        // canonicalBaseUrl?: string;
+        // customHeaderPath?: string;
+        // ga?: GoogleAnalyticsConfig;
+        // logoPath?: string;
+        // siteFaviconPath?: string;
+        // siteIndex?: string;
+        siteHierarchies: z.array(z.string()),
+        enableSiteLastModified: z.boolean(),
+        siteRootDir: z.string(),
+        // siteUrl?: string;
+        enableFrontmatterTags: z.boolean(),
+        enableHashesForFMTags: z.boolean(),
+        // enableRandomlyColoredTags?: boolean;
+        // enableTaskNotes?: boolean;
+        // hierarchy?: { [key: string]: HierarchyConfig };
+        // duplicateNoteBehavior?: DuplicateNoteBehavior;
+        writeStubs: z.boolean(),
+        seo: z.object({}).passthrough(),
+        github: z.object({ enableEditLink: z.boolean() }).passthrough(),
+        // theme?: Theme;
+        // segmentKey?: string;
+        // cognitoUserPoolId?: string;
+        // cognitoClientId?: string;
+        enablePrettyLinks: z.boolean(),
+        // siteBanner?: string;
+        // giscus?: GiscusConfig;
+        // sidebarPath?: string | false;
+        // searchMode?: SearchMode;
+      })
+      .passthrough();
+
+    const schema: z.ZodType<
+      DendronConfig,
+      {},
+      { publishing: DendronPublishingConfig }
+    > = z
+      .object({
+        // version: z.number(),
+        // global: z.object({}).optional(), // TODO DendronGlobalConfig;
+        // commands: z.object({}), // TODO DendronCommandConfig;
+        // workspace: z.object({}), // TODO DendronWorkspaceConfig;
+        // preview: z.object({}), // TODO DendronPreviewConfig;
+        publishing: publishingSchema,
+        // dev: z.object({}).optional(), // TODO DendronDevConfig;
+      })
+      .transform((value) => {
+        const defaultConfig = ConfigUtils.genDefaultConfig();
+        return _.defaultsDeep(value, defaultConfig) as DendronConfig;
+      });
 
     return parse(schema, input);
   }

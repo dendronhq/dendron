@@ -1156,41 +1156,30 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   }
 
   private createRenderedCache(
-    config: IntermediateDendronConfig
+    config: DendronConfig
   ): Cache<string, CachedPreview> {
     const ctx = "createRenderedCache";
 
-    if (config.noCaching) {
-      // If no caching flag is set we will use null caching object to avoid doing any
-      // actual caching of rendered previews.
+    const maxPreviewsCached =
+      ConfigUtils.getWorkspace(config).maxPreviewsCached;
+    if (maxPreviewsCached && maxPreviewsCached > 0) {
       this.logger.info({
         ctx,
-        msg: `noCaching flag is true, will NOT use preview cache.`,
+        msg: `Creating rendered preview cache set to hold maximum of '${config.workspace.maxPreviewsCached}' items.`,
       });
 
-      return new NullCache();
+      return new LruCache({ maxItems: maxPreviewsCached });
     } else {
-      const maxPreviewsCached =
-        ConfigUtils.getWorkspace(config).maxPreviewsCached;
-      if (maxPreviewsCached && maxPreviewsCached > 0) {
-        this.logger.info({
-          ctx,
-          msg: `Creating rendered preview cache set to hold maximum of '${config.maxPreviewsCached}' items.`,
-        });
-
-        return new LruCache({ maxItems: maxPreviewsCached });
-      } else {
-        // This is most likely to happen if the user were to set incorrect configuration
-        // value for maxPreviewsCached, we don't want to crash initialization due to
-        // not being able to cache previews. Hence we will log an error and not use
-        // the preview cache.
-        this.logger.error({
-          ctx,
-          msg: `Did not find valid maxPreviewsCached (value was '${maxPreviewsCached}')
+      // This is most likely to happen if the user were to set incorrect configuration
+      // value for maxPreviewsCached, we don't want to crash initialization due to
+      // not being able to cache previews. Hence we will log an error and not use
+      // the preview cache.
+      this.logger.error({
+        ctx,
+        msg: `Did not find valid maxPreviewsCached (value was '${maxPreviewsCached}')
           in configuration. When specified th value must be a number greater than 0. Using null cache.`,
-        });
-        return new NullCache();
-      }
+      });
+      return new NullCache();
     }
   }
 

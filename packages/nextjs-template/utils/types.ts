@@ -24,10 +24,6 @@ export type NoteData = {
   vaults: DVault[];
 };
 
-export type NoteRouterQuery = {
-  id: string;
-};
-
 export type DendronCommonProps = Partial<NoteData> & {
   dendronRouter: DendronRouterProps;
 };

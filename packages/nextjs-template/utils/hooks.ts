@@ -8,13 +8,20 @@ import {
 import { verifyEngineSliceState } from "@dendronhq/common-frontend";
 import { Grid } from "antd";
 import _ from "lodash";
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import React from "react";
 import { useEngineAppSelector } from "../features/engine/hooks";
-import { getNoteRouterQuery } from "./etc";
 import { fetchNoteBody } from "./fetchers";
 
+export type NoteRouterQuery = {
+  id: string;
+};
+
 export type DendronRouterProps = ReturnType<typeof useDendronRouter>;
+
+export function getNoteRouterQuery(router: NextRouter) {
+  return router.query as Partial<NoteRouterQuery>;
+}
 
 export function useDendronRouter() {
   const router = useRouter();

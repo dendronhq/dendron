@@ -27,8 +27,13 @@ export function getDataDir(): string {
   return dataDir;
 }
 
-export function fromPath(path: string) {
-  return fromPromise(fs.readJSON(path), (error) => {
+type AnyJson = boolean | number | string | null | JsonArray | JsonMap;
+type JsonMap = { [key: string]: AnyJson };
+type JsonArray = AnyJson[];
+
+// TODO could be moved into packages/common-server/src/files.ts
+export function readToJson(path: string) {
+  return fromPromise<AnyJson, DendronError>(fs.readJSON(path), (error) => {
     return new DendronError({
       message: ErrorMessages.formatShouldNeverOccurMsg(`Cannot find ${path}`),
       severity: ERROR_SEVERITY.FATAL,
@@ -117,7 +122,7 @@ export function getNoteMeta(id: string): Promise<NoteProps> {
 let _CONFIG_CACHE: DendronConfig | undefined;
 export async function getConfig(): Promise<DendronConfig> {
   if (_.isUndefined(_CONFIG_CACHE)) {
-    const dendronConfigResult = await fromPath(
+    const dendronConfigResult = await readToJson(
       path.join(getDataDir(), "dendron.json")
     )
       .andThen((input) => {

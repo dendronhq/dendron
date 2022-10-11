@@ -18,14 +18,10 @@
     "build:sitemap:ts": "tsc -p tsconfig.sitemap.json && mv dist/scripts/sitemap.js . ",
     "build:sitemap": "next-sitemap --config sitemap.js",
     "clean": "yarn rimraf public data out",
-    "copy:robotstxt": "cpx assets/robots.txt public/",
+    "copy:robotstxt": "npx cpx assets/robots.txt public/",
     "rimraf": "npx rimraf",
     "test": "NODE_ENV=test playwright test",
     "test:skipbuild": "SKIP_BUILD=1 yarn test"
-  },
-  "overrides": {
-    "trim": "0.0.3",
-    "@types/react": "17.0.39"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.115.0",
@@ -53,12 +49,20 @@
     "@next/bundle-analyzer": "^11.1.2",
     "@playwright/test": "^1.26.0",
     "@types/fs-extra": "^9.0.12",
+    "@types/lodash": "^4.14.186",
     "@types/luxon": "^2.3.1",
-    "@types/react": "^17.0.39",
+    "@types/react": "17.0.38",
     "cpx": "^1.5.0",
     "eslint": "^7.32.0",
     "eslint-config-next": "^11.1.2",
     "har-validator": "^5.1.5",
     "typescript": "^4.4.3"
+  },
+  "resolutions": {
+    "@types/react": "17.0.38"
+  },
+  "overrides": {
+    "trim": "0.0.3",
+    "@types/react": "17.0.38"
   }
 }

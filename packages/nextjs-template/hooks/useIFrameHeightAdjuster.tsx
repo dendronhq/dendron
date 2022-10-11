@@ -2,7 +2,7 @@ import React from "react";
 
 const updateIFrameHeight = () => {
   const iframes = document.querySelectorAll("iframe");
-  iframes.forEach((iframe) => {
+  iframes.forEach((iframe, i) => {
     if (iframe) {
       const height = iframe!.contentWindow!.document.body.offsetHeight;
       iframe.style.height = `${height}px`;

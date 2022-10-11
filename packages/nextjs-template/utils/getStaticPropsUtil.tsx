@@ -1,9 +1,11 @@
-import { GetStaticProps } from "next";
+import { GetStaticProps, GetStaticPropsContext } from "next";
 import { prepChildrenForCollection } from "../components/DendronCollection";
 import { DendronNotePageProps } from "../components/DendronNotePage";
 import { getConfig, getCustomHead, getNoteBody, getNotes } from "./build";
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async (
+  context: GetStaticPropsContext
+) => {
   const { noteIndex: note, notes } = getNotes();
   const body = await getNoteBody(note.id);
   const config = await getConfig();

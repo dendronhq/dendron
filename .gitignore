@@ -38,3 +38,4 @@ packages/engine-server/prisma/dev.db
 dev.db-journal
 builds
 packages/nextjs-template/styles/scss/
+packages/nextjs-template/next-env.d.ts

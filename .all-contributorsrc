@@ -2202,6 +2202,15 @@
       "contributions": [
         "tool"
       ]
+    },
+    {
+      "login": "tjr357",
+      "name": "tjr357",
+      "avatar_url": "https://avatars.githubusercontent.com/u/97111937?v=4",
+      "profile": "https://github.com/tjr357",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

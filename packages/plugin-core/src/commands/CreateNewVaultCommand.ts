@@ -1,6 +1,7 @@
 import { DVault, VaultUtils } from "@dendronhq/common-all";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 import { commands, OpenDialogOptions, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
@@ -50,9 +51,9 @@ export class CreateNewVaultCommand extends BasicCommand<
     vaultDestination: string,
     enableSelfContainedVaults?: boolean
   ): Promise<CommandOpts | undefined> {
-    // If the vault name already exists, creating a vault with the same name would break things
     const sourceName = await VSCodeUtils.showInputBox({
       prompt: "Name of new vault (optional, press enter to skip)",
+      placeHolder: path.basename(vaultDestination),
     });
 
     return {

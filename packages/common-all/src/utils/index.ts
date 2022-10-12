@@ -1274,6 +1274,7 @@ export class ConfigUtils {
         publishing: publishingSchema,
         // dev: z.object({}).optional(), // TODO DendronDevConfig;
       })
+      .passthrough()
       .transform((value) => {
         const defaultConfig = ConfigUtils.genDefaultConfig();
         return _.defaultsDeep(value, defaultConfig) as DendronConfig;

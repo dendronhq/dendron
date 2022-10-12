@@ -188,15 +188,15 @@ export class DConfig {
 
   /**
    * Read configuration
-   * @param path
+   * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
    * @returns
    */
-  static readConfigSync(path: string, useCache?: boolean) {
+  static readConfigSync(wsRoot: string, useCache?: boolean) {
     if (_dendronConfig && useCache) {
       return _dendronConfig;
     }
-    const configPath = DConfig.configPath(path);
+    const configPath = DConfig.configPath(wsRoot);
     const dendronConfigResult = readToString(configPath)
       .andThen((input) => YamlUtils.fromStr(input))
       .andThen((unknownconfig) => {

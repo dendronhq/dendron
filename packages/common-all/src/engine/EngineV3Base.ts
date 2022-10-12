@@ -6,18 +6,19 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { FuseEngine } from "../FuseEngine";
-import { INoteStore } from "../store";
+import { INoteStore, IQueryStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
-  BulkWriteNotesResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
   DeleteNoteResp,
+  DLink,
   EngineDeleteOpts,
   EngineWriteOptsV2,
   FindNotesMetaResp,
   FindNotesResp,
+  GetNoteMetaResp,
   GetNoteResp,
   NoteChangeEntry,
   NoteProps,
@@ -29,8 +30,6 @@ import {
   RenameNoteResp,
   RespV3,
   WriteNoteResp,
-  GetNoteMetaResp,
-  DLink,
 } from "../types";
 import { DVault } from "../types/DVault";
 import { FindNoteOpts } from "../types/FindNoteOpts";
@@ -42,13 +41,25 @@ import { VaultUtils } from "../vault";
  * DendronEngineV3Web
  */
 export abstract class EngineV3Base implements ReducedDEngine {
-  protected abstract fuseEngine: FuseEngine;
+  protected noteStore;
+  protected queryStore;
+  protected logger;
+  public vaults;
+  public wsRoot;
 
-  constructor(
-    protected noteStore: INoteStore<string>,
-    protected logger: DLogger,
-    public vaults: DVault[]
-  ) {}
+  constructor(opts: {
+    noteStore: INoteStore<string>;
+    queryStore: IQueryStore;
+    logger: DLogger;
+    vaults: DVault[];
+    wsRoot: string;
+  }) {
+    this.noteStore = opts.noteStore;
+    this.queryStore = opts.queryStore;
+    this.logger = opts.logger;
+    this.vaults = opts.vaults;
+    this.wsRoot = opts.wsRoot;
+  }
 
   /**
    * See {@link DEngine.getNote}
@@ -269,7 +280,7 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
+    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -285,37 +296,35 @@ export abstract class EngineV3Base implements ReducedDEngine {
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // const ctx = "Engine:queryNotes";
     const { qs, vault, onlyDirectChildren, originalQS } = opts;
-
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
 
-    const items = await this.fuseEngine.queryNote({
-      qs,
+    const response = await this.queryStore.queryNotes(qs, {
       onlyDirectChildren,
       originalQS,
     });
-
+    if (response.isErr()) {
+      // TODO: need to return an error
+      return [];
+    }
+    const items = response.value;
     if (items.length === 0) {
       return [];
     }
 
-    const notes = await Promise.all(
-      items.map((ent) => this.noteStore.get(ent.id)) // TODO: Should be using metadata instead
-    );
+    const notes = await this.noteStore.bulkGet(items.map((ent) => ent.id));
 
     let modifiedNotes;
-    // let notes = items.map((ent) => this.notes[ent.id]);
-    // if (!_.isUndefined(vault)) {
     modifiedNotes = notes
       .filter((ent) => _.isUndefined(ent.error))
       .map((resp) => resp.data!);
 
     if (!_.isUndefined(vault)) {
-      modifiedNotes = modifiedNotes.filter((ent) =>
-        VaultUtils.isEqualV2(vault, ent.data!.vault)
-      );
+      modifiedNotes = modifiedNotes.filter((ent) => {
+        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
+      });
     }
 
     return modifiedNotes;

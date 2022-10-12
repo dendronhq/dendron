@@ -15,10 +15,11 @@ import {
   ERROR_STATUS,
   Event,
   EventEmitter,
-  FuseEngine,
+  FuseQueryStore,
   IDendronError,
   IFileStore,
   INoteStore,
+  IQueryStore,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -47,19 +48,22 @@ export class DendronEngineV3Web
   implements ReducedDEngine, EngineEventEmitter
 {
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
-  protected fuseEngine: FuseEngine;
+  private wsRootURI: URI;
 
   constructor(
-    @inject("wsRoot") private wsRoot: URI,
+    @inject("wsRoot") wsRootURI: URI,
     @inject("vaults") vaults: DVault[],
     @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>
   ) {
-    super(noteStore, new ConsoleLogger(), vaults);
-
-    this.fuseEngine = new FuseEngine({
-      fuzzThreshold: 0.2, // TODO: Pull from config: ConfigUtils.getLookup(props.config).note.fuzzThreshold,
+    super({
+      logger: new ConsoleLogger(),
+      noteStore,
+      vaults,
+      queryStore: new FuseQueryStore() as IQueryStore,
+      wsRoot: wsRootURI.fsPath,
     });
+    this.wsRootURI = wsRootURI;
   }
 
   get onEngineNoteStateChanged(): Event<NoteChangeEntry[]> {
@@ -89,7 +93,7 @@ export class DendronEngineV3Web
           }),
         };
       }
-      this.fuseEngine.replaceNotesIndex(notes);
+      this.queryStore.replaceNotesIndex(notes);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
 
@@ -332,7 +336,7 @@ export class DendronEngineV3Web
     // TODO: Add schema
 
     // Propragate metadata for all other changes
-    await this.fuseEngine.updateNotesIndex(changes);
+    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this._onNoteChangedEmitter.fire(changes);
@@ -383,7 +387,7 @@ export class DendronEngineV3Web
       vaults.map(async (vault) => {
         // Get list of files from filesystem
         const maybeFiles = await this.fileStore.readDir({
-          root: Utils.joinPath(this.wsRoot, VaultUtils.getRelPath(vault)),
+          root: Utils.joinPath(this.wsRootURI, VaultUtils.getRelPath(vault)),
           include: ["*.md"],
         });
 
@@ -419,7 +423,7 @@ export class DendronEngineV3Web
         // };
 
         const { data: notesDict, error } = await new NoteParserV2(
-          this.wsRoot
+          this.wsRootURI
         ).parseFiles(filteredFiles, vault);
         if (error) {
           errors = errors.concat(error);

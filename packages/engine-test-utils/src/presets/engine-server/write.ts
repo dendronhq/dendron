@@ -1049,4 +1049,5 @@ export const ENGINE_WRITE_PRESETS = {
 };
 export const ENGINE_WRITE_PRESETS_MULTI = {
   NOTES: NOTES_MULTI,
+  SCHEMAS: {},
 };

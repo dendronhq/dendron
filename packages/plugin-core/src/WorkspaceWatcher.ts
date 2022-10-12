@@ -254,7 +254,7 @@ export class WorkspaceWatcher {
    * @param event
    * @returns
    */
-  async onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
+  onWillSaveTextDocument(event: TextDocumentWillSaveEvent) {
     try {
       const ctx = "WorkspaceWatcher:onWillSaveTextDocument";
       const uri = event.document.uri;
@@ -308,50 +308,47 @@ export class WorkspaceWatcher {
     const engine = this._extension.getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
-
-    const note = NoteUtils.getNoteByFnameFromEngine({
-      fname,
-      vault: this._extension.wsUtils.getVaultFromUri(uri),
-      engine,
-    });
-
-    // If we can't find the note, don't do anything
-    if (!note) {
-      // Log at info level and not error level for now to reduce Sentry noise
-      Logger.info({
-        ctx,
-        msg: `Note with fname ${fname} not found in engine! Skipping updated field FM modification.`,
-      });
-      return;
-    }
-
-    // Return undefined if document is missing frontmatter
-    if (!TextDocumentService.containsFrontmatter(event.document)) {
-      return;
-    }
-
-    const content = event.document.getText();
-    const match = NoteUtils.RE_FM_UPDATED.exec(content);
     let changes: TextEdit[] = [];
+    // eslint-disable-next-line  no-async-promise-executor
+    const promise = new Promise(async (resolve) => {
+      const note = (
+        await engine.findNotes({
+          fname,
+          vault: this._extension.wsUtils.getVaultFromUri(uri),
+        })
+      )[0];
+      // If we can't find the note, don't do anything
+      if (!note) {
+        // Log at info level and not error level for now to reduce Sentry noise
+        Logger.info({
+          ctx,
+          msg: `Note with fname ${fname} not found in engine! Skipping updated field FM modification.`,
+        });
+        return;
+      }
 
-    // update the `updated` time in frontmatter if it exists and content has changed
-    if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
-      Logger.info({ ctx, match, msg: "update activeText editor" });
-      const startPos = event.document.positionAt(match.index);
-      const endPos = event.document.positionAt(match.index + match[0].length);
-      changes = [
-        TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
-      ];
+      // Return undefined if document is missing frontmatter
+      if (!TextDocumentService.containsFrontmatter(event.document)) {
+        return;
+      }
+      const content = event.document.getText();
+      const match = NoteUtils.RE_FM_UPDATED.exec(content);
+      // update the `updated` time in frontmatter if it exists and content has changed
+      if (match && WorkspaceUtils.noteContentChanged({ content, note })) {
+        Logger.info({ ctx, match, msg: "update activeText editor" });
+        const startPos = event.document.positionAt(match.index);
+        const endPos = event.document.positionAt(match.index + match[0].length);
+        changes = [
+          TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
+        ];
 
-      // update the note in engine
-      // eslint-disable-next-line  no-async-promise-executor
-      const p = new Promise(async (resolve) => {
+        // update the note in engine
         note.updated = now;
         await engine.writeNote(note, { metaOnly: true });
-        return resolve(changes);
-      });
-      event.waitUntil(p);
-    }
+      }
+      return resolve(changes);
+    });
+    event.waitUntil(promise);
     return { changes };
   }
 

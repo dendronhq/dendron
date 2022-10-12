@@ -35,6 +35,7 @@ import {
   IDendronError,
   IFileStore,
   INoteStore,
+  IQueryStore,
   ISchemaStore,
   isNotUndefined,
   LruCache,
@@ -53,8 +54,6 @@ import {
   NoteUtils,
   NullCache,
   ProcFlavor,
-  QueryNotesOpts,
-  QueryNotesResp,
   QuerySchemaResp,
   RenameNoteOpts,
   RenameNoteResp,
@@ -119,8 +118,6 @@ type CachedPreview = {
 
 export class DendronEngineV3 extends EngineV3Base implements DEngine {
   public wsRoot: string;
-  public fuseEngine: FuseEngine;
-  public store: DStore;
   public hooks: DHookDict;
   private _fileStore: IFileStore;
   private _noteStore: INoteStore<string>;
@@ -814,41 +811,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     return {
       data: schemas,
     };
-  }
-
-  /**
-   * See {@link DEngine.queryNotes}
-   */
-  async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
-    const ctx = "DEngine:queryNotes";
-    const { qs, vault, onlyDirectChildren, originalQS } = opts;
-
-    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
-    // @ts-ignore
-    if (vault?.selfContained === "true" || vault?.selfContained === "false")
-      vault.selfContained = vault.selfContained === "true";
-
-    const noteIds = this.fuseEngine
-      .queryNote({
-        qs,
-        onlyDirectChildren,
-        originalQS,
-      })
-      .map((ent) => ent.id);
-
-    if (noteIds.length === 0) {
-      return [];
-    }
-
-    const responses = await this._noteStore.bulkGet(noteIds);
-    let notes = responses.map((resp) => resp.data).filter(isNotUndefined);
-    if (!_.isUndefined(vault)) {
-      notes = notes.filter((ent) => {
-        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
-      });
-    }
-    this.logger.info({ ctx, msg: "exit" });
-    return notes;
   }
 
   async renderNote({

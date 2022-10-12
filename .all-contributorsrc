@@ -2193,6 +2193,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "mivanit",
+      "name": "mivanit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19347900?v=4",
+      "profile": "https://mivanit.github.io",
+      "contributions": [
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,

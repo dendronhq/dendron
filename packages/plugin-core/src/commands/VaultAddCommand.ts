@@ -205,6 +205,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
+    window.showWarningMessage(
+      `This command will be deprecated in future releases. 
+      Please use Dendron: Create New Vault to create a new vault and 
+      Dendron: Add Existing Vault to add an existing vault to your workspace.`
+    );
     const sourceTypeSelected = await VSCodeUtils.showQuickPick([
       { label: VaultType.LOCAL, picked: true },
       { label: VaultType.REMOTE },

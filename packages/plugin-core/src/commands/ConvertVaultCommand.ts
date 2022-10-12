@@ -30,7 +30,7 @@ export class ConvertVaultCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.VAULT_CONVERT.key;
+  key = DENDRON_COMMANDS.CONVERT_VAULT.key;
   constructor(private _ext: IDendronExtension) {
     super();
   }

@@ -772,9 +772,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Remove Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_CONVERT: {
-    key: "dendron.vaultConvert",
-    title: `${CMD_PREFIX} Vault Convert`,
+  CONVERT_VAULT: {
+    key: "dendron.convertVault",
+    title: `${CMD_PREFIX} Convert Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   CREATE_NEW_VAULT: {

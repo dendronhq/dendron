@@ -79,7 +79,7 @@ import { TaskStatusCommand } from "./TaskStatus";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { ValidateEngineCommand } from "./ValidateEngineCommand";
 import { VaultAddCommand } from "./VaultAddCommand";
-import { VaultConvertCommand } from "./VaultConvert";
+import { ConvertVaultCommand } from "./ConvertVaultCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
 import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
@@ -166,7 +166,7 @@ const ALL_COMMANDS = [
   CreateNewVaultCommand,
   AddExistingVaultCommand,
   RemoveVaultCommand,
-  VaultConvertCommand,
+  ConvertVaultCommand,
   ShowWelcomePageCommand,
   LaunchTutorialWorkspaceCommand,
   ConvertLinkCommand,

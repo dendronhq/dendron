@@ -3,16 +3,6 @@ import { ok, err } from "./utils";
 import type { Result } from "neverthrow";
 import { DendronError } from "./error";
 
-const formatErrors = (
-  errors: z.ZodFormattedError<Map<string, string>, string>
-) =>
-  Object.entries(errors).flatMap(([name, value]) => {
-    if (value && "_errors" in value) {
-      return `${name}: ${value._errors.join(", ")}\n`;
-    }
-    return [];
-  });
-
 /**
  * Parse `zod` schema into `Result`
  * @param schema ZodType
@@ -33,7 +23,7 @@ export const parse = <T extends z.ZodTypeAny>(
       new DendronError({
         message: [
           ...(msg ? [msg] : []),
-          JSON.stringify(formatErrors(parsed.error.format()), null, 2),
+          JSON.stringify(parsed.error.issues, null, 2),
           ...(schema.description ? [`Schema:${schema.description}`] : []),
         ].join("\n"),
       })

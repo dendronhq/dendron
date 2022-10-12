@@ -1279,7 +1279,7 @@ export class ConfigUtils {
         return _.defaultsDeep(value, defaultConfig) as DendronConfig;
       });
 
-    return parse(schema, input);
+    return parse(schema, input, "Invalid Dendron Config");
   }
 }
 

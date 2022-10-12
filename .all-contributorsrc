@@ -2238,6 +2238,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "forivall",
+      "name": "Emily Marigold Klassen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/760204?v=4",
+      "profile": "http://forivall.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

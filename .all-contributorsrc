@@ -2211,6 +2211,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "pedrolimasi",
+      "name": "Pedro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44039025?v=4",
+      "profile": "https://github.com/pedrolimasi",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

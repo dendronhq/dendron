@@ -23,11 +23,11 @@ suite("CreateNewVault Command", function () {
   describe("GIVEN Create new vault command is run within a workspace with ", () => {
     describeSingleWS(
       "WHEN ran inside a workspace with dev.enableSelfContainedVaults config set to false",
-      { modConfigCb: disableSelfContainedVaults, timeout: 5e3 },
+      { modConfigCb: disableSelfContainedVaults, timeout: 1e4 },
       () => {
         before(async () => {
+          sinon.stub(VSCodeUtils, "showInputBox").resolves();
           sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
-          sinon.stub(VSCodeUtils, "showInputBox").resolves("vault2");
         });
         test("THEN create a new standard vault", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();

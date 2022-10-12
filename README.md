@@ -6,7 +6,7 @@
 [![VS Code Installs of Dendron](https://img.shields.io/visual-studio-marketplace/i/dendron.dendron?label=VS%20Code%20Installs%20of%20Dendron&color=blue&style=flat-square)](https://link.dendron.so/vscode)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-238-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-239-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Dendron
@@ -508,6 +508,9 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
       <td align="center"><a href="https://github.com/pedrolimasi"><img src="https://avatars.githubusercontent.com/u/44039025?v=4?s=100" width="100px;" alt="Pedro"/><br /><sub><b>Pedro</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Apedrolimasi" title="Bug reports">🐛</a></td>
       <td align="center"><a href="https://github.com/JM-Laurel"><img src="https://avatars.githubusercontent.com/u/43501511?v=4?s=100" width="100px;" alt="JM-Laurel"/><br /><sub><b>JM-Laurel</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AJM-Laurel" title="Bug reports">🐛</a></td>
       <td align="center"><a href="http://twitter.com/roblourens"><img src="https://avatars.githubusercontent.com/u/323878?v=4?s=100" width="100px;" alt="Rob Lourens"/><br /><sub><b>Rob Lourens</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aroblourens" title="Bug reports">🐛</a></td>
+    </tr>
+    <tr>
+      <td align="center"><a href="http://forivall.com"><img src="https://avatars.githubusercontent.com/u/760204?v=4?s=100" width="100px;" alt="Emily Marigold Klassen"/><br /><sub><b>Emily Marigold Klassen</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aforivall" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

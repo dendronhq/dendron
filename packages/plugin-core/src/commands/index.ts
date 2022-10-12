@@ -88,6 +88,7 @@ import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
 import { CopyAsCommand } from "./CopyAsCommand";
 import { RemoveVaultCommand } from "./RemoveVaultCommand";
 import { CreateNewVaultCommand } from "./CreateNewVaultCommand";
+import { AddExistingVaultCommand } from "./AddExistingVaultCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -163,6 +164,7 @@ const ALL_COMMANDS = [
   UpgradeSettingsCommand,
   VaultAddCommand,
   CreateNewVaultCommand,
+  AddExistingVaultCommand,
   RemoveVaultCommand,
   VaultConvertCommand,
   ShowWelcomePageCommand,

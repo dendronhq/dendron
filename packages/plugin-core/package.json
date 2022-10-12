@@ -393,12 +393,16 @@
         "title": "Dendron: Remove Vault"
       },
       {
+        "command": "dendron.vaultConvert",
+        "title": "Dendron: Vault Convert"
+      },
+      {
         "command": "dendron.createNewVault",
         "title": "Dendron: Create New Vault"
       },
       {
-        "command": "dendron.vaultConvert",
-        "title": "Dendron: Vault Convert"
+        "command": "dendron.addExistingVault",
+        "title": "Dendron: Add Existing Vault"
       },
       {
         "command": "dendron.initWS",
@@ -813,15 +817,19 @@
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
-          "command": "dendron.createNewVault",
-          "when": "dendron:pluginActive && shellExecutionSupported"
-        },
-        {
           "command": "dendron.removeVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
           "command": "dendron.vaultConvert",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.createNewVault",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.addExistingVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

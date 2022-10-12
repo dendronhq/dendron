@@ -782,6 +782,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Create New Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
+  ADD_EXISTING_VAULT: {
+    key: "dendron.addExistingVault",
+    title: `${CMD_PREFIX} Add Existing Vault`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,

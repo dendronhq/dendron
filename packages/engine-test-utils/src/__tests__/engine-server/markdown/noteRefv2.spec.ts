@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   DendronASTDest,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDictsUtils,
   NoteProps,
   ProcFlavor,
@@ -570,9 +570,17 @@ describe("noteRefV2", () => {
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
-        const configOverride: IntermediateDendronConfig = {
-          ...DConfig.readConfigSync(wsRoot),
-          useFMTitle: true,
+        const config = DConfig.readConfigSync(wsRoot);
+        const configOverride: DendronConfig = {
+          ...config,
+          publishing: {
+            ...config.publishing,
+            enableFMTitle: true,
+          },
+          preview: {
+            ...config.preview,
+            enableFMTitle: true,
+          },
         };
         return processTextV2({
           text: "# Foo Bar\n![[foo#header2]]",
@@ -591,9 +599,17 @@ describe("noteRefV2", () => {
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
         const { engine, wsRoot, vaults } = opts;
-        const configOverride: IntermediateDendronConfig = {
-          ...DConfig.readConfigSync(wsRoot),
-          useNoteTitleForLink: true,
+        const config = DConfig.readConfigSync(wsRoot);
+        const configOverride: DendronConfig = {
+          ...config,
+          publishing: {
+            ...config.publishing,
+            enableNoteTitleForLink: true,
+          },
+          preview: {
+            ...config.preview,
+            enableNoteTitleForLink: true,
+          },
         };
         return processTextV2({
           text: "# Foo Bar\n![[foo.ch1#header2]]",

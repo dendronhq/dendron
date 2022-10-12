@@ -1,15 +1,13 @@
 import {
-  configIsV4,
   ConfigUtils,
   CONSTANTS,
   createSerializedFuseNoteIndex,
   DendronError,
   DendronPublishingConfig,
-  DendronSiteConfig,
   DEngineClient,
   ERROR_SEVERITY,
   getStage,
-  IntermediateDendronConfig,
+  DendronConfig,
   isWebUri,
   NoteProps,
   NotePropsByIdDict,
@@ -52,10 +50,10 @@ const TEMPLATE_BRANCH = "main";
 const $$ = execa.command;
 
 type NextjsExportPodCustomOpts = {
-  overrides?: Partial<DendronSiteConfig>;
+  overrides?: Partial<DendronPublishingConfig>;
 };
 
-export type BuildOverrides = Pick<DendronSiteConfig, "siteUrl">;
+export type BuildOverrides = Pick<DendronPublishingConfig, "siteUrl">;
 
 export enum PublishTarget {
   GITHUB = "github",
@@ -76,33 +74,24 @@ function getSiteConfig({
   config,
   overrides,
 }: {
-  config: IntermediateDendronConfig;
-  overrides?: Partial<DendronSiteConfig> | Partial<DendronPublishingConfig>;
-}): DendronSiteConfig | DendronPublishingConfig {
-  if (configIsV4(config)) {
-    const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
-    return {
-      ...siteConfig,
-      ...overrides,
-      usePrettyLinks: true,
-    } as DendronSiteConfig;
-  } else {
-    const publishingConfig = ConfigUtils.getPublishing(
-      config
-    ) as DendronPublishingConfig;
-    return {
-      ...publishingConfig,
-      ...overrides,
-      enablePrettyLinks: true,
-    } as DendronPublishingConfig;
-  }
+  config: DendronConfig;
+  overrides?: Partial<DendronPublishingConfig>;
+}): DendronPublishingConfig {
+  const publishingConfig = ConfigUtils.getPublishing(
+    config
+  ) as DendronPublishingConfig;
+  return {
+    ...publishingConfig,
+    ...overrides,
+    enablePrettyLinks: true,
+  } as DendronPublishingConfig;
 }
 
 async function validateSiteConfig({
   config,
   wsRoot,
 }: {
-  config: DendronSiteConfig | DendronPublishingConfig;
+  config: DendronPublishingConfig;
   wsRoot: string;
 }): Promise<RespV3<undefined>> {
   if (ConfigUtils.isDendronPublishingConfig(config)) {
@@ -288,7 +277,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
   }: {
     engine: DEngineClient;
     note: NoteProps;
-    engineConfig: IntermediateDendronConfig;
+    engineConfig: DendronConfig;
   }) {
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
@@ -317,7 +306,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     siteConfig,
     dest,
   }: {
-    siteConfig: DendronSiteConfig | DendronPublishingConfig;
+    siteConfig: DendronPublishingConfig;
     dest: URI;
   }) {
     // add .env.production, next will use this to replace `process.env` vars when building
@@ -338,7 +327,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     dest,
   }: {
     wsRoot: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     dest: string;
   }) {
     const ctx = "copyAssets";
@@ -346,7 +335,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const destPublicPath = path.join(dest, "public");
     fs.ensureDirSync(destPublicPath);
     const siteAssetsDir = path.join(destPublicPath, "assets");
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
 
     // if copyAssets not set, skip it
     if (!publishingConfig.copyAssets) {
@@ -475,7 +464,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engineConfig,
   }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
     notesDir: string;
-    engineConfig: IntermediateDendronConfig;
+    engineConfig: DendronConfig;
   }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
@@ -533,8 +522,10 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     await this.copyAssets({ wsRoot, config, dest: dest.fsPath });
 
     this.L.info({ ctx, msg: "filtering notes..." });
-    const engineConfig: IntermediateDendronConfig =
-      ConfigUtils.overridePublishingConfig(config, siteConfig);
+    const engineConfig: DendronConfig = ConfigUtils.overridePublishingConfig(
+      config,
+      siteConfig
+    );
 
     const { notes: publishedNotes, domains } = await SiteUtils.filterByConfig({
       engine,

@@ -48,7 +48,7 @@ export const decorateWikilink: Decorator<
     vaultName,
     note,
     engine,
-    vaults: config.workspace?.vaults ?? config.vaults ?? [],
+    vaults: config.workspace?.vaults ?? [],
   });
   const wikilinkRange = position2VSCodeRange(position);
   const decorations: DecorationsForDecorateWikilink[] = [];

@@ -1,7 +1,7 @@
 /* eslint-disable */
 import {
   ConfigUtils,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
   RESERVED_KEYS,
   Time,
@@ -30,7 +30,7 @@ const formatString = (opts: { txt: string; note: NoteProps }) => {
 
 class GitUtils {
   static canShowGitLink = (opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     note: NoteProps;
   }) => {
     const { config, note } = opts;
@@ -50,18 +50,12 @@ class GitUtils {
     ]);
   };
 
-  static githubUrl = (opts: {
-    note: NoteProps;
-    config: IntermediateDendronConfig;
-  }) => {
+  static githubUrl = (opts: { note: NoteProps; config: DendronConfig }) => {
     const url = GitUtils.getGithubEditUrl(opts);
     return url;
   };
 
-  static getGithubEditUrl(opts: {
-    note: NoteProps;
-    config: IntermediateDendronConfig;
-  }) {
+  static getGithubEditUrl(opts: { note: NoteProps; config: DendronConfig }) {
     const { note, config } = opts;
     const vault = note.vault;
     const vaults = ConfigUtils.getVaults(config);

@@ -214,7 +214,7 @@ describe("GIVEN dendron.yml default", () => {
               const { resp } = extra;
               await checkVFile(
                 resp,
-                `<a href="/notes/not-secret.html">Not Secret (vaultThree)</a>`
+                `<a href="/notes/not-secret">Not Secret (vaultThree)</a>`
               );
               await checkNotInVFile(
                 resp,
@@ -232,9 +232,9 @@ describe("GIVEN dendron.yml default", () => {
               const vaults = ConfigUtils.getVaults(config);
               const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
               bvault!.visibility = DVaultVisibility.PRIVATE;
-              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-              ConfigUtils.setVaults(v4DefaultConfig, vaults);
-              return v4DefaultConfig;
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setVaults(defaultConfig, vaults);
+              return defaultConfig;
             },
             { wsRoot: opts.wsRoot }
           );

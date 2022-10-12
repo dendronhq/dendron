@@ -10,7 +10,7 @@ import { getWorkspaceConfig } from "./getWorkspaceConfig";
 export async function getSiteIndex(wsRoot: Uri): Promise<string | undefined> {
   const config = await getWorkspaceConfig(wsRoot);
   return (
-    ConfigUtils.getPublishingConfig(config).siteIndex ||
-    ConfigUtils.getPublishingConfig(config).siteHierarchies[0]
+    ConfigUtils.getPublishing(config).siteIndex ||
+    ConfigUtils.getPublishing(config).siteHierarchies[0]
   );
 }

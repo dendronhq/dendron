@@ -408,71 +408,86 @@ suite("GotoNote", function () {
       });
     });
 
-    test("hashtag", (done) => {
+    describe("hashtag", () => {
       let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          // Create a note with a hashtag in it
-          note = await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "test.note",
-            body: "#my.test-0.tag",
+      describeMultiWS(
+        "WHEN go to note used on hashtag",
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "#my.test-0.tag",
+            });
+          },
+        },
+        () => {
+          test("THEN go to note referenced by hashtag", async () => {
+            const extension = ExtensionProvider.getExtension();
+            const { vaults } = extension.getEngine();
+            const promptVaultStub = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
+            await extension.wsUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(
+                new vscode.Position(7, 1),
+                new vscode.Position(7, 1)
+              );
+            await createGoToNoteCmd().run();
+            expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
+            expect(promptVaultStub.calledOnce).toBeTruthy();
+            promptVaultStub.restore();
           });
-        },
-        onInit: async () => {
-          // Open the note, select the hashtag, and use the command
-          await WSUtils.openNote(note);
-          VSCodeUtils.getActiveTextEditorOrThrow().selection =
-            new vscode.Selection(
-              new vscode.Position(7, 1),
-              new vscode.Position(7, 1)
-            );
-          await createGoToNoteCmd().run();
-          // Make sure this took us to the tag note
-          expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
-          done();
-        },
-      });
+        }
+      );
     });
 
-    test("user tag", (done) => {
+    describe("usertag", () => {
       let note: NoteProps;
-      runLegacyMultiWorkspaceTest({
-        ctx,
-        preSetupHook: async ({ wsRoot, vaults }) => {
-          // Create a note with a hashtag in it
-          note = await NoteTestUtilsV4.createNote({
-            wsRoot,
-            vault: vaults[0],
-            fname: "test.note",
-            body: "@test.mctestface",
-          });
+      describeMultiWS(
+        "WHEN go to note used on usertag",
+        {
+          preSetupHook: async ({ wsRoot, vaults }) => {
+            note = await NoteTestUtilsV4.createNote({
+              wsRoot,
+              vault: vaults[0],
+              fname: "test.note",
+              body: "@test.mctestface",
+            });
+          },
         },
-        onInit: async () => {
-          // Open the note, select the hashtag, and use the command
-          await WSUtils.openNote(note);
-          VSCodeUtils.getActiveTextEditorOrThrow().selection =
-            new vscode.Selection(
-              new vscode.Position(7, 1),
-              new vscode.Position(7, 1)
+        () => {
+          test("THEN go to note referenced by usertag", async () => {
+            const extension = ExtensionProvider.getExtension();
+            const { vaults } = extension.getEngine();
+            const promptVaultStub = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
+            await extension.wsUtils.openNote(note);
+            VSCodeUtils.getActiveTextEditorOrThrow().selection =
+              new vscode.Selection(
+                new vscode.Position(7, 1),
+                new vscode.Position(7, 1)
+              );
+            await createGoToNoteCmd().run();
+            expect(getActiveEditorBasename()).toEqual(
+              "user.test.mctestface.md"
             );
-          await createGoToNoteCmd().run();
-          // Make sure this took us to the tag note
-          expect(getActiveEditorBasename()).toEqual("user.test.mctestface.md");
-          done();
-        },
-      });
+            expect(promptVaultStub.calledOnce).toBeTruthy();
+            promptVaultStub.restore();
+          });
+        }
+      );
     });
 
     describe("frontmatter tags", () => {
-      test("single tag", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
+      let note: NoteProps;
+      describeMultiWS(
+        "WHEN single tag",
+        {
           preSetupHook: async ({ wsRoot, vaults }) => {
-            // Create a note with a hashtag in it
             note = await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
@@ -482,28 +497,31 @@ suite("GotoNote", function () {
               },
             });
           },
-          onInit: async () => {
-            // Open the note, select the hashtag, and use the command
-            await WSUtils.openNote(note);
+        },
+        () => {
+          test("THEN go to note referenced in frontmatter", async () => {
+            const extension = ExtensionProvider.getExtension();
+            const { vaults } = extension.getEngine();
+            const promptVaultStub = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
+            await extension.wsUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(6, 8),
                 new vscode.Position(6, 8)
               );
             await createGoToNoteCmd().run();
-            // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
-            done();
-          },
-        });
-      });
-
-      test("tag containing space", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
+            expect(promptVaultStub.calledOnce).toBeTruthy();
+            promptVaultStub.restore();
+          });
+        }
+      );
+      describeMultiWS(
+        "WHEN tag contains space",
+        {
           preSetupHook: async ({ wsRoot, vaults }) => {
-            // Create a note with a hashtag in it
             note = await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
@@ -513,28 +531,32 @@ suite("GotoNote", function () {
               },
             });
           },
-          onInit: async () => {
-            // Open the note, select the hashtag, and use the command
-            await WSUtils.openNote(note);
+        },
+        () => {
+          test("THEN go to note referenced in frontmatter", async () => {
+            const extension = ExtensionProvider.getExtension();
+            const { vaults } = extension.getEngine();
+            const promptVaultStub = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
+            await extension.wsUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(6, 8),
                 new vscode.Position(6, 8)
               );
             await createGoToNoteCmd().run();
-            // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.one.md");
-            done();
-          },
-        });
-      });
+            expect(promptVaultStub.calledOnce).toBeTruthy();
+            promptVaultStub.restore();
+          });
+        }
+      );
 
-      test("multiple tags", (done) => {
-        let note: NoteProps;
-        runLegacyMultiWorkspaceTest({
-          ctx,
+      describeMultiWS(
+        "WHEN multiple tags",
+        {
           preSetupHook: async ({ wsRoot, vaults }) => {
-            // Create a note with a hashtag in it
             note = await NoteTestUtilsV4.createNote({
               wsRoot,
               vault: vaults[0],
@@ -544,21 +566,27 @@ suite("GotoNote", function () {
               },
             });
           },
-          onInit: async () => {
-            // Open the note, select the hashtag, and use the command
-            await WSUtils.openNote(note);
+        },
+        () => {
+          test("THEN go to note referenced in frontmatter", async () => {
+            const extension = ExtensionProvider.getExtension();
+            const { vaults } = extension.getEngine();
+            const promptVaultStub = sinon
+              .stub(PickerUtilsV2, "promptVault")
+              .returns(Promise.resolve(vaults[1]));
+            await extension.wsUtils.openNote(note);
             VSCodeUtils.getActiveTextEditorOrThrow().selection =
               new vscode.Selection(
                 new vscode.Position(8, 6),
                 new vscode.Position(8, 6)
               );
             await createGoToNoteCmd().run();
-            // Make sure this took us to the tag note
             expect(getActiveEditorBasename()).toEqual("tags.my.test-0.tag.md");
-            done();
-          },
-        });
-      });
+            expect(promptVaultStub.calledOnce).toBeTruthy();
+            promptVaultStub.restore();
+          });
+        }
+      );
     });
   });
 

@@ -1,7 +1,6 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   DEngineClient,
-  DuplicateNoteActionEnum,
   DVault,
   NoteDictsUtils,
   NoteProps,
@@ -64,7 +63,7 @@ export const createProcForTest = async (opts: {
   engine: DEngineClient;
   dest: DendronASTDest;
   vault: DVault;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   fname?: string;
   useIdAsLink?: boolean;
   parsingDependenciesByFname?: string[];
@@ -254,7 +253,7 @@ export const createProcCompileTests = (opts: {
               async (presetOpts) => {
                 const { wsRoot, vaults: optsVaults, engine } = presetOpts;
                 const config = DConfig.readConfigSync(wsRoot);
-                const vaults = config.vaults ?? optsVaults;
+                const vaults = config.workspace.vaults ?? optsVaults;
                 const vault = vaults[0];
                 let proc: Processor;
                 const noteToRender = (
@@ -334,7 +333,7 @@ export const createProcCompileTests = (opts: {
 export const dupNote = (payload: DVault | string[]) => {
   const out: any = {
     duplicateNoteBehavior: {
-      action: DuplicateNoteActionEnum.useVault,
+      action: "useVault",
     },
   };
   if (_.isArray(payload)) {
@@ -374,7 +373,7 @@ type ProcessTextV2Opts = {
   engine: DEngineClient;
   fname: string;
   vault: DVault;
-  configOverride?: IntermediateDendronConfig;
+  configOverride?: DendronConfig;
   parsingDependenciesByFname?: string[];
   parsingDependenciesByNoteProps?: NoteProps[];
 };

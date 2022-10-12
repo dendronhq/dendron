@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  IntermediateDendronConfig,
+  DendronConfig,
   ReducedDEngine,
   TaskNoteUtils,
   VaultUtils,
@@ -27,12 +27,15 @@ export async function decorateTaskNote({
   range: VSRange;
   fname: string;
   vaultName?: string;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 }) {
   const taskConfig = ConfigUtils.getTask(config);
   const vault =
-    vaultName && config.vaults
-      ? VaultUtils.getVaultByName({ vname: vaultName, vaults: config.vaults })
+    vaultName && config.workspace.vaults
+      ? VaultUtils.getVaultByName({
+          vname: vaultName,
+          vaults: config.workspace.vaults,
+        })
       : undefined;
 
   const note = (await engine.findNotesMeta({ fname, vault }))[0];

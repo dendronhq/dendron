@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   ConfigUtils,
-  DendronSiteConfig,
+  DendronPublishingConfig,
   getStage,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -25,7 +25,7 @@ export const getSiteRootDirPath = () => {
   const ws = ExtensionProvider.getDWorkspace();
   const wsRoot = ws.wsRoot;
   const config = ws.config;
-  const siteRootDir = ConfigUtils.getPublishingConfig(config).siteRootDir;
+  const siteRootDir = ConfigUtils.getPublishing(config).siteRootDir;
   const sitePath = path.join(wsRoot, siteRootDir);
   return sitePath;
 };
@@ -64,10 +64,10 @@ export class NextJSPublishUtils {
     }
     if (getStage() !== "prod") {
       const config = DConfig.readConfigSync(wsRoot);
-      const siteConfig = ConfigUtils.getPublishingConfig(config);
-      if (enrichedOpts?.config && !siteConfig.siteUrl) {
+      const publishingConfig = ConfigUtils.getPublishing(config);
+      if (enrichedOpts?.config && !publishingConfig.siteUrl) {
         _.set(
-          enrichedOpts.config.overrides as Partial<DendronSiteConfig>,
+          enrichedOpts.config.overrides as Partial<DendronPublishingConfig>,
           "siteUrl",
           "localhost:3000"
         );

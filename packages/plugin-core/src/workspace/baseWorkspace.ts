@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   DendronError,
   DEngineClient,
   DVault,
@@ -33,7 +33,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   }
 
   // TODO: optimize to not read every time
-  get config(): IntermediateDendronConfig {
+  get config(): DendronConfig {
     const { data, error } = DConfig.readConfigAndApplyLocalOverrideSync(
       this.wsRoot
     );

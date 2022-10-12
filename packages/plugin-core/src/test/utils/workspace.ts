@@ -1,10 +1,9 @@
 import {
+  DendronConfig,
   DVault,
   InsertNoteLinkAliasModeEnum,
-  LegacyLookupSelectionType,
   NoteAddBehaviorEnum,
   SearchMode,
-  StrictConfigV5,
 } from "@dendronhq/common-all";
 
 export class WorkspaceTestUtils {
@@ -16,9 +15,9 @@ export class WorkspaceTestUtils {
     duplicateNoteBehavior,
   }: {
     vaults: DVault[];
-    duplicateNoteBehavior?: StrictConfigV5["publishing"]["duplicateNoteBehavior"];
+    duplicateNoteBehavior?: DendronConfig["publishing"]["duplicateNoteBehavior"];
   }) {
-    const config: StrictConfigV5 = {
+    const config: DendronConfig = {
       version: 5,
       dev: {
         enablePreviewV2: true,
@@ -80,7 +79,7 @@ export class WorkspaceTestUtils {
             L: "low",
           },
           todoIntegration: false,
-          createTaskSelectionType: LegacyLookupSelectionType.selection2link,
+          createTaskSelectionType: "selection2link",
         },
         graph: {
           zoomSpeed: 1,

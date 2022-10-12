@@ -5,7 +5,7 @@ import {
   Diagnostic,
   GetDecorationsOpts,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   NonOptional,
   NoteProps,
   offsetRange,
@@ -65,7 +65,7 @@ export async function runAllDecorators(
   opts: Omit<GetDecorationsOpts, "id"> & {
     note: NoteProps;
     engine: DEngine;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }
 ) {
   const { note, ranges, config } = opts;

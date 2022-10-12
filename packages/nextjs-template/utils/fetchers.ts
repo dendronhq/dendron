@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   SerializedFuseIndex,
   TreeMenu,
 } from "@dendronhq/common-all";
@@ -19,7 +19,7 @@ export async function fetchTreeMenu() {
 
 export async function fetchConfig() {
   const resp = await fetch(getAssetUrl("/data/dendron.json"));
-  return (await resp.json()) as IntermediateDendronConfig;
+  return (await resp.json()) as DendronConfig;
 }
 
 /** See the helpers in `utils/fuse.ts` for your convenienance. */

@@ -9,5 +9,5 @@ import { getWorkspaceConfig } from "./getWorkspaceConfig";
  */
 export async function getSiteUrl(wsRoot: Uri): Promise<string | undefined> {
   const config = await getWorkspaceConfig(wsRoot);
-  return ConfigUtils.getPublishingConfig(config).siteUrl || "";
+  return ConfigUtils.getPublishing(config).siteUrl || "";
 }

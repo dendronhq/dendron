@@ -1,4 +1,4 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
@@ -12,7 +12,7 @@ import { describeMultiWS } from "../testUtilsV3";
 
 const ROOT_URL = "https://dendron.so";
 const ASSET_PREFIX = "aprefix";
-function setupConfig(config: IntermediateDendronConfig) {
+function setupConfig(config: DendronConfig) {
   config = ConfigUtils.genDefaultConfig();
   config.publishing.siteUrl = ROOT_URL;
   return config;

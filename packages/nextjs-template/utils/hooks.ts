@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   FuseEngine,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
   NotePropsByIdDict,
 } from "@dendronhq/common-all";
@@ -73,7 +73,7 @@ export function useDendronRouter() {
  */
 export function useDendronLookup(notes?: NotePropsByIdDict) {
   const engine = useEngineAppSelector((state) => state.engine);
-  const config = engine.config as IntermediateDendronConfig;
+  const config = engine.config as DendronConfig;
   const fuzzThreshold = ConfigUtils.getLookup(config).note.fuzzThreshold;
 
   const [noteIndex, setNoteIndex] = React.useState<FuseEngine | undefined>(

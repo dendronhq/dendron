@@ -2,7 +2,7 @@ import {
   DendronASTDest,
   DendronError,
   DVault,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDictsUtils,
   NoteProps,
   NoteUtils,
@@ -26,8 +26,8 @@ export class PluginNoteRenderer implements INoteRenderer {
   // parameters that are needed. Right now, the unified proc's require the
   // entire config to be passed in.
   constructor(
-    @inject("IntermediateDendronConfig")
-    private publishingConfig: IntermediateDendronConfig,
+    @inject("DendronConfig")
+    private publishingConfig: DendronConfig, // why is this call publishingConfig?
     @inject("ReducedDEngine") private engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[]
   ) {}

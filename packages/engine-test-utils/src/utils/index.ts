@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
+  DendronConfig,
   VaultUtils,
   WorkspaceFolderRaw,
   WorkspaceOpts,
@@ -99,7 +99,7 @@ const getWorkspaceFolders = (wsRoot: string) => {
 export async function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
   const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as IntermediateDendronConfig;
+  const config = readYAML(configPath) as DendronConfig;
   const vaultsConfig = ConfigUtils.getVaults(config);
   expect(_.sortBy(vaultsConfig, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])

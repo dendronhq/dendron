@@ -13,7 +13,7 @@ export default function DendronLogoOrTitle() {
   }
   const { title } = PublishUtils.getSEOPropsFromConfig(engine.config);
   const logoUrl = ConfigUtils.getSiteLogoUrl(engine.config) || "";
-  const publishingConfig = ConfigUtils.getPublishingConfig(engine.config);
+  const publishingConfig = ConfigUtils.getPublishing(engine.config);
 
   return (
     <Link href={getRootUrl(publishingConfig)}>

@@ -4,7 +4,7 @@ import {
   DNodeCompositeKey,
   DUtils,
   DVault,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDicts,
   NoteDictsUtils,
   NoteProps,
@@ -39,7 +39,7 @@ import { MDUtilsV5 } from "../utilsv5";
 export async function getParsingDependencyDicts(
   noteToProcess: NoteProps,
   engine: ReducedDEngine,
-  config: IntermediateDendronConfig,
+  config: DendronConfig,
   vaults: DVault[]
 ): Promise<NoteDicts> {
   let allData: NoteProps[] = [];
@@ -205,7 +205,7 @@ async function getForwardLinkDependencies(
   noteToRender: NoteProps,
   vaults: DVault[],
   engine: ReducedDEngine,
-  config: IntermediateDendronConfig
+  config: DendronConfig
 ): Promise<NoteProps[]> {
   const MAX_DEPTH = 3;
 

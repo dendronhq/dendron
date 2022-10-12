@@ -10,7 +10,7 @@ import {
   DVault,
   getSlugger,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   isBlockAnchor,
   NoteDicts,
   NoteDictsUtils,
@@ -384,7 +384,7 @@ export function convertNoteRefToHAST(
 
   const prettyRefs = shouldRenderPretty({ proc });
 
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   const duplicateNoteConfig = publishingConfig.duplicateNoteBehavior;
   // process note references.
   // let noteRefs: DNoteLoc[] = [];
@@ -952,7 +952,7 @@ function findBlockAnchor({
 }
 
 function getTitle(opts: {
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   note: NoteProps;
   loc: DNoteLoc;
   shouldApplyPublishRules?: boolean;
@@ -979,7 +979,7 @@ const genRefAsIFrame = ({
   noteId: string;
   content: Parent;
   title: string;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   prettyHAST: Parent<Node<Data>, Data>;
 }) => {
   const refId = getRefId({ id: noteId, link });
@@ -990,8 +990,7 @@ const genRefAsIFrame = ({
     prettyHAST,
   });
 
-  const assetsPrefix =
-    ConfigUtils.getPublishingConfig(config).assetsPrefix ?? "";
+  const assetsPrefix = ConfigUtils.getPublishing(config).assetsPrefix ?? "";
   return paragraph(
     html(
       `<iframe class="noteref-iframe" src="${assetsPrefix}/refs/${refId}" title="Reference to the note called ${title}">Your browser does not support iframes.</iframe>`

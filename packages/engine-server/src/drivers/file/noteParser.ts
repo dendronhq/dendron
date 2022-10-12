@@ -26,7 +26,7 @@ import {
   stringifyError,
   string2Note,
   globMatch,
-  IntermediateDendronConfig,
+  DendronConfig,
   asyncLoopOneAtATime,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
@@ -337,7 +337,7 @@ export class NoteParser extends ParserBase {
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     errors: IDendronError[];
   }): Promise<{
     changeEntries: NoteChangeEntry[];
@@ -419,7 +419,7 @@ export class NoteParser extends ParserBase {
     fpath: string;
     vault: DVault;
     toLowercase?: boolean;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     errors: IDendronError[];
   }): Promise<{
     note: NoteProps;

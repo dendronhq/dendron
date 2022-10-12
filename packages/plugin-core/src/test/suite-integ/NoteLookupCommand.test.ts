@@ -3,7 +3,7 @@ import {
   DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
-  IntermediateDendronConfig,
+  DendronConfig,
   LookupNoteTypeEnum,
   LookupSelectionModeEnum,
   LookupSelectionTypeEnum,
@@ -1488,7 +1488,7 @@ suite("NoteLookupCommand", function () {
   });
 
   describe("onAccept with lookupConfirmVaultOnCreate", () => {
-    const modConfigCb = (config: IntermediateDendronConfig) => {
+    const modConfigCb = (config: DendronConfig) => {
       ConfigUtils.setNoteLookupProps(config, "confirmVaultOnCreate", true);
       return config;
     };
@@ -1833,7 +1833,7 @@ suite("NoteLookupCommand", function () {
     test("selection modifier set to none in configs", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
-        modConfigCb: (config: IntermediateDendronConfig) => {
+        modConfigCb: (config: DendronConfig) => {
           ConfigUtils.setNoteLookupProps(
             config,
             "selectionMode",

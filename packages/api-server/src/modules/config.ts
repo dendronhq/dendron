@@ -1,6 +1,6 @@
 import {
   DendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   RespV3,
   WorkspaceRequest,
 } from "@dendronhq/common-all";
@@ -18,9 +18,7 @@ export class ConfigController {
     return ConfigController.singleton;
   }
 
-  async get({
-    ws,
-  }: WorkspaceRequest): Promise<RespV3<IntermediateDendronConfig>> {
+  async get({ ws }: WorkspaceRequest): Promise<RespV3<DendronConfig>> {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();

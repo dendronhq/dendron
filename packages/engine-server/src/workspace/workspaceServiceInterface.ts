@@ -1,8 +1,4 @@
-import {
-  DEngineClient,
-  DVault,
-  IntermediateDendronConfig,
-} from "@dendronhq/common-all";
+import { DEngineClient, DVault, DendronConfig } from "@dendronhq/common-all";
 
 export enum SyncActionStatus {
   DONE = "",
@@ -30,7 +26,7 @@ export type SyncActionResult = {
 };
 
 export interface IWorkspaceService {
-  get config(): IntermediateDendronConfig;
+  get config(): DendronConfig;
 
   commitAndAddAll(opts: { engine: DEngineClient }): Promise<SyncActionResult[]>;
 

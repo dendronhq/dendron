@@ -62,11 +62,7 @@ export type DendronPublishingConfig = {
 export type CleanDendronPublishingConfig = DendronPublishingConfig &
   Required<Pick<DendronPublishingConfig, "siteIndex" | "siteUrl">>;
 
-export enum DuplicateNoteActionEnum {
-  useVault = "useVault",
-}
-
-export type DuplicateNoteAction = keyof typeof DuplicateNoteActionEnum;
+export type DuplicateNoteAction = "useVault";
 
 export type UseVaultBehaviorPayload = { vault: DVault } | string[];
 

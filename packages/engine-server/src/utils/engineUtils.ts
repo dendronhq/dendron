@@ -5,7 +5,7 @@ import {
   DendronError,
   ErrorFactory,
   ERROR_SEVERITY,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
   ReducedDEngine,
   RespV3,
@@ -100,7 +100,7 @@ export class EngineUtils {
   }: {
     note: NoteProps;
     engine: ReducedDEngine;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     fmChangeOnly?: boolean;
     silent?: boolean;
   }): Promise<void> {

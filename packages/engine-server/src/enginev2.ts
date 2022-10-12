@@ -230,7 +230,7 @@ export class DendronEngineV2 implements DEngine {
       // Set schemas locally in the engine:
       this.schemas = schemas;
       await this.updateIndex("schema");
-      this.logger.error({ ctx, msg: "updated index" });
+      this.logger.info({ ctx, msg: "updated index" });
       const hookErrors: DendronError[] = [];
       this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
         const { valid, error } = HookUtils.validateHook({

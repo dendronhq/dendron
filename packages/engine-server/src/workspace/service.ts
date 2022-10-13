@@ -884,6 +884,21 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return contributors.filter(isNotUndefined);
   }
 
+  /**
+   * Try to get the url of the top level repository.
+   * If self contained vault, workspace root should be the top level if remotely tracked.
+   * If not self contained, workspace root should be the top level if remotely tracked.
+   * If not self contained vault, and workspace root doesn't have a remote url,
+   *   This means nothing is remotely tracked, or some vaults in the workspace is tracked, not the workspace itself.
+   *   In this case, it is ambiguous what the top level is, and we assume the top level is not tracked remotely.
+   * @returns remote url or undefined
+   */
+  async getTopLevelRemoteUrl(): Promise<string | undefined> {
+    const git = new Git({ localUrl: this.wsRoot });
+    const remoteUrl = await git.getRemoteUrl();
+    return remoteUrl;
+  }
+
   async commitAndAddAll({
     engine,
   }: {

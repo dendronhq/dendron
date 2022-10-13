@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/api-server",
-  "version": "0.115.0",
+  "version": "0.115.1",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -54,10 +54,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.115.0",
-    "@dendronhq/common-server": "^0.115.0",
-    "@dendronhq/engine-server": "^0.115.0",
-    "@dendronhq/unified": "^0.115.0",
+    "@dendronhq/common-all": "^0.115.1",
+    "@dendronhq/common-server": "^0.115.1",
+    "@dendronhq/engine-server": "^0.115.1",
+    "@dendronhq/unified": "^0.115.1",
     "@sentry/integrations": "7.11.1",
     "@sentry/node": "7.11.1",
     "cors": "^2.8.5",

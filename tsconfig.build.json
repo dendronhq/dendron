@@ -2,14 +2,18 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2019",
-    "lib": ["es2019", "es2020.string"],
+    "lib": [
+      "es2019",
+      "es2020.string"
+    ],
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
     "types": [
-      "node", "jest"
+      "node",
+      "jest"
     ],
     // --- checks
     "noUnusedLocals": true,
@@ -19,8 +23,15 @@
     "noFallthroughCasesInSwitch": true,
     // --- language features
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true
   },
   "compileOnSave": true,
-  "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
+  "exclude": [
+    "node_modules",
+    "lib",
+    "local",
+    ".vscode-test",
+    "out"
+  ]
 }

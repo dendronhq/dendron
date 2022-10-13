@@ -15,7 +15,7 @@ const config = {
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[name].js",
-    // commonjs2 is like commonjs but also includes the module.exports 
+    // commonjs2 is like commonjs but also includes the module.exports
     // see https://github.com/webpack/webpack/issues/1114
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
@@ -33,6 +33,7 @@ const config = {
     /\.\/webpack-require-hack/,
     /\.\/prisma-shim/,
     /\.\/adm-zip/,
+    /\.\/sqlite3-binding/,
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
@@ -61,61 +62,75 @@ const config = {
     new CopyPlugin({
       patterns: [
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
+        { from: "sqlite3-binding.js", to: "sqlite3-binding.js" },
+        {
+          from: path.join(
+            "..",
+            "..",
+            "node_modules",
+            "sqlite3",
+            "lib",
+            "binding",
+            "*",
+            "node_sqlite3.node"
+          ),
+          to: "node_sqlite3.node",
+        },
       ],
     }),
     ...(process.env.SKIP_SENTRY
       ? []
       : [
-        // Upload one set of source maps to associate it with the vscode@ prefixed client release:
-        // @ts-ignore
-        new SentryWebpackPlugin({
-          authToken: process.env.SENTRY_AUTH_TOKEN,
-          org: "dendron",
-          project: "dendron",
-          release: "vscode@" + process.env.DENDRON_RELEASE_VERSION,
+          // Upload one set of source maps to associate it with the vscode@ prefixed client release:
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: "vscode@" + process.env.DENDRON_RELEASE_VERSION,
 
-          // other SentryWebpackPlugin configuration
-          include: ".",
-          ignore: ["node_modules", "webpack.*.js"],
-        }),
-        // Upload a second set of source maps to associate it with the express@ prefixed client release:
-        // @ts-ignore
-        new SentryWebpackPlugin({
-          authToken: process.env.SENTRY_AUTH_TOKEN,
-          org: "dendron",
-          project: "dendron",
-          release: "express@" + process.env.DENDRON_RELEASE_VERSION,
-          include: ".",
-          ignore: ["node_modules", "webpack.*.js"],
-        }),
-      ]),
+            // other SentryWebpackPlugin configuration
+            include: ".",
+            ignore: ["node_modules", "webpack.*.js"],
+          }),
+          // Upload a second set of source maps to associate it with the express@ prefixed client release:
+          // @ts-ignore
+          new SentryWebpackPlugin({
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            org: "dendron",
+            project: "dendron",
+            release: "express@" + process.env.DENDRON_RELEASE_VERSION,
+            include: ".",
+            ignore: ["node_modules", "webpack.*.js"],
+          }),
+        ]),
     // bundle analysis only done when enabled
     // see [[dendron://dendron.dendron-site/dendron.topic.dev.cli.package-plugin]] for usage
     ...(process.env.ANALYZE_BUNDLE
       ? [
-        new BundleAnalyzerPlugin({
-          analyzerMode: "static",
-          openAnalyzer: false,
-          generateStatsFile: true,
-        }),
-      ]
+          new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            openAnalyzer: false,
+            generateStatsFile: true,
+          }),
+        ]
       : []),
     ...(process.env.DETECT_CIRCULAR_DEPS
       ? [
-        new CircularDependencyPlugin({
-          // exclude detection of files based on a RegExp
-          exclude: /a\.js|node_modules/,
-          // include specific files based on a RegExp
-          include: /src/,
-          // add warnings to webpack instead of errors
-          failOnError: false,
-          // allow import cycles that include an asyncronous import,
-          // e.g. via import(/* webpackMode: "weak" */ './file.js')
-          allowAsyncCycles: false,
-          // set the current working directory for displaying module paths
-          cwd: process.cwd(),
-        }),
-      ]
+          new CircularDependencyPlugin({
+            // exclude detection of files based on a RegExp
+            exclude: /a\.js|node_modules/,
+            // include specific files based on a RegExp
+            include: /src/,
+            // add warnings to webpack instead of errors
+            failOnError: false,
+            // allow import cycles that include an asyncronous import,
+            // e.g. via import(/* webpackMode: "weak" */ './file.js')
+            allowAsyncCycles: false,
+            // set the current working directory for displaying module paths
+            cwd: process.cwd(),
+          }),
+        ]
       : []),
   ],
   module: {
@@ -126,6 +141,7 @@ const config = {
         type: "javascript/auto",
       },
       // don't handle the following files - causes errors
+      // { test: /node_sqlite3.node/, loader: "node-loader" },
       { test: /\.node$/, loader: "ignore-loader" },
       { test: /\.d\.ts$/, loader: "ignore-loader" },
       { test: /\.js\.map$/, loader: "ignore-loader" },

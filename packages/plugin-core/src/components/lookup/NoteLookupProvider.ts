@@ -19,7 +19,11 @@ import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { NotePickerUtils } from "./NotePickerUtils";
 import { IDendronQuickInputButton } from "./ButtonTypes";
-import { CREATE_NEW_NOTE_DETAIL } from "./constants";
+import {
+  CREATE_NEW_LABEL,
+  CREATE_NEW_NOTE_DETAIL,
+  CREATE_NEW_WITH_TEMPLATE_LABEL,
+} from "./constants";
 import {
   ILookupProviderOptsV3,
   ILookupProviderV3,
@@ -81,16 +85,33 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     quickpick.onDidChangeValue(onUpdateDebounced);
 
     quickpick.onDidAccept(async () => {
+      const ctx = "quickpick:onDidAccept";
       Logger.info({
-        ctx: "NoteLookupProvider:onDidAccept",
+        ctx,
+        msg: "enter",
         quickpick: quickpick.value,
       });
       await onUpdateDebounced.flush();
       if (_.isEmpty(quickpick.selectedItems)) {
+        Logger.debug({
+          ctx,
+          msg: "no selected items",
+          quickpick: quickpick.value,
+        });
         await onUpdatePickerItems({
           picker: quickpick,
           token: new CancellationTokenSource().token,
         });
+      }
+
+      // NOTE: sometimes, even with debouncing, the value of a new item is not the same as the selectedItem. this makes sure that the value is in sync
+      if (
+        quickpick.selectedItems.length === 1 &&
+        [CREATE_NEW_LABEL, CREATE_NEW_WITH_TEMPLATE_LABEL].includes(
+          quickpick.selectedItems[0].label
+        )
+      ) {
+        quickpick.selectedItems[0].fname = quickpick.value;
       }
       this.onDidAccept({ quickpick, cancellationToken: token })();
     });
@@ -159,8 +180,18 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // NOTE: if user presses <ENTER> before picker has a chance to process, this will be `[]`
       // In this case we want to calculate picker item from current value
       if (_.isEmpty(selectedItems)) {
+        Logger.debug({
+          ctx,
+          msg: "no selected items, calculating from picker value",
+          value: picker.value,
+        });
         selectedItems = await NotePickerUtils.fetchPickerResultsNoInput({
           picker,
+        });
+        Logger.debug({
+          ctx,
+          msg: "selected items from picker value",
+          selectedItems: selectedItems.map((item) => NoteUtils.toLogObj(item)),
         });
       }
 
@@ -233,7 +264,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
   //  ^hlj1vvw48s2v
   async onUpdatePickerItems(opts: OnUpdatePickerItemsOpts) {
     const { picker, token, fuzzThreshold } = opts;
-    const ctx = "updatePickerItems";
+    const ctx = "NoteLookupProvider:updatePickerItems";
     picker.busy = true;
     let pickerValue = picker.value;
     const start = process.hrtime();
@@ -264,7 +295,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         : undefined;
 
     const engine = ws.engine;
-    Logger.info({
+    Logger.debug({
       ctx,
       msg: "enter",
       queryOrig,

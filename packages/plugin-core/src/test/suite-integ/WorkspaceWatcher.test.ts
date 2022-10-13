@@ -122,6 +122,7 @@ suite("WorkspaceWatcher", function () {
     "GIVEN a basic setup on a single vault workspace",
     {
       postSetupHook: setupBasic,
+      timeout: 1e6,
     },
     () => {
       test("WHEN user renames a file outside of dendron rename command, THEN all of its references are also updated", async () => {
@@ -260,6 +261,14 @@ suite("WorkspaceWatcher", function () {
         const editor = await ExtensionProvider.getWSUtils().openNote(fooNote);
         const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
           document: editor.document,
+          // eslint-disable-next-line no-undef
+          waitUntil: (_args: Thenable<any>) => {
+            _args.then(async () => {
+              // Engine note body hasn't been updated yet
+              const foo = (await engine.getNote("foo.one")).data!;
+              expect(foo.updated).toEqual(updatedBefore);
+            });
+          },
         };
         const changes = await watcher.onWillSaveTextDocument(vscodeEvent);
         expect(changes).toBeTruthy();

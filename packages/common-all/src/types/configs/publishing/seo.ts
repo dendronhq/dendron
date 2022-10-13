@@ -1,11 +1,5 @@
 import { z } from "zod";
-// import { schemaForType } from '../../../utils'
-
-const schemaForType =
-  <T>() =>
-  <S extends z.ZodType<T, any, any>>(arg: S) => {
-    return arg;
-  };
+import { schemaForType } from "../../../util/zod";
 
 /**
  * Namespace for SEO related site configurations.

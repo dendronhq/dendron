@@ -44,6 +44,7 @@ import {
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
+import { schemaForType } from "../util/zod";
 import { DVault } from "../types/DVault";
 import {
   DendronConfig,
@@ -1371,14 +1372,3 @@ export class YamlUtils {
     return this.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   }
 }
-
-/**
- * util for defining zod schemas with external/custom types.
- * Origin: https://github.com/colinhacks/zod/issues/372#issuecomment-826380330
- * @returns a function to be called with a zod schema
- */
-export const schemaForType =
-  <T>() =>
-  <S extends z.ZodType<T, any, any>>(arg: S) => {
-    return arg;
-  };

@@ -1,11 +1,5 @@
 import { z } from "zod";
-// import { schemaForType } from '../../../utils'
-
-const schemaForType =
-  <T>() =>
-  <S extends z.ZodType<T, any, any>>(arg: S) => {
-    return arg;
-  };
+import { schemaForType } from "../../../util/zod";
 
 export enum GithubEditViewModeEnum {
   tree = "tree",
@@ -35,10 +29,12 @@ export function genDefaultGithubConfig(): GithubConfig {
   };
 }
 
-const githubEditViewModeSchema: z.ZodType<GithubEditViewMode> = z.union([
-  z.literal(GithubEditViewModeEnum.tree),
-  z.literal(GithubEditViewModeEnum.edit),
-]);
+const githubEditViewModeSchema = schemaForType<GithubEditViewMode>()(
+  z.union([
+    z.literal(GithubEditViewModeEnum.tree),
+    z.literal(GithubEditViewModeEnum.edit),
+  ])
+);
 
 export const githubSchema = schemaForType<GithubConfig>()(
   z.object({

@@ -3,13 +3,7 @@ import { DVault } from "../../DVault";
 import { GiscusConfig } from "./giscus";
 import { GithubConfig, genDefaultGithubConfig, githubSchema } from "./github";
 import { SEOConfig, genDefaultSEOConfig, seoSchema } from "./seo";
-// import { schemaForType } from "../../../utils";
-
-const schemaForType =
-  <T>() =>
-  <S extends z.ZodType<T, any, any>>(arg: S) => {
-    return arg;
-  };
+import { schemaForType } from "../../../util/zod";
 
 export enum Theme {
   DARK = "dark",

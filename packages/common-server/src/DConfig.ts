@@ -200,11 +200,10 @@ export class DConfig {
     const dendronConfigResult = readToString(configPath)
       .andThen((input) => YamlUtils.fromStr(input))
       .andThen((unknownconfig) => {
-        const cleanConfig = DConfigLegacy.configIsV4(
-          unknownconfig
-        )
+        const cleanConfig = DConfigLegacy.configIsV4(unknownconfig)
           ? DConfigLegacy.v4ToV5(unknownconfig)
-          : (unknownconfig);
+          : _.defaultsDeep(unknownconfig, ConfigUtils.genDefaultConfig());
+
         return ConfigUtils.parse(cleanConfig);
       })
       .map((dendronConfig) => {

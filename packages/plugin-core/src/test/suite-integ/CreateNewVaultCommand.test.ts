@@ -1,8 +1,8 @@
 import {
   ConfigUtils,
   CONSTANTS,
+  DendronConfig,
   FOLDERS,
-  IntermediateDendronConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DConfig, readYAMLAsync, vault2Path } from "@dendronhq/common-server";
@@ -63,12 +63,12 @@ suite("CreateNewVault Command", function () {
   });
 });
 
-function enableSelfCOntainedVaults(config: IntermediateDendronConfig) {
+function enableSelfCOntainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = true;
   return config;
 }
 
-function disableSelfContainedVaults(config: IntermediateDendronConfig) {
+function disableSelfContainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = false;
   return config;
 }

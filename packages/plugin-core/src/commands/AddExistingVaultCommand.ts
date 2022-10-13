@@ -6,11 +6,11 @@ import {
   DVault,
   DWorkspace,
   FOLDERS,
-  IntermediateDendronConfig,
   SelfContainedVault,
   VaultRemoteSource,
   VaultUtils,
   WorkspaceEvents,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -380,9 +380,7 @@ export class AddExistingVaultCommand extends BasicCommand<
           path.join(vaultRootPath, CONSTANTS.DENDRON_CONFIG_FILE)
         )
       ) {
-        const vaultConfig = DConfig.getRaw(
-          vaultRootPath
-        ) as IntermediateDendronConfig;
+        const vaultConfig = DConfig.getRaw(vaultRootPath) as DendronConfig;
         if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
           await AnalyticsUtils.trackForNextRun(
             WorkspaceEvents.TransitiveDepsWarningShow

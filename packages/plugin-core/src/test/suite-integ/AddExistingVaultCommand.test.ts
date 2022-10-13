@@ -2,8 +2,8 @@ import {
   ConfigUtils,
   CONSTANTS,
   FOLDERS,
-  IntermediateDendronConfig,
   VaultUtils,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -66,7 +66,7 @@ suite("AddExistingVaultCommand", function () {
           );
           await cmd.run();
           const configPath = DConfig.configPath(wsRoot);
-          const configRaw = readYAML(configPath) as IntermediateDendronConfig;
+          const configRaw = readYAML(configPath) as DendronConfig;
           const workspaces = ConfigUtils.getWorkspace(configRaw).workspaces;
           expect(workspaces).toEqual({
             [vname]: {
@@ -257,12 +257,12 @@ suite("AddExistingVaultCommand", function () {
   });
 });
 
-function enableSelfContainedVaults(config: IntermediateDendronConfig) {
+function enableSelfContainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = true;
   return config;
 }
 
-function disableSelfContainedVaults(config: IntermediateDendronConfig) {
+function disableSelfContainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = false;
   return config;
 }

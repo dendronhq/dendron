@@ -1,8 +1,7 @@
-import { env, Uri } from "vscode";
-import { DENDRON_COMMANDS } from "../constants";
-import { BasicCommand } from "./base";
 import { Database } from "sqlite3";
 import * as vscode from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {};
 

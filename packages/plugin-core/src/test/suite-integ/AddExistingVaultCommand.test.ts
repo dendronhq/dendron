@@ -218,42 +218,6 @@ suite("AddExistingVaultCommand", function () {
         });
       }
     );
-
-    describeSingleWS(
-      "WHEN vault was already in .gitignore",
-      { timeout, modConfigCb: disableSelfContainedVaults },
-      () => {
-        test("THEN vault is not duplicated", async () => {
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const vaultPath = path.join(wsRoot, "vaultRemote");
-          const gitIgnore = path.join(wsRoot, ".gitignore");
-          const remoteDir = tmpDir().name;
-
-          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
-          await fs.writeFile(gitIgnore, "vaultRemote");
-
-          const cmd = new AddExistingVaultCommand(
-            ExtensionProvider.getExtension()
-          );
-          sinon.stub(cmd, "gatherInputs").returns(
-            Promise.resolve({
-              type: "remote",
-              name: "dendron",
-              path: vaultPath,
-              pathRemote: remoteDir,
-            })
-          );
-          await cmd.run();
-
-          expect(
-            await FileTestUtils.assertTimesInFile({
-              fpath: gitIgnore,
-              match: [[1, "vaultRemote"]],
-            })
-          ).toBeTruthy();
-        });
-      }
-    );
   });
 });
 

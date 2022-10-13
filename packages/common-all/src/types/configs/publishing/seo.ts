@@ -1,3 +1,12 @@
+import { z } from "zod";
+// import { schemaForType } from '../../../utils'
+
+const schemaForType =
+  <T>() =>
+  <S extends z.ZodType<T, any, any>>(arg: S) => {
+    return arg;
+  };
+
 /**
  * Namespace for SEO related site configurations.
  */
@@ -24,3 +33,21 @@ export function genDefaultSEOConfig(): SEOConfig {
     description: "Personal Knowledge Space",
   };
 }
+
+/**
+ * `zod` schema to be used with `parse.ts` for validation.
+ */
+export const seoSchema = schemaForType<SEOConfig>()(
+  z.object({
+    title: z.string().optional().default("Dendron"),
+    description: z.string().optional().default("Personal Knowledge Space"),
+    author: z.string().optional(),
+    twitter: z.string().optional(),
+    image: z
+      .object({
+        url: z.string(),
+        alt: z.string(),
+      })
+      .optional(),
+  })
+);

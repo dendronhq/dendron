@@ -31,13 +31,14 @@ import {
   ERROR_SEVERITY,
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
-import { DendronError, ErrorMessages } from "../error";
+import { DendronError, ErrorMessages, IDendronError } from "../error";
 import { DHookDict, NoteChangeEntry, NoteProps, AnyJson } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
   genDefaultPublishingConfig,
+  publishingSchema,
   HierarchyConfig,
   SearchMode,
 } from "../types/configs/publishing/publishing";
@@ -1215,72 +1216,33 @@ export class ConfigUtils {
     return diff;
   }
 
-  static parse(input: unknown) {
-    const publishingSchema: z.ZodType<DendronPublishingConfig> = z
-      .object({
-        // enableFMTitle?: boolean;
-        // enableHierarchyDisplay?: boolean;
-        // hierarchyDisplayTitle?: string;
-        // enableNoteTitleForLink?: boolean;
-        // enablePrettyRefs?: boolean;
-        // enableBackLinks?: boolean;
-        // enableKatex?: boolean;
-        //
-        // assetsPrefix?: string;
-        copyAssets: z.boolean(),
-        //
-        // canonicalBaseUrl?: string;
-        // customHeaderPath?: string;
-        // ga?: GoogleAnalyticsConfig;
-        // logoPath?: string;
-        // siteFaviconPath?: string;
-        // siteIndex?: string;
-        siteHierarchies: z.array(z.string()),
-        enableSiteLastModified: z.boolean(),
-        siteRootDir: z.string(),
-        // siteUrl?: string;
-        enableFrontmatterTags: z.boolean(),
-        enableHashesForFMTags: z.boolean(),
-        // enableRandomlyColoredTags?: boolean;
-        // enableTaskNotes?: boolean;
-        // hierarchy?: { [key: string]: HierarchyConfig };
-        // duplicateNoteBehavior?: DuplicateNoteBehavior;
-        writeStubs: z.boolean(),
-        seo: z.object({}).passthrough(),
-        github: z.object({ enableEditLink: z.boolean() }).passthrough(),
-        // theme?: Theme;
-        // segmentKey?: string;
-        // cognitoUserPoolId?: string;
-        // cognitoClientId?: string;
-        enablePrettyLinks: z.boolean(),
-        // siteBanner?: string;
-        // giscus?: GiscusConfig;
-        // sidebarPath?: string | false;
-        // searchMode?: SearchMode;
-      })
-      .passthrough();
+  /**
+   * Parses an unkown input into a DendronConfig
+   * @param input
+   */
 
-    const schema: z.ZodType<
-      DendronConfig,
-      {},
-      { publishing: DendronPublishingConfig }
-    > = z
-      .object({
-        // version: z.number(),
-        // global: z.object({}).optional(), // TODO DendronGlobalConfig;
-        // commands: z.object({}), // TODO DendronCommandConfig;
-        // workspace: z.object({}), // TODO DendronWorkspaceConfig;
-        // preview: z.object({}), // TODO DendronPreviewConfig;
-        publishing: publishingSchema,
-        // dev: z.object({}).optional(), // TODO DendronDevConfig;
-      })
-      .passthrough()
-      .transform((value) => {
-        const defaultConfig = ConfigUtils.genDefaultConfig();
-        return _.defaultsDeep(value, defaultConfig) as DendronConfig;
-      });
+  static parse(input: unknown): Result<DendronConfig, IDendronError> {
+    const schema = schemaForType<{ publishing: DendronPublishingConfig }>()(
+      z
+        .object({
+          version: z.number(),
+          dev: z.object({}).passthrough().optional(), // TODO DendronDevConfig;
+          commands: z.object({}).passthrough(), // TODO DendronCommandConfig;
+          workspace: z.object({}).passthrough(), // TODO DendronWorkspaceConfig;
+          preview: z.object({}).passthrough(), // TODO DendronPreviewConfig;
+          publishing: publishingSchema,
+          global: z.object({}).passthrough().optional(), // TODO DendronGlobalConfig;
+        })
+        .passthrough()
+    );
 
-    return parse(schema, input, "Invalid Dendron Config");
+    return parse(schema, input, "Invalid Dendron Config").map((value) => {
+      // TODO remove once all propeties are defined in the schema
+      return _.defaultsDeep(
+        value,
+        ConfigUtils.genDefaultConfig()
+      ) as DendronConfig;
+    });
   }
 }
 
@@ -1409,3 +1371,14 @@ export class YamlUtils {
     return this.dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   }
 }
+
+/**
+ * util for defining zod schemas with external/custom types.
+ * Origin: https://github.com/colinhacks/zod/issues/372#issuecomment-826380330
+ * @returns a function to be called with a zod schema
+ */
+export const schemaForType =
+  <T>() =>
+  <S extends z.ZodType<T, any, any>>(arg: S) => {
+    return arg;
+  };

@@ -1,7 +1,15 @@
+import { z } from "zod";
 import { DVault } from "../../DVault";
 import { GiscusConfig } from "./giscus";
-import { GithubConfig, genDefaultGithubConfig } from "./github";
-import { SEOConfig, genDefaultSEOConfig } from "./seo";
+import { GithubConfig, genDefaultGithubConfig, githubSchema } from "./github";
+import { SEOConfig, genDefaultSEOConfig, seoSchema } from "./seo";
+// import { schemaForType } from "../../../utils";
+
+const schemaForType =
+  <T>() =>
+  <S extends z.ZodType<T, any, any>>(arg: S) => {
+    return arg;
+  };
 
 export enum Theme {
   DARK = "dark",
@@ -13,6 +21,8 @@ export enum SearchMode {
   SEARCH = "search",
   LOOKUP = "lookup",
 }
+
+const searchModeSchema = z.enum([SearchMode.SEARCH, SearchMode.LOOKUP]);
 
 /**
  * Namespace for all publishing related configurations
@@ -88,6 +98,52 @@ export type CustomFMEntry = {
 export type GoogleAnalyticsConfig = {
   tracking?: string;
 };
+
+export const publishingSchema = schemaForType<DendronPublishingConfig>()(
+  z
+    .object({
+      enableFMTitle: z.boolean().optional().default(true),
+      // enableHierarchyDisplay?: boolean;
+      // hierarchyDisplayTitle?: string;
+      enableNoteTitleForLink: z.boolean().optional().default(true),
+      enablePrettyRefs: z.boolean().optional().default(true),
+      // enableBackLinks?: boolean;
+      enableKatex: z.boolean().optional().default(true),
+      //
+      // assetsPrefix?: string;
+      copyAssets: z.boolean().default(true),
+      //
+      // canonicalBaseUrl?: string;
+      // customHeaderPath?: string;
+      // ga?: GoogleAnalyticsConfig;
+      // logoPath?: string;
+      // siteFaviconPath?: string;
+      // siteIndex?: string;
+      siteHierarchies: z.array(z.string()).default(["root"]),
+      writeStubs: z.boolean().default(false),
+      siteRootDir: z.string().default("docs"),
+      seo: seoSchema,
+      github: githubSchema,
+      enableSiteLastModified: z.boolean().default(true),
+      // siteUrl?: string;
+      enableFrontmatterTags: z.boolean().default(true),
+      enableHashesForFMTags: z.boolean().default(false),
+      enableRandomlyColoredTags: z.boolean().optional().default(true),
+      enableTaskNotes: z.boolean().optional().default(true),
+      // hierarchy?: { [key: string]: HierarchyConfig };
+      // duplicateNoteBehavior?: DuplicateNoteBehavior;
+      // theme?: Theme;
+      // segmentKey?: string;
+      // cognitoUserPoolId?: string;
+      // cognitoClientId?: string;
+      enablePrettyLinks: z.boolean().default(true),
+      // siteBanner?: string;
+      // giscus?: GiscusConfig;
+      // sidebarPath?: string | false;
+      searchMode: searchModeSchema.optional().default(SearchMode.LOOKUP),
+    })
+    .passthrough()
+);
 
 /**
  * Generate default {@link DendronPublishingConfig}

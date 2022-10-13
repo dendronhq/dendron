@@ -9,13 +9,13 @@ const { env: clientEnv } = require("./client")
 
 const serverEnv = parse(serverSchema, process.env);
 
-if (serverEnv.error) {
+if (serverEnv.isErr()) {
   throw serverEnv.error;
 }
 
 module.exports = {
   env: {
-    ...serverEnv.data,
+    ...serverEnv.value,
     ...clientEnv
   }
 };

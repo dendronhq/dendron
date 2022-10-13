@@ -4,10 +4,10 @@ const { clientEnv, clientSchema } = require("./schema");
 
 const _clientEnv = parse(clientSchema, clientEnv);
 
-if (_clientEnv.error) {
+if (_clientEnv.isErr()) {
   throw _clientEnv.error;
 }
 
 module.exports = {
-  env: _clientEnv.data
+  env: _clientEnv.value
 };

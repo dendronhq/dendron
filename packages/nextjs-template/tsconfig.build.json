@@ -1,26 +1,22 @@
 {
   "extends": "../../tsconfig.build.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2019",
-    "lib": ["es2019", "es2020.string"],
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
     "strict": true,
-    "declaration": true,
-    "types": ["node"],
-    // --- checks
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    // --- language features
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "jsx": "react-jsx"
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "declaration": false,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true
   },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "**/*-spec.ts"]
 }

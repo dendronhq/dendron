@@ -80,8 +80,12 @@ function getWorkspaceFile() {
 }
 
 suite("GIVEN RemoveVaultCommand", function () {
+  let executeCmdStub: sinon.SinonStub;
   this.beforeEach(() => {
-    sinon.stub(vscode.commands, "executeCommand").resolves({});
+    executeCmdStub = sinon.stub(vscode.commands, "executeCommand").resolves({});
+  });
+  this.afterEach(() => {
+    executeCmdStub.restore();
   });
 
   describeMultiWS("WHEN removing a workspace vault", {}, () => {

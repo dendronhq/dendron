@@ -3,7 +3,7 @@ import { DVault } from "../../DVault";
 import { GiscusConfig } from "./giscus";
 import { GithubConfig, genDefaultGithubConfig, githubSchema } from "./github";
 import { SEOConfig, genDefaultSEOConfig, seoSchema } from "./seo";
-import { schemaForType } from "../../../util/zod";
+import { schemaForType } from "../../../util/zodUtil";
 
 export enum Theme {
   DARK = "dark",

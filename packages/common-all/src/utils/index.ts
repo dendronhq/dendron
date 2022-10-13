@@ -44,7 +44,7 @@ import {
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
-import { schemaForType } from "../util/zod";
+import { schemaForType } from "../util/zodUtil";
 import { DVault } from "../types/DVault";
 import {
   DendronConfig,

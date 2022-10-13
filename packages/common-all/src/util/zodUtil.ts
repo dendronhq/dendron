@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { ZodType } from "zod";
 
 /**
  * util for defining zod schemas with external/custom types.
@@ -7,6 +7,6 @@ import { z } from "zod";
  */
 export const schemaForType =
   <T>() =>
-  <S extends z.ZodType<T, any, any>>(arg: S) => {
+  <S extends ZodType<T, any, any>>(arg: S) => {
     return arg;
   };

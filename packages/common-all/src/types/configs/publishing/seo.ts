@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { schemaForType } from "../../../util/zod";
+import { schemaForType } from "../../../util/zodUtil";
 
 /**
  * Namespace for SEO related site configurations.

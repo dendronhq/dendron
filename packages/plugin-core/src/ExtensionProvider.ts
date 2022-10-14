@@ -26,6 +26,10 @@ export class ExtensionProvider {
     return ExtensionProvider.extension;
   }
 
+  static getState() {
+    return ExtensionProvider.extension.getState();
+  }
+
   static getDWorkspace() {
     return ExtensionProvider.getExtension().getDWorkspace();
   }

@@ -1,4 +1,4 @@
-import { position2VSCodeRange } from "@dendronhq/common-all";
+import { position2VSCodeRange, DECORATION_TYPES } from "@dendronhq/common-all";
 import { NoteRefNoteV4 } from "../types";
 import { Decorator } from "./utils";
 import { DecorationWikilink, linkedNoteType } from "./wikilinks";
@@ -10,7 +10,7 @@ export const decorateReference: Decorator<
   const { node: reference, engine, note, config } = opts;
   const { position } = reference;
 
-  const { type, errors } = await linkedNoteType({
+  const { errors } = await linkedNoteType({
     fname: reference.data.link.from.fname,
     anchorStart: reference.data.link.data.anchorStart,
     anchorEnd: reference.data.link.data.anchorEnd,
@@ -20,7 +20,7 @@ export const decorateReference: Decorator<
     vaults: config.workspace?.vaults ?? [],
   });
   const decoration: DecorationWikilink = {
-    type,
+    type: DECORATION_TYPES.noteRef,
     range: position2VSCodeRange(position),
   };
 

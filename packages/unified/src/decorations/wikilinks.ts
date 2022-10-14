@@ -19,7 +19,10 @@ import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
 import { Decoration, DECORATION_TYPES, Decorator } from "./utils";
 
 export type DecorationWikilink = Decoration & {
-  type: DECORATION_TYPES.wikiLink | DECORATION_TYPES.brokenWikilink;
+  type:
+    | DECORATION_TYPES.wikiLink
+    | DECORATION_TYPES.brokenWikilink
+    | DECORATION_TYPES.noteRef;
 };
 export type DecorationAlias = Decoration & {
   type: DECORATION_TYPES.alias;

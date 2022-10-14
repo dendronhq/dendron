@@ -1,27 +1,36 @@
 import {
   ConfigUtils,
   DateTime,
+  debounceAsyncUntilComplete,
   Decoration,
   groupBy,
-  mapValues,
   isNotUndefined,
+  mapValues,
   NoteProps,
-  debounceAsyncUntilComplete,
 } from "@dendronhq/common-all";
-import * as Sentry from "@sentry/node";
+import { DConfig } from "@dendronhq/common-server";
 import {
-  DECORATION_TYPES,
-  DecorationTimestamp,
   DecorationHashTag,
-  isDecorationHashTag,
-  DecorationWikilink,
   DecorationTaskNote,
+  DecorationTimestamp,
+  DecorationWikilink,
+  DECORATION_TYPES,
+  isDecorationHashTag,
 } from "@dendronhq/unified";
+import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import {
+  Comment,
+  CommentAuthorInformation,
+  CommentMode,
+  CommentThreadCollapsibleState,
   DecorationOptions,
   DecorationRangeBehavior,
   Diagnostic,
+  MarkdownString,
+  Position,
+  Range,
+  TextDocument,
   TextEditor,
   TextEditorDecorationType,
   ThemeColor,
@@ -32,7 +41,6 @@ import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { delayedFrontmatterWarning } from "../utils/frontmatter";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DConfig } from "@dendronhq/common-server";
 
 /** Wait this long in miliseconds before trying to update decorations when a command forces a decoration update. */
 const DECORATION_UPDATE_DELAY = 100;
@@ -62,6 +70,10 @@ export const EDITOR_DECORATION_TYPES: {
   }),
   /** Decoration for wikilinks that point to valid notes. */
   wikiLink: window.createTextEditorDecorationType({
+    color: new ThemeColor("editorLink.activeForeground"),
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+  }),
+  noteRef: window.createTextEditorDecorationType({
     color: new ThemeColor("editorLink.activeForeground"),
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   }),
@@ -113,6 +125,45 @@ export const debouncedUpdateDecorations = debounceAsyncUntilComplete({
   timeout: 50,
   trailing: true,
 });
+
+export class NoteRefComment implements Comment {
+  public body: MarkdownString;
+  public mode: CommentMode;
+  public author: CommentAuthorInformation;
+
+  constructor() {
+    this.mode = CommentMode.Preview;
+    this.author = { name: "" };
+    this.body = new MarkdownString(`note ref`);
+  }
+}
+
+function posToRange(start: Position, end: Position, document: TextDocument) {
+  const offsetToPos = document.positionAt;
+  const rangeStart = offsetToPos(start.line);
+  const rangeEnd = offsetToPos(end.line);
+  return new Range(rangeStart, rangeEnd);
+}
+
+function addInlineNoteRefs(opts: {
+  decorations: DecorationOptions[];
+  document: TextDocument;
+}) {
+  const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
+  const noteRefCommentController =
+    ExtensionProvider.getExtension().noteRefCommentController;
+  opts.decorations.map(({ range }) => {
+    const thread = noteRefCommentController.createCommentThread(
+      opts.document.uri,
+      range,
+      [new NoteRefComment()]
+    );
+    thread.canReply = false;
+    thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
+    // TODO: get name of note
+    // thread.label = "";
+  });
+}
 
 // see [[Decorations|dendron://dendron.docs/pkg.plugin-core.ref.decorations]] for further docs
 export async function updateDecorations(editor: TextEditor): Promise<{
@@ -194,14 +245,28 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     const vscodeDecorations = data?.decorations
       ?.map(mapDecoration)
       .filter(isNotUndefined);
+    // return if no decorations
     if (vscodeDecorations === undefined) return {};
+
     const activeDecorations = mapValues(
       groupBy(vscodeDecorations, (decoration) => decoration.type),
       (decorations) => decorations.map((item) => item.decoration)
     );
 
+    let noteRefDecorators: DecorationOptions[] | undefined;
+
     for (const [type, decorations] of activeDecorations.entries()) {
       editor.setDecorations(type, decorations);
+      if (type === EDITOR_DECORATION_TYPES.noteRef) {
+        noteRefDecorators = decorations;
+      }
+    }
+
+    if (noteRefDecorators) {
+      addInlineNoteRefs({
+        decorations: noteRefDecorators,
+        document: editor.document,
+      });
     }
 
     // Clear out any old decorations left over from last pass

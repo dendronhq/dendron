@@ -198,7 +198,7 @@ export class DConfig {
     }
     const configPath = DConfig.configPath(wsRoot);
     const dendronConfigResult = readToString(configPath)
-      .andThen((input) => YamlUtils.fromStr(input))
+      .andThen((input) => YamlUtils.fromStr(input, true))
       .andThen((unknownconfig) => {
         const cleanConfig = DConfigLegacy.configIsV4(unknownconfig)
           ? DConfigLegacy.v4ToV5(unknownconfig)

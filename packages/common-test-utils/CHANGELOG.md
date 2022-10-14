@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.115.1 (2022-10-13)
+
+
+### Bug Fixes
+
+* npm overrides for packages with vulnerabilities ([#3666](https://github.com/dendronhq/dendron/issues/3666)) ([84f3cb2](https://github.com/dendronhq/dendron/commit/84f3cb2af692516778142e003cad294b7c579b25))
+
+
+
+
+
 # 0.115.0 (2022-10-11)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

@@ -30,6 +30,6 @@ export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
     });
 
-    vscode.window.showInformationMessage(`Ran something in SQLite`);
+    vscode.window.showInformationMessage(`Ran something in SQLite.`);
   }
 }

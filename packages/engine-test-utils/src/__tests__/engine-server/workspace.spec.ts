@@ -272,7 +272,7 @@ describe("WorkspaceService", () => {
         });
         ConfigUtils.setVaults(config, vaultsConfig);
         ConfigUtils.setWorkspaceProp(config, "enableRemoteVaultInit", false);
-        DConfig.writeConfig({ wsRoot, config });
+        await DConfig.writeConfig({ wsRoot, config });
         const ws = new WorkspaceService({ wsRoot });
         const didClone = await ws.initialize({
           onSyncVaultsProgress: () => {},

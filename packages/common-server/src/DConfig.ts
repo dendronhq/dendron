@@ -2,8 +2,8 @@ import {
   CleanDendronPublishingConfig,
   ConfigUtils,
   CONSTANTS,
-  RespWithOptError,
   DeepPartial,
+  DendronConfig,
   DendronError,
   DendronPublishingConfig,
   ErrorFactory,
@@ -13,7 +13,7 @@ import {
   GithubEditViewModeEnum,
   IDendronError,
   RespV3,
-  DendronConfig,
+  RespWithOptError,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -21,6 +21,7 @@ import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
 import { readYAML, writeYAML, writeYAMLAsync } from "./files";
+import { DConfigLegacy } from "./oneoff/ConfigCompat";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
@@ -195,9 +196,14 @@ export class DConfig {
       return _dendronConfig;
     }
     const configPath = DConfig.configPath(wsRoot);
+    const unknownconfig = readYAML(configPath, true) as DendronConfig;
+    const cleanConfig: DendronConfig = DConfigLegacy.configIsV4(unknownconfig)
+      ? DConfigLegacy.v4ToV5(unknownconfig)
+      : (unknownconfig as DendronConfig);
+
     // TODO: validate
     const config: DendronConfig = _.defaultsDeep(
-      readYAML(configPath, true) as DendronConfig,
+      cleanConfig,
       ConfigUtils.genDefaultConfig()
     );
     _dendronConfig = config;

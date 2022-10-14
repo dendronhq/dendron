@@ -1348,14 +1348,20 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
 export class YamlUtils {
   static load = fromThrowable(YAML.load, (error) => {
     return new DendronError({
-      message: `Error coding YAML string`,
+      message:
+        error instanceof YAML.YAMLException
+          ? `${error.name}: ${error.message}`
+          : `YAMLException`,
       severity: ERROR_SEVERITY.FATAL,
       ...(error instanceof Error && { innerError: error }),
     });
   });
   static dump = fromThrowable(YAML.dump, (error) => {
     return new DendronError({
-      message: `Error decoding YAML string`,
+      message:
+        error instanceof YAML.YAMLException
+          ? `${error.name}: ${error.message}`
+          : `YAMLException`,
       severity: ERROR_SEVERITY.FATAL,
       ...(error instanceof Error && { innerError: error }),
     });

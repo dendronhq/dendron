@@ -20,12 +20,14 @@ export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const createTablesSQL = `
   CREATE TABLE IF NOT EXISTS notes (
     id TEXT PRIMARY KEY,
-       fname TEXT NOT NULL,
+       fname TEXT NOT NULL
   ) WITHOUT ROWID;
   `;
 
     db.exec(createTablesSQL, (err) => {
-      vscode.window.showErrorMessage(`Error in SQLite: ${err}`);
+      if (err) {
+        vscode.window.showErrorMessage(`Error in SQLite: ${err}`);
+      }
     });
 
     vscode.window.showInformationMessage(`Ran something in SQLite`);

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "./util/zodUtil";
 import { ok, err } from "./utils";
 import type { Result } from "neverthrow";
 import { DendronError } from "./error";

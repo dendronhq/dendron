@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { schemaForType } from "../../../util/zodUtil";
+import { z, schemaForType } from "../../../util/zodUtil";
 
 export enum GithubEditViewModeEnum {
   tree = "tree",

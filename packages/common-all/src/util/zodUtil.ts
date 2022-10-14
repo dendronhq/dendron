@@ -1,4 +1,7 @@
+import { z } from "zod";
 import type { ZodType } from "zod";
+
+export { z };
 
 /**
  * util for defining zod schemas with external/custom types.

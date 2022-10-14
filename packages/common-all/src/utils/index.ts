@@ -2,7 +2,6 @@
 /* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
-import { z } from "zod";
 import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
@@ -44,7 +43,7 @@ import {
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
-import { schemaForType } from "../util/zodUtil";
+import { z, schemaForType } from "../util/zodUtil";
 import { DVault } from "../types/DVault";
 import {
   DendronConfig,

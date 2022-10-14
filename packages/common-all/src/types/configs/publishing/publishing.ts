@@ -1,9 +1,8 @@
-import { z } from "zod";
 import { DVault } from "../../DVault";
 import { GiscusConfig } from "./giscus";
 import { GithubConfig, genDefaultGithubConfig, githubSchema } from "./github";
 import { SEOConfig, genDefaultSEOConfig, seoSchema } from "./seo";
-import { schemaForType } from "../../../util/zodUtil";
+import { z, schemaForType } from "../../../util/zodUtil";
 
 export enum Theme {
   DARK = "dark",

@@ -10,7 +10,7 @@ export const decorateReference: Decorator<
   const { node: reference, engine, note, config } = opts;
   const { position } = reference;
 
-  const { errors } = await linkedNoteType({
+  const { errors, noteMeta } = await linkedNoteType({
     fname: reference.data.link.from.fname,
     anchorStart: reference.data.link.data.anchorStart,
     anchorEnd: reference.data.link.data.anchorEnd,
@@ -22,6 +22,10 @@ export const decorateReference: Decorator<
   const decoration: DecorationWikilink = {
     type: DECORATION_TYPES.noteRef,
     range: position2VSCodeRange(position),
+    data: {
+      link: reference.data.link,
+      noteMeta,
+    },
   };
 
   return { errors, decorations: [decoration] };

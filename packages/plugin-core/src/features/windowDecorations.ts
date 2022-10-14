@@ -7,6 +7,7 @@ import {
   isNotUndefined,
   mapValues,
   NoteProps,
+  RenderNoteResp,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import {
@@ -16,6 +17,7 @@ import {
   DecorationWikilink,
   DECORATION_TYPES,
   isDecorationHashTag,
+  NoteRefDecorator,
 } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
@@ -28,8 +30,6 @@ import {
   DecorationRangeBehavior,
   Diagnostic,
   MarkdownString,
-  Position,
-  Range,
   TextDocument,
   TextEditor,
   TextEditorDecorationType,
@@ -92,10 +92,24 @@ export const EDITOR_DECORATION_TYPES: {
   }),
 };
 
-export type DecorationAndType = {
+export type DendronDecoration<T = any> = {
+  /**
+   * type: mapping of {@link: DECORATION_TYPES} -> {@link: TextEditorDecorationType}
+   */
   type: TextEditorDecorationType;
+  /**
+   * VSCode DecorationOptions
+   */
   decoration: DecorationOptions;
+  /**
+   * Specific to type of decoration
+   */
+  data?: T;
 };
+
+type DendronNoteRefDecoration = Required<
+  DendronDecoration<NoteRefDecorator["data"]>
+>;
 
 export function delayedUpdateDecorations(
   updateDelay: number = DECORATION_UPDATE_DELAY
@@ -131,37 +145,43 @@ export class NoteRefComment implements Comment {
   public mode: CommentMode;
   public author: CommentAuthorInformation;
 
-  constructor() {
+  constructor(renderResp: RenderNoteResp) {
     this.mode = CommentMode.Preview;
     this.author = { name: "" };
-    this.body = new MarkdownString(`note ref`);
+    const mdString = renderResp.error
+      ? new MarkdownString(`Error: ${renderResp.error}`)
+      : new MarkdownString(renderResp.data);
+    mdString.isTrusted = true;
+    mdString.supportHtml = true;
+    this.body = mdString;
   }
 }
 
-function posToRange(start: Position, end: Position, document: TextDocument) {
-  const offsetToPos = document.positionAt;
-  const rangeStart = offsetToPos(start.line);
-  const rangeEnd = offsetToPos(end.line);
-  return new Range(rangeStart, rangeEnd);
-}
-
-function addInlineNoteRefs(opts: {
-  decorations: DecorationOptions[];
+async function addInlineNoteRefs(opts: {
+  decorations: DendronNoteRefDecoration[];
   document: TextDocument;
 }) {
   const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
+  const engine = ExtensionProvider.getEngine();
+
   const noteRefCommentController =
     ExtensionProvider.getExtension().noteRefCommentController;
-  opts.decorations.map(({ range }) => {
+
+  opts.decorations.map(async (ent) => {
+    if (ent.data.noteMeta === undefined) {
+      return;
+    }
+    const id = ent.data.noteMeta.id;
+    const renderResp = await engine.renderNote({ id });
     const thread = noteRefCommentController.createCommentThread(
       opts.document.uri,
-      range,
-      [new NoteRefComment()]
+      ent.decoration.range,
+      [new NoteRefComment(renderResp)]
     );
     thread.canReply = false;
     thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
     // TODO: get name of note
-    // thread.label = "";
+    thread.label = ent.data.noteMeta.title;
   });
 }
 
@@ -242,32 +262,33 @@ export async function updateDecorations(editor: TextEditor): Promise<{
       },
     });
 
+    // begin: extract decorations
     const vscodeDecorations = data?.decorations
       ?.map(mapDecoration)
       .filter(isNotUndefined);
     // return if no decorations
     if (vscodeDecorations === undefined) return {};
 
+    // begin: apply decorations
+    // NOTE: we group decorations so we can use `editor.setDecorations(type, decorations)` to apply values in bulk
     const activeDecorations = mapValues(
       groupBy(vscodeDecorations, (decoration) => decoration.type),
       (decorations) => decorations.map((item) => item.decoration)
     );
-
-    let noteRefDecorators: DecorationOptions[] | undefined;
-
-    for (const [type, decorations] of activeDecorations.entries()) {
-      editor.setDecorations(type, decorations);
-      if (type === EDITOR_DECORATION_TYPES.noteRef) {
-        noteRefDecorators = decorations;
-      }
+    for (const [type, payload] of activeDecorations.entries()) {
+      editor.setDecorations(type, payload);
     }
 
-    if (noteRefDecorators) {
-      addInlineNoteRefs({
-        decorations: noteRefDecorators,
-        document: editor.document,
-      });
-    }
+    // begin: apply inline note refs
+    const noteRefDecorators: DendronNoteRefDecoration[] =
+      vscodeDecorations.filter((ent) => {
+        return ent.type === EDITOR_DECORATION_TYPES.noteRef;
+      }) as DendronNoteRefDecoration[];
+
+    await addInlineNoteRefs({
+      decorations: noteRefDecorators,
+      document: editor.document,
+    });
 
     // Clear out any old decorations left over from last pass
     for (const type of _.values(EDITOR_DECORATION_TYPES)) {
@@ -298,11 +319,13 @@ export async function updateDecorations(editor: TextEditor): Promise<{
   }
 }
 
-function mapDecoration(decoration: Decoration): DecorationAndType | undefined {
+function mapDecoration(decoration: Decoration): DendronDecoration | undefined {
   switch (decoration.type) {
     // Some decoration types require special processing to add per-decoration data
     case DECORATION_TYPES.timestamp:
       return mapTimestamp(decoration as DecorationTimestamp);
+    case DECORATION_TYPES.noteRef:
+      return mapNoteRefLink(decoration as NoteRefDecorator);
     case DECORATION_TYPES.brokenWikilink: // fallthrough deliberate
     case DECORATION_TYPES.wikiLink:
       return mapWikilink(decoration as DecorationWikilink); // some wikilinks are hashtags and need the color squares
@@ -316,7 +339,7 @@ function mapDecoration(decoration: Decoration): DecorationAndType | undefined {
 
 function mapBasicDecoration(
   decoration: Decoration
-): DecorationAndType | undefined {
+): DendronDecoration | undefined {
   const type = EDITOR_DECORATION_TYPES[decoration.type];
   if (!type) return undefined;
 
@@ -325,10 +348,11 @@ function mapBasicDecoration(
     decoration: {
       range: VSCodeUtils.toRangeObject(decoration.range),
     },
+    data: decoration.data,
   };
 }
 
-function mapTimestamp(decoration: DecorationTimestamp): DecorationAndType {
+function mapTimestamp(decoration: DecorationTimestamp): DendronDecoration {
   const tsConfig = ExtensionProvider.getWorkspaceConfig().get(
     CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
   ) as DateTimeFormat;
@@ -347,9 +371,15 @@ function mapTimestamp(decoration: DecorationTimestamp): DecorationAndType {
   };
 }
 
+function mapNoteRefLink(
+  decoration: NoteRefDecorator
+): DendronNoteRefDecoration | undefined {
+  return mapBasicDecoration(decoration) as DendronNoteRefDecoration;
+}
+
 function mapWikilink(
   decoration: DecorationWikilink | DecorationHashTag
-): DecorationAndType | undefined {
+): DendronDecoration | undefined {
   if (isDecorationHashTag(decoration)) {
     const type = EDITOR_DECORATION_TYPES[decoration.type];
     if (!type) return undefined;
@@ -376,7 +406,7 @@ function mapWikilink(
 
 function mapTaskNote(
   decoration: DecorationTaskNote
-): DecorationAndType | undefined {
+): DendronDecoration | undefined {
   return {
     type: EDITOR_DECORATION_TYPES.taskNote,
     decoration: {

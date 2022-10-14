@@ -11,7 +11,8 @@ export enum DECORATION_TYPES {
   taskNote = "taskNote",
 }
 
-export type Decoration = {
+export type Decoration<T = any> = {
   type: DECORATION_TYPES;
   range: VSRange;
+  data?: T;
 };

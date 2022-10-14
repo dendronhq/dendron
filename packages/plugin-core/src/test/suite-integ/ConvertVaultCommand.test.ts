@@ -20,7 +20,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 suite("GIVEN ConvertVaultCommand", function () {
   describeMultiWS(
     "WHEN converting a local vault to a remote vault",
-    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
+    { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti, timeout: 5e3 },
     () => {
       let remote: string;
       before(async () => {

@@ -240,6 +240,7 @@ suite("WorkspaceWatcher", function () {
     "GIVEN a basic setup on a single vault workspace",
     {
       postSetupHook: setupBasic,
+      timeout: 5e3,
     },
     () => {
       test("WHEN user saves a file and content has not changed, THEN updated timestamp in frontmatter is not updated", async () => {

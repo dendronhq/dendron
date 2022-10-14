@@ -25,10 +25,12 @@ export class MockEngineAPIService implements ReducedDEngine {
   // private noteProps: NoteProps[];
 
   private store: NoteMetadataStore;
+  public wsRoot: string;
 
   constructor() {
     // this.noteProps = [];
     this.store = new NoteMetadataStore();
+    this.wsRoot = "";
   }
 
   async init() {
@@ -119,8 +121,6 @@ export class MockEngineAPIService implements ReducedDEngine {
     const resp = await this.store.get("foo");
 
     const data = resp.data as NoteProps;
-    return Promise.resolve({
-      data: [data],
-    });
+    return Promise.resolve([data]);
   }
 }

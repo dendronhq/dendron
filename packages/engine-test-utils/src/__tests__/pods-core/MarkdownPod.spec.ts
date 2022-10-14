@@ -14,7 +14,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { TestConfigUtils } from "../../config";
-import { createSiteConfig, runEngineTestV5 } from "../../engine";
+import { createPublishingConfig, runEngineTestV5 } from "../../engine";
 import { ENGINE_HOOKS } from "../../presets";
 import { checkNotInString, checkString, TestSeedUtils } from "../../utils";
 
@@ -154,20 +154,17 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
                 siteHierarchies: ["test-wikilink-to-url"],
                 siteRootDir: "docs",
               })
             );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
           },
           {
             wsRoot,
@@ -185,12 +182,9 @@ describe("markdown publish pod", () => {
             wikiLinkToURL: true,
           },
         });
-        // note id is foo.one, hence notes/foo.one.html
-        expect(resp).toContain("(https://localhost:8080/notes/foo.one.html)");
-        await checkString(
-          resp,
-          "[Link](https://localhost:8080/notes/foo.one.html)"
-        );
+        // note id is foo.one, hence notes/foo.one
+        expect(resp).toContain("(https://localhost:8080/notes/foo.one)");
+        await checkString(resp, "[Link](https://localhost:8080/notes/foo.one)");
       },
       { expect, preSetupHook: setupBasic }
     );
@@ -203,25 +197,22 @@ describe("markdown publish pod", () => {
         const vaultName = VaultUtils.getName(vaults[0]);
         const config = TestConfigUtils.withConfig(
           (config) => {
-            const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+            const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setWorkspaceProp(
-              v4DefaultConfig,
+              defaultConfig,
               "enableXVaultWikiLink",
               true
             );
             ConfigUtils.setProp(
-              v4DefaultConfig,
-              "site",
-              createSiteConfig({
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
                 siteHierarchies: ["test-wikilink-to-url"],
                 siteRootDir: "docs",
               })
             );
-            ConfigUtils.setVaults(
-              v4DefaultConfig,
-              ConfigUtils.getVaults(config)
-            );
-            return v4DefaultConfig;
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
           },
           {
             wsRoot,
@@ -240,9 +231,9 @@ describe("markdown publish pod", () => {
             wikiLinkToURL: true,
           },
         });
-        // note id is foo.one, hence notes/foo.one.html
-        expect(resp).toContain("https://localhost:8080/notes/test1.html");
-        await checkNotInString(resp, "https://localhost:8080/notes/test2.html");
+        // note id is foo.one, hence notes/foo.one
+        expect(resp).toContain("https://localhost:8080/notes/test1");
+        await checkNotInString(resp, "https://localhost:8080/notes/test2");
       },
       { expect, preSetupHook: setupBasicMulti }
     );

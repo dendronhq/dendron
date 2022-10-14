@@ -18,7 +18,7 @@ import {
   DNoteRefLinkRaw,
   DVault,
   getSlugger,
-  IntermediateDendronConfig,
+  DendronConfig,
   isBlockAnchor,
   isLineAnchor,
   isNotUndefined,
@@ -488,7 +488,7 @@ export class LinkUtils {
   }: {
     note: NoteProps;
     engine: ReducedDEngine;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     filter?: LinkFilter;
     type: "regular" | "candidate";
   }): Promise<DLink[]> {
@@ -530,7 +530,7 @@ export class LinkUtils {
     filter,
   }: {
     note: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     filter?: LinkFilter;
   }): DLink[] {
     const content = note.body;
@@ -861,7 +861,7 @@ export class LinkUtils {
   }: {
     note: NoteProps;
     engine: ReducedDEngine;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const content = note.body;
 
@@ -898,7 +898,7 @@ export class LinkUtils {
   }: {
     note: NoteProps;
     noteDicts: NoteDicts;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const content = note.body;
 
@@ -1419,7 +1419,7 @@ export class RemarkUtils {
     note: NoteProps,
     changes: NoteChangeEntry[],
     engine: DEngineClient,
-    dendronConfig: IntermediateDendronConfig
+    dendronConfig: DendronConfig
   ) {
     const prevNote = { ...note };
     // eslint-disable-next-line func-names
@@ -1443,8 +1443,7 @@ export class RemarkUtils {
             await engine.findNotesMeta({ fname: linkNode.value, vault })
           )[0];
           if (existingNote) {
-            const publishingConfig =
-              ConfigUtils.getPublishingConfig(dendronConfig);
+            const publishingConfig = ConfigUtils.getPublishing(dendronConfig);
             const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
             linkNode.value = RemarkUtils.getNoteUrl({
@@ -1605,7 +1604,7 @@ export class RemarkUtils {
     config,
   }: {
     note: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): Promise<NoteBlock[]> {
     const proc = MDUtilsV5.procRemarkFull({
       noteToRender: note,
@@ -1738,7 +1737,7 @@ export class RemarkUtils {
 
   // Copied from WorkspaceUtils:
   static getNoteUrl(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     note: NotePropsMeta;
     vault: DVault;
     urlRoot?: string;

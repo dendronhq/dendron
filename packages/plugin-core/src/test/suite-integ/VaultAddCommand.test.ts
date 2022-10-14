@@ -3,7 +3,7 @@ import {
   CONSTANTS,
   DVault,
   FOLDERS,
-  IntermediateDendronConfig,
+  DendronConfig,
   normalizeUnixPath,
   NoteUtils,
   SchemaUtils,
@@ -426,12 +426,12 @@ suite("VaultAddCommand", function () {
   });
 });
 
-function enableSelfCOntainedVaults(config: IntermediateDendronConfig) {
+function enableSelfCOntainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = true;
   return config;
 }
 
-function disableSelfContainedVaults(config: IntermediateDendronConfig) {
+function disableSelfContainedVaults(config: DendronConfig) {
   config.dev!.enableSelfContainedVaults = false;
   return config;
 }

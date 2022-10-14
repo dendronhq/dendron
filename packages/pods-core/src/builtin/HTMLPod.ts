@@ -67,7 +67,6 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
     const previewConfig = ConfigUtils.getPreview(overrideConfig);
     previewConfig.enablePrettyRefs = enablePrettyRefs;
-
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       engine,

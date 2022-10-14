@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   DVault,
   WorkspaceSettings,
   ConfigUtils,
@@ -69,7 +69,7 @@ function stubQuickPick(vault: DVault) {
 function getConfig() {
   return DConfig.getRaw(
     ExtensionProvider.getDWorkspace().wsRoot
-  ) as IntermediateDendronConfig;
+  ) as DendronConfig;
 }
 
 function getWorkspaceFile() {
@@ -95,7 +95,7 @@ suite("GIVEN VaultRemoveCommand", function () {
         wsName: remoteWsName,
       });
       stubQuickPick({ fsPath: remoteVaultName, workspace: remoteWsName });
-      await new VaultRemoveCommand().run();
+      await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
       const config = getConfig();
       expect(ConfigUtils.getVaults(config)).toEqual(vaults);
       expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});
@@ -116,7 +116,7 @@ suite("GIVEN VaultRemoveCommand", function () {
         // @ts-ignore
         data: vaultToRemove,
       });
-      await new VaultRemoveCommand().run();
+      await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
       // Shouldn't delete the actual files
       expect(
@@ -127,7 +127,7 @@ suite("GIVEN VaultRemoveCommand", function () {
       ).toBeTruthy();
 
       // check that the config updated
-      const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+      const config = DConfig.getRaw(wsRoot) as DendronConfig;
       expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
         vaults[0].fsPath,
         vaults[2].fsPath,
@@ -190,7 +190,7 @@ suite("GIVEN VaultRemoveCommand", function () {
             // @ts-ignore
             data: vaultToRemove,
           });
-          await new VaultRemoveCommand().run();
+          await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
           // after remove, we have 2 vaults in dendron.yml
           const postRunConfig = DConfig.readConfigSync(wsRoot);
@@ -217,7 +217,7 @@ suite("GIVEN VaultRemoveCommand", function () {
           // @ts-ignore
           data: vaultToRemove,
         });
-        await new VaultRemoveCommand().run();
+        await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
         // Shouldn't delete the actual files
         expect(
@@ -228,7 +228,7 @@ suite("GIVEN VaultRemoveCommand", function () {
         ).toBeTruthy();
 
         // check that the config updated
-        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const config = DConfig.getRaw(wsRoot) as DendronConfig;
         expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
           vaults[0].fsPath,
           vaults[2].fsPath,
@@ -258,7 +258,7 @@ suite("GIVEN VaultRemoveCommand", function () {
           // @ts-ignore
           data: vaultToRemove,
         });
-        await new VaultRemoveCommand().run();
+        await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
         // Shouldn't delete the actual files
         expect(
@@ -269,7 +269,7 @@ suite("GIVEN VaultRemoveCommand", function () {
         ).toBeTruthy();
 
         // check that the config updated
-        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const config = DConfig.getRaw(wsRoot) as DendronConfig;
         expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
           vaults[1].fsPath,
           vaults[2].fsPath,
@@ -298,9 +298,9 @@ suite("GIVEN VaultRemoveCommand", function () {
       stubVaultInput({ sourceType: "local", sourcePath: vault2 });
       await new VaultAddCommand().run();
 
-      const config = readYAML(configPath) as IntermediateDendronConfig;
+      const config = readYAML(configPath) as DendronConfig;
       // confirm that duplicateNoteBehavior option exists
-      const publishingConfig = ConfigUtils.getPublishingConfig(config);
+      const publishingConfig = ConfigUtils.getPublishing(config);
       expect(publishingConfig.duplicateNoteBehavior).toBeTruthy();
 
       const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
@@ -308,11 +308,11 @@ suite("GIVEN VaultRemoveCommand", function () {
       VSCodeUtils.showQuickPick = () => {
         return { data: vaultsAfter[1] };
       };
-      await new VaultRemoveCommand().run();
+      await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
-      const configNew = readYAML(configPath) as IntermediateDendronConfig;
+      const configNew = readYAML(configPath) as DendronConfig;
       // confirm that duplicateNoteBehavior setting is gone
-      const publishingConfigNew = ConfigUtils.getPublishingConfig(configNew);
+      const publishingConfigNew = ConfigUtils.getPublishing(configNew);
       expect(publishingConfigNew.duplicateNoteBehavior).toBeFalsy();
     });
   });
@@ -332,7 +332,7 @@ suite("GIVEN VaultRemoveCommand", function () {
 
       const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
 
-      const configOrig = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+      const configOrig = DConfig.getRaw(wsRoot) as DendronConfig;
       // check what we are starting from.
       const origVaults = ConfigUtils.getVaults(configOrig);
       expect(origVaults.map((ent) => ent.fsPath)).toEqual([
@@ -345,12 +345,12 @@ suite("GIVEN VaultRemoveCommand", function () {
       VSCodeUtils.showQuickPick = () => {
         return { data: vaultsAfter[1] };
       };
-      await new VaultRemoveCommand().run();
+      await new VaultRemoveCommand(ExtensionProvider.getExtension()).run();
 
-      const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+      const config = DConfig.getRaw(wsRoot) as DendronConfig;
 
       // check that "vault2" is gone from payload
-      const publishingConfig = ConfigUtils.getPublishingConfig(config);
+      const publishingConfig = ConfigUtils.getPublishing(config);
       expect(publishingConfig.duplicateNoteBehavior!.payload).toEqual([
         VaultUtils.getName(vaultsAfter[2]),
         VaultUtils.getName(vaultsAfter[0]),
@@ -365,7 +365,9 @@ suite("GIVEN VaultRemoveCommand", function () {
         const args = {
           fsPath: path.join(wsRoot, vaults[1].fsPath),
         };
-        await new VaultRemoveCommand().run(args);
+        await new VaultRemoveCommand(ExtensionProvider.getExtension()).run(
+          args
+        );
         const config = getConfig();
         expect(ConfigUtils.getVaults(config)).toNotEqual(vaults);
         expect(
@@ -388,7 +390,9 @@ suite("GIVEN VaultRemoveCommand", function () {
         const args = {
           fsPath: path.join(wsRoot, remoteWsName, remoteVaultName),
         };
-        await new VaultRemoveCommand().run(args);
+        await new VaultRemoveCommand(ExtensionProvider.getExtension()).run(
+          args
+        );
         const config = getConfig();
         expect(ConfigUtils.getVaults(config)).toEqual(vaults);
         expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});

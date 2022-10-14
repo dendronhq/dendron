@@ -21,7 +21,7 @@ import _ from "lodash";
 import React, { useCallback, useMemo, useState } from "react";
 import { useWorkspaceProps } from "../hooks";
 import { DendronProps } from "../types";
-import luxonGenerateConfig from "../utils/luxon";
+import luxonGenerateConfig from "../utils/luxonGenerateConfig";
 import { postVSCodeMessage } from "../utils/vscode";
 
 const { useEngine } = engineHooks;

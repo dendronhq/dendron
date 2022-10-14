@@ -6,7 +6,7 @@ import {
   DVault,
   FOLDERS,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   IProgress,
   IProgressStep,
   NoteProps,
@@ -50,7 +50,7 @@ export class MarkdownExportPodV2
 {
   private _config: RunnableMarkdownV2PodConfig;
   private _engine: DEngineClient;
-  private _dendronConfig: IntermediateDendronConfig;
+  private _dendronConfig: DendronConfig;
 
   constructor({
     podConfig,
@@ -59,7 +59,7 @@ export class MarkdownExportPodV2
   }: {
     podConfig: RunnableMarkdownV2PodConfig;
     engine: DEngineClient;
-    dendronConfig: IntermediateDendronConfig;
+    dendronConfig: DendronConfig;
   }) {
     this._config = podConfig;
     this._engine = engine;
@@ -215,7 +215,7 @@ export class MarkdownExportPodV2
     config,
   }: {
     note: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const {
       convertTagNotesToLinks = false,
@@ -245,7 +245,14 @@ export class MarkdownExportPodV2
       dest: DendronASTDest.MD_REGULAR,
       config: {
         ...config,
-        usePrettyRefs: false,
+        preview: {
+          ...config.preview,
+          enablePrettyRefs: false,
+        },
+        publishing: {
+          ...config.publishing,
+          enablePrettyRefs: false,
+        },
       },
       fname: note.fname,
       vault: note.vault,

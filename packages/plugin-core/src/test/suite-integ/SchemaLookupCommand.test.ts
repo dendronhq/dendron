@@ -120,8 +120,8 @@ suite("SchemaLookupCommand", function () {
           const fileName = editor!.document.fileName;
           const basename = path.basename(fileName, ".yml");
           expect(basename).toEqual("baz.schema");
-          const bazSchemaModule = engine.schemas["baz"];
-          expect(bazSchemaModule.vault.fsPath).toEqual(fooNote.vault.fsPath);
+          const bazSchemaModule = (await engine.getSchema("baz")).data;
+          expect(bazSchemaModule?.vault.fsPath).toEqual(fooNote.vault.fsPath);
           cmd.cleanUp();
           done();
         },
@@ -142,7 +142,12 @@ suite("SchemaLookupCommand", function () {
           const enrichOut = await cmd.enrichInputs(gatherOut);
           const selectedItems = enrichOut?.quickpick.selectedItems;
           const selectedItemIds = selectedItems?.map((item) => item.id);
-          expect(selectedItemIds).toEqual(_.keys(engine.schemas));
+          expect(selectedItemIds).toEqual(
+            _.map(
+              (await engine.querySchema("*")).data,
+              (schema) => schema.fname
+            )
+          );
           cmd.cleanUp();
           done();
         },

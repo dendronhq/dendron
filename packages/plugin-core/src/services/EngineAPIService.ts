@@ -1,17 +1,20 @@
 import {
   APIUtils,
-  BulkWriteNotesResp,
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
   BulkWriteNotesOpts,
+  BulkWriteNotesResp,
+  DeleteNoteResp,
   DendronAPI,
   DEngineClient,
   DEngineInitResp,
   DHookDict,
   DVault,
   EngagementEvents,
-  DeleteNoteResp,
   EngineDeleteOpts,
   EngineEventEmitter,
   EngineInfoResp,
+  EngineSchemaWriteOpts,
   EngineWriteOptsV2,
   Event,
   extractNoteChangeEntriesByType,
@@ -20,28 +23,22 @@ import {
   GetDecorationsResp,
   GetNoteBlocksOpts,
   GetNoteBlocksResp,
+  GetNoteMetaResp,
+  GetNoteResp,
+  GetSchemaResp,
   NoteChangeEntry,
   NoteProps,
-  NotePropsByFnameDict,
-  NotePropsByIdDict,
   NotePropsMeta,
   QueryNotesOpts,
+  QueryNotesResp,
+  QuerySchemaResp,
   RenameNoteOpts,
+  RenameNoteResp,
   RenderNoteOpts,
-  SchemaModuleDict,
+  RenderNoteResp,
   SchemaModuleProps,
   WriteNoteResp,
-  BulkGetNoteResp,
-  BulkGetNoteMetaResp,
-  GetNoteResp,
-  RenameNoteResp,
-  QueryNotesResp,
-  RenderNoteResp,
-  GetSchemaResp,
-  QuerySchemaResp,
   WriteSchemaResp,
-  EngineSchemaWriteOpts,
-  GetNoteMetaResp,
 } from "@dendronhq/common-all";
 import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -119,40 +116,11 @@ export class EngineAPIService
     this._trustedWorkspace = value;
   }
 
-  /**
-   * @deprecated
-   * For accessing a specific note by id, see {@link EngineAPIService.getNote}
-   * If you need all notes, avoid modifying any note as this will cause unintended changes on the store side
-   */
-  public get notes(): NotePropsByIdDict {
-    return this._internalEngine.notes;
-  }
-  public set notes(arg: NotePropsByIdDict) {
-    this._internalEngine.notes = arg;
-  }
-
-  /**
-   * @deprecated see {@link EngineAPIService.findNotes}
-   */
-  public get noteFnames(): NotePropsByFnameDict {
-    return this._internalEngine.noteFnames;
-  }
-  public set noteFnames(arg: NotePropsByFnameDict) {
-    this._internalEngine.noteFnames = arg;
-  }
-
   public get wsRoot(): string {
     return this._internalEngine.wsRoot;
   }
   public set wsRoot(arg: string) {
     this._internalEngine.wsRoot = arg;
-  }
-
-  public get schemas(): SchemaModuleDict {
-    return this._internalEngine.schemas;
-  }
-  public set schemas(arg: SchemaModuleDict) {
-    this._internalEngine.schemas = arg;
   }
 
   public get vaults(): DVault[] {
@@ -273,18 +241,6 @@ export class EngineAPIService
 
   queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     return this._internalEngine.queryNotes(opts);
-  }
-
-  queryNotesSync({
-    qs,
-    originalQS,
-    vault,
-  }: {
-    qs: string;
-    originalQS: string;
-    vault?: DVault | undefined;
-  }): QueryNotesResp {
-    return this._internalEngine.queryNotesSync({ qs, originalQS, vault });
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {

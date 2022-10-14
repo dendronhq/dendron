@@ -6,7 +6,7 @@ import {
   DVault,
   ERROR_STATUS,
   getSlugger,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteDicts,
   NotePropsMeta,
   OptionalExceptFor,
@@ -96,7 +96,7 @@ export type ProcDataFullOptsV5 = {
   vault: DVault;
   fname: string;
   dest: DendronASTDest;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   vaults?: DVault[];
 
   /**
@@ -128,7 +128,7 @@ export type ProcDataFullV5 = {
 
   // derived: unless passed in, these come from engine or are set by
   // other unified plugins
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   insideNoteRef?: boolean;
 
   fm?: any;
@@ -359,7 +359,7 @@ export class MDUtilsV5 {
             );
           }
           const config = data.config;
-          const publishingConfig = ConfigUtils.getPublishingConfig(config);
+          const publishingConfig = ConfigUtils.getPublishing(config);
           const assetsPrefix = publishingConfig.assetsPrefix;
 
           proc = proc.use(dendronPub, {
@@ -402,7 +402,7 @@ export class MDUtilsV5 {
         this.setProcData(proc, data as ProcDataFullV5);
 
         // add additional plugins
-        const config = data.config as IntermediateDendronConfig;
+        const config = data.config as DendronConfig;
         const shouldApplyPublishRules =
           MDUtilsV5.shouldApplyPublishingRules(proc);
 

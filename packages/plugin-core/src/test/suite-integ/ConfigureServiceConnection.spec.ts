@@ -29,7 +29,9 @@ suite("ConfigureServiceConnection", function () {
       },
       () => {
         test("THEN new service config must be created", async () => {
-          const cmd = new ConfigureServiceConnection();
+          const cmd = new ConfigureServiceConnection(
+            ExtensionProvider.getExtension()
+          );
           sinon.stub(vscode.window, "showQuickPick").returns(
             Promise.resolve({
               label: "Create New Service Connection",
@@ -62,7 +64,9 @@ suite("ConfigureServiceConnection", function () {
       },
       () => {
         test("THEN service config of selected connection Id must open", async () => {
-          const cmd = new ConfigureServiceConnection();
+          const cmd = new ConfigureServiceConnection(
+            ExtensionProvider.getExtension()
+          );
           sinon.stub(vscode.window, "showQuickPick").returns(
             Promise.resolve({
               label: "airtable-2",

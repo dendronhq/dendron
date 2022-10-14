@@ -6,8 +6,8 @@ import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { WSUtils } from "../WSUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getExtension, getDWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { ExtensionProvider } from "../ExtensionProvider";
 
 type CommandOpts = { src: string };
 
@@ -23,7 +23,8 @@ export class RestoreVaultCommand extends BaseCommand<
 > {
   key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
-    const snapshots = path.join(getDWorkspace().wsRoot as string, "snapshots");
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const snapshots = path.join(wsRoot, "snapshots");
 
     const choices = readdirSync(snapshots)
       .sort()
@@ -37,7 +38,8 @@ export class RestoreVaultCommand extends BaseCommand<
   }
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
-    const snapshots = path.join(getDWorkspace().wsRoot as string, "snapshots");
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const snapshots = path.join(wsRoot, "snapshots");
     const { data } = inputs;
     const src = path.join(snapshots, data);
     if (!fs.existsSync(src)) {
@@ -48,8 +50,8 @@ export class RestoreVaultCommand extends BaseCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const ext = getExtension();
-    const { engine, vaults, wsRoot } = getDWorkspace();
+    const ext = ExtensionProvider.getExtension();
+    const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
     try {
       const { src } = opts;
       const pod = new SnapshotImportPod();

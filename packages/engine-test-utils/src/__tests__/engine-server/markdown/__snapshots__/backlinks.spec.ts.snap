@@ -6,8 +6,8 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"one.html\\">One (vault1)</a></li>
-<li><a href=\\"two.html\\">Two (vault1)</a></li>
+<li><a href=\\"one\\">One (vault1)</a></li>
+<li><a href=\\"two\\">Two (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -22,7 +22,7 @@ VFile {
 <hr>
 <strong>Backlinks</strong>
 <ul>
-<li><a href=\\"one.html\\">One (vault1)</a></li>
+<li><a href=\\"one\\">One (vault1)</a></li>
 </ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},

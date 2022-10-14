@@ -35,12 +35,12 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
           await testCase.preSetupHook(opts);
           TestConfigUtils.withConfig(
             (config) => {
-              const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
+              const defaultConfig = ConfigUtils.genDefaultConfig();
               ConfigUtils.setVaults(
-                v4DefaultConfig,
+                defaultConfig,
                 ConfigUtils.getVaults(config)
               );
-              return v4DefaultConfig;
+              return defaultConfig;
             },
             {
               wsRoot: opts.wsRoot,

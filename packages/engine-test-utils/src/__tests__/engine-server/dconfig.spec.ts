@@ -1,4 +1,4 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig } from "@dendronhq/common-all";
 import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
 import _ from "lodash";
 import Sinon from "sinon";
@@ -7,7 +7,7 @@ import { VAULTS } from "../../presets";
 import { TestWorkspaceUtils } from "../../utils/workspace";
 
 function getDefaultConfig() {
-  const defaultConfig: IntermediateDendronConfig = {
+  const defaultConfig: DendronConfig = {
     ...ConfigUtils.genLatestConfig(),
   };
   defaultConfig.publishing.duplicateNoteBehavior = {

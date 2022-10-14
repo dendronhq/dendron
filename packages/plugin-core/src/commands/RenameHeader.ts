@@ -20,12 +20,10 @@ import { DENDRON_COMMANDS } from "../constants";
 import { delayedUpdateDecorations } from "../features/windowDecorations";
 import { VSCodeUtils } from "../vsCodeUtils";
 import { getAnalyticsPayload } from "../utils/analytics";
-import { getExtension } from "../workspace";
 import { BasicCommand } from "./base";
-import { WSUtils } from "../WSUtils";
-import { ExtensionProvider } from "../ExtensionProvider";
 import { ProxyMetricUtils } from "../utils/ProxyMetricUtils";
 import { Heading } from "@dendronhq/engine-server";
+import { IDendronExtension } from "../dendronExtensionInterface";
 
 type CommandOpts =
   | {
@@ -51,14 +49,19 @@ export class RenameHeaderCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.RENAME_HEADER.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
 
   async gatherInputs(
     opts: CommandOpts
   ): Promise<Required<CommandOpts> | undefined> {
     let { oldHeader, newHeader, source } = opts || {};
     const { editor, selection } = VSCodeUtils.getSelection();
-    const extension = ExtensionProvider.getExtension();
-    const { wsUtils } = extension;
+    const { wsUtils } = this.extension;
     const note = await wsUtils.getActiveNote();
     if (_.isUndefined(note)) {
       throw new DendronError({
@@ -119,11 +122,12 @@ export class RenameHeaderCommand extends BasicCommand<
     const { oldHeader, newHeader } = opts || {};
     const ctx = "RenameHeaderCommand";
     this.L.info({ ctx, oldHeader, newHeader, msg: "enter" });
-    const engine = getExtension().getEngine();
+    const engine = this.extension.getEngine();
     const editor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(newHeader) || _.isUndefined(oldHeader) || !editor) return;
-    const document = editor.document;
-    const note = await WSUtils.getNoteFromDocument(document);
+    const note = await this.extension.wsUtils.getNoteFromDocument(
+      editor.document
+    );
     if (!note) return;
 
     const noteLoc = {
@@ -188,8 +192,7 @@ export class RenameHeaderCommand extends BasicCommand<
       return;
     }
 
-    const extension = ExtensionProvider.getExtension();
-    const engine = extension.getEngine();
+    const engine = this.extension.getEngine();
     const { vaults } = engine;
 
     ProxyMetricUtils.trackRefactoringProxyMetric({

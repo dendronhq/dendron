@@ -1,11 +1,9 @@
 import {
   assert,
-  IntermediateDendronConfig,
+  DendronConfig,
   DendronError,
-  DendronSiteConfig,
   DendronSiteFM,
   DNodeUtils,
-  DuplicateNoteActionEnum,
   DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
@@ -17,7 +15,6 @@ import {
   VaultUtils,
   ConfigUtils,
   DendronPublishingConfig,
-  configIsV4,
   isBlockAnchor,
   getSlugger,
   IDendronError,
@@ -44,7 +41,7 @@ const LOGGER_NAME = "SiteUtils";
 export class SiteUtils {
   static canPublish(opts: {
     note: NotePropsMeta;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config, engine } = opts;
@@ -91,13 +88,13 @@ export class SiteUtils {
 
   static isPublished(opts: {
     note: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     engine: DEngineClient;
   }) {
     const { note, config } = opts;
     // check if note is in index
     const domain = DNodeUtils.domainName(note.fname);
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (
       publishingConfig.siteHierarchies[0] !== "root" &&
       publishingConfig.siteHierarchies.indexOf(domain) < 0
@@ -160,17 +157,15 @@ export class SiteUtils {
 
   static async filterByConfig(opts: {
     engine: DEngineClient;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     noExpandSingleDomain?: boolean;
   }): Promise<{ notes: NotePropsByIdDict; domains: NoteProps[] }> {
     const logger = createLogger(LOGGER_NAME);
     const { engine, config } = opts;
 
-    const cleanPublishingConfig = configIsV4(config)
-      ? DConfig.cleanSiteConfig(
-          ConfigUtils.getSite(config) as DendronSiteConfig
-        )
-      : DConfig.cleanPublishingConfig(ConfigUtils.getPublishing(config));
+    const cleanPublishingConfig = DConfig.cleanPublishingConfig(
+      ConfigUtils.getPublishing(config)
+    );
 
     DConfig.setCleanPublishingConfig({
       config,
@@ -241,7 +236,7 @@ export class SiteUtils {
    */
   static async filterByHierarchy(opts: {
     domain: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     engine: DEngineClient;
     navOrder: number;
   }): Promise<{ notes: NotePropsByIdDict; domain: NoteProps } | undefined> {
@@ -263,7 +258,7 @@ export class SiteUtils {
     });
 
     let domainNote: NoteProps | undefined;
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     const duplicateNoteBehavior = publishingConfig.duplicateNoteBehavior;
     // duplicate notes found with same name, need to intelligently resolve
     if (notes.length > 1) {
@@ -412,7 +407,7 @@ export class SiteUtils {
   }
 
   static getConfigForHierarchy(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     noteOrName: NotePropsMeta | string;
   }) {
     const { config, noteOrName } = opts;
@@ -434,13 +429,13 @@ export class SiteUtils {
   }
 
   static getSiteOutputPath(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     wsRoot: string;
     stage: "dev" | "prod";
   }) {
     const { config, wsRoot, stage } = opts;
     let siteRootPath: string;
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (stage === "dev") {
       siteRootPath = path.join(wsRoot, "build", "site");
       fs.ensureDirSync(siteRootPath);
@@ -454,7 +449,7 @@ export class SiteUtils {
     config,
   }: {
     vault: DVault;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): { url?: string; index?: string } {
     if (vault.seed) {
       const seeds = ConfigUtils.getWorkspace(config).seeds;
@@ -468,11 +463,11 @@ export class SiteUtils {
     if (vault.siteUrl) {
       return { url: vault.siteUrl, index: vault.siteIndex };
     }
-    const { siteUrl, siteIndex } = ConfigUtils.getPublishingConfig(config);
+    const { siteUrl, siteIndex } = ConfigUtils.getPublishing(config);
     return { url: siteUrl, index: siteIndex };
   }
 
-  static getSitePrefixForNote(config: IntermediateDendronConfig) {
+  static getSitePrefixForNote(config: DendronConfig) {
     const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
     return assetsPrefix ? assetsPrefix + "/notes/" : "/notes/";
   }
@@ -486,7 +481,7 @@ export class SiteUtils {
   }: {
     pathValue?: string;
     pathAnchor?: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     addPrefix?: boolean;
     note?: NoteProps;
   }): string {
@@ -527,13 +522,13 @@ export class SiteUtils {
     allowStubs?: boolean;
     engine: DEngineClient;
     fname: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     noteCandidates: NoteProps[];
   }) {
     const { engine, fname, noteCandidates, config, dupBehavior, allowStubs } =
       _.defaults(opts, {
         dupBehavior: {
-          action: DuplicateNoteActionEnum.useVault,
+          action: "useVault",
           payload: [],
         } as UseVaultBehavior,
         allowStubs: true,
@@ -637,7 +632,7 @@ export class SiteUtils {
     return indexNote ? note.fname === indexNote : DNodeUtils.isRoot(note);
   }
 
-  static validateConfig(sconfig: DendronSiteConfig | DendronPublishingConfig): {
+  static validateConfig(sconfig: DendronPublishingConfig): {
     error?: IDendronError;
   } {
     // asset prefix needs one slash

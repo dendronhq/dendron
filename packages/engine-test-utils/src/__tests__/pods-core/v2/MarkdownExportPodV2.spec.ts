@@ -1,6 +1,6 @@
 import {
   DEngineClient,
-  IntermediateDendronConfig,
+  DendronConfig,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -28,7 +28,7 @@ const setupPod = async (setupOpts: {
   opts: RunEngineTestFunctionOpts;
   fname: string;
   podConfigOpts?: Partial<RunnableMarkdownV2PodConfig>;
-  publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
+  publishConfigOverride?: Partial<DendronConfig["publishing"]>;
 }) => {
   const { opts, fname, podConfigOpts } = setupOpts;
   const config = DConfig.readConfigSync(opts.engine.wsRoot);
@@ -60,7 +60,7 @@ async function runPod({
 }: {
   engineOpts: RunEngineTestFunctionOpts;
   podOpts: { fname: string; podConfigOpts: any };
-  publishConfigOverride?: Partial<IntermediateDendronConfig["publishing"]>;
+  publishConfigOverride?: Partial<DendronConfig["publishing"]>;
 }) {
   const { props, pod } = await setupPod({
     opts: engineOpts,

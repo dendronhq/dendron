@@ -1,8 +1,8 @@
 /* eslint-disable */
 import {
   CONSTANTS,
-  IntermediateDendronConfig,
-  DendronSiteConfig,
+  DendronConfig,
+  DendronPublishingConfig,
   Time,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -21,11 +21,11 @@ export class DConfig {
    */
   static getRaw(wsRoot: string) {
     const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(configPath) as Partial<IntermediateDendronConfig>;
+    const config = readYAML(configPath) as Partial<DendronConfig>;
     return config;
   }
 
-  static getSiteIndex(sconfig: DendronSiteConfig) {
+  static getSiteIndex(sconfig: DendronPublishingConfig) {
     let { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
@@ -35,7 +35,7 @@ export class DConfig {
     config,
   }: {
     wsRoot: string;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const configPath = DConfig.configPath(wsRoot);
     return writeYAML(configPath, config);

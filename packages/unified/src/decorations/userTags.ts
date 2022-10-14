@@ -12,7 +12,7 @@ export const decorateUserTag: Decorator<UserTag, DecorationWikilink> = async (
   const { type, errors } = await linkedNoteType({
     fname: userTag.fname,
     engine,
-    vaults: config.workspace?.vaults ?? config.vaults ?? [],
+    vaults: config.workspace?.vaults ?? [],
   });
 
   const decoration: DecorationWikilink = {

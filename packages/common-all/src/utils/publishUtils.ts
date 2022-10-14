@@ -1,11 +1,6 @@
 import path from "path";
 import { ConfigUtils } from ".";
-import { DendronSiteFM, NoteProps, SEOProps } from "../types";
-import { DendronSiteConfig } from "../types/configs/dendronConfigLegacy";
-import {
-  configIsV4,
-  IntermediateDendronConfig,
-} from "../types/intermediateConfigs";
+import { DendronConfig, DendronSiteFM, NoteProps, SEOProps } from "../types";
 
 export class PublishUtils {
   static getPublishFM(note: NoteProps): DendronSiteFM {
@@ -14,19 +9,10 @@ export class PublishUtils {
     }
     return note.custom as DendronSiteFM;
   }
-  static getSEOPropsFromConfig(
-    config: IntermediateDendronConfig
-  ): Partial<SEOProps> {
-    if (configIsV4(config)) {
-      const { title, twitter, description, image } = ConfigUtils.getSite(
-        config
-      ) as DendronSiteConfig;
-      return { title, twitter, description, image };
-    } else {
-      const { title, twitter, description, image } =
-        ConfigUtils.getPublishing(config).seo;
-      return { title, twitter, description, image };
-    }
+  static getSEOPropsFromConfig(config: DendronConfig): Partial<SEOProps> {
+    const { title, twitter, description, image } =
+      ConfigUtils.getPublishing(config).seo;
+    return { title, twitter, description, image };
   }
 
   static getSEOPropsFromNote(note: NoteProps): SEOProps {
@@ -61,7 +47,7 @@ export class PublishUtils {
   /**
    * Site banner uses a custom react component
    */
-  static hasCustomSiteBanner(config: IntermediateDendronConfig): boolean {
+  static hasCustomSiteBanner(config: DendronConfig): boolean {
     return ConfigUtils.getPublishing(config).siteBanner === "custom";
   }
 }

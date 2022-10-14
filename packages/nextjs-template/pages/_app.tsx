@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   CONSTANTS,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
   Theme,
 } from "@dendronhq/common-all";
@@ -41,7 +41,7 @@ const themes: { [key in Theme]: string } = {
 
 type PageProps = {
   noteIndex: NoteProps;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   body?: string;
 };
 

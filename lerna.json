@@ -1,8 +1,5 @@
 {
-  "packages": [
-    "packages/*",
-    "bootstrap/scripts"
-  ],
+  "packages": ["packages/*", "bootstrap/scripts"],
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {

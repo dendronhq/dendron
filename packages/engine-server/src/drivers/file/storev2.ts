@@ -8,7 +8,6 @@ import {
   DendronCompositeError,
   DendronError,
   DEngineClient,
-  DEngineInitResp,
   DHookEntry,
   DLink,
   DLinkUtils,
@@ -26,8 +25,9 @@ import {
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
+  GetSchemaResp,
   IDendronError,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteChangeEntry,
   NoteChangeUpdateEntry,
@@ -44,6 +44,7 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaUtils,
+  StoreV2InitResp,
   stringifyError,
   TAGS_HIERARCHY,
   TimeUtils,
@@ -91,14 +92,14 @@ export class FileStorage implements DStore {
   public logger: DLogger;
   public anchors: DNoteAnchorPositioned[];
   public wsRoot: string;
-  public config: IntermediateDendronConfig;
+  public config: DendronConfig;
 
   private engine: DEngineClient;
 
   constructor(props: {
     engine: DEngineClient;
     logger: DLogger;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }) {
     const { vaults, wsRoot } = props.engine;
     const { logger, config } = props;
@@ -115,7 +116,7 @@ export class FileStorage implements DStore {
     this.engine = props.engine;
   }
 
-  async init(): Promise<DEngineInitResp> {
+  async init(): Promise<StoreV2InitResp> {
     const ctx = "FileStorage:init";
     let errors: IDendronError<any>[] = [];
     try {
@@ -402,6 +403,10 @@ export class FileStorage implements DStore {
 
     out.push({ note: noteToDelete, status: "delete" });
     return out;
+  }
+
+  getSchema(id: string): Promise<GetSchemaResp> {
+    return Promise.resolve({ data: this.schemas[id] });
   }
 
   async deleteSchema(
@@ -700,7 +705,9 @@ export class FileStorage implements DStore {
     const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
     const notesCache: NotesFileSystemCache = new NotesFileSystemCache({
       cachePath,
-      noCaching: this.config.noCaching,
+      // TODO: remove caching logic later
+      // noCaching: this.config.noCaching,
+      noCaching: false,
       logger: this.logger,
     });
     if (!out.data) {

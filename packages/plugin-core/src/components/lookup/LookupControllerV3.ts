@@ -7,7 +7,7 @@ import {
   DNoteAnchorPositioned,
   ERROR_STATUS,
   getSlugger,
-  IntermediateDendronConfig,
+  DendronConfig,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
   NoteChangeEntry,
@@ -719,7 +719,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   private async updateBacklinksToAnchorsInSelection(opts: {
     selection: vscode.Selection | undefined;
     destNote: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
   }): Promise<NoteChangeEntry[]> {
     const { selection, destNote, config } = opts;
     if (selection === undefined) {

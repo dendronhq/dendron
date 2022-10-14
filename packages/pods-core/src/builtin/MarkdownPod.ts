@@ -557,13 +557,22 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine.vaults
     );
 
+    const rawConfig = DConfig.readConfigSync(engine.wsRoot);
+
     let remark = MDUtilsV5.procRemarkFull({
       noteToRender: note,
       noteCacheForRenderDict,
       dest: DendronASTDest.MD_REGULAR,
       config: {
-        ...DConfig.readConfigSync(engine.wsRoot),
-        usePrettyRefs: false,
+        ...rawConfig,
+        preview: {
+          ...rawConfig.preview,
+          enablePrettyRefs: false,
+        },
+        publishing: {
+          ...rawConfig.publishing,
+          enablePrettyRefs: false,
+        },
       },
       fname: note.fname,
       vault: note.vault,

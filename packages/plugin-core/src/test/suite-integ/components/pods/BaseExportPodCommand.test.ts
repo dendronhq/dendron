@@ -268,5 +268,37 @@ suite("BaseExportPodCommand", function () {
         });
       }
     );
+
+    describeSingleWS(
+      "WHEN exporting with selection scope",
+      {
+        postSetupHook: ENGINE_HOOKS.setupBasic,
+      },
+      () => {
+        test("THEN export payload must contain the selection as note body", async () => {
+          const cmd = new TestExportPodCommand(
+            ExtensionProvider.getExtension()
+          );
+          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const notePath = path.join(
+            vault2Path({ vault: vaults[0], wsRoot }),
+            "root.md"
+          );
+          const editor = await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(notePath)
+          );
+          if (editor) {
+            editor.selection = new vscode.Selection(7, 0, 8, 0);
+          }
+
+          const payload = await cmd.enrichInputs({
+            exportScope: PodExportScope.Selection,
+          });
+          expect((payload?.payload as NoteProps[])[0].fname).toEqual("root");
+          expect((payload?.payload as NoteProps[]).length).toEqual(1);
+          expect(payload?.payload[0].body).toEqual("# Welcome to Dendron");
+        });
+      }
+    );
   });
 });

@@ -3,7 +3,7 @@ import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import sinon, { SinonStub } from "sinon";
-import { getExtension } from "../../workspace";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
@@ -25,7 +25,7 @@ suite("StartServer", function () {
     test("ok", function (done) {
       ServerUtils.execServerNode({
         scriptPath: path.join(__dirname, "..", "..", "server.js"),
-        logPath: getExtension().context.logPath,
+        logPath: ExtensionProvider.getExtension().context.logPath,
       }).then(({ port }) => {
         expect(port > 0).toBeTruthy();
         done();

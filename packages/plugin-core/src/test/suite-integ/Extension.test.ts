@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   InstallStatus,
-  IntermediateDendronConfig,
+  DendronConfig,
   Time,
 } from "@dendronhq/common-all";
 import {
@@ -59,7 +59,7 @@ async function inactiveMessageTest(opts: {
 }
 
 function getDefaultConfig() {
-  const defaultConfig: IntermediateDendronConfig = {
+  const defaultConfig: DendronConfig = {
     ...ConfigUtils.genDefaultConfig(),
   };
   defaultConfig.workspace.vaults = VAULTS.MULTI_VAULT_WITH_THREE_VAULTS();

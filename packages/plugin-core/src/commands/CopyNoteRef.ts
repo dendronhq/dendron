@@ -14,11 +14,11 @@ import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { clipboard } from "../utils";
 import { EditorUtils } from "../utils/EditorUtils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -29,6 +29,13 @@ export class CopyNoteRefCommand extends BasicCommand<
   CommandOutput
 > {
   key = DENDRON_COMMANDS.COPY_NOTE_REF.key;
+  private extension: IDendronExtension;
+
+  constructor(ext: IDendronExtension) {
+    super();
+    this.extension = ext;
+  }
+
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";
@@ -70,7 +77,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       const { startAnchor, endAnchor } = await EditorUtils.getSelectionAnchors({
         editor,
         selection,
-        engine: getEngine(),
+        engine: this.extension.getEngine(),
       });
       linkData.anchorStart = startAnchor;
       if (!_.isUndefined(startAnchor) && !isBlockAnchor(startAnchor)) {

@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   DNoteRefLink,
   DNoteRefLinkRaw,
   DVault,
@@ -71,7 +71,7 @@ export type DendronASTData = {
   vault: DVault;
   fname: string;
   wikiLinkOpts?: WikiLinksOpts;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
   shouldApplyPublishRules?: boolean;
   /**

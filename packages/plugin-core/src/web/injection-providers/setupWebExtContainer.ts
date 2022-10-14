@@ -5,7 +5,7 @@ import {
   IDataStore,
   IFileStore,
   INoteStore,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
@@ -175,8 +175,8 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   });
 
   const config = await getWorkspaceConfig(wsRoot);
-  container.register<IntermediateDendronConfig>("IntermediateDendronConfig", {
-    useValue: config as IntermediateDendronConfig,
+  container.register<DendronConfig>("DendronConfig", {
+    useValue: config as DendronConfig,
   });
 
   setupTabAutoComplete(context);

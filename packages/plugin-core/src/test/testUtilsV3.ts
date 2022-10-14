@@ -5,7 +5,7 @@ import {
   Disposable,
   DVault,
   InstallStatus,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteChangeEntry,
   NoteUtils,
@@ -65,7 +65,7 @@ import { Logger } from "../logger";
 import { StateService } from "../services/stateService";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { DendronExtension, getDWorkspace } from "../workspace";
+import { DendronExtension } from "../workspace";
 import { BlankInitializer } from "../workspace/blankInitializer";
 import { WorkspaceInitFactory } from "../workspace/WorkspaceInitFactory";
 import { _activate } from "../_extension";
@@ -145,12 +145,12 @@ export class EditorUtils {
 
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as IntermediateDendronConfig;
+  const config = readYAML(configPath) as DendronConfig;
   return config;
 };
 
 export const withConfig = (
-  func: (config: IntermediateDendronConfig) => IntermediateDendronConfig,
+  func: (config: DendronConfig) => DendronConfig,
   opts: { wsRoot: string }
 ) => {
   const config = getConfig(opts);
@@ -161,7 +161,7 @@ export const withConfig = (
 };
 
 export const writeConfig = (opts: {
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
   wsRoot: string;
 }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
@@ -317,7 +317,7 @@ export async function runLegacySingleWorkspaceTest(
     skipMigrations: true,
     skipTreeView: true,
   });
-  const engine = getDWorkspace().engine;
+  const engine = ExtensionProvider.getEngine();
   await opts.onInit({ wsRoot, vaults, engine });
 
   cleanupVSCodeContextSubscriptions(opts.ctx!);
@@ -341,7 +341,7 @@ export async function runLegacyMultiWorkspaceTest(
       : true,
     skipTreeView: true,
   });
-  const engine = getDWorkspace().engine;
+  const engine = ExtensionProvider.getEngine();
   await opts.onInit({ wsRoot, vaults, engine });
 
   cleanupVSCodeContextSubscriptions(opts.ctx!);
@@ -425,11 +425,7 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
   };
 }
 
-class FakeEngine {
-  get schemas() {
-    return {};
-  }
-}
+class FakeEngine {}
 
 type EngineOverride = {
   [P in keyof DendronEngineV2]: (opts: WorkspaceOpts) => DendronEngineV2[P];

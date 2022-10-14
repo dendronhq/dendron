@@ -1,10 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteData } from "./types";
 import { GetStaticPathsResult } from "next";
@@ -100,8 +96,8 @@ export function getNoteMeta(id: string): Promise<NoteProps> {
   return fs.readJSON(path.join(dataDir, NOTE_META_DIR, `${id}.json`));
 }
 
-let _CONFIG_CACHE: IntermediateDendronConfig | undefined;
-export function getConfig(): Promise<IntermediateDendronConfig> {
+let _CONFIG_CACHE: DendronConfig | undefined;
+export function getConfig(): Promise<DendronConfig> {
   if (_.isUndefined(_CONFIG_CACHE)) {
     const dataDir = getDataDir();
     return fs.readJSON(path.join(dataDir, "dendron.json"));
@@ -119,7 +115,7 @@ export function getPublicDir(): string {
 
 export async function getCustomHead(): Promise<string | null> {
   const config = await getConfig();
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   const customHeadPathConfig = publishingConfig.customHeaderPath;
   if (_.isUndefined(customHeadPathConfig)) {
     return null;

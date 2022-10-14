@@ -2193,6 +2193,69 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "mivanit",
+      "name": "mivanit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19347900?v=4",
+      "profile": "https://mivanit.github.io",
+      "contributions": [
+        "tool"
+      ]
+    },
+    {
+      "login": "tjr357",
+      "name": "tjr357",
+      "avatar_url": "https://avatars.githubusercontent.com/u/97111937?v=4",
+      "profile": "https://github.com/tjr357",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "pedrolimasi",
+      "name": "Pedro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44039025?v=4",
+      "profile": "https://github.com/pedrolimasi",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "JM-Laurel",
+      "name": "JM-Laurel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43501511?v=4",
+      "profile": "https://github.com/JM-Laurel",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "roblourens",
+      "name": "Rob Lourens",
+      "avatar_url": "https://avatars.githubusercontent.com/u/323878?v=4",
+      "profile": "http://twitter.com/roblourens",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "forivall",
+      "name": "Emily Marigold Klassen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/760204?v=4",
+      "profile": "http://forivall.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Harshita-mindfire",
+      "name": "Harshita Joshi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84971366?v=4",
+      "profile": "https://github.com/Harshita-mindfire",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

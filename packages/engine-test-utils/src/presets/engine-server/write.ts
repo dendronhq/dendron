@@ -490,7 +490,7 @@ const NOTES = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data![0];
+    const note = resp[0];
 
     return [
       {
@@ -843,7 +843,7 @@ const NOTES_MULTI = {
       originalQS: "bar",
       vault,
     });
-    const note = resp.data![0];
+    const note = resp[0];
 
     return [
       {
@@ -877,7 +877,7 @@ const NOTES_MULTI = {
         originalQS: "bar",
         vault,
       });
-      const note = resp.data![0];
+      const note = resp[0];
 
       return [
         {
@@ -1049,4 +1049,5 @@ export const ENGINE_WRITE_PRESETS = {
 };
 export const ENGINE_WRITE_PRESETS_MULTI = {
   NOTES: NOTES_MULTI,
+  SCHEMAS: {},
 };

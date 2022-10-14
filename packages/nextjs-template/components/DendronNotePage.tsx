@@ -1,10 +1,6 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import {
-  ConfigUtils,
-  IntermediateDendronConfig,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   DendronNote,
@@ -34,7 +30,7 @@ export type DendronNotePageProps = {
   note: NoteProps;
   body: string;
   collectionChildren: NoteProps[] | null;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
 };
 let BannerAlert: any | undefined;
 

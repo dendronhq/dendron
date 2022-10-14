@@ -8,7 +8,7 @@ import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
-import { getDWorkspace } from "../../workspace";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { WSUtils } from "../../WSUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -29,7 +29,7 @@ suite("Journal Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-          const engine = getDWorkspace().engine;
+          const engine = ExtensionProvider.getEngine();
           const note = (await engine.findNotesMeta({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({
@@ -67,7 +67,7 @@ suite("Journal Notes", function () {
         onInit: async ({ vaults }) => {
           const vault = vaults[1];
           const fname = "daily";
-          const engine = getDWorkspace().engine;
+          const engine = ExtensionProvider.getEngine();
           const note = (await engine.findNotesMeta({ fname, vault }))[0];
           await WSUtils.openNote(note!);
           await new NoteLookupCommand().run({

@@ -56,6 +56,7 @@ const test = base.extend<
 
       // now that nextjs has loaded env-vars through dotenv (behind the curtain) we can "fetch" them
       // import-from allows us to request without cache
+      // @ts-ignore
       const { env } = importFresh("../env/server");
       const basePath = env.NEXT_PUBLIC_ASSET_PREFIX;
 

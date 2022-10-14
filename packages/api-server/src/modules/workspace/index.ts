@@ -51,12 +51,10 @@ export class WorkspaceController {
 
   async sync({ ws }: WorkspaceSyncRequest): Promise<DEngineInitResp> {
     const engine = await getWSEngine({ ws });
-    const { schemas } = engine;
     const notes = await engine.findNotes({ excludeStub: false });
     return {
       data: {
         notes: NoteDictsUtils.createNotePropsByIdDict(notes),
-        schemas,
         config: DConfig.readConfigSync(engine.wsRoot),
         vaults: engine.vaults,
         wsRoot: engine.wsRoot,

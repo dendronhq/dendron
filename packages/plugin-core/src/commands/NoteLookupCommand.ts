@@ -40,6 +40,7 @@ import {
   LookupSplitType,
   LookupSplitTypeEnum,
 } from "../components/lookup/ButtonTypes";
+import { CREATE_NEW_LABEL } from "../components/lookup/constants";
 import { ILookupControllerV3 } from "../components/lookup/LookupControllerV3Interface";
 import {
   ILookupProviderV3,
@@ -656,6 +657,12 @@ export class NoteLookupCommand extends BaseCommand<
         targetNote: nodeNew,
         engine,
       });
+    } else {
+      // template note is not selected. cancel note creation.
+      window.showInformationMessage(
+        `No template selected. Cancelling note creation.`
+      );
+      return;
     }
 
     // only enable selection 2 link
@@ -750,6 +757,14 @@ export class NoteLookupCommand extends BaseCommand<
       logger: this.L,
       providerId: "createNewWithTemplate",
     });
+
+    // this needs to be checked because note lookup provider
+    // assumes user selected `create new` when `selectionItems` is empty.
+    // without this, hitting enter when the template picker has nothing listed
+    // will result in note creation with an empty template applied.
+    if (templateNote && templateNote.id === CREATE_NEW_LABEL) {
+      return;
+    }
 
     return templateNote;
   }

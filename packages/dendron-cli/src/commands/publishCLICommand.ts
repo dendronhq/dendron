@@ -2,7 +2,7 @@ import {
   assertUnreachable,
   ConfigUtils,
   DendronError,
-  DendronSiteConfig,
+  DendronPublishingConfig,
   error2PlainObject,
   getStage,
   Stage,
@@ -91,7 +91,7 @@ const isBuildOverrideKey = (key: string): key is keyof BuildOverrides => {
   const allowedKeys = [
     "siteUrl",
     "assetsPrefix",
-  ] as (keyof DendronSiteConfig)[];
+  ] as (keyof DendronPublishingConfig)[];
   return allowedKeys.includes(key as any);
 };
 
@@ -266,11 +266,11 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     // if no siteUrl set, override with localhost
     const config = DConfig.readConfigSync(opts.engine.wsRoot);
-    const publishingConfig = ConfigUtils.getPublishingConfig(config);
+    const publishingConfig = ConfigUtils.getPublishing(config);
     if (stage !== "prod") {
       if (!publishingConfig.siteUrl && !overrides?.siteUrl) {
         _.set(
-          opts.config.overrides as Partial<DendronSiteConfig>,
+          opts.config.overrides as Partial<DendronPublishingConfig>,
           "siteUrl",
           "localhost:3000"
         );

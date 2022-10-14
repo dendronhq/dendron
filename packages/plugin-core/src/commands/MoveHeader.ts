@@ -11,7 +11,7 @@ import {
   ERROR_SEVERITY,
   extractNoteChangeEntryCounts,
   getSlugger,
-  IntermediateDendronConfig,
+  DendronConfig,
   isNotUndefined,
   NoteChangeEntry,
   NoteProps,
@@ -391,7 +391,7 @@ export class MoveHeaderCommand extends BasicCommand<
     note: NoteProps,
     origin: NoteProps,
     anchorNamesToUpdate: string[],
-    config: IntermediateDendronConfig
+    config: DendronConfig
   ) {
     const links = LinkUtils.findLinksFromBody({
       note,

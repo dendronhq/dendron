@@ -1,6 +1,7 @@
 import {
   assertUnreachable,
   Awaited,
+  ConfigUtils,
   DNoteAnchorBasic,
   getSlugger,
   InvalidFilenameReason,
@@ -149,8 +150,10 @@ export class GotoNoteCommand extends BasicCommand<
   private async setOptsFromNewNote(opts: GoToNoteCommandOpts) {
     // Depending on the config, we can either
     // automatically pick the vault or we'll prompt for it.
+    const { config } = this.extension.getDWorkspace();
     const confirmVaultSetting =
-      this.extension.getDWorkspace().config["lookupConfirmVaultOnCreate"];
+      ConfigUtils.getLookup(config).note.confirmVaultOnCreate;
+
     const selectionMode =
       confirmVaultSetting !== true
         ? VaultSelectionMode.smart

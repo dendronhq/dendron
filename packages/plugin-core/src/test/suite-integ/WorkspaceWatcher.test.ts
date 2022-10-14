@@ -82,7 +82,11 @@ runSuiteButSkipForWindows()(
           const testNote = (await engine.getNoteMeta("foo")).data!;
           expect(testNote).toBeTruthy();
 
-          const opened = await WSUtils.openSchema(engine.schemas.plain_schema);
+          const opened = await WSUtils.openSchema(
+            (
+              await engine.getSchema("plain_schema")
+            ).data
+          );
 
           expect(await doesSchemaExist("new_schema")).toBeFalsy();
           await opened.edit((editBuilder) => {

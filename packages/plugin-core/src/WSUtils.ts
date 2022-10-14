@@ -12,7 +12,6 @@ import { DENDRON_COMMANDS } from "./constants";
 import { ExtensionProvider } from "./ExtensionProvider";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./vsCodeUtils";
-import { getDWorkspace } from "./workspace";
 
 /**
  * Prefer to use WSUtilsV2 instead of this class to prevent circular dependencies.
@@ -134,7 +133,7 @@ export class WSUtils {
     vault: DVault,
     fnameWithExtension: string
   ) {
-    const wsRoot = getDWorkspace().wsRoot;
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, fnameWithExtension);
     const editor = await VSCodeUtils.openFileInEditor(
@@ -150,7 +149,7 @@ export class WSUtils {
     vault: DVault;
     fname: string;
   }) {
-    const { wsRoot } = getDWorkspace();
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
     const vpath = vault2Path({ vault, wsRoot });
     const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(

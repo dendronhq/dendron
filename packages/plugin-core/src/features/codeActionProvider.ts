@@ -116,7 +116,8 @@ export const refactorProvider: CodeActionProvider = {
         isPreferred: true,
         kind: CodeActionKind.RefactorInline,
         command: {
-          command: new RenameHeaderCommand().key,
+          command: new RenameHeaderCommand(ExtensionProvider.getExtension())
+            .key,
           title: "Rename Header",
           arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },
@@ -152,7 +153,7 @@ export const refactorProvider: CodeActionProvider = {
         isPreferred: true,
         kind: CodeActionKind.RefactorInline,
         command: {
-          command: new CopyNoteRefCommand().key,
+          command: new CopyNoteRefCommand(ExtensionProvider.getExtension()).key,
           title: "Copy Header Reference",
           arguments: [{ source: ContextualUIEvents.ContextualUICodeAction }],
         },

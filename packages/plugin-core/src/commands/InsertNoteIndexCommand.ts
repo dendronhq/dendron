@@ -3,8 +3,8 @@ import _ from "lodash";
 import { window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
 import { DENDRON_COMMANDS } from "../constants";
+import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getEngine } from "../workspace";
 import { WSUtils } from "../WSUtils";
 import { BasicCommand } from "./base";
 
@@ -23,6 +23,10 @@ export class InsertNoteIndexCommand extends BasicCommand<
 > {
   key = DENDRON_COMMANDS.INSERT_NOTE_INDEX.key;
 
+  constructor(private _ext: IDendronExtension) {
+    super();
+  }
+
   // TODO: make this into a util once the cli version is implemented.
   // NOTE: the marker flag is not exposed to the plugin yet.
   genNoteIndex(
@@ -34,7 +38,9 @@ export class InsertNoteIndexCommand extends BasicCommand<
     const listItems = notes.map((note) => {
       const link = NoteUtils.createWikiLink({
         note,
-        useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(getEngine()),
+        useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
+          this._ext.getEngine()
+        ),
         alias: { mode: "title" },
       });
       return `- ${link}`;
@@ -65,14 +71,14 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showErrorMessage("Active file is not a Dendron note.");
       return opts;
     }
-    const engine = getEngine();
+    const engine = this._ext.getEngine();
     const bulkResp = await engine.bulkGetNotesMeta(activeNote.children);
     const children = bulkResp.data;
     if (children.length === 0) {
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
-    const config = getDWorkspace().config;
+    const { config } = this._ext.getDWorkspace();
 
     const insertNoteIndexConfig =
       ConfigUtils.getCommands(config).insertNoteIndex;

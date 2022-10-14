@@ -1,6 +1,5 @@
 import {
   CONSTANTS,
-  IntermediateDendronConfig,
   DendronError,
   DVault,
   DWorkspace,
@@ -9,6 +8,7 @@ import {
   VaultUtils,
   ConfigUtils,
   FOLDERS,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import execa from "execa";
 import fs from "fs-extra";
@@ -39,10 +39,7 @@ const formatString = (opts: { txt: string; note: NoteProps }) => {
  * Utilities for working with git urls
  */
 export class GitUtils {
-  static canShowGitLink(opts: {
-    config: IntermediateDendronConfig;
-    note: NoteProps;
-  }) {
+  static canShowGitLink(opts: { config: DendronConfig; note: NoteProps }) {
     const { config, note } = opts;
 
     if (
@@ -87,7 +84,7 @@ export class GitUtils {
 
   static getGithubEditUrl(opts: {
     note: NoteProps;
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     wsRoot: string;
   }) {
     const { note, config, wsRoot } = opts;
@@ -273,7 +270,7 @@ export class GitUtils {
     ) {
       const config = (await readYAMLAsync(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
-      )) as IntermediateDendronConfig;
+      )) as DendronConfig;
       const workspace = path.basename(repoPath);
       const vaultsConfig = ConfigUtils.getVaults(config);
       const vaults = vaultsConfig.map((ent) => {

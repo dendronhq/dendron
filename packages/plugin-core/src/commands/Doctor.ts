@@ -645,9 +645,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       case DoctorActionsEnum.FIX_INVALID_FILENAMES: {
         const ds = new DoctorService();
-        const notes = (await engine.queryNotes({ qs: "*", originalQS: "*" }))
-          .data;
-        if (notes !== undefined) {
+        const notes = await engine.queryNotes({ qs: "*", originalQS: "*" });
+        if (notes.length !== 0) {
           const notesById = NoteDictsUtils.createNotePropsByIdDict(notes);
           const notesByFname =
             NoteFnameDictUtils.createNotePropsByFnameDict(notesById);

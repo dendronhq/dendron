@@ -23,7 +23,6 @@ import {
   GetDecorationsResp,
   GetNoteBlocksResp,
   GetSchemaResp,
-  IntermediateDendronConfig,
   QueryNotesResp,
   QuerySchemaResp,
   RenameNoteResp,
@@ -32,6 +31,7 @@ import {
   RespV3,
   VSRange,
   WriteSchemaResp,
+  DendronConfig,
 } from "./types";
 import { DVault } from "./types/DVault";
 import { FindNoteOpts } from "./types/FindNoteOpts";
@@ -309,7 +309,7 @@ export class DendronAPI extends API {
     });
   }
 
-  configGet(req: WorkspaceRequest): Promise<RespV3<IntermediateDendronConfig>> {
+  configGet(req: WorkspaceRequest): Promise<RespV3<DendronConfig>> {
     return this._makeRequest({
       path: "config/get",
       method: "get",
@@ -382,7 +382,7 @@ export class DendronAPI extends API {
     });
   }
 
-  noteQuery(req: NoteQueryRequest): Promise<QueryNotesResp> {
+  noteQuery(req: NoteQueryRequest): Promise<RespV3<QueryNotesResp>> {
     return this._makeRequest({
       path: "note/query",
       method: "get",

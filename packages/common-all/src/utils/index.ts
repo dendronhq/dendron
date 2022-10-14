@@ -26,8 +26,10 @@ import {
   SearchMode,
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
+import { isWebUri } from "../util/regex";
+import { DVault } from "../types/DVault";
 import {
-  configIsV4,
+  DendronConfig,
   DendronCommandConfig,
   DendronPreviewConfig,
   DendronWorkspaceConfig,
@@ -35,22 +37,26 @@ import {
   genDefaultPreviewConfig,
   genDefaultWorkspaceConfig,
   GiscusConfig,
-  IntermediateDendronConfig,
   JournalConfig,
   LookupConfig,
   NonNoteFileLinkAnchorType,
   NoteLookupConfig,
   ScratchConfig,
-  StrictConfigV4,
-  StrictConfigV5,
-} from "../types/intermediateConfigs";
-import { isWebUri } from "../util/regex";
-import {
-  DendronSiteConfig,
-  LegacyDuplicateNoteBehavior,
-  LegacyHierarchyConfig,
-} from "../types/configs/dendronConfigLegacy";
-import { DVault } from "../types/DVault";
+} from "../types/configs";
+
+export {
+  ok,
+  Ok,
+  err,
+  Err,
+  Result,
+  okAsync,
+  errAsync,
+  ResultAsync,
+  fromThrowable,
+  fromPromise,
+  fromSafePromise,
+} from "neverthrow";
 
 export * from "./lookup";
 export * from "./publishUtils";
@@ -530,41 +536,7 @@ export type ConfigVaildationResp = {
 };
 
 export class ConfigUtils {
-  /**
-   * generates backwards compatible (v4) default config
-   * marking as @deprecated since this shouldn't be used anywhere
-   * other than legacy test codes
-   */
-  static genDefaultV4Config(): StrictConfigV4 {
-    const common = {
-      useFMTitle: true,
-      useNoteTitleForLink: true,
-      mermaid: true,
-      useKatex: true,
-      dev: {
-        enablePreviewV2: true,
-      },
-      site: {
-        copyAssets: true,
-        siteHierarchies: ["root"],
-        siteRootDir: "docs",
-        usePrettyRefs: true,
-        title: "Dendron",
-        description: "Personal knowledge space",
-        siteLastModified: true,
-        gh_edit_branch: "main",
-      },
-    };
-    return {
-      version: 4,
-      ...common,
-      commands: genDefaultCommandConfig(),
-      workspace: genDefaultWorkspaceConfig(),
-      preview: genDefaultPreviewConfig(),
-    } as StrictConfigV4;
-  }
-
-  static genDefaultConfig(): StrictConfigV5 {
+  static genDefaultConfig(): DendronConfig {
     const common = {
       dev: {
         enablePreviewV2: true,
@@ -578,7 +550,7 @@ export class ConfigUtils {
       workspace: genDefaultWorkspaceConfig(),
       preview: genDefaultPreviewConfig(),
       publishing: genDefaultPublishingConfig(),
-    } as StrictConfigV5;
+    };
   }
 
   /**
@@ -586,9 +558,7 @@ export class ConfigUtils {
    * as it includes updated settings that we don't want to set as
    * defaults for backward compatibility reasons
    */
-  static genLatestConfig(
-    defaults?: DeepPartial<StrictConfigV5>
-  ): StrictConfigV5 {
+  static genLatestConfig(defaults?: DeepPartial<DendronConfig>): DendronConfig {
     const common = {
       dev: {
         enablePreviewV2: true,
@@ -611,26 +581,24 @@ export class ConfigUtils {
   }
 
   // get
-  static getProp<K extends keyof StrictConfigV5>(
-    config: IntermediateDendronConfig,
+  static getProp<K extends keyof DendronConfig>(
+    config: DendronConfig,
     key: K
-  ): StrictConfigV5[K] {
+  ): DendronConfig[K] {
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const configWithDefaults = _.defaultsDeep(config, defaultConfig);
     return configWithDefaults[key];
   }
 
-  static getCommands(config: IntermediateDendronConfig): DendronCommandConfig {
+  static getCommands(config: DendronConfig): DendronCommandConfig {
     return ConfigUtils.getProp(config, "commands");
   }
 
-  static getWorkspace(
-    config: IntermediateDendronConfig
-  ): DendronWorkspaceConfig {
+  static getWorkspace(config: DendronConfig): DendronWorkspaceConfig {
     return ConfigUtils.getProp(config, "workspace");
   }
 
-  static getPreview(config: IntermediateDendronConfig): DendronPreviewConfig {
+  static getPreview(config: DendronConfig): DendronPreviewConfig {
     const out = ConfigUtils.getProp(config, "preview");
     // FIXME: for some reason, this can return undefined when run in context of chrome in `dendron-plugin-views`
     if (_.isUndefined(out)) {
@@ -639,69 +607,39 @@ export class ConfigUtils {
     return out;
   }
 
-  static getPublishing(
-    config: IntermediateDendronConfig
-  ): DendronPublishingConfig {
+  static getPublishing(config: DendronConfig): DendronPublishingConfig {
     return ConfigUtils.getProp(config, "publishing");
   }
 
-  /**
-   * @deprecated This will be phased out once we fully migrate to v5 config.
-   * Use {@link ConfigUtils.getPublishing} to access publishing related configs
-   */
-  static getSite(
-    config: IntermediateDendronConfig
-  ): DendronSiteConfig | undefined {
-    const v4DefaultConfig = ConfigUtils.genDefaultV4Config();
-    const configWithDefaults = _.defaultsDeep(config, v4DefaultConfig);
-    return configWithDefaults.site;
-  }
-
-  // This is only used temporarily until we make migration mandatory.
-  // Grabs the appropriate util for retrieving publishing configs.
-  // if config is v4, grabs from site
-  // if config is v5, grabs from publishing
-  // if neither, v5 default is assumed by `.getPublising`
-  // Use this only when both namespace refers to the property with the same name.
-  static getPublishingConfig(
-    config: IntermediateDendronConfig
-  ): DendronPublishingConfig | DendronSiteConfig {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)!
-      : ConfigUtils.getPublishing(config);
-  }
-
-  static getVaults(config: IntermediateDendronConfig): DVault[] {
+  static getVaults(config: DendronConfig): DVault[] {
     return ConfigUtils.getWorkspace(config).vaults;
   }
 
-  static getHooks(config: IntermediateDendronConfig): DHookDict | undefined {
+  static getHooks(config: DendronConfig): DHookDict | undefined {
     return ConfigUtils.getWorkspace(config).hooks;
   }
 
-  static getJournal(config: IntermediateDendronConfig): JournalConfig {
+  static getJournal(config: DendronConfig): JournalConfig {
     return ConfigUtils.getWorkspace(config).journal;
   }
 
-  static getScratch(config: IntermediateDendronConfig): ScratchConfig {
+  static getScratch(config: DendronConfig): ScratchConfig {
     return ConfigUtils.getWorkspace(config).scratch;
   }
 
-  static getTask(config: IntermediateDendronConfig): TaskConfig {
+  static getTask(config: DendronConfig): TaskConfig {
     return ConfigUtils.getWorkspace(config).task;
   }
 
-  static getLookup(config: IntermediateDendronConfig): LookupConfig {
+  static getLookup(config: DendronConfig): LookupConfig {
     return ConfigUtils.getCommands(config).lookup;
   }
 
   static getEnableFMTitle(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getProp(config, "useFMTitle")
-      : ConfigUtils.getPublishing(config).enableFMTitle;
+    const publishRule = ConfigUtils.getPublishing(config).enableFMTitle;
 
     return shouldApplyPublishRules
       ? publishRule
@@ -709,12 +647,11 @@ export class ConfigUtils {
   }
 
   static getEnableNoteTitleForLink(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getProp(config, "useNoteTitleForLink")
-      : ConfigUtils.getPublishing(config).enableNoteTitleForLink;
+    const publishRule =
+      ConfigUtils.getPublishing(config).enableNoteTitleForLink;
 
     return shouldApplyPublishRules
       ? publishRule
@@ -722,12 +659,10 @@ export class ConfigUtils {
   }
 
   static getEnableKatex(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     shouldApplyPublishRules?: boolean
   ): boolean | undefined {
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getProp(config, "useKatex")
-      : ConfigUtils.getPublishing(config).enableKatex;
+    const publishRule = ConfigUtils.getPublishing(config).enableKatex;
 
     return shouldApplyPublishRules
       ? publishRule
@@ -735,84 +670,40 @@ export class ConfigUtils {
   }
 
   static getHierarchyConfig(
-    config: IntermediateDendronConfig
-  ):
-    | { [key: string]: HierarchyConfig }
-    | { [key: string]: LegacyHierarchyConfig }
-    | undefined {
-    if (configIsV4(config)) {
-      const siteConfig = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return siteConfig.config as { [key: string]: LegacyHierarchyConfig };
-    } else {
-      return ConfigUtils.getPublishing(config).hierarchy;
-    }
+    config: DendronConfig
+  ): { [key: string]: HierarchyConfig } | undefined {
+    return ConfigUtils.getPublishing(config).hierarchy;
   }
 
-  static getGithubConfig(config: IntermediateDendronConfig): GithubConfig {
-    if (configIsV4(config)) {
-      const {
-        gh_edit_link,
-        gh_edit_link_text,
-        gh_edit_repository,
-        gh_edit_branch,
-        gh_edit_view_mode,
-        githubCname,
-      } = ConfigUtils.getSite(config) as DendronSiteConfig;
-      return {
-        cname: githubCname,
-        // gh_edit_link is wrongly a string in old config
-        enableEditLink: gh_edit_link === "true",
-        editLinkText: gh_edit_link_text,
-        editBranch: gh_edit_branch,
-        editViewMode: gh_edit_view_mode,
-        editRepository: gh_edit_repository,
-      };
-    } else {
-      return ConfigUtils.getPublishing(config).github;
-    }
+  static getGithubConfig(config: DendronConfig): GithubConfig {
+    return ConfigUtils.getPublishing(config).github;
   }
 
-  static getGiscusConfig(
-    config: IntermediateDendronConfig
-  ): GiscusConfig | undefined {
+  static getGiscusConfig(config: DendronConfig): GiscusConfig | undefined {
     return ConfigUtils.getPublishing(config).giscus;
   }
 
-  static getLogo(config: IntermediateDendronConfig): string | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)!.logo
-      : ConfigUtils.getPublishing(config).logoPath;
+  static getLogo(config: DendronConfig): string | undefined {
+    return ConfigUtils.getPublishing(config).logoPath;
   }
 
-  static getAssetsPrefix(
-    config: IntermediateDendronConfig
-  ): string | undefined {
-    return ConfigUtils.getPublishingConfig(config).assetsPrefix;
-  }
-
-  static getUseContainers(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return ConfigUtils.getSite(config)?.useContainers;
+  static getAssetsPrefix(config: DendronConfig): string | undefined {
+    return ConfigUtils.getPublishing(config).assetsPrefix;
   }
 
   static getEnableRandomlyColoredTags(
-    config: IntermediateDendronConfig
+    config: DendronConfig
   ): boolean | undefined {
-    return configIsV4(config)
-      ? !ConfigUtils.getSite(config)?.noRandomlyColoredTags
-      : ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
+    return ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
   }
 
   static getEnableFrontmatterTags(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     shouldApplyPublishRules: boolean;
   }): boolean | undefined {
     const { config, shouldApplyPublishRules } = opts;
 
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getSite(config)?.showFrontMatterTags
-      : ConfigUtils.getPublishing(config).enableFrontmatterTags;
+    const publishRule = ConfigUtils.getPublishing(config).enableFrontmatterTags;
 
     return shouldApplyPublishRules
       ? publishRule
@@ -820,43 +711,31 @@ export class ConfigUtils {
   }
 
   static getEnableHashesForFMTags(opts: {
-    config: IntermediateDendronConfig;
+    config: DendronConfig;
     shouldApplyPublishRules: boolean;
   }): boolean | undefined {
     const { config, shouldApplyPublishRules } = opts;
 
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getSite(config)?.useHashesForFMTags
-      : ConfigUtils.getPublishing(config).enableHashesForFMTags;
+    const publishRule = ConfigUtils.getPublishing(config).enableHashesForFMTags;
 
     return shouldApplyPublishRules
       ? publishRule
       : ConfigUtils.getPreview(config).enableHashesForFMTags;
   }
 
-  static getEnablePrettlyLinks(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)?.usePrettyLinks
-      : ConfigUtils.getPublishing(config).enablePrettyLinks;
+  static getEnablePrettlyLinks(config: DendronConfig): boolean | undefined {
+    return ConfigUtils.getPublishing(config).enablePrettyLinks;
   }
 
-  static getGATracking(config: IntermediateDendronConfig): string | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)?.ga_tracking
-      : ConfigUtils.getPublishing(config).ga?.tracking;
+  static getGATracking(config: DendronConfig): string | undefined {
+    return ConfigUtils.getPublishing(config).ga?.tracking;
   }
 
-  static getSiteLastModified(
-    config: IntermediateDendronConfig
-  ): boolean | undefined {
-    return configIsV4(config)
-      ? ConfigUtils.getSite(config)?.siteLastModified
-      : ConfigUtils.getPublishing(config).enableSiteLastModified;
+  static getSiteLastModified(config: DendronConfig): boolean | undefined {
+    return ConfigUtils.getPublishing(config).enableSiteLastModified;
   }
 
-  static getSiteLogoUrl(config: IntermediateDendronConfig): string | undefined {
+  static getSiteLogoUrl(config: DendronConfig): string | undefined {
     const assetsPrefix = ConfigUtils.getAssetsPrefix(config);
     const logo = ConfigUtils.getLogo(config);
 
@@ -875,7 +754,7 @@ export class ConfigUtils {
   }
 
   static getEnablePrettyRefs(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     opts?: {
       note?: NotePropsMeta;
       shouldApplyPublishRules?: boolean;
@@ -884,9 +763,7 @@ export class ConfigUtils {
     const override = opts?.note?.config?.global?.enablePrettyRefs;
     if (override !== undefined) return override;
 
-    const publishRule = configIsV4(config)
-      ? ConfigUtils.getSite(config)?.usePrettyRefs
-      : ConfigUtils.getPublishing(config).enablePrettyRefs;
+    const publishRule = ConfigUtils.getPublishing(config).enablePrettyRefs;
 
     return opts?.shouldApplyPublishRules
       ? publishRule
@@ -898,7 +775,7 @@ export class ConfigUtils {
    * to make using the API easier when we do add it
    */
   static getEnableChildLinks(
-    _config: IntermediateDendronConfig,
+    _config: DendronConfig,
     opts?: { note?: NotePropsMeta }
   ): boolean {
     if (
@@ -913,7 +790,7 @@ export class ConfigUtils {
     return true;
   }
   static getEnableBackLinks(
-    _config: IntermediateDendronConfig,
+    _config: DendronConfig,
     opts?: { note?: NotePropsMeta; shouldApplyPublishingRules?: boolean }
   ): boolean {
     // check if note has override. takes precedence
@@ -927,7 +804,7 @@ export class ConfigUtils {
       return opts.note.config.global.enableBackLinks;
     }
     // check config value, if enableBacklinks set, then use value set
-    const publishConfig = ConfigUtils.getPublishingConfig(_config);
+    const publishConfig = ConfigUtils.getPublishing(_config);
     if (
       ConfigUtils.isDendronPublishingConfig(publishConfig) &&
       opts?.shouldApplyPublishingRules
@@ -939,33 +816,29 @@ export class ConfigUtils {
     return true;
   }
 
-  static getHierarchyDisplayConfigForPublishing(
-    config: IntermediateDendronConfig
-  ) {
-    const isConfigV4 = configIsV4(config);
-    const hierarchyDisplay = isConfigV4
-      ? config.hierarchyDisplay
-      : ConfigUtils.getPublishing(config).enableHierarchyDisplay;
-    const hierarchyDisplayTitle = isConfigV4
-      ? config.hierarchyDisplayTitle
-      : ConfigUtils.getPublishing(config).hierarchyDisplayTitle;
+  static getHierarchyDisplayConfigForPublishing(config: DendronConfig) {
+    const hierarchyDisplay =
+      ConfigUtils.getPublishing(config).enableHierarchyDisplay;
+    const hierarchyDisplayTitle =
+      ConfigUtils.getPublishing(config).hierarchyDisplayTitle;
     return { hierarchyDisplay, hierarchyDisplayTitle };
   }
-  static getNonNoteLinkAnchorType(config: IntermediateDendronConfig) {
+
+  static getNonNoteLinkAnchorType(config: DendronConfig) {
     return (
       this.getCommands(config).copyNoteLink.nonNoteFile?.anchorType || "block"
     );
   }
-  static getAliasMode(config: IntermediateDendronConfig) {
+
+  static getAliasMode(config: DendronConfig) {
     return this.getCommands(config).copyNoteLink.aliasMode;
   }
 
-  static getVersion(config: IntermediateDendronConfig): number {
+  static getVersion(config: DendronConfig): number {
     return config.version;
   }
 
-  static getSearchMode(config: IntermediateDendronConfig): SearchMode {
-    const isConfigV4 = configIsV4(config);
+  static getSearchMode(config: DendronConfig): SearchMode {
     const defaultMode = ConfigUtils.getPublishing(config).searchMode;
     if (!isConfigV4 && defaultMode) {
       return defaultMode;
@@ -973,16 +846,16 @@ export class ConfigUtils {
     return SearchMode.LOOKUP;
   }
   // set
-  static setProp<K extends keyof StrictConfigV4>(
-    config: IntermediateDendronConfig,
+  static setProp<K extends keyof DendronConfig>(
+    config: DendronConfig,
     key: K,
-    value: StrictConfigV4[K]
+    value: DendronConfig[K]
   ): void {
     _.set(config, key, value);
   }
 
   static setCommandsProp<K extends keyof DendronCommandConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: DendronCommandConfig[K]
   ) {
@@ -991,7 +864,7 @@ export class ConfigUtils {
   }
 
   static setWorkspaceProp<K extends keyof DendronWorkspaceConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: DendronWorkspaceConfig[K]
   ) {
@@ -999,17 +872,8 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
-  static setSiteProp<K extends keyof DendronSiteConfig>(
-    config: IntermediateDendronConfig,
-    key: K,
-    value: DendronSiteConfig[K]
-  ) {
-    const path = `site.${key}`;
-    _.set(config, path, value);
-  }
-
   static setPublishProp<K extends keyof DendronPublishingConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: DendronPublishingConfig[K]
   ) {
@@ -1021,7 +885,7 @@ export class ConfigUtils {
    * Set properties under the publishing.github namaspace (v5+ config)
    */
   static setGithubProp<K extends keyof GithubConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: GithubConfig[K]
   ) {
@@ -1036,39 +900,24 @@ export class ConfigUtils {
   }
 
   static overridePublishingConfig(
-    config: IntermediateDendronConfig,
-    value: DendronSiteConfig | DendronPublishingConfig
+    config: DendronConfig,
+    value: DendronPublishingConfig
   ) {
-    if (configIsV4(config)) {
-      return {
-        ...config,
-        site: value,
-      } as StrictConfigV4;
-    } else {
-      return {
-        ...config,
-        publishing: value,
-      } as StrictConfigV5;
-    }
+    return {
+      ...config,
+      publishing: value,
+    };
   }
 
-  static unsetProp<K extends keyof IntermediateDendronConfig>(
-    config: IntermediateDendronConfig,
+  static unsetProp<K extends keyof DendronConfig>(
+    config: DendronConfig,
     key: K
   ) {
     _.unset(config, key);
   }
 
-  static unsetSiteProp<K extends keyof DendronSiteConfig>(
-    config: IntermediateDendronConfig,
-    key: K
-  ) {
-    const path = `site.${key}`;
-    _.unset(config, path);
-  }
-
   static unsetPublishProp<K extends keyof DendronPublishingConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K
   ) {
     const path = `publishing.${key}`;
@@ -1076,39 +925,27 @@ export class ConfigUtils {
   }
 
   static setDuplicateNoteBehavior(
-    config: IntermediateDendronConfig,
-    value: DuplicateNoteBehavior | LegacyDuplicateNoteBehavior
+    config: DendronConfig,
+    value: DuplicateNoteBehavior
   ): void {
-    if (configIsV4(config)) {
-      ConfigUtils.setSiteProp(
-        config,
-        "duplicateNoteBehavior",
-        value as LegacyDuplicateNoteBehavior
-      );
-    } else {
-      ConfigUtils.setPublishProp(
-        config,
-        "duplicateNoteBehavior",
-        value as DuplicateNoteBehavior
-      );
-    }
+    ConfigUtils.setPublishProp(
+      config,
+      "duplicateNoteBehavior",
+      value as DuplicateNoteBehavior
+    );
   }
 
-  static unsetDuplicateNoteBehavior(config: IntermediateDendronConfig): void {
-    if (configIsV4(config)) {
-      ConfigUtils.unsetSiteProp(config, "duplicateNoteBehavior");
-    } else {
-      ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
-    }
+  static unsetDuplicateNoteBehavior(config: DendronConfig): void {
+    ConfigUtils.unsetPublishProp(config, "duplicateNoteBehavior");
   }
 
-  static setVaults(config: IntermediateDendronConfig, value: DVault[]): void {
+  static setVaults(config: DendronConfig, value: DVault[]): void {
     ConfigUtils.setWorkspaceProp(config, "vaults", value);
   }
 
   /** Finds the matching vault in the config, and uses the callback to update it. */
   static updateVault(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     vaultToUpdate: DVault,
     updateCb: (vault: DVault) => DVault
   ): void {
@@ -1123,7 +960,7 @@ export class ConfigUtils {
   }
 
   static setNoteLookupProps<K extends keyof NoteLookupConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: NoteLookupConfig[K]
   ) {
@@ -1132,7 +969,7 @@ export class ConfigUtils {
   }
 
   static setJournalProps<K extends keyof JournalConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: JournalConfig[K]
   ) {
@@ -1141,7 +978,7 @@ export class ConfigUtils {
   }
 
   static setScratchProps<K extends keyof ScratchConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: ScratchConfig[K]
   ) {
@@ -1149,12 +986,12 @@ export class ConfigUtils {
     _.set(config, path, value);
   }
 
-  static setHooks(config: IntermediateDendronConfig, value: DHookDict) {
+  static setHooks(config: DendronConfig, value: DHookDict) {
     ConfigUtils.setWorkspaceProp(config, "hooks", value);
   }
 
   static setPreviewProps<K extends keyof DendronPreviewConfig>(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     key: K,
     value: DendronPreviewConfig[K]
   ) {
@@ -1163,16 +1000,13 @@ export class ConfigUtils {
   }
 
   static setNonNoteLinkAnchorType(
-    config: IntermediateDendronConfig,
+    config: DendronConfig,
     value: NonNoteFileLinkAnchorType
   ) {
     _.set(config, "commands.copyNoteLink.nonNoteFile.anchorType", value);
   }
 
-  static setAliasMode(
-    config: IntermediateDendronConfig,
-    aliasMode: "title" | "none"
-  ) {
+  static setAliasMode(config: DendronConfig, aliasMode: "title" | "none") {
     _.set(config, "commands.copyNoteLink.aliasMode", aliasMode);
   }
 
@@ -1246,11 +1080,11 @@ export class ConfigUtils {
   }
 
   static detectMissingDefaults(opts: {
-    config: Partial<IntermediateDendronConfig>;
-    defaultConfig?: IntermediateDendronConfig;
+    config: Partial<DendronConfig>;
+    defaultConfig?: DendronConfig;
   }): {
     needsBackfill: boolean;
-    backfilledConfig: IntermediateDendronConfig;
+    backfilledConfig: DendronConfig;
   } {
     const { config } = opts;
     const configDeepCopy = _.cloneDeep(config);
@@ -1266,7 +1100,7 @@ export class ConfigUtils {
   }
 
   static detectDeprecatedConfigs(opts: {
-    config: Partial<IntermediateDendronConfig>;
+    config: Partial<DendronConfig>;
     deprecatedPaths: string[];
   }): string[] {
     const { config, deprecatedPaths } = opts;
@@ -1341,12 +1175,8 @@ export class ConfigUtils {
    *
    * This is used to track changes from the default during activation.
    */
-  static findDifference(opts: { config: IntermediateDendronConfig }) {
+  static findDifference(opts: { config: DendronConfig }) {
     const { config } = opts;
-    if (configIsV4(config)) {
-      // don't track diff if V4. we are deprecating it soon.
-      return [];
-    }
 
     const defaultConfig = ConfigUtils.genDefaultConfig();
     const omitPaths = [

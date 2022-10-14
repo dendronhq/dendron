@@ -1,5 +1,5 @@
 import {
-  IntermediateDendronConfig,
+  DendronConfig,
   DendronError,
   DEngineClient,
   DVault,
@@ -56,7 +56,7 @@ export class EngineConnector {
   public onReady?: ({ ws }: { ws: EngineConnector }) => Promise<void>;
   public serverPortWatcher?: FSWatcher;
   public initialized: boolean;
-  public config: IntermediateDendronConfig;
+  public config: DendronConfig;
   public logger: DLogger;
 
   static _ENGINE_CONNECTOR: EngineConnector | undefined;

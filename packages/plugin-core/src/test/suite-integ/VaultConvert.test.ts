@@ -12,7 +12,7 @@ import { before, after, describe } from "mocha";
 import {
   ConfigUtils,
   FOLDERS,
-  IntermediateDendronConfig,
+  DendronConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { ExtensionProvider } from "../../ExtensionProvider";
@@ -25,7 +25,7 @@ suite("GIVEN VaultConvert", function () {
       let remote: string;
       before(async () => {
         const { vaults } = ExtensionProvider.getDWorkspace();
-        const cmd = new VaultConvertCommand();
+        const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
 
@@ -50,7 +50,7 @@ suite("GIVEN VaultConvert", function () {
 
       test("THEN updates config", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const config = DConfig.getRaw(wsRoot) as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
           url: remote,
@@ -67,7 +67,7 @@ suite("GIVEN VaultConvert", function () {
       describe("AND converting that back to a local vault", () => {
         before(async () => {
           const { vaults } = ExtensionProvider.getDWorkspace();
-          const cmd = new VaultConvertCommand();
+          const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
 
@@ -87,7 +87,7 @@ suite("GIVEN VaultConvert", function () {
 
         test("THEN updates config", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          const config = DConfig.getRaw(wsRoot) as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
@@ -115,7 +115,7 @@ suite("GIVEN VaultConvert", function () {
       let remote: string;
       before(async () => {
         const { vaults } = ExtensionProvider.getDWorkspace();
-        const cmd = new VaultConvertCommand();
+        const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
         sinon.stub(cmd, "promptForFolderMove").resolves(true);
@@ -151,7 +151,7 @@ suite("GIVEN VaultConvert", function () {
 
       test("THEN updates config", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const config = DConfig.getRaw(wsRoot) as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
           url: remote,
@@ -180,7 +180,7 @@ suite("GIVEN VaultConvert", function () {
       describe("AND converting that back to a local vault", () => {
         before(async () => {
           const { vaults } = ExtensionProvider.getDWorkspace();
-          const cmd = new VaultConvertCommand();
+          const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
           sinon.stub(cmd, "promptForFolderMove").resolves(true);
@@ -201,7 +201,7 @@ suite("GIVEN VaultConvert", function () {
 
         test("THEN updates config", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          const config = DConfig.getRaw(wsRoot) as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
@@ -237,7 +237,7 @@ suite("GIVEN VaultConvert", function () {
     () => {
       before(async () => {
         const { vaults } = ExtensionProvider.getDWorkspace();
-        const cmd = new VaultConvertCommand();
+        const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
 
@@ -254,14 +254,14 @@ suite("GIVEN VaultConvert", function () {
       test("THEN conversion fails mid-operation", async () => {
         // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+        const config = DConfig.getRaw(wsRoot) as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
       });
 
       describe("AND running the conversion command again", () => {
         before(async () => {
           const { vaults } = ExtensionProvider.getDWorkspace();
-          const cmd = new VaultConvertCommand();
+          const cmd = new VaultConvertCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("remote");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
 
@@ -279,7 +279,7 @@ suite("GIVEN VaultConvert", function () {
         test("THEN the conversion completes", async () => {
           // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as IntermediateDendronConfig;
+          const config = DConfig.getRaw(wsRoot) as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeTruthy();
         });
       });

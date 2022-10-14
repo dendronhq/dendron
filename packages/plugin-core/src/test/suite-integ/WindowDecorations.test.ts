@@ -685,7 +685,7 @@ suite("GIVEN a text document with decorations", function () {
         test("THEN don't warn for schemas", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
           const engine = ExtensionProvider.getEngine();
-          const schema = engine.schemas.root;
+          const schema = (await engine.getSchema("root")).data!;
           const schemaFile = path.join(
             wsRoot,
             schema.vault.fsPath,

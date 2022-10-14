@@ -1,6 +1,6 @@
 import {
   ConfigUtils,
-  IntermediateDendronConfig,
+  DendronConfig,
   LookupNoteTypeEnum,
   NoteTrait,
   NoteUtils,
@@ -14,9 +14,9 @@ export class JournalNote implements NoteTrait {
   id: string = "journalNote";
   getTemplateType: any;
 
-  _config: IntermediateDendronConfig;
+  _config: DendronConfig;
 
-  constructor(config: IntermediateDendronConfig) {
+  constructor(config: DendronConfig) {
     this._config = config;
   }
 

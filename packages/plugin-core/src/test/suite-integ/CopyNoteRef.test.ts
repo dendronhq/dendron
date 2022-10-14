@@ -1,4 +1,4 @@
-import { ConfigUtils, IntermediateDendronConfig } from "@dendronhq/common-all";
+import { ConfigUtils, DendronConfig } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -45,7 +45,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
             expect(link).toEqual(`![[bar#foo]]`);
           });
         }
@@ -63,7 +65,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 4);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
             expect(link).toEqual(`![[bar#foo]]`);
           });
         }
@@ -93,7 +97,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
             expect(link).toEqual(`![[bar#foo]]`);
           });
         }
@@ -131,7 +137,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(8, 0, 8, 0);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
             expect(link).toEqual("![[bar#^test-anchor]]");
           });
         }
@@ -169,7 +177,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(8, 0, 11, 0);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
 
             // make sure the link is correct
             expect(link!.startsWith("![[bar#^test-anchor:#^"));
@@ -198,7 +208,7 @@ suite("CopyNoteRef", function () {
       "WHEN xvault link when allowed in config",
       {
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        modConfigCb: (config: IntermediateDendronConfig) => {
+        modConfigCb: (config: DendronConfig) => {
           ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
           return config;
         },
@@ -212,7 +222,9 @@ suite("CopyNoteRef", function () {
             "foo.md"
           );
           await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-          const link = await new CopyNoteRefCommand().run();
+          const link = await new CopyNoteRefCommand(
+            ExtensionProvider.getExtension()
+          ).run();
           expect(link).toEqual("![[dendron://vault1/foo]]");
         });
       }
@@ -222,7 +234,7 @@ suite("CopyNoteRef", function () {
       "no xvault link when disabled in config",
       {
         preSetupHook: ENGINE_HOOKS.setupBasic,
-        modConfigCb: (config: IntermediateDendronConfig) => {
+        modConfigCb: (config: DendronConfig) => {
           ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", false);
           return config;
         },
@@ -235,7 +247,9 @@ suite("CopyNoteRef", function () {
             "foo.md"
           );
           await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-          const link = await new CopyNoteRefCommand().run();
+          const link = await new CopyNoteRefCommand(
+            ExtensionProvider.getExtension()
+          ).run();
           expect(link).toEqual("![[foo]]");
         });
       }
@@ -252,7 +266,9 @@ suite("CopyNoteRef", function () {
           const engine = ExtensionProvider.getEngine();
           const note = (await engine.getNoteMeta("foo")).data!;
           await WSUtils.openNote(note);
-          const link = await new CopyNoteRefCommand().run();
+          const link = await new CopyNoteRefCommand(
+            ExtensionProvider.getExtension()
+          ).run();
           expect(link).toEqual("![[foo]]");
         });
       }
@@ -282,7 +298,9 @@ suite("CopyNoteRef", function () {
             const note = (await engine.getNoteMeta("bar")).data!;
             const editor = await WSUtils.openNote(note);
             editor.selection = new vscode.Selection(7, 0, 7, 12);
-            const link = await new CopyNoteRefCommand().run();
+            const link = await new CopyNoteRefCommand(
+              ExtensionProvider.getExtension()
+            ).run();
             expect(link).toEqual("![[bar#foo]]");
           });
         }

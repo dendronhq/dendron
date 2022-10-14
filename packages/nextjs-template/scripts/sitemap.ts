@@ -1,7 +1,7 @@
 import {
   ConfigUtils,
   DateTime,
-  IntermediateDendronConfig,
+  DendronConfig,
   NoteProps,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
@@ -42,8 +42,8 @@ export function getNoteUrl(opts: { note: NoteProps; noteIndex: NoteProps }) {
 function getRootUrlStatic() {
   const config = fs.readJSONSync(
     path.join("data", "dendron.json")
-  ) as IntermediateDendronConfig;
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  ) as DendronConfig;
+  const publishingConfig = ConfigUtils.getPublishing(config);
   let url = publishingConfig.siteUrl;
   const assetsPrefix = publishingConfig.assetsPrefix;
   if (assetsPrefix) {

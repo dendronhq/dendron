@@ -1,5 +1,7 @@
 import {
-  IntermediateDendronConfig,
+  ConfigUtils,
+  DendronConfig,
+  NoteProps,
   NoteUtils,
   Position,
   position2VSCodeRange,
@@ -22,13 +24,14 @@ export function isDecorationHashTag(
 export const decorateHashTag: Decorator<HashTag, DecorationHashTag> = (
   opts
 ) => {
-  const { node: hashtag, engine, config } = opts;
+  const { node: hashtag, engine, config, note } = opts;
   const { position } = hashtag;
   return decorateTag({
     fname: hashtag.fname,
     engine,
     position,
     config,
+    note,
   });
 };
 
@@ -38,26 +41,31 @@ export async function decorateTag({
   position,
   lineOffset,
   config,
+  note,
 }: {
   fname: string;
   engine: ReducedDEngine;
   position: Position;
   lineOffset?: number;
-  config: IntermediateDendronConfig;
+  config: DendronConfig;
+  note?: NoteProps;
 }) {
   let color: string | undefined;
   const { color: foundColor, type: colorType } = NoteUtils.color({
     fname,
+    note,
     // engine,
   });
-  if (colorType === "configured" || !config.noRandomlyColoredTags) {
+  const enableRandomlyColoredTags =
+    ConfigUtils.getPublishing(config).enableRandomlyColoredTags;
+  if (colorType === "configured" || enableRandomlyColoredTags) {
     color = foundColor;
   }
 
   const { type, errors } = await linkedNoteType({
     fname,
     engine,
-    vaults: config.workspace?.vaults ?? config.vaults ?? [],
+    vaults: config.workspace?.vaults ?? [],
   });
   const decoration: DecorationHashTag = {
     type,

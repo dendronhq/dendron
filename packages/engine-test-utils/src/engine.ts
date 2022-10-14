@@ -1,15 +1,16 @@
 import { Server } from "@dendronhq/api-server";
 import {
-  CleanDendronSiteConfig,
   ConfigUtils,
   CONSTANTS,
   DEngineClient,
   DVault,
   DWorkspace,
-  IntermediateDendronConfig,
+  DendronConfig,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
+  CleanDendronPublishingConfig,
+  genDefaultPublishingConfig,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -40,9 +41,7 @@ import sinon, { SinonStub } from "sinon";
 import { ENGINE_HOOKS } from "./presets";
 import { GitTestUtils } from "./utils";
 
-export type ModConfigCb = (
-  config: IntermediateDendronConfig
-) => IntermediateDendronConfig;
+export type ModConfigCb = (config: DendronConfig) => DendronConfig;
 
 export type TestSetupWorkspaceOpts = {
   /**
@@ -126,14 +125,17 @@ export async function createEngineByConnectingToDebugServer(
   return { engine, port, server };
 }
 
-export function createSiteConfig(
-  opts: Partial<CleanDendronSiteConfig> &
-    Required<Pick<CleanDendronSiteConfig, "siteRootDir" | "siteHierarchies">>
-): CleanDendronSiteConfig {
+export function createPublishingConfig(
+  opts: Partial<CleanDendronPublishingConfig> &
+    Required<
+      Pick<CleanDendronPublishingConfig, "siteRootDir" | "siteHierarchies">
+    >
+): CleanDendronPublishingConfig {
+  const defaultPublishingConfig = genDefaultPublishingConfig();
   const copts = {
-    siteNotesDir: "docs",
-    siteUrl: "https://localhost:8080",
+    ...defaultPublishingConfig,
     ...opts,
+    siteUrl: "https://localhost:8080",
   };
   return {
     ...copts,
@@ -169,7 +171,7 @@ export async function setupWS(opts: {
   const vaultsConfig = ConfigUtils.getVaults(config);
   const sortedVaultsConfig = _.sortBy(vaultsConfig, "fsPath");
   ConfigUtils.setVaults(config, sortedVaultsConfig);
-  const publishingConfig = ConfigUtils.getPublishingConfig(config);
+  const publishingConfig = ConfigUtils.getPublishing(config);
   if (publishingConfig.duplicateNoteBehavior) {
     const sortedPayload = (
       publishingConfig.duplicateNoteBehavior.payload as string[]

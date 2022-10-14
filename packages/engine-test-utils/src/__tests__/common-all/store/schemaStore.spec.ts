@@ -171,9 +171,11 @@ describe("GIVEN SchemaStore", () => {
           URI.parse(wsRoot)
         );
 
-        _.values(engine.schemas).forEach(async (schema) => {
-          await schemaStore.writeMetadata({ key: schema.root.id, schema });
-        });
+        _.values((await engine.querySchema("*")).data).forEach(
+          async (schema) => {
+            await schemaStore.writeMetadata({ key: schema.root.id, schema });
+          }
+        );
 
         // Test SchemaStore.getMetadata
         const resp = await schemaStore.getMetadata("root");

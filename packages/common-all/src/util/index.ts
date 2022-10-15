@@ -14,11 +14,11 @@ export * from "./treeUtil";
 export class DefaultMap<K = string, V = any> extends Map<K, V> {
   private defaultMethod: () => V;
 
-  get(key: K) {
+  get(key: K): V {
     if (!this.has(key)) {
       this.set(key, this.defaultMethod());
     }
-    return super.get(key);
+    return super.get(key) as V;
   }
   constructor(defaultMethod: () => V) {
     super();

@@ -189,65 +189,6 @@ export function makeColorTranslucent(color: string, translucency: number) {
   return color;
 }
 
-/** A map that automatically inserts a value provided by the factory when a missing key is looked up.
- *
- * Modeled after python's `defaultdict`.
- *
- * Mind that `get` may mutate the map, which may be unintuitive.
- *
- * Example usage:
- *
- * ```ts
- * const myMap = new DefaultMap<string, string[]>(() => []);
- * myMap.get("foo").push("bar");
- * ```
- */
-export class DefaultMap<K, V> {
-  private _internalMap = new Map<K, V>();
-  private _factory: (key: K) => V;
-
-  public constructor(factory: (key: K) => V) {
-    this._factory = factory;
-  }
-
-  public get(key: K) {
-    let value = this._internalMap.get(key);
-    if (_.isUndefined(value)) {
-      value = this._factory(key);
-      this._internalMap.set(key, value);
-    }
-    return value;
-  }
-
-  public set(key: K, value: V) {
-    return this._internalMap.set(key, value);
-  }
-
-  public has(key: K) {
-    return this._internalMap.has(key);
-  }
-
-  public keys() {
-    return this._internalMap.keys();
-  }
-
-  public values() {
-    return this._internalMap.values();
-  }
-
-  public entries() {
-    return this._internalMap.entries();
-  }
-
-  public delete(key: K) {
-    return this._internalMap.delete(key);
-  }
-
-  public get size() {
-    return this._internalMap.size;
-  }
-}
-
 /** Memoizes function results, but allows a custom function to decide if the
  * value needs to be recalculated.
  *

@@ -21,7 +21,7 @@ import {
   NoteRefUtils,
 } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
-import _, { get } from "lodash";
+import _ from "lodash";
 import {
   Comment,
   CommentAuthorInformation,
@@ -162,80 +162,84 @@ async function addInlineNoteRefs(opts: {
   decorations: DendronNoteRefDecoration[];
   document: TextDocument;
 }) {
-  // shortcircuit early
-  if (opts.decorations.length === 0) {
-    return;
-  }
-  const range2String = (range: Range) => {
-    return [
-      range.start.line,
-      range.start.character,
-      range.end.line,
-      range.end.character,
-    ].join(",");
-  };
-
-  const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
-  const engine = ExtensionProvider.getEngine();
   const ctx = "addInlineNoteRefs";
-
-  const noteRefCommentController =
-    ExtensionProvider.getExtension().noteRefCommentController;
-
+  const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
   const docKey = opts.document.uri.toString();
   const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);
-  const newNoteRefThreadMap = new Map();
 
-  // OPTIMIZE: should not log
-  Logger.debug({
-    ctx,
-    msg: "enter",
-    docKey,
-    lastNoteRefThreadMap: Array.from(lastNoteRefThreadMap.entries()),
-  });
-
-  // update all comment threads as needed
-  opts.decorations.map(async (ent) => {
-    if (ent.data.noteMeta === undefined) {
+  try {
+    // shortcircuit early
+    if (opts.decorations.length === 0) {
       return;
     }
-    const key = [
-      docKey,
-      range2String(ent.decoration.range),
-      NoteRefUtils.dnodeRefLink2String(ent.data.link),
-    ].toString();
+    const range2String = (range: Range) => {
+      return [
+        range.start.line,
+        range.start.character,
+        range.end.line,
+        range.end.character,
+      ].join(",");
+    };
 
-    if (lastNoteRefThreadMap.has(key)) {
-      Logger.debug({ ctx, msg: "found key, restoring", key });
-      newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
-      lastNoteRefThreadMap.delete(key);
-    } else {
-      Logger.debug({ ctx, msg: "no key found, creating", key });
-      const id = ent.data.noteMeta.id;
-      const renderResp = await engine.renderNote({ id });
-      const thread = noteRefCommentController.createCommentThread(
-        opts.document.uri,
-        ent.decoration.range,
-        [new NoteRefComment(renderResp)]
-      );
-      thread.canReply = false;
-      thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
-      thread.label = ent.data.noteMeta.title;
-      newNoteRefThreadMap.set(key, thread);
+    const engine = ExtensionProvider.getEngine();
+
+    const noteRefCommentController =
+      ExtensionProvider.getExtension().noteRefCommentController;
+
+    const newNoteRefThreadMap = new Map();
+
+    // OPTIMIZE: should not log
+    Logger.debug({
+      ctx,
+      msg: "enter",
+      docKey,
+      // lastNoteRefThreadMap: Array.from(lastNoteRefThreadMap.entries()),
+    });
+
+    // update all comment threads as needed
+    opts.decorations.map(async (ent) => {
+      if (ent.data.noteMeta === undefined) {
+        return;
+      }
+      const key = [
+        docKey,
+        range2String(ent.decoration.range),
+        NoteRefUtils.dnodeRefLink2String(ent.data.link),
+      ].toString();
+
+      if (lastNoteRefThreadMap.has(key)) {
+        Logger.debug({ ctx, msg: "found key, restoring", key });
+        newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
+        lastNoteRefThreadMap.delete(key);
+      } else {
+        Logger.debug({ ctx, msg: "no key found, creating", key });
+        const id = ent.data.noteMeta.id;
+        const renderResp = await engine.renderNote({ id });
+        const thread = noteRefCommentController.createCommentThread(
+          opts.document.uri,
+          ent.decoration.range,
+          [new NoteRefComment(renderResp)]
+        );
+        thread.canReply = false;
+        thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
+        thread.label = ent.data.noteMeta.title;
+        newNoteRefThreadMap.set(key, thread);
+      }
+    });
+    // OPTIMIZE: should not log
+    Logger.debug({
+      ctx,
+      msg: "exit",
+      docKey,
+      // newNoteRefThreadMap: Array.from(newNoteRefThreadMap.entries()),
+    });
+    inlineNoteRefs.set(docKey, newNoteRefThreadMap);
+  } finally {
+    // dispose of old thread values
+    for (const thread of lastNoteRefThreadMap.values()) {
+      thread.dispose();
     }
-  });
-  // dispose of old thread values
-  for (const thread of lastNoteRefThreadMap.values()) {
-    thread.dispose();
   }
-  // OPTIMIZE: should not log
-  Logger.debug({
-    ctx,
-    msg: "exit",
-    docKey,
-    newNoteRefThreadMap: Array.from(newNoteRefThreadMap.entries()),
-  });
-  inlineNoteRefs.set(docKey, newNoteRefThreadMap);
 }
 
 // see [[Decorations|dendron://dendron.docs/pkg.plugin-core.ref.decorations]] for further docs

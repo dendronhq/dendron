@@ -12,6 +12,9 @@ on:
 
 jobs:
   build:
+    # Don't run this job outside of the Dendronhq organization https://github.com/prisma/prisma/issues/3539#issuecomment-690260573
+    if: github.repository_owner == 'dendronhq'
+  
     environment: plugin-production
 
     timeout-minutes: 30

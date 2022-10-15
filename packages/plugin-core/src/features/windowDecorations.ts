@@ -18,9 +18,10 @@ import {
   DECORATION_TYPES,
   isDecorationHashTag,
   NoteRefDecorator,
+  NoteRefUtils,
 } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
-import _ from "lodash";
+import _, { get } from "lodash";
 import {
   Comment,
   CommentAuthorInformation,
@@ -30,6 +31,7 @@ import {
   DecorationRangeBehavior,
   Diagnostic,
   MarkdownString,
+  Range,
   TextDocument,
   TextEditor,
   TextEditorDecorationType,
@@ -151,7 +153,6 @@ export class NoteRefComment implements Comment {
     const mdString = renderResp.error
       ? new MarkdownString(`Error: ${renderResp.error}`)
       : new MarkdownString(renderResp.data);
-    mdString.isTrusted = true;
     mdString.supportHtml = true;
     this.body = mdString;
   }
@@ -161,28 +162,80 @@ async function addInlineNoteRefs(opts: {
   decorations: DendronNoteRefDecoration[];
   document: TextDocument;
 }) {
+  // shortcircuit early
+  if (opts.decorations.length === 0) {
+    return;
+  }
+  const range2String = (range: Range) => {
+    return [
+      range.start.line,
+      range.start.character,
+      range.end.line,
+      range.end.character,
+    ].join(",");
+  };
+
   const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
   const engine = ExtensionProvider.getEngine();
+  const ctx = "addInlineNoteRefs";
 
   const noteRefCommentController =
     ExtensionProvider.getExtension().noteRefCommentController;
 
+  const docKey = opts.document.uri.toString();
+  const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);
+  const newNoteRefThreadMap = new Map();
+
+  // OPTIMIZE: should not log
+  Logger.debug({
+    ctx,
+    msg: "enter",
+    docKey,
+    lastNoteRefThreadMap: Array.from(lastNoteRefThreadMap.entries()),
+  });
+
+  // update all comment threads as needed
   opts.decorations.map(async (ent) => {
     if (ent.data.noteMeta === undefined) {
       return;
     }
-    const id = ent.data.noteMeta.id;
-    const renderResp = await engine.renderNote({ id });
-    const thread = noteRefCommentController.createCommentThread(
-      opts.document.uri,
-      ent.decoration.range,
-      [new NoteRefComment(renderResp)]
-    );
-    thread.canReply = false;
-    thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
-    // TODO: get name of note
-    thread.label = ent.data.noteMeta.title;
+    const key = [
+      docKey,
+      range2String(ent.decoration.range),
+      NoteRefUtils.dnodeRefLink2String(ent.data.link),
+    ].toString();
+
+    if (lastNoteRefThreadMap.has(key)) {
+      Logger.debug({ ctx, msg: "found key, restoring", key });
+      newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
+      lastNoteRefThreadMap.delete(key);
+    } else {
+      Logger.debug({ ctx, msg: "no key found, creating", key });
+      const id = ent.data.noteMeta.id;
+      const renderResp = await engine.renderNote({ id });
+      const thread = noteRefCommentController.createCommentThread(
+        opts.document.uri,
+        ent.decoration.range,
+        [new NoteRefComment(renderResp)]
+      );
+      thread.canReply = false;
+      thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
+      thread.label = ent.data.noteMeta.title;
+      newNoteRefThreadMap.set(key, thread);
+    }
   });
+  // dispose of old thread values
+  for (const thread of lastNoteRefThreadMap.values()) {
+    thread.dispose();
+  }
+  // OPTIMIZE: should not log
+  Logger.debug({
+    ctx,
+    msg: "exit",
+    docKey,
+    newNoteRefThreadMap: Array.from(newNoteRefThreadMap.entries()),
+  });
+  inlineNoteRefs.set(docKey, newNoteRefThreadMap);
 }
 
 // see [[Decorations|dendron://dendron.docs/pkg.plugin-core.ref.decorations]] for further docs
@@ -198,6 +251,42 @@ export async function updateDecorations(editor: TextEditor): Promise<{
       // Explicitly disabled, stop here.
       return {};
     }
+    Logger.debug({ ctx, msg: "enter" });
+
+    const getInputRanges = (editor: TextEditor) => {
+      const inputRanges = VSCodeUtils.mergeOverlappingRanges(
+        editor.visibleRanges.map((range) =>
+          VSCodeUtils.padRange({
+            range,
+            padding: VISIBLE_RANGE_MARGIN,
+            zeroCharacter: true,
+          })
+        )
+      );
+
+      return inputRanges.map((range) => {
+        return {
+          range: VSCodeUtils.toPlainRange(range),
+          text: editor.document.getText(range),
+        };
+      });
+    };
+
+    const shouldAbort = (editor: TextEditor) => {
+      // There's another execution that has already been called after this was
+      // run. That means these results are stale. If existing lines have shifted
+      // up or down since this function execution was started, setting the
+      // decorations now will place the decorations at bad positions in the
+      // document. On the other hand, if we do nothing VSCode will smartly move
+      // those decorations to their new locations. With another execution
+      // already scheduled, it's better to just wait for those decorations to
+      // come in.
+      return (
+        debouncedUpdateDecorations.states.get(
+          updateDecorationsKeyFunction(editor)
+        ) === "trailing"
+      );
+    };
 
     // Only show decorations & warnings for notes
     let note: NoteProps | undefined;
@@ -214,47 +303,23 @@ export async function updateDecorations(editor: TextEditor): Promise<{
       });
       return {};
     }
-    // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
-    const inputRanges = VSCodeUtils.mergeOverlappingRanges(
-      editor.visibleRanges.map((range) =>
-        VSCodeUtils.padRange({
-          range,
-          padding: VISIBLE_RANGE_MARGIN,
-          zeroCharacter: true,
-        })
-      )
-    );
 
-    const ranges = inputRanges.map((range) => {
-      return {
-        range: VSCodeUtils.toPlainRange(range),
-        text: editor.document.getText(range),
-      };
-    });
+    // Only decorate visible ranges, of which there could be multiple if the document is open in multiple tabs
+    const ranges = getInputRanges(editor);
     const out = await engine.getDecorations({
       id: note.id,
       ranges,
       text: editor.document.getText(),
     });
 
-    if (
-      debouncedUpdateDecorations.states.get(
-        updateDecorationsKeyFunction(editor)
-      ) === "trailing"
-    ) {
-      // There's another execution that has already been called after this was
-      // run. That means these results are stale. If existing lines have shifted
-      // up or down since this function execution was started, setting the
-      // decorations now will place the decorations at bad positions in the
-      // document. On the other hand, if we do nothing VSCode will smartly move
-      // those decorations to their new locations. With another execution
-      // already scheduled, it's better to just wait for those decorations to
-      // come in.
+    if (shouldAbort(editor)) {
       return {};
     }
+
     const { data, error } = out;
     Logger.info({
       ctx,
+      msg: "decorating...",
       payload: {
         error,
         decorationsLength: data?.decorations?.length,
@@ -285,6 +350,13 @@ export async function updateDecorations(editor: TextEditor): Promise<{
         return ent.type === EDITOR_DECORATION_TYPES.noteRef;
       }) as DendronNoteRefDecoration[];
 
+    Logger.debug({
+      ctx,
+      msg: "noteRefDecorators",
+      noteRefDecorators: noteRefDecorators.map((ent) => {
+        return { range: ent.decoration.range, link: ent.data.link };
+      }),
+    });
     await addInlineNoteRefs({
       decorations: noteRefDecorators,
       document: editor.document,

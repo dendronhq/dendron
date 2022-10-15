@@ -137,6 +137,7 @@ function renderNoteRef({
     // And using the reference as the text of the note
     contents: reference,
   });
+  fakeNote.config = { global: { enablePrettyRefs: false } };
   return engine.renderNote({
     id: fakeNote.id,
     note: fakeNote,

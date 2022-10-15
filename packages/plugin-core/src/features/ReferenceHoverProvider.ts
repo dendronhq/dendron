@@ -197,7 +197,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         note = maybeNotes[0];
       }
 
-      // For notes, let's use the noteRef functionality to render the referenced portion.
+      // For notes, let's use the noteRef functionality to render the referenced portion. ^tiagtt7sjzyw
       const referenceText = ["![["];
       if (refAtPos.vaultName)
         referenceText.push(`dendron://${refAtPos.vaultName}/`);

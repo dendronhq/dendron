@@ -3,10 +3,15 @@ import {
   DateTime,
   debounceAsyncUntilComplete,
   Decoration,
+  DendronASTDest,
+  DEngineClient,
   groupBy,
   isNotUndefined,
   mapValues,
   NoteProps,
+  NotePropsMeta,
+  NoteUtils,
+  ProcFlavor,
   RenderNoteResp,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -113,6 +118,33 @@ type DendronNoteRefDecoration = Required<
   DendronDecoration<NoteRefDecorator["data"]>
 >;
 
+function renderNoteRef({
+  reference,
+  note,
+  engine,
+}: {
+  reference: string;
+  note: NotePropsMeta;
+  engine: DEngineClient;
+}) {
+  const id = `note.id-${reference}`;
+  const fakeNote = NoteUtils.createForFake({
+    // Mostly same as the note...
+    fname: note.fname,
+    vault: note.vault,
+    // except the changed ID to avoid caching
+    id,
+    // And using the reference as the text of the note
+    contents: reference,
+  });
+  return engine.renderNote({
+    id: fakeNote.id,
+    note: fakeNote,
+    dest: DendronASTDest.HTML,
+    flavor: ProcFlavor.PREVIEW,
+  });
+}
+
 export function delayedUpdateDecorations(
   updateDelay: number = DECORATION_UPDATE_DELAY
 ) {
@@ -188,12 +220,10 @@ async function addInlineNoteRefs(opts: {
 
     const newNoteRefThreadMap = new Map();
 
-    // OPTIMIZE: should not log
     Logger.debug({
       ctx,
       msg: "enter",
       docKey,
-      // lastNoteRefThreadMap: Array.from(lastNoteRefThreadMap.entries()),
     });
 
     // update all comment threads as needed
@@ -213,8 +243,13 @@ async function addInlineNoteRefs(opts: {
         lastNoteRefThreadMap.delete(key);
       } else {
         Logger.debug({ ctx, msg: "no key found, creating", key });
-        const id = ent.data.noteMeta.id;
-        const renderResp = await engine.renderNote({ id });
+        const reference = opts.document.getText(ent.decoration.range);
+        const renderResp = await renderNoteRef({
+          reference,
+          note: ent.data.noteMeta,
+          engine,
+        });
+        // const renderResp = await engine.renderNote({ id });
         const thread = noteRefCommentController.createCommentThread(
           opts.document.uri,
           ent.decoration.range,
@@ -226,12 +261,10 @@ async function addInlineNoteRefs(opts: {
         newNoteRefThreadMap.set(key, thread);
       }
     });
-    // OPTIMIZE: should not log
     Logger.debug({
       ctx,
       msg: "exit",
       docKey,
-      // newNoteRefThreadMap: Array.from(newNoteRefThreadMap.entries()),
     });
     inlineNoteRefs.set(docKey, newNoteRefThreadMap);
   } finally {

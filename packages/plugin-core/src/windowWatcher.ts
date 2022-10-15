@@ -77,7 +77,9 @@ export class WindowWatcher {
       if (
         !editor ||
         editor.document.uri.fsPath !==
-          window.activeTextEditor?.document.uri.fsPath
+          window.activeTextEditor?.document.uri.fsPath ||
+        // ignore text editors like the output window
+        editor.document.uri.scheme !== "file"
       ) {
         return;
       }

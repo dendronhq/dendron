@@ -142,7 +142,7 @@ function renderNoteRef({
     id: fakeNote.id,
     note: fakeNote,
     dest: DendronASTDest.HTML,
-    flavor: ProcFlavor.PREVIEW,
+    flavor: ProcFlavor.HOVER_PREVIEW,
   });
 }
 
@@ -187,6 +187,7 @@ export class NoteRefComment implements Comment {
       ? new MarkdownString(`Error: ${renderResp.error}`)
       : new MarkdownString(renderResp.data);
     mdString.supportHtml = true;
+    mdString.isTrusted = true;
     this.body = mdString;
   }
 }

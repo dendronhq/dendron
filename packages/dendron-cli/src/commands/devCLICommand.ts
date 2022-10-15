@@ -464,8 +464,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       );
       await TimeUtils.sleep(2 * 60 * 1000);
     } else {
-      this.print("sleeping 6s for local npm registry to have packages ready");
-      await TimeUtils.sleep(6 * 1000);
+      this.print("sleeping 20s for local npm registry to have packages ready");
+      await TimeUtils.sleep(20 * 1000);
     }
 
     this.print("install deps...");

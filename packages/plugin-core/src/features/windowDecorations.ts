@@ -388,22 +388,24 @@ export async function updateDecorations(editor: TextEditor): Promise<{
     }
 
     // begin: apply inline note refs
-    const noteRefDecorators: DendronNoteRefDecoration[] =
-      vscodeDecorations.filter((ent) => {
-        return ent.type === EDITOR_DECORATION_TYPES.noteRef;
-      }) as DendronNoteRefDecoration[];
+    if (config.dev?.enableExperimentalInlineNoteRef) {
+      const noteRefDecorators: DendronNoteRefDecoration[] =
+        vscodeDecorations.filter((ent) => {
+          return ent.type === EDITOR_DECORATION_TYPES.noteRef;
+        }) as DendronNoteRefDecoration[];
 
-    Logger.debug({
-      ctx,
-      msg: "noteRefDecorators",
-      noteRefDecorators: noteRefDecorators.map((ent) => {
-        return { range: ent.decoration.range, link: ent.data.link };
-      }),
-    });
-    await addInlineNoteRefs({
-      decorations: noteRefDecorators,
-      document: editor.document,
-    });
+      Logger.debug({
+        ctx,
+        msg: "noteRefDecorators",
+        noteRefDecorators: noteRefDecorators.map((ent) => {
+          return { range: ent.decoration.range, link: ent.data.link };
+        }),
+      });
+      await addInlineNoteRefs({
+        decorations: noteRefDecorators,
+        document: editor.document,
+      });
+    }
 
     // Clear out any old decorations left over from last pass
     for (const type of _.values(EDITOR_DECORATION_TYPES)) {

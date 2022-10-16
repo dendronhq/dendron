@@ -54,6 +54,10 @@ export type DendronDevConfig = {
    * False (Default) -> Continue to use engine v3 as backend
    */
   enableEngineV3?: boolean;
+  /**
+   * Feature flag to enable note references
+   */
+  enableExperimentalInlineNoteRef?: boolean;
 };
 
 /**

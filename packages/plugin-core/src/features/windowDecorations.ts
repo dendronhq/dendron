@@ -200,81 +200,85 @@ async function addInlineNoteRefs(opts: {
   const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
   const docKey = opts.document.uri.toString();
   const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);
+  const newNoteRefThreadMap = new Map();
 
-  try {
-    // shortcircuit early
-    if (opts.decorations.length === 0) {
-      return;
-    }
-    const range2String = (range: Range) => {
-      return [
-        range.start.line,
-        range.start.character,
-        range.end.line,
-        range.end.character,
-      ].join(",");
-    };
-
-    const engine = ExtensionProvider.getEngine();
-
-    const noteRefCommentController =
-      ExtensionProvider.getExtension().noteRefCommentController;
-
-    const newNoteRefThreadMap = new Map();
-
-    Logger.debug({
-      ctx,
-      msg: "enter",
-      docKey,
-    });
-
-    // update all comment threads as needed
-    opts.decorations.map(async (ent) => {
-      if (ent.data.noteMeta === undefined) {
-        return;
-      }
-      const key = [
-        docKey,
-        range2String(ent.decoration.range),
-        NoteRefUtils.dnodeRefLink2String(ent.data.link),
-      ].toString();
-
-      if (lastNoteRefThreadMap.has(key)) {
-        Logger.debug({ ctx, msg: "found key, restoring", key });
-        newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
-        lastNoteRefThreadMap.delete(key);
-      } else {
-        Logger.debug({ ctx, msg: "no key found, creating", key });
-        const reference = opts.document.getText(ent.decoration.range);
-        const renderResp = await renderNoteRef({
-          reference,
-          note: ent.data.noteMeta,
-          engine,
-        });
-        // const renderResp = await engine.renderNote({ id });
-        const thread = noteRefCommentController.createCommentThread(
-          opts.document.uri,
-          ent.decoration.range,
-          [new NoteRefComment(renderResp)]
-        );
-        thread.canReply = false;
-        thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
-        thread.label = ent.data.noteMeta.title;
-        newNoteRefThreadMap.set(key, thread);
-      }
-    });
-    Logger.debug({
-      ctx,
-      msg: "exit",
-      docKey,
-    });
-    inlineNoteRefs.set(docKey, newNoteRefThreadMap);
-  } finally {
-    // dispose of old thread values
+  const disposeLastNoteRefThreadMap = () => {
     for (const thread of lastNoteRefThreadMap.values()) {
       thread.dispose();
     }
+  };
+
+  // if decoratorations is zero it could mean:
+  // 1. no note refs in document in which case we dispose of everything
+  // 2. we scrolled out of the range of the note refs
+  if (opts.decorations.length === 0) {
+    disposeLastNoteRefThreadMap();
+    inlineNoteRefs.set(docKey, newNoteRefThreadMap);
+    return;
   }
+  const range2String = (range: Range) => {
+    return [
+      range.start.line,
+      range.start.character,
+      range.end.line,
+      range.end.character,
+    ].join(",");
+  };
+
+  const engine = ExtensionProvider.getEngine();
+
+  const noteRefCommentController =
+    ExtensionProvider.getExtension().noteRefCommentController;
+
+  Logger.debug({
+    ctx,
+    msg: "enter",
+    docKey,
+  });
+
+  // update all comment threads as needed
+  opts.decorations.map(async (ent) => {
+    if (ent.data.noteMeta === undefined) {
+      return;
+    }
+    const key = [
+      docKey,
+      range2String(ent.decoration.range),
+      NoteRefUtils.dnodeRefLink2String(ent.data.link),
+    ].toString();
+
+    if (lastNoteRefThreadMap.has(key)) {
+      Logger.debug({ ctx, msg: "found key, restoring", key });
+      newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
+      lastNoteRefThreadMap.delete(key);
+    } else {
+      Logger.debug({ ctx, msg: "no key found, creating", key });
+      const reference = opts.document.getText(ent.decoration.range);
+      const renderResp = await renderNoteRef({
+        reference,
+        note: ent.data.noteMeta,
+        engine,
+      });
+      // const renderResp = await engine.renderNote({ id });
+      const thread = noteRefCommentController.createCommentThread(
+        opts.document.uri,
+        ent.decoration.range,
+        [new NoteRefComment(renderResp)]
+      );
+      thread.canReply = false;
+      thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
+      thread.label = ent.data.noteMeta.title;
+      newNoteRefThreadMap.set(key, thread);
+    }
+  });
+  Logger.debug({
+    ctx,
+    msg: "exit",
+    docKey,
+  });
+  inlineNoteRefs.set(docKey, newNoteRefThreadMap);
+  // dispose of old thread values
+  disposeLastNoteRefThreadMap();
 }
 
 // see [[Decorations|dendron://dendron.docs/pkg.plugin-core.ref.decorations]] for further docs

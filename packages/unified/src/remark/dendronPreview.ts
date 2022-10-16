@@ -56,7 +56,7 @@ function modifyWikilinkValueToCommandUri({
     anchor,
   };
   const encodedArgs = encodeURIComponent(JSON.stringify(goToNoteCommandOpts));
-  node.data.alias = qs;
+  node.data.alias = node.data.alias || qs;
   node.value = `command:dendron.gotoNote?${encodedArgs}`;
 }
 

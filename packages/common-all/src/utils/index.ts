@@ -1236,7 +1236,7 @@ export class ConfigUtils {
     );
 
     return parse(schema, input, "Invalid Dendron Config").map((value) => {
-      // TODO remove once all propeties are defined in the schema
+      // TODO remove once all properties are defined in the schema, because that the parse will have set all default values for us already.
       return _.defaultsDeep(
         value,
         ConfigUtils.genDefaultConfig()

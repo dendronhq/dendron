@@ -1,5 +1,4 @@
-import { Database } from "sqlite3";
-import * as vscode from "vscode";
+import { env, Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 
@@ -15,21 +14,10 @@ export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute() {
-    const db = new Database(":memory:");
-
-    const createTablesSQL = `
-  CREATE TABLE IF NOT EXISTS notes (
-    id TEXT PRIMARY KEY,
-       fname TEXT NOT NULL
-  ) WITHOUT ROWID;
-  `;
-
-    db.exec(createTablesSQL, (err) => {
-      if (err) {
-        vscode.window.showErrorMessage(`Error in SQLite: ${err}`);
-      }
-    });
-
-    vscode.window.showInformationMessage(`Ran something in SQLite.`);
+    env.openExternal(
+      Uri.parse(
+        "https://www.dendron.so/notes/f9540bb6-7a5a-46db-ae7c-e1a606f28c73.html"
+      )
+    );
   }
 }

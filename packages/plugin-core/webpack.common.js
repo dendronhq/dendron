@@ -132,7 +132,6 @@ const config = {
         type: "javascript/auto",
       },
       // don't handle the following files - causes errors
-      // { test: /node_sqlite3.node/, loader: "node-loader" },
       { test: /\.node$/, loader: "ignore-loader" },
       { test: /\.d\.ts$/, loader: "ignore-loader" },
       { test: /\.js\.map$/, loader: "ignore-loader" },

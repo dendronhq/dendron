@@ -6,19 +6,7 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import {
-  ok,
-  Ok,
-  err,
-  Err,
-  Result,
-  okAsync,
-  errAsync,
-  ResultAsync,
-  fromThrowable,
-  fromPromise,
-  fromSafePromise,
-} from "neverthrow";
+import type { Result } from "neverthrow";
 import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
 import { parse } from "../parse";
 import { COLORS_LIST } from "../colors";
@@ -72,7 +60,7 @@ export {
   fromThrowable,
   fromPromise,
   fromSafePromise,
-};
+} from "neverthrow";
 
 export * from "./lookup";
 export * from "./publishUtils";

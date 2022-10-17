@@ -1,7 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
 import { ConfigUtils, DendronConfig, NoteProps } from "@dendronhq/common-all";
-import { readJson } from "@dendronhq/common-server";
 import _ from "lodash";
 import { NoteData } from "./types";
 import { GetStaticPathsResult } from "next";
@@ -98,24 +97,12 @@ export function getNoteMeta(id: string): Promise<NoteProps> {
 }
 
 let _CONFIG_CACHE: DendronConfig | undefined;
-export async function getConfig(): Promise<DendronConfig> {
+export function getConfig(): Promise<DendronConfig> {
   if (_.isUndefined(_CONFIG_CACHE)) {
-    const dendronConfigResult = await readJson(
-      path.join(getDataDir(), "dendron.json")
-    )
-      .andThen((input) => {
-        return ConfigUtils.parse(input);
-      })
-      .map((dendronConfig) => {
-        _CONFIG_CACHE = dendronConfig;
-        return dendronConfig;
-      });
-    if (dendronConfigResult.isErr()) {
-      throw dendronConfigResult.error;
-    }
-    return dendronConfigResult.value;
+    const dataDir = getDataDir();
+    return fs.readJSON(path.join(dataDir, "dendron.json"));
   }
-  return _CONFIG_CACHE;
+  return new Promise(() => _CONFIG_CACHE);
 }
 
 export function getPublicDir(): string {

@@ -14,6 +14,7 @@ import {
   RespV3,
   RespWithOptError,
   DendronConfig,
+  YamlUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -22,7 +23,6 @@ import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
 import { readYAML, writeYAML, writeYAMLAsync, readString } from "./files";
-import * as YamlUtils from "./yaml";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",

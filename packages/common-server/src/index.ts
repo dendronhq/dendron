@@ -13,4 +13,3 @@ export * from "./template";
 export * from "./StateValidator";
 export * from "./DConfig";
 export * from "./backup";
-export * as YamlUtils from "./yaml";

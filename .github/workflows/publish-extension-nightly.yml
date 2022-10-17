@@ -14,12 +14,50 @@ jobs:
   build:
     # Don't run this job outside of the Dendronhq organization https://github.com/prisma/prisma/issues/3539#issuecomment-690260573
     if: github.repository_owner == 'dendronhq'
-  
+    timeout-minutes: 60
     environment: plugin-production
 
-    timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win32
+            arch: x64
+            npm_config_arch: x64
+          - os: windows-latest
+            platform: win32
+            arch: ia32
+            npm_config_arch: ia32
+          - os: windows-latest
+            platform: win32
+            arch: arm64
+            npm_config_arch: arm
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            npm_config_arch: x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            npm_config_arch: arm64
+          - os: ubuntu-latest
+            platform: linux
+            arch: armhf
+            npm_config_arch: arm
+          - os: ubuntu-latest
+            platform: alpine
+            arch: x64
+            npm_config_arch: x64
+          - os: macos-latest
+            platform: darwin
+            arch: x64
+            npm_config_arch: x64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            npm_config_arch: arm64
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Gather environment data
@@ -39,10 +77,16 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14.x
+          node-version: 16.x
 
       - name: Yarn Setup
         run: yarn setup
+
+      - name: Download SQLite Binary
+        run: yarn download-sqlite-binary --target_arch=${{ env.npm_config_arch }}
+        working-directory: ./packages/plugin-core
+        env:
+          npm_config_arch: ${{ matrix.npm_config_arch }}
 
       - name: Update schema file
         run: yarn gen:data
@@ -60,6 +104,7 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+          echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $env:GITHUB_ENV
 
       - name: Build the VSIX
         run: |
@@ -89,10 +134,10 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
+        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }} --target ${{ env.PUBLISHING_TARGET }}
 
       - name: Publish to Open VSX Marketplace
         env:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
-        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
+        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }} --target ${{ env.PUBLISHING_TARGET }}

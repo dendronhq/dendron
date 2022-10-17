@@ -8,7 +8,7 @@ import querystring from "querystring";
 import semver from "semver";
 import type { Result } from "neverthrow";
 import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
-import { parse } from "../parse";
+import { parse, z, schemaForType } from "../parse";
 import { COLORS_LIST } from "../colors";
 import SparkMD5 from "spark-md5";
 import {
@@ -30,7 +30,6 @@ import {
 } from "../types/configs/publishing/publishing";
 import { TaskConfig } from "../types/configs/workspace/task";
 import { isWebUri } from "../util/regex";
-import { z, schemaForType } from "../util/zodUtil";
 import { DVault } from "../types/DVault";
 import {
   DendronConfig,

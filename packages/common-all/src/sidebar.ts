@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { z } from "./util";
 import type {
   NotePropsByIdDict,
   DuplicateNoteBehavior,
@@ -7,7 +6,7 @@ import type {
 } from "./types";
 import type { Option } from "./utils";
 import { PublishUtils, err, fromThrowable, Result } from "./utils";
-import { parse } from "./parse";
+import { z, parse } from "./parse";
 import type { IDendronError } from "./error";
 import { DendronError, assertUnreachable } from "./error";
 import { ERROR_STATUS } from "./constants";

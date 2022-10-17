@@ -6,5 +6,4 @@ export * from "./regex";
 export * from "./dateFormatUtil";
 export * from "./treeUtil";
 export * from "./stringUtil";
-export * from "./zodUtil";
 export { URI } from "vscode-uri";

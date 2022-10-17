@@ -1,4 +1,4 @@
-import { z, schemaForType } from "../../../util/zodUtil";
+import { z, schemaForType } from "../../../parse";
 
 /**
  * Namespace for SEO related site configurations.

@@ -1496,6 +1496,7 @@
     "ignore-loader": "^0.1.2",
     "mocha": "^7.1.2",
     "node-loader": "^2.0.0",
+    "node-pre-gyp": "^0.17.0",
     "ovsx": "^0.5.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

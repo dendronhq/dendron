@@ -42,6 +42,11 @@ jobs:
         env:
           npm_config_arch: arm64
 
+      - name: Download SQLite Binary
+        run: yarn download-sqlite-binary --target_arch=${{ env.npm_config_arch }}
+        env:
+          npm_config_arch: arm64
+
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873
 

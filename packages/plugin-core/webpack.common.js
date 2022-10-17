@@ -64,16 +64,7 @@ const config = {
         { from: "webpack-require-hack.js", to: "webpack-require-hack.js" },
         { from: "sqlite3-binding.js", to: "sqlite3-binding.js" },
         {
-          from: path.join(
-            "..",
-            "..",
-            "node_modules",
-            "sqlite3",
-            "lib",
-            "binding",
-            "*",
-            "node_sqlite3.node"
-          ),
+          from: path.join("lib", "binding", "*", "node_sqlite3.node"),
           to: "node_sqlite3.node",
         },
       ],

@@ -215,7 +215,19 @@ export function removeMDExtension(nodePath: string) {
   return nodePath;
 }
 
-export function readToJson(path: string) {
+const readFileSync = fromThrowable(fs.readFileSync, (error) => {
+  return new DendronError({
+    message: `Cannot find ${path}`,
+    severity: ERROR_SEVERITY.FATAL,
+    ...(error instanceof Error && { innerError: error }),
+  });
+});
+
+export function readString(path: string) {
+  return readFileSync(path, "utf8") as Result<string, DendronError>;
+}
+
+export function readJson(path: string) {
   return fromPromise<AnyJson, DendronError>(fs.readJSON(path), (error) => {
     return new DendronError({
       message: `Cannot find ${path}`,
@@ -223,15 +235,4 @@ export function readToJson(path: string) {
       ...(error instanceof Error && { innerError: error }),
     });
   });
-}
-
-const _readToString = fromThrowable(fs.readFileSync, (error) => {
-  return new DendronError({
-    message: `Cannot find ${path}`,
-    severity: ERROR_SEVERITY.FATAL,
-    ...(error instanceof Error && { innerError: error }),
-  });
-});
-export function readToString(path: string) {
-  return _readToString(path, "utf8") as Result<string, DendronError>;
 }

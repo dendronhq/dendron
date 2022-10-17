@@ -21,7 +21,7 @@ import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
-import { readYAML, writeYAML, writeYAMLAsync, readToString } from "./files";
+import { readYAML, writeYAML, writeYAMLAsync, readString } from "./files";
 import * as YamlUtils from "./yaml";
 
 export enum LocalConfigScope {
@@ -197,7 +197,7 @@ export class DConfig {
       return _dendronConfig;
     }
     const configPath = DConfig.configPath(wsRoot);
-    const dendronConfigResult = readToString(configPath)
+    const dendronConfigResult = readString(configPath)
       .andThen((input) => YamlUtils.fromStr(input, true))
       .andThen((unknownconfig) => {
         const cleanConfig = DConfigLegacy.configIsV4(unknownconfig)

@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { z } from "./util/zodUtil";
+import { z } from "./util";
 import type {
   NotePropsByIdDict,
   DuplicateNoteBehavior,

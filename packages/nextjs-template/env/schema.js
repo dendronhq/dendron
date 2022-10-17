@@ -1,5 +1,5 @@
 // @ts-check
-const { z } = require("zod");
+const { z } = require("@dendronhq/common-all");
 const path = require("path");
 const { FRONTEND_CONSTANTS } = require("@dendronhq/common-frontend");
 

@@ -1,3 +1,5 @@
+import { z, schemaForType } from "../../../parse";
+
 export enum GithubEditViewModeEnum {
   tree = "tree",
   edit = "edit",
@@ -25,3 +27,23 @@ export function genDefaultGithubConfig(): GithubConfig {
     editViewMode: GithubEditViewModeEnum.tree,
   };
 }
+
+const githubEditViewModeSchema = schemaForType<GithubEditViewMode>()(
+  z.union([
+    z.literal(GithubEditViewModeEnum.tree),
+    z.literal(GithubEditViewModeEnum.edit),
+  ])
+);
+
+export const githubSchema = schemaForType<GithubConfig>()(
+  z.object({
+    cname: z.string().optional(),
+    enableEditLink: z.boolean().default(true),
+    editLinkText: z.string().optional().default("Edit this page on GitHub"),
+    editBranch: z.string().optional().default("main"),
+    editViewMode: githubEditViewModeSchema
+      .optional()
+      .default(GithubEditViewModeEnum.tree),
+    editRepository: z.string().optional(),
+  })
+);

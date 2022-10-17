@@ -3,7 +3,6 @@ import {
   ConfigUtils,
   CONSTANTS,
   DeepPartial,
-  DendronConfig,
   DendronError,
   DendronPublishingConfig,
   ErrorFactory,
@@ -14,14 +13,16 @@ import {
   IDendronError,
   RespV3,
   RespWithOptError,
+  DendronConfig,
+  YamlUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
-import { readYAML, writeYAML, writeYAMLAsync } from "./files";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
+import { readYAML, writeYAML, writeYAMLAsync, readString } from "./files";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
@@ -196,18 +197,24 @@ export class DConfig {
       return _dendronConfig;
     }
     const configPath = DConfig.configPath(wsRoot);
-    const unknownconfig = readYAML(configPath, true) as DendronConfig;
-    const cleanConfig: DendronConfig = DConfigLegacy.configIsV4(unknownconfig)
-      ? DConfigLegacy.v4ToV5(unknownconfig)
-      : (unknownconfig as DendronConfig);
+    const dendronConfigResult = readString(configPath)
+      .andThen((input) => YamlUtils.fromStr(input, true))
+      .andThen((unknownconfig) => {
+        const cleanConfig = DConfigLegacy.configIsV4(unknownconfig)
+          ? DConfigLegacy.v4ToV5(unknownconfig)
+          : _.defaultsDeep(unknownconfig, ConfigUtils.genDefaultConfig());
 
-    // TODO: validate
-    const config: DendronConfig = _.defaultsDeep(
-      cleanConfig,
-      ConfigUtils.genDefaultConfig()
-    );
-    _dendronConfig = config;
-    return config;
+        return ConfigUtils.parse(cleanConfig);
+      })
+      .map((dendronConfig) => {
+        _dendronConfig = dendronConfig;
+        return dendronConfig;
+      });
+
+    if (dendronConfigResult.isErr()) {
+      throw dendronConfigResult.error;
+    }
+    return dendronConfigResult.value;
   }
 
   /**

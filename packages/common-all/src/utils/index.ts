@@ -6,7 +6,9 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
+import type { Result } from "neverthrow";
 import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
+import { parse, z, schemaForType } from "../parse";
 import { COLORS_LIST } from "../colors";
 import SparkMD5 from "spark-md5";
 import {
@@ -15,13 +17,14 @@ import {
   ERROR_SEVERITY,
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
-import { DendronError, ErrorMessages } from "../error";
+import { DendronError, ErrorMessages, IDendronError } from "../error";
 import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
   DendronPublishingConfig,
   DuplicateNoteBehavior,
   genDefaultPublishingConfig,
+  publishingSchema,
   HierarchyConfig,
   SearchMode,
 } from "../types/configs/publishing/publishing";
@@ -675,7 +678,7 @@ export class ConfigUtils {
     return ConfigUtils.getPublishing(config).hierarchy;
   }
 
-  static getGithubConfig(config: DendronConfig): GithubConfig {
+  static getGithubConfig(config: DendronConfig): GithubConfig | undefined {
     return ConfigUtils.getPublishing(config).github;
   }
 
@@ -1197,6 +1200,35 @@ export class ConfigUtils {
       _.isEqual
     );
     return diff;
+  }
+
+  /**
+   * Parses an unkown input into a DendronConfig
+   * @param input
+   */
+
+  static parse(input: unknown): Result<DendronConfig, IDendronError> {
+    const schema = schemaForType<{ publishing: DendronPublishingConfig }>()(
+      z
+        .object({
+          version: z.number(),
+          dev: z.object({}).passthrough().optional(), // TODO DendronDevConfig;
+          commands: z.object({}).passthrough(), // TODO DendronCommandConfig;
+          workspace: z.object({}).passthrough(), // TODO DendronWorkspaceConfig;
+          preview: z.object({}).passthrough(), // TODO DendronPreviewConfig;
+          publishing: publishingSchema,
+          global: z.object({}).passthrough().optional(), // TODO DendronGlobalConfig;
+        })
+        .passthrough()
+    );
+
+    return parse(schema, input, "Invalid Dendron Config").map((value) => {
+      // TODO remove once all properties are defined in the schema, because that the parse will have set all default values for us already.
+      return _.defaultsDeep(
+        value,
+        ConfigUtils.genDefaultConfig()
+      ) as DendronConfig;
+    });
   }
 }
 

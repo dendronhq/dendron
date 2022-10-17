@@ -12,6 +12,10 @@ import {
   globMatch,
   isNotNull,
   RespV2,
+  fromPromise,
+  AnyJson,
+  fromThrowable,
+  Result,
 } from "@dendronhq/common-all";
 
 /**
@@ -209,4 +213,26 @@ export function removeMDExtension(nodePath: string) {
     nodePath = nodePath.slice(0, idx);
   }
   return nodePath;
+}
+
+const readFileSync = fromThrowable(fs.readFileSync, (error) => {
+  return new DendronError({
+    message: `Cannot find ${path}`,
+    severity: ERROR_SEVERITY.FATAL,
+    ...(error instanceof Error && { innerError: error }),
+  });
+});
+
+export function readString(path: string) {
+  return readFileSync(path, "utf8") as Result<string, DendronError>;
+}
+
+export function readJson(path: string) {
+  return fromPromise<AnyJson, DendronError>(fs.readJSON(path), (error) => {
+    return new DendronError({
+      message: `Cannot find ${path}`,
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
 }

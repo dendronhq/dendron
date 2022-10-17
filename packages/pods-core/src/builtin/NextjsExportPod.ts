@@ -423,7 +423,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     }
     // get cname
     const githubConfig = ConfigUtils.getGithubConfig(config);
-    const githubCname = githubConfig.cname;
+    const githubCname = githubConfig?.cname;
     if (githubCname) {
       fs.writeFileSync(path.join(destPublicPath, "CNAME"), githubCname, {
         encoding: "utf8",

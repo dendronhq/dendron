@@ -50,7 +50,7 @@ export type DendronPublishingConfig = {
   duplicateNoteBehavior?: DuplicateNoteBehavior;
   writeStubs: boolean;
   seo: SEOConfig;
-  github: GithubConfig;
+  github?: GithubConfig;
   theme?: Theme;
   segmentKey?: string;
   cognitoUserPoolId?: string;
@@ -116,7 +116,7 @@ export const publishingSchema = schemaForType<DendronPublishingConfig>()(
       writeStubs: z.boolean().default(false),
       siteRootDir: z.string().default("docs"),
       seo: seoSchema,
-      github: githubSchema,
+      github: githubSchema.optional(),
       enableSiteLastModified: z.boolean().default(true),
       // siteUrl?: string;
       enableFrontmatterTags: z.boolean().default(true),

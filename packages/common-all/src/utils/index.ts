@@ -691,7 +691,7 @@ export class ConfigUtils {
     return ConfigUtils.getPublishing(config).hierarchy;
   }
 
-  static getGithubConfig(config: DendronConfig): GithubConfig {
+  static getGithubConfig(config: DendronConfig): GithubConfig | undefined {
     return ConfigUtils.getPublishing(config).github;
   }
 

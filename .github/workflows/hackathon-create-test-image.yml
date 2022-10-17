@@ -44,6 +44,7 @@ jobs:
 
       - name: Download SQLite Binary
         run: yarn download-sqlite-binary --target_arch=${{ env.npm_config_arch }}
+        working-directory: ./packages/plugin-core
         env:
           npm_config_arch: arm64
 

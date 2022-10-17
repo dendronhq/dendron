@@ -22,7 +22,7 @@ import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
 import { readYAML, writeYAML, writeYAMLAsync, readToString } from "./files";
-import { YamlUtils } from "./yaml";
+import * as YamlUtils from "./yaml";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",

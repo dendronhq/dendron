@@ -39,7 +39,7 @@ jobs:
 
       - name: Yarn Setup
         run: yarn setup
-        env: npm_config_arch: arm64
+        npm_config_arch: arm64
 
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873

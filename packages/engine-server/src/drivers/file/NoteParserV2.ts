@@ -20,7 +20,6 @@ import {
   NoteChangeEntry,
   genHash,
   RespV2,
-  cleanName,
   SchemaUtils,
   string2Note,
   globMatch,

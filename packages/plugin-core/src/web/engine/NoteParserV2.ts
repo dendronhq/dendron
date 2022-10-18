@@ -311,7 +311,7 @@ export class NoteParserV2 {
 
     const note = string2Note({
       content,
-      fname: cleanName(name),
+      fname: name,
       vault,
     });
     note.contentHash = sig;

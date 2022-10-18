@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { z } from "zod";
+import { z } from "../parse";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";

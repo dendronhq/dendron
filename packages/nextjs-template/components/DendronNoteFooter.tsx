@@ -41,13 +41,15 @@ class GitUtils {
       return false;
     }
     const githubConfig = ConfigUtils.getGithubConfig(config);
-    return _.every([
-      githubConfig.enableEditLink,
-      githubConfig.editLinkText,
-      githubConfig.editRepository,
-      githubConfig.editBranch,
-      githubConfig.editViewMode,
-    ]);
+    return githubConfig
+      ? _.every([
+          githubConfig.enableEditLink,
+          githubConfig.editLinkText,
+          githubConfig.editRepository,
+          githubConfig.editBranch,
+          githubConfig.editViewMode,
+        ])
+      : false;
   };
 
   static githubUrl = (opts: { note: NoteProps; config: DendronConfig }) => {
@@ -62,14 +64,14 @@ class GitUtils {
     const mvault = VaultUtils.matchVaultV2({ vault, vaults });
     const vaultUrl = _.get(mvault, "remote.url", false);
     const githubConfig = ConfigUtils.getGithubConfig(config);
-    const gitRepoUrl = githubConfig.editRepository;
+    const gitRepoUrl = githubConfig?.editRepository;
     // if we have a vault, we don't need to include the vault name as an offset
     if (mvault && vaultUrl) {
       return _.join(
         [
           this.git2Github(vaultUrl),
-          githubConfig.editViewMode,
-          githubConfig.editBranch,
+          githubConfig?.editViewMode,
+          githubConfig?.editBranch,
           note.fname + ".md",
         ],
         "/"
@@ -90,8 +92,8 @@ class GitUtils {
     return _.join(
       [
         gitRepoUrl,
-        githubConfig.editViewMode,
-        githubConfig.editBranch,
+        githubConfig?.editViewMode,
+        githubConfig?.editBranch,
         gitNotePath,
       ],
       "/"
@@ -138,7 +140,7 @@ export function FooterText() {
               href={GitUtils.githubUrl({ note: noteActive, config })}
               target="_blank"
             >
-              {githubConfig.editLinkText}
+              {githubConfig?.editLinkText}
             </Link>
           )}
         </Col>

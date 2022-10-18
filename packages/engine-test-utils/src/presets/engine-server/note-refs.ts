@@ -1,8 +1,6 @@
-import { vault2Path } from "@dendronhq/common-server";
 import {
   TestPresetEntryV4,
   AssertUtils,
-  FileTestUtils,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 
@@ -22,25 +20,30 @@ const WILDCARD_LINK_V4 = new TestPresetEntryV4(
       return [{ actual: out, expected: true }];
     },
     preSetupHook: async ({ wsRoot, vaults }) => {
-      const vpath = vault2Path({ wsRoot, vault: vaults[0] });
-      await FileTestUtils.createFiles(vpath, [
-        {
-          path: "journal.2020.07.01.md",
-          body: "journal0",
-        },
-        {
-          path: "journal.2020.08.01.md",
-          body: "journal1",
-        },
-        {
-          path: "journal.2020.08.03.md",
-          body: "journal3",
-        },
-        {
-          path: "journal.2020.08.02.md",
-          body: "journal2",
-        },
-      ]);
+      await NoteTestUtilsV4.createNote({
+        vault: vaults[0],
+        wsRoot,
+        body: "journal0",
+        fname: "journal.2020.07.01",
+      });
+      await NoteTestUtilsV4.createNote({
+        vault: vaults[0],
+        wsRoot,
+        body: "journal1",
+        fname: "journal.2020.08.01",
+      });
+      await NoteTestUtilsV4.createNote({
+        vault: vaults[0],
+        wsRoot,
+        body: "journal2",
+        fname: "journal.2020.08.02",
+      });
+      await NoteTestUtilsV4.createNote({
+        vault: vaults[0],
+        wsRoot,
+        body: "journal3",
+        fname: "journal.2020.08.03",
+      });
       const note = await NoteTestUtilsV4.createNote({
         vault: vaults[0],
         wsRoot,

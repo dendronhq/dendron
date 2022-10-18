@@ -1429,6 +1429,16 @@
     ]
   },
   "icon": "media/logo.png",
+  "binary": {
+    "module_name": "node_sqlite3",
+    "module_path": "./lib/binding/napi-v{napi_build_version}-{platform}-{libc}-{arch}",
+    "host": "https://github.com/TryGhost/node-sqlite3/releases/download/",
+    "remote_path": "v5.1.2",
+    "package_name": "napi-v{napi_build_version}-{platform}-{libc}-{arch}.tar.gz",
+    "napi_versions": [
+      6
+    ]
+  },
   "scripts": {
     "webpack": "cross-env SKIP_SENTRY=1 DETECT_CIRCULAR_DEPS=1 webpack --config webpack.dev.js",
     "webpack:dev:watch": "yarn webpack --watch",
@@ -1455,7 +1465,8 @@
     "watch-web": "webpack --watch --config webpack.webext.js",
     "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ~/dendron-20/",
-    "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput"
+    "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput",
+    "download-sqlite-binary": "node-pre-gyp install"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.115.1",
@@ -1484,6 +1495,7 @@
     "ignore-loader": "^0.1.2",
     "mocha": "^7.1.2",
     "node-loader": "^2.0.0",
+    "node-pre-gyp": "^0.17.0",
     "ovsx": "^0.5.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

@@ -18,44 +18,33 @@ jobs:
     environment: plugin-production
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
             platform: win32
             arch: x64
-            npm_config_arch: x64
           - os: windows-latest
             platform: win32
             arch: ia32
-            npm_config_arch: ia32
           - os: windows-latest
             platform: win32
             arch: arm64
-            npm_config_arch: arm
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            npm_config_arch: x64
           - os: ubuntu-latest
             platform: linux
             arch: arm64
-            npm_config_arch: arm64
-          - os: ubuntu-latest
-            platform: linux
-            arch: armhf
-            npm_config_arch: arm
           - os: ubuntu-latest
             platform: alpine
             arch: x64
-            npm_config_arch: x64
           - os: macos-latest
             platform: darwin
             arch: x64
-            npm_config_arch: x64
           - os: macos-latest
             platform: darwin
             arch: arm64
-            npm_config_arch: arm64
 
     runs-on: ${{ matrix.os }}
 
@@ -83,10 +72,8 @@ jobs:
         run: yarn setup
 
       - name: Download SQLite Binary
-        run: yarn download-sqlite-binary --target_arch=${{ env.npm_config_arch }}
+        run: yarn download-sqlite-binary --target_arch=${{ matrix.arch }}
         working-directory: ./packages/plugin-core
-        env:
-          npm_config_arch: ${{ matrix.npm_config_arch }}
 
       - name: Update schema file
         run: yarn gen:data

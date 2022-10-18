@@ -175,7 +175,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
       desc: "",
       links: [],
       anchors: {},
-      fname: "foo",
+      fname: "publish",
       updated: 1627283357535,
       created: 1627283357535,
       parent: null,
@@ -229,7 +229,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",
@@ -271,7 +271,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",
@@ -319,7 +319,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",
@@ -365,7 +365,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",
@@ -410,7 +410,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",
@@ -456,7 +456,7 @@ describe("GIVEN: Github publish pod is run for a note", () => {
             vaults,
             wsRoot,
             config: {
-              fname: "foo",
+              fname: "publish",
               vaultName,
               dest: "stdout",
               token: "asjska",

@@ -435,8 +435,10 @@ export class Git {
     if (opts.recursive) args.push("-r");
     if (opts.force) args.push("--force");
     if (opts.dryRun) args.push("--dry-run");
+    // new vaults are already in .gitignore hence may not be tracked by git.
+    args.push("--ignore-unmatch");
     args.push("--", opts.path);
 
-    return execa("git", args, { cwd: this.opts.localUrl });
+    return execa("git rm", args, { cwd: this.opts.localUrl });
   }
 }

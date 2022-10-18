@@ -65,10 +65,10 @@ export class RemoveVaultCommand extends BasicCommand<
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
     await wsService.removeVault({ vault, updateWorkspace: true });
+    await commands.executeCommand("workbench.action.reloadWindow");
     window.showInformationMessage(
       "finished removing vault (from dendron). you will still need to delete the notes from your disk"
     );
-    await commands.executeCommand("workbench.action.reloadWindow");
     return { vault };
   }
 }

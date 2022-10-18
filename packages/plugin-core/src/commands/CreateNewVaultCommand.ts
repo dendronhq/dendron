@@ -35,7 +35,7 @@ export class CreateNewVaultCommand extends BasicCommand<
     // Prompt user where to create new vault
     const options: OpenDialogOptions = {
       canSelectMany: false,
-      openLabel: "Select Vault Destination",
+      openLabel: "Pick or create a folder for your new vault",
       canSelectFiles: false,
       canSelectFolders: true,
       defaultUri,
@@ -118,8 +118,8 @@ export class CreateNewVaultCommand extends BasicCommand<
     await this.addVaultToWorkspace(vault);
     vaults = [vault];
 
-    window.showInformationMessage("finished creating a new vault");
     await commands.executeCommand("workbench.action.reloadWindow");
+    window.showInformationMessage("finished creating a new vault");
     return { vaults };
   }
 }

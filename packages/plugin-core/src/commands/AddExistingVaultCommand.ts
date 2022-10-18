@@ -207,8 +207,19 @@ export class AddExistingVaultCommand extends BasicCommand<
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const sourceTypeSelected = await VSCodeUtils.showQuickPick([
-      { label: VaultType.LOCAL, picked: true },
-      { label: VaultType.REMOTE },
+      {
+        label: VaultType.LOCAL,
+        picked: true,
+        detail: "eg. /home/dendron/hello-vault",
+        description:
+          "A local vault is a Dendron vault that is present in your computer",
+      },
+      {
+        label: VaultType.REMOTE,
+        detail: "eg. git@github.com:dendronhq/dendron-site.git",
+        description:
+          "A remote vault is a Dendron vault that is available at a git endpoint",
+      },
     ]);
     if (!sourceTypeSelected) {
       return;
@@ -497,8 +508,8 @@ export class AddExistingVaultCommand extends BasicCommand<
       await this.addVaultToWorkspace(vault);
       vaults = [vault];
     }
-    window.showInformationMessage("finished adding vault");
     await commands.executeCommand("workbench.action.reloadWindow");
+    window.showInformationMessage("finished adding vault");
     return { vaults };
   }
 }

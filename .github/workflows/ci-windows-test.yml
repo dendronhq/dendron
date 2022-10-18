@@ -37,7 +37,7 @@ jobs:
           yarn --version
 
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -45,7 +45,7 @@ jobs:
 
       - name: Restore Node modules cache for Windows
         if: runner.os == 'Windows'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: node-modules-cache-windows
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}

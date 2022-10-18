@@ -112,11 +112,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
             ? VaultUtils.getVaultByName({ vname: data.vaultName, vaults })
             : undefined;
 
-          const target = NoteDictsUtils.findByFname(
-            value,
-            noteCacheForRenderDict,
-            targetVault
-          )[0];
+          const target = NoteDictsUtils.findByFname({
+            fname: value,
+            noteDicts: noteCacheForRenderDict,
+            vault: targetVault,
+          })[0];
 
           if (target) {
             alias = target.title;
@@ -150,7 +150,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         // TODO: Consolidate logic.
         if (noteCacheForRenderDict) {
           // TODO: Add vault filter
-          notes = NoteDictsUtils.findByFname(alias, noteCacheForRenderDict);
+          notes = NoteDictsUtils.findByFname({
+            fname: alias,
+            noteDicts: noteCacheForRenderDict,
+          });
         } else {
           return "error - no note cache provided";
         }

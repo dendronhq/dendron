@@ -440,7 +440,10 @@ export function convertNoteRefToHAST(
 
     let data;
     if (noteCacheForRenderDict) {
-      data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict);
+      data = NoteDictsUtils.findByFname({
+        fname,
+        noteDicts: noteCacheForRenderDict,
+      });
       // data = NoteDictsUtils.findByFname(fname, noteCacheForRenderDict, vault);
     }
     if (!data || data.length === 0) {

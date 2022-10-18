@@ -232,11 +232,11 @@ export class FileStorage implements DStore {
     let notes: NoteProps[];
 
     if (fname) {
-      notes = NoteDictsUtils.findByFname(
+      notes = NoteDictsUtils.findByFname({
         fname,
-        { notesById: this.notes, notesByFname: this.noteFnames },
-        vault
-      );
+        noteDicts: { notesById: this.notes, notesByFname: this.noteFnames },
+        vault,
+      });
     } else if (vault) {
       notes = _.values(this.notes).filter((note) =>
         VaultUtils.isEqualV2(note.vault, vault)
@@ -1300,11 +1300,11 @@ export class FileStorage implements DStore {
       note: NoteUtils.toLogObj(note),
     });
     // check if note might already exist
-    const maybeNote = NoteDictsUtils.findByFname(
-      note.fname,
-      { notesById: this.notes, notesByFname: this.noteFnames },
-      note.vault
-    )[0];
+    const maybeNote = NoteDictsUtils.findByFname({
+      fname: note.fname,
+      noteDicts: { notesById: this.notes, notesByFname: this.noteFnames },
+      vault: note.vault,
+    })[0];
     this.logger.info({
       ctx,
       msg: "check:existing",
@@ -1499,19 +1499,16 @@ export class FileStorage implements DStore {
             vaults: this.vaults,
           })
         : undefined;
-      const notes = NoteDictsUtils.findByFname(
-        link.to.fname,
-        { notesById: this.notes, notesByFname: this.noteFnames },
-        maybeVault
-      );
+      const notes = NoteDictsUtils.findByFname({
+        fname: link.to.fname,
+        noteDicts: { notesById: this.notes, notesByFname: this.noteFnames },
+        vault: maybeVault,
+        skipCloneDeep: true,
+      });
       return Promise.all(
         notes.map(async (note) => {
           const prevNote = _.cloneDeep(note);
           BacklinkUtils.addBacklinkInPlace({ note, backlink: maybeBacklink });
-          NoteDictsUtils.add(note, {
-            notesById: this.notes,
-            notesByFname: this.noteFnames,
-          });
           return {
             prevNote,
             note,
@@ -1541,21 +1538,18 @@ export class FileStorage implements DStore {
             vaults: this.vaults,
           })
         : undefined;
-      const notes = NoteDictsUtils.findByFname(
-        link.to.fname,
-        { notesById: this.notes, notesByFname: this.noteFnames },
-        maybeVault
-      );
+      const notes = NoteDictsUtils.findByFname({
+        fname: link.to.fname,
+        noteDicts: { notesById: this.notes, notesByFname: this.noteFnames },
+        vault: maybeVault,
+        skipCloneDeep: true,
+      });
       return Promise.all(
         notes.map(async (note) => {
           const prevNote = _.cloneDeep(note);
           BacklinkUtils.removeBacklinkInPlace({
             note,
             backlink: maybeBacklink,
-          });
-          NoteDictsUtils.add(note, {
-            notesById: this.notes,
-            notesByFname: this.noteFnames,
           });
           return {
             prevNote,

@@ -69,11 +69,11 @@ const plugin: Plugin = function (this: Unified.Processor) {
         return false;
       }
 
-      const note = NoteDictsUtils.findByFname(
-        backlink.from.fname!,
-        noteCacheForRenderDict,
-        vault
-      )[0];
+      const note = NoteDictsUtils.findByFname({
+        fname: backlink.from.fname!,
+        noteDicts: noteCacheForRenderDict,
+        vault,
+      })[0];
 
       // if note doesn't exist, don't include in backlinks
       if (!note) {
@@ -100,14 +100,14 @@ const plugin: Plugin = function (this: Unified.Processor) {
           backlinksToPublish.map((mdLink) => {
             let alias;
 
-            const notes = NoteDictsUtils.findByFname(
-              mdLink.from.fname!,
-              noteCacheForRenderDict!,
-              VaultUtils.getVaultByName({
+            const notes = NoteDictsUtils.findByFname({
+              fname: mdLink.from.fname!,
+              noteDicts: noteCacheForRenderDict!,
+              vault: VaultUtils.getVaultByName({
                 vaults,
                 vname: mdLink.from.vaultName!,
-              })
-            );
+              }),
+            });
 
             const note = notes[0];
 

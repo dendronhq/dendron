@@ -246,6 +246,7 @@ export type EngineWriteOptsV2 = {
   runHooks?: boolean;
   /**
    * If true, overwrite existing note with same fname and vault, even if note has a different id
+   * Commonly used if needed to override a note id
    */
   overrideExisting?: boolean;
   /**

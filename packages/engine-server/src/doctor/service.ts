@@ -115,11 +115,11 @@ export class DoctorService implements Disposable {
         if (!vault) return false;
       }
       const isMultiVault = vaults.length > 1;
-      const noteExists: NoteProps | undefined = NoteDictsUtils.findByFname(
-        link.to!.fname as string,
+      const noteExists: NoteProps | undefined = NoteDictsUtils.findByFname({
+        fname: link.to!.fname as string,
         noteDicts,
-        hasVaultPrefix ? vault! : note.vault
-      )[0];
+        vault: hasVaultPrefix ? vault! : note.vault,
+      })[0];
       if (hasVaultPrefix) {
         // true: link w/ vault prefix that points to nothing. (candidate for sure)
         // false: link w/ vault prefix that points to a note. (valid link)
@@ -408,6 +408,7 @@ export class DoctorService implements Disposable {
           note.id = genUUID();
           await engine.writeNote(note, {
             runHooks: false,
+            overrideExisting: true,
           });
           numChanges += 1;
         };
@@ -714,8 +715,11 @@ export class DoctorService implements Disposable {
           fname,
         });
         const canRename =
-          NoteDictsUtils.findByFname(cleanedFname, noteDicts, note.vault)
-            .length === 0;
+          NoteDictsUtils.findByFname({
+            fname: cleanedFname,
+            noteDicts,
+            vault: note.vault,
+          }).length === 0;
         return {
           ...item,
           cleanedFname,

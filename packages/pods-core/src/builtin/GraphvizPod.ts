@@ -97,11 +97,11 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
       note.links.forEach((link: DLink) => {
         if (link.to) {
           const destinationNote: NoteProps | undefined =
-            NoteDictsUtils.findByFname(
-              link.to!.fname as string,
+            NoteDictsUtils.findByFname({
+              fname: link.to!.fname as string,
               noteDicts,
-              note.vault
-            )[0];
+              vault: note.vault,
+            })[0];
 
           if (!_.isUndefined(destinationNote)) {
             if (

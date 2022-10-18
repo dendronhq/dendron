@@ -288,11 +288,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let note: NoteProps | undefined;
         if (mode !== ProcMode.IMPORT) {
           if (noteCacheForRenderDict) {
-            note = NoteDictsUtils.findByFname(
-              valueOrig,
-              noteCacheForRenderDict,
-              vault
-            )[0];
+            note = NoteDictsUtils.findByFname({
+              fname: valueOrig,
+              noteDicts: noteCacheForRenderDict,
+              vault,
+            })[0];
           }
 
           if (!note) {
@@ -381,11 +381,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               ? VaultUtils.getVaultByName({ vname: data.vaultName, vaults })
               : undefined;
 
-            const target = NoteDictsUtils.findByFname(
-              valueOrig,
-              noteCacheForRenderDict,
-              targetVault
-            )[0];
+            const target = NoteDictsUtils.findByFname({
+              fname: valueOrig,
+              noteDicts: noteCacheForRenderDict,
+              vault: targetVault,
+            })[0];
 
             if (target) {
               title = target.title;

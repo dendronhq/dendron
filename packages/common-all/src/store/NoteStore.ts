@@ -4,7 +4,6 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { NoteUtils } from "../dnode";
 import { DendronError } from "../error";
 import {
-  Disposable,
   DNoteLoc,
   NoteProps,
   NotePropsMeta,
@@ -22,7 +21,7 @@ import { INoteStore } from "./INoteStore";
 /**
  * Responsible for storing NoteProps non-metadata and NoteProps metadata
  */
-export class NoteStore implements Disposable, INoteStore<string> {
+export class NoteStore implements INoteStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, NotePropsMeta>;
   private _wsRoot: URI;
@@ -37,7 +36,9 @@ export class NoteStore implements Disposable, INoteStore<string> {
     this._wsRoot = wsRoot;
   }
 
-  dispose() {}
+  dispose() {
+    this._metadataStore.dispose();
+  }
 
   /**
    * See {@link INoteStore.get}
@@ -69,11 +70,9 @@ export class NoteStore implements Disposable, INoteStore<string> {
     if (capture) {
       const offset = capture[0].length;
       const body = nonMetadata.data.slice(offset + 1);
-      // add `contentHash` to this signature because its not saved with metadata
       const note = {
         ...metadata.data,
         body,
-        contentHash: genHash(nonMetadata.data),
       };
       return { data: note };
     } else {
@@ -137,7 +136,12 @@ export class NoteStore implements Disposable, INoteStore<string> {
    */
   async write(opts: WriteNoteOpts<string>): Promise<RespV3<string>> {
     const { key, note } = opts;
-    const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
+    const notePropsMeta: NotePropsMeta = _.omit(note, ["body"]);
+    const content = NoteUtils.serialize(note, { excludeStub: true });
+    const noteMeta = {
+      ...notePropsMeta,
+      contentHash: genHash(content),
+    };
     const metaResp = await this.writeMetadata({ key, noteMeta });
     if (metaResp.error) {
       return { error: metaResp.error };
@@ -150,7 +154,6 @@ export class NoteStore implements Disposable, INoteStore<string> {
         VaultUtils.getRelPath(note.vault),
         note.fname + ".md"
       );
-      const content = NoteUtils.serialize(note, { excludeStub: true });
       const writeResp = await this._fileStore.write(uri, content);
       if (writeResp.error) {
         return { error: writeResp.error };

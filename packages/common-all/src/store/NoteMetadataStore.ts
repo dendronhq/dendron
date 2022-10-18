@@ -23,6 +23,11 @@ export class NoteMetadataStore implements INoteMetadataStore {
     this._noteIdsByFname = {};
   }
 
+  dispose() {
+    this._noteMetadataById = {};
+    this._noteIdsByFname = {};
+  }
+
   /**
    * See {@link IDataStore.get}
    */

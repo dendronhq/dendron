@@ -68,6 +68,8 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     });
   }
 
+  dispose() {}
+
   async get(id: string) {
     const note = await getPrismaClient().note.findUnique({ where: { id } });
     if (_.isNull(note)) {

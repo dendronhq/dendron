@@ -611,11 +611,11 @@ export class DendronEngineV2 implements DEngine {
             })
           : undefined;
 
-        return NoteDictsUtils.findByFname(
-          pointTo.fname!,
+        return NoteDictsUtils.findByFname({
+          fname: pointTo.fname!,
           noteDicts,
-          maybeVault
-        )[0];
+          vault: maybeVault,
+        })[0];
       })
       // Filter out broken links (pointing to non existent files)
       .filter((refNote) => refNote !== undefined);

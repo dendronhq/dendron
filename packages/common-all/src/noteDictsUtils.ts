@@ -49,13 +49,21 @@ export class NoteDictsUtils {
    * @param fname
    * @param noteDicts
    * @param vault If provided, use to filter results
+   * @param skipCloneDeep If true, do not clone notes and return same reference in noteDicts.
+   * This means that any changes to the returned notes will affect the same note in noteDicts
    * @returns Array of NoteProps matching opts
    */
-  static findByFname(
-    fname: string,
-    noteDicts: NoteDicts,
-    vault?: DVault
-  ): NoteProps[] {
+  static findByFname({
+    fname,
+    noteDicts,
+    vault,
+    skipCloneDeep,
+  }: {
+    fname: string;
+    noteDicts: NoteDicts;
+    vault?: DVault;
+    skipCloneDeep?: boolean;
+  }): NoteProps[] {
     const { notesById, notesByFname } = noteDicts;
     const cleanedFname = cleanName(fname);
     const ids: string[] | undefined = notesByFname[cleanedFname];
@@ -65,6 +73,10 @@ export class NoteDictsUtils {
     let notes = ids.map((id) => notesById[id]).filter(isNotUndefined);
     if (vault) {
       notes = notes.filter((note) => VaultUtils.isEqualV2(note.vault, vault));
+    }
+
+    if (skipCloneDeep) {
+      return notes;
     }
     return _.cloneDeep(notes);
   }

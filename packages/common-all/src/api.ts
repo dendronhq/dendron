@@ -7,6 +7,7 @@ import {
   EngineDeleteOpts,
   EngineInfoResp,
   EngineWriteOptsV2,
+  FindNotesMetaResp,
   RenameNoteOpts,
   SchemaModuleProps,
   WriteNoteResp,
@@ -377,6 +378,16 @@ export class DendronAPI extends API {
   noteFind(req: APIRequest<FindNoteOpts>): Promise<RespV3<FindNotesResp>> {
     return this._makeRequest({
       path: "note/find",
+      method: "post",
+      body: req,
+    });
+  }
+
+  noteFindMeta(
+    req: APIRequest<FindNoteOpts>
+  ): Promise<RespV3<FindNotesMetaResp>> {
+    return this._makeRequest({
+      path: "note/findMeta",
       method: "post",
       body: req,
     });

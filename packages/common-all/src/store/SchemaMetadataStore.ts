@@ -16,6 +16,10 @@ export class SchemaMetadataStore
     this._schemaMetadataById = {};
   }
 
+  dispose() {
+    this._schemaMetadataById = {};
+  }
+
   /**
    * See {@link IDataStore.get}
    */

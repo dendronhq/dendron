@@ -172,12 +172,15 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
+    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+      this.wsRoot
+    );
     const defaultResp = {
       notes: {},
       schemas: {},
       wsRoot: this.wsRoot,
       vaults: this.vaults,
-      config: ConfigUtils.genDefaultConfig(),
+      config,
     };
     try {
       const { data: schemas, error: schemaErrors } = await this.initSchema();
@@ -201,12 +204,14 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       const bulkWriteSchemaOpts = schemas.map((schema) => {
         return { key: schema.root.id, schema };
       });
+      this._schemaStore.dispose();
       this._schemaStore.bulkWriteMetadata(bulkWriteSchemaOpts);
 
-      const { data: notes, error: noteErrors } = await this.initNotes(
+      const { data: noteDicts, error: noteErrors } = await this.initNotes(
         schemaDict
       );
-      if (_.isUndefined(notes)) {
+      const { notesById } = noteDicts;
+      if (_.isUndefined(notesById)) {
         return {
           data: defaultResp,
           error: DendronError.createFromStatus({
@@ -217,13 +222,26 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         };
       }
 
-      await this.queryStore.replaceNotesIndex(notes);
+      // Backlink candidates have to be done after notes are initialized because it depends on the engine already having notes in it
+      if (config.dev?.enableLinkCandidates) {
+        const ctx = "_addLinkCandidates";
+        const start = process.hrtime();
+        this.logger.info({ ctx, msg: "pre:addLinkCandidates" });
+        // Mutates existing note objects so we don't need to reset the notes
+        const maxNoteLength = ConfigUtils.getWorkspace(config).maxNoteLength;
+        this.updateNotesWithLinkCandidates(noteDicts, maxNoteLength, config);
+        const duration = getDurationMilliseconds(start);
+        this.logger.info({ ctx, duration });
+      }
+
+      await this.queryStore.replaceNotesIndex(notesById);
       await this.queryStore.replaceSchemasIndex(schemaDict);
-      const bulkWriteOpts = _.values(notes).map((note) => {
-        const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
+      const bulkWriteOpts = _.values(notesById).map((note) => {
+        const noteMeta: NotePropsMeta = _.omit(note, ["body"]);
 
         return { key: note.id, noteMeta };
       });
+      this._noteStore.dispose();
       this._noteStore.bulkWriteMetadata(bulkWriteOpts);
 
       const hookErrors: IDendronError[] = [];
@@ -261,10 +279,10 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       return {
         error,
         data: {
-          notes,
+          notes: notesById,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
-          config: DConfig.readConfigSync(this.wsRoot),
+          config,
         },
       };
     } catch (error: any) {
@@ -297,11 +315,14 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       note: NoteUtils.toLogObj(note),
     });
 
+    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+      this.wsRoot
+    );
     // Update links/anchors based on note body
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this,
-      config: DConfig.readConfigSync(this.wsRoot),
+      config,
     });
 
     // Apply hooks
@@ -611,7 +632,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+      this.wsRoot
+    );
     const notesToUpdate = linkNotesResp
       .map((resp) => {
         if (resp.error) {
@@ -907,9 +930,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           }),
         };
       }
+      const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+        this.wsRoot
+      );
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        config: DConfig.readConfigSync(this.wsRoot, true),
+        config,
       });
       if (opts.filterByAnchorType) {
         _.remove(
@@ -950,7 +976,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           ),
         };
       });
-      const config = DConfig.readConfigSync(this.wsRoot, true);
+      const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+        this.wsRoot
+      );
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
@@ -1043,7 +1071,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    */
   private async initNotes(
     schemas: SchemaModuleDict
-  ): Promise<RespWithOptError<NotePropsByIdDict>> {
+  ): Promise<RespWithOptError<NoteDicts>> {
     const ctx = "DEngine:initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let errors: IDendronError[] = [];
@@ -1081,16 +1109,14 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           logger: this.logger,
         });
 
-        const { data: notesDict, error } = await new NoteParserV2({
+        const { noteDicts, errors: parseErrors } = await new NoteParserV2({
           cache: notesCache,
           engine: this,
           logger: this.logger,
         }).parseFiles(maybeFiles.data, vault, schemas);
-        if (error) {
-          errors = errors.concat(error);
-        }
-        if (notesDict) {
-          const { notesById, notesByFname } = notesDict;
+        errors = errors.concat(parseErrors);
+        if (noteDicts) {
+          const { notesById, notesByFname } = noteDicts;
           notesFname = NoteFnameDictUtils.merge(notesFname, notesByFname);
 
           this.logger.info({
@@ -1117,8 +1143,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     this.logger.info({ ctx, msg: `time to init notes: "${duration}" ms` });
 
     return {
-      data: allNotes,
-      error: new DendronCompositeError(errors),
+      data: {
+        notesById: allNotes,
+        notesByFname: notesFname,
+      },
+      error:
+        errors.length === 0 ? undefined : new DendronCompositeError(errors),
     };
   }
 
@@ -1159,17 +1189,17 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         noteFrom.links.forEach((link) => {
           const maybeBacklink = BacklinkUtils.createFromDLink(link);
           if (maybeBacklink) {
-            const notes = NoteDictsUtils.findByFname(
-              link.to!.fname!,
-              noteDicts
-            );
+            const notes = NoteDictsUtils.findByFname({
+              fname: link.to!.fname!,
+              noteDicts,
+              skipCloneDeep: true,
+            });
 
             notes.forEach((noteTo: NoteProps) => {
               BacklinkUtils.addBacklinkInPlace({
                 note: noteTo,
                 backlink: maybeBacklink,
               });
-              NoteDictsUtils.add(noteTo, noteDicts);
             });
           }
         });
@@ -1477,7 +1507,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
+      this.wsRoot
+    );
 
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
@@ -1517,6 +1549,36 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const payload = await proc.process(NoteUtils.serialize(note));
     const renderedNote = payload.toString();
     return renderedNote;
+  }
+
+  private updateNotesWithLinkCandidates(
+    noteDicts: NoteDicts,
+    maxNoteLength: number,
+    config: DendronConfig
+  ) {
+    return _.map(noteDicts.notesById, (noteFrom: NoteProps) => {
+      try {
+        if (
+          noteFrom.body.length <
+          (maxNoteLength || CONSTANTS.DENDRON_DEFAULT_MAX_NOTE_LENGTH)
+        ) {
+          const linkCandidates = LinkUtils.findLinkCandidatesSync({
+            note: noteFrom,
+            noteDicts,
+            config,
+          });
+          noteFrom.links = noteFrom.links.concat(linkCandidates);
+        }
+      } catch (err: any) {
+        const error = error2PlainObject(err);
+        this.logger.error({
+          error,
+          noteFrom,
+          message: "issue with link candidates",
+        });
+        return;
+      }
+    });
   }
 }
 

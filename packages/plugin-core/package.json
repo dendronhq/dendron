@@ -1436,7 +1436,6 @@
     "remote_path": "v5.1.2",
     "package_name": "napi-v{napi_build_version}-{platform}-{libc}-{arch}.tar.gz",
     "napi_versions": [
-      3,
       6
     ]
   },

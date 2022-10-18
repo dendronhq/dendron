@@ -34,9 +34,6 @@ export class GitUtils {
   static canShowGitLink(opts: { config: DendronConfig; note: NoteProps }) {
     return CommonGitUtils.canShowGitLink(opts);
   }
-  /**
-   * Convert a github repo orul to access token format
-   */
   static getGithubAccessTokenUrl(opts: {
     remotePath: string;
     accessToken: string;
@@ -64,13 +61,6 @@ export class GitUtils {
     return CommonGitUtils.getRepoNameFromURL(url);
   }
 
-  /** Find the dependency path for a vault given the remote url. You can use
-   * this even if the vault has no remote.
-   *
-   * This is the relative path within the dependencies folder, like
-   * `github.com/dendronhq/dendron-site`. For more details see the
-   * [[Self Contained Vaults RFC|dendron://dendron.docs/rfc.42-self-contained-vaults]]
-   */
   public static remoteUrlToDependencyPath({
     vaultName,
     url,
@@ -81,10 +71,6 @@ export class GitUtils {
     return CommonGitUtils.remoteUrlToDependencyPath({ vaultName, url });
   }
 
-  /** If this vault had this remote, what path should it be stored under?
-   *
-   * If the remote is null, then you'll get the path should be if the vault was a local vault.
-   */
   static getDependencyPathWithRemote({
     vault,
     remote,

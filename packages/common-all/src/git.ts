@@ -194,6 +194,10 @@ export function remoteUrlToDependencyPath({
   return vaultName;
 }
 
+/** If this vault had this remote, what path should it be stored under?
+ *
+ * If the remote is null, then you'll get the path should be if the vault was a local vault.
+ */
 export function getDependencyPathWithRemote({
   vault,
   remote,

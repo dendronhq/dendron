@@ -39,7 +39,7 @@ suite("AddExistingVaultCommand", function () {
       "WHEN a remote workspace vault is added",
       {
         modConfigCb: disableSelfContainedVaults,
-        timeout,
+        timeout: 1e6,
       },
       () => {
         before(() => {
@@ -355,13 +355,12 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
       });
 
-      test("THEN the vault is added at the destination folder, and is self contained", async () => {
+      test("THEN the vault is added at the dependencies/remote, and is self contained", async () => {
         const cmd = new AddExistingVaultCommand(
           ExtensionProvider.getExtension()
         );
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        fs.ensureDir(path.join(wsRoot, "testing"));
-        const vaultPath = path.join(wsRoot, "testing", vaultName);
+        const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             type: "remote",
@@ -393,7 +392,10 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         });
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
-        expect(vault?.fsPath).toEqual(`testing/${vaultName}`);
+        expect(vault?.fsPath).toEqual(
+          // vault paths always use UNIX style
+          path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
+        );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });
 
@@ -509,7 +511,7 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
 
         const { wsRoot } = ExtensionProvider.getDWorkspace();
         fs.ensureDir(path.join(wsRoot, "testing"));
-        const vaultPath = path.join(wsRoot, "testing", vaultName);
+        const vaultPath = path.join(wsRoot, FOLDERS.DEPENDENCIES, vaultName);
         sinon.stub(cmd, "gatherInputs").returns(
           Promise.resolve({
             type: "remote",
@@ -542,7 +544,7 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         expect(vault?.selfContained).toBeFalsy();
         expect(vault?.fsPath).toEqual(
           // vault paths always use UNIX style
-          path.posix.join("testing", vaultName)
+          path.posix.join(FOLDERS.DEPENDENCIES, vaultName)
         );
         expect(vault?.remote?.url).toEqual(remoteDir);
       });

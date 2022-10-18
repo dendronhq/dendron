@@ -89,10 +89,10 @@ export class AddExistingVaultCommand extends BasicCommand<
 
   /** A regular, non-self contained vault. */
   async gatherVaultStandard(
-    sourceType: VaultRemoteSource,
-    vaultDestination: string
+    sourceType: VaultRemoteSource
   ): Promise<CommandOpts | undefined> {
     let sourceName: string | undefined;
+    let vaultDestination: string | undefined;
     if (sourceType === VaultType.REMOTE) {
       // eslint-disable-next-line  no-async-promise-executor
       const out = new Promise<CommandOpts | undefined>(async (resolve) => {
@@ -110,18 +110,30 @@ export class AddExistingVaultCommand extends BasicCommand<
             selected.src = qp.value;
           }
           const sourceRemotePath = selected.src;
-          const path2Vault =
+
+          const placeHolder =
             selected.label === "custom"
               ? GitUtils.getRepoNameFromURL(sourceRemotePath)
               : selected.label;
-          const placeHolder = path2Vault;
+
+          const out = await VSCodeUtils.showInputBox({
+            prompt: "Path to your new vault (relative to your workspace root)",
+            placeHolder: path.basename(placeHolder),
+            value: placeHolder,
+          });
+
+          if (PickerUtilsV2.isInputEmpty(out)) {
+            return resolve(undefined);
+          }
+          vaultDestination = path.join(this._ext.getDWorkspace().wsRoot, out);
+
           sourceName = await VSCodeUtils.showInputBox({
             prompt: "Name of new vault (optional, press enter to skip)",
             value: placeHolder,
           });
           qp.hide();
           return resolve({
-            type: sourceType!,
+            type: sourceType,
             name: sourceName,
             path: vaultDestination,
             pathRemote: sourceRemotePath,
@@ -131,6 +143,9 @@ export class AddExistingVaultCommand extends BasicCommand<
       });
       return out;
     }
+
+    vaultDestination = await this.gatherDestinationFolder();
+    if (!vaultDestination) return;
     const placeHolder = path.basename(vaultDestination);
     sourceName = await VSCodeUtils.showInputBox({
       prompt: "Name of new vault (optional, press enter to skip)",
@@ -161,10 +176,12 @@ export class AddExistingVaultCommand extends BasicCommand<
   }
 
   async gatherVaultSelfContained(
-    sourceType: VaultRemoteSource,
-    vaultDestination: string
+    sourceType: VaultRemoteSource
   ): Promise<CommandOpts | undefined> {
     if (sourceType === VaultType.LOCAL) {
+      const vaultDestination = await this.gatherDestinationFolder();
+      if (!vaultDestination) return;
+
       const sourceName = await VSCodeUtils.showInputBox({
         prompt: "Name of new vault (optional, press enter to skip)",
         placeHolder: path.basename(vaultDestination),
@@ -198,7 +215,14 @@ export class AddExistingVaultCommand extends BasicCommand<
       return {
         type: sourceType,
         name: sourceName,
-        path: vaultDestination,
+        path: path.join(
+          this._ext.getDWorkspace().wsRoot,
+          FOLDERS.DEPENDENCIES,
+          GitUtils.remoteUrlToDependencyPath({
+            vaultName,
+            url: remote,
+          })
+        ),
         pathRemote: remote,
         isSelfContained: true,
       };
@@ -225,15 +249,13 @@ export class AddExistingVaultCommand extends BasicCommand<
       return;
     }
     const sourceType = sourceTypeSelected.label;
-    const vaultDestination = await this.gatherDestinationFolder();
-    if (!vaultDestination) return;
 
     const { config } = this._ext.getDWorkspace();
     if (config.dev?.enableSelfContainedVaults) {
-      return this.gatherVaultSelfContained(sourceType, vaultDestination);
+      return this.gatherVaultSelfContained(sourceType);
     } else {
       // A "standard", non self contained vault
-      return this.gatherVaultStandard(sourceType, vaultDestination);
+      return this.gatherVaultStandard(sourceType);
     }
   }
 

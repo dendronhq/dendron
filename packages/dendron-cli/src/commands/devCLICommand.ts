@@ -153,7 +153,6 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     args.option("extensionTarget", {
       describe:
         "extension target to pass to vsce to specify platform and architecture",
-      choices: Object.values(ExtensionType),
     });
     args.option("fast", {
       describe: "skip some checks",

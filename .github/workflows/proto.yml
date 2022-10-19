@@ -61,7 +61,7 @@ jobs:
 
       - name: Download SQLite Binary
         run: |
-          if [ ${{ matrix.platform }} == 'linux']; then
+          if [ ${{ matrix.platform }} == linux ]; then
             yarn download-sqlite-binary --target_arch=${{ matrix.arch }}
             else
             yarn download-sqlite-binary --target_arch=${{ matrix.arch }} --target_platform=${{ matrix.platform }} --target_libc=unknown

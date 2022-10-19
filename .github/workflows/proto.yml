@@ -1,38 +1,17 @@
-# This workflow will build the plugin vsix every week night at 12:00 AM PST and
-# publish it to the VS Code Marketplace under the 'nightly' extension target.
-# This will NOT publish any packages to NPM.
+# Builds and publishes the release. This will publish packages to npm and
+# publish the release extension to the VS Code and Open VSX Marketplaces. This
+# is manually triggered once the release build is smoke-tested and ready for
+# release.
 name: Proto
 
-# See documentation on POSIX cron syntax here: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events
-# Scheduled to run every weekday at 12:00 AM PST, which is 7:00 AM UTC Tuesday-Saturday
-on:
-  workflow_dispatch:
-  # schedule:
-  #   - cron: "0 7 * * 1-6"
-
+on: workflow_dispatch
 jobs:
   build:
-    # Don't run this job outside of the Dendronhq organization https://github.com/prisma/prisma/issues/3539#issuecomment-690260573
-    if: github.repository_owner == 'dendronhq'
-    timeout-minutes: 60
-    environment: plugin-production
-
+    environment: plugin-development
     strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: win32
-            arch: x64
-          - platform: win32
-            arch: ia32
-          - platform: linux
-            arch: x64
-          - platform: linux
-            arch: arm64
-          - platform: darwin
-            arch: x64
-          - platform: darwin
-            arch: arm64
+      fail-fast: true
+
+    timeout-minutes: 30
 
     runs-on: ubuntu-latest
 
@@ -54,22 +33,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
-
-      - name: Download SQLite Binary
-        run: |
-          if [ ${{ matrix.platform }} == linux ]; then
-            yarn download-sqlite-binary --target_arch=${{ matrix.arch }}
-            else
-            yarn download-sqlite-binary --target_arch=${{ matrix.arch }} --target_platform=${{ matrix.platform }} --target_libc=unknown
-          fi
-        working-directory: ./packages/plugin-core
-
-      - name: Update schema file
-        run: yarn gen:data
 
       - name: Set Up Yarn Local Registry
         run: yarn config set registry http://localhost:4873
@@ -79,23 +46,22 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          echo "DENDRON_RELEASE_VERSION=`(cat ./packages/plugin-core/package.json | jq .version -r; npx vsce show dendron.nightly --json | jq .versions[0].version -r) | sort -rn | head -n 1 | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`-nightly" >> $GITHUB_ENV
+          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
-          echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Build the VSIX
         run: |
-          yarn build:patch:local:ci:nightly ${{ env.PUBLISHING_TARGET }}
+          yarn build:patch:local:ci
 
       - name: Check for VSIX
         run: |
           vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
           if [ $vsixCount = 1 ]; then
             vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
-            echo "found a single .vsix file named $vsix" 
+            echo "found a single .vsix file named $vsix"
             echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
             echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
             else
@@ -110,14 +76,15 @@ jobs:
           path: ${{ env.VSIX_RELATIVE_PATH }}
           if-no-files-found: error
 
-      - name: Publish to VS Code Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
-        working-directory: ./packages/plugin-core
-        run: yarn deploy:vscode:vsix ${{ env.VSIX_FILE_NAME }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Publish to Open VSX Marketplace
-        env:
-          OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
-        working-directory: ./packages/plugin-core
-        run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
+      - name: Publish VSIX to S3
+        run: |
+          BUCKET=org-dendron-public-assets
+          aws s3 cp --acl public-read ${{ env.VSIX_RELATIVE_PATH }} s3://$BUCKET/publish/${{ env.VSIX_FILE_NAME }}
+          echo https://$BUCKET.s3.amazonaws.com/publish/${{ env.VSIX_FILE_NAME }}

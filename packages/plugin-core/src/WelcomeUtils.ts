@@ -1,9 +1,5 @@
-import {
-  TutorialEvents,
-  VideoTutorialTestGroups,
-  _2022_09_VIDEO_TUTORIAL_TEST,
-} from "@dendronhq/common-all";
-import { readMD, SegmentClient } from "@dendronhq/common-server";
+import { TutorialEvents } from "@dendronhq/common-all";
+import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -22,17 +18,16 @@ async function initWorkspace() {
   return;
 }
 
+export enum VideoTutorialTestGroups {
+  "gif" = "gif",
+  "video" = "video",
+}
+
 export function showWelcome(assetUri: vscode.Uri) {
   try {
     let content: string;
-    const ABUserGroup = _2022_09_VIDEO_TUTORIAL_TEST.getUserGroup(
-      SegmentClient.instance().anonymousId
-    );
     let testgroup: string;
-    if (
-      ABUserGroup === VideoTutorialTestGroups.video &&
-      semver.gte(vscode.version, "1.71.0")
-    ) {
+    if (semver.gte(vscode.version, "1.71.0")) {
       const videoUri = VSCodeUtils.joinPath(
         assetUri,
         "dendron-ws",

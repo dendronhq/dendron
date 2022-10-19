@@ -171,6 +171,10 @@
         "icon": "$(new-file)"
       },
       {
+        "command": "dendron.treeView.expandStub",
+        "title": "Dendron:Dev: Expand Stub"
+      },
+      {
         "command": "dendron.graph-panel.increaseDepth",
         "title": "Increase Depth",
         "icon": "$(arrow-up)"
@@ -623,6 +627,10 @@
         {
           "command": "dendron.treeView.expandAll",
           "when": "dendron:devMode"
+        },
+        {
+          "command": "dendron.treeView.expandStub",
+          "when": "false"
         },
         {
           "command": "dendron.browseNote",

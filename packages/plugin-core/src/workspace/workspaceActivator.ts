@@ -101,6 +101,15 @@ function _setupTreeViewCommands(
       })
     );
   }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_EXPAND_STUB.key)) {
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.TREEVIEW_EXPAND_STUB.key,
+      sentryReportingCallback(async (id) => {
+        await treeView.expandTreeItem(id);
+      })
+    );
+  }
 }
 
 export function trackTopLevelRepoFound(opts: { wsService: WorkspaceService }) {

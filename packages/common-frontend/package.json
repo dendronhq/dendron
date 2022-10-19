@@ -36,7 +36,6 @@
     "@aws-amplify/core": "^4.0.2",
     "@dendronhq/common-all": "^0.115.1",
     "@reduxjs/toolkit": "^1.5.1",
-    "antd": "^4.15.4",
     "lodash": "^4.17.20",
     "querystring": "^0.2.1",
     "react": "^17.0.2",

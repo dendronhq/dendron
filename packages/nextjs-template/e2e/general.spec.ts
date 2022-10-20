@@ -55,6 +55,14 @@ test.describe("GIVEN default viewport", () => {
     );
     expect(await themeLinkLocator.count()).toBe(4);
   });
+
+  test("THEN should display breadcrumbs", async ({ page, url }) => {
+    await page.goto(`${url}/notes/ufzjlbxfti6endd1o6egr6r`);
+
+    const breadcrumb = page.locator(".ant-breadcrumb");
+    await breadcrumb.hover();
+    await expect(breadcrumb).toHaveScreenshot("breadcrumb.png");
+  });
 });
 
 test.describe("GIVEN mobile viewport", () => {

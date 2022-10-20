@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Build plugin for CI and release
-# TODO: `buildPatch.sh` is a bad name - it should just be `buildPlugin`
+# Build script specific for Nightly
 
 echo "starting verdaccio with in-memory cache to speed up build time"
 verdaccio -c ./bootstrap/data/verdaccio/config.yaml > verdaccio.log 2>&1 &

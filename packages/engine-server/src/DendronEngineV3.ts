@@ -139,11 +139,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
-    const { error, data: config } =
-      DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
-    if (error) {
-      LOGGER.error(stringifyError(error));
-    }
+    const config = DConfig.readConfigSync(wsRoot);
 
     const queryStore = new FuseQueryStore();
     const fileStore = new NodeJSFileStore();
@@ -172,9 +168,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
-    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
+    const config = DConfig.readConfigSync(this.wsRoot);
     const defaultResp = {
       notes: {},
       schemas: {},
@@ -315,9 +309,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       note: NoteUtils.toLogObj(note),
     });
 
-    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
+    const config = DConfig.readConfigSync(this.wsRoot);
     // Update links/anchors based on note body
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
@@ -632,9 +624,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
-    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
+    const config = DConfig.readConfigSync(this.wsRoot);
     const notesToUpdate = linkNotesResp
       .map((resp) => {
         if (resp.error) {
@@ -930,9 +920,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           }),
         };
       }
-      const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-        this.wsRoot
-      );
+      const config = DConfig.readConfigSync(this.wsRoot);
       const blocks = await RemarkUtils.extractBlocks({
         note,
         config,
@@ -976,9 +964,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           ),
         };
       });
-      const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-        this.wsRoot
-      );
+      const config = DConfig.readConfigSync(this.wsRoot);
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
@@ -1507,9 +1493,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    const { data: config } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
+    const config = DConfig.readConfigSync(this.wsRoot);
 
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,

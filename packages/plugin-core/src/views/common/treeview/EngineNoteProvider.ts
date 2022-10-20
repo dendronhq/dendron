@@ -13,11 +13,13 @@ import {
   Event,
   EventEmitter,
   ProviderResult,
+  ThemeIcon,
   TreeDataProvider,
   TreeItem,
   TreeItemCollapsibleState,
 } from "vscode";
 import { URI } from "vscode-uri";
+import { ICONS } from "../../../constants";
 import { type ITreeViewConfig } from "./ITreeViewConfig";
 import { TreeNote } from "./TreeNote";
 
@@ -255,6 +257,9 @@ export class EngineNoteProvider
     });
 
     this._tree[note.id] = tn;
+    if (note.schema) {
+      tn.iconPath = new ThemeIcon(ICONS.SCHEMA);
+    }
 
     return tn;
   }

@@ -77,6 +77,7 @@ import { WSUtils } from "./WSUtils";
 import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 import semver from "semver";
 import _ from "lodash";
+import { GotoNoteCommand } from "./commands/GotoNote";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.]+)");
 // === Main
@@ -711,6 +712,21 @@ async function _setupCommands({
             await new ConfigureWithUICommand(
               ConfigureUIPanelFactory.create(ext)
             ).run();
+          })
+        )
+      );
+    }
+    if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_GOTO_NOTE.key)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(
+          DENDRON_COMMANDS.TREEVIEW_GOTO_NOTE.key,
+          sentryReportingCallback(async (id: string) => {
+            const resp = await ext.getEngine().getNoteMeta(id);
+            const { data } = resp;
+            await new GotoNoteCommand(ext).run({
+              qs: data?.fname,
+              vault: data?.vault,
+            });
           })
         )
       );

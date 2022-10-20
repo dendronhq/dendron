@@ -172,7 +172,12 @@
       },
       {
         "command": "dendron.treeView.expandStub",
-        "title": "Dendron:Dev: Expand Stub"
+        "title": "Dendron: Dev: Expand Stub"
+      },
+      {
+        "command": "dendron.treeView.gotoNote",
+        "title": "Create Note",
+        "icon": "$(gist-new)"
       },
       {
         "command": "dendron.graph-panel.increaseDepth",
@@ -629,7 +634,15 @@
           "when": "dendron:devMode"
         },
         {
+          "command": "dendron.treeView.createNote",
+          "when": "false"
+        },
+        {
           "command": "dendron.treeView.expandStub",
+          "when": "false"
+        },
+        {
+          "command": "dendron.treeView.gotoNote",
           "when": "false"
         },
         {
@@ -1164,6 +1177,11 @@
         {
           "command": "dendron.createNote",
           "when": "view == dendron.treeView && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.treeView.gotoNote",
+          "when": "view == dendron.treeView && viewItem == stub && shellExecutionSupported",
+          "group": "inline"
         }
       ]
     },

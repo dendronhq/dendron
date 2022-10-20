@@ -99,6 +99,20 @@ async function setupCommands(context: vscode.ExtensionContext) {
       )
     );
   }
+  /**
+   * go to note is not yet supported in dendron-web.
+   * for now, we open lookup bar when user clicks on the view action(+) for stubs
+   */
+  if (!existingCommands.includes(DENDRON_COMMANDS.TREEVIEW_GOTO_NOTE.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TREEVIEW_GOTO_NOTE.key,
+        async (_args: any) => {
+          await container.resolve(NoteLookupCmd).run();
+        }
+      )
+    );
+  }
 }
 
 async function setupViews(context: vscode.ExtensionContext) {
@@ -112,17 +126,29 @@ async function setupTreeView(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(treeView);
 
-  vscode.commands.registerCommand("dendron.treeView.labelByTitle", () => {
-    treeView.updateLabelType({
-      labelType: TreeViewItemLabelTypeEnum.title,
-    });
-  });
+  vscode.commands.registerCommand(
+    DENDRON_COMMANDS.TREEVIEW_LABEL_BY_TITLE.key,
+    () => {
+      treeView.updateLabelType({
+        labelType: TreeViewItemLabelTypeEnum.title,
+      });
+    }
+  );
 
-  vscode.commands.registerCommand("dendron.treeView.labelByFilename", () => {
-    treeView.updateLabelType({
-      labelType: TreeViewItemLabelTypeEnum.filename,
-    });
-  });
+  vscode.commands.registerCommand(
+    DENDRON_COMMANDS.TREEVIEW_LABEL_BY_FILENAME.key,
+    () => {
+      treeView.updateLabelType({
+        labelType: TreeViewItemLabelTypeEnum.filename,
+      });
+    }
+  );
+  vscode.commands.registerCommand(
+    DENDRON_COMMANDS.TREEVIEW_EXPAND_STUB.key,
+    async (id: string) => {
+      await treeView.expandTreeItem(id);
+    }
+  );
 }
 
 async function reportActivationTelemetry() {

@@ -1,6 +1,7 @@
 import {
   ConfigUtils,
   DENDRON_VSCODE_CONFIG_KEYS,
+  DEngine,
   DEngineClient,
   Disposable,
   DVault,
@@ -34,7 +35,6 @@ import {
 } from "@dendronhq/common-test-utils";
 import {
   DendronEngineClient,
-  DendronEngineV2,
   Git,
   HistoryService,
   WorkspaceUtils,
@@ -428,7 +428,7 @@ export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
 class FakeEngine {}
 
 type EngineOverride = {
-  [P in keyof DendronEngineV2]: (opts: WorkspaceOpts) => DendronEngineV2[P];
+  [P in keyof DEngine]: (opts: WorkspaceOpts) => DEngine[P];
 };
 
 export const createEngineFactory = (
@@ -438,7 +438,7 @@ export const createEngineFactory = (
     opts: WorkspaceOpts
   ): DEngineClient => {
     const engine = new FakeEngine() as DEngineClient;
-    _.map(overrides || {}, (method, key: keyof DendronEngineV2) => {
+    _.map(overrides || {}, (method, key: keyof DEngine) => {
       // @ts-ignore
       engine[key] = method(opts);
     });

@@ -84,7 +84,6 @@ describe("api/note/render tests", () => {
             // Modify the value of foo
             await api.engineWrite({
               ws: wsRoot,
-              opts: { metaOnly: true },
               node: {
                 ...fooNote,
                 updated: fooNote.updated + 1,
@@ -182,7 +181,6 @@ describe("api/note/render tests", () => {
         // Modify the value of foo-two
         await api.engineWrite({
           ws: wsRoot,
-          opts: { metaOnly: true },
           node: {
             ...fooTwo,
             updated: 2,

@@ -218,13 +218,21 @@ export class DNodeUtils {
     const { vault } = opts;
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
-      const _node = NoteDictsUtils.findByFname("root", noteDicts, vault)[0];
+      const _node = NoteDictsUtils.findByFname({
+        fname: "root",
+        noteDicts,
+        vault,
+      })[0];
       if (_.isUndefined(_node)) {
         throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = NoteDictsUtils.findByFname(dirname, noteDicts, vault)[0];
+    const maybeNode = NoteDictsUtils.findByFname({
+      fname: dirname,
+      noteDicts,
+      vault,
+    })[0];
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
@@ -350,11 +358,11 @@ export class NoteUtils {
       return changed;
     }
     const parentPath = DNodeUtils.dirName(note.fname).toLowerCase();
-    const parent = NoteDictsUtils.findByFname(
-      parentPath,
+    const parent = NoteDictsUtils.findByFname({
+      fname: parentPath,
       noteDicts,
-      note.vault
-    )[0];
+      vault: note.vault,
+    })[0];
 
     if (parent) {
       const prevParentState = { ...parent };

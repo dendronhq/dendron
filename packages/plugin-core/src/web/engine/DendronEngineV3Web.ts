@@ -95,7 +95,7 @@ export class DendronEngineV3Web
       }
       this.queryStore.replaceNotesIndex(notes);
       const bulkWriteOpts = _.values(notes).map((note) => {
-        const noteMeta: NotePropsMeta = _.omit(note, ["body", "contentHash"]);
+        const noteMeta: NotePropsMeta = _.omit(note, ["body"]);
 
         return { key: note.id, noteMeta };
       });
@@ -422,14 +422,12 @@ export class DendronEngineV3Web
         //   notesByFname: {},
         // };
 
-        const { data: notesDict, error } = await new NoteParserV2(
+        const { noteDicts, errors: parseErrors } = await new NoteParserV2(
           this.wsRootURI
         ).parseFiles(filteredFiles, vault);
-        if (error) {
-          errors = errors.concat(error);
-        }
-        if (notesDict) {
-          const { notesById, notesByFname } = notesDict;
+        errors = errors.concat(parseErrors);
+        if (noteDicts) {
+          const { notesById, notesByFname } = noteDicts;
           notesFname = NoteFnameDictUtils.merge(notesFname, notesByFname);
 
           // this.logger.info({
@@ -470,17 +468,17 @@ export class DendronEngineV3Web
         noteFrom.links.forEach((link) => {
           const maybeBacklink = BacklinkUtils.createFromDLink(link);
           if (maybeBacklink) {
-            const notes = NoteDictsUtils.findByFname(
-              link.to!.fname!,
-              noteDicts
-            );
+            const notes = NoteDictsUtils.findByFname({
+              fname: link.to!.fname!,
+              noteDicts,
+              skipCloneDeep: true,
+            });
 
             notes.forEach((noteTo: NoteProps) => {
               BacklinkUtils.addBacklinkInPlace({
                 note: noteTo,
                 backlink: maybeBacklink,
               });
-              NoteDictsUtils.add(noteTo, noteDicts);
             });
           }
         });

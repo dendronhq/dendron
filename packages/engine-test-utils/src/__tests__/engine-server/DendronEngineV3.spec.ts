@@ -174,6 +174,7 @@ describe("engine, cache", () => {
         ).toEqual([newVault]);
       },
       {
+        createEngine,
         expect,
         preSetupHook: async ({ wsRoot, vaults }) => {
           await NoteTestUtilsV4.createNote({

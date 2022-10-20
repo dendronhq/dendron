@@ -20,13 +20,10 @@ import {
   NoteChangeEntry,
   genHash,
   RespV2,
-  cleanName,
-  DendronCompositeError,
   SchemaUtils,
   string2Note,
   globMatch,
   DendronConfig,
-  RespWithOptError,
   asyncLoopOneAtATime,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
@@ -94,7 +91,7 @@ export class NoteParserV2 {
     allPaths: string[],
     vault: DVault,
     schemas: SchemaModuleDict
-  ): Promise<RespWithOptError<NoteDicts>> {
+  ): Promise<{ noteDicts: NoteDicts; errors: IDendronError[] }> {
     const ctx = "parseFiles";
     const fileMetaDict: FileMetaDict = getFileMeta(allPaths);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -114,19 +111,23 @@ export class NoteParserV2 {
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
       return {
-        data: noteDicts,
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        }),
+        noteDicts,
+        errors: [
+          DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
+          }),
+        ],
       };
     }
     const rootFile = fileMetaDict[1].find((n) => n.fpath === "root.md");
     if (!rootFile) {
       return {
-        data: noteDicts,
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        }),
+        noteDicts,
+        errors: [
+          DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
+          }),
+        ],
       };
     }
     const rootProps = await this.parseNoteProps({
@@ -140,10 +141,12 @@ export class NoteParserV2 {
     }
     if (!rootProps.data || rootProps.data.length === 0) {
       return {
-        data: noteDicts,
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
-        }),
+        noteDicts,
+        errors: [
+          DendronError.createFromStatus({
+            status: ERROR_STATUS.NO_ROOT_NOTE_FOUND,
+          }),
+        ],
       };
     }
     const rootNote = rootProps.data[0].note;
@@ -282,8 +285,8 @@ export class NoteParserV2 {
 
     this.logger.info({ ctx, msg: "post:matchSchemas" });
     return {
-      data: noteDicts,
-      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
+      noteDicts,
+      errors,
     };
   }
 
@@ -402,7 +405,7 @@ export class NoteParserV2 {
       }
     }
     // If hash is different, then we update all links and anchors ^link-anchor
-    note = string2Note({ content, fname: cleanName(name), vault });
+    note = string2Note({ content, fname: name, vault });
     note.contentHash = sig;
     // Link/anchor errors should be logged but not interfere with rest of parsing
     let error: IDendronError | null = null;

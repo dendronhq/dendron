@@ -72,7 +72,7 @@ suite("AirtableExportCommand", function () {
         test("THEN new airtable id should be appended in the note frontmatter", async () => {
           const extension = ExtensionProvider.getExtension();
           const cmd = new AirtableExportPodCommand(extension);
-          const { engine } = ExtensionProvider.getDWorkspace();
+          const { engine, vaults } = ExtensionProvider.getDWorkspace();
           const { config } = await setUpPod();
           const note = getNoteFromTextEditor();
           note.custom = {
@@ -82,6 +82,7 @@ suite("AirtableExportCommand", function () {
               },
             },
           };
+          note.vault = vaults[0];
           await engine.writeNote(note);
           const payload = await cmd.enrichInputs(config);
           const airtableId = "airtable-proj.beta";

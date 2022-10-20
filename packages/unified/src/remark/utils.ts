@@ -402,11 +402,11 @@ const getLinkCandidatesSync = ({
     const value = textNode.value as string;
 
     value.split(/\s+/).map((word) => {
-      const possibleCandidates = NoteDictsUtils.findByFname(
-        word,
+      const possibleCandidates = NoteDictsUtils.findByFname({
+        fname: word,
         noteDicts,
-        note.vault
-      )
+        vault: note.vault,
+      })
         // await engine.findNotesMeta({ fname: word, vault: note.vault })
         .filter((note) => note.stub !== true);
 

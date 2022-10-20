@@ -1,4 +1,5 @@
 import {
+  Disposable,
   DNoteLoc,
   NoteProps,
   NotePropsMeta,
@@ -11,7 +12,7 @@ import { FindNoteOpts } from "../types/FindNoteOpts";
 /**
  * Interface responsible for interacting with NoteProps storage layer
  */
-export interface INoteStore<K> {
+export interface INoteStore<K> extends Disposable {
   /**
    * Get NoteProps by key
    * If key is not found, return error.

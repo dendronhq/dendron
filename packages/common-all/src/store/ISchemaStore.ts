@@ -1,9 +1,14 @@
-import { SchemaModuleProps, RespV3, WriteSchemaOpts } from "../types";
+import {
+  SchemaModuleProps,
+  RespV3,
+  WriteSchemaOpts,
+  Disposable,
+} from "../types";
 
 /**
  * Interface responsible for interacting with SchemaModuleProps storage layer
  */
-export interface ISchemaStore<K> {
+export interface ISchemaStore<K> extends Disposable {
   /**
    * Get SchemaModuleProps metadata by key.
    * Unlike {@link ISchemaStore.get}, this retrieves SchemaModuleProps from the metadata store.

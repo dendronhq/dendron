@@ -77,6 +77,7 @@ function verifyWikiLink(resp: MarkdownExportReturnType, match: string) {
 
 function addVaultSiteUrlOverride(engine: DEngineClient) {
   engine.vaults[0].siteUrl = SITE_URL_VAULT;
+  engine.init();
 }
 
 const NOTE_REG = "parent";

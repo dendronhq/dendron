@@ -234,10 +234,10 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
 
   /**
    * See {@link DStore.findNotesMeta}
-   * TODO: fix logic after engine refactor
    */
   async findNotesMeta(opts: FindNoteOpts): Promise<NotePropsMeta[]> {
-    return this.findNotes(opts);
+    const resp = await this.api.noteFindMeta({ ...opts, ws: this.ws });
+    return resp.data!;
   }
 
   async bulkWriteNotes(opts: BulkWriteNotesOpts) {

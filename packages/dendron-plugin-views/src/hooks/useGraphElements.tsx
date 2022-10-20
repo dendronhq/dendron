@@ -412,14 +412,14 @@ function getOutwardLinkedConnections({
       }
 
       const fname = fnameArray[fnameArray.length - 1];
-      const to = NoteDictsUtils.findByFname(
+      const to = NoteDictsUtils.findByFname({
         fname,
-        {
+        noteDicts: {
           notesById: notes,
           notesByFname: fNameDict,
         },
-        toVault
-      )[0];
+        vault: toVault,
+      })[0];
 
       if (!to) {
         logger.warn(
@@ -565,14 +565,14 @@ const getFullNoteGraphElements = ({
         }
 
         const fname = fnameArray[fnameArray.length - 1];
-        let to = NoteDictsUtils.findByFname(
+        let to = NoteDictsUtils.findByFname({
           fname,
-          {
+          noteDicts: {
             notesById: notes,
             notesByFname: fNameDict,
           },
-          toVault
-        )[0];
+          vault: toVault,
+        })[0];
 
         if (!to) {
           logger.debug(

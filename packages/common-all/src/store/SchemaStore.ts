@@ -2,18 +2,13 @@ import { URI, Utils } from "vscode-uri";
 import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { SchemaUtils } from "../dnode";
 import { DendronError } from "../error";
-import {
-  Disposable,
-  RespV3,
-  SchemaModuleProps,
-  WriteSchemaOpts,
-} from "../types";
+import { RespV3, SchemaModuleProps, WriteSchemaOpts } from "../types";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";
 import { ISchemaStore } from "./ISchemaStore";
 
-export class SchemaStore implements Disposable, ISchemaStore<string> {
+export class SchemaStore implements ISchemaStore<string> {
   private _fileStore: IFileStore;
   private _metadataStore: IDataStore<string, SchemaModuleProps>;
   private _wsRoot: URI;
@@ -28,7 +23,9 @@ export class SchemaStore implements Disposable, ISchemaStore<string> {
     this._wsRoot = wsRoot;
   }
 
-  dispose() {}
+  dispose() {
+    this._metadataStore.dispose();
+  }
 
   /**
    * See {@link ISchemaStore.getMetadata}

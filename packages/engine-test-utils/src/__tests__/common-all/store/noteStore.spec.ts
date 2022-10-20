@@ -175,8 +175,7 @@ describe("GIVEN NoteStore", () => {
         note = await noteStore.get(newNote.id);
         expect(note.data!.fname).toEqual(newNote.fname);
         expect(note.data!.body.trim()).toEqual(newNote.body.trim());
-        expect(note.data!.contentHash).toBeFalsy();
-        expect(newNote.data!.contentHash).toBeFalsy();
+        expect(note.data!.contentHash).toBeTruthy();
 
         // Test NoteStore.getMetadata
         const noteMetadata = await noteStore.getMetadata(newNote.id);
@@ -380,7 +379,7 @@ describe("GIVEN NoteStore", () => {
           noWrite: true,
         });
 
-        let noteMeta: NotePropsMeta = _.omit(newNote, ["body", "contentHash"]);
+        let noteMeta: NotePropsMeta = _.omit(newNote, ["body"]);
         let writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -395,7 +394,7 @@ describe("GIVEN NoteStore", () => {
         expect(metadata.data!.fname).toEqual(newNote.fname);
 
         // Write same note
-        noteMeta = _.omit(newNote, ["body", "contentHash"]);
+        noteMeta = _.omit(newNote, ["body"]);
         writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -406,7 +405,7 @@ describe("GIVEN NoteStore", () => {
 
         // Update note metadata and write
         newNote.color = "new color";
-        noteMeta = _.omit(newNote, ["body", "contentHash"]);
+        noteMeta = _.omit(newNote, ["body"]);
         writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -448,14 +447,8 @@ describe("GIVEN NoteStore", () => {
           noWrite: true,
         });
 
-        const newNoteMeta: NotePropsMeta = _.omit(newNote, [
-          "body",
-          "contentHash",
-        ]);
-        const anotherNoteMeta: NotePropsMeta = _.omit(anotherNote, [
-          "body",
-          "contentHash",
-        ]);
+        const newNoteMeta: NotePropsMeta = _.omit(newNote, ["body"]);
+        const anotherNoteMeta: NotePropsMeta = _.omit(anotherNote, ["body"]);
         const writeResp = await noteStore.bulkWriteMetadata([
           {
             key: newNoteMeta.id,

@@ -39,7 +39,7 @@ export class BackfillService {
           return n;
         })
     );
-    await engine.bulkWriteNotes({ notes });
+    await engine.bulkWriteNotes({ notes, opts: { overrideExisting: true } });
     return {};
   }
 }

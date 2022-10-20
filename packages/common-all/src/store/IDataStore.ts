@@ -1,10 +1,10 @@
-import { RespV3 } from "../types";
+import { Disposable, RespV3 } from "../types";
 
 /**
  * Interface responsible for interacting with data store
  */
 
-export interface IDataStore<K, V> {
+export interface IDataStore<K, V> extends Disposable {
   /**
    * Get data by key
    * If key is not found, return error.

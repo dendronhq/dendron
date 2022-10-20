@@ -528,7 +528,11 @@ export class SiteUtils {
           vaults,
         });
 
-        const maybeNote = NoteDictsUtils.findByFname(fname, noteDict, vault)[0];
+        const maybeNote = NoteDictsUtils.findByFname({
+          fname,
+          noteDicts: noteDict,
+          vault,
+        })[0];
         if (
           maybeNote &&
           this.canPublish({

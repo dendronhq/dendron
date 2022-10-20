@@ -1,5 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { DendronError, DEngine } from "@dendronhq/common-all";
 import _ from "lodash";
 
 const STORE: any = {};
@@ -22,7 +21,7 @@ export class MemoryStore {
     STORE[key] = value;
   }
 
-  getEngine(): DendronEngineV2 {
+  getEngine(): DEngine {
     const out = _.values(STORE)[0];
     if (!out) {
       throw new DendronError({ message: "STORE is empty" });

@@ -14,6 +14,7 @@ import {
   RespV3,
   FindNoteOpts,
   APIRequest,
+  FindNotesMetaResp,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -78,6 +79,18 @@ router.post(
     const out = await engine.findNotes(opts);
     ExpressUtils.setResponse(res, { data: out });
   })
+);
+
+router.post(
+  "/findMeta",
+  asyncHandler(
+    async (req: Request, res: Response<RespV3<FindNotesMetaResp>>) => {
+      const { ws, ...opts } = req.body as APIRequest<FindNoteOpts>;
+      const engine = await getWSEngine({ ws: ws || "" });
+      const out = await engine.findNotesMeta(opts);
+      ExpressUtils.setResponse(res, { data: out });
+    }
+  )
 );
 
 router.post(

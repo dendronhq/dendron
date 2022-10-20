@@ -417,24 +417,18 @@ export abstract class EngineV3Base implements ReducedDEngine {
             vaults: this.vaults,
           })
         : undefined;
-      const notes = await this.noteStore.findMetaData({
+      const notes = await this.noteStore.find({
         fname: link.to.fname,
         vault: maybeVault,
       });
       if (notes.data) {
         return Promise.all(
           notes.data.map(async (note) => {
-            const prevNote = _.merge(_.cloneDeep(note), {
-              body: "",
-            });
+            const prevNote = _.cloneDeep(note);
             BacklinkUtils.addBacklinkInPlace({ note, backlink: maybeBacklink });
-            // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
-            const updatedNote = _.merge(note, {
-              body: "",
-            });
             return {
               prevNote,
-              note: updatedNote,
+              note,
               status: "update",
             };
           })
@@ -462,27 +456,21 @@ export abstract class EngineV3Base implements ReducedDEngine {
             vaults: this.vaults,
           })
         : undefined;
-      const notes = await this.noteStore.findMetaData({
+      const notes = await this.noteStore.find({
         fname: link.to.fname,
         vault: maybeVault,
       });
       if (notes.data) {
         return Promise.all(
           notes.data.map(async (note) => {
-            const prevNote = _.merge(_.cloneDeep(note), {
-              body: "",
-            });
+            const prevNote = _.cloneDeep(note);
             BacklinkUtils.removeBacklinkInPlace({
               note,
               backlink: maybeBacklink,
             });
-            // Temp solution to get around current restrictions where NoteChangeEntry needs a NoteProp
-            const updatedNote = _.merge(note, {
-              body: "",
-            });
             return {
               prevNote,
-              note: updatedNote,
+              note,
               status: "update",
             };
           })

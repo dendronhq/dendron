@@ -75,7 +75,9 @@ export const createProcForTest = async (opts: {
   // Using IDs for the links breaks snapshots since note ids are random.
   if (opts.useIdAsLink === undefined) opts.useIdAsLink = false;
 
-  const noteToRender = (await engine.findNotes({ fname, vault }))[0];
+  const noteToRender = (
+    await engine.findNotes({ fname: fname || "root", vault })
+  )[0];
   const noteCacheForRenderDict = await getParsingDependencyDicts(
     noteToRender,
     engine,
@@ -83,23 +85,23 @@ export const createProcForTest = async (opts: {
     engine.vaults
   );
   if (parsingDependenciesByFname) {
-    parsingDependenciesByFname.map(async (dep) => {
-      (await engine.findNotes({ fname: dep })).forEach((noteProps) => {
-        NoteDictsUtils.add(noteProps, noteCacheForRenderDict);
-      });
-    });
+    await Promise.all(
+      parsingDependenciesByFname.map(async (dep) => {
+        (await engine.findNotes({ fname: dep })).forEach((noteProps) => {
+          NoteDictsUtils.add(noteProps, noteCacheForRenderDict);
+        });
+      })
+    );
   }
 
   if (opts.parsingDependenciesByNoteProps) {
-    opts.parsingDependenciesByNoteProps.map(async (dep) => {
+    opts.parsingDependenciesByNoteProps.map((dep) => {
       NoteDictsUtils.add(dep, noteCacheForRenderDict);
     });
   }
 
   const data = {
-    noteToRender: (
-      await engine.findNotes({ fname: fname || "root", vault })
-    )[0],
+    noteToRender,
     noteCacheForRenderDict,
     dest,
     fname: fname || "root",

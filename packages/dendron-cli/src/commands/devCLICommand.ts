@@ -29,7 +29,7 @@ import yargs from "yargs";
 import { CLIAnalyticsUtils, setupEngine } from "..";
 import {
   BuildUtils,
-  ExtensionTarget,
+  ExtensionType,
   LernaUtils,
   PublishEndpoint,
   SemverVersion,
@@ -69,7 +69,8 @@ type CommandOutput = Partial<{ error: DendronError; data: any }>;
 type BuildCmdOpts = {
   publishEndpoint: PublishEndpoint;
   fast?: boolean;
-  extensionTarget: ExtensionTarget;
+  extensionType: ExtensionType;
+  extensionTarget?: string;
   skipSentry?: boolean;
 } & BumpVersionOpts &
   PrepPluginOpts;
@@ -87,7 +88,7 @@ type BumpVersionOpts = {
 } & CommandCLIOpts;
 
 type PrepPluginOpts = {
-  extensionTarget: ExtensionTarget;
+  extensionType: ExtensionType;
 } & CommandCLIOpts;
 
 type RunMigrationOpts = {
@@ -144,9 +145,14 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "where to publish",
       choices: Object.values(PublishEndpoint),
     });
+    args.option("extensionType", {
+      describe:
+        "extension name to publish in the marketplace (Dendron / Nightly)",
+      choices: Object.values(ExtensionType),
+    });
     args.option("extensionTarget", {
-      describe: "extension name to publish in the marketplace",
-      choices: Object.values(ExtensionTarget),
+      describe:
+        "extension target to pass to vsce to specify platform and architecture",
     });
     args.option("fast", {
       describe: "skip some checks",
@@ -347,7 +353,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             };
           }
 
-          await BuildUtils.prepPluginPkg(opts.extensionTarget);
+          await BuildUtils.prepPluginPkg(opts.extensionType);
           return { error: null };
         }
         case DevCommands.PACKAGE_PLUGIN: {
@@ -450,7 +456,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     await this.syncAssets(opts);
 
     this.print("prep repo...");
-    await BuildUtils.prepPluginPkg(opts.extensionTarget);
+    await BuildUtils.prepPluginPkg(opts.extensionType);
 
     if (!shouldPublishLocal) {
       this.print(
@@ -581,8 +587,8 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   validatePrepPluginArgs(opts: CommandOpts): opts is PrepPluginOpts {
-    if (opts.extensionTarget) {
-      return Object.values(ExtensionTarget).includes(opts.extensionTarget);
+    if (opts.extensionType) {
+      return Object.values(ExtensionType).includes(opts.extensionType);
     }
     return true;
   }

@@ -36,7 +36,7 @@ export enum PublishEndpoint {
   REMOTE = "remote",
 }
 
-export enum ExtensionTarget {
+export enum ExtensionType {
   DENDRON = "dendron",
   NIGHTLY = "nightly",
 }
@@ -176,27 +176,33 @@ export class BuildUtils {
   static async packagePluginDependencies({
     skipSentry,
     quiet,
+    extensionTarget,
   }: {
     skipSentry?: boolean;
     quiet?: boolean;
+    extensionTarget?: string;
   }) {
-    await $$(`vsce package --yarn`, {
+    const execOpts = {
       cwd: this.getPluginRootPath(),
       env: skipSentry ? { SKIP_SENTRY: "true" } : {},
       quiet,
-    });
+    };
+
+    if (extensionTarget) {
+      await $$(`vsce package --yarn --target ${extensionTarget}`, execOpts);
+    } else {
+      await $$(`vsce package --yarn`, execOpts);
+    }
   }
 
-  static async prepPluginPkg(
-    target: ExtensionTarget = ExtensionTarget.DENDRON
-  ) {
+  static async prepPluginPkg(target: ExtensionType = ExtensionType.DENDRON) {
     const pkgPath = path.join(this.getPluginRootPath(), "package.json");
 
     let version;
     let description;
     let icon;
 
-    if (target === ExtensionTarget.NIGHTLY) {
+    if (target === ExtensionType.NIGHTLY) {
       version = await this.getIncrementedVerForNightly();
       description =
         "This is a prerelease version of Dendron that may be unstable. Please install the main dendron extension instead.";
@@ -493,11 +499,6 @@ export class BuildUtils {
     }
     pkg.main = "dist/extension.js";
     fs.writeJSONSync(pkgPath, pkg, { spaces: 4 });
-  }
-
-  static async installAndPackageDeps({ cwd }: { cwd: string }) {
-    await $("yarn install --no-lockfile ", { cwd });
-    await $("vsce package --yarn", { cwd });
   }
 
   static async publish({ cwd, osvxKey }: { cwd: string; osvxKey: string }) {

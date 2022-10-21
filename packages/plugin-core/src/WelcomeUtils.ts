@@ -18,7 +18,11 @@ async function initWorkspace() {
   return;
 }
 
-export enum VideoTutorialTestGroups {
+/**
+ * video formats are supported above vscode version 1.71. For users below this version,
+ * we render gif in welcome page
+ */
+export enum WelcomePageMedia {
   "gif" = "gif",
   "video" = "video",
 }
@@ -35,7 +39,7 @@ export function showWelcome(assetUri: vscode.Uri) {
         "welcome_video.html"
       );
       content = readMD(videoUri.fsPath).content;
-      testgroup = VideoTutorialTestGroups.video;
+      testgroup = WelcomePageMedia.video;
     } else {
       // NOTE: this needs to be from extension because no workspace might exist at this point
       const uri = VSCodeUtils.joinPath(
@@ -45,7 +49,7 @@ export function showWelcome(assetUri: vscode.Uri) {
         "welcome.html"
       );
       content = readMD(uri.fsPath).content;
-      testgroup = VideoTutorialTestGroups.gif;
+      testgroup = WelcomePageMedia.gif;
     }
 
     const title = "Welcome to Dendron";

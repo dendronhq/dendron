@@ -399,6 +399,10 @@ export const dendronConfig: { [key: string]: Config } = {
     type: "boolean",
     group: "dev",
   },
+  "dev.enableEngineV3": {
+    type: "boolean",
+    group: "dev",
+  },
 };
 
 const configSortOrder = [

@@ -48,6 +48,12 @@ export type DendronDevConfig = {
    * False (Default) -> renders note references inline.
    */
   enableExperimentalIFrameNoteRef?: boolean;
+  /**
+   * Enable engine v3
+   * True -> Use engine v3 as backend
+   * False (Default) -> Continue to use engine v3 as backend
+   */
+  enableEngineV3?: boolean;
 };
 
 /**

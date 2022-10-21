@@ -28,7 +28,7 @@ export type WikiLinkDecorator = Decoration & {
 export type NoteRefDecorator = Required<
   Decoration<{ link: DNoteRefLink; noteMeta?: NotePropsMeta }>
 > & {
-  type: DECORATION_TYPES.noteRef;
+  type: DECORATION_TYPES.noteRef | DECORATION_TYPES.brokenNoteRef;
 };
 export type DecorationAlias = Decoration & {
   type: DECORATION_TYPES.alias;

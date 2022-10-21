@@ -7,6 +7,7 @@ export enum DECORATION_TYPES {
   wikiLink = "wikiLink",
   brokenWikilink = "brokenWikilink",
   noteRef = "noteRef",
+  brokenNoteRef = "brokenNoteRef",
   alias = "alias",
   taskNote = "taskNote",
 }

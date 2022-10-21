@@ -393,10 +393,11 @@ suite("GIVEN a text document with decorations", function () {
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
-          const wikilinkDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.wikiLink
-          );
-          expect(wikilinkDecorations!.length).toEqual(10);
+          const wikilinkDecorations = allDecorations!
+            .get(EDITOR_DECORATION_TYPES.wikiLink)!
+            .concat(allDecorations!.get(EDITOR_DECORATION_TYPES.noteRef)!);
+
+          expect(wikilinkDecorations.length).toEqual(10);
           const shouldBeDecorated = [
             "[[#^anchor-1]]",
             "![[#^anchor-1]]",
@@ -411,13 +412,15 @@ suite("GIVEN a text document with decorations", function () {
           ];
           shouldBeDecorated.forEach((text) => {
             expect(
-              isTextDecorated(text, wikilinkDecorations!, document)
+              isTextDecorated(text, wikilinkDecorations, document)
             ).toBeTruthy();
           });
 
-          const brokenWikilinkDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.brokenWikilink
-          );
+          const brokenWikilinkDecorations = allDecorations!
+            .get(EDITOR_DECORATION_TYPES.brokenWikilink)!
+            .concat(
+              allDecorations!.get(EDITOR_DECORATION_TYPES.brokenNoteRef)!
+            );
           expect(brokenWikilinkDecorations!.length).toEqual(3);
           expect(
             isTextDecorated(
@@ -464,9 +467,9 @@ suite("GIVEN a text document with decorations", function () {
           const document = editor.document;
           const { allDecorations } = (await updateDecorations(editor))!;
 
-          const wikilinkDecorations = allDecorations!.get(
-            EDITOR_DECORATION_TYPES.wikiLink
-          );
+          const wikilinkDecorations = (
+            allDecorations!.get(EDITOR_DECORATION_TYPES.wikiLink) || []
+          ).concat(allDecorations!.get(EDITOR_DECORATION_TYPES.noteRef) || []);
           expect(wikilinkDecorations!.length).toEqual(1);
           expect(
             isTextDecorated("![[foo.bar.*]]", wikilinkDecorations!, document)

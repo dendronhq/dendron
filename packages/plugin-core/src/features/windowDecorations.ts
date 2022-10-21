@@ -80,10 +80,6 @@ export const EDITOR_DECORATION_TYPES: {
     color: new ThemeColor("editorLink.activeForeground"),
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   }),
-  noteRef: window.createTextEditorDecorationType({
-    color: new ThemeColor("editorLink.activeForeground"),
-    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
-  }),
   /** Decoration for wikilinks that do *not* point to valid notes (e.g. broken). */
   brokenWikilink: window.createTextEditorDecorationType({
     color: new ThemeColor("editorWarning.foreground"),
@@ -93,6 +89,15 @@ export const EDITOR_DECORATION_TYPES: {
   /** Decoration for the alias part of wikilinks. */
   alias: window.createTextEditorDecorationType({
     fontStyle: "italic",
+  }),
+  noteRef: window.createTextEditorDecorationType({
+    color: new ThemeColor("editorLink.activeForeground"),
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
+  }),
+  brokenNoteRef: window.createTextEditorDecorationType({
+    color: new ThemeColor("editorWarning.foreground"),
+    backgroundColor: new ThemeColor("editorWarning.background"),
+    rangeBehavior: DecorationRangeBehavior.ClosedClosed,
   }),
   taskNote: window.createTextEditorDecorationType({
     rangeBehavior: DecorationRangeBehavior.ClosedClosed,
@@ -441,6 +446,7 @@ function mapDecoration(decoration: Decoration): DendronDecoration | undefined {
     // Some decoration types require special processing to add per-decoration data
     case DECORATION_TYPES.timestamp:
       return mapTimestamp(decoration as DecorationTimestamp);
+    case DECORATION_TYPES.brokenNoteRef:
     case DECORATION_TYPES.noteRef:
       return mapNoteRefLink(decoration as NoteRefDecorator);
     case DECORATION_TYPES.brokenWikilink: // fallthrough deliberate

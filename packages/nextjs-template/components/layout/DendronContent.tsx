@@ -19,13 +19,11 @@ export const DendronContent: React.FC<any> = (props) => {
         display: !isSidebarCollapsed && isResponsive ? "none" : "block",
       }}
     >
-      <div
-        className="main-content"
-        role="main"
-        style={{ padding: `0 ${LAYOUT.PADDING}px` }}
-      >
+      <div style={{ padding: `0 ${LAYOUT.PADDING}px` }}>
         <DendronBreadCrumb {...props} />
-        {props.children}
+        <div className="main-content" role="main">
+          {props.children}
+        </div>
       </div>
       <Divider />
       <Footer

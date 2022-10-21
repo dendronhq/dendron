@@ -555,7 +555,8 @@ suite("GIVEN a text document with decorations", function () {
   });
 
   describe("AND GIVEN warnings in document", () => {
-    describeMultiWS(
+    // SKIP. Notes without frontmatter should no longer exist in the engine
+    describeMultiWS.skip(
       "AND WHEN missing frontmatter",
       {
         preSetupHook: async ({ vaults, wsRoot }) => {

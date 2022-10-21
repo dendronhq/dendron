@@ -25,7 +25,13 @@ VFile {
 exports[`user tags rendering compile "HTML: inside a link" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"https://twitter.com/dendronhq\\">@dendronhq</a></p>",
+<p><a href=\\"https://twitter.com/dendronhq\\">@dendronhq</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -36,7 +42,13 @@ VFile {
 exports[`user tags rendering compile "HTML: inside a link" 2`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"https://twitter.com/dendronhq\\">@dendronhq</a></p>",
+<p><a href=\\"https://twitter.com/dendronhq\\">@dendronhq</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -47,7 +59,13 @@ VFile {
 exports[`user tags rendering compile "HTML: simple" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a href=\\"user.Hamilton.Margaret\\">@Hamilton.Margaret</a></p>",
+<p><a href=\\"user.Hamilton.Margaret\\">@Hamilton.Margaret</a></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

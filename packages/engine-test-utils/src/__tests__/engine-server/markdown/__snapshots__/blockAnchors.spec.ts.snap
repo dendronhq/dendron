@@ -5,7 +5,13 @@ VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
 <p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a></p><pre><code>const x = 1;
 </code></pre><p></p>
-<p></p>",
+<p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -29,13 +35,25 @@ exports[`blockAnchors rendering compile "HTML: after table" 1`] = `
 
 
 <table><thead><tr><th><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>t</th><th>a</th></tr></thead><tbody><tr><td>c</td><td>d</td></tr></tbody></table></div>
-<p></p>"
+<p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>"
 `;
 
 exports[`blockAnchors rendering compile "HTML: end of paragraph" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\">Root</h1>
-<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>Lorem ipsum dolor amet </p>",
+<p><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>Lorem ipsum dolor amet </p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -46,7 +64,13 @@ VFile {
 exports[`blockAnchors rendering compile "HTML: simple" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"block-anchor anchor-heading icon-link\\" id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\"></a>Root</h1>
-<p></p>",
+<p></p>
+<hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

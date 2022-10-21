@@ -253,7 +253,7 @@ export async function runEngineTestV5(
   } = _.defaults(opts, {
     preSetupHook: async () => {},
     postSetupHook: async () => {},
-    createEngine: createEngineFromEngine,
+    createEngine: createEngineV3FromEngine,
     extra: {},
     // third vault has diff name
     vaults: [

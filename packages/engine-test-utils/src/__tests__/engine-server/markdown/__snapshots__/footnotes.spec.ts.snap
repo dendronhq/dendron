@@ -7,6 +7,11 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam mollitia <a id=\\"fnref-magni\\" class=\\"fnref\\" href=\\"#fn-magni\\">magni</a> quas porro tenetur.</p>
 <hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-1\\" style=\\"width: 0; height: 0;\\"></span><p>nesciunt ullam quos<a class=\\"fn\\" href=\\"#fnref-1\\">˄</a></p></li>
@@ -26,6 +31,11 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam <a id=\\"fnref-magni\\" class=\\"fnref\\" href=\\"#fn-magni\\">magni</a> mollitia quas porro tenetur.</p>
 <hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-1\\" style=\\"width: 0; height: 0;\\"></span><p>nesciunt ullam <a href=\\"http://example.com\\">quos</a><a class=\\"fn\\" href=\\"#fnref-1\\">˄</a></p></li>
@@ -65,6 +75,8 @@ Ipsum iusto impedit provident. <a id=\\"fnref-vel\\" class=\\"fnref\\" href=\\"#
 <hr>
 <strong>Children</strong>
 <ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
 <li><a href=\\"target\\">Target</a></li>
 </ol>
 <h2 id=\\"footnotes-1\\">Footnotes</h2>
@@ -86,6 +98,11 @@ VFile {
 Architecto saepe repudiandae sunt sed labore. <a id=\\"fnref-1\\" class=\\"fnref\\" href=\\"#fn-1\\">1</a></p>
 <p>Et maiores magnam mollitia quas porro tenetur.</p>
 <hr>
+<strong>Children</strong>
+<ol>
+<li><a href=\\"bar\\">Bar</a></li>
+<li><a href=\\"foo\\">Foo</a></li>
+</ol>
 <h2 id=\\"footnotes\\">Footnotes</h2>
 <ol>
 <li><span id=\\"fn-1\\" style=\\"width: 0; height: 0;\\"></span><p>nesciunt ullam quos<a class=\\"fn\\" href=\\"#fnref-1\\">˄</a></p></li>

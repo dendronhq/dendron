@@ -398,7 +398,7 @@ export class NoteParserV2 {
         // No frontmatter exists for this file, return error
         return {
           error: new DendronError({
-            message: `File "${fpath}" is missing frontmatter. Please delete file and recreate note`,
+            message: `File "${fpath}" is missing frontmatter.`,
             severity: ERROR_SEVERITY.MINOR,
           }),
         };

@@ -7,14 +7,9 @@ import {
   NoteLookupUtils,
   NoteProps,
   NoteQuickInput,
-  CreateNewWithTemplateQuickPickLabelHighlightTestGroups,
   TransformedQueryString,
-  _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST,
 } from "@dendronhq/common-all";
-import {
-  getDurationMilliseconds,
-  SegmentClient,
-} from "@dendronhq/common-server";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
@@ -111,27 +106,15 @@ export class NotePickerUtils {
       // @ts-ignore
       vault: {},
     });
-    const ABUserGroup =
-      _2022_09_CREATE_NEW_WITH_TEMPLATE_QUICKPICK_LABEL_HIGHLIGHT_TEST.getUserGroup(
-        SegmentClient.instance().anonymousId
-      );
 
-    let label: string;
-    if (
-      ABUserGroup ===
-      CreateNewWithTemplateQuickPickLabelHighlightTestGroups.label
-    ) {
-      label = LabelUtils.createLabelWithHighlight({
-        value: CREATE_NEW_WITH_TEMPLATE_LABEL,
-        highlight: {
-          value: "$(beaker) [New] ",
-          location: "prefix",
-          expirationDate: new Date("2022-11-01"),
-        },
-      });
-    } else {
-      label = CREATE_NEW_WITH_TEMPLATE_LABEL;
-    }
+    const label = LabelUtils.createLabelWithHighlight({
+      value: CREATE_NEW_WITH_TEMPLATE_LABEL,
+      highlight: {
+        value: "$(beaker) [New] ",
+        location: "prefix",
+        expirationDate: new Date("2022-11-15"),
+      },
+    });
 
     return {
       ...props,

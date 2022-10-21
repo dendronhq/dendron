@@ -341,10 +341,6 @@ export class WorkspaceWatcher {
         changes = [
           TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),
         ];
-
-        // update the note in engine
-        note.updated = now;
-        await engine.writeNote(note, { metaOnly: true });
       }
       return resolve(changes);
     });

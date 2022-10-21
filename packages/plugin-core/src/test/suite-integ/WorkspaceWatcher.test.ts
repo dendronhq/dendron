@@ -305,23 +305,21 @@ suite("WorkspaceWatcher", function () {
               const line = editor.document.getText().split("\n").length;
               editBuilder.insert(new vscode.Position(line, 0), textToAppend);
             });
-            await editor.document.save().then(async () => {
+            await editor.document.save().then(() => {
               const vscodeEvent: vscode.TextDocumentWillSaveEvent = {
                 document: editor.document,
                 // eslint-disable-next-line no-undef
                 waitUntil: (_args: Thenable<any>) => {
                   _args.then(async () => {
-                    // Engine note body hasn't been updated yet
+                    // Engine note hasn't been updated yet
                     const foo = (await engine.getNote("foo.one")).data!;
                     expect(foo.body).toEqual(bodyBefore);
-                    expect(foo.updated).toNotEqual(updatedBefore);
+                    expect(foo.updated).toEqual(updatedBefore);
                     done();
                   });
                 },
               };
-              const changes = await watcher.onWillSaveTextDocument(vscodeEvent);
-              expect(changes).toBeTruthy();
-              expect(changes?.changes.length).toEqual(1);
+              watcher.onWillSaveTextDocument(vscodeEvent);
             });
           });
       });

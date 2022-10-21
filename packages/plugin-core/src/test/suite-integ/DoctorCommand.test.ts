@@ -21,7 +21,8 @@ import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { describe } from "mocha";
 
 suite("DoctorCommandTest", function () {
-  describeMultiWS(
+  // TODO: Add back in once doctor is refactored
+  describeMultiWS.skip(
     "GIVEN bad frontmatter",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -64,7 +65,8 @@ suite("DoctorCommandTest", function () {
     }
   );
 
-  describeMultiWS(
+  // TODO: Add back in once doctor is refactored
+  describeMultiWS.skip(
     "AND when scoped to file",
     {
       preSetupHook: ENGINE_HOOKS.setupBasic,

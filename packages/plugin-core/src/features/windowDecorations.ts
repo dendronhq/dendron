@@ -5,6 +5,7 @@ import {
   Decoration,
   DendronASTDest,
   DEngineClient,
+  fromPromise,
   groupBy,
   isNotUndefined,
   mapValues,
@@ -242,40 +243,49 @@ async function addInlineNoteRefs(opts: {
   });
 
   // update all comment threads as needed
-  opts.decorations.map(async (ent) => {
-    if (ent.data.noteMeta === undefined) {
-      return;
-    }
-    const key = [
-      docKey,
-      range2String(ent.decoration.range),
-      NoteRefUtils.dnodeRefLink2String(ent.data.link),
-    ].toString();
+  await Promise.all(
+    opts.decorations.map(async (ent) => {
+      if (ent.data.noteMeta === undefined) {
+        return;
+      }
+      const key = [
+        docKey,
+        range2String(ent.decoration.range),
+        NoteRefUtils.dnodeRefLink2String(ent.data.link),
+      ].toString();
 
-    if (lastNoteRefThreadMap.has(key)) {
-      Logger.debug({ ctx, msg: "found key, restoring", key });
-      newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
-      lastNoteRefThreadMap.delete(key);
-    } else {
-      Logger.debug({ ctx, msg: "no key found, creating", key });
-      const reference = opts.document.getText(ent.decoration.range);
-      const renderResp = await renderNoteRef({
-        reference,
-        note: ent.data.noteMeta,
-        engine,
-      });
-      // const renderResp = await engine.renderNote({ id });
-      const thread = noteRefCommentController.createCommentThread(
-        opts.document.uri,
-        ent.decoration.range,
-        [new NoteRefComment(renderResp)]
-      );
-      thread.canReply = false;
-      thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
-      thread.label = ent.data.noteMeta.title;
-      newNoteRefThreadMap.set(key, thread);
-    }
-  });
+      if (lastNoteRefThreadMap.has(key)) {
+        Logger.debug({ ctx, msg: "found key, restoring", key });
+        newNoteRefThreadMap.set(key, lastNoteRefThreadMap.get(key));
+        lastNoteRefThreadMap.delete(key);
+      } else {
+        Logger.debug({ ctx, msg: "no key found, creating", key });
+        const reference = opts.document.getText(ent.decoration.range);
+        const renderResult = await fromPromise(
+          renderNoteRef({
+            reference,
+            note: ent.data.noteMeta,
+            engine,
+          }),
+          (err) => err
+        );
+        if (renderResult.isErr()) {
+          return;
+        }
+        const renderResp = renderResult.value;
+        // const renderResp = await engine.renderNote({ id });
+        const thread = noteRefCommentController.createCommentThread(
+          opts.document.uri,
+          ent.decoration.range,
+          [new NoteRefComment(renderResp)]
+        );
+        thread.canReply = false;
+        thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
+        thread.label = ent.data.noteMeta.title;
+        newNoteRefThreadMap.set(key, thread);
+      }
+    })
+  );
   Logger.debug({
     ctx,
     msg: "exit",

@@ -1,7 +1,7 @@
-import { Awaited, NoteUtils } from "@dendronhq/common-all";
+import { Awaited, ConfigUtils, NoteUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
-import _ from "lodash";
+import _, { last } from "lodash";
 import { before, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -771,4 +771,43 @@ suite("mergeOverlappingRanges", () => {
       });
     });
   });
+});
+
+suite("GIVEN NoteReference", () => {
+  const FNAME = "bar";
+  describeMultiWS(
+    "",
+    {
+      timeout: 10e10,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "withHeader",
+          vault: vaults[0],
+          wsRoot,
+          body: "## ipsam adipisci",
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: FNAME,
+          body: ["![[withHeader#ipsam-adipisci]]"].join("\n"),
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+      modConfigCb: (config) => {
+        config.dev = { enableExperimentalInlineNoteRef: true };
+        return config;
+      },
+    },
+    () => {
+      test("THEN COMMENT is created for controller ", async () => {
+        const { editor } = await getNote({ fname: FNAME });
+        await updateDecorations(editor);
+        const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
+        const docKey =
+          VSCodeUtils.getActiveTextEditor()!.document.uri.toString();
+        const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);
+        expect(lastNoteRefThreadMap.size).toEqual(1);
+      });
+    }
+  );
 });

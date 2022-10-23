@@ -280,7 +280,6 @@ async function addInlineNoteRefs(opts: {
           [new NoteRefComment(renderResp)]
         );
         thread.canReply = false;
-        thread.collapsibleState = CommentThreadCollapsibleState.Expanded;
         thread.label = ent.data.noteMeta.title;
         newNoteRefThreadMap.set(key, thread);
       }

@@ -1,7 +1,7 @@
-import { Awaited, ConfigUtils, NoteUtils } from "@dendronhq/common-all";
+import { Awaited, NoteUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { writeFile } from "fs-extra";
-import _, { last } from "lodash";
+import _ from "lodash";
 import { before, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";

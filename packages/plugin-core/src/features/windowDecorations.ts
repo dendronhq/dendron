@@ -32,7 +32,6 @@ import {
   Comment,
   CommentAuthorInformation,
   CommentMode,
-  CommentThreadCollapsibleState,
   DecorationOptions,
   DecorationRangeBehavior,
   Diagnostic,

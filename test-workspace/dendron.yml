@@ -4,6 +4,7 @@ dev:
   enableExportPodV2: true
   enableSelfContainedVaults: true
   enableEngineV3: true
+  enableExperimentalInlineNoteRef: true
 commands:
   lookup:
     note:

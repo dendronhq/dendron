@@ -1,6 +1,7 @@
 import {
   BacklinkUtils,
   Cache,
+  ConfigStore,
   ConfigUtils,
   CONSTANTS,
   DeleteSchemaResp,
@@ -74,6 +75,7 @@ import {
   WorkspaceOpts,
   WriteNoteResp,
   WriteSchemaResp,
+  IConfigStore,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -92,6 +94,7 @@ import {
 } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
+import os from "os";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
@@ -106,6 +109,7 @@ type DendronEngineOptsV3 = {
   noteStore: INoteStore<string>;
   queryStore: IQueryStore;
   schemaStore: ISchemaStore<string>;
+  configStore: IConfigStore;
   logger: DLogger;
   config: DendronConfig;
 };
@@ -123,6 +127,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   private _noteStore: INoteStore<string>;
   private _schemaStore: ISchemaStore<string>;
   private _renderedCache: Cache<string, CachedPreview>;
+  private _configStore: IConfigStore;
 
   constructor(props: DendronEngineOptsV3) {
     super(props);
@@ -135,6 +140,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     this._fileStore = props.fileStore;
     this._noteStore = props.noteStore;
     this._schemaStore = props.schemaStore;
+    this._configStore = props.configStore;
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -143,6 +149,12 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
 
     const queryStore = new FuseQueryStore();
     const fileStore = new NodeJSFileStore();
+
+    const configStore = new ConfigStore(
+      fileStore,
+      URI.parse(wsRoot),
+      URI.parse(os.homedir())
+    );
 
     return new DendronEngineV3({
       wsRoot,
@@ -159,6 +171,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         URI.parse(wsRoot)
       ),
       fileStore,
+      configStore,
       logger: LOGGER,
       config,
     });
@@ -168,6 +181,10 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
+    const test = await this._configStore.read({ mode: "default" });
+    if (test.isOk()) {
+      console.log({ bond: test.value });
+    }
     const config = DConfig.readConfigSync(this.wsRoot);
     const defaultResp = {
       notes: {},

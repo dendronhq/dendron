@@ -6,7 +6,7 @@ import {
   WorkspaceInitRequest,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2, DendronEngineV3 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
 import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
@@ -26,10 +26,19 @@ export class WorkspaceController {
     const ctx = "WorkspaceController:init";
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });
-    const engine = DendronEngineV2.create({
-      wsRoot: uri,
-      logger,
-    });
+    const config = DConfig.readConfigSync(uri);
+    let engine;
+    if (config.dev?.enableEngineV3) {
+      engine = DendronEngineV3.create({
+        wsRoot: uri,
+        logger,
+      });
+    } else {
+      engine = DendronEngineV2.create({
+        wsRoot: uri,
+        logger,
+      });
+    }
     const { data, error } = await engine.init();
     if (error && error.severity === ERROR_SEVERITY.FATAL) {
       logger.error({ ctx, msg: "fatal error initializing notes", error });

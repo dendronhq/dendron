@@ -13,7 +13,6 @@ import {
   NotePropsMeta,
   NoteUtils,
   ProcFlavor,
-  RenderNoteResp,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
 import {
@@ -29,13 +28,9 @@ import {
 import * as Sentry from "@sentry/node";
 import _ from "lodash";
 import {
-  Comment,
-  CommentAuthorInformation,
-  CommentMode,
   DecorationOptions,
   DecorationRangeBehavior,
   Diagnostic,
-  MarkdownString,
   Range,
   TextDocument,
   TextEditor,
@@ -48,6 +43,7 @@ import { Logger } from "../logger";
 import { CodeConfigKeys, DateTimeFormat } from "../types";
 import { delayedFrontmatterWarning } from "../utils/frontmatter";
 import { VSCodeUtils } from "../vsCodeUtils";
+import { NoteRefComment } from "./NoteRefComment";
 
 /** Wait this long in miliseconds before trying to update decorations when a command forces a decoration update. */
 const DECORATION_UPDATE_DELAY = 100;
@@ -180,29 +176,13 @@ export const debouncedUpdateDecorations = debounceAsyncUntilComplete({
   trailing: true,
 });
 
-export class NoteRefComment implements Comment {
-  public body: MarkdownString;
-  public mode: CommentMode;
-  public author: CommentAuthorInformation;
-
-  constructor(renderResp: RenderNoteResp) {
-    this.mode = CommentMode.Preview;
-    this.author = { name: "" };
-    const mdString = renderResp.error
-      ? new MarkdownString(`Error: ${renderResp.error}`)
-      : new MarkdownString(renderResp.data);
-    mdString.supportHtml = true;
-    mdString.isTrusted = true;
-    this.body = mdString;
-  }
-}
-
 async function addInlineNoteRefs(opts: {
   decorations: DendronNoteRefDecoration[];
   document: TextDocument;
 }) {
   const ctx = "addInlineNoteRefs";
-  const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
+  const inlineNoteRefs =
+    ExtensionProvider.getCommentThreadsState().inlineNoteRefs;
   const docKey = opts.document.uri.toString();
   const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);
   const newNoteRefThreadMap = new Map();

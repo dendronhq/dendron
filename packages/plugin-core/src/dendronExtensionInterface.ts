@@ -81,7 +81,7 @@ export interface IDendronExtension {
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;
-  getState(): {
+  getCommentThreadsState(): {
     inlineNoteRefs: DefaultMap<string, Map<string, vscode.CommentThread>>;
   };
 

@@ -85,7 +85,7 @@ export class MockDendronExtension implements IDendronExtension {
     throw new Error("Method not implemented in MockDendronExtension");
   }
 
-  getState(): {
+  getCommentThreadsState(): {
     inlineNoteRefs: DefaultMap<string, Map<string, CommentThread>>;
   } {
     throw new Error("Method not implemented in MockDendronExtension.");

@@ -409,7 +409,7 @@ export class DendronExtension implements IDendronExtension {
     return this.workspaceImpl;
   }
 
-  getState() {
+  getCommentThreadsState() {
     return {
       inlineNoteRefs: this._inlineNoteRefs,
     };

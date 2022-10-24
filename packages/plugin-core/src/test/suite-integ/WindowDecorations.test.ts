@@ -802,7 +802,8 @@ suite("GIVEN NoteReference", () => {
       test("THEN COMMENT is created for controller ", async () => {
         const { editor } = await getNote({ fname: FNAME });
         await updateDecorations(editor);
-        const inlineNoteRefs = ExtensionProvider.getState().inlineNoteRefs;
+        const inlineNoteRefs =
+          ExtensionProvider.getCommentThreadsState().inlineNoteRefs;
         const docKey =
           VSCodeUtils.getActiveTextEditor()!.document.uri.toString();
         const lastNoteRefThreadMap = inlineNoteRefs.get(docKey);

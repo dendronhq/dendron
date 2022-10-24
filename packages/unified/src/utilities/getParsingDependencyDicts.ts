@@ -123,7 +123,7 @@ function getNoteDependencies(ast: Node<Data>): DNodeCompositeKey[] {
 
   visit(ast, [DendronASTTypes.HASHTAG], (hashtag: HashTag, _index) => {
     renderDependencies.push({
-      fname: hashtag.value,
+      fname: hashtag.fname,
     });
   });
 

@@ -99,14 +99,24 @@ export class ConfigStore implements IConfigStore {
       >((config) => {
         return ResultAsync.fromPromise(
           Promise.resolve(
-            this.searchOverride().then((override) => {
-              _.mergeWith(config, override, (objValue: any, srcValue: any) => {
-                if (_.isArray(objValue)) {
-                  return srcValue.concat(objValue);
-                }
-                return;
-              });
-              return config;
+            this.searchOverride().then((res) => {
+              // TODO: move validateConfig logic to common-all and add it here.
+              if (res.isOk()) {
+                const override = res.value;
+                _.mergeWith(
+                  config,
+                  override,
+                  (objValue: any, srcValue: any) => {
+                    if (_.isArray(objValue)) {
+                      return srcValue.concat(objValue);
+                    }
+                    return;
+                  }
+                );
+                return config;
+              } else {
+                throw res.error;
+              }
             })
           ),
           (err) => err as DendronError

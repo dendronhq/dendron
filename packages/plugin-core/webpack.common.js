@@ -66,6 +66,7 @@ const config = {
         {
           from: path.join("lib", "binding", "*", "node_sqlite3.node"),
           to: "node_sqlite3.node",
+          noErrorOnMissing: true,
         },
       ],
     }),

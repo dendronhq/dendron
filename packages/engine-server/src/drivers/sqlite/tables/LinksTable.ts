@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Links (
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
         resolve();
       });
     });
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS Links (
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
 
         if (err) {
           // debugger;
@@ -68,17 +68,20 @@ CREATE TABLE IF NOT EXISTS Links (
     linkType: LinkType,
     payload?: DLink
   ) {
+    const select = payload ? `'${JSON.stringify(payload)}'` : "NULL";
+
     const sql = `
 INSERT INTO Links (source, sink, linkType, payload)
-SELECT id, '${sinkId}', ${LinksTableUtils.getSQLValueForLinkType(linkType)}, '${
-      JSON.stringify(payload) ?? {}
-    }'
+SELECT id, '${sinkId}', ${LinksTableUtils.getSQLValueForLinkType(
+      linkType
+    )}, ${select}
 FROM NoteProps
 WHERE fname = '${sourceFname}'`;
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // debugger;
+        // console.log(err);
 
         if (err) {
           // debugger;
@@ -105,7 +108,7 @@ WHERE fname = '${sinkFname}'`;
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
 
         if (err) {
           // debugger;
@@ -121,7 +124,7 @@ WHERE source = '${source}'`;
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
 
         if (err) {
           // debugger;

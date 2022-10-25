@@ -6,6 +6,7 @@ import {
   NotePropsMeta,
   string2Note,
 } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
 import fs from "fs-extra";
 import path from "path";
@@ -59,6 +60,7 @@ export async function parseAllNoteFiles(
     })
   );
 
+  const one = process.hrtime();
   // TODO: Bulk Insert
   await Promise.all(
     allNotes.map((note) => {
@@ -66,11 +68,18 @@ export async function parseAllNoteFiles(
     })
   );
 
+  const two = process.hrtime();
+  console.log(
+    `Duration for ProcessNoteProps: ${getDurationMilliseconds(one)} ms`
+  );
+  // debugger;
   await Promise.all(
     allNotes.map((note) => {
-      processLinks(note, db, {} as DendronConfig);
+      return processLinks(note, db, {} as DendronConfig);
     })
   );
+
+  console.log(`Duration for ProcessLinks: ${getDurationMilliseconds(two)} ms`);
 }
 
 // TODO: Probably move this out of note parser
@@ -104,8 +113,9 @@ function content2Note({
 }
 
 async function processNoteProps(note: NotePropsMeta, db: Database) {
-  await NotePropsTableUtils.insert(db, note);
-
+  // debugger;
+  const result = await NotePropsTableUtils.insert(db, note);
+  // debugger;
   const vaultId = await VaultsTableUtils.getIdByFsPath(db, note.vault.fsPath);
   await VaultNotesTableUtils.insert(
     db,

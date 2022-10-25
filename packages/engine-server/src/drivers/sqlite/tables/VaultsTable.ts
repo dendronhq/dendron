@@ -17,7 +17,7 @@ export class VaultsTableUtils {
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
         resolve();
       });
     });
@@ -49,7 +49,7 @@ VALUES (
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
         resolve();
       });
     });

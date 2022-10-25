@@ -1,11 +1,13 @@
 import { NotePropsMeta } from "@dendronhq/common-all";
+import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
+import { SqliteError } from "../SqliteError";
 import { LinkType } from "./LinksTable";
 import {
   getIntegerString,
-  getSQLValueString,
   getJSONString,
   getSQLBoolean,
+  getSQLValueString,
 } from "./SQLiteUtils";
 
 // NoteProps : PK TEXT id
@@ -45,24 +47,33 @@ CREATE TABLE IF NOT EXISTS NoteProps (
 
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
-        console.log(err);
+        // console.log(err);
         resolve();
       });
     });
     // TODO: Return error
   }
-  static insert(db: Database, row: NotePropsMeta) {
+
+  static insert(
+    db: Database,
+    row: NotePropsMeta
+  ): ResultAsync<void, SqliteError> {
     const sql = this.getSQLInsertString(row);
 
-    return new Promise<void>((resolve) => {
+    const prom = new Promise<void>((resolve, reject) => {
       db.run(sql, (err) => {
-        console.log(err);
-
         if (err) {
+          reject(err.message);
+        } else {
           // debugger;
+          resolve();
         }
-        resolve();
       });
+    });
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      // debugger;
+      return e as SqliteError;
     });
   }
 

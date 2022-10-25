@@ -11,7 +11,7 @@ describe("GIVEN sqlite store", () => {
   // afterEach(async () => {
   //   await SQLiteMetadataStore.prisma().$disconnect();
   // });
-  // jest.setTimeout(10e3);
+  jest.setTimeout(10e6);
 
   test("WHEN playground THEN nothing is verified", async () => {
     const factory = new SqliteFactory();
@@ -32,7 +32,8 @@ describe("GIVEN sqlite store", () => {
 
     const fileStore = new NodeJSFileStore();
 
-    const vpath = "/Users/jyeung/code/dendron/dendron/test-workspace/vault/";
+    // const vpath = "/Users/jyeung/code/dendron/dendron/test-workspace/vault/";
+    const vpath = "/Users/jyeung/code/dendron/org-workspace/org-private/notes";
     const resp = await fileStore.readDir({
       root: URI.parse(vpath),
       include: ["*.md"],
@@ -46,54 +47,54 @@ describe("GIVEN sqlite store", () => {
 
     const metadataStore = new SqliteMetadataStore(db);
 
-    const res = await metadataStore.get("apples");
+    // const res = await metadataStore.get("apples");
 
-    const fakeDLink: DLink = {
-      type: "wiki",
-      value: "[[something.fake]]",
-      from: {
-        fname: "testNote",
-        id: "testNote",
-        vaultName: "fakeVault",
-        uri: undefined,
-        anchorHeader: undefined,
-      },
-      to: {
-        fname: "dendron.apples",
-        id: "apples",
-      },
-    };
+    // const fakeDLink: DLink = {
+    //   type: "wiki",
+    //   value: "[[something.fake]]",
+    //   from: {
+    //     fname: "testNote",
+    //     id: "testNote",
+    //     vaultName: "fakeVault",
+    //     uri: undefined,
+    //     anchorHeader: undefined,
+    //   },
+    //   to: {
+    //     fname: "dendron.apples",
+    //     id: "apples",
+    //   },
+    // };
 
-    const testProps: NotePropsMeta = {
-      id: "testNote",
-      title: "",
-      desc: "",
-      updated: 0,
-      created: 0,
-      fname: "testNote",
-      links: [fakeDLink],
-      anchors: {},
-      type: "note",
-      parent: "b8064760-d3e6-4aac-ad62-eb44a52b01be", // This is root in test-workspace
-      children: ["testNote.child1", "testNote.child2"],
-      data: undefined,
-      vault: fakeVault,
-    };
+    // const testProps: NotePropsMeta = {
+    //   id: "testNote",
+    //   title: "",
+    //   desc: "",
+    //   updated: 0,
+    //   created: 0,
+    //   fname: "testNote",
+    //   links: [fakeDLink],
+    //   anchors: {},
+    //   type: "note",
+    //   parent: "b8064760-d3e6-4aac-ad62-eb44a52b01be", // This is root in test-workspace
+    //   children: ["testNote.child1", "testNote.child2"],
+    //   data: undefined,
+    //   vault: fakeVault,
+    // };
 
-    const writeRes = await metadataStore.write("testNote", testProps);
-    const deleteRes = await metadataStore.delete("testNote");
+    // const writeRes = await metadataStore.write("testNote", testProps);
+    // const deleteRes = await metadataStore.delete("testNote");
 
-    const findRespOne = await metadataStore.find({ fname: "dendron.apples" });
-    // debugger;
-    const findRespTwo = await metadataStore.find({
-      fname: "dendron.apples",
-      excludeStub: true,
-    });
-    // debugger;
-    const findRespThree = await metadataStore.find({
-      fname: "dendron.apples",
-      vault: fakeVault,
-    });
+    // const findRespOne = await metadataStore.find({ fname: "dendron.apples" });
+    // // debugger;
+    // const findRespTwo = await metadataStore.find({
+    //   fname: "dendron.apples",
+    //   excludeStub: true,
+    // });
+    // // debugger;
+    // const findRespThree = await metadataStore.find({
+    //   fname: "dendron.apples",
+    //   vault: fakeVault,
+    // });
 
     debugger;
   });

@@ -1,4 +1,4 @@
-import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { DendronError, IDendronError } from "../error";
 import { URI, Utils } from "vscode-uri";
 import { ConfigReadOpts, IConfigStore } from "./IConfigStore";
@@ -55,7 +55,7 @@ export class ConfigStore implements IConfigStore {
   }
 
   readRaw(): ResultAsync<
-    Partial<DendronConfig>,
+    DeepPartial<DendronConfig>,
     IDendronError<StatusCodes | undefined>
   > {
     return ResultAsync.fromPromise(
@@ -75,7 +75,7 @@ export class ConfigStore implements IConfigStore {
           if (configLoadResult.isErr()) {
             throw configLoadResult.error;
           }
-          return configLoadResult.value as Partial<DendronConfig>;
+          return configLoadResult.value as DeepPartial<DendronConfig>;
         })
       ),
       (err) => err as DendronError
@@ -136,7 +136,7 @@ export class ConfigStore implements IConfigStore {
         if (loadResult.isErr()) {
           throw loadResult.error;
         }
-        return loadResult.value as Partial<DendronConfig>;
+        return loadResult.value as DeepPartial<DendronConfig>;
       } else {
         return undefined;
       }
@@ -144,7 +144,7 @@ export class ConfigStore implements IConfigStore {
   }
 
   private searchOverride(): ResultAsync<
-    Partial<DendronConfig>,
+    DeepPartial<DendronConfig>,
     IDendronError<StatusCodes | undefined>
   > {
     const workspaceOverridePath = Utils.joinPath(
@@ -157,7 +157,7 @@ export class ConfigStore implements IConfigStore {
         this.readOverride(workspaceOverridePath).then((override) => {
           if (override) {
             // override found in workspace.
-            return override as Partial<DendronConfig>;
+            return override as DeepPartial<DendronConfig>;
           } else if (this._homeDir) {
             // try finding it globally
             const globalOverridePath = Utils.joinPath(
@@ -168,7 +168,7 @@ export class ConfigStore implements IConfigStore {
               this.readOverride(globalOverridePath).then((override) => {
                 if (override) {
                   // found it in global
-                  return override as Partial<DendronConfig>;
+                  return override as DeepPartial<DendronConfig>;
                 } else {
                   throw new DendronError({ message: "not found" });
                 }

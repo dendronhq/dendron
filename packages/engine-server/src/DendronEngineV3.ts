@@ -181,10 +181,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
-    const test = await this._configStore.read({ mode: "default" });
-    if (test.isOk()) {
-      console.log({ bond: test.value });
-    }
     const config = DConfig.readConfigSync(this.wsRoot);
     const defaultResp = {
       notes: {},

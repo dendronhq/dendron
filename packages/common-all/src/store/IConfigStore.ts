@@ -1,6 +1,6 @@
 import { ResultAsync } from "neverthrow";
-import { DendronError, IDendronError } from "../error";
-import { DendronConfig, Disposable } from "../types";
+import { IDendronError } from "../error";
+import { DendronConfig } from "../types";
 import { DeepPartial } from "../utils";
 
 export type ConfigValue = string | number | object;
@@ -12,7 +12,7 @@ export type ConfigEntryUpdateResult = {
 } & BaseConfigEntryPayload;
 export type ConfigEntryDeleteResult = { prevValue: ConfigValue };
 
-export type ConfigReadMode = "raw" | "override" | "default";
+export type ConfigReadMode = "override" | "default";
 export type ConfigReadOpts = {
   mode: ConfigReadMode;
   useCache?: boolean;
@@ -31,7 +31,7 @@ export interface IConfigStore {
   /**
    * Read the entire dendron config
    */
-  readRaw(): ResultAsync<Partial<DendronConfig>, IDendronError>;
+  readRaw(): ResultAsync<DeepPartial<DendronConfig>, IDendronError>;
   read(opts: ConfigReadOpts): ResultAsync<DendronConfig, IDendronError>;
   /**
    * Given a dendron config, update the persistant dendron config with the given payload

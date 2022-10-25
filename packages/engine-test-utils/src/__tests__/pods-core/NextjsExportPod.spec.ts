@@ -728,7 +728,7 @@ describe("GIVEN nextjs export", () => {
     });
   });
 
-  describe("WHEN config.dev.enableExperimentalIFrameNoteRef is true", () => {
+  describe.skip("WHEN config.dev.enableExperimentalIFrameNoteRef is true", () => {
     test("WHEN note ref is the root of a hierarchy, link should be / not /notes/", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {

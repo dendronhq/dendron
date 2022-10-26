@@ -52,11 +52,14 @@ export function githubUrl(opts: { note: NoteProps; config: DendronConfig }) {
 export function getGithubEditUrl(opts: {
   note: NoteProps;
   config: DendronConfig;
+  wsRoot?: string;
 }) {
-  const { note, config } = opts;
+  const { note, config, wsRoot } = opts;
   const vault = note.vault;
   const vaults = ConfigUtils.getVaults(config);
-  const mvault = VaultUtils.matchVaultV2({ vault, vaults });
+  const mvault = wsRoot
+    ? VaultUtils.matchVault({ wsRoot, vault, vaults })
+    : VaultUtils.matchVaultV2({ vault, vaults });
   const vaultUrl = _.get(mvault, "remote.url", false);
   const githubConfig = ConfigUtils.getGithubConfig(config);
   const gitRepoUrl = githubConfig?.editRepository;

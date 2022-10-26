@@ -1,2 +1,7 @@
 vendor/**/*
 node_modules
+
+**/lib/**
+**/out/**
+packages/engine-server/src/drivers/generated-prisma-client/
+packages/engine-server/src/generated-prisma-client/

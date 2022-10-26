@@ -36,22 +36,22 @@ export interface IConfigStore {
   /**
    * Given a dendron config, update the persistant dendron config with the given payload
    */
-  // update(payload: DendronConfig): ResultAsync<DendronConfig, DendronError>;
+  write(payload: DendronConfig): ResultAsync<DendronConfig, IDendronError>;
 
   // individual keys
   /**
    * Given a dot delimited path, retrieve the config entry value in the persistant dendron config
    */
-  // get(key: string): ResultAsync<ConfigEntryGetResult, DendronError>;
+  // get(key: string): ResultAsync<ConfigEntryGetResult, IDendronError>;
   /**
    * Given a dot delimited path, update the config entry value with given value in the persistant dendron config
    */
   // update(
   //   key: string,
   //   value: ConfigValue
-  // ): ResultAsync<ConfigEntryUpdateResult, DendronError>;
+  // ): ResultAsync<ConfigEntryUpdateResult, IDendronError>;
   /**
    * Given a dot delimited path, delete the config entry in the persistant dendron config
    */
-  // delete(key: string): ResultAsync<ConfigEntryDeleteResult, DendronError>;
+  // delete(key: string): ResultAsync<ConfigEntryDeleteResult, IDendronError>;
 }

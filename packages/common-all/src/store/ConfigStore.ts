@@ -192,4 +192,27 @@ export class ConfigStore implements IConfigStore {
       (err) => err as DendronError
     );
   }
+
+  write(
+    payload: DendronConfig
+  ): ResultAsync<DendronConfig, IDendronError<StatusCodes | undefined>> {
+    const payloadDumpResult = toStr(payload);
+    if (payloadDumpResult.isErr()) {
+      return errAsync(payloadDumpResult.error);
+    }
+
+    return ResultAsync.fromPromise(
+      Promise.resolve(
+        this._fileStore
+          .write(this.path, payloadDumpResult.value)
+          .then((resp) => {
+            if (resp.error) {
+              throw resp.error;
+            }
+            return payload;
+          })
+      ),
+      (err) => err as DendronError
+    );
+  }
 }

@@ -1,13 +1,15 @@
+import { DVault } from "@dendronhq/common-all";
 import { Database } from "sqlite3";
 import { SqliteMetadataStore } from "./SqliteMetadataStore";
 import { LinksTableUtils } from "./tables/LinksTable";
 import { NotePropsTableUtils } from "./tables/NotePropsTable";
+import { SchemaNotesTableUtils } from "./tables/SchemaNotesTable";
 import { VaultNotesTableUtils } from "./tables/VaultNotesTable";
 import { VaultsTableUtils } from "./tables/VaultsTable";
 
 export class SqliteFactory {
-  public async init() {
-    const _db = new Database("dendron.test3.db");
+  public static async init(dbname?: string) {
+    const _db = new Database(dbname ?? "dendron.test3.db");
 
     // Create the relation-less tables first (vaults and NoteProps);
     await VaultsTableUtils.createTable(_db);
@@ -16,6 +18,7 @@ export class SqliteFactory {
     // Now create tables with relations
     await LinksTableUtils.createTable(_db);
     await VaultNotesTableUtils.createTable(_db);
+    await SchemaNotesTableUtils.createTable(_db);
 
     return _db;
   }
@@ -49,6 +52,23 @@ export class SqliteFactory {
   static createMetadataStore(): SqliteMetadataStore {
     const db = SqliteFactory.initSync();
 
-    return new SqliteMetadataStore(db);
+    return new SqliteMetadataStore(db, []);
+  }
+
+  static async createMetadataStoreForTest(
+    vaults: DVault[]
+  ): Promise<SqliteMetadataStore> {
+    const db = await SqliteFactory.init(":memory:");
+
+    await Promise.all(
+      vaults.map((vault) => {
+        return VaultsTableUtils.insert(db, {
+          name: vault.name ?? "vault",
+          fsPath: vault.fsPath,
+        });
+      })
+    );
+
+    return new SqliteMetadataStore(db, vaults);
   }
 }

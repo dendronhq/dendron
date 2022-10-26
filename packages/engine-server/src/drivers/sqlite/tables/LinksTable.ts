@@ -61,6 +61,46 @@ CREATE TABLE IF NOT EXISTS Links (
     });
   }
 
+  static bulkInsertLinkWithSourceAsFname(
+    db: Database,
+    data: {
+      sinkId: string;
+      sourceFname: string;
+      linkType: LinkType;
+      payload?: DLink;
+    }[]
+  ) {
+    const values = data
+      .map(
+        (d) =>
+          `('${d.sourceFname}','${d.sinkId}','${d.linkType}',${
+            d.payload ? "'" + JSON.stringify(d.payload) + "'" : "NULL"
+          })`
+      )
+      .join(",");
+
+    const sql = `
+INSERT OR IGNORE INTO Links (source, sink, linkType, payload)
+WITH T(fname, sink, linkType, payload) as 
+(VALUES ${values})
+SELECT NoteProps.id, T.sink, T.linkType, T.payload FROM T
+JOIN NoteProps ON T.fname = NoteProps.fname
+  `;
+
+    // debugger;
+    return new Promise<void>((resolve) => {
+      db.run(sql, (err) => {
+        // debugger;
+        // console.log(err);
+
+        if (err) {
+          // debugger;
+        }
+        resolve();
+      });
+    });
+  }
+
   static insertLinkWithSourceAsFname(
     db: Database,
     sinkId: string,
@@ -68,6 +108,7 @@ CREATE TABLE IF NOT EXISTS Links (
     linkType: LinkType,
     payload?: DLink
   ) {
+    // debugger;
     const select = payload ? `'${JSON.stringify(payload)}'` : "NULL";
 
     const sql = `
@@ -78,6 +119,46 @@ SELECT id, '${sinkId}', ${LinksTableUtils.getSQLValueForLinkType(
 FROM NoteProps
 WHERE fname = '${sourceFname}'`;
 
+    return new Promise<void>((resolve) => {
+      db.run(sql, (err) => {
+        // debugger;
+        // console.log(err);
+
+        if (err) {
+          // debugger;
+        }
+        resolve();
+      });
+    });
+  }
+
+  static bulkInsertLinkWithSinkAsFname(
+    db: Database,
+    data: {
+      sourceId: string;
+      sinkFname: string;
+      linkType: LinkType;
+      payload?: DLink;
+    }[]
+  ) {
+    const values = data
+      .map(
+        (d) =>
+          `('${d.sourceId}','${d.sinkFname}','${d.linkType}',${
+            d.payload ? "'" + JSON.stringify(d.payload) + "'" : "NULL"
+          })`
+      )
+      .join(",");
+
+    const sql = `
+INSERT OR IGNORE INTO Links (source, sink, linkType, payload)
+WITH T(source, fname, linkType, payload) as 
+(VALUES ${values})
+SELECT T.source, NoteProps.id, T.linkType, T.payload FROM T
+JOIN NoteProps ON T.fname = NoteProps.fname
+  `;
+
+    // debugger;
     return new Promise<void>((resolve) => {
       db.run(sql, (err) => {
         // debugger;
@@ -114,6 +195,51 @@ WHERE fname = '${sinkFname}'`;
           // debugger;
         }
         resolve();
+      });
+    });
+  }
+
+  // Anything that shows up in NotePropsMeta.links (this includes forward and
+  // backlinks, excludes parent/children)
+  static getAllDLinks(db: Database, sourceId: string): Promise<DLink[]> {
+    const sql = `
+SELECT source, sink, linkType, payload
+FROM Links
+WHERE (source = '${sourceId}' OR sink = '${sourceId}') AND linkType != 1
+    `;
+
+    return new Promise<DLink[]>((resolve) => {
+      const dlinks: DLink[] = [];
+
+      db.all(sql, (err, rows: LinksTableRow[]) => {
+        if (err) {
+          // debugger;
+          // TODO: reject error
+        } else {
+          rows
+            // .filter((row) => row.type !== "child")
+            .map((row) => {
+              // Forward Links:
+              if (row.source === sourceId && row.payload) {
+                dlinks.push(JSON.parse(row.payload as unknown as string)); // TODO - prolly need to change type in LinksTableRow to string instead of DLink
+              } else if (row.sink === sourceId) {
+                const dlink: DLink = JSON.parse(
+                  row.payload as unknown as string
+                );
+
+                // TODO: Check to see how to properly translate a forward link to a backlink
+                const backlink: DLink = {
+                  type: "backlink",
+                  value: dlink.value,
+                  from: dlink.from,
+                };
+
+                dlinks.push(backlink);
+              }
+            });
+
+          resolve(dlinks);
+        }
       });
     });
   }

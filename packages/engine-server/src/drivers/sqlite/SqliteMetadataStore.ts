@@ -1,60 +1,88 @@
 /* eslint-disable no-empty-function */
 /* eslint-disable no-useless-constructor */
 import {
-  DLink,
+  DendronError,
   DNodePointer,
+  DVault,
+  ERROR_SEVERITY,
+  ERROR_STATUS,
   FindNoteOpts,
   IDataStore,
   NotePropsMeta,
   RespV3,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+import _, { find } from "lodash";
 import { Database } from "sqlite3";
 import {
   LinksTableRow,
   LinksTableUtils,
   LinkType,
   NotePropsTableUtils,
+  VaultNotesTableRow,
+  VaultNotesTableUtils,
   VaultsTableUtils,
 } from "./tables";
+import { SchemaNotesTableUtils } from "./tables/SchemaNotesTable";
 
 export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
-  constructor(private _db: Database) {}
+  constructor(private _db: Database, private _vaults: DVault[]) {}
 
   async get(key: string): Promise<RespV3<NotePropsMeta>> {
+    // debugger;
+
+    const props = await NotePropsTableUtils.getById(this._db, key);
+
+    if (!props) {
+      return {
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `NoteProps metadata not found for key ${key}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
+      };
+    }
     // TODO: package response from the err, row
 
-    const linksSql = `
-    SELECT payload FROM Links
-    WHERE source = '${key}' AND linkType != 1`;
+    // TODO: Optimize
+    // this._db.parallelize(() => {
 
-    const links = await new Promise((resolve) => {
-      this._db.all(linksSql, (err, rows) => {
-        // debugger;
-        const links = rows.map((row) => row.payload as DLink);
-        resolve(links);
-      });
-    });
+    // });
+    const links = await LinksTableUtils.getAllDLinks(this._db, key);
 
     const children = await this.getChildren(key);
 
     const parent = await this.getParent(key);
 
-    const props = await new Promise<any>((resolve) => {
-      this._db.get(
-        `SELECT * FROM NoteProps WHERE id = '${key}'`,
-        (err, row) => {
-          // debugger;
-          resolve(row);
-        }
-      );
-    });
+    const vaultFsPath = await VaultNotesTableUtils.getVaultFsPathForNoteId(
+      this._db,
+      key
+    );
+
+    const vault = this._vaults.find((vault) => vault.fsPath === vaultFsPath);
+
+    if (!vault) {
+      throw new Error(`Unable to find vault for note with ID ${key}`);
+    }
 
     const data: NotePropsMeta = {
       parent,
       children,
-      ...props, // TODO: Need to massage missing properties and description->desc
       links,
+      id: props.id,
+      fname: props.fname,
+      title: props.title,
+      desc: props.description,
+      updated: props.updated,
+      created: props.created,
+      anchors: JSON.parse(props.anchors),
+      stub: props.stub === 1,
+      custom: props.custom,
+      color: props.color,
+      image: JSON.parse(props.image),
+      traits: JSON.parse(props.traits),
+      data: undefined,
+      type: "note",
+      vault,
     };
 
     return {
@@ -65,6 +93,18 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   // TODO: If the query building requirements starts to get more complex, maybe
   // we can consider using a library such as knex.js https://knexjs.org/
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
+    debugger;
+    // Special case: if no arguments are passed, return nothing.
+    if (
+      opts.excludeStub === undefined &&
+      opts.fname === undefined &&
+      opts.vault === undefined
+    ) {
+      return {
+        data: [],
+      };
+    }
+
     const fNameConditionalClause = opts.fname
       ? `fname = '${opts.fname}'`
       : `1 = 1`;
@@ -112,6 +152,23 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   async write(key: string, data: NotePropsMeta): Promise<RespV3<string>> {
     await NotePropsTableUtils.insert(this._db, data);
 
+    const vaultId = await VaultsTableUtils.getIdByFsPath(
+      this._db,
+      data.vault.fsPath
+    );
+    await VaultNotesTableUtils.insert(
+      this._db,
+      new VaultNotesTableRow(vaultId as number, data.id) // TODO: Remove cast
+    );
+
+    if (data.schema) {
+      await SchemaNotesTableUtils.insert(this._db, {
+        noteId: data.id,
+        moduleId: data.schema.moduleId,
+        schemaId: data.schema.schemaId,
+      });
+    }
+
     // First we need to clear any existing links
     await LinksTableUtils.delete(this._db, key);
 
@@ -155,7 +212,6 @@ WHERE id = '${key}'
     const resp = new Promise<RespV3<string>>((resolve) => {
       this._db.run(deleteSQL, (err) => {
         if (err) {
-          debugger;
           resolve({
             error: "Delete Failed",
           });
@@ -170,6 +226,7 @@ WHERE id = '${key}'
     return resp;
   }
 
+  // TODO: Move to LinksTableUtils
   private async getChildren(key: string): Promise<DNodePointer[]> {
     const childrenSql = `
     SELECT sink FROM Links
@@ -185,6 +242,7 @@ WHERE id = '${key}'
     });
   }
 
+  // TODO: Move to LinksTableUtils
   private async getParent(key: string): Promise<DNodePointer | null> {
     const parentSql = `
     SELECT source FROM Links
@@ -192,10 +250,11 @@ WHERE id = '${key}'
 
     return new Promise((resolve) => {
       this._db.get(parentSql, (err, row) => {
-        // debugger;
-
-        resolve(row.source);
-        //TODO: What if there are 0 results, need to resolve null.
+        if (row && row.source) {
+          resolve(row.source);
+        } else {
+          resolve(null);
+        }
       });
     });
   }

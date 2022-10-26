@@ -14,8 +14,8 @@ describe("GIVEN sqlite store", () => {
   jest.setTimeout(10e6);
 
   test("WHEN playground THEN nothing is verified", async () => {
-    const factory = new SqliteFactory();
-    const db = await factory.init();
+    // const factory = new SqliteFactory();
+    const db = await SqliteFactory.init();
 
     await new Promise<void>((resolve) => {
       db.run("PRAGMA foreign_keys = ON", (err) => {
@@ -42,8 +42,8 @@ describe("GIVEN sqlite store", () => {
     const paths = resp.data!;
     // const paths = resp.data?.map((value) => path.join(vpath, value));
 
-    // debugger;
-    await parseAllNoteFiles(paths!, fakeVault, db, vpath);
+    // TODO: Add in schemaModuleDict
+    await parseAllNoteFiles(paths!, fakeVault, db, vpath, {});
 
     const metadataStore = new SqliteMetadataStore(db);
 

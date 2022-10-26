@@ -24,7 +24,20 @@ import {
 // NoteProps : TEXT traits
 
 export class NotePropsTableRow {
-  constructor(public from: string, public to: string, public type: LinkType) {}
+  constructor(
+    public id: string,
+    public fname: string,
+    public title: string,
+    public description: string,
+    public updated: number,
+    public created: number,
+    public anchors: string,
+    public stub: number,
+    public custom: string,
+    public color: string,
+    public image: string,
+    public traits: string
+  ) {}
 }
 
 export class NotePropsTableUtils {
@@ -54,6 +67,22 @@ CREATE TABLE IF NOT EXISTS NoteProps (
     // TODO: Return error
   }
 
+  static getById(db: Database, id: string): Promise<NotePropsTableRow> {
+    const sql = `SELECT * FROM NoteProps WHERE id = '${id}'`;
+
+    return new Promise<NotePropsTableRow>((resolve, reject) => {
+      db.get(sql, (err, row) => {
+        if (err) {
+          // debugger;
+          // reject(err.message);
+        } else {
+          // debugger;
+          resolve(row as NotePropsTableRow);
+        }
+      });
+    });
+  }
+
   static insert(
     db: Database,
     row: NotePropsMeta
@@ -63,6 +92,7 @@ CREATE TABLE IF NOT EXISTS NoteProps (
     const prom = new Promise<void>((resolve, reject) => {
       db.run(sql, (err) => {
         if (err) {
+          debugger;
           reject(err.message);
         } else {
           // debugger;
@@ -77,7 +107,7 @@ CREATE TABLE IF NOT EXISTS NoteProps (
     });
   }
 
-  static delete(_db: Database, _from: string) {}
+  // static delete(_db: Database, _from: string) {}
 
   private static getSQLInsertString(props: NotePropsMeta): string {
     const sql = `
@@ -95,6 +125,19 @@ VALUES (
   ${getSQLValueString(props.color)},
   ${getJSONString(props.image)},
   ${getJSONString(props.traits)})
+ON CONFLICT(id) DO UPDATE
+SET
+fname = ${getSQLValueString(props.fname)},
+title = ${getSQLValueString(props.title)},
+description = ${getSQLValueString(props.desc)},
+updated = ${getIntegerString(props.updated)},
+created = ${getIntegerString(props.created)},
+anchors = ${getJSONString(props.anchors)},
+stub = ${getSQLBoolean(props.stub)},
+custom = ${getJSONString(props.custom)},
+color = ${getSQLValueString(props.color)},
+image = ${getJSONString(props.image)},
+traits = ${getJSONString(props.traits)}
   `;
     return sql;
   }

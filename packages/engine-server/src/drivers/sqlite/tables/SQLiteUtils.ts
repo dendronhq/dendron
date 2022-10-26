@@ -7,14 +7,14 @@ export function getIntegerString(value: number | undefined | null): string {
 
 export function getJSONString(value: any): string {
   if (value) {
-    return `'${JSON.stringify(value)}'`;
+    return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
   }
   return "null";
 }
 
 export function getSQLValueString(value: string | null | undefined): string {
   if (value) {
-    return `'${value}'`;
+    return `'${value.replace(/'/g, "''")}'`; // Single quotes need to be escaped in SQLite
   }
   return "null";
 }

@@ -113,6 +113,29 @@ suite("GotoNote", function () {
     );
 
     describeMultiWS(
+      "WHEN goto existing note via wikilink",
+      {
+        preSetupHook: GOTO_NOTE_PRESETS.LINK_TO_NOTE_IN_SAME_VAULT.preSetupHook,
+        timeout: 5e3,
+      },
+      () => {
+        test("THEN user is not prompted to select vault", async () => {
+          const ext = ExtensionProvider.getExtension();
+          await GOTO_NOTE_PRESETS.LINK_TO_NOTE_IN_SAME_VAULT.beforeTestResults({
+            ext,
+          });
+          const promptVaultSpy = sinon.spy(PickerUtilsV2, "promptVault");
+          const cmd = createGoToNoteCmd();
+          await cmd.run();
+          expect(promptVaultSpy.called).toBeFalsy();
+          await runMochaHarness(
+            GOTO_NOTE_PRESETS.LINK_TO_NOTE_IN_SAME_VAULT.results
+          );
+        });
+      }
+    );
+
+    describeMultiWS(
       "WHEN goto new note with invalid filename",
       {
         preSetupHook,

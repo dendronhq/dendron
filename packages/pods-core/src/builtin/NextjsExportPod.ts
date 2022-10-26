@@ -21,7 +21,7 @@ import {
   DisabledSidebar,
   DefaultSidebar,
   NoteDicts,
-  NoteFnameDictUtils,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -536,12 +536,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       noExpandSingleDomain: true,
     });
 
-    const publishedNotesFullDict = {
-      notesById: publishedNotes,
-      notesByFname:
-        NoteFnameDictUtils.createNotePropsByFnameDict(publishedNotes),
-    };
-
     const duplicateNoteBehavior =
       "duplicateNoteBehavior" in siteConfig
         ? siteConfig.duplicateNoteBehavior
@@ -571,6 +565,14 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       vaults: engine.vaults,
     };
 
+    // The reason to use all engine notes instead of just the published notes
+    // here is because a published note may link to a private note, in which
+    // case we still "need" the private note in the cache to do the rendering,
+    // since the title of the note is used in the (Private) placeholder for the
+    // link.
+    const noteDeps = await engine.findNotes({ excludeStub: true });
+    const fullDict = NoteDictsUtils.createNoteDicts(noteDeps);
+
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
@@ -588,7 +590,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             note,
             notesDir: notesBodyDir,
             engineConfig,
-            noteCacheForRenderDict: publishedNotesFullDict,
+            noteCacheForRenderDict: fullDict,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
           this.renderBodyAsMD({ note, notesDir: notesBodyDir }),

@@ -40,6 +40,7 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
+import throttle from "@jcoreio/async-throttle";
 
 const ID = "dendron.nextjs";
 
@@ -566,6 +567,8 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
     const notesRefsDir = path.join(podDstDir, "refs");
+    const throttledFind = throttle(_.bind(engine.findNotes, engine), 50);
+    engine.findNotes = throttledFind;
 
     this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
     fs.ensureDirSync(notesBodyDir);

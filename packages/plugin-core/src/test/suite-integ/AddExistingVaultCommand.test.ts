@@ -157,7 +157,7 @@ suite("AddExistingVaultCommand", function () {
     );
 
     describeSingleWS(
-      "WHEN adding a local self conatined vault",
+      "WHEN adding a local self conatined vault with enableSelfConatinedVaults config set to false",
       {
         modConfigCb: disableSelfContainedVaults,
         timeout,
@@ -246,14 +246,20 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
       });
 
-      test("THEN the vault is added to the workspace", async () => {
+      test("THEN the vault is added to the dependencies/localhost", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vaultPath = path.join(wsRoot, vaultName);
-        await createVaultWithGit(vaultPath);
+        const sourcePath = path.join(wsRoot, vaultName);
+        await createVaultWithGit(sourcePath);
         const cmd = new AddExistingVaultCommand(
           ExtensionProvider.getExtension()
         );
-        sinon.stub(cmd, "gatherDestinationFolder").resolves(vaultPath);
+        const vaultPath = path.join(
+          wsRoot,
+          FOLDERS.DEPENDENCIES,
+          FOLDERS.LOCAL_DEPENDENCY,
+          vaultName
+        );
+        sinon.stub(cmd, "gatherDestinationFolder").resolves(sourcePath);
         await cmd.run();
         expect(await fs.pathExists(vaultPath)).toBeTruthy();
         expect(
@@ -275,7 +281,14 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         });
         expect(vault?.selfContained).toBeFalsy();
         expect(vault?.name).toEqual(vaultName);
-        expect(vault?.fsPath).toEqual(vaultName);
+        expect(vault?.fsPath).toEqual(
+          // vault paths always use UNIX style
+          path.posix.join(
+            FOLDERS.DEPENDENCIES,
+            FOLDERS.LOCAL_DEPENDENCY,
+            vaultName
+          )
+        );
       });
     }
   );
@@ -294,15 +307,21 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
       });
 
-      test("THEN the vault is added to the workspace", async () => {
+      test("THEN the vault is added to the dependencies/localhost", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vaultPath = path.join(wsRoot, vaultName);
-        await createSelfContainedVaultWithGit(vaultPath);
+        const sourcePath = path.join(wsRoot, vaultName);
+        await createSelfContainedVaultWithGit(sourcePath);
         const cmd = new AddExistingVaultCommand(
           ExtensionProvider.getExtension()
         );
-        sinon.stub(cmd, "gatherDestinationFolder").resolves(vaultPath);
+        sinon.stub(cmd, "gatherDestinationFolder").resolves(sourcePath);
         await cmd.run();
+        const vaultPath = path.join(
+          wsRoot,
+          FOLDERS.DEPENDENCIES,
+          FOLDERS.LOCAL_DEPENDENCY,
+          vaultName
+        );
         expect(await fs.pathExists(vaultPath)).toBeTruthy();
         expect(
           await fs.pathExists(
@@ -323,7 +342,14 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         });
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
-        expect(vault?.fsPath).toEqual(vaultName);
+        expect(vault?.fsPath).toEqual(
+          // vault paths always use UNIX style
+          path.posix.join(
+            FOLDERS.DEPENDENCIES,
+            FOLDERS.LOCAL_DEPENDENCY,
+            vaultName
+          )
+        );
       });
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault

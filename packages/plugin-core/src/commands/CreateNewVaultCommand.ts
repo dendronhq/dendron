@@ -1,8 +1,9 @@
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import { DVault, FOLDERS, VaultUtils } from "@dendronhq/common-all";
 import { WorkspaceService, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { commands, OpenDialogOptions, Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
@@ -47,10 +48,9 @@ export class CreateNewVaultCommand extends BasicCommand<
     return folder;
   }
 
-  async gatherVault(
-    vaultDestination: string,
-    enableSelfContainedVaults?: boolean
-  ): Promise<CommandOpts | undefined> {
+  async gatherVaultStandard(): Promise<CommandOpts | undefined> {
+    const vaultDestination = await this.gatherDestinationFolder();
+    if (!vaultDestination) return;
     const sourceName = await VSCodeUtils.showInputBox({
       prompt: "Name of new vault (optional, press enter to skip)",
       placeHolder: path.basename(vaultDestination),
@@ -59,17 +59,38 @@ export class CreateNewVaultCommand extends BasicCommand<
     return {
       name: sourceName,
       path: vaultDestination,
-      isSelfContained: enableSelfContainedVaults,
+    };
+  }
+
+  async gatherVaultSelfContained(): Promise<CommandOpts | undefined> {
+    const vaultName = await VSCodeUtils.showInputBox({
+      title: "Vault name",
+      prompt: "Name for the new vault",
+      placeHolder: "my-vault",
+    });
+    // If empty, then user cancelled the prompt
+    if (PickerUtilsV2.isInputEmpty(vaultName)) return;
+
+    return {
+      name: vaultName,
+      path: path.join(
+        this._ext.getDWorkspace().wsRoot,
+        FOLDERS.DEPENDENCIES,
+        FOLDERS.LOCAL_DEPENDENCY,
+        vaultName
+      ),
+      isSelfContained: true,
     };
   }
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
-    const vaultDestination = await this.gatherDestinationFolder();
-    if (!vaultDestination) return;
-
     const { config } = this._ext.getDWorkspace();
-    const enableSelfContainedVaults = config.dev?.enableSelfContainedVaults;
-    return this.gatherVault(vaultDestination, enableSelfContainedVaults);
+    if (config.dev?.enableSelfContainedVaults) {
+      return this.gatherVaultSelfContained();
+    } else {
+      // A "standard", non self contained vault
+      return this.gatherVaultStandard();
+    }
   }
 
   async addVaultToWorkspace(vault: DVault) {

@@ -20,7 +20,7 @@ import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 
 suite("CreateNewVault Command", function () {
-  describe("GIVEN Create new vault command is run within a workspace with ", () => {
+  describe("GIVEN Create new vault command is run within a workspace", () => {
     describeSingleWS(
       "WHEN ran inside a workspace with dev.enableSelfContainedVaults config set to false",
       { modConfigCb: disableSelfContainedVaults, timeout: 1e4 },
@@ -29,7 +29,7 @@ suite("CreateNewVault Command", function () {
           sinon.stub(VSCodeUtils, "showInputBox").resolves();
           sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
         });
-        test("THEN create a new standard vault", async () => {
+        test("THEN create a new standard vault at selected destination", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
           const vpath = path.join(wsRoot, "vault2");
           const cmd = new CreateNewVaultCommand(
@@ -87,11 +87,15 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
         sinon.stub(vscode.commands, "executeCommand").resolves({}); // stub reload window
       });
 
-      test("THEN new vault is created, and is self contained", async () => {
+      test("THEN new vault is created in dependencies/localhost folder, and is self contained", async () => {
         const cmd = new CreateNewVaultCommand(ExtensionProvider.getExtension());
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const vaultPath = path.join(wsRoot, vaultName);
-        sinon.stub(cmd, "gatherDestinationFolder").resolves(vaultPath);
+        const vaultPath = path.join(
+          wsRoot,
+          FOLDERS.DEPENDENCIES,
+          FOLDERS.LOCAL_DEPENDENCY,
+          vaultName
+        );
         await cmd.run();
 
         expect(await fs.pathExists(vaultPath)).toBeTruthy();
@@ -114,6 +118,14 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
         });
         expect(vault?.selfContained).toBeTruthy();
         expect(vault?.name).toEqual(vaultName);
+        expect(vault?.fsPath).toEqual(
+          // vault paths always use UNIX style
+          path.posix.join(
+            FOLDERS.DEPENDENCIES,
+            FOLDERS.LOCAL_DEPENDENCY,
+            vaultName
+          )
+        );
       });
 
       test("THEN the notes in this vault are accessible", async () => {

@@ -179,13 +179,22 @@ export class AddExistingVaultCommand extends BasicCommand<
     sourceType: VaultRemoteSource
   ): Promise<CommandOpts | undefined> {
     if (sourceType === VaultType.LOCAL) {
-      const vaultDestination = await this.gatherDestinationFolder();
-      if (!vaultDestination) return;
+      const sourcePath = await this.gatherDestinationFolder();
+      if (!sourcePath) return;
+      const placeHolder = path.basename(sourcePath);
+      const sourceName =
+        (await VSCodeUtils.showInputBox({
+          prompt: "Name of new vault (optional, press enter to skip)",
+          placeHolder,
+        })) || placeHolder;
 
-      const sourceName = await VSCodeUtils.showInputBox({
-        prompt: "Name of new vault (optional, press enter to skip)",
-        placeHolder: path.basename(vaultDestination),
-      });
+      const vaultDestination = path.join(
+        this._ext.getDWorkspace().wsRoot,
+        FOLDERS.DEPENDENCIES,
+        FOLDERS.LOCAL_DEPENDENCY,
+        sourceName
+      );
+      await fs.copy(sourcePath, vaultDestination);
 
       return {
         type: sourceType,

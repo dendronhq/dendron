@@ -5,7 +5,7 @@ import { ConfigReadOpts, IConfigStore } from "./IConfigStore";
 import { IFileStore } from "./IFileStore";
 import { CONSTANTS, StatusCodes } from "../constants";
 import { ConfigUtils, DeepPartial } from "../utils";
-import { DendronConfig } from "../types";
+import { DendronConfig, DVault } from "../types";
 import { fromStr, toStr } from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
 import _ from "lodash";
@@ -196,21 +196,65 @@ export class ConfigStore implements IConfigStore {
   write(
     payload: DendronConfig
   ): ResultAsync<DendronConfig, IDendronError<StatusCodes | undefined>> {
-    const payloadDumpResult = toStr(payload);
-    if (payloadDumpResult.isErr()) {
-      return errAsync(payloadDumpResult.error);
-    }
+    // TODO: once the store methods are mirrored to the engine,
+    // move this filtering logic out of store implementation.
+
+    // check if we have overrides and only write the difference
+    const searchOverrideResult = this.searchOverride();
 
     return ResultAsync.fromPromise(
       Promise.resolve(
-        this._fileStore
-          .write(this.path, payloadDumpResult.value)
-          .then((resp) => {
-            if (resp.error) {
-              throw resp.error;
+        searchOverrideResult.then((override) => {
+          const payloadDumpResult = toStr(payload);
+          if (payloadDumpResult.isErr()) {
+            throw payloadDumpResult.error;
+          }
+          if (override.isErr()) {
+            return Promise.resolve(
+              this._fileStore
+                .write(this.path, payloadDumpResult.value)
+                .then((resp) => {
+                  if (resp.error) {
+                    throw resp.error;
+                  }
+                  return payload;
+                })
+            );
+          } else {
+            // currently you can only override vaults
+            // if we extend `dendronrc.yml` to accept arbitrary configs,
+            // we need to find the deep-difference
+            const vaultsFromOverride = override.value.workspace
+              ?.vaults as DVault[];
+            const payloadDifference: DendronConfig = {
+              ...payload,
+              workspace: {
+                ...payload.workspace,
+                vaults: _.differenceWith(
+                  payload.workspace.vaults,
+                  vaultsFromOverride,
+                  _.isEqual
+                ),
+              },
+            };
+
+            const payloadDifferenceDumpResult = toStr(payloadDifference);
+            if (payloadDifferenceDumpResult.isErr()) {
+              throw payloadDifferenceDumpResult.error;
             }
-            return payload;
-          })
+
+            return Promise.resolve(
+              this._fileStore
+                .write(this.path, payloadDifferenceDumpResult.value)
+                .then((resp) => {
+                  if (resp.error) {
+                    throw resp.error;
+                  }
+                  return payloadDifference;
+                })
+            );
+          }
+        })
       ),
       (err) => err as DendronError
     );

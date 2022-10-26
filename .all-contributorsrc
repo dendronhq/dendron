@@ -2284,6 +2284,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "karstengresch",
+      "name": "Karsten Gresch",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7924413?v=4",
+      "profile": "http://gresch.io",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

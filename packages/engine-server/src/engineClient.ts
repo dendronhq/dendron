@@ -320,7 +320,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         originalQS,
       });
     }
-    let noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
+    let noteProps = noteIndexProps
+      .map((ent) => this.notes[ent.id])
+      .filter((note) => !note.id.startsWith(NoteUtils.FAKE_ID_PREFIX));
     // TODO: hack
     if (!_.isUndefined(vault)) {
       noteProps = noteProps.filter((ent) =>

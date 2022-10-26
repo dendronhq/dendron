@@ -20,6 +20,8 @@ import {
   parseSidebarConfig,
   DisabledSidebar,
   DefaultSidebar,
+  NoteDicts,
+  NoteFnameDictUtils,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -40,7 +42,6 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ExportPod, ExportPodConfig, ExportPodPlantOpts } from "../basev3";
 import { PodUtils } from "../utils";
-import throttle from "@jcoreio/async-throttle";
 
 const ID = "dendron.nextjs";
 
@@ -275,18 +276,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engine,
     note,
     engineConfig,
+    noteCacheForRenderDict,
   }: {
     engine: DEngineClient;
     note: NoteProps;
     engineConfig: DendronConfig;
+    noteCacheForRenderDict: NoteDicts;
   }) {
-    const noteCacheForRenderDict = await getParsingDependencyDicts(
-      note,
-      engine,
-      engineConfig,
-      engine.vaults
-    );
-
     const proc = MDUtilsV5.procRehypeFull(
       {
         noteToRender: note,
@@ -463,13 +459,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     note,
     notesDir,
     engineConfig,
+    noteCacheForRenderDict,
   }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
     notesDir: string;
     engineConfig: DendronConfig;
   }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
-    const out = await this._renderNote({ engine, note, engineConfig });
+    const out = await this._renderNote({
+      engine,
+      note,
+      engineConfig,
+      noteCacheForRenderDict,
+    });
     const dst = path.join(notesDir, note.id + ".html");
     this.L.debug({ ctx, dst, msg: "writeNote" });
     return fs.writeFile(dst, out);
@@ -534,6 +536,12 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       noExpandSingleDomain: true,
     });
 
+    const publishedNotesFullDict = {
+      notesById: publishedNotes,
+      notesByFname:
+        NoteFnameDictUtils.createNotePropsByFnameDict(publishedNotes),
+    };
+
     const duplicateNoteBehavior =
       "duplicateNoteBehavior" in siteConfig
         ? siteConfig.duplicateNoteBehavior
@@ -567,8 +575,6 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
     const notesRefsDir = path.join(podDstDir, "refs");
-    const throttledFind = throttle(_.bind(engine.findNotes, engine), 50);
-    engine.findNotes = throttledFind;
 
     this.L.info({ ctx, msg: "ensuring notesDir...", notesDir: notesBodyDir });
     fs.ensureDirSync(notesBodyDir);
@@ -582,6 +588,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             note,
             notesDir: notesBodyDir,
             engineConfig,
+            noteCacheForRenderDict: publishedNotesFullDict,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
           this.renderBodyAsMD({ note, notesDir: notesBodyDir }),

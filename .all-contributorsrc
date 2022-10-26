@@ -2275,6 +2275,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "allibell",
+      "name": "Allison Bellows",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25647843?v=4",
+      "profile": "http://www.allison-bellows.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

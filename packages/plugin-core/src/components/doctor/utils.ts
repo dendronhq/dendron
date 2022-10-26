@@ -26,6 +26,14 @@ export class DoctorUtils {
     const { vaults, wsRoot, engine } = extension.getDWorkspace();
     let vault;
     try {
+      if ((await vscode.workspace.fs.stat(document.uri)).ctime === 0) {
+        Logger.debug({
+          ctx,
+          editor: document.uri.fsPath,
+          state: "uri does not exist (anymore)",
+        });
+        throw Error;
+      }
       vault = VaultUtils.getVaultByFilePath({
         vaults,
         wsRoot,

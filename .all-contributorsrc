@@ -2257,6 +2257,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "KitLeskinen",
+      "name": "KitLeskinen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9257451?v=4",
+      "profile": "http://leskinen.ru",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

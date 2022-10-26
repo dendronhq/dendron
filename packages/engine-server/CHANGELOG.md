@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.2) (2022-10-26)
+
+
+
+# 0.116.0 (2022-10-25)
+
+
+### Bug Fixes
+
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **workspace:** engine init with note candidates enabled ([#3585](https://github.com/dendronhq/dendron/issues/3585)) ([59597b4](https://github.com/dendronhq/dendron/commit/59597b476fd4b46d5b1c9a5d950af2c8e2dc15b1))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+
+
+
+## [0.116.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.1) (2022-10-25)
+
+
+
+# 0.116.0 (2022-10-25)
+
+
+### Bug Fixes
+
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **workspace:** engine init with note candidates enabled ([#3585](https://github.com/dendronhq/dendron/issues/3585)) ([59597b4](https://github.com/dendronhq/dendron/commit/59597b476fd4b46d5b1c9a5d950af2c8e2dc15b1))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+
+
+
 # 0.116.0 (2022-10-25)
 
 **Note:** Version bump only for package @dendronhq/engine-server

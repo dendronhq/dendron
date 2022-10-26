@@ -20,6 +20,8 @@ import {
   parseSidebarConfig,
   DisabledSidebar,
   DefaultSidebar,
+  NoteDicts,
+  NoteDictsUtils,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -274,18 +276,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     engine,
     note,
     engineConfig,
+    noteCacheForRenderDict,
   }: {
     engine: DEngineClient;
     note: NoteProps;
     engineConfig: DendronConfig;
+    noteCacheForRenderDict: NoteDicts;
   }) {
-    const noteCacheForRenderDict = await getParsingDependencyDicts(
-      note,
-      engine,
-      engineConfig,
-      engine.vaults
-    );
-
     const proc = MDUtilsV5.procRehypeFull(
       {
         noteToRender: note,
@@ -462,13 +459,19 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     note,
     notesDir,
     engineConfig,
+    noteCacheForRenderDict,
   }: Parameters<NextjsExportPod["_renderNote"]>[0] & {
     notesDir: string;
     engineConfig: DendronConfig;
   }) {
     const ctx = `${ID}:renderBodyToHTML`;
     this.L.debug({ ctx, msg: "renderNote:pre", note: note.id });
-    const out = await this._renderNote({ engine, note, engineConfig });
+    const out = await this._renderNote({
+      engine,
+      note,
+      engineConfig,
+      noteCacheForRenderDict,
+    });
     const dst = path.join(notesDir, note.id + ".html");
     this.L.debug({ ctx, dst, msg: "writeNote" });
     return fs.writeFile(dst, out);
@@ -562,6 +565,14 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
       vaults: engine.vaults,
     };
 
+    // The reason to use all engine notes instead of just the published notes
+    // here is because a published note may link to a private note, in which
+    // case we still "need" the private note in the cache to do the rendering,
+    // since the title of the note is used in the (Private) placeholder for the
+    // link.
+    const noteDeps = await engine.findNotes({ excludeStub: true });
+    const fullDict = NoteDictsUtils.createNoteDicts(noteDeps);
+
     // render notes
     const notesBodyDir = path.join(podDstDir, "notes");
     const notesMetaDir = path.join(podDstDir, "meta");
@@ -579,6 +590,7 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
             note,
             notesDir: notesBodyDir,
             engineConfig,
+            noteCacheForRenderDict: fullDict,
           }),
           this.renderMetaToJSON({ note, notesDir: notesMetaDir }),
           this.renderBodyAsMD({ note, notesDir: notesBodyDir }),

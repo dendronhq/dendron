@@ -20,13 +20,8 @@ module.exports = {
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
-    },
-    ecmaVersion: 2018,
-    sourceType: "module",
-    tsconfigRootDir: __dirname,
-    project: ["./tsconfig.json"],
+    // tsconfigRootDir: __dirname,
+    // project: ["./tsconfig.json"], // diabled because we run into OOM. see https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-1153418862 for why 
   },
   plugins: ["@typescript-eslint", "jest"],
   rules: {

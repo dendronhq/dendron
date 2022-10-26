@@ -5,7 +5,7 @@ import { ConfigReadOpts, IConfigStore } from "./IConfigStore";
 import { IFileStore } from "./IFileStore";
 import { CONSTANTS, StatusCodes } from "../constants";
 import { ConfigUtils, DeepPartial } from "../utils";
-import { DendronConfig, DVault } from "../types";
+import { DendronConfig, DendronConfigValue, DVault } from "../types";
 import { fromStr, toStr } from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
 import _ from "lodash";
@@ -217,6 +217,7 @@ export class ConfigStore implements IConfigStore {
                   if (resp.error) {
                     throw resp.error;
                   }
+                  this._cachedDendronConfig = payload;
                   return payload;
                 })
             );
@@ -250,12 +251,85 @@ export class ConfigStore implements IConfigStore {
                   if (resp.error) {
                     throw resp.error;
                   }
+                  this._cachedDendronConfig = payloadDifference;
                   return payloadDifference;
                 })
             );
           }
         })
       ),
+      (err) => err as DendronError
+    );
+  }
+
+  get(
+    key: string,
+    opts: ConfigReadOpts
+  ): ResultAsync<DendronConfigValue, IDendronError<StatusCodes | undefined>> {
+    return ResultAsync.fromPromise(
+      Promise.resolve(
+        this.read(opts).then((res) => {
+          if (res.isOk()) {
+            return _.get(res.value, key);
+          }
+          throw res.error;
+        })
+      ),
+      (err) => err as DendronError
+    );
+  }
+
+  update(
+    key: string,
+    value: DendronConfigValue
+  ): ResultAsync<
+    DendronConfigValue | undefined,
+    IDendronError<StatusCodes | undefined>
+  > {
+    return ResultAsync.fromPromise(
+      this.read({ mode: "default" }).then((res) => {
+        if (res.isOk()) {
+          const config = res.value;
+          const prevValue = _.get(config, key);
+          const updatedConfig = _.set(config, key, value);
+          return Promise.resolve(
+            this.write(updatedConfig).then((res) => {
+              if (res.isOk()) {
+                return prevValue;
+              }
+              throw res.error;
+            })
+          );
+        }
+        throw res.error;
+      }),
+      (err) => err as DendronError
+    );
+  }
+
+  delete(
+    key: string
+  ): ResultAsync<
+    DendronConfigValue | undefined,
+    IDendronError<StatusCodes | undefined>
+  > {
+    return ResultAsync.fromPromise(
+      this.read({ mode: "default" }).then((res) => {
+        if (res.isOk()) {
+          const config = res.value;
+          const prevValue = _.get(config, key);
+          _.unset(config, key);
+          return Promise.resolve(
+            this.write(config).then((res) => {
+              if (res.isOk()) {
+                return prevValue;
+              }
+              throw res.error;
+            })
+          );
+        }
+        throw res.error;
+      }),
       (err) => err as DendronError
     );
   }

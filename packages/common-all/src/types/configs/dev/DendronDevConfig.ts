@@ -31,7 +31,7 @@ export type DendronDevConfig = {
    * - plugin: Uses VSCode's builtin watcher
    * - engine: Uses the engine watcher, watching the files directly without VSCode
    */
-  forceWatcherType?: "plugin" | "engine";
+  forceWatcherType?: ForceWatcherType;
   /**
    * Enable export pod v2
    */
@@ -55,6 +55,8 @@ export type DendronDevConfig = {
    */
   enableEngineV3?: boolean;
 };
+
+export type ForceWatcherType = "plugin" | "engine";
 
 /**
  * Generates defaults for {@link DendronDevConfig}

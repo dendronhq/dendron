@@ -1,22 +1,17 @@
 import { ResultAsync } from "neverthrow";
 import { IDendronError } from "../error";
-import { DendronConfig } from "../types";
+import { DendronConfig, DendronConfigValue } from "../types";
 import { DeepPartial } from "../utils";
 
 export type ConfigValue = string | number | object;
-export type BaseConfigEntryPayload = { value: ConfigValue };
-
-export type ConfigEntryGetResult = {} & BaseConfigEntryPayload;
-export type ConfigEntryUpdateResult = {
-  prevValue: ConfigValue;
-} & BaseConfigEntryPayload;
-export type ConfigEntryDeleteResult = { prevValue: ConfigValue };
 
 export type ConfigReadMode = "override" | "default";
 export type ConfigReadOpts = {
   mode: ConfigReadMode;
   useCache?: boolean;
 };
+
+export type ConfigGetOpts = ConfigReadOpts;
 
 export interface IConfigStore {
   // entire config
@@ -42,16 +37,23 @@ export interface IConfigStore {
   /**
    * Given a dot delimited path, retrieve the config entry value in the persistant dendron config
    */
-  // get(key: string): ResultAsync<ConfigEntryGetResult, IDendronError>;
+  get(
+    key: string,
+    opts: ConfigGetOpts
+  ): ResultAsync<DendronConfigValue, IDendronError>;
   /**
    * Given a dot delimited path, update the config entry value with given value in the persistant dendron config
+   * returns previous value
    */
-  // update(
-  //   key: string,
-  //   value: ConfigValue
-  // ): ResultAsync<ConfigEntryUpdateResult, IDendronError>;
+  update(
+    key: string,
+    value: DendronConfigValue
+  ): ResultAsync<DendronConfigValue | undefined, IDendronError>;
   /**
    * Given a dot delimited path, delete the config entry in the persistant dendron config
+   * returns previous value
    */
-  // delete(key: string): ResultAsync<ConfigEntryDeleteResult, IDendronError>;
+  delete(
+    key: string
+  ): ResultAsync<DendronConfigValue | undefined, IDendronError>;
 }

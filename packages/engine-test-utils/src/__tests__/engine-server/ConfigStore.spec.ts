@@ -323,5 +323,141 @@ describe("ConfigStore", () => {
         ]);
       });
     });
+
+    describe("AND get", () => {
+      test("WHEN default mode, then retrieve value of config", async () => {
+        const homeDir = tmpDir().name;
+        const wsRoot = tmpDir().name;
+        const configStore = new ConfigStore(
+          fileStore,
+          URI.parse(wsRoot),
+          URI.parse(homeDir)
+        );
+
+        const createResult = await configStore.create();
+
+        const defaultConfig = createResult._unsafeUnwrap();
+
+        const getResult = await configStore.get("commands", {
+          mode: "default",
+        });
+        expect(getResult.isOk()).toBeTruthy();
+        expect(getResult._unsafeUnwrap()).toEqual(defaultConfig.commands);
+      });
+
+      test("WHEN useCache, then retrieve value from cached config", async () => {
+        const homeDir = tmpDir().name;
+        const wsRoot = tmpDir().name;
+        const configStore = new ConfigStore(
+          fileStore,
+          URI.parse(wsRoot),
+          URI.parse(homeDir)
+        );
+
+        await configStore.create();
+
+        const getResult = await configStore.get("commands", {
+          mode: "default",
+        });
+
+        unlinkSync(configStore.path.fsPath);
+
+        const cachedGetResult = await configStore.get("commands", {
+          mode: "default",
+        });
+
+        expect(
+          cachedGetResult.isOk() &&
+            cachedGetResult._unsafeUnwrap() === getResult._unsafeUnwrap()
+        );
+      });
+
+      test("WHEN override mode, then retrieve value of config after override", async () => {
+        const homeDir = tmpDir().name;
+        const wsRoot = tmpDir().name;
+        const configStore = new ConfigStore(
+          fileStore,
+          URI.parse(wsRoot),
+          URI.parse(homeDir)
+        );
+
+        await configStore.create();
+
+        const workspaceOverridePayload = {
+          workspace: {
+            vaults: [
+              {
+                fsPath: "bar",
+                name: "bar",
+              },
+            ],
+          },
+        };
+
+        writeYAML(
+          path.join(wsRoot, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE),
+          workspaceOverridePayload
+        );
+
+        const getResult = await configStore.get("workspace.vaults", {
+          mode: "override",
+        });
+
+        expect(getResult.isOk()).toBeTruthy();
+        expect(getResult._unsafeUnwrap()).toEqual([
+          {
+            fsPath: "bar",
+            name: "bar",
+          },
+        ]);
+      });
+    });
+
+    test("WHEN update, update key with value, then persist change", async () => {
+      const homeDir = tmpDir().name;
+      const wsRoot = tmpDir().name;
+      const configStore = new ConfigStore(
+        fileStore,
+        URI.parse(wsRoot),
+        URI.parse(homeDir)
+      );
+
+      await configStore.create();
+
+      const updateResult = await configStore.update(
+        "commands.lookup.note.fuzzThreshold",
+        100
+      );
+      expect(updateResult.isOk()).toBeTruthy();
+      expect(updateResult._unsafeUnwrap()).toEqual(0.2);
+
+      const readResult = await configStore.readRaw();
+      expect(
+        readResult._unsafeUnwrap().commands?.lookup?.note?.fuzzThreshold
+      ).toEqual(100);
+    });
+
+    test("WHEN delete, delete key, then persist/cache", async () => {
+      const homeDir = tmpDir().name;
+      const wsRoot = tmpDir().name;
+      const configStore = new ConfigStore(
+        fileStore,
+        URI.parse(wsRoot),
+        URI.parse(homeDir)
+      );
+
+      await configStore.create();
+
+      const deleteResult = await configStore.delete(
+        "commands.lookup.note.fuzzThreshold"
+      );
+      expect(deleteResult.isOk()).toBeTruthy();
+      expect(deleteResult._unsafeUnwrap()).toEqual(0.2);
+
+      const readResult = await configStore.readRaw();
+      expect(
+        readResult._unsafeUnwrap().commands?.lookup?.note?.fuzzThreshold
+      ).toBeUndefined();
+    });
   });
 });

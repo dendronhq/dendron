@@ -4,15 +4,12 @@ on:
   push:
     branches:
       - master
-      - dev
-      - integ-publish
       - release/*
-      - prerelease/*
-      - kevin-*/*
   pull_request:
     branches:
       - "*"
       - "*/*"
+  workflow_dispatch:
 
 env:
   BINARY_CACHE_INDEX: 23 # Rev this if we need a new node cache

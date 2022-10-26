@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.1) (2022-10-25)
+
+
+
+# 0.116.0 (2022-10-25)
+
+
+### Bug Fixes
+
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+
+
+
+
+
 # 0.116.0 (2022-10-25)
 
 **Note:** Version bump only for package @dendronhq/common-assets

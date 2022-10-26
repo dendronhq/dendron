@@ -3,6 +3,55 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.1) (2022-10-25)
+
+
+### Bug Fixes
+
+* **publish:** correct hashtag parsing ([#3708](https://github.com/dendronhq/dendron/issues/3708)) ([ab6f2b3](https://github.com/dendronhq/dendron/commit/ab6f2b345ecb536fc0978a82427d5ba03fd8d0b0))
+* **publish:** make safe access to iframe ([#3707](https://github.com/dendronhq/dendron/issues/3707)) ([7ac3207](https://github.com/dendronhq/dendron/commit/7ac320748f7c7f149cfee32d965fe8cb1a1499b4))
+
+
+
+# 0.116.0 (2022-10-25)
+
+
+### Bug Fixes
+
+* **commands:** lookup sometimes omits last keystrokes in new note when under load ([#3671](https://github.com/dendronhq/dendron/issues/3671)) ([9eac312](https://github.com/dendronhq/dendron/commit/9eac312c86e12f0743027765ebb8ab5ad04e117e))
+* npm overrides for packages with vulnerabilities ([#3666](https://github.com/dendronhq/dendron/issues/3666)) ([a3ea753](https://github.com/dendronhq/dendron/commit/a3ea753e368b68dd1ba991dec3dbeff2940a0d8c))
+* **build:** build errors in web classes from bad merge ([3d9e9b3](https://github.com/dendronhq/dendron/commit/3d9e9b312f03278a4a95f0fde17ae129f54a8eb3))
+* **internal:** correct reading of error tack ([#3647](https://github.com/dendronhq/dendron/issues/3647)) ([45a8c09](https://github.com/dendronhq/dendron/commit/45a8c09e53132a231ebe5b607bd272caf325860c))
+* **lookup:** cancel note creation during "Create Note with Template" if template was not selected ([#3645](https://github.com/dendronhq/dendron/issues/3645)) ([5f1b1e7](https://github.com/dendronhq/dendron/commit/5f1b1e7749459fc87dee717b784c36605e675906))
+* **markdown:** same page header links ([#3543](https://github.com/dendronhq/dendron/issues/3543)) ([559a5f6](https://github.com/dendronhq/dendron/commit/559a5f610e12763dbc715f364316544579346f9f))
+* **preview:** task notes inside of note references should render correctly ([#3640](https://github.com/dendronhq/dendron/issues/3640)) ([513354b](https://github.com/dendronhq/dendron/commit/513354bbd5405b79ace5b69d4d4874885eb3a5af))
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+* **publish:** prevent "Table of content" overflowing container ([#3624](https://github.com/dendronhq/dendron/issues/3624)) ([a3c7eb4](https://github.com/dendronhq/dendron/commit/a3c7eb4333e18a2008447f84e5a8055ae6c3d705))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **views:** apply preview theme's backgroundColor ([#3552](https://github.com/dendronhq/dendron/issues/3552)) ([7842c15](https://github.com/dendronhq/dendron/commit/7842c15a00bf568bbe4f7f1d577f3e5436d557d9))
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* **workspace:** custom color decoration for hashtags ([#3637](https://github.com/dendronhq/dendron/issues/3637)) ([1d41270](https://github.com/dendronhq/dendron/commit/1d412701791b4d5018f41c5dabdee759a968649c))
+* **workspace:** Disallow note creation through go to note if filename is invalid ([#3551](https://github.com/dendronhq/dendron/issues/3551)) ([cd337ab](https://github.com/dendronhq/dendron/commit/cd337ab479ec70b7e5897e74f332374a30dae7a8))
+* **workspace:** engine init with note candidates enabled ([#3585](https://github.com/dendronhq/dendron/issues/3585)) ([59597b4](https://github.com/dendronhq/dendron/commit/59597b476fd4b46d5b1c9a5d950af2c8e2dc15b1))
+* **workspace:** go to definition for wikilink with header ([#3632](https://github.com/dendronhq/dendron/issues/3632)) ([9a74123](https://github.com/dendronhq/dendron/commit/9a74123fe475add288f319d3ce85040f38e725e1))
+* click into "empty area" on sidebar submenuitem ([#3523](https://github.com/dendronhq/dendron/issues/3523)) ([82bda25](https://github.com/dendronhq/dendron/commit/82bda25a591106ef6d9710aa0cad9988f7c6c5db))
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* regression in apply template command ([#3623](https://github.com/dendronhq/dendron/issues/3623)) ([16cc85e](https://github.com/dendronhq/dendron/commit/16cc85e6352e21b3035c7834fdea4be56d7943a0))
+* render favicon when assetPrefix is set ([#3571](https://github.com/dendronhq/dendron/issues/3571)) ([5a24a9e](https://github.com/dendronhq/dendron/commit/5a24a9e9e137e3fb8ca19d55a7260d90fbfa6e41))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+
+
+
 # 0.116.0 (2022-10-25)
 
 **Note:** Version bump only for package root

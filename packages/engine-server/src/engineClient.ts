@@ -67,6 +67,7 @@ type DendronEngineClientOpts = {
 
 export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   private _onNoteChangedEmitter = new EventEmitter<NoteChangeEntry[]>();
+  private _config;
 
   public notes: NotePropsByIdDict;
   public noteFnames: NotePropsByFnameDict;
@@ -134,6 +135,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.hooks = ConfigUtils.getWorkspace(config).hooks || {
       onCreate: [],
     };
+    this._config = config;
   }
 
   /**
@@ -168,6 +170,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       throw new DendronError({ message: "no data" });
     }
     const { notes, config } = resp.data;
+    this._config = config;
     this.notes = notes;
     this.noteFnames = NoteFnameDictUtils.createNotePropsByFnameDict(this.notes);
     await this.fuseEngine.replaceNotesIndex(notes);
@@ -185,23 +188,31 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    * See {@link DStore.getNote}
    */
   async getNote(id: string): Promise<GetNoteResp> {
-    const maybeNote = this.notes[id];
-
-    if (maybeNote) {
-      return { data: _.cloneDeep(maybeNote) };
+    if (this._config.dev?.enableEngineV3) {
+      return this.api.noteGet({ id, ws: this.ws });
     } else {
-      return {
-        error: DendronError.createFromStatus({
-          status: ERROR_STATUS.CONTENT_NOT_FOUND,
-          message: `NoteProps not found for key ${id}.`,
-          severity: ERROR_SEVERITY.MINOR,
-        }),
-      };
+      const maybeNote = this.notes[id];
+
+      if (maybeNote) {
+        return { data: _.cloneDeep(maybeNote) };
+      } else {
+        return {
+          error: DendronError.createFromStatus({
+            status: ERROR_STATUS.CONTENT_NOT_FOUND,
+            message: `NoteProps not found for key ${id}.`,
+            severity: ERROR_SEVERITY.MINOR,
+          }),
+        };
+      }
     }
   }
 
   async getNoteMeta(id: string): Promise<GetNoteMetaResp> {
-    return this.getNote(id);
+    if (this._config.dev?.enableEngineV3) {
+      return this.api.noteGetMeta({ id, ws: this.ws });
+    } else {
+      return this.getNote(id);
+    }
   }
 
   /**
@@ -209,11 +220,15 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    * TODO: remove this.notes
    */
   async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {
-    return {
-      data: ids.map((id) => {
-        return _.cloneDeep(this.notes[id]);
-      }),
-    };
+    if (this._config.dev?.enableEngineV3) {
+      return this.api.noteBulkGet({ ids, ws: this.ws });
+    } else {
+      return {
+        data: ids.map((id) => {
+          return _.cloneDeep(this.notes[id]);
+        }),
+      };
+    }
   }
 
   /**
@@ -221,7 +236,11 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
    * TODO: remove this.notes
    */
   async bulkGetNotesMeta(ids: string[]): Promise<BulkGetNoteMetaResp> {
-    return this.bulkGetNotes(ids);
+    if (this._config.dev?.enableEngineV3) {
+      return this.api.noteBulkGetMeta({ ids, ws: this.ws });
+    } else {
+      return this.bulkGetNotes(ids);
+    }
   }
 
   /**

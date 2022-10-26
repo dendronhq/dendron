@@ -6,11 +6,14 @@ export enum DECORATION_TYPES {
   blockAnchor = "blockAnchor",
   wikiLink = "wikiLink",
   brokenWikilink = "brokenWikilink",
+  noteRef = "noteRef",
+  brokenNoteRef = "brokenNoteRef",
   alias = "alias",
   taskNote = "taskNote",
 }
 
-export type Decoration = {
+export type Decoration<T = any> = {
   type: DECORATION_TYPES;
   range: VSRange;
+  data?: T;
 };

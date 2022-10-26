@@ -1,10 +1,11 @@
 import {
+  DefaultMap,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import { execa, IWorkspaceService } from "@dendronhq/engine-server";
-import vscode from "vscode";
+import vscode, { CommentController } from "vscode";
 import { ILookupControllerV3Factory } from "./components/lookup/LookupControllerV3Interface";
 import {
   INoteLookupProviderFactory,
@@ -70,6 +71,7 @@ export interface IDendronExtension {
   noteLookupProviderFactory: INoteLookupProviderFactory;
   schemaLookupProviderFactory: ISchemaLookupProviderFactory;
   workspaceImpl?: DWorkspaceV2;
+  noteRefCommentController: CommentController;
 
   activateWatchers(): Promise<void>;
   /**
@@ -79,6 +81,9 @@ export interface IDendronExtension {
   pauseWatchers<T = void>(cb: () => Promise<T>): Promise<T>;
 
   getClientAPIRootUrl(): Promise<string>;
+  getCommentThreadsState(): {
+    inlineNoteRefs: DefaultMap<string, Map<string, vscode.CommentThread>>;
+  };
 
   /** Shorthand for previously existing function getWorkspaceImplOrThrow() */
   getDWorkspace(): DWorkspaceV2;

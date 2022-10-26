@@ -62,6 +62,30 @@ type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   note: NoteProps;
 };
 
+export class NoteRefUtils {
+  static dnodeRefLink2String(link: DNoteRefLink) {
+    const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
+    const { fname, alias } = link.from;
+    const linkText = alias ? `${alias}|${fname}` : fname;
+    let suffix = "";
+
+    const vaultPrefix = link.data.vaultName
+      ? `${CONSTANTS.DENDRON_DELIMETER}${link.data.vaultName}/`
+      : "";
+
+    if (anchorStart) {
+      suffix += `#${anchorStart}`;
+    }
+    if (anchorStartOffset) {
+      suffix += `,${anchorStartOffset}`;
+    }
+    if (anchorEnd) {
+      suffix += `:#${anchorEnd}`;
+    }
+    return `![[${vaultPrefix}${linkText}${suffix}]]`;
+  }
+}
+
 function gatherNoteRefs({
   link,
   vault,
@@ -204,26 +228,7 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
 
       // converting to itself (used for doctor commands. preserve existing format)
       if (dest === DendronASTDest.MD_DENDRON) {
-        const { fname, alias } = ndata.link.from;
-
-        const { anchorStart, anchorStartOffset, anchorEnd } = ndata.link.data;
-        const link = alias ? `${alias}|${fname}` : fname;
-        let suffix = "";
-
-        const vaultPrefix = ndata.link.data.vaultName
-          ? `${CONSTANTS.DENDRON_DELIMETER}${ndata.link.data.vaultName}/`
-          : "";
-
-        if (anchorStart) {
-          suffix += `#${anchorStart}`;
-        }
-        if (anchorStartOffset) {
-          suffix += `,${anchorStartOffset}`;
-        }
-        if (anchorEnd) {
-          suffix += `:#${anchorEnd}`;
-        }
-        return `![[${vaultPrefix}${link}${suffix}]]`;
+        return NoteRefUtils.dnodeRefLink2String(ndata.link);
       }
       return;
     };

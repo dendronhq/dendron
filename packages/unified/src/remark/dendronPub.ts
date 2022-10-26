@@ -174,7 +174,11 @@ function shouldInsertTitle({ proc }: { proc: Processor }) {
   const opts = MDUtilsV5.getProcOpts(proc);
   const isNoteRef = !_.isNumber(data.noteRefLvl) && data.noteRefLvl > 0;
   let insertTitle;
-  if (isNoteRef || opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER) {
+  if (
+    isNoteRef ||
+    opts.flavor === ProcFlavor.BACKLINKS_PANEL_HOVER ||
+    opts.flavor === ProcFlavor.HOVER_PREVIEW
+  ) {
     insertTitle = false;
   } else {
     const config = data.config as DendronConfig;

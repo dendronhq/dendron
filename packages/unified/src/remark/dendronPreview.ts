@@ -49,13 +49,14 @@ function modifyWikilinkValueToCommandUri({
     ? AnchorUtils.string2anchor(node.data.anchorHeader)
     : undefined;
 
+  const qs = node.value;
   const goToNoteCommandOpts = {
-    qs: node.value,
+    qs,
     vault,
     anchor,
   };
-
   const encodedArgs = encodeURIComponent(JSON.stringify(goToNoteCommandOpts));
+  node.data.alias = node.data.alias || qs;
   node.value = `command:dendron.gotoNote?${encodedArgs}`;
 }
 

@@ -1,4 +1,5 @@
 import {
+  DefaultMap,
   DEngineClient,
   DVault,
   DWorkspaceV2,
@@ -7,6 +8,8 @@ import {
 } from "@dendronhq/common-all";
 import { IWorkspaceService, WorkspaceService } from "@dendronhq/engine-server";
 import {
+  CommentController,
+  CommentThread,
   Disposable,
   ExtensionContext,
   FileSystemWatcher,
@@ -36,6 +39,7 @@ export class MockDendronExtension implements IDendronExtension {
   private _context: ExtensionContext | undefined;
   private _wsRoot: string | undefined;
   private _vaults: DVault[] | undefined;
+  noteRefCommentController: CommentController;
 
   constructor({
     engine,
@@ -52,6 +56,7 @@ export class MockDendronExtension implements IDendronExtension {
     this._context = context;
     this._wsRoot = wsRoot;
     this._vaults = vaults;
+    this.noteRefCommentController = {} as CommentController;
   }
   get podsDir(): string {
     throw new Error("Method not implemented.");
@@ -79,6 +84,13 @@ export class MockDendronExtension implements IDendronExtension {
   get type(): WorkspaceType {
     throw new Error("Method not implemented in MockDendronExtension");
   }
+
+  getCommentThreadsState(): {
+    inlineNoteRefs: DefaultMap<string, Map<string, CommentThread>>;
+  } {
+    throw new Error("Method not implemented in MockDendronExtension.");
+  }
+
   get wsUtils(): IWSUtilsV2 {
     return new WSUtilsV2(this);
   }

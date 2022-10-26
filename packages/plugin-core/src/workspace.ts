@@ -11,6 +11,7 @@ import {
   WorkspaceSettings,
   WorkspaceType,
   BacklinkPanelSortOrder,
+  DefaultMap,
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
@@ -147,6 +148,11 @@ export class DendronExtension implements IDendronExtension {
   public type: WorkspaceType;
   public workspaceImpl?: DWorkspaceV2;
   public wsUtils: IWSUtilsV2;
+  public noteRefCommentController: vscode.CommentController;
+  private _inlineNoteRefs: DefaultMap<
+    string,
+    Map<string, vscode.CommentThread>
+  > = new DefaultMap(() => new Map());
 
   static context(): vscode.ExtensionContext {
     return getExtension().context;
@@ -380,6 +386,10 @@ export class DendronExtension implements IDendronExtension {
     this.lookupControllerFactory = new LookupControllerV3Factory(this);
     this.noteLookupProviderFactory = new NoteLookupProviderFactory(this);
     this.schemaLookupProviderFactory = new SchemaLookupProviderFactory(this);
+    this.noteRefCommentController = vscode.comments.createCommentController(
+      "noteRefs",
+      "Show note refs"
+    );
 
     const ctx = "DendronExtension";
     this.L.info({ ctx, msg: "initialized" });
@@ -397,6 +407,12 @@ export class DendronExtension implements IDendronExtension {
       });
     }
     return this.workspaceImpl;
+  }
+
+  getCommentThreadsState() {
+    return {
+      inlineNoteRefs: this._inlineNoteRefs,
+    };
   }
 
   /**

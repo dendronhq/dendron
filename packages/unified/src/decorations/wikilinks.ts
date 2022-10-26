@@ -1,6 +1,7 @@
 import {
   containsNonDendronUri,
   DendronError,
+  DNoteRefLink,
   DVault,
   getTextRange,
   IDendronError,
@@ -18,8 +19,16 @@ import { WikiLinkNoteV4 } from "../types";
 import { decorateTaskNote, DecorationTaskNote } from "./taskNotes";
 import { Decoration, DECORATION_TYPES, Decorator } from "./utils";
 
-export type DecorationWikilink = Decoration & {
+export type DecorationWikilink = WikiLinkDecorator | NoteRefDecorator;
+
+export type WikiLinkDecorator = Decoration & {
   type: DECORATION_TYPES.wikiLink | DECORATION_TYPES.brokenWikilink;
+};
+
+export type NoteRefDecorator = Required<
+  Decoration<{ link: DNoteRefLink; noteMeta?: NotePropsMeta }>
+> & {
+  type: DECORATION_TYPES.noteRef | DECORATION_TYPES.brokenNoteRef;
 };
 export type DecorationAlias = Decoration & {
   type: DECORATION_TYPES.alias;
@@ -91,7 +100,13 @@ export const decorateWikilink: Decorator<
   }
 
   // Highlight the wikilink itself
-  decorations.push({ type, range: wikilinkRange });
+  decorations.push({
+    type,
+    range: wikilinkRange,
+    data: {
+      link: wikiLink,
+    },
+  });
   return { decorations, errors };
 };
 
@@ -131,6 +146,7 @@ export async function linkedNoteType({
   vaults: DVault[];
 }): Promise<{
   type: DECORATION_TYPES.brokenWikilink | DECORATION_TYPES.wikiLink;
+  noteMeta?: NotePropsMeta;
   errors: IDendronError[];
 }> {
   const ctx = "linkedNoteType";
@@ -206,7 +222,11 @@ export async function linkedNoteType({
 
   if (matchingNotes.length > 0) {
     // There are no anchors specified in the link, but we did find matching notes
-    return { type: DECORATION_TYPES.wikiLink, errors: [] };
+    return {
+      type: DECORATION_TYPES.wikiLink,
+      errors: [],
+      noteMeta: matchingNotes[0],
+    };
   }
   // No matching notes, and not a non-note file or web URL. This is just a broken link then.
   return { type: DECORATION_TYPES.brokenWikilink, errors: [] };

@@ -26,6 +26,10 @@ export class ExtensionProvider {
     return ExtensionProvider.extension;
   }
 
+  static getCommentThreadsState() {
+    return ExtensionProvider.extension.getCommentThreadsState();
+  }
+
   static getDWorkspace() {
     return ExtensionProvider.getExtension().getDWorkspace();
   }

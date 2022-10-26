@@ -1,7 +1,7 @@
 export * from "./dendronPub";
 export * from "./hierarchies";
 export * from "./transformLinks";
-export { convertNoteRefToHAST } from "./noteRefsV2";
+export { convertNoteRefToHAST, NoteRefUtils } from "./noteRefsV2";
 export {
   LinkUtils,
   AnchorUtils,

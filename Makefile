@@ -31,7 +31,7 @@ publish-local:
 
 build-plugin:
 	dendron dev prep_plugin && rm package.json
-	dendron dev package_plugin
+	env FAST=1 SKIP_SENTRY=1 LOG_LEVEL=info dendron dev package_plugin
 
 docs-push:
 	cd docs && zip -r generated-api-docs.zip generated-api-docs

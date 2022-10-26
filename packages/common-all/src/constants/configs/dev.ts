@@ -42,4 +42,8 @@ export const DEV: DendronConfigEntryCollection<DendronDevConfig> = {
     label: "Enable Engine V3",
     desc: "Uses engine v3 as default backend",
   },
+  enableExperimentalInlineNoteRef: {
+    label: "Enable inline note references.",
+    desc: "Uses inline note references in Editor",
+  },
 };

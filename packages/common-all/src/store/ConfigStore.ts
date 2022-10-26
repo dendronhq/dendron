@@ -40,7 +40,7 @@ export class ConfigStore implements IConfigStore {
     return ResultAsync.fromPromise(
       Promise.resolve(
         this._fileStore.write(this.path, configDump).then((resp) => {
-          // TODO: remove throws and chain result.
+          // TODO: remove throws and chain results instead.
           // until IFileStore methods are changed to use neverthrow
           // instead of RespV3, we need to manually throw here
           // in order for this ResultAsync to properly handle it
@@ -61,7 +61,7 @@ export class ConfigStore implements IConfigStore {
     return ResultAsync.fromPromise(
       Promise.resolve(
         this._fileStore.read(this.path).then((resp) => {
-          // TODO: remove throws and chain result.
+          // TODO: remove throws and chain results instead.
           // until IFileStore methods are changed to use neverthrow
           // instead of RespV3, we need to manually throw here
           // in order for this ResultAsync to properly handle it
@@ -100,7 +100,7 @@ export class ConfigStore implements IConfigStore {
         return ResultAsync.fromPromise(
           Promise.resolve(
             this.searchOverride().then((res) => {
-              // TODO: move validateConfig logic to common-all and add it here.
+              // TODO: move validateConfig logic from common-server to common-all and add it here.
               if (res.isOk()) {
                 const override = res.value;
                 _.mergeWith(
@@ -221,9 +221,9 @@ export class ConfigStore implements IConfigStore {
                 })
             );
           } else {
-            // currently you can only override vaults
-            // if we extend `dendronrc.yml` to accept arbitrary configs,
-            // we need to find the deep-difference
+            // currently we only allow override of workspace.vaults
+            // if we extend `dendronrc.yml` to accept arbitrary config keys,
+            // we need to find the deep-difference here
             const vaultsFromOverride = override.value.workspace
               ?.vaults as DVault[];
             const payloadDifference: DendronConfig = {

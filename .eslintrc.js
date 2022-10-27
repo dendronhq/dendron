@@ -7,10 +7,10 @@ module.exports = {
   },
   extends: [
     "plugin:react/recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
     "airbnb",
     "airbnb/hooks",
-    "prettier"
+    "prettier",
+    "plugin:@typescript-eslint/eslint-recommended"
   ],
   globals: {
     Atomics: "readonly",
@@ -116,6 +116,8 @@ module.exports = {
         ],
       },
     ],
+    'react/require-default-props': 'off', // sometimes the default value is undefined so that's fine..."
+    'react/no-array-index-key': 'off', // sometimes you don't care about the issues or they don't apply
     // used for redux toolkit
     "no-param-reassign": "off",
     "max-classes-per-file": "off",

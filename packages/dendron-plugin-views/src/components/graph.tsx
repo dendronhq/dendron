@@ -14,6 +14,7 @@ import {
   GraphViewMessage,
   GraphViewMessageEnum,
   VaultUtils,
+  assertUnreachable,
 } from "@dendronhq/common-all";
 import useApplyGraphConfig from "../hooks/useApplyGraphConfig";
 import { DendronProps } from "../types";
@@ -57,6 +58,8 @@ const getCytoscapeStyle = (
     case GraphThemeEnum.Custom: {
       return getStyles(theme, ClassicTheme, isSidePanel, customCSS);
     }
+    default:
+      assertUnreachable(config.graphTheme.value);
   }
 };
 

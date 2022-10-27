@@ -10,7 +10,6 @@ import {
   SeedBrowserMessageType,
 } from "@dendronhq/common-all";
 import { Tooltip } from "antd";
-import * as React from "react";
 import { postVSCodeMessage } from "../utils/vscode";
 
 /**
@@ -26,7 +25,7 @@ export function GoToSiteButton({
   url: string | undefined;
   inVscode: boolean;
 }) {
-  function onClick() {
+  const onClick = () => {
     if (url) {
       // If we're in VSCode, the webview does not allow popups, so send a
       // message back to the plugin and open the link from within the plugin
@@ -40,7 +39,7 @@ export function GoToSiteButton({
         window.open(url);
       }
     }
-  }
+  };
 
   if (url) {
     return (
@@ -70,13 +69,13 @@ export function AddToWorkspaceButton({
   existsInWorkspace: boolean;
   seedId: string;
 }) {
-  function onClick() {
+  const onClick = () => {
     postVSCodeMessage({
       type: SeedBrowserMessageType.onSeedAdd,
       data: { data: seedId },
       source: DMessageSource.webClient,
     } as SeedBrowserMessage);
-  }
+  };
 
   if (!existsInWorkspace) {
     return (

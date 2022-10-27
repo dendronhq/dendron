@@ -10,7 +10,7 @@ import {
   Form,
 } from "antd";
 import { debounce } from "lodash";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Config } from "../utils/dendronConfig";
 import "antd/dist/antd.css";
 import { DeleteOutlined } from "@ant-design/icons";
@@ -115,7 +115,9 @@ const ListView = (props: ConfigureElementProps) => {
   };
 
   const handleChange = (e: any) => {
-    e.target.value && setAddItems(e.target.value);
+    if (e.target.value) {
+      setAddItems(e.target.value);
+    }
   };
 
   const addItem = () => {
@@ -161,7 +163,7 @@ const ListView = (props: ConfigureElementProps) => {
           value={addItems}
           style={{ width: "75%" }}
           onChange={handleChange}
-        ></Input>
+        />
         <Button onClick={addItem}>Add Item</Button>
       </div>
     </>
@@ -175,13 +177,15 @@ const TableView = (props: ConfigureElementProps) => {
   };
   const [form] = Form.useForm();
   const items: TableItems[] = Object.keys(props.default).map((key) => {
-    return { key: key, value: props.default[key] };
+    return { key, value: props.default[key] };
   });
 
   const sendMessage = (newTableItems: TableItems[]) => {
     const value: { [key: string]: string } = {};
-    newTableItems.forEach((item) => (value[item.key] = item.value));
-    props.postMessage({ key: props.name, value: value });
+    newTableItems.forEach((item) => {
+      value[item.key] = item.value;
+    });
+    props.postMessage({ key: props.name, value });
   };
 
   const [tableItems, setTableItems] = useState(items || []);

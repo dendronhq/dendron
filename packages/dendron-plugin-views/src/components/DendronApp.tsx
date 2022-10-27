@@ -69,7 +69,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
     logger.info({ ctx, msgType: msg.type });
     switch (msg.type) {
       // TODO: Handle case where note is deleted. This should be implemented after we implement new message type to denote note state changes
-      case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR:
+      case DMessageEnum.ON_DID_CHANGE_ACTIVE_TEXT_EDITOR: {
         const cmsg = msg as OnDidChangeActiveTextEditorMsg;
         const { sync, note, syncChangedNote, activeNote } = cmsg.data;
         if (sync) {
@@ -93,11 +93,12 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
         }
         logger.info({ ctx, msg: "setNoteActive:pre" });
         // If activeNote is in the data payload, set that as active note. Otherwise default to changed note
-        const noteToSetActive = activeNote ? activeNote : note;
+        const noteToSetActive = activeNote || note;
         ideDispatch(ideSlice.actions.setNoteActive(noteToSetActive));
         logger.info({ ctx, msg: "setNoteActive:post" });
         break;
-      case DMessageEnum.ON_UPDATE_PREVIEW_HTML:
+      }
+      case DMessageEnum.ON_UPDATE_PREVIEW_HTML: {
         logger.info({ ctx, msg: "onUpdatePreviewHTML:pre" });
 
         const updatePreviewMsg = msg as OnUpdatePreviewHTMLMsg;
@@ -111,6 +112,7 @@ function DendronVSCodeApp({ Component }: { Component: DendronComponent }) {
           msg: `onUpdatePreviewHTML:post`,
         });
         break;
+      }
       case LookupViewMessageEnum.onUpdate:
         logger.info({ ctx, msg: "refreshLookup:pre" });
         ideDispatch(ideSlice.actions.refreshLookup(msg.data.payload));

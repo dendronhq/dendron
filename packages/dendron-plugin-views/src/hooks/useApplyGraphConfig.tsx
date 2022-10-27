@@ -113,14 +113,16 @@ const useApplyGraphConfig = ({
         const trimmedInput = input.trim();
         if (trimmedInput === "") return acc;
 
-        return (acc += `${prefix}[fname *= "${trimmedInput}"], [vault *= "${trimmedInput}"], [label *= "${trimmedInput}"]`);
+        acc += `${prefix}[fname *= "${trimmedInput}"], [vault *= "${trimmedInput}"], [label *= "${trimmedInput}"]`;
+        return acc;
       }, "");
 
       const excludedInput = regexItemInputs.reduce((acc, input, i) => {
         const trimmedInput = input.trim();
         if (trimmedInput === "") return acc;
 
-        return (acc += `[fname !*= "${trimmedInput}"][vault !*= "${trimmedInput}"][label !*= "${trimmedInput}"]`);
+        acc += `[fname !*= "${trimmedInput}"][vault !*= "${trimmedInput}"][label !*= "${trimmedInput}"]`;
+        return acc;
       }, "");
 
       const matchingElements = graph.$(matchingInput);

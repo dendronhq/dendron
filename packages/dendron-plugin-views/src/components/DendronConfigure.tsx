@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "antd/dist/antd.css";
 import {
   Layout,
@@ -34,9 +34,9 @@ const DendronConfigure: DendronComponent = ({ engine }: DendronProps) => {
 
   useEffect(() => {
     setConfig(engine.config);
-    Object.keys(dendronConfig).forEach(
-      (key) => (dendronConfig[key].default = _.get(engine.config, key))
-    );
+    Object.keys(dendronConfig).forEach((key) => {
+      dendronConfig[key].default = _.get(engine.config, key);
+    });
   }, [engine.config]);
 
   useConfig({ opts: workspace });

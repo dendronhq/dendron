@@ -2,7 +2,6 @@ import { NotePropsMeta } from "@dendronhq/common-all";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { LinkType } from "./LinksTable";
 import {
   getIntegerString,
   getJSONString,
@@ -59,7 +58,8 @@ CREATE TABLE IF NOT EXISTS NoteProps (
 );`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS NoteProps (
   static getById(db: Database, id: string): Promise<NotePropsTableRow> {
     const sql = `SELECT * FROM NoteProps WHERE id = '${id}'`;
 
-    return new Promise<NotePropsTableRow>((resolve, reject) => {
+    return new Promise<NotePropsTableRow>((resolve, _reject) => {
       db.get(sql, (err, row) => {
         if (err) {
           // debugger;
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS NoteProps (
     const prom = new Promise<void>((resolve, reject) => {
       db.run(sql, (err) => {
         if (err) {
-          debugger;
+          // debugger;
           reject(err.message);
         } else {
           // debugger;

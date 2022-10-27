@@ -11,7 +11,7 @@ import {
   NotePropsMeta,
   RespV3,
 } from "@dendronhq/common-all";
-import _, { find } from "lodash";
+import _ from "lodash";
 import { Database } from "sqlite3";
 import {
   LinksTableRow,
@@ -28,8 +28,6 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   constructor(private _db: Database, private _vaults: DVault[]) {}
 
   async get(key: string): Promise<RespV3<NotePropsMeta>> {
-    // debugger;
-
     const props = await NotePropsTableUtils.getById(this._db, key);
 
     if (!props) {
@@ -93,7 +91,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   // TODO: If the query building requirements starts to get more complex, maybe
   // we can consider using a library such as knex.js https://knexjs.org/
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
-    debugger;
+    // debugger;
     // Special case: if no arguments are passed, return nothing.
     if (
       opts.excludeStub === undefined &&
@@ -130,9 +128,8 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
     ${_.join([fNameConditionalClause, excludeStubClause, vaultClause], " AND ")}
     `;
 
-    debugger;
     const links = await new Promise((resolve) => {
-      this._db.all(sql, (err, rows) => {
+      this._db.all(sql, (_err, rows) => {
         const props = Promise.all(
           rows.map(async (row) => {
             const resp = await this.get(row.id);
@@ -212,9 +209,9 @@ WHERE id = '${key}'
     const resp = new Promise<RespV3<string>>((resolve) => {
       this._db.run(deleteSQL, (err) => {
         if (err) {
-          resolve({
-            error: "Delete Failed",
-          });
+          // resolve({
+          //   error: "Delete Failed",
+          // });
         } else {
           resolve({
             data: key,
@@ -233,7 +230,7 @@ WHERE id = '${key}'
     WHERE source = '${key}' AND linkType = 1`;
 
     return new Promise((resolve) => {
-      this._db.all(childrenSql, (err, rows) => {
+      this._db.all(childrenSql, (_err, rows) => {
         // debugger;
 
         const children = rows.map((row) => row.sink) as DNodePointer[];
@@ -249,7 +246,7 @@ WHERE id = '${key}'
     where sink = '${key}' AND linkType = 1`;
 
     return new Promise((resolve) => {
-      this._db.get(parentSql, (err, row) => {
+      this._db.get(parentSql, (_err, row) => {
         if (row && row.source) {
           resolve(row.source);
         } else {

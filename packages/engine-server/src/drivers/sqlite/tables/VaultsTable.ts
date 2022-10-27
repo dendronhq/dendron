@@ -13,11 +13,16 @@ export class VaultsTableUtils {
       id INTEGER PRIMARY KEY,
       name TEXT,
       fsPath TEXT
-    )`;
+    )`; // TODO: UNIQUE INDEX On name, fsPath
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
+
+        if (_err) {
+          debugger;
+        }
         resolve();
       });
     });
@@ -31,7 +36,7 @@ WHERE fsPath = '${fsPath}'
 `;
 
     return new Promise((resolve) => {
-      db.get(sql, (err, row) => {
+      db.get(sql, (_err, row) => {
         // debugger;
 
         resolve(row.id);
@@ -48,7 +53,8 @@ VALUES (
 );`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });

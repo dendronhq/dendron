@@ -23,7 +23,8 @@ export class SchemaNotesTableUtils {
 );`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });

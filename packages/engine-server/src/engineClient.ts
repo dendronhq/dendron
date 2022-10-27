@@ -167,7 +167,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       };
     }
     if (!resp.data) {
-      throw new DendronError({ message: "no data" });
+      return {} as DEngineInitResp;
+      // throw new DendronError({ message: "no data" });
     }
     const { notes, config } = resp.data;
     this._config = config;

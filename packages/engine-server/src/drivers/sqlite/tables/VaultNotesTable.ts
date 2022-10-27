@@ -18,7 +18,8 @@ export class VaultNotesTableUtils {
     );`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });
@@ -34,7 +35,7 @@ export class VaultNotesTableUtils {
     JOIN Vaults ON Vaults.id = VaultNotes.vaultId
     WHERE noteId = '${noteId}';`;
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string>((resolve, _reject) => {
       db.get(sql, (err, row) => {
         if (err) {
           // debugger;
@@ -56,7 +57,8 @@ VALUES (
 );`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });
@@ -70,7 +72,8 @@ VALUES (
     `;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });

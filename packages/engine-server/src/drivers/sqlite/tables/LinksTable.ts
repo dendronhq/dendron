@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS Links (
 ) WITHOUT ROWID;`;
 
     return new Promise<void>((resolve) => {
-      db.run(sql, (err) => {
+      db.run(sql, (_err) => {
+        console.log(_err);
         // console.log(err);
         resolve();
       });
@@ -213,7 +214,8 @@ WHERE (source = '${sourceId}' OR sink = '${sourceId}') AND linkType != 1
 
       db.all(sql, (err, rows: LinksTableRow[]) => {
         if (err) {
-          // debugger;
+          console.log(err);
+          debugger;
           // TODO: reject error
         } else {
           rows

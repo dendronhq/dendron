@@ -1,15 +1,32 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, IFileStore } from "@dendronhq/common-all";
 import { Database } from "sqlite3";
+import { parseAllNoteFiles } from "../file";
 import { SqliteMetadataStore } from "./SqliteMetadataStore";
 import { LinksTableUtils } from "./tables/LinksTable";
 import { NotePropsTableUtils } from "./tables/NotePropsTable";
 import { SchemaNotesTableUtils } from "./tables/SchemaNotesTable";
 import { VaultNotesTableUtils } from "./tables/VaultNotesTable";
 import { VaultsTableUtils } from "./tables/VaultsTable";
+import { URI } from "vscode-uri";
+import { vault2Path } from "@dendronhq/common-server";
 
 export class SqliteFactory {
-  public static async init(dbname?: string) {
-    const _db = new Database(dbname ?? "dendron.test3.db");
+  public static async init(
+    wsRoot: string,
+    vaults: DVault[],
+    fileStore: IFileStore,
+    dbname?: string
+  ) {
+    const _db = await new Promise<Database>((resolve) => {
+      const db = new Database(dbname ?? "dendron.test3.db", (err) => {
+        if (err) {
+          debugger;
+          console.log(err);
+        }
+
+        resolve(db);
+      });
+    });
 
     // Create the relation-less tables first (vaults and NoteProps);
     await VaultsTableUtils.createTable(_db);
@@ -20,20 +37,46 @@ export class SqliteFactory {
     await VaultNotesTableUtils.createTable(_db);
     await SchemaNotesTableUtils.createTable(_db);
 
+    // await Promise.all(
+    //   vaults.map((vault) => {
+    //     return VaultsTableUtils.insert(_db, {
+    //       name: vault.name ?? "vault",
+    //       fsPath: vault.fsPath,
+    //     });
+    //   })
+    // );
+
+    debugger;
+    await Promise.all(
+      vaults.map(async (vault) => {
+        const vpath = vault2Path({ vault, wsRoot });
+        // Get list of files from filesystem
+        const maybeFiles = await fileStore.readDir({
+          root: URI.parse(vpath),
+          include: ["*.md"],
+        });
+
+        if (maybeFiles.error) {
+          //
+        }
+        return parseAllNoteFiles(maybeFiles.data!, vault, _db, vpath, {});
+      })
+    );
+
     return _db;
   }
 
-  static async createIndices(db: Database) {
-    db.run(
-      `CREATE INDEX IF NOT EXISTS idx_NoteProps_fname
-    ON NoteProps (fname);`,
-      (err) => {
-        if (!err) {
-          resolve();
-        }
-      }
-    );
-  }
+  // static async createIndices(db: Database) {
+  //   db.run(
+  //     `CREATE INDEX IF NOT EXISTS idx_NoteProps_fname
+  //   ON NoteProps (fname);`,
+  //     (err) => {
+  //       if (!err) {
+  //         resolve();
+  //       }
+  //     }
+  //   );
+  // }
 
   static initSync() {
     const _db = new Database("dendron.test3.db");
@@ -58,16 +101,16 @@ export class SqliteFactory {
   static async createMetadataStoreForTest(
     vaults: DVault[]
   ): Promise<SqliteMetadataStore> {
-    const db = await SqliteFactory.init(":memory:");
+    const db = await SqliteFactory.init(vaults, ":memory:");
 
-    await Promise.all(
-      vaults.map((vault) => {
-        return VaultsTableUtils.insert(db, {
-          name: vault.name ?? "vault",
-          fsPath: vault.fsPath,
-        });
-      })
-    );
+    // await Promise.all(
+    //   vaults.map((vault) => {
+    //     return VaultsTableUtils.insert(db, {
+    //       name: vault.name ?? "vault",
+    //       fsPath: vault.fsPath,
+    //     });
+    //   })
+    // );
 
     return new SqliteMetadataStore(db, vaults);
   }

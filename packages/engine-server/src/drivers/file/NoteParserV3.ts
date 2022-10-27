@@ -56,7 +56,6 @@ export async function parseAllNoteFiles(
   const dicts = NoteDictsUtils.createNoteDicts(allNotes);
   const domains = allNotes.filter((note) => !note.fname.includes("."));
 
-  debugger;
   domains.map((domain) => {
     SchemaUtils.matchDomain(domain, dicts.notesById, schemas);
   });
@@ -209,47 +208,4 @@ async function bulkProcessOtherLinks(
   // });
 
   // return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, dataArray);
-}
-
-// Old, unoptimized:
-async function processLinks(
-  note: NoteProps,
-  db: Database,
-  config: DendronConfig
-) {
-  // Add Children to Links Table
-  // TODO: Bulk insert
-
-  // const potentialParentName = note.fname.split(".").slice(0, -1).join(".");
-
-  // Insert the parent relationship for the individual note. If the parent
-  // doesn't exist, that's ok, we can fail silently.
-  // await LinksTableUtils.insertLinkWithSourceAsFname(
-  //   db,
-  //   note.id,
-  //   potentialParentName,
-  //   "child",
-  //   undefined
-  // );
-
-  const links = LinkUtils.findLinksFromBody({ note, config });
-  // Add Forward Links
-  await Promise.all(
-    links.map((link) => {
-      if (
-        link.type === "ref" ||
-        link.type === "frontmatterTag" ||
-        link.type === "wiki" ||
-        link.type === "md"
-      ) {
-        return LinksTableUtils.insertLinkWithSinkAsFname(
-          db,
-          note.id,
-          link.to!.fname!, // TODO - don't run if null
-          link.type,
-          link
-        );
-      }
-    })
-  );
 }

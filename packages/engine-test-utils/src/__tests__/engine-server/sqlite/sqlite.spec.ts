@@ -15,8 +15,9 @@ describe("GIVEN sqlite store", () => {
 
   test("WHEN playground THEN nothing is verified", async () => {
     // const factory = new SqliteFactory();
-    const db = await SqliteFactory.init();
+    const db = await SqliteFactory.init([]);
 
+    debugger;
     await new Promise<void>((resolve) => {
       db.run("PRAGMA foreign_keys = ON", (err) => {
         if (!err) {

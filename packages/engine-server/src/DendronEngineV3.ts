@@ -92,7 +92,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-import { SqliteFactory } from "./drivers";
+import { SqliteFactory, SqliteMetadataStore } from "./drivers";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
 import { NodeJSFileStore } from "./store";
@@ -168,7 +168,13 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     });
   }
 
-  static create2({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
+  static async create2({
+    wsRoot,
+    logger,
+  }: {
+    logger?: DLogger;
+    wsRoot: string;
+  }) {
     const LOGGER = logger || createLogger();
     const { error, data: config } =
       DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
@@ -179,7 +185,16 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const queryStore = new FuseQueryStore();
     const fileStore = new NodeJSFileStore();
 
-    const sqliteMetadataStore = SqliteFactory.createMetadataStore();
+    const vaults = ConfigUtils.getVaults(config);
+    const sqliteDb = await SqliteFactory.init(
+      wsRoot,
+      ConfigUtils.getVaults(config),
+      fileStore,
+      "/Users/jyeung/code/dendron/dendron/dendron.test.plugin.db"
+      // ":memory:"
+      // "dendron.test-plugin.db"
+    );
+    const sqliteMetadataStore = new SqliteMetadataStore(sqliteDb, vaults);
 
     return new DendronEngineV3({
       wsRoot,

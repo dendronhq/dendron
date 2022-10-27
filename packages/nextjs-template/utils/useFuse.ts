@@ -5,7 +5,6 @@ import {
   FuseNoteIndex,
   NotePropsByIdDict,
   ConfigUtils,
-  genDefaultLookupConfig,
 } from "@dendronhq/common-all";
 import { fetchFuseIndex } from "./fetchers";
 import { useEffect, useState } from "react";
@@ -29,7 +28,9 @@ function useFuse(
   const [loading, setLoading] = useState<boolean>(false);
   const [fuse, setFuse] = useState<FuseNote>();
   const dendronConfig = useDendronConfig();
-  const fuzzThreshold = dendronConfig ? ConfigUtils.getLookup(dendronConfig).note.fuzzThreshold : 0.6;
+  const fuzzThreshold = dendronConfig
+    ? ConfigUtils.getLookup(dendronConfig).note.fuzzThreshold
+    : 0.6;
 
   useEffect(() => {
     if (_.isUndefined(fuse)) {

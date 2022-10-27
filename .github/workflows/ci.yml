@@ -91,6 +91,10 @@ jobs:
         run: yarn bootstrap:buildCI
         shell: bash
 
+      - name: Typecheck
+        run: yarn lerna:typecheck
+        shell: bash
+
       - name: Start Xvfb
         if: runner.os == 'Linux'
         run: |

@@ -301,7 +301,7 @@ export const DENDRON_MENUS = {
     },
     {
       when: "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
-      command: "dendron.vaultRemove",
+      command: "dendron.removeVault",
       group: "2_workspace",
     },
     {
@@ -767,14 +767,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Vault Add`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_REMOVE: {
-    key: "dendron.vaultRemove",
-    title: `${CMD_PREFIX} Vault Remove`,
+  REMOVE_VAULT: {
+    key: "dendron.removeVault",
+    title: `${CMD_PREFIX} Remove Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_CONVERT: {
-    key: "dendron.vaultConvert",
-    title: `${CMD_PREFIX} Vault Convert`,
+  CONVERT_VAULT: {
+    key: "dendron.convertVault",
+    title: `${CMD_PREFIX} Convert Vault`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
+  CREATE_NEW_VAULT: {
+    key: "dendron.createNewVault",
+    title: `${CMD_PREFIX} Create New Vault`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
+  ADD_EXISTING_VAULT: {
+    key: "dendron.addExistingVault",
+    title: `${CMD_PREFIX} Add Existing Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INIT_WS: {

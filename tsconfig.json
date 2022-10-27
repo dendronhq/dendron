@@ -1,9 +1,41 @@
 {
   "extends": "./tsconfig.build.json",
-  "include": ["./packages"],
   "compilerOptions": {
     "baseUrl": ".",
     "strict": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "paths": {
+      //"@dendronhq/*": ["packages/*/src"],
+      "@dendronhq/api-server": [
+        "packages/api-server/src"
+      ],
+      "@dendronhq/common-all": [
+        "packages/common-all/src"
+      ],
+      "@dendronhq/unified": [
+        "packages/unified/src"
+      ],
+      "@dendronhq/common-server": [
+        "packages/common-server/src"
+      ],
+      "@dendronhq/common-test-utils": [
+        "packages/common-test-utils/src"
+      ],
+      "@dendronhq/engine-test-utils": [
+        "packages/engine-test-utils/src"
+      ],
+      "@dendronhq/dendron-cli": [
+        "packages/dendron-cli/src"
+      ],
+      "@dendronhq/engine-server": [
+        "packages/engine-server/src"
+      ],
+      "@dendronhq/plugin-core": [
+        "packages/plugin-core/src"
+      ],
+      "@dendronhq/pods-core": [
+        "packages/pods-core/src"
+      ]
+    }
   }
 }

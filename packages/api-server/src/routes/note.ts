@@ -15,6 +15,12 @@ import {
   FindNoteOpts,
   APIRequest,
   FindNotesMetaResp,
+  GetNoteResp,
+  EngineGetNoteRequest,
+  GetNoteMetaResp,
+  BulkGetNoteResp,
+  EngineBulkGetNoteRequest,
+  BulkGetNoteMetaResp,
 } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -23,6 +29,42 @@ import { NoteController } from "../modules/notes";
 import { getWSEngine } from "../utils";
 
 const router = Router();
+
+router.get(
+  "/get",
+  asyncHandler(async (req: Request, res: Response<GetNoteResp>) => {
+    const { id, ws } = req.query as unknown as EngineGetNoteRequest;
+    const engine = await getWSEngine({ ws: ws || "" });
+    ExpressUtils.setResponse(res, await engine.getNote(id));
+  })
+);
+
+router.get(
+  "/getMeta",
+  asyncHandler(async (req: Request, res: Response<GetNoteMetaResp>) => {
+    const { id, ws } = req.query as unknown as EngineGetNoteRequest;
+    const engine = await getWSEngine({ ws: ws || "" });
+    ExpressUtils.setResponse(res, await engine.getNoteMeta(id));
+  })
+);
+
+router.get(
+  "/bulkGet",
+  asyncHandler(async (req: Request, res: Response<BulkGetNoteResp>) => {
+    const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
+    const engine = await getWSEngine({ ws: ws || "" });
+    ExpressUtils.setResponse(res, await engine.bulkGetNotes(ids));
+  })
+);
+
+router.get(
+  "/bulkGetMeta",
+  asyncHandler(async (req: Request, res: Response<BulkGetNoteMetaResp>) => {
+    const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
+    const engine = await getWSEngine({ ws: ws || "" });
+    ExpressUtils.setResponse(res, await engine.bulkGetNotesMeta(ids));
+  })
+);
 
 router.post(
   "/delete",

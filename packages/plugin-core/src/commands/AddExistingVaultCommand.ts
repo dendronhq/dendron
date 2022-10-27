@@ -160,7 +160,7 @@ export class AddExistingVaultCommand extends BasicCommand<
 
   async gatherDestinationFolder() {
     const defaultUri = Uri.file(this._ext.getDWorkspace().wsRoot);
-    // Prompt user where to create new vault
+    // opens the workspace root by default and prompts user to select vault
     const options: OpenDialogOptions = {
       canSelectMany: false,
       openLabel: "Select vault to add",

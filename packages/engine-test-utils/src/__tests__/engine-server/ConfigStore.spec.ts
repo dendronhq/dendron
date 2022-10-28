@@ -19,7 +19,7 @@ describe("ConfigStore", () => {
   let fileStore: IFileStore;
   describe("GIVEN NodeJSFileStore", () => {
     fileStore = new NodeJSFileStore();
-    test("WHEN create, then create new config and persist", async () => {
+    test("WHEN createConfig, then create new config and persist", async () => {
       const homeDir = tmpDir().name;
       const wsRoot = tmpDir().name;
       const configStore = new ConfigStore(
@@ -28,7 +28,7 @@ describe("ConfigStore", () => {
         URI.parse(homeDir)
       );
 
-      const createResult = await configStore.create();
+      const createResult = await configStore.createConfig();
       expect(createResult.isOk()).toBeTruthy();
       const config = createResult._unsafeUnwrap();
       expect(config).toMatchSnapshot();
@@ -44,9 +44,12 @@ describe("ConfigStore", () => {
         const wsRoot = tmpDir().name;
 
         // remove some configs initially
-        const initialConfig = ConfigUtils.genDefaultConfig();
-        ConfigUtils.unsetProp(initialConfig, "preview");
-        ConfigUtils.unsetProp(initialConfig, "commands");
+        let initialConfig: DeepPartial<DendronConfig> =
+          ConfigUtils.genDefaultConfig();
+        initialConfig = {
+          ...initialConfig,
+          preview: {},
+        };
 
         const configPath = path.join(wsRoot, "dendron.yml");
         ensureFileSync(configPath);
@@ -69,9 +72,12 @@ describe("ConfigStore", () => {
         const wsRoot = tmpDir().name;
 
         // remove some configs initially
-        const initialConfig = ConfigUtils.genDefaultConfig();
-        ConfigUtils.unsetProp(initialConfig, "preview");
-        ConfigUtils.unsetProp(initialConfig, "commands");
+        let initialConfig: DeepPartial<DendronConfig> =
+          ConfigUtils.genDefaultConfig();
+        initialConfig = {
+          ...initialConfig,
+          preview: {},
+        };
 
         const configPath = path.join(wsRoot, "dendron.yml");
         ensureFileSync(configPath);
@@ -209,7 +215,7 @@ describe("ConfigStore", () => {
           URI.parse(homeDir)
         );
 
-        await configStore.create();
+        await configStore.createConfig();
 
         const defaultConfig = ConfigUtils.genDefaultConfig();
         const diff: LookupConfig = {
@@ -334,7 +340,7 @@ describe("ConfigStore", () => {
           URI.parse(homeDir)
         );
 
-        const createResult = await configStore.create();
+        const createResult = await configStore.createConfig();
 
         const defaultConfig = createResult._unsafeUnwrap();
 
@@ -354,7 +360,7 @@ describe("ConfigStore", () => {
           URI.parse(homeDir)
         );
 
-        await configStore.create();
+        await configStore.createConfig();
 
         const getResult = await configStore.get("commands", {
           mode: "default",
@@ -381,7 +387,7 @@ describe("ConfigStore", () => {
           URI.parse(homeDir)
         );
 
-        await configStore.create();
+        await configStore.createConfig();
 
         const workspaceOverridePayload = {
           workspace: {
@@ -422,7 +428,7 @@ describe("ConfigStore", () => {
         URI.parse(homeDir)
       );
 
-      await configStore.create();
+      await configStore.createConfig();
 
       const updateResult = await configStore.update(
         "commands.lookup.note.fuzzThreshold",
@@ -446,7 +452,7 @@ describe("ConfigStore", () => {
         URI.parse(homeDir)
       );
 
-      await configStore.create();
+      await configStore.createConfig();
 
       const deleteResult = await configStore.delete(
         "commands.lookup.note.fuzzThreshold"

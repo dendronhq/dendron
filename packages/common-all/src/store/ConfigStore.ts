@@ -6,9 +6,10 @@ import { IFileStore } from "./IFileStore";
 import { CONSTANTS, StatusCodes } from "../constants";
 import { ConfigUtils, DeepPartial } from "../utils";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
-import { fromStr, toStr } from "../yaml";
+import * as YamlUtils from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
-import _ from "lodash";
+import _, { over } from "lodash";
+import { ResultUtils } from "../ResultUtils";
 
 export class ConfigStore implements IConfigStore {
   private _fileStore: IFileStore;
@@ -26,60 +27,27 @@ export class ConfigStore implements IConfigStore {
     this._homeDir = homeDir;
   }
 
-  create(
+  createConfig(
     defaults?: DeepPartial<DendronConfig>
   ): ResultAsync<DendronConfig, IDendronError> {
     const config: DendronConfig = ConfigUtils.genLatestConfig(defaults);
 
-    const configDumpResult = toStr(config);
-    if (configDumpResult.isErr()) {
-      return errAsync(configDumpResult.error);
-    }
-
-    const configDump = configDumpResult.value;
-    return ResultAsync.fromPromise(
-      Promise.resolve(
-        this._fileStore.write(this.path, configDump).then((resp) => {
-          // TODO: remove throws and chain results instead.
-          // until IFileStore methods are changed to use neverthrow
-          // instead of RespV3, we need to manually throw here
-          // in order for this ResultAsync to properly handle it
-          if (resp.error) {
-            throw resp.error;
-          }
-          return config;
-        })
-      ),
-      (err) => err as DendronError
-    );
+    return YamlUtils.toStr(config)
+      .asyncAndThen((configDump) =>
+        ResultUtils.PromiseRespV3ToResultAsync(
+          this._fileStore.write(this.path, configDump)
+        )
+      )
+      .map(() => config);
   }
 
-  readRaw(): ResultAsync<
-    DeepPartial<DendronConfig>,
-    IDendronError<StatusCodes | undefined>
-  > {
-    return ResultAsync.fromPromise(
-      Promise.resolve(
-        this._fileStore.read(this.path).then((resp) => {
-          // TODO: remove throws and chain results instead.
-          // until IFileStore methods are changed to use neverthrow
-          // instead of RespV3, we need to manually throw here
-          // in order for this ResultAsync to properly handle it
-          if (resp.error) {
-            throw resp.error;
-          }
-
-          const readPayload = resp.data;
-
-          const configLoadResult = fromStr(readPayload);
-          if (configLoadResult.isErr()) {
-            throw configLoadResult.error;
-          }
-          return configLoadResult.value as DeepPartial<DendronConfig>;
-        })
-      ),
-      (err) => err as DendronError
-    );
+  readRaw(): ResultAsync<DeepPartial<DendronConfig>, IDendronError> {
+    const result = ResultUtils.PromiseRespV3ToResultAsync(
+      this._fileStore.read(this.path)
+    )
+      .andThen(YamlUtils.fromStr)
+      .andThen(ConfigUtils.parsePartial);
+    return result;
   }
 
   read(
@@ -92,36 +60,27 @@ export class ConfigStore implements IConfigStore {
       }
       return this.readWithDefaults();
     } else {
-      const readResult = this.readWithDefaults();
-      return readResult.andThen<
-        DendronConfig,
-        IDendronError<StatusCodes | undefined>
-      >((config) => {
-        return ResultAsync.fromPromise(
-          Promise.resolve(
-            this.searchOverride().then((res) => {
-              // TODO: move validateConfig logic from common-server to common-all and add it here.
-              if (res.isOk()) {
-                const override = res.value;
-                _.mergeWith(
-                  config,
-                  override,
-                  (objValue: any, srcValue: any) => {
-                    if (_.isArray(objValue)) {
-                      return srcValue.concat(objValue);
-                    }
-                    return;
-                  }
-                );
-                return config;
-              } else {
-                throw res.error;
-              }
-            })
-          ),
-          (err) => err as DendronError
-        );
-      });
+      return this.searchOverride()
+        .map((override) => {
+          if (override.workspace) {
+            if (
+              _.isEmpty(override.workspace) ||
+              (override.workspace.vaults &&
+                !_.isArray(override.workspace.vaults))
+            ) {
+              return errAsync(
+                new DendronError({
+                  message:
+                    "workspace must not be empty and vaults must be an array if workspace is set",
+                })
+              );
+            }
+          }
+          return this.readWithDefaults().map((config) =>
+            ConfigUtils.mergeConfig(config, override)
+          );
+        })
+        .andThen((inner) => inner);
     }
   }
 
@@ -140,22 +99,14 @@ export class ConfigStore implements IConfigStore {
   }
 
   private readOverride(path: URI) {
-    return this._fileStore.read(path).then((resp) => {
-      if (resp.data) {
-        const loadResult = fromStr(resp.data);
-        if (loadResult.isErr()) {
-          throw loadResult.error;
-        }
-        return loadResult.value as DeepPartial<DendronConfig>;
-      } else {
-        return undefined;
-      }
-    });
+    return ResultUtils.PromiseRespV3ToResultAsync(
+      this._fileStore.read(path)
+    ).andThen(YamlUtils.fromStr);
   }
 
   private searchOverride(): ResultAsync<
     DeepPartial<DendronConfig>,
-    IDendronError<StatusCodes | undefined>
+    IDendronError
   > {
     const workspaceOverridePath = Utils.joinPath(
       this._wsRoot,
@@ -164,10 +115,10 @@ export class ConfigStore implements IConfigStore {
 
     return ResultAsync.fromPromise(
       Promise.resolve(
-        this.readOverride(workspaceOverridePath).then((override) => {
-          if (override) {
+        this.readOverride(workspaceOverridePath).then((res) => {
+          if (res.isOk()) {
             // override found in workspace.
-            return override as DeepPartial<DendronConfig>;
+            return res.value as DeepPartial<DendronConfig>;
           } else if (this._homeDir) {
             // try finding it globally
             const globalOverridePath = Utils.joinPath(
@@ -175,17 +126,17 @@ export class ConfigStore implements IConfigStore {
               CONSTANTS.DENDRON_LOCAL_CONFIG_FILE
             );
             return Promise.resolve(
-              this.readOverride(globalOverridePath).then((override) => {
-                if (override) {
+              this.readOverride(globalOverridePath).then((res) => {
+                if (res.isOk()) {
                   // found it in global
-                  return override as DeepPartial<DendronConfig>;
+                  return res.value as DeepPartial<DendronConfig>;
                 } else {
-                  throw new DendronError({ message: "not found" });
+                  throw new DendronError({ message: "override not found" });
                 }
               })
             );
           } else {
-            throw new DendronError({ message: "not found" });
+            throw new DendronError({ message: "override not found" });
           }
         })
       ),
@@ -204,12 +155,13 @@ export class ConfigStore implements IConfigStore {
 
     return ResultAsync.fromPromise(
       Promise.resolve(
-        searchOverrideResult.then((override) => {
-          const payloadDumpResult = toStr(payload);
+        searchOverrideResult.then((res) => {
+          const payloadDumpResult = YamlUtils.toStr(payload);
           if (payloadDumpResult.isErr()) {
             throw payloadDumpResult.error;
           }
-          if (override.isErr()) {
+
+          if (res.isErr()) {
             return Promise.resolve(
               this._fileStore
                 .write(this.path, payloadDumpResult.value)
@@ -225,8 +177,7 @@ export class ConfigStore implements IConfigStore {
             // currently we only allow override of workspace.vaults
             // if we extend `dendronrc.yml` to accept arbitrary config keys,
             // we need to find the deep-difference here
-            const vaultsFromOverride = override.value.workspace
-              ?.vaults as DVault[];
+            const vaultsFromOverride = res.value.workspace?.vaults as DVault[];
             const payloadDifference: DendronConfig = {
               ...payload,
               workspace: {
@@ -239,7 +190,8 @@ export class ConfigStore implements IConfigStore {
               },
             };
 
-            const payloadDifferenceDumpResult = toStr(payloadDifference);
+            const payloadDifferenceDumpResult =
+              YamlUtils.toStr(payloadDifference);
             if (payloadDifferenceDumpResult.isErr()) {
               throw payloadDifferenceDumpResult.error;
             }
@@ -266,71 +218,36 @@ export class ConfigStore implements IConfigStore {
     key: string,
     opts: ConfigReadOpts
   ): ResultAsync<DendronConfigValue, IDendronError<StatusCodes | undefined>> {
-    return ResultAsync.fromPromise(
-      Promise.resolve(
-        this.read(opts).then((res) => {
-          if (res.isOk()) {
-            return _.get(res.value, key);
-          }
-          throw res.error;
-        })
-      ),
-      (err) => err as DendronError
-    );
+    return this.read(opts).map((config) => _.get(config, key));
   }
 
   update(
     key: string,
     value: DendronConfigValue
-  ): ResultAsync<
-    DendronConfigValue | undefined,
-    IDendronError<StatusCodes | undefined>
-  > {
-    return ResultAsync.fromPromise(
-      this.read({ mode: "default" }).then((res) => {
-        if (res.isOk()) {
-          const config = res.value;
-          const prevValue = _.get(config, key);
-          const updatedConfig = _.set(config, key, value);
-          return Promise.resolve(
-            this.write(updatedConfig).then((res) => {
-              if (res.isOk()) {
-                return prevValue;
-              }
-              throw res.error;
-            })
-          );
-        }
-        throw res.error;
-      }),
-      (err) => err as DendronError
-    );
+  ): ResultAsync<DendronConfigValue, IDendronError<StatusCodes | undefined>> {
+    return this.read({ mode: "default" })
+      .map((config) => {
+        const prevValue = _.get(config, key);
+        const updatedConfig = _.set(config, key, value);
+        return this.write(updatedConfig).map(() => prevValue);
+      })
+      .andThen((inner) => inner);
   }
 
   delete(
     key: string
-  ): ResultAsync<
-    DendronConfigValue | undefined,
-    IDendronError<StatusCodes | undefined>
-  > {
-    return ResultAsync.fromPromise(
-      this.read({ mode: "default" }).then((res) => {
-        if (res.isOk()) {
-          const config = res.value;
-          const prevValue = _.get(config, key);
-          _.unset(config, key);
-          return Promise.resolve(
-            this.write(config).then((res) => {
-              if (res.isOk()) {
-                return prevValue;
-              }
-              throw res.error;
-            })
+  ): ResultAsync<DendronConfigValue, IDendronError<StatusCodes | undefined>> {
+    return this.read({ mode: "default" })
+      .map((config) => {
+        const prevValue = _.get(config, key);
+        if (prevValue === undefined) {
+          return errAsync(
+            new DendronError({ message: `${key} does not exist` })
           );
         }
-        throw res.error;
-      }),
-      (err) => err as DendronError
-    );
+        _.unset(config, key);
+        return this.write(config).map(() => prevValue);
+      })
+      .andThen((inner) => inner);
   }
 }

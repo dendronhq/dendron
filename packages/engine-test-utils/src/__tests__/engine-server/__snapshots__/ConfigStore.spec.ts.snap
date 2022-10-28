@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConfigStore GIVEN NodeJSFileStore WHEN create, then create new config and persist 1`] = `
+exports[`ConfigStore GIVEN NodeJSFileStore WHEN createConfig, then create new config and persist 1`] = `
 Object {
   "commands": Object {
     "copyNoteLink": Object {

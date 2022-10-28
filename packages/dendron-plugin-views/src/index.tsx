@@ -1,3 +1,5 @@
+/* eslint-disable no-console, global-require, import/no-dynamic-require  */
+
 import { renderOnDOM } from "./bootstrap";
 // const VIEW_NAME = process.env["REACT_APP_VIEW_NAME"] || "";
 const VALID_NAMES = [

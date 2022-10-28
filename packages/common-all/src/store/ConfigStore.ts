@@ -8,7 +8,7 @@ import { ConfigUtils, DeepPartial } from "../utils";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
 import * as YamlUtils from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
-import _, { over } from "lodash";
+import _ from "lodash";
 import { ResultUtils } from "../ResultUtils";
 
 export class ConfigStore implements IConfigStore {

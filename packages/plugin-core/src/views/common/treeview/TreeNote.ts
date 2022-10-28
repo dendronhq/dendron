@@ -8,6 +8,7 @@ import {
 import _ from "lodash";
 import vscode, { Uri } from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { DENDRON_COMMANDS } from "../../../constants";
 
 /**
  * Contains {@link NoteProps} representing a single Tree Item inside the
@@ -67,10 +68,18 @@ export class TreeNote extends vscode.TreeItem {
     // TODO: Need to replace with go-to note if we want parity with local ext.
     // This will not create a new note right now if you click on a 'stub' but
     // will show an error page
-    this.command = {
-      command: "vscode.open",
-      title: "",
-      arguments: [this.uri],
-    };
+    if (note.stub) {
+      this.command = {
+        command: DENDRON_COMMANDS.TREEVIEW_EXPAND_STUB.key,
+        title: "",
+        arguments: [this.note.id],
+      };
+    } else {
+      this.command = {
+        command: "vscode.open",
+        title: "",
+        arguments: [this.uri],
+      };
+    }
   }
 }

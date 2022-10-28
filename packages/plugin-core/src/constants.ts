@@ -172,9 +172,9 @@ type CommandEntry = {
 
 const CMD_PREFIX = "Dendron:";
 export const ICONS = {
-  STUB: "gist-new",
   LINK_CANDIDATE: "debug-disconnect",
   WIKILINK: "link",
+  SCHEMA: "repo",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 
@@ -353,6 +353,11 @@ export const DENDRON_MENUS = {
       command: "dendron.createNote",
       when: "view == dendron.treeView && shellExecutionSupported",
     },
+    {
+      command: "dendron.treeView.gotoNote",
+      when: "view == dendron.treeView && viewItem == stub && shellExecutionSupported",
+      group: "inline",
+    },
   ],
 };
 
@@ -400,6 +405,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.treeView.createNote",
     title: "Create Note",
     icon: "$(new-file)",
+    when: "false",
+  },
+  TREEVIEW_EXPAND_STUB: {
+    key: "dendron.treeView.expandStub",
+    title: `${CMD_PREFIX} Dev: Expand Stub`,
+    when: "false",
+  },
+  TREEVIEW_GOTO_NOTE: {
+    key: "dendron.treeView.gotoNote",
+    title: `Create Note`, // will appear in the tooltip
+    icon: "$(gist-new)",
+    when: "false",
   },
   // graph panel buttons
   GRAPH_PANEL_INCREASE_DEPTH: {

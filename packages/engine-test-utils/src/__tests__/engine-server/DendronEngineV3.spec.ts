@@ -10,23 +10,12 @@ import _ from "lodash";
 import path from "path";
 import { createEngineV3FromEngine, runEngineTestV5 } from "../../engine";
 import {
-  getPreset,
   ENGINE_HOOKS,
   ENGINE_PRESETS,
   ENGINE_PRESETS_MULTI,
 } from "../../presets";
 
 const createEngine = createEngineV3FromEngine;
-test.skip("bond", async () => {
-  const preset = getPreset({
-    key: "NEW_DOMAIN_WITH_FULL_PATH_VAULT",
-    nodeType: "SCHEMAS",
-    presetName: "write",
-    presets: ENGINE_PRESETS_MULTI,
-  });
-  const { testFunc, ...opts } = preset;
-  await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
-});
 
 describe("engine, notes/", () => {
   const nodeType = "NOTES";

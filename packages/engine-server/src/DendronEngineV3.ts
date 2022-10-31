@@ -837,11 +837,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     // If provided, we render the given note entirely. Otherwise find the note in workspace.
     if (!note) {
       note = (await this.getNote(id)).data;
-    } else {
-      // `procRehype` needs the note to be in the engine, so we have to add it in case it's a dummy note
-      await this.writeNote(note, { metaOnly: true });
     }
-
     // If note was not provided and we couldn't find it, we can't render.
     if (!note) {
       return {

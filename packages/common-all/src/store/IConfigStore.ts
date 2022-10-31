@@ -1,4 +1,4 @@
-import { ResultAsync } from "neverthrow";
+import { Result } from "neverthrow";
 import { IDendronError } from "../error";
 import { DendronConfig, DendronConfigValue } from "../types";
 import { DeepPartial } from "../utils";
@@ -20,16 +20,16 @@ export interface IConfigStore {
    */
   createConfig(
     defaults?: DeepPartial<DendronConfig>
-  ): ResultAsync<DendronConfig, IDendronError>;
+  ): Promise<Result<DendronConfig, IDendronError>>;
   /**
    * Read the entire dendron config
    */
-  readRaw(): ResultAsync<DeepPartial<DendronConfig>, IDendronError>;
-  read(opts: ConfigReadOpts): ResultAsync<DendronConfig, IDendronError>;
+  readRaw(): Promise<Result<DeepPartial<DendronConfig>, IDendronError>>;
+  read(opts: ConfigReadOpts): Promise<Result<DendronConfig, IDendronError>>;
   /**
    * Given a dendron config, update the persistent dendron config with the given payload
    */
-  write(payload: DendronConfig): ResultAsync<DendronConfig, IDendronError>;
+  write(payload: DendronConfig): Promise<Result<DendronConfig, IDendronError>>;
 
   // individual keys
   /**
@@ -39,7 +39,7 @@ export interface IConfigStore {
   get(
     key: string,
     opts: ConfigReadOpts
-  ): ResultAsync<DendronConfigValue, IDendronError>;
+  ): Promise<Result<DendronConfigValue, IDendronError>>;
   /**
    * Given a property path, update the config entry value with given value in the persistent dendron config
    * e.g.) update("commands.lookup.note.fuzzThreshold", 1) will update the fuzzThreshold to 1
@@ -48,11 +48,11 @@ export interface IConfigStore {
   update(
     key: string,
     value: DendronConfigValue
-  ): ResultAsync<DendronConfigValue, IDendronError>;
+  ): Promise<Result<DendronConfigValue, IDendronError>>;
   /**
    * Given a property path, delete the config entry in the persistent dendron config
    * e.g.) delete("commands.lookup.note.fuzzThreshold") will unset the property fuzzThreshold
    * returns previous value
    */
-  delete(key: string): ResultAsync<DendronConfigValue, IDendronError>;
+  delete(key: string): Promise<Result<DendronConfigValue, IDendronError>>;
 }

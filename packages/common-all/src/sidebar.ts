@@ -178,7 +178,7 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
         const isCategory = hasChildren;
         const isNote = !hasChildren;
 
-        if (!note || fm.nav_exclude) {
+        if (!note) {
           return undefined;
         }
 
@@ -198,12 +198,10 @@ const defaultSidebarItemsGenerator: SidebarItemsGenerator = ({
         }
 
         if (isCategory) {
-          const shouldIgnoreChildren =
-            fm.nav_exclude_children || fm.has_collection;
           return {
             type: "category",
             label: note.title,
-            items: shouldIgnoreChildren ? [] : generateSidebar(children),
+            items: generateSidebar(children),
             link: { type: "note", id: note.id },
             ...positionalProps,
           } as SidebarItemCategory;
@@ -355,7 +353,7 @@ export function parseSidebarConfig(
   input: unknown
 ): Result<SidebarConfig, IDendronError> {
   if (Array.isArray(input)) {
-    const x = input.map((maybeSidebarItem) => {
+    const resultList = input.map((maybeSidebarItem) => {
       const { type } = maybeSidebarItem;
       switch (type) {
         case "note":
@@ -388,7 +386,7 @@ export function parseSidebarConfig(
           );
       }
     });
-    return Result.combine(x);
+    return Result.combine(resultList);
   }
 
   return err(new DendronError({ message: "Sidebar object is not an array" }));

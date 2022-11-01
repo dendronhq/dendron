@@ -274,6 +274,10 @@ function treeMenuNode2DataNode({
 }): DataNode[] {
   return roots
     .map((node: TreeMenuNode) => {
+      if (node.exclude) {
+        return undefined;
+      }
+
       let icon;
       if (node.icon === "numberOutlined") {
         icon = <NumberOutlined />;
@@ -297,12 +301,13 @@ function treeMenuNode2DataNode({
         key: node.key,
         title,
         icon,
-        children: node.children
-          ? treeMenuNode2DataNode({
-              roots: node.children,
-              showVaultName,
-            })
-          : [],
+        children:
+          !node.excludeChildren && node.children
+            ? treeMenuNode2DataNode({
+                roots: node.children,
+                showVaultName,
+              })
+            : [],
       };
     })
     .filter(isNotUndefined);

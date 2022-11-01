@@ -25,11 +25,12 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
     return null;
   }
 
-  const noteIdPareents = TreeUtils.getAllParents({
+  const noteIdParents = TreeUtils.getAllParents({
     child2parent: tree?.child2parent ?? {},
     noteId: noteActive.id,
   }).concat(noteActive.id);
-  const noteParents = noteIdPareents.map((noteId) => props.notes[noteId]);
+
+  const noteParents = noteIdParents.map((noteId) => props.notes[noteId]);
 
   return (
     <Breadcrumb style={{ margin: "16px 0" }}>

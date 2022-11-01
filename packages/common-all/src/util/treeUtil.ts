@@ -3,6 +3,7 @@ import { z } from "../parse";
 import { DendronError } from "..";
 import { TAGS_HIERARCHY, TAGS_HIERARCHY_BASE } from "../constants";
 import { NotePropsByIdDict, NoteProps, RespV3 } from "../types";
+import { PublishUtils } from "../utils";
 import { VaultUtils } from "../vault";
 import { assertUnreachable } from "../error";
 import type { Sidebar, SidebarItem } from "../sidebar";
@@ -17,6 +18,8 @@ export type TreeMenuNode = {
   vaultName: string;
   children?: TreeMenuNode[];
   contextValue?: string;
+  excludeChildren?: boolean;
+  exclude?: boolean;
 };
 
 const treeMenuNodeSchema: z.ZodType<TreeMenuNode> = z.lazy(() =>
@@ -30,6 +33,8 @@ const treeMenuNodeSchema: z.ZodType<TreeMenuNode> = z.lazy(() =>
     vaultName: z.string(),
     children: z.array(treeMenuNodeSchema),
     contextValue: z.string().optional(),
+    excludeChildren: z.boolean().optional(),
+    exclude: z.boolean().optional(),
   })
 );
 
@@ -98,6 +103,11 @@ export class TreeUtils {
 
       notesLabelById[note.id] = title;
 
+      const fm = PublishUtils.getPublishFM(note);
+
+      const excludeChildren = fm.nav_exclude_children || fm.has_collection;
+      const exclude = fm.nav_exclude;
+
       const treeMenuNode: TreeMenuNode = {
         key: note.id,
         title,
@@ -105,6 +115,8 @@ export class TreeUtils {
         hasTitleNumberOutlined: note.fname.startsWith(TAGS_HIERARCHY),
         vaultName: VaultUtils.getName(note.vault),
         children: [],
+        excludeChildren,
+        exclude,
       };
 
       if (child2parent[note.id] === undefined) {

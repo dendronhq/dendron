@@ -1,6 +1,5 @@
 import {
   ERROR_STATUS,
-  NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
   URI,
@@ -8,28 +7,42 @@ import {
 import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { NodeJSFileStore, SqliteFactory } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
-import fs from "fs-extra";
 
 describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
   test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot, engine }) => {
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const engineNotes = await engine.findNotesMeta({ excludeStub: false });
-        engineNotes.forEach(async (noteMeta) => {
-          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
-        });
+        await Promise.all(
+          engineNotes.map(async (noteMeta) => {
+            const res = await noteStore.writeMetadata({
+              key: noteMeta.id,
+              noteMeta,
+            });
+
+            if (res.error) {
+              debugger;
+            }
+
+            return res;
+          })
+        );
 
         // Test NoteStore.find
         let findResp = await noteStore.find({ fname: "foo" });
@@ -52,6 +65,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
         findResp = await noteStore.find({ fname: "root" });
         expect(findResp.data!.length).toEqual(3);
         findResp = await noteStore.find({ fname: "root", vault: vaults[0] });
+        debugger;
         expect(findResp.data!.length).toEqual(1);
         note = findResp.data![0];
         expect(note.fname).toEqual("root");
@@ -111,13 +125,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
 
@@ -130,7 +147,12 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
 
         let note = await noteStore.get(newNote.id);
         expect(note.data).toBeFalsy();
-        await noteStore.write({ key: newNote.id, note: newNote });
+        const writeResult = await noteStore.write({
+          key: newNote.id,
+          note: newNote,
+        });
+
+        debugger;
 
         // Make sure note is written to filesystem
         const vpath = vault2Path({ vault, wsRoot });
@@ -138,6 +160,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
 
         // Test NoteStore.get
         note = await noteStore.get(newNote.id);
+        debugger;
         expect(note.data!.fname).toEqual(newNote.fname);
         expect(note.data!.body.trim()).toEqual(newNote.body.trim());
         expect(note.data!.contentHash).toBeTruthy();
@@ -157,13 +180,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -186,8 +212,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
         note = await noteStore.get(newNote.id);
         expect(note.data!.fname).toEqual(newNote.fname);
         expect(note.data!.body.trim()).toEqual(newNote.body.trim());
-        expect(note.data!.contentHash).toBeFalsy();
-        expect(newNote.data!.contentHash).toBeFalsy();
+        expect(note.data!.contentHash).toBeTruthy();
 
         // Test NoteStore.getMetadata
         const noteMetadata = await noteStore.getMetadata(newNote.id);
@@ -220,13 +245,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -259,13 +287,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -313,13 +344,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -364,13 +398,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -394,13 +431,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -411,7 +451,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
           noWrite: true,
         });
 
-        let noteMeta: NotePropsMeta = _.omit(newNote, ["body", "contentHash"]);
+        let noteMeta: NotePropsMeta = _.omit(newNote, ["body"]);
         let writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -426,7 +466,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
         expect(metadata.data!.fname).toEqual(newNote.fname);
 
         // Write same note
-        noteMeta = _.omit(newNote, ["body", "contentHash"]);
+        noteMeta = _.omit(newNote, ["body"]);
         writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -437,7 +477,7 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
 
         // Update note metadata and write
         newNote.color = "new color";
-        noteMeta = _.omit(newNote, ["body", "contentHash"]);
+        noteMeta = _.omit(newNote, ["body"]);
         writeResp = await noteStore.writeMetadata({
           key: newNote.id,
           noteMeta,
@@ -459,13 +499,16 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -523,20 +566,25 @@ describe("GIVEN NoteStore with SQLiteMetadataStore", () => {
   test("WHEN deleting a root note, THEN error should return and be CANT_DELETE_ROOT", async () => {
     await runEngineTestV5(
       async ({ wsRoot, engine, vaults }) => {
+        const fileStore = new NodeJSFileStore();
         const metadataStore = await SqliteFactory.createMetadataStoreForTest(
-          vaults
+          vaults,
+          fileStore,
+          wsRoot
         );
 
         const noteStore = new NoteStore(
-          new NodeJSFileStore(),
-          metadataStore, // new NoteMetadataStore(),
+          fileStore,
+          metadataStore,
           URI.file(wsRoot)
         );
 
         const engineNotes = await engine.findNotesMeta({ excludeStub: false });
-        engineNotes.forEach(async (noteMeta) => {
-          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
-        });
+        await Promise.all(
+          engineNotes.map((noteMeta) => {
+            return noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
+          })
+        );
 
         // Test NoteStore.get
         const resp = await noteStore.find({ fname: "root" });

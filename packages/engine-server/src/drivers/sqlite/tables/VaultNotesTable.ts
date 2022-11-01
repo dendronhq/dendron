@@ -1,82 +1,82 @@
+/* eslint-disable no-useless-constructor */
 /* eslint-disable no-empty-function */
 
+import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
+import { SqliteError } from "../SqliteError";
+import { executeSqlWithVoidResult } from "./SQLiteUtils";
 
 export class VaultNotesTableRow {
   constructor(public vaultId: number, public noteId: string) {}
 }
 
+/**
+ * Utilities for read/write on the VaultNotes Table in sqlite
+ */
 export class VaultNotesTableUtils {
-  static async createTable(db: Database) {
+  static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS VaultNotes (
       vaultId INTEGER,
       noteId TEXT,
       PRIMARY KEY (vaultId, noteId),
       FOREIGN KEY(vaultId) REFERENCES Vaults(id) ON DELETE CASCADE,
-      FOREIGN KEY(noteId) REFERENCES NoteProps(id) ON DELETE CASCADE
-    );`;
+      FOREIGN KEY(noteId) REFERENCES NoteProps(id) ON DELETE CASCADE);`;
 
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
-        resolve();
-      });
-    });
-
-    // TODO: Return error
+    // TODO: Create index on NoteId
+    return executeSqlWithVoidResult(db, sql);
   }
 
-  // TODO: Vault Not Found Error Handling
-  static getVaultFsPathForNoteId(db: Database, noteId: string) {
+  static getVaultFsPathForNoteId(
+    db: Database,
+    noteId: string
+  ): ResultAsync<string, SqliteError> {
     const sql = `
-    SELECT fsPath FROM VaultNotes
-    JOIN Vaults ON Vaults.id = VaultNotes.vaultId
-    WHERE noteId = '${noteId}';`;
+      SELECT fsPath FROM VaultNotes
+      JOIN Vaults ON Vaults.id = VaultNotes.vaultId
+      WHERE noteId = '${noteId}';`;
 
-    return new Promise<string>((resolve, _reject) => {
+    const prom = new Promise<string>((resolve, reject) => {
       db.get(sql, (err, row) => {
         if (err) {
-          // debugger;
-          // reject(err.message);
+          reject(err.message);
+        } else if (!row) {
+          reject(
+            new SqliteError(`No note or vault found for note with ID ${noteId}`)
+          );
         } else {
-          // debugger;
-          resolve(row?.fsPath ?? undefined);
+          resolve(row.fsPath);
         }
       });
     });
-  }
 
-  static insert(db: Database, row: VaultNotesTableRow) {
-    const sql = `
-INSERT INTO VaultNotes (vaultId, noteId)
-VALUES (
-  ${row.vaultId},
-  '${row.noteId}'
-);`;
-
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
-        resolve();
-      });
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
     });
   }
 
-  static deleteNote(db: Database, noteId: string) {
+  static insert(
+    db: Database,
+    row: VaultNotesTableRow
+  ): ResultAsync<void, SqliteError> {
     const sql = `
-    DELETE FROM VaultNotes
-    WHERE noteId = '${noteId}'
-    `;
+      INSERT INTO VaultNotes (vaultId, noteId)
+      VALUES (
+        ${row.vaultId},
+        '${row.noteId}'
+      );`;
 
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
-        resolve();
-      });
-    });
+    return executeSqlWithVoidResult(db, sql);
+  }
+
+  static delete(
+    db: Database,
+    row: VaultNotesTableRow
+  ): ResultAsync<void, SqliteError> {
+    const sql = `
+      DELETE FROM VaultNotes
+      WHERE vaultId = ${row.vaultId} AND noteId = '${row.noteId}';`;
+
+    return executeSqlWithVoidResult(db, sql);
   }
 }

@@ -25,25 +25,24 @@ export class WorkspaceController {
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });
 
-    const config = DConfig.readConfigSync(uri);
-    let engine;
+    // const config = DConfig.readConfigSync(uri);
+    // let engine;
     // if (config.dev?.enableEngineV3) {
-    if (false) {
-      engine = DendronEngineV3.create({
-        wsRoot: uri,
-        logger,
-      });
-    } else {
-      // engine = DendronEngineV2.create({
-      //   wsRoot: uri,
-      //   logger,
-      // });
+    //   engine = DendronEngineV3.create({
+    //     wsRoot: uri,
+    //     logger,
+    //   });
+    // } else {
+    // engine = DendronEngineV2.create({
+    //   wsRoot: uri,
+    //   logger,
+    // });
 
-      engine = await DendronEngineV3.create2({
-        wsRoot: uri,
-        logger,
-      });
-    }
+    const engine = await DendronEngineV3.create2({
+      wsRoot: uri,
+      logger,
+    });
+    // }
 
     await putWS({ ws: uri, engine });
     // const duration = getDurationMilliseconds(start);

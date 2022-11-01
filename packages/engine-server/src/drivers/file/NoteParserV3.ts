@@ -111,11 +111,19 @@ function content2Note({
 
 async function processNoteProps(note: NotePropsMeta, db: Database) {
   await NotePropsTableUtils.insert(db, note);
-  const vaultId = await VaultsTableUtils.getIdByFsPath(db, note.vault.fsPath);
+  const vaultIdResp = await VaultsTableUtils.getIdByFsPath(
+    db,
+    note.vault.fsPath
+  );
+
+  if (vaultIdResp.isErr()) {
+    return;
+  }
+
   await VaultNotesTableUtils.insert(
     db,
-    new VaultNotesTableRow(vaultId as number, note.id)
-  ); // TODO: Remove cast
+    new VaultNotesTableRow(vaultIdResp.value, note.id)
+  );
 
   if (note.schema) {
     await SchemaNotesTableUtils.insert(db, {

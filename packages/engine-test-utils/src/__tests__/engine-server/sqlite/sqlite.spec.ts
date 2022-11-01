@@ -14,39 +14,51 @@ describe("GIVEN sqlite store", () => {
   jest.setTimeout(10e6);
 
   test("WHEN playground THEN nothing is verified", async () => {
-    // const factory = new SqliteFactory();
-    const db = await SqliteFactory.init([]);
-
     debugger;
-    await new Promise<void>((resolve) => {
-      db.run("PRAGMA foreign_keys = ON", (err) => {
-        if (!err) {
-          resolve();
-        }
-      });
-    });
+    // const factory = new SqliteFactory();
 
-    const fakeVault: DVault = {
-      name: "fakeVault",
-      fsPath: ".",
+    const wsRoot = "/Users/jyeung/code/dendron/dendron/test-workspace/";
+    const vault1: DVault = {
+      name: "vault",
+      fsPath: "vault",
     };
 
-    const fileStore = new NodeJSFileStore();
+    const vpath = "/Users/jyeung/code/dendron/dendron/test-workspace/vault/";
+    // const vpath = "/Users/jyeung/code/dendron/org-workspace/org-private/notes";
+    const db = await SqliteFactory.init(
+      wsRoot,
+      [vault1],
+      new NodeJSFileStore()
+    );
+
+    // await new Promise<void>((resolve) => {
+    //   db.run("PRAGMA foreign_keys = ON", (err) => {
+    //     if (!err) {
+    //       resolve();
+    //     }
+    //   });
+    // });
+
+    // const fakeVault: DVault = {
+    //   name: "fakeVault",
+    //   fsPath: ".",
+    // };
+
+    // const fileStore = new NodeJSFileStore();
 
     // const vpath = "/Users/jyeung/code/dendron/dendron/test-workspace/vault/";
-    const vpath = "/Users/jyeung/code/dendron/org-workspace/org-private/notes";
-    const resp = await fileStore.readDir({
-      root: URI.parse(vpath),
-      include: ["*.md"],
-    });
+    // // const vpath = "/Users/jyeung/code/dendron/org-workspace/org-private/notes";
+    // const resp = await fileStore.readDir({
+    //   root: URI.parse(vpath),
+    //   include: ["*.md"],
+    // });
 
-    const paths = resp.data!;
-    // const paths = resp.data?.map((value) => path.join(vpath, value));
+    // const paths = resp.data!;
 
-    // TODO: Add in schemaModuleDict
-    await parseAllNoteFiles(paths!, fakeVault, db, vpath, {});
+    // // TODO: Add in schemaModuleDict
+    // await parseAllNoteFiles(paths!, fakeVault, db, vpath, {});
 
-    const metadataStore = new SqliteMetadataStore(db);
+    const metadataStore = new SqliteMetadataStore(db, [vault1]);
 
     // const res = await metadataStore.get("apples");
 
@@ -85,17 +97,19 @@ describe("GIVEN sqlite store", () => {
     // const writeRes = await metadataStore.write("testNote", testProps);
     // const deleteRes = await metadataStore.delete("testNote");
 
-    // const findRespOne = await metadataStore.find({ fname: "dendron.apples" });
-    // // debugger;
-    // const findRespTwo = await metadataStore.find({
-    //   fname: "dendron.apples",
-    //   excludeStub: true,
-    // });
-    // // debugger;
-    // const findRespThree = await metadataStore.find({
-    //   fname: "dendron.apples",
-    //   vault: fakeVault,
-    // });
+    debugger;
+
+    const findRespOne = await metadataStore.find({ fname: "dendron.apples" });
+    debugger;
+    const findRespTwo = await metadataStore.find({
+      fname: "dendron.apples",
+      excludeStub: true,
+    });
+    debugger;
+    const findRespThree = await metadataStore.find({
+      fname: "dendron.apples",
+      vault: fakeVault,
+    });
 
     debugger;
   });

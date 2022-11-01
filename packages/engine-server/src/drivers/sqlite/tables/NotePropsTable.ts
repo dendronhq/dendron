@@ -1,26 +1,16 @@
+/* eslint-disable no-empty-function */
+/* eslint-disable no-useless-constructor */
 import { NotePropsMeta } from "@dendronhq/common-all";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
 import {
+  executeSqlWithVoidResult,
   getIntegerString,
   getJSONString,
   getSQLBoolean,
   getSQLValueString,
 } from "./SQLiteUtils";
-
-// NoteProps : PK TEXT id
-// NoteProps : TEXT fname
-// NoteProps : TEXT title
-// NoteProps : TEXT desc
-// NoteProps : INTEGER updated
-// NoteProps : INTEGER created
-// NoteProps : TEXT anchors
-// NoteProps : BOOLEAN stub
-// NoteProps : TEXT custom
-// NoteProps : TEXT color
-// NoteProps : TEXT image
-// NoteProps : TEXT traits
 
 export class NotePropsTableRow {
   constructor(
@@ -33,6 +23,7 @@ export class NotePropsTableRow {
     public anchors: string,
     public stub: number,
     public custom: string,
+    public contentHash: string,
     public color: string,
     public image: string,
     public traits: string
@@ -40,7 +31,12 @@ export class NotePropsTableRow {
 }
 
 export class NotePropsTableUtils {
-  static async createTable(db: Database) {
+  /**
+   * Create the NoteProps table in the given sqlite database
+   * @param db
+   * @returns
+   */
+  public static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
 CREATE TABLE IF NOT EXISTS NoteProps (
   id TEXT PRIMARY KEY,
@@ -52,66 +48,72 @@ CREATE TABLE IF NOT EXISTS NoteProps (
   anchors TEXT,
   stub BOOLEAN,
   custom TEXT,
+  contentHash TEXT,
   color TEXT,
   image TEXT,
   traits TEXT
 );`;
 
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
-        resolve();
-      });
-    });
-    // TODO: Return error
+    return executeSqlWithVoidResult(db, sql);
   }
 
-  static getById(db: Database, id: string): Promise<NotePropsTableRow> {
+  /**
+   * Get a row by the note id
+   * @param db
+   * @param id
+   * @returns
+   */
+  public static getById(
+    db: Database,
+    id: string
+  ): ResultAsync<NotePropsTableRow, SqliteError> {
     const sql = `SELECT * FROM NoteProps WHERE id = '${id}'`;
 
-    return new Promise<NotePropsTableRow>((resolve, _reject) => {
+    const prom = new Promise<NotePropsTableRow>((resolve, reject) => {
       db.get(sql, (err, row) => {
         if (err) {
-          // debugger;
-          // reject(err.message);
-        } else {
-          // debugger;
-          resolve(row as NotePropsTableRow);
-        }
-      });
-    });
-  }
-
-  static insert(
-    db: Database,
-    row: NotePropsMeta
-  ): ResultAsync<void, SqliteError> {
-    const sql = this.getSQLInsertString(row);
-
-    const prom = new Promise<void>((resolve, reject) => {
-      db.run(sql, (err) => {
-        if (err) {
-          // debugger;
           reject(err.message);
+        } else if (!row) {
+          reject(new Error(`No row with id ${id} found`));
         } else {
-          // debugger;
-          resolve();
+          resolve(row as NotePropsTableRow);
         }
       });
     });
 
     return ResultAsync.fromPromise(prom, (e) => {
-      // debugger;
       return e as SqliteError;
     });
   }
 
-  // static delete(_db: Database, _from: string) {}
+  /**
+   * Insert a NoteProp object in the NoteProps sqlite table
+   * @param db
+   * @param row
+   * @returns
+   */
+  public static insert(
+    db: Database,
+    row: NotePropsMeta
+  ): ResultAsync<void, SqliteError> {
+    const sql = this.getSQLInsertString(row);
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
+  public static delete(
+    db: Database,
+    key: string
+  ): ResultAsync<void, SqliteError> {
+    const sql = `DELETE FROM NoteProps
+    WHERE id = '${key}'`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
 
   private static getSQLInsertString(props: NotePropsMeta): string {
     const sql = `
-INSERT INTO NoteProps (id, fname, title, description, updated, created, anchors, stub, custom, color, image, traits)
+INSERT INTO NoteProps (id, fname, title, description, updated, created, anchors, stub, custom, contentHash, color, image, traits)
 VALUES (
   ${getSQLValueString(props.id)},
   ${getSQLValueString(props.fname)},
@@ -122,6 +124,7 @@ VALUES (
   ${getJSONString(props.anchors)},
   ${getSQLBoolean(props.stub)},
   ${getJSONString(props.custom)},
+  ${getSQLValueString(props.contentHash)},
   ${getSQLValueString(props.color)},
   ${getJSONString(props.image)},
   ${getJSONString(props.traits)})
@@ -135,6 +138,7 @@ created = ${getIntegerString(props.created)},
 anchors = ${getJSONString(props.anchors)},
 stub = ${getSQLBoolean(props.stub)},
 custom = ${getJSONString(props.custom)},
+contentHash = ${getSQLValueString(props.contentHash)},
 color = ${getSQLValueString(props.color)},
 image = ${getJSONString(props.image)},
 traits = ${getJSONString(props.traits)}

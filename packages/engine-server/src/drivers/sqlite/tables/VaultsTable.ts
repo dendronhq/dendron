@@ -1,65 +1,66 @@
+/* eslint-disable no-useless-constructor */
 /* eslint-disable no-empty-function */
 
+import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
+import { SqliteError } from "../SqliteError";
+import { executeSqlWithVoidResult } from "./SQLiteUtils";
 
 export class VaultsTableRow {
-  constructor(public id: string, public name: string, public fsPath: string) {}
+  constructor(public id: number, public name: string, public fsPath: string) {}
 }
 
 export class VaultsTableUtils {
-  static async createTable(db: Database) {
+  static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS Vaults (
       id INTEGER PRIMARY KEY,
       name TEXT,
       fsPath TEXT
-    )`; // TODO: UNIQUE INDEX On name, fsPath
+    )`;
 
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
+    const sqlIndex = `
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_vaults_fsPath ON Vaults ('fsPath')`;
 
-        if (_err) {
-          debugger;
+    return executeSqlWithVoidResult(db, sql).andThen(() => {
+      return executeSqlWithVoidResult(db, sqlIndex);
+    });
+  }
+
+  static getIdByFsPath(
+    db: Database,
+    fsPath: string
+  ): ResultAsync<number, SqliteError> {
+    const sql = `
+      SELECT id FROM Vaults
+      WHERE fsPath = '${fsPath}'`;
+
+    const prom = new Promise<number>((resolve, reject) => {
+      db.get(sql, (err, row) => {
+        if (err) {
+          reject(err.message);
+        } else {
+          resolve(row.id);
         }
-        resolve();
       });
     });
-    // TODO: Return error
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
+    });
   }
 
-  static getIdByFsPath(db: Database, fsPath: string) {
+  static insert(
+    db: Database,
+    row: Omit<VaultsTableRow, "id">
+  ): ResultAsync<void, SqliteError> {
     const sql = `
-SELECT id FROM Vaults
-WHERE fsPath = '${fsPath}'
-`;
+      INSERT INTO Vaults (name, fsPath)
+      VALUES (
+        '${row.name}',
+        '${row.fsPath}'
+      );`;
 
-    return new Promise((resolve) => {
-      db.get(sql, (_err, row) => {
-        // debugger;
-
-        resolve(row.id);
-      });
-    });
+    return executeSqlWithVoidResult(db, sql);
   }
-
-  static insert(db: Database, row: Omit<VaultsTableRow, "id">) {
-    const sql = `
-INSERT INTO Vaults (name, fsPath)
-VALUES (
-  '${row.name}',
-  '${row.fsPath}'
-);`;
-
-    return new Promise<void>((resolve) => {
-      db.run(sql, (_err) => {
-        console.log(_err);
-        // console.log(err);
-        resolve();
-      });
-    });
-  }
-
-  static delete(_db: Database, _from: string) {}
 }

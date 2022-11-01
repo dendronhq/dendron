@@ -46,7 +46,6 @@ export class SqliteFactory {
     //   })
     // );
 
-    debugger;
     await Promise.all(
       vaults.map(async (vault) => {
         const vpath = vault2Path({ vault, wsRoot });
@@ -59,9 +58,19 @@ export class SqliteFactory {
         if (maybeFiles.error) {
           //
         }
+
+        // TODO: Add in schemaModuleDict
         return parseAllNoteFiles(maybeFiles.data!, vault, _db, vpath, {});
       })
     );
+
+    await new Promise<void>((resolve) => {
+      _db.run("PRAGMA foreign_keys = ON", (err) => {
+        if (!err) {
+          resolve();
+        }
+      });
+    });
 
     return _db;
   }
@@ -99,9 +108,11 @@ export class SqliteFactory {
   }
 
   static async createMetadataStoreForTest(
-    vaults: DVault[]
+    vaults: DVault[],
+    store: IFileStore,
+    wsRoot: string
   ): Promise<SqliteMetadataStore> {
-    const db = await SqliteFactory.init(vaults, ":memory:");
+    const db = await SqliteFactory.init(wsRoot, vaults, store, ":memory:");
 
     // await Promise.all(
     //   vaults.map((vault) => {

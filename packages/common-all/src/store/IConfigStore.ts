@@ -1,4 +1,4 @@
-import { Result } from "neverthrow";
+import { Result, ResultAsync } from "neverthrow";
 import { IDendronError } from "../error";
 import { DendronConfig, DendronConfigValue } from "../types";
 import { DeepPartial } from "../utils";
@@ -29,7 +29,7 @@ export interface IConfigStore {
   /**
    * Given a dendron config, update the persistent dendron config with the given payload
    */
-  write(payload: DendronConfig): Promise<Result<DendronConfig, IDendronError>>;
+  write(payload: DendronConfig): ResultAsync<DendronConfig, IDendronError>;
 
   // individual keys
   /**

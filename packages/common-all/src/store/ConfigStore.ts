@@ -112,9 +112,7 @@ export class ConfigStore implements IConfigStore {
   }
 
   private readOverride(path: URI) {
-    return ResultUtils.PromiseRespV3ToResultAsync(
-      this._fileStore.read(path)
-    ).andThen(YamlUtils.fromStr);
+    return ResultUtils.PromiseRespV3ToResultAsync(this._fileStore.read(path));
   }
 
   private searchOverride() {
@@ -124,18 +122,21 @@ export class ConfigStore implements IConfigStore {
     );
 
     return this.readOverride(workspaceOverridePath)
-      .orElse((overrideError) => {
+      .orElse(() => {
         if (this._homeDir) {
           // try finding it globally
           const globalOverridePath = Utils.joinPath(
             this._homeDir,
             CONSTANTS.DENDRON_LOCAL_CONFIG_FILE
           );
-          return this.readOverride(globalOverridePath);
+          return this.readOverride(globalOverridePath).orElse(() =>
+            okAsync("")
+          );
         } else {
-          return errAsync(overrideError);
+          return okAsync("");
         }
       })
+      .andThen(YamlUtils.fromStr)
       .map((overrideConfig) => {
         // TODO ideally we would parse incoming data
         return overrideConfig as DeepPartial<DendronConfig>;
@@ -146,32 +147,28 @@ export class ConfigStore implements IConfigStore {
     // TODO: once the store methods are mirrored to the engine,
     // move this filtering logic out of store implementation.
 
-    return this.searchOverride()
-      .orElse(() => okAsync({} as DeepPartial<DendronConfig>))
-      .andThen((overrideConfig) => {
-        const vaultsFromOverride = overrideConfig.workspace?.vaults as DVault[];
-        const payloadDifference: DendronConfig = {
-          ...payload,
-          workspace: {
-            ...payload.workspace,
-            vaults: _.differenceWith(
-              payload.workspace.vaults,
-              vaultsFromOverride,
-              _.isEqual
-            ),
-          },
-        };
-        return YamlUtils.toStr(payloadDifference).asyncAndThen((endPayload) => {
-          const ss = fromPromise(
-            this._fileStore.write(this.path, endPayload),
-            (err) => err as DendronError
-          ).map(() => {
-            this._cachedDendronConfig = payloadDifference;
-            return payloadDifference;
-          });
-          return ss;
+    return this.searchOverride().andThen((overrideConfig) => {
+      const vaultsFromOverride = overrideConfig.workspace?.vaults as DVault[];
+      const payloadDifference: DendronConfig = {
+        ...payload,
+        workspace: {
+          ...payload.workspace,
+          vaults: _.differenceWith(
+            payload.workspace.vaults,
+            vaultsFromOverride,
+            _.isEqual
+          ),
+        },
+      };
+      return YamlUtils.toStr(payloadDifference).asyncAndThen((endPayload) => {
+        return ResultUtils.PromiseRespV3ToResultAsync(
+          this._fileStore.write(this.path, endPayload)
+        ).map(() => {
+          this._cachedDendronConfig = payloadDifference;
+          return payloadDifference;
         });
       });
+    });
   }
 
   async get(

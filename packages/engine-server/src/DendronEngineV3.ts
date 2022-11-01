@@ -996,7 +996,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
           // Get list of files from filesystem
           const maybeFiles = await this._fileStore.readDir({
-            root: URI.parse(vpath),
+            root: URI.file(vpath),
             include: ["*.schema.yml"],
           });
           if (maybeFiles.error || maybeFiles.data.length === 0) {

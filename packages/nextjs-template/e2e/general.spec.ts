@@ -56,12 +56,49 @@ test.describe("GIVEN default viewport", () => {
     expect(await themeLinkLocator.count()).toBe(4);
   });
 
-  test("THEN should display breadcrumbs", async ({ page, url }) => {
-    await page.goto(`${url}/notes/ufzjlbxfti6endd1o6egr6r`);
+  test.describe("WHEN displaying breadcrumbs", () => {
+    test("THEN should display breadcrumbs", async ({ page, url }) => {
+      await page.goto(`${url}/notes/ufzjlbxfti6endd1o6egr6r`);
 
-    const breadcrumb = page.locator(".ant-breadcrumb");
-    await breadcrumb.hover();
-    await expect(breadcrumb).toHaveScreenshot("breadcrumb.png");
+      const breadcrumb = page.locator(".ant-breadcrumb");
+      await expect(breadcrumb).toHaveScreenshot(["breadcrumb", "normal.png"]);
+    });
+
+    test.describe("AND parent has property `has_collection` set", () => {
+      test("THEN should display breadcrumbs", async ({ page, url }) => {
+        await page.goto(`${url}/notes/rxOL3iDLtytHxCAraYSlg`);
+
+        const breadcrumb = page.locator(".ant-breadcrumb");
+        await expect(breadcrumb).toHaveScreenshot([
+          "breadcrumb",
+          "parent-has_collection.png",
+        ]);
+      });
+    });
+
+    test.describe("AND parent has property `nav_exclude_children` set", () => {
+      test("THEN should display breadcrumbs", async ({ page, url }) => {
+        await page.goto(`${url}/notes/6ku8rrazosekbz0uv4me13z`);
+
+        const breadcrumb = page.locator(".ant-breadcrumb");
+        await expect(breadcrumb).toHaveScreenshot([
+          "breadcrumb",
+          "parent-nav_exclude_children.png",
+        ]);
+      });
+    });
+
+    test.describe("AND note has property `nav_exclude` set", () => {
+      test("THEN should display breadcrumbs", async ({ page, url }) => {
+        await page.goto(`${url}/notes/foo-two`);
+
+        const breadcrumb = page.locator(".ant-breadcrumb");
+        await expect(breadcrumb).toHaveScreenshot([
+          "breadcrumb",
+          "parent-nav_exclude.png",
+        ]);
+      });
+    });
   });
 });
 

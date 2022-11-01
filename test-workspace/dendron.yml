@@ -104,6 +104,7 @@ publishing:
   siteHierarchies:
     - dendron
     - bar
+    - foo
     - tags
     - task
   enableSiteLastModified: true

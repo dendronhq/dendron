@@ -5,6 +5,7 @@ desc: ""
 updated: 1638882358581
 created: 1595170096361
 published: true
+nav_exclude: true
 ---
 
 ## Foo Header

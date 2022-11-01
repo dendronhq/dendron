@@ -42,12 +42,14 @@ Object {
 }
 `;
 
-exports[`GIVEN sidebar WHEN regular tree THEN return regular tree 1`] = `
+exports[`GIVEN sidebar WHEN has_collection is enabled THEN return root marked without children 1`] = `
 Array [
   Object {
     "children": Array [
       Object {
         "children": Array [],
+        "exclude": undefined,
+        "excludeChildren": undefined,
         "hasTitleNumberOutlined": false,
         "icon": null,
         "key": "foo.ch1",
@@ -55,6 +57,112 @@ Array [
         "vaultName": "vault1",
       },
     ],
+    "exclude": undefined,
+    "excludeChildren": true,
+    "hasTitleNumberOutlined": false,
+    "icon": null,
+    "key": "foo",
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;
+
+exports[`GIVEN sidebar WHEN nav_exclude is enabled THEN return root marked without children 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "exclude": true,
+        "excludeChildren": undefined,
+        "hasTitleNumberOutlined": false,
+        "icon": null,
+        "key": "foo.ch1",
+        "title": "Ch1",
+        "vaultName": "vault1",
+      },
+    ],
+    "exclude": undefined,
+    "excludeChildren": undefined,
+    "hasTitleNumberOutlined": false,
+    "icon": null,
+    "key": "foo",
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;
+
+exports[`GIVEN sidebar WHEN nav_exclude_children is enabled AND has_collection is set to false THEN return root marked without children 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "exclude": undefined,
+        "excludeChildren": undefined,
+        "hasTitleNumberOutlined": false,
+        "icon": null,
+        "key": "foo.ch1",
+        "title": "Ch1",
+        "vaultName": "vault1",
+      },
+    ],
+    "exclude": undefined,
+    "excludeChildren": true,
+    "hasTitleNumberOutlined": false,
+    "icon": null,
+    "key": "foo",
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;
+
+exports[`GIVEN sidebar WHEN nav_exclude_children is enabled THEN return root marked without children 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "exclude": undefined,
+        "excludeChildren": undefined,
+        "hasTitleNumberOutlined": false,
+        "icon": null,
+        "key": "foo.ch1",
+        "title": "Ch1",
+        "vaultName": "vault1",
+      },
+    ],
+    "exclude": undefined,
+    "excludeChildren": true,
+    "hasTitleNumberOutlined": false,
+    "icon": null,
+    "key": "foo",
+    "title": "Foo",
+    "vaultName": "vault1",
+  },
+]
+`;
+
+exports[`GIVEN sidebar WHEN regular tree THEN return regular tree 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [],
+        "exclude": undefined,
+        "excludeChildren": undefined,
+        "hasTitleNumberOutlined": false,
+        "icon": null,
+        "key": "foo.ch1",
+        "title": "Ch1",
+        "vaultName": "vault1",
+      },
+    ],
+    "exclude": undefined,
+    "excludeChildren": undefined,
     "hasTitleNumberOutlined": false,
     "icon": null,
     "key": "foo",

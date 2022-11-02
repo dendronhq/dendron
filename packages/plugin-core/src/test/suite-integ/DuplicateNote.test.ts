@@ -9,6 +9,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { expect } from "../testUtilsv2";
 import { DoctorUtils } from "../../components/doctor/utils";
 import { VaultUtils } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 
 suite("Duplicate note detection", function () {
   describeSingleWS(
@@ -114,6 +115,40 @@ suite("Duplicate note detection", function () {
 
         const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
         expect(resp?.duplicate).toEqual(undefined);
+      });
+    }
+  );
+
+  describeSingleWS(
+    "GIVEN an open file that has been deleted",
+    {
+      postSetupHook: ENGINE_HOOKS.setupEmpty,
+    },
+    () => {
+      test("THEN do nothing", async () => {
+        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+
+        await NoteTestUtilsV4.createNoteWithEngine({
+          fname: "deleted",
+          vault: vaults[0],
+          wsRoot,
+          body: "note will be deleted",
+          engine,
+        });
+
+        const vaultPath = VaultUtils.getRelPath(vaults[0]);
+        const deletedFilePath = path.join(wsRoot, vaultPath, "deleted.md");
+        const deletedFileUri = vscode.Uri.file(deletedFilePath);
+        await VSCodeUtils.openFileInEditor(deletedFileUri);
+
+        fs.unlinkSync(deletedFilePath);
+
+        await VSCodeUtils.openFileInEditor(deletedFileUri);
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const document = editor?.document;
+
+        const resp = await DoctorUtils.findDuplicateNoteFromDocument(document!);
+        expect(resp).toEqual(undefined);
       });
     }
   );

@@ -24,13 +24,13 @@ type CommandOpts = {
 
 type CommandOutput = { updatedVault: DVault | null };
 
-export { CommandOpts as VaultConvertCommandOpts };
+export { CommandOpts as ConvertVaultCommandOpts };
 
-export class VaultConvertCommand extends BasicCommand<
+export class ConvertVaultCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  key = DENDRON_COMMANDS.VAULT_CONVERT.key;
+  key = DENDRON_COMMANDS.CONVERT_VAULT.key;
   constructor(private _ext: IDendronExtension) {
     super();
   }
@@ -119,7 +119,7 @@ export class VaultConvertCommand extends BasicCommand<
   }
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandOpts | undefined> {
-    const ctx = "VaultConvertCommand:gatherInputs";
+    const ctx = "ConvertVaultCommand:gatherInputs";
     let { vault, type, remoteUrl } = opts || {};
     // Let the user select the vault
     if (!vault) vault = await this.gatherVault();
@@ -175,7 +175,7 @@ export class VaultConvertCommand extends BasicCommand<
    * @returns
    */
   async execute(opts: CommandOpts) {
-    const ctx = "VaultConvertCommand";
+    const ctx = "ConvertVaultCommand";
     const { vault, type, remoteUrl } = opts;
     const { wsRoot } = this._ext.getDWorkspace();
     if (!vault || !type)

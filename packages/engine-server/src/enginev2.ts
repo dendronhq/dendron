@@ -469,9 +469,6 @@ export class DendronEngineV2 implements DEngine {
     // If provided, we render the given note entirely. Otherwise find the note in workspace.
     if (!note) {
       note = this.notes[id];
-    } else {
-      // `procRehype` needs the note to be in the engine, so we have to add it in case it's a dummy note
-      this.store.updateNote(note);
     }
 
     // If note was not provided and we couldn't find it, we can't render.

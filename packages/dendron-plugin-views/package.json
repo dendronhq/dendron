@@ -1,24 +1,18 @@
 {
   "name": "@dendronhq/dendron-plugin-views",
-  "version": "0.116.0",
+  "version": "0.116.2",
   "private": true,
   "workspaces": {
     "nohoist": [
       "webpack",
-      "webpack/**",
-      "eslint",
-      "eslint/**",
-      "@types/eslint-scope",
-      "@types/eslint-scope/**",
-      "@types/eslint",
-      "@types/eslint/**"
+      "webpack/**"
     ]
   },
   "dependencies": {
     "@babel/core": "7.12.3",
-    "@dendronhq/common-all": "^0.116.0",
-    "@dendronhq/common-frontend": "^0.116.0",
-    "@dendronhq/common-server": "^0.116.0",
+    "@dendronhq/common-all": "^0.116.2",
+    "@dendronhq/common-frontend": "^0.116.2",
+    "@dendronhq/common-server": "^0.116.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -30,10 +24,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.5.0",
-    "@typescript-eslint/parser": "^4.5.0",
     "antd": "^4.21.4",
-    "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.0",
     "babel-loader": "8.1.0",
     "babel-plugin-named-asset-import": "^0.3.7",
@@ -47,7 +38,6 @@
     "cytoscape-popper": "^2.0.0",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
-    "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.2.0",
     "eslint-plugin-import": "^2.22.1",
@@ -112,12 +102,6 @@
     "test-local": "node scripts/test.js",
     "clean": "yarn rimraf build public/static public/*.css public/index.html node_modules || 0",
     "rimraf": "npx rimraf"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

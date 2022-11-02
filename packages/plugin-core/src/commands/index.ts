@@ -79,14 +79,16 @@ import { TaskStatusCommand } from "./TaskStatus";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { ValidateEngineCommand } from "./ValidateEngineCommand";
 import { VaultAddCommand } from "./VaultAddCommand";
-import { VaultConvertCommand } from "./VaultConvert";
-import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { ConvertVaultCommand } from "./ConvertVaultCommand";
 import { RenameNoteCommand } from "./RenameNoteCommand";
 import { CreateNoteCommand } from "./CreateNoteCommand";
 import { MergeNoteCommand } from "./MergeNoteCommand";
 import { CopyCodespaceURL } from "./CopyCodespaceURL";
 import { MoveSelectionToCommand } from "./MoveSelectionToCommand";
 import { CopyAsCommand } from "./CopyAsCommand";
+import { RemoveVaultCommand } from "./RemoveVaultCommand";
+import { CreateNewVaultCommand } from "./CreateNewVaultCommand";
+import { AddExistingVaultCommand } from "./AddExistingVaultCommand";
 
 /**
  * Note: this does not contain commands that have parametered constructors, as
@@ -161,8 +163,10 @@ const ALL_COMMANDS = [
   ApplyTemplateCommand,
   UpgradeSettingsCommand,
   VaultAddCommand,
-  VaultRemoveCommand,
-  VaultConvertCommand,
+  CreateNewVaultCommand,
+  AddExistingVaultCommand,
+  RemoveVaultCommand,
+  ConvertVaultCommand,
   ShowWelcomePageCommand,
   LaunchTutorialWorkspaceCommand,
   ConvertLinkCommand,

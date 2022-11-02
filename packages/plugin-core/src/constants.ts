@@ -172,9 +172,9 @@ type CommandEntry = {
 
 const CMD_PREFIX = "Dendron:";
 export const ICONS = {
-  STUB: "gist-new",
   LINK_CANDIDATE: "debug-disconnect",
   WIKILINK: "link",
+  SCHEMA: "repo",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 
@@ -301,7 +301,7 @@ export const DENDRON_MENUS = {
     },
     {
       when: "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
-      command: "dendron.vaultRemove",
+      command: "dendron.removeVault",
       group: "2_workspace",
     },
     {
@@ -353,6 +353,11 @@ export const DENDRON_MENUS = {
       command: "dendron.createNote",
       when: "view == dendron.treeView && shellExecutionSupported",
     },
+    {
+      command: "dendron.treeView.gotoNote",
+      when: "view == dendron.treeView && viewItem == stub && shellExecutionSupported",
+      group: "inline",
+    },
   ],
 };
 
@@ -400,6 +405,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.treeView.createNote",
     title: "Create Note",
     icon: "$(new-file)",
+    when: "false",
+  },
+  TREEVIEW_EXPAND_STUB: {
+    key: "dendron.treeView.expandStub",
+    title: `${CMD_PREFIX} Dev: Expand Stub`,
+    when: "false",
+  },
+  TREEVIEW_GOTO_NOTE: {
+    key: "dendron.treeView.gotoNote",
+    title: `Create Note`, // will appear in the tooltip
+    icon: "$(gist-new)",
+    when: "false",
   },
   // graph panel buttons
   GRAPH_PANEL_INCREASE_DEPTH: {
@@ -767,14 +784,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Vault Add`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_REMOVE: {
-    key: "dendron.vaultRemove",
-    title: `${CMD_PREFIX} Vault Remove`,
+  REMOVE_VAULT: {
+    key: "dendron.removeVault",
+    title: `${CMD_PREFIX} Remove Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  VAULT_CONVERT: {
-    key: "dendron.vaultConvert",
-    title: `${CMD_PREFIX} Vault Convert`,
+  CONVERT_VAULT: {
+    key: "dendron.convertVault",
+    title: `${CMD_PREFIX} Convert Vault`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
+  CREATE_NEW_VAULT: {
+    key: "dendron.createNewVault",
+    title: `${CMD_PREFIX} Create New Vault`,
+    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+  },
+  ADD_EXISTING_VAULT: {
+    key: "dendron.addExistingVault",
+    title: `${CMD_PREFIX} Add Existing Vault`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
   INIT_WS: {

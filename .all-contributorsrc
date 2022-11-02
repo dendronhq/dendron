@@ -1853,7 +1853,8 @@
       "profile": "https://github.com/Maarrk",
       "contributions": [
         "doc",
-        "code"
+        "code",
+        "tool"
       ]
     },
     {
@@ -2253,6 +2254,42 @@
       "name": "Harshita Joshi",
       "avatar_url": "https://avatars.githubusercontent.com/u/84971366?v=4",
       "profile": "https://github.com/Harshita-mindfire",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "KitLeskinen",
+      "name": "KitLeskinen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9257451?v=4",
+      "profile": "http://leskinen.ru",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Braweria",
+      "name": "Wiktoria Mielcarek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62669899?v=4",
+      "profile": "https://github.com/Braweria",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "allibell",
+      "name": "Allison Bellows",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25647843?v=4",
+      "profile": "http://www.allison-bellows.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "karstengresch",
+      "name": "Karsten Gresch",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7924413?v=4",
+      "profile": "http://gresch.io",
       "contributions": [
         "bug"
       ]

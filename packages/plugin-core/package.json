@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.116.0",
+  "version": "0.116.2",
   "sponsor": {
     "url": "https://accounts.dendron.so/account/subscribe"
   },
@@ -169,6 +169,15 @@
         "command": "dendron.treeView.createNote",
         "title": "Create Note",
         "icon": "$(new-file)"
+      },
+      {
+        "command": "dendron.treeView.expandStub",
+        "title": "Dendron: Dev: Expand Stub"
+      },
+      {
+        "command": "dendron.treeView.gotoNote",
+        "title": "Create Note",
+        "icon": "$(gist-new)"
       },
       {
         "command": "dendron.graph-panel.increaseDepth",
@@ -389,12 +398,20 @@
         "title": "Dendron: Vault Add"
       },
       {
-        "command": "dendron.vaultRemove",
-        "title": "Dendron: Vault Remove"
+        "command": "dendron.removeVault",
+        "title": "Dendron: Remove Vault"
       },
       {
-        "command": "dendron.vaultConvert",
-        "title": "Dendron: Vault Convert"
+        "command": "dendron.convertVault",
+        "title": "Dendron: Convert Vault"
+      },
+      {
+        "command": "dendron.createNewVault",
+        "title": "Dendron: Create New Vault"
+      },
+      {
+        "command": "dendron.addExistingVault",
+        "title": "Dendron: Add Existing Vault"
       },
       {
         "command": "dendron.initWS",
@@ -625,6 +642,18 @@
           "when": "dendron:devMode"
         },
         {
+          "command": "dendron.treeView.createNote",
+          "when": "false"
+        },
+        {
+          "command": "dendron.treeView.expandStub",
+          "when": "false"
+        },
+        {
+          "command": "dendron.treeView.gotoNote",
+          "when": "false"
+        },
+        {
           "command": "dendron.browseNote",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
@@ -809,11 +838,19 @@
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
-          "command": "dendron.vaultRemove",
+          "command": "dendron.removeVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
-          "command": "dendron.vaultConvert",
+          "command": "dendron.convertVault",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.createNewVault",
+          "when": "dendron:pluginActive && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.addExistingVault",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {
@@ -1108,7 +1145,7 @@
         },
         {
           "when": "explorerResourceIsFolder && dendron:pluginActive && shellExecutionSupported",
-          "command": "dendron.vaultRemove",
+          "command": "dendron.removeVault",
           "group": "2_workspace"
         },
         {
@@ -1156,6 +1193,11 @@
         {
           "command": "dendron.createNote",
           "when": "view == dendron.treeView && shellExecutionSupported"
+        },
+        {
+          "command": "dendron.treeView.gotoNote",
+          "when": "view == dendron.treeView && viewItem == stub && shellExecutionSupported",
+          "group": "inline"
         }
       ]
     },
@@ -1469,8 +1511,8 @@
     "download-sqlite-binary": "node-pre-gyp install"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.116.0",
-    "@dendronhq/engine-test-utils": "^0.116.0",
+    "@dendronhq/common-test-utils": "^0.116.2",
+    "@dendronhq/engine-test-utils": "^0.116.2",
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
@@ -1513,11 +1555,11 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.116.0",
-    "@dendronhq/common-all": "^0.116.0",
-    "@dendronhq/common-server": "^0.116.0",
-    "@dendronhq/engine-server": "^0.116.0",
-    "@dendronhq/pods-core": "^0.116.0",
+    "@dendronhq/api-server": "^0.116.2",
+    "@dendronhq/common-all": "^0.116.2",
+    "@dendronhq/common-server": "^0.116.2",
+    "@dendronhq/engine-server": "^0.116.2",
+    "@dendronhq/pods-core": "^0.116.2",
     "@sentry/integrations": "7.11.1",
     "@sentry/node": "7.11.1",
     "@types/vscode": "1.62.0",

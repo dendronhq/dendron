@@ -2,12 +2,16 @@ import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
 import * as querystring from "qs";
 import {
+  BulkGetNoteMetaResp,
+  BulkGetNoteResp,
   BulkWriteNotesOpts,
   DNodeProps,
   EngineDeleteOpts,
   EngineInfoResp,
   EngineWriteOptsV2,
   FindNotesMetaResp,
+  GetNoteMetaResp,
+  GetNoteResp,
   RenameNoteOpts,
   SchemaModuleProps,
   WriteNoteResp,
@@ -105,6 +109,14 @@ export type WorkspaceInitRequest = {
 export type WorkspaceSyncRequest = WorkspaceRequest;
 
 export type WorkspaceRequest = { ws: string };
+
+export type EngineGetNoteRequest = {
+  id: string;
+} & WorkspaceRequest;
+
+export type EngineBulkGetNoteRequest = {
+  ids: string[];
+} & WorkspaceRequest;
 
 export type EngineRenameNoteRequest = RenameNoteOpts & { ws: string };
 export type EngineWriteRequest = {
@@ -372,6 +384,38 @@ export class DendronAPI extends API {
       path: "note/write",
       method: "post",
       body: req,
+    });
+  }
+
+  noteGet(req: EngineGetNoteRequest): Promise<GetNoteResp> {
+    return this._makeRequest({
+      path: "note/get",
+      method: "get",
+      qs: req,
+    });
+  }
+
+  noteGetMeta(req: EngineGetNoteRequest): Promise<GetNoteMetaResp> {
+    return this._makeRequest({
+      path: "note/getMeta",
+      method: "get",
+      qs: req,
+    });
+  }
+
+  noteBulkGet(req: EngineBulkGetNoteRequest): Promise<BulkGetNoteResp> {
+    return this._makeRequest({
+      path: "note/bulkGet",
+      method: "get",
+      qs: req,
+    });
+  }
+
+  noteBulkGetMeta(req: EngineBulkGetNoteRequest): Promise<BulkGetNoteMetaResp> {
+    return this._makeRequest({
+      path: "note/bulkGetMeta",
+      method: "get",
+      qs: req,
     });
   }
 

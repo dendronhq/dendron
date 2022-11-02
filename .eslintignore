@@ -1,9 +1,7 @@
 vendor/**/*
 node_modules
 
-# TODO remove after fixing eslint errors in other packages
-packages/*
-!packages/plugin-core/
-!packages/nextjs-template/
-!packages/common-frontend/
-**/src/test/**
+**/lib/**
+**/out/**
+packages/engine-server/src/drivers/generated-prisma-client/
+packages/engine-server/src/generated-prisma-client/

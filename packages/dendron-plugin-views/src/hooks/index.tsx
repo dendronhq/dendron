@@ -13,7 +13,9 @@ export const useCurrentTheme = () => {
     "light"
   );
   React.useEffect(() => {
-    window.currentTheme && setCurrentTheme(window.currentTheme);
+    if (window.currentTheme) {
+      setCurrentTheme(window.currentTheme);
+    }
     // @ts-ignore
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [window.currentTheme]);

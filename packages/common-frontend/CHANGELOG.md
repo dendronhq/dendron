@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.2) (2022-10-26)
+
+
+
+# 0.116.0 (2022-10-25)
+
+**Note:** Version bump only for package @dendronhq/common-frontend
+
+
+
+
+
+## [0.116.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.1) (2022-10-25)
+
+
+
+# 0.116.0 (2022-10-25)
+
+**Note:** Version bump only for package @dendronhq/common-frontend
+
+
+
+
+
 # 0.116.0 (2022-10-25)
 
 **Note:** Version bump only for package @dendronhq/common-frontend

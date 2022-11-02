@@ -92,6 +92,16 @@ export class NativeTreeView implements Disposable {
     }
   }
 
+  public async expandTreeItem(id: string) {
+    if (this.treeView) {
+      await this.treeView?.reveal(id, {
+        expand: true,
+        focus: false,
+        select: false,
+      });
+    }
+  }
+
   /**
    * Whenever a new note is opened, we move the tree view focus to the newly
    * opened note.

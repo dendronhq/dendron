@@ -255,11 +255,11 @@ export class EngineNoteProvider
       collapsibleState,
       labelType: this._treeViewConfig.LabelTypeSetting,
     });
-    if (note.stub) {
-      tn.iconPath = new ThemeIcon(ICONS.STUB);
-    }
 
     this._tree[note.id] = tn;
+    if (note.schema) {
+      tn.iconPath = new ThemeIcon(ICONS.SCHEMA);
+    }
 
     return tn;
   }

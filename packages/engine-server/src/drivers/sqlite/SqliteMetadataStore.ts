@@ -108,7 +108,6 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   // TODO: If the query building requirements starts to get more complex, maybe
   // we can consider using a library such as knex.js https://knexjs.org/
   async find(opts: FindNoteOpts): Promise<RespV3<NotePropsMeta[]>> {
-    debugger;
     // Special case: if no arguments are passed, return nothing.
     if (
       opts.excludeStub === undefined &&
@@ -165,13 +164,10 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         });
       });
 
-      // debugger;
-
       const results = await Promise.all(
         ids.map(async (id) => {
           const res = await this._get(id);
 
-          // debugger;
           if (res.isOk()) {
             return res.value;
           }

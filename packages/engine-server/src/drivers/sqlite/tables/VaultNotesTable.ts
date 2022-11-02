@@ -17,14 +17,17 @@ export class VaultNotesTableUtils {
   static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS VaultNotes (
-      vaultId INTEGER,
-      noteId TEXT,
+      vaultId INTEGER NOT NULL,
+      noteId TEXT NOT NULL,
       PRIMARY KEY (vaultId, noteId),
       FOREIGN KEY(vaultId) REFERENCES Vaults(id) ON DELETE CASCADE,
       FOREIGN KEY(noteId) REFERENCES NoteProps(id) ON DELETE CASCADE);`;
 
-    // TODO: Create index on NoteId
-    return executeSqlWithVoidResult(db, sql);
+    const idx = `CREATE INDEX IF NOT EXISTS idx_VaultNotes_noteId ON VaultNotes (noteId)`;
+
+    return executeSqlWithVoidResult(db, sql).andThen(() => {
+      return executeSqlWithVoidResult(db, idx);
+    });
   }
 
   static getVaultFsPathForNoteId(

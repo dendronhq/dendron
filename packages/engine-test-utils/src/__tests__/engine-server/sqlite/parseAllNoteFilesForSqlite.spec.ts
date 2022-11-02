@@ -14,19 +14,17 @@ describe("GIVEN sqlite store", () => {
   jest.setTimeout(10e6);
 
   test("WHEN playground THEN nothing is verified", async () => {
-    // const wsRoot = "/Users/jyeung/code/dendron/dendron/test-workspace/";
-    // const vault1: DVault = {
-    //   name: "vault",
-    //   fsPath: "vault",
-    // };
+    debugger;
+    // const factory = new SqliteFactory();
 
-    const wsRoot = "/Users/jyeung/code/dendron/org-workspace/";
+    const wsRoot = "/Users/jyeung/code/dendron/dendron/test-workspace/";
     const vault1: DVault = {
-      name: "private",
-      fsPath: "org-private",
-      selfContained: true,
+      name: "vault",
+      fsPath: "vault",
     };
 
+    const vpath = "/Users/jyeung/code/dendron/dendron/test-workspace/vault/";
+    // const vpath = "/Users/jyeung/code/dendron/org-workspace/org-private/notes";
     const db = await SqliteFactory.init(
       wsRoot,
       [vault1],

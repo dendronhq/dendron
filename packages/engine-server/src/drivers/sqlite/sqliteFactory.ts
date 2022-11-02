@@ -1,6 +1,6 @@
 import { DVault, IFileStore } from "@dendronhq/common-all";
 import { Database } from "sqlite3";
-import { parseAllNoteFiles } from "../file";
+import { parseAllNoteFilesForSqlite } from "../file";
 import { SqliteMetadataStore } from "./SqliteMetadataStore";
 import { LinksTableUtils } from "./tables/LinksTable";
 import { NotePropsTableUtils } from "./tables/NotePropsTable";
@@ -60,7 +60,13 @@ export class SqliteFactory {
         }
 
         // TODO: Add in schemaModuleDict
-        return parseAllNoteFiles(maybeFiles.data!, vault, _db, vpath, {});
+        return parseAllNoteFilesForSqlite(
+          maybeFiles.data!,
+          vault,
+          _db,
+          vpath,
+          {}
+        );
       })
     );
 

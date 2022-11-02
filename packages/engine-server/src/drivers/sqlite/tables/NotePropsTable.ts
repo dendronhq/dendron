@@ -2,6 +2,7 @@
 /* eslint-disable no-useless-constructor */
 import { NotePropsMeta } from "@dendronhq/common-all";
 import { ResultAsync } from "neverthrow";
+import { RehypeStringifyOptions } from "rehype-stringify";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
 import {
@@ -38,23 +39,26 @@ export class NotePropsTableUtils {
    */
   public static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
-CREATE TABLE IF NOT EXISTS NoteProps (
-  id TEXT PRIMARY KEY,
-  fname TEXT NOT NULL,
-  title TEXT,
-  description TEXT,
-  updated INTEGER,
-  created INTEGER,
-  anchors TEXT,
-  stub BOOLEAN,
-  custom TEXT,
-  contentHash TEXT,
-  color TEXT,
-  image TEXT,
-  traits TEXT
-);`;
+      CREATE TABLE IF NOT EXISTS NoteProps (
+        id TEXT NOT NULL PRIMARY KEY,
+        fname TEXT NOT NULL,
+        title TEXT,
+        description TEXT,
+        updated INTEGER,
+        created INTEGER,
+        anchors TEXT,
+        stub BOOLEAN,
+        custom TEXT,
+        contentHash TEXT,
+        color TEXT,
+        image TEXT,
+        traits TEXT);`;
 
-    return executeSqlWithVoidResult(db, sql);
+    const idx = `CREATE INDEX IF NOT EXISTS idx_NoteProps_fname ON NoteProps (fname)`;
+
+    return executeSqlWithVoidResult(db, sql).andThen(() => {
+      return executeSqlWithVoidResult(db, idx);
+    });
   }
 
   /**
@@ -77,6 +81,35 @@ CREATE TABLE IF NOT EXISTS NoteProps (
           reject(new Error(`No row with id ${id} found`));
         } else {
           resolve(row as NotePropsTableRow);
+        }
+      });
+    });
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
+    });
+  }
+
+  public static getHashByFnameAndVaultId(
+    db: Database,
+    fname: string,
+    vaultId: number
+  ): ResultAsync<string | null, SqliteError> {
+    const sql = `
+      SELECT contentHash
+      FROM NoteProps
+      JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id
+      WHERE fname = '${fname}'
+      AND VaultNotes.vaultId = ${vaultId}`;
+
+    const prom = new Promise<string | null>((resolve, reject) => {
+      db.get(sql, (err, row) => {
+        if (err) {
+          reject(err.message);
+        } else if (!row) {
+          resolve(null);
+        } else {
+          resolve(row.contentHash as string);
         }
       });
     });

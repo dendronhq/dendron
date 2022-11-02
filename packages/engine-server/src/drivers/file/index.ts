@@ -1,2 +1,2 @@
 export * from "./schemaParser";
-export * from "./NoteParserV3";
+export * from "./paseAllNoteFilesForSqlite";

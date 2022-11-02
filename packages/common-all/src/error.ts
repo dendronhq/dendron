@@ -414,3 +414,34 @@ export function isTSError(err: any): err is Error {
     (err as Error).message !== undefined && (err as Error).name !== undefined
   );
 }
+
+export type DendronErrorExperimental =
+  | { type: "Other"; error?: IDendronError; context?: string }
+  | { type: "YAMLException"; error: IDendronError }
+  | { type: "NotFound"; context?: string };
+
+export const other = (
+  context: string,
+  error?: IDendronError
+): DendronErrorExperimental => ({
+  type: "Other",
+  context,
+  error,
+});
+
+export const notFound = (context?: string): DendronErrorExperimental => ({
+  type: "NotFound",
+  context,
+});
+
+export const yamlException = (error?: unknown): DendronErrorExperimental => ({
+  type: "YAMLException",
+  error: new DendronError({
+    message:
+      error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : `YAMLException`,
+    severity: ERROR_SEVERITY.FATAL,
+    ...(error instanceof Error && { innerError: error }),
+  }),
+});

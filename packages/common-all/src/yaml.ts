@@ -1,32 +1,16 @@
 import YAML from "js-yaml";
 import { fromThrowable, Result } from "neverthrow";
 import type { AnyJson } from "./types";
-import { ERROR_SEVERITY } from "./constants";
-import { DendronError } from "./error";
+import { yamlException, DendronErrorExperimental } from "./error";
 
-type YAMLDendronError = DendronError;
-type YAMLResult<T> = Result<T, YAMLDendronError>;
+type YAMLResult<T> = Result<T, DendronErrorExperimental>;
 
 const load = fromThrowable(YAML.load, (error) => {
-  return new DendronError({
-    message:
-      error instanceof YAML.YAMLException
-        ? `${error.name}: ${error.message}`
-        : `YAMLException`,
-    severity: ERROR_SEVERITY.FATAL,
-    ...(error instanceof Error && { innerError: error }),
-  });
+  return yamlException(error);
 });
 
 const dump = fromThrowable(YAML.dump, (error) => {
-  return new DendronError({
-    message:
-      error instanceof YAML.YAMLException
-        ? `${error.name}: ${error.message}`
-        : `YAMLException`,
-    severity: ERROR_SEVERITY.FATAL,
-    ...(error instanceof Error && { innerError: error }),
-  });
+  return yamlException(error);
 });
 
 export const fromStr = (str: string, overwriteDuplicate?: boolean) => {

@@ -1221,7 +1221,7 @@ export class ConfigUtils {
   static parsePartial(
     input: unknown
   ): Result<DeepPartial<DendronConfig>, DendronError> {
-    const schema = getDendronConfigSchema();
+    const schema = getDendronConfigSchema().deepPartial();
     return parse(schema, input, "Invalid partial Dendron config");
   }
 

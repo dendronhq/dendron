@@ -5,6 +5,7 @@ import { ERROR_SEVERITY } from "./constants";
 import { DendronError } from "./error";
 
 type YAMLDendronError = DendronError;
+type YAMLResult<T> = Result<T, YAMLDendronError>;
 
 const load = fromThrowable(YAML.load, (error) => {
   return new DendronError({
@@ -14,7 +15,7 @@ const load = fromThrowable(YAML.load, (error) => {
         : `YAMLException`,
     severity: ERROR_SEVERITY.FATAL,
     ...(error instanceof Error && { innerError: error }),
-  }) as YAMLDendronError;
+  });
 });
 
 const dump = fromThrowable(YAML.dump, (error) => {
@@ -25,16 +26,19 @@ const dump = fromThrowable(YAML.dump, (error) => {
         : `YAMLException`,
     severity: ERROR_SEVERITY.FATAL,
     ...(error instanceof Error && { innerError: error }),
-  }) as YAMLDendronError;
+  });
 });
 
 export const fromStr = (str: string, overwriteDuplicate?: boolean) => {
   return load(str, {
     schema: YAML.JSON_SCHEMA,
     json: overwriteDuplicate ?? false,
-  }) as Result<AnyJson, YAMLDendronError>;
+  }) as YAMLResult<AnyJson>;
 };
 
 export const toStr = (data: any) => {
-  return dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  return dump(data, {
+    indent: 4,
+    schema: YAML.JSON_SCHEMA,
+  }) as YAMLResult<string>;
 };

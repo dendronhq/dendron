@@ -142,17 +142,17 @@ export class ConfigStore implements IConfigStore {
         return okAsync(payload);
       });
 
-    return processedPayload
-      .map((payload) => {
-        return YamlUtils.toStr(payload).asyncAndThen((endPayload) => {
+    return processedPayload.andThen((payload) => {
+      return YamlUtils.toStr(payload)
+        .asyncAndThen((endPayload) => {
           return ResultUtils.PromiseRespV3ToResultAsync(
             this._fileStore.write(this.path, endPayload)
-          ).map(() => {
-            return payload;
-          });
+          );
+        })
+        .map(() => {
+          return payload;
         });
-      })
-      .andThen((inner) => inner);
+    });
   }
 
   get(key: string, opts?: ConfigReadOpts) {

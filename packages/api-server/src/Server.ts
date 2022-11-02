@@ -17,6 +17,7 @@ import asyncHandler from "express-async-handler";
 import fs from "fs-extra";
 import morgan from "morgan";
 import path from "path";
+import qs from "qs";
 import querystring from "querystring";
 import { getLogger } from "./core";
 import { GoogleAuthController } from "./modules/oauth";
@@ -47,6 +48,14 @@ export function appModule({
   const ctx = "appModule:start";
   const logger = getLogger();
   const app = express();
+
+  // Increase the size limit of arrays being parsed from query parameters. If
+  // the number of items in the query string exceed 'arrayLimit', it gets
+  // converted to an object instead of an array automatically.
+  app.set("query parser", (str: any) => {
+    return qs.parse(str, { arrayLimit: 1000 });
+  });
+
   app.use(cors());
   app.use(express.json({ limit: "500mb" }));
   app.use(express.urlencoded({ extended: true }));

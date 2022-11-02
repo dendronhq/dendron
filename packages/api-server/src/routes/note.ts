@@ -52,8 +52,20 @@ router.get(
   "/bulkGet",
   asyncHandler(async (req: Request, res: Response<BulkGetNoteResp>) => {
     const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
+
+    // Express will convert the ids array into an object if it exceeds the
+    // 'arrayLimit' value set in the query parser (see {@link appModule}). In
+    // that case, convert the object back to an array
+    let processedIdPayload = ids;
+    if (!Array.isArray(processedIdPayload)) {
+      processedIdPayload = Object.values(processedIdPayload);
+    }
+
     const engine = await getWSEngine({ ws: ws || "" });
-    ExpressUtils.setResponse(res, await engine.bulkGetNotes(ids));
+    ExpressUtils.setResponse(
+      res,
+      await engine.bulkGetNotes(processedIdPayload)
+    );
   })
 );
 
@@ -61,8 +73,17 @@ router.get(
   "/bulkGetMeta",
   asyncHandler(async (req: Request, res: Response<BulkGetNoteMetaResp>) => {
     const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
+
+    let processedIdPayload = ids;
+    if (!Array.isArray(processedIdPayload)) {
+      processedIdPayload = Object.values(processedIdPayload);
+    }
+
     const engine = await getWSEngine({ ws: ws || "" });
-    ExpressUtils.setResponse(res, await engine.bulkGetNotesMeta(ids));
+    ExpressUtils.setResponse(
+      res,
+      await engine.bulkGetNotesMeta(processedIdPayload)
+    );
   })
 );
 
@@ -149,6 +170,11 @@ router.post(
   "/bulkAdd",
   asyncHandler(async (req: Request, res: Response<BulkWriteNotesResp>) => {
     const { ws, opts } = req.body as EngineBulkAddRequest;
+
+    if (!Array.isArray(opts.notes)) {
+      opts.notes = Object.values(opts.notes);
+    }
+
     const engine = await getWSEngine({ ws: ws || "" });
     const out = await engine.bulkWriteNotes(opts);
     ExpressUtils.setResponse(res, out);

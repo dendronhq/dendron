@@ -53,13 +53,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response<BulkGetNoteResp>) => {
     const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
 
-    // Express will convert the ids array into an object if it exceeds the
-    // 'arrayLimit' value set in the query parser (see {@link appModule}). In
-    // that case, convert the object back to an array
-    let processedIdPayload = ids;
-    if (!Array.isArray(processedIdPayload)) {
-      processedIdPayload = Object.values(processedIdPayload);
-    }
+    const processedIdPayload = convertToArrayIfObject(ids);
 
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(
@@ -74,10 +68,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response<BulkGetNoteMetaResp>) => {
     const { ids, ws } = req.query as unknown as EngineBulkGetNoteRequest;
 
-    let processedIdPayload = ids;
-    if (!Array.isArray(processedIdPayload)) {
-      processedIdPayload = Object.values(processedIdPayload);
-    }
+    const processedIdPayload = convertToArrayIfObject(ids);
 
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(
@@ -202,5 +193,17 @@ router.post(
     ExpressUtils.setResponse(res, await engine.getDecorations(opts));
   })
 );
+
+/**
+ * Express will convert the ids array into an object if it exceeds the
+ * 'arrayLimit' value set in the query parser (see {@link appModule}). In that
+ * case, convert the object back to an array
+ */
+function convertToArrayIfObject(payload: any): Array<any> {
+  if (!Array.isArray(payload)) {
+    return Object.values(payload);
+  }
+  return payload;
+}
 
 export { router as noteRouter };

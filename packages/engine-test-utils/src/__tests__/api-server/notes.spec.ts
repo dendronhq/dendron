@@ -319,4 +319,6 @@ describe("api/note/getMeta tests", () => {
       expect(resp.error?.message).toContain("NoteProps not found");
     });
   });
+
+  // TODO: Add bulk get tests
 });

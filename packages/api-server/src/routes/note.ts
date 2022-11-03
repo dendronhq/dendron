@@ -33,6 +33,9 @@ const router = Router();
 router.get(
   "/get",
   asyncHandler(async (req: Request, res: Response<GetNoteResp>) => {
+    // TODO: All of these 'as unknown as foo' calls are problematic - we can
+    // never guarantee that the correct parameters get passed over to the API.
+    // We need more robust input checking at this API layer.
     const { id, ws } = req.query as unknown as EngineGetNoteRequest;
     const engine = await getWSEngine({ ws: ws || "" });
     ExpressUtils.setResponse(res, await engine.getNote(id));
@@ -200,7 +203,7 @@ router.post(
  * case, convert the object back to an array
  */
 function convertToArrayIfObject(payload: any): Array<any> {
-  if (!Array.isArray(payload)) {
+  if (payload && !Array.isArray(payload)) {
     return Object.values(payload);
   }
   return payload;

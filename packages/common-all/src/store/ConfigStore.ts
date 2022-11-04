@@ -30,20 +30,12 @@ export class ConfigStore implements IConfigStore {
     const config: DendronConfig = ConfigUtils.genLatestConfig(defaults);
 
     return YamlUtils.toStr(config)
-      .asyncAndThen((configDump) =>
-        ResultUtils.PromiseRespV3ToResultAsync(
-          this._fileStore.write(this.path, configDump)
-        )
-      )
-      .map(() => {
-        return config;
-      });
+      .asyncAndThen((configDump) => this.writeToFS(this.path, configDump))
+      .map(() => config);
   }
 
   readRaw() {
-    return ResultUtils.PromiseRespV3ToResultAsync(
-      this._fileStore.read(this.path)
-    )
+    return this.readFromFS(this.path)
       .andThen(YamlUtils.fromStr)
       .andThen(ConfigUtils.parsePartial);
   }
@@ -56,28 +48,13 @@ export class ConfigStore implements IConfigStore {
       return this.readWithDefaults();
     } else {
       return this.searchOverride()
-        .orElse(() => {
-          return this.readWithDefaults();
-        })
-        .andThen((override) => {
-          if (override.workspace) {
-            if (
-              _.isEmpty(override.workspace) ||
-              (override.workspace.vaults &&
-                !_.isArray(override.workspace.vaults))
-            ) {
-              return errAsync(
-                new DendronError({
-                  message:
-                    "workspace must not be empty and vaults must be an array if workspace is set",
-                })
-              );
-            }
-          }
-          return this.readWithDefaults().map((config) => {
-            return ConfigUtils.mergeConfig(config, override);
-          });
-        });
+        .orElse(() => this.readWithDefaults())
+        .andThen(ConfigUtils.validateLocalConfig)
+        .andThen((override) =>
+          this.readWithDefaults().map((config) =>
+            ConfigUtils.mergeConfig(config, override)
+          )
+        );
     }
   }
 
@@ -91,7 +68,7 @@ export class ConfigStore implements IConfigStore {
   }
 
   private readOverride(path: URI) {
-    return ResultUtils.PromiseRespV3ToResultAsync(this._fileStore.read(path));
+    return this.readFromFS(path);
   }
 
   private searchOverride() {
@@ -138,21 +115,23 @@ export class ConfigStore implements IConfigStore {
         };
         return okAsync(payloadDifference);
       })
-      .orElse(() => {
-        return okAsync(payload);
-      });
+      .orElse(() => okAsync(payload));
 
-    return processedPayload.andThen((payload) => {
-      return YamlUtils.toStr(payload)
-        .asyncAndThen((endPayload) => {
-          return ResultUtils.PromiseRespV3ToResultAsync(
-            this._fileStore.write(this.path, endPayload)
-          );
-        })
-        .map(() => {
-          return payload;
-        });
-    });
+    return processedPayload.andThen((payload) =>
+      YamlUtils.toStr(payload)
+        .asyncAndThen((endPayload) => this.writeToFS(this.path, endPayload))
+        .map(() => payload)
+    );
+  }
+
+  private writeToFS(uri: URI, content: string) {
+    return ResultUtils.PromiseRespV3ToResultAsync(
+      this._fileStore.write(uri, content)
+    );
+  }
+
+  private readFromFS(uri: URI) {
+    return ResultUtils.PromiseRespV3ToResultAsync(this._fileStore.read(uri));
   }
 
   get(key: string, opts?: ConfigReadOpts) {

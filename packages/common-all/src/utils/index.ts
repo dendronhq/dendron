@@ -1247,12 +1247,10 @@ export class ConfigUtils {
     config: DeepPartial<DendronConfig>
   ): Result<DeepPartial<DendronConfig>, DendronError> {
     if (config.workspace) {
-      console.log(1);
       if (
         _.isEmpty(config.workspace) ||
         (config.workspace.vaults && !_.isArray(config.workspace.vaults))
       ) {
-        console.log(2);
         return err(
           new DendronError({
             message:

@@ -41,3 +41,4 @@ packages/nextjs-template/yarn.lock
 packages/nextjs-template/styles/scss/
 packages/nextjs-template/next-env.d.ts
 packages/nextjs-template/tsconfig.tsbuildinfo
+packages/nextjs-template/package-lock.json

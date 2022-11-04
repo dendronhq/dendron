@@ -29,7 +29,7 @@ export class WorkspaceController {
     const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
-      engine = DendronEngineV3.create({
+      engine = await DendronEngineV3.create({
         wsRoot: uri,
         logger,
       });

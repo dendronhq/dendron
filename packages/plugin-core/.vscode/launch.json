@@ -146,6 +146,29 @@
       "outFiles": [
         "${workspaceFolder}/out/src/test/**/*.js"
       ]
-    }
+    },
+    {
+      "name": "Run Performance Test - File",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/perf-test/index"
+      ],
+      "env": {
+        "STAGE": "test",
+        "TEST_TO_RUN": "${fileBasenameNoExtension}"
+      },
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+        "**/extensionHostProcess.js"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/src/test/**/*.js"
+      ]
+    },
   ]
 }

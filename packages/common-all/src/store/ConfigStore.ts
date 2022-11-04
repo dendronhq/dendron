@@ -1,5 +1,5 @@
-import { errAsync, okAsync, err } from "neverthrow";
-import { other, notFound } from "../error";
+import { errAsync, okAsync } from "neverthrow";
+import { DendronError } from "../error";
 import { URI, Utils } from "vscode-uri";
 import { ConfigReadOpts, IConfigStore } from "./IConfigStore";
 import { IFileStore } from "./IFileStore";
@@ -45,11 +45,7 @@ export class ConfigStore implements IConfigStore {
       this._fileStore.read(this.path)
     )
       .andThen(YamlUtils.fromStr)
-      .andThen((x) =>
-        ConfigUtils.parsePartial(x).orElse((error) =>
-          err(other("parsePartial error", error))
-        )
-      );
+      .andThen(ConfigUtils.parsePartial);
   }
 
   read(opts?: ConfigReadOpts) {
@@ -71,9 +67,10 @@ export class ConfigStore implements IConfigStore {
                 !_.isArray(override.workspace.vaults))
             ) {
               return errAsync(
-                notFound(
-                  "workspace must not be empty and vaults must be an array if workspace is set"
-                )
+                new DendronError({
+                  message:
+                    "workspace must not be empty and vaults must be an array if workspace is set",
+                })
               );
             }
           }
@@ -89,9 +86,7 @@ export class ConfigStore implements IConfigStore {
       const cleanConfig = DConfigLegacy.configIsV4(rawConfig)
         ? DConfigLegacy.v4ToV5(rawConfig)
         : _.defaultsDeep(rawConfig, ConfigUtils.genDefaultConfig());
-      return ConfigUtils.parse(cleanConfig).orElse((error) =>
-        err(other("parsePartial error", error))
-      );
+      return ConfigUtils.parse(cleanConfig);
     });
   }
 
@@ -176,7 +171,7 @@ export class ConfigStore implements IConfigStore {
     return this.read().andThen((config) => {
       const prevValue = _.get(config, key);
       if (prevValue === undefined) {
-        return errAsync(notFound(`${key} does not exist`));
+        return errAsync(new DendronError({ message: `${key} does not exist` }));
       }
       _.unset(config, key);
       return this.write(config).map(() => prevValue);

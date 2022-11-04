@@ -24,8 +24,8 @@ describe("ConfigStore", () => {
       const wsRoot = tmpDir().name;
       const configStore = new ConfigStore(
         fileStore,
-        URI.parse(wsRoot),
-        URI.parse(homeDir)
+        URI.file(wsRoot),
+        URI.file(homeDir)
       );
 
       const createResult = await configStore.createConfig();
@@ -60,8 +60,8 @@ describe("ConfigStore", () => {
 
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         const readRawResult = await configStore.readRaw();
@@ -91,8 +91,8 @@ describe("ConfigStore", () => {
 
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         const readWithDefaultResult = await configStore.read();
@@ -152,8 +152,8 @@ describe("ConfigStore", () => {
 
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         // readRaw returns config with no vaults
@@ -207,8 +207,8 @@ describe("ConfigStore", () => {
         const wsRoot = tmpDir().name;
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         await configStore.createConfig();
@@ -298,8 +298,8 @@ describe("ConfigStore", () => {
 
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         // read in config with override
@@ -344,8 +344,8 @@ describe("ConfigStore", () => {
         const wsRoot = tmpDir().name;
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         const createResult = await configStore.createConfig();
@@ -365,8 +365,8 @@ describe("ConfigStore", () => {
         const wsRoot = tmpDir().name;
         const configStore = new ConfigStore(
           fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
+          URI.file(wsRoot),
+          URI.file(homeDir)
         );
 
         await configStore.createConfig();
@@ -410,8 +410,8 @@ describe("ConfigStore", () => {
       const wsRoot = tmpDir().name;
       const configStore = new ConfigStore(
         fileStore,
-        URI.parse(wsRoot),
-        URI.parse(homeDir)
+        URI.file(wsRoot),
+        URI.file(homeDir)
       );
 
       await configStore.createConfig();
@@ -438,8 +438,8 @@ describe("ConfigStore", () => {
       const wsRoot = tmpDir().name;
       const configStore = new ConfigStore(
         fileStore,
-        URI.parse(wsRoot),
-        URI.parse(homeDir)
+        URI.file(wsRoot),
+        URI.file(homeDir)
       );
 
       await configStore.createConfig();

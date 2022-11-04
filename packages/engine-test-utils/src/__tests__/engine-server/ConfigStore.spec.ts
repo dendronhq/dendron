@@ -89,33 +89,11 @@ describe("ConfigStore", () => {
           URI.parse(homeDir)
         );
 
-        const readWithDefaultResult = await configStore.read({
-          mode: "default",
-        });
+        const readWithDefaultResult = await configStore.read();
 
         expect(readWithDefaultResult.isOk()).toBeTruthy();
         const config = readWithDefaultResult._unsafeUnwrap();
         expect(config).toEqual(ConfigUtils.genDefaultConfig());
-
-        // test cache
-
-        // make sure dendron.yml is deleted
-        unlinkSync(configPath);
-        const rawResultIsError = (
-          await configStore.readRaw()
-        )._unsafeUnwrapErr();
-        expect(
-          rawResultIsError.message.includes(`Failed to read from ${configPath}`)
-        ).toBeTruthy();
-        const readWithDefaultCacheResult = await configStore.read({
-          mode: "default",
-          useCache: true,
-        });
-
-        // test if useCache returns ok
-        expect(readWithDefaultCacheResult.isOk()).toBeTruthy();
-        const configCached = readWithDefaultCacheResult._unsafeUnwrap();
-        expect(configCached).toEqual(ConfigUtils.genDefaultConfig());
       });
 
       test("WHEN read with override, then retrieve config with override applied", async () => {
@@ -178,7 +156,7 @@ describe("ConfigStore", () => {
 
         // read with override from workspace override if both exists
         const readOverrideResult1 = await configStore.read({
-          mode: "override",
+          applyOverride: true,
         });
         expect(readOverrideResult1.isOk()).toBeTruthy();
         const overrideConfig1 = readOverrideResult1._unsafeUnwrap();
@@ -192,7 +170,7 @@ describe("ConfigStore", () => {
         // read with override from home directory if not found in workspace
         unlinkSync(path.join(wsRoot, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE));
         const readOverrideResult2 = await configStore.read({
-          mode: "override",
+          applyOverride: true,
         });
         expect(readOverrideResult2.isOk()).toBeTruthy();
         const overrideConfig2 = readOverrideResult2._unsafeUnwrap();
@@ -234,7 +212,7 @@ describe("ConfigStore", () => {
         };
 
         // make sure we start with a default config
-        const readResult = await configStore.read({ mode: "default" });
+        const readResult = await configStore.read();
         expect(
           readResult.isOk() && readResult._unsafeUnwrap() === defaultConfig
         );
@@ -245,7 +223,7 @@ describe("ConfigStore", () => {
         expect(writeResult._unsafeUnwrap().commands.lookup).toEqual(diff);
 
         // read again and verify
-        const readResult2 = await configStore.read({ mode: "default" });
+        const readResult2 = await configStore.read();
         expect(
           readResult2.isOk() &&
             readResult2._unsafeUnwrap().commands.lookup === diff
@@ -299,7 +277,7 @@ describe("ConfigStore", () => {
 
         // read in config with override
         const configWithOverride = (
-          await configStore.read({ mode: "override" })
+          await configStore.read({ applyOverride: true })
         )._unsafeUnwrap();
 
         // change some things
@@ -344,38 +322,9 @@ describe("ConfigStore", () => {
 
         const defaultConfig = createResult._unsafeUnwrap();
 
-        const getResult = await configStore.get("commands", {
-          mode: "default",
-        });
+        const getResult = await configStore.get("commands");
         expect(getResult.isOk()).toBeTruthy();
         expect(getResult._unsafeUnwrap()).toEqual(defaultConfig.commands);
-      });
-
-      test("WHEN useCache, then retrieve value from cached config", async () => {
-        const homeDir = tmpDir().name;
-        const wsRoot = tmpDir().name;
-        const configStore = new ConfigStore(
-          fileStore,
-          URI.parse(wsRoot),
-          URI.parse(homeDir)
-        );
-
-        await configStore.createConfig();
-
-        const getResult = await configStore.get("commands", {
-          mode: "default",
-        });
-
-        unlinkSync(configStore.path.fsPath);
-
-        const cachedGetResult = await configStore.get("commands", {
-          mode: "default",
-        });
-
-        expect(
-          cachedGetResult.isOk() &&
-            cachedGetResult._unsafeUnwrap() === getResult._unsafeUnwrap()
-        );
       });
 
       test("WHEN override mode, then retrieve value of config after override", async () => {
@@ -406,7 +355,7 @@ describe("ConfigStore", () => {
         );
 
         const getResult = await configStore.get("workspace.vaults", {
-          mode: "override",
+          applyOverride: true,
         });
 
         expect(getResult.isOk()).toBeTruthy();
@@ -443,7 +392,7 @@ describe("ConfigStore", () => {
       ).toEqual(100);
     });
 
-    test("WHEN delete, delete key, then persist/cache", async () => {
+    test("WHEN delete, delete key, then persist", async () => {
       const homeDir = tmpDir().name;
       const wsRoot = tmpDir().name;
       const configStore = new ConfigStore(

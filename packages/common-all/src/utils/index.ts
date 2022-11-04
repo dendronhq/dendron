@@ -17,7 +17,7 @@ import {
   ERROR_SEVERITY,
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
-import { DendronError, ErrorMessages, IDendronError } from "../error";
+import { DendronError, ErrorMessages } from "../error";
 import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
@@ -1206,11 +1206,11 @@ export class ConfigUtils {
    * Parses an unknown input into a DendronConfig
    * @param input
    */
-  static parse(input: unknown): Result<DendronConfig, IDendronError> {
+  static parse(input: unknown): Result<DendronConfig, DendronError> {
     const schema = getDendronConfigSchema();
 
     return parse(schema, input, "Invalid Dendron Config").map((value) => {
-      // TODO remove once all properties are defined in the schema, because that the parse will have set all default values for us already.
+      // TODO remove once all properties are defined in the schema, because then the parse will have set all default values for us already.
       return _.defaultsDeep(
         value,
         ConfigUtils.genDefaultConfig()
@@ -1221,7 +1221,7 @@ export class ConfigUtils {
   static parsePartial(
     input: unknown
   ): Result<DeepPartial<DendronConfig>, DendronError> {
-    const schema = getDendronConfigSchema();
+    const schema = getDendronConfigSchema().deepPartial();
     return parse(schema, input, "Invalid partial Dendron config");
   }
 

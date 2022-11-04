@@ -1188,7 +1188,7 @@ export function cleanName(name: string): string {
 
 /**
  * Convert Windows backslash paths to slash paths: `foo\\bar` ➔ `foo/bar`
- * Copied from https://github.com/sindresorhus/slash with the rational that its latest version is build as an pure ESM.
+ * Copied from https://github.com/sindresorhus/slash with the rational that its latest version is build as an pure ESM and we currently don't support these.
  */
 export function slash(path: string) {
   const isExtendedLengthPath = /^\\\\\?\\/.test(path);

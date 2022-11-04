@@ -79,6 +79,12 @@ export abstract class EngineV3Base implements ReducedDEngine {
    * See {@link DEngine.bulkGetNotes}
    */
   async bulkGetNotes(ids: string[]): Promise<BulkGetNoteResp> {
+    if (!ids || ids.length === 0) {
+      return {
+        data: [],
+      };
+    }
+
     const bulkResponses = await this.noteStore.bulkGet(ids);
 
     const errors = bulkResponses
@@ -97,6 +103,12 @@ export abstract class EngineV3Base implements ReducedDEngine {
    * See {@link DEngine.bulkGetNotesMeta}
    */
   async bulkGetNotesMeta(ids: string[]): Promise<BulkGetNoteMetaResp> {
+    if (!ids || ids.length === 0) {
+      return {
+        data: [],
+      };
+    }
+
     const bulkResponses = await this.noteStore.bulkGetMetadata(ids);
 
     const errors = bulkResponses

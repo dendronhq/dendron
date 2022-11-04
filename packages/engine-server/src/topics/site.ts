@@ -602,12 +602,22 @@ export class SiteUtils {
     const domainId = domainNote.id;
     // merge children
     domainNote.children = getUniqueChildrenIds(noteCandidates);
-    // update children's parent field
-    const children = (await engine.bulkGetNotes(domainNote.children)).data;
-    children.map((note) => {
-      note.parent = domainId;
-    });
-    await engine.bulkWriteNotes({ notes: children, opts: { metaOnly: true } });
+
+    if (domainNote.children) {
+      // update children's parent field
+      const children = (await engine.bulkGetNotes(domainNote.children)).data;
+
+      if (children && children.length > 0) {
+        children.map((note) => {
+          note.parent = domainId;
+        });
+        await engine.bulkWriteNotes({
+          notes: children,
+          opts: { metaOnly: true },
+        });
+      }
+    }
+
     const logger = createLogger(LOGGER_NAME);
     logger.info({
       ctx: "filterByHierarchy",

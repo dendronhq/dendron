@@ -1,7 +1,6 @@
 // TODO: remove this disable once we deprecate old site config.
 /* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
-import slash from "slash";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -1185,6 +1184,20 @@ export function cleanName(name: string): string {
     .toLocaleLowerCase();
   name = name.replace(/ /g, "-");
   return name;
+}
+
+/**
+ * Convert Windows backslash paths to slash paths: `foo\\bar` ➔ `foo/bar`
+ * Copied from https://github.com/sindresorhus/slash with the rational that its latest version is build as an pure ESM.
+ */
+export function slash(path: string) {
+  const isExtendedLengthPath = /^\\\\\?\\/.test(path);
+
+  if (isExtendedLengthPath) {
+    return path;
+  }
+
+  return path.replace(/\\/g, "/");
 }
 
 /**

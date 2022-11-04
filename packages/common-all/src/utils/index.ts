@@ -1,6 +1,7 @@
 // TODO: remove this disable once we deprecate old site config.
 /* eslint-disable camelcase */
 import GithubSlugger from "github-slugger";
+import slash from "slash";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
@@ -1188,10 +1189,11 @@ export function cleanName(name: string): string {
 
 /**
  * Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths.
- * NOTE: `path.posix` might be not available depending on your build system. For example at the time of writing `dendron-plugin-views` does not implement a `posix` property.
  */
 export function normalizeUnixPath(fsPath: string): string {
-  return path.posix.normalize(fsPath.replace(/\\/g, "/"));
+  return path.posix
+    ? path.posix.normalize(fsPath.replace(/\\/g, "/")) // NOTE: `path.posix` might be not available depending on your build system. For example at the time of writing `dendron-plugin-views` does not implement a `posix` property.
+    : slash(fsPath);
 }
 
 /** Wrapper(s) for easier testing, to wrap functions where we don't want to mock the global function. */

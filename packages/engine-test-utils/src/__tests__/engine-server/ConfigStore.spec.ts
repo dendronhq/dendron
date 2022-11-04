@@ -29,6 +29,9 @@ describe("ConfigStore", () => {
       );
 
       const createResult = await configStore.createConfig();
+      if (createResult.isErr()) {
+        throw createResult.error;
+      }
       expect(createResult.isOk()).toBeTruthy();
       const config = createResult._unsafeUnwrap();
       expect(config).toMatchSnapshot();
@@ -62,6 +65,9 @@ describe("ConfigStore", () => {
         );
 
         const readRawResult = await configStore.readRaw();
+        if (readRawResult.isErr()) {
+          throw readRawResult.error;
+        }
         expect(readRawResult.isOk()).toBeTruthy();
         const rawConfig = readRawResult._unsafeUnwrap();
         expect(rawConfig).toEqual(initialConfig);
@@ -91,6 +97,9 @@ describe("ConfigStore", () => {
 
         const readWithDefaultResult = await configStore.read();
 
+        if (readWithDefaultResult.isErr()) {
+          throw readWithDefaultResult.error;
+        }
         expect(readWithDefaultResult.isOk()).toBeTruthy();
         const config = readWithDefaultResult._unsafeUnwrap();
         expect(config).toEqual(ConfigUtils.genDefaultConfig());
@@ -149,6 +158,9 @@ describe("ConfigStore", () => {
 
         // readRaw returns config with no vaults
         const readRawResult = await configStore.readRaw();
+        if (readRawResult.isErr()) {
+          throw readRawResult.error;
+        }
         expect(
           readRawResult.isOk() &&
             readRawResult._unsafeUnwrap().workspace?.vaults === undefined
@@ -158,6 +170,9 @@ describe("ConfigStore", () => {
         const readOverrideResult1 = await configStore.read({
           applyOverride: true,
         });
+        if (readOverrideResult1.isErr()) {
+          throw readOverrideResult1.error;
+        }
         expect(readOverrideResult1.isOk()).toBeTruthy();
         const overrideConfig1 = readOverrideResult1._unsafeUnwrap();
         expect(overrideConfig1.workspace.vaults).toEqual([
@@ -172,6 +187,9 @@ describe("ConfigStore", () => {
         const readOverrideResult2 = await configStore.read({
           applyOverride: true,
         });
+        if (readOverrideResult2.isErr()) {
+          throw readOverrideResult2.error;
+        }
         expect(readOverrideResult2.isOk()).toBeTruthy();
         const overrideConfig2 = readOverrideResult2._unsafeUnwrap();
         expect(overrideConfig2.workspace.vaults).toEqual([
@@ -213,17 +231,26 @@ describe("ConfigStore", () => {
 
         // make sure we start with a default config
         const readResult = await configStore.read();
+        if (readResult.isErr()) {
+          throw readResult.error;
+        }
         expect(
           readResult.isOk() && readResult._unsafeUnwrap() === defaultConfig
         );
 
         // write result contains payload
         const writeResult = await configStore.write(writePayload);
+        if (writeResult.isErr()) {
+          throw writeResult.error;
+        }
         expect(writeResult.isOk()).toBeTruthy();
         expect(writeResult._unsafeUnwrap().commands.lookup).toEqual(diff);
 
         // read again and verify
         const readResult2 = await configStore.read();
+        if (readResult2.isErr()) {
+          throw readResult2.error;
+        }
         expect(
           readResult2.isOk() &&
             readResult2._unsafeUnwrap().commands.lookup === diff
@@ -292,6 +319,9 @@ describe("ConfigStore", () => {
         await configStore.write(configWithOverride);
 
         const postWriteReadResult = await configStore.readRaw();
+        if (postWriteReadResult.isErr()) {
+          throw postWriteReadResult.error;
+        }
         expect(postWriteReadResult.isOk()).toBeTruthy();
         expect(
           postWriteReadResult._unsafeUnwrap().commands?.lookup?.note
@@ -323,6 +353,9 @@ describe("ConfigStore", () => {
         const defaultConfig = createResult._unsafeUnwrap();
 
         const getResult = await configStore.get("commands");
+        if (getResult.isErr()) {
+          throw getResult.error;
+        }
         expect(getResult.isOk()).toBeTruthy();
         expect(getResult._unsafeUnwrap()).toEqual(defaultConfig.commands);
       });
@@ -358,6 +391,10 @@ describe("ConfigStore", () => {
           applyOverride: true,
         });
 
+        if (getResult.isErr()) {
+          throw getResult.error;
+        }
+
         expect(getResult.isOk()).toBeTruthy();
         expect(getResult._unsafeUnwrap()).toEqual([
           {
@@ -383,6 +420,10 @@ describe("ConfigStore", () => {
         "commands.lookup.note.fuzzThreshold",
         100
       );
+
+      if (updateResult.isErr()) {
+        throw updateResult.error;
+      }
       expect(updateResult.isOk()).toBeTruthy();
       expect(updateResult._unsafeUnwrap()).toEqual(0.2);
 
@@ -406,6 +447,10 @@ describe("ConfigStore", () => {
       const deleteResult = await configStore.delete(
         "commands.lookup.note.fuzzThreshold"
       );
+
+      if (deleteResult.isErr()) {
+        throw deleteResult.error;
+      }
       expect(deleteResult.isOk()).toBeTruthy();
       expect(deleteResult._unsafeUnwrap()).toEqual(0.2);
 

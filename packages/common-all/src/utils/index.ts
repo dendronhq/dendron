@@ -6,7 +6,7 @@ import minimatch from "minimatch";
 import path from "path";
 import querystring from "querystring";
 import semver from "semver";
-import type { Result } from "neverthrow";
+import { err, ok, Result } from "neverthrow";
 import { DateTime, LruCache, NotePropsMeta, VaultUtils } from "..";
 import { parse, z, schemaForType } from "../parse";
 import { COLORS_LIST } from "../colors";
@@ -17,7 +17,7 @@ import {
   ERROR_SEVERITY,
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
-import { DendronError, ErrorMessages, IDendronError } from "../error";
+import { DendronError, ErrorMessages } from "../error";
 import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {
@@ -1144,33 +1144,80 @@ export class ConfigUtils {
   }
 
   /**
-   * Parses an unkown input into a DendronConfig
+   * Parses an unknown input into a DendronConfig
    * @param input
    */
-
-  static parse(input: unknown): Result<DendronConfig, IDendronError> {
-    const schema = schemaForType<{ publishing: DendronPublishingConfig }>()(
-      z
-        .object({
-          version: z.number(),
-          dev: z.object({}).passthrough().optional(), // TODO DendronDevConfig;
-          commands: z.object({}).passthrough(), // TODO DendronCommandConfig;
-          workspace: z.object({}).passthrough(), // TODO DendronWorkspaceConfig;
-          preview: z.object({}).passthrough(), // TODO DendronPreviewConfig;
-          publishing: publishingSchema,
-          global: z.object({}).passthrough().optional(), // TODO DendronGlobalConfig;
-        })
-        .passthrough()
-    );
+  static parse(input: unknown): Result<DendronConfig, DendronError> {
+    const schema = getDendronConfigSchema();
 
     return parse(schema, input, "Invalid Dendron Config").map((value) => {
-      // TODO remove once all properties are defined in the schema, because that the parse will have set all default values for us already.
+      // TODO remove once all properties are defined in the schema, because then the parse will have set all default values for us already.
       return _.defaultsDeep(
         value,
         ConfigUtils.genDefaultConfig()
       ) as DendronConfig;
     });
   }
+
+  static parsePartial(
+    input: unknown
+  ): Result<DeepPartial<DendronConfig>, DendronError> {
+    const schema = getDendronConfigSchema().deepPartial();
+    return parse(schema, input, "Invalid partial Dendron config");
+  }
+
+  /**
+   * Given a dendron config and a override, return the merged result
+   * @param config
+   * @param override
+   */
+  static mergeConfig(
+    config: DendronConfig,
+    override: DeepPartial<DendronConfig>
+  ) {
+    _.mergeWith(config, override, (objValue: any, srcValue: any) => {
+      if (_.isArray(objValue)) {
+        return srcValue.concat(objValue);
+      }
+      return;
+    });
+    return config;
+  }
+
+  static validateLocalConfig(
+    config: DeepPartial<DendronConfig>
+  ): Result<DeepPartial<DendronConfig>, DendronError> {
+    if (config.workspace) {
+      if (
+        _.isEmpty(config.workspace) ||
+        (config.workspace.vaults && !_.isArray(config.workspace.vaults))
+      ) {
+        return err(
+          new DendronError({
+            message:
+              "workspace must not be empty and vaults must be an array if workspace is set",
+          })
+        );
+      }
+    }
+    return ok(config);
+  }
+}
+
+function getDendronConfigSchema() {
+  return schemaForType<{ publishing: DendronPublishingConfig }>()(
+    z
+      .object({
+        version: z.number(),
+        dev: z.object({}).passthrough().optional(), // TODO DendronDevConfig;
+        commands: z.object({}).passthrough(), // TODO DendronCommandConfig;
+        workspace: z.object({}).passthrough(), // TODO DendronWorkspaceConfig;
+        preview: z.object({}).passthrough(), // TODO DendronPreviewConfig;
+        publishing: publishingSchema,
+        global: z.object({}).passthrough().optional(), // TODO DendronGlobalConfig;
+      })
+      .passthrough()
+  );
 }
 
 /**

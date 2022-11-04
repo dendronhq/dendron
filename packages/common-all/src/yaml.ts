@@ -4,6 +4,9 @@ import type { AnyJson } from "./types";
 import { ERROR_SEVERITY } from "./constants";
 import { DendronError } from "./error";
 
+type YAMLDendronError = DendronError;
+type YAMLResult<T> = Result<T, YAMLDendronError>;
+
 const load = fromThrowable(YAML.load, (error) => {
   return new DendronError({
     message:
@@ -30,9 +33,12 @@ export const fromStr = (str: string, overwriteDuplicate?: boolean) => {
   return load(str, {
     schema: YAML.JSON_SCHEMA,
     json: overwriteDuplicate ?? false,
-  }) as Result<AnyJson, DendronError>;
+  }) as YAMLResult<AnyJson>;
 };
 
 export const toStr = (data: any) => {
-  return dump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
+  return dump(data, {
+    indent: 4,
+    schema: YAML.JSON_SCHEMA,
+  }) as YAMLResult<string>;
 };

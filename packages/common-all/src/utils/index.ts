@@ -1186,7 +1186,10 @@ export function cleanName(name: string): string {
   return name;
 }
 
-/** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
+/**
+ * Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths.
+ * NOTE: `path.posix` might be not available depending on your build system. For example at the time of writing `dendron-plugin-views` does not implement a `posix` property.
+ */
 export function normalizeUnixPath(fsPath: string): string {
   return path.posix.normalize(fsPath.replace(/\\/g, "/"));
 }

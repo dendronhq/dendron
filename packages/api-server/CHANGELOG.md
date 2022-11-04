@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.3](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.3) (2022-11-04)
+
+
+### Bug Fixes
+
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **workspace:** completionProvider and other bulk operations for engine v3 ([#3747](https://github.com/dendronhq/dendron/issues/3747)) ([e401a7e](https://github.com/dendronhq/dendron/commit/e401a7eb0256d66495d0782ca9bbbf87a16d8779))
+
+
+
+
+
 ## [0.116.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.116.2) (2022-10-26)
 
 

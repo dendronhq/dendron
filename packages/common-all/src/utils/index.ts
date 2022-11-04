@@ -17,7 +17,7 @@ import {
   ERROR_SEVERITY,
 } from "../constants";
 import { DENDRON_CONFIG } from "../constants/configs/dendronConfig";
-import { DendronError, ErrorMessages, IDendronError } from "../error";
+import { DendronError, ErrorMessages } from "../error";
 import { DHookDict, NoteChangeEntry, NoteProps } from "../types";
 import { GithubConfig } from "../types/configs/publishing/github";
 import {

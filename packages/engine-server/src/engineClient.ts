@@ -332,8 +332,15 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         });
         noteIndexProps = [];
       }
+    } else if (this._config.dev?.enableEngineV3) {
+      noteIndexProps = (
+        await this.api.noteQuery({
+          opts,
+          ws: this.wsRoot,
+        })
+      ).data!;
     } else {
-      noteIndexProps = await this.fuseEngine.queryNote({
+      noteIndexProps = this.fuseEngine.queryNote({
         qs,
         onlyDirectChildren,
         originalQS,

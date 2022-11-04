@@ -6,7 +6,7 @@ import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
 import { DLogger } from "../DLogger";
 import { DNodeUtils, NoteUtils } from "../dnode";
 import { DendronCompositeError, DendronError } from "../error";
-import { INoteStore, IQueryStore } from "../store";
+import { INoteStore } from "../store";
 import {
   BulkGetNoteMetaResp,
   BulkGetNoteResp,
@@ -42,20 +42,17 @@ import { VaultUtils } from "../vault";
  */
 export abstract class EngineV3Base implements ReducedDEngine {
   protected noteStore;
-  protected queryStore;
   protected logger;
   public vaults;
   public wsRoot;
 
   constructor(opts: {
     noteStore: INoteStore<string>;
-    queryStore: IQueryStore;
     logger: DLogger;
     vaults: DVault[];
     wsRoot: string;
   }) {
     this.noteStore = opts.noteStore;
-    this.queryStore = opts.queryStore;
     this.logger = opts.logger;
     this.vaults = opts.vaults;
     this.wsRoot = opts.wsRoot;
@@ -292,7 +289,6 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
     changes.push({ note: noteToDelete, status: "delete" });
     // Update metadata for all other changes
-    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -307,16 +303,12 @@ export abstract class EngineV3Base implements ReducedDEngine {
 
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // const ctx = "Engine:queryNotes";
-    const { qs, vault, onlyDirectChildren, originalQS } = opts;
+    const { vault } = opts;
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
       vault.selfContained = vault.selfContained === "true";
-
-    const response = await this.queryStore.queryNotes(qs, {
-      onlyDirectChildren,
-      originalQS,
-    });
+    const response = await this.noteStore.queryMetadata(opts);
     if (response.isErr()) {
       // TODO: need to return an error
       return [];

@@ -15,11 +15,9 @@ import {
   ERROR_STATUS,
   Event,
   EventEmitter,
-  FuseQueryStore,
   IDendronError,
   IFileStore,
   INoteStore,
-  IQueryStore,
   NoteChangeEntry,
   NoteDicts,
   NoteDictsUtils,
@@ -60,7 +58,6 @@ export class DendronEngineV3Web
       logger: new ConsoleLogger(),
       noteStore,
       vaults,
-      queryStore: new FuseQueryStore() as IQueryStore,
       wsRoot: wsRootURI.fsPath,
     });
     this.wsRootURI = wsRootURI;
@@ -93,7 +90,6 @@ export class DendronEngineV3Web
           }),
         };
       }
-      this.queryStore.replaceNotesIndex(notes);
       const bulkWriteOpts = _.values(notes).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body"]);
 
@@ -336,7 +332,6 @@ export class DendronEngineV3Web
     // TODO: Add schema
 
     // Propragate metadata for all other changes
-    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this._onNoteChangedEmitter.fire(changes);

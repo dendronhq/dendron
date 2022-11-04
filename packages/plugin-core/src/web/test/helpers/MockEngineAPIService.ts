@@ -19,6 +19,7 @@ import {
   RespV3,
   WriteNoteResp,
   type ReducedDEngine,
+  FuseEngine,
 } from "@dendronhq/common-all";
 
 export class MockEngineAPIService implements ReducedDEngine {
@@ -29,7 +30,11 @@ export class MockEngineAPIService implements ReducedDEngine {
 
   constructor() {
     // this.noteProps = [];
-    this.store = new NoteMetadataStore();
+    this.store = new NoteMetadataStore(
+      new FuseEngine({
+        fuzzThreshold: 0.2,
+      })
+    );
     this.wsRoot = "";
   }
 

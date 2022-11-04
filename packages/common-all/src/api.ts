@@ -12,6 +12,7 @@ import {
   FindNotesMetaResp,
   GetNoteMetaResp,
   GetNoteResp,
+  QueryNotesOpts,
   RenameNoteOpts,
   SchemaModuleProps,
   WriteNoteResp,
@@ -132,9 +133,8 @@ export type EngineBulkAddRequest = {
 } & { ws: string };
 
 export type NoteQueryRequest = {
-  qs: string;
-  vault?: DVault;
-} & Partial<WorkspaceRequest>;
+  opts: QueryNotesOpts;
+} & { ws: string };
 
 export type GetNoteBlocksRequest = {
   id: string;

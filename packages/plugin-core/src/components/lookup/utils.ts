@@ -550,7 +550,6 @@ export class PickerUtilsV2 {
     const queryResponse = await engine.queryNotes({
       qs: newQs,
       originalQS: newQs,
-      createIfNew: false,
     });
 
     // Sort Alphabetically by the Path Name

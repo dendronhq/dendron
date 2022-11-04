@@ -1,3 +1,5 @@
+import { ResultAsync } from "neverthrow";
+import { IDendronError } from "../error";
 import { Disposable, RespV3 } from "../types";
 
 /**
@@ -40,4 +42,14 @@ export interface IDataStore<K, V> extends Disposable {
    * @return original key
    */
   delete(key: K): Promise<RespV3<string>>;
+
+  /**
+   * Query data by criteria. Differs from find in that this supports full-text fuzzy search
+   * on note properties.
+   * TODO: consider replacing find altogether
+   *
+   * @param opts: data criteria
+   * @return List of data that matches criteria
+   */
+  query(opts: any): ResultAsync<V[], IDendronError>;
 }

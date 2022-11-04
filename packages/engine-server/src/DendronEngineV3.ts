@@ -26,7 +26,7 @@ import {
   error2PlainObject,
   ERROR_SEVERITY,
   ERROR_STATUS,
-  FuseQueryStore,
+  FuseEngine,
   GetDecorationsOpts,
   GetDecorationsResp,
   GetNoteBlocksOpts,
@@ -35,7 +35,6 @@ import {
   IDendronError,
   IFileStore,
   INoteStore,
-  IQueryStore,
   ISchemaStore,
   isNotUndefined,
   LruCache,
@@ -104,7 +103,6 @@ type DendronEngineOptsV3 = {
   vaults: DVault[];
   fileStore: IFileStore;
   noteStore: INoteStore<string>;
-  queryStore: IQueryStore;
   schemaStore: ISchemaStore<string>;
   logger: DLogger;
   config: DendronConfig;
@@ -141,21 +139,22 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const LOGGER = logger || createLogger();
     const config = DConfig.readConfigSync(wsRoot);
 
-    const queryStore = new FuseQueryStore();
     const fileStore = new NodeJSFileStore();
+    const fuseEngine = new FuseEngine({
+      fuzzThreshold: ConfigUtils.getLookup(config).note.fuzzThreshold,
+    });
 
     return new DendronEngineV3({
       wsRoot,
       vaults: ConfigUtils.getVaults(config),
-      queryStore,
       noteStore: new NoteStore(
         fileStore,
-        new NoteMetadataStore(),
+        new NoteMetadataStore(fuseEngine),
         URI.file(wsRoot)
       ),
       schemaStore: new SchemaStore(
         fileStore,
-        new SchemaMetadataStore(),
+        new SchemaMetadataStore(fuseEngine),
         URI.parse(wsRoot)
       ),
       fileStore,
@@ -190,6 +189,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       }
       const schemaDict: SchemaModuleDict = {};
       schemas.forEach((schema) => {
+        // TODO: what if there are duplicate schema.root.id
         schemaDict[schema.root.id] = schema;
       });
 
@@ -228,8 +228,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
         this.logger.info({ ctx, duration });
       }
 
-      await this.queryStore.replaceNotesIndex(notesById);
-      await this.queryStore.replaceSchemasIndex(schemaDict);
       const bulkWriteOpts = _.values(notesById).map((note) => {
         const noteMeta: NotePropsMeta = _.omit(note, ["body"]);
 
@@ -548,7 +546,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     }
 
     // Propragate metadata for all other changes
-    await this.queryStore.updateNotesIndex(changes);
     await this.updateNoteMetadataStore(changes);
 
     this.logger.info({
@@ -757,8 +754,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     schema: SchemaModuleProps,
     opts?: EngineSchemaWriteOpts
   ): Promise<WriteSchemaResp> {
-    const maybeSchema = await this._schemaStore.getMetadata(schema.root.id);
-
     const resp = opts?.metaOnly
       ? await this._schemaStore.writeMetadata({ key: schema.root.id, schema })
       : await this._schemaStore.write({ key: schema.root.id, schema });
@@ -766,11 +761,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     if (resp.error) {
       return { error: resp.error };
     }
-    // Remove existing schema from fuse engine first
-    if (maybeSchema.data) {
-      await this.queryStore.removeSchemaFromIndex(maybeSchema.data);
-    }
-    await this.queryStore.addSchemaToIndex(schema);
     return { data: undefined };
   }
 
@@ -812,17 +802,15 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   async querySchema(queryString: string): Promise<QuerySchemaResp> {
     const ctx = "DEngine:querySchema";
 
-    const schemaIds = await this.queryStore.querySchemas(queryString);
-    if (schemaIds.isErr()) {
-      return { error: schemaIds.error };
+    const schemas = await this._schemaStore.queryMetadata({
+      qs: queryString,
+    });
+    if (schemas.isErr()) {
+      return { error: schemas.error };
     }
-    const responses = await this._schemaStore.bulkGetMetadata(
-      schemaIds.value.map((ent) => ent.id)
-    );
-    const schemas = responses.map((resp) => resp.data).filter(isNotUndefined);
     this.logger.info({ ctx, msg: "exit" });
     return {
-      data: schemas,
+      data: schemas.value,
     };
   }
 

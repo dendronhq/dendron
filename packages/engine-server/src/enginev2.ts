@@ -346,7 +346,7 @@ export class DendronEngineV2 implements DEngine {
         (ent) => ent.note.id === id
       ) as NoteChangeEntry;
       if (noteChangeEntry.status === "delete") {
-        await this.fuseEngine.removeNoteFromIndex(note);
+        this.fuseEngine.removeNoteFromIndex(note);
       }
       return {
         data: changed,

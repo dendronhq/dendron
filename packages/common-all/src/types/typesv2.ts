@@ -316,10 +316,6 @@ export type QueryNotesOpts = {
   originalQS: string;
   onlyDirectChildren?: boolean;
   vault?: DVault;
-  /**
-   * @deprecated - we shouldn't be creating any notes in the engine from a query API call
-   */
-  createIfNew?: boolean;
 };
 
 export type BulkWriteNotesOpts = {

@@ -80,7 +80,6 @@ export class VaultQuickPick {
     const queryResponse = await this._engine.queryNotes({
       qs: newQs,
       originalQS: newQs,
-      createIfNew: false,
     });
 
     // Sort Alphabetically by the Path Name

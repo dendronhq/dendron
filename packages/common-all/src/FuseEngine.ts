@@ -6,6 +6,7 @@ import {
   DNodeUtils,
   NoteProps,
   NotePropsByIdDict,
+  NotePropsMeta,
   SchemaModuleDict,
   SchemaModuleProps,
   SchemaProps,
@@ -276,8 +277,8 @@ export class FuseEngine {
           }
           case "update": {
             // Fuse has no update. Must remove old and add new
-            await this.removeNoteFromIndex(change.prevNote);
-            await this.addNoteToIndex(change.note);
+            this.removeNoteFromIndex(change.prevNote);
+            this.addNoteToIndex(change.note);
             return;
           }
           default:
@@ -288,7 +289,7 @@ export class FuseEngine {
     );
   }
 
-  async removeNoteFromIndex(note: NoteProps) {
+  removeNoteFromIndex(note: NotePropsMeta) {
     this.notesIndex.remove((doc) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {
@@ -298,7 +299,7 @@ export class FuseEngine {
     });
   }
 
-  async addNoteToIndex(note: NoteProps) {
+  addNoteToIndex(note: NotePropsMeta) {
     const indexProps: NoteIndexProps = _.pick(note, [
       "fname",
       "id",
@@ -311,11 +312,11 @@ export class FuseEngine {
     this.notesIndex.add(indexProps);
   }
 
-  async addSchemaToIndex(schema: SchemaModuleProps) {
+  addSchemaToIndex(schema: SchemaModuleProps) {
     this.schemaIndex.add(SchemaUtils.getModuleRoot(schema));
   }
 
-  async removeSchemaFromIndex(smod: SchemaModuleProps) {
+  removeSchemaFromIndex(smod: SchemaModuleProps) {
     this.schemaIndex.remove((doc: SchemaProps) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {

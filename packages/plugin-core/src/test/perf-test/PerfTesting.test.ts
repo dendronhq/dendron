@@ -55,7 +55,7 @@ suite("Performance testing", function () {
               console.log(log, "------------->", perflogs[log], "\n");
             });
             const headers = {
-              Authorization: `Bearer <apiKey>`,
+              Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
               "Content-Type": "application/json",
             };
             const data = {
@@ -71,7 +71,7 @@ suite("Performance testing", function () {
               ],
             };
             await axios.post(
-              `https://api.airtable.com/v0/<baseId>/PerformaceData`,
+              `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PerformaceData`,
               data,
               { headers }
             );

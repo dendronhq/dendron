@@ -7,6 +7,7 @@ env:
 
 jobs:
   test:
+    environment: plugin-development
     strategy:
       # Allow other matrix jobs to continue after one fails, allowing us to
       # isolate platform-specific issues.
@@ -81,5 +82,8 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
       - name: Run tests
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
         run: yarn ci:test:plugin-perf
         timeout-minutes: 30

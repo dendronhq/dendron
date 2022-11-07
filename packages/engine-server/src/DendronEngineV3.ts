@@ -155,8 +155,8 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const fileStore = new NodeJSFileStore();
     const configStore = new ConfigStore(
       fileStore,
-      URI.parse(wsRoot),
-      URI.parse(homedir())
+      URI.file(wsRoot),
+      URI.file(homedir())
     );
 
     const configReadResult = await configStore.read();

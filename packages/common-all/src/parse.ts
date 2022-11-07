@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
 import type { ZodType } from "zod";
 import { ok, err } from "./utils";
 import type { Result } from "neverthrow";
@@ -36,8 +37,7 @@ export const parse = <T extends z.ZodTypeAny>(
     return err(
       new DendronError({
         message: [
-          ...(msg ? [msg] : []),
-          JSON.stringify(parsed.error.issues, null, 2),
+          fromZodError(parsed.error, { prefix: msg }).message,
           ...(schema.description ? [`Schema:${schema.description}`] : []),
         ].join("\n"),
       })

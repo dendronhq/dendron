@@ -187,3 +187,25 @@ describe("engine, cache", () => {
     );
   });
 });
+
+describe("engine, config", () => {
+  describe("WHEN engine is created", () => {
+    test("THEN config store is properly initialized", async () => {
+      await runEngineTestV5(
+        async ({ engine }) => {
+          const initResp = await engine.init();
+          expect(initResp.error).toBeUndefined();
+          expect(initResp.data).toBeTruthy();
+          expect(initResp.data.config).toBeTruthy();
+        },
+        {
+          createEngine,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+          },
+        }
+      );
+    });
+  });
+});

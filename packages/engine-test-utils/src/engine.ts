@@ -299,7 +299,6 @@ export async function runEngineTestV5(
     await preSetupHook({ wsRoot, vaults });
     const resp = await createEngine({ wsRoot, vaults });
     const engine = resp.engine;
-    console.log({ engine: JSON.stringify(engine, null, 2) });
     server = resp.server;
     const start = process.hrtime();
     const initResp = await engine.init();

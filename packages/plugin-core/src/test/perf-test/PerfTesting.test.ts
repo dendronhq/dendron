@@ -18,9 +18,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 
-let perflogs: { [key: string]: number } = {
-  activationTime: 0,
-};
+let perflogs: { [key: string]: number } = {};
 
 suite("Performance testing", function () {
   describe("10000 notes perf testing", () => {
@@ -65,6 +63,8 @@ suite("Performance testing", function () {
                 {
                   fields: {
                     date: Time.now().toLocaleString(),
+                    commitHash: process.env.GITHUB_SHA,
+                    githubRef: process.env.GITHUB_REF,
                     flag: `enableEngineV3: ${enableEngineV3}`,
                     os: os.platform(),
                     ...perflogs,
@@ -77,7 +77,7 @@ suite("Performance testing", function () {
               data,
               { headers }
             );
-            perflogs = { activationTime: 0 };
+            perflogs = {};
           });
           test("engine init duration", async () => {
             const engine = ExtensionProvider.getEngine();

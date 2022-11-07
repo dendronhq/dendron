@@ -95,4 +95,4 @@ jobs:
           AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
         run: yarn ci:test:plugin-perf
-        timeout-minutes: 30
+        timeout-minutes: 45

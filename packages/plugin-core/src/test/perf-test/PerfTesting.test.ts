@@ -18,7 +18,9 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 
-let perflogs: { [key: string]: number } = {};
+let perflogs: { [key: string]: number } = {
+  activationTime: 0,
+};
 
 suite("Performance testing", function () {
   describe("10000 notes perf testing", () => {
@@ -71,11 +73,11 @@ suite("Performance testing", function () {
               ],
             };
             await axios.post(
-              `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PerformaceData`,
+              `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PerformanceData`,
               data,
               { headers }
             );
-            perflogs = {};
+            perflogs = { activationTime: 0 };
           });
           test("engine init duration", async () => {
             const engine = ExtensionProvider.getEngine();

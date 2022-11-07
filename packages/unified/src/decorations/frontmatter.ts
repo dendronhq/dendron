@@ -24,7 +24,7 @@ export const decorateFrontmatter: Decorator<
   FrontmatterContent,
   DecorationsForDecorateFrontmatter
 > = async (opts) => {
-  const { node: frontmatter, config, engine, note } = opts;
+  const { node: frontmatter, config, engine } = opts;
   const { value: contents, position } = frontmatter;
   // Decorate the timestamps
 
@@ -71,7 +71,6 @@ export const decorateFrontmatter: Decorator<
         lineOffset,
         config,
         engine,
-        note,
       });
       tagDecorations.push(...decorations);
       errors.push(...errors);

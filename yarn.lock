@@ -4399,6 +4399,11 @@
   resolved "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
 
+"@types/normalize-path@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/@types/normalize-path/-/normalize-path-3.0.0.tgz#bb5c46cab77b93350b4cf8d7ff1153f47189ae31"
+  integrity sha512-Nd8y/5t/7CRakPYiyPzr/IAfYusy1FkcZYFEAcoMZkwpJv2n4Wm+olW+e7xBdHEXhOnWdG9ddbar0gqZWS4x5Q==
+
 "@types/open-graph-scraper@^4.7.0":
   version "4.8.1"
   resolved "https://registry.npmjs.org/@types/open-graph-scraper/-/open-graph-scraper-4.8.1.tgz#c009360a3e242f7e9a290d3609ffb950f44d6966"

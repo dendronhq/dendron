@@ -4,6 +4,7 @@ import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import minimatch from "minimatch";
 import path from "path";
+import normalizePath from "normalize-path";
 import querystring from "querystring";
 import semver from "semver";
 import type { Result } from "neverthrow";
@@ -1186,9 +1187,13 @@ export function cleanName(name: string): string {
   return name;
 }
 
-/** Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths. */
+/**
+ * Given a path on any platform, convert it to a unix style path. Avoid using this with absolute paths.
+ */
 export function normalizeUnixPath(fsPath: string): string {
-  return path.posix.normalize(fsPath.replace(/\\/g, "/"));
+  return path.posix
+    ? path.posix.normalize(fsPath.replace(/\\/g, "/"))
+    : normalizePath(fsPath); // `path.posix` might be not available depending on your build system. For example at the time of writing `dendron-plugin-views` does not implement a `posix` property.
 }
 
 /** Wrapper(s) for easier testing, to wrap functions where we don't want to mock the global function. */

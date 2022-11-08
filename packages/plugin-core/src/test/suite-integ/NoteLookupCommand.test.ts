@@ -2077,8 +2077,13 @@ suite("NoteLookupCommand", function () {
           expect(newNote?.body.trim()).toEqual("foo body");
 
           // should remove selection
-          const changedText = fooNoteEditor.document.getText();
-          expect(changedText.includes("foo body")).toBeFalsy();
+          const originalNote = (
+            await engine.findNotes({
+              fname: "foo",
+              vault: vaults[0],
+            })
+          )[0];
+          expect(originalNote.body.includes("foo body")).toBeFalsy();
           cmd.cleanUp();
           done();
         },

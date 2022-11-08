@@ -4,9 +4,12 @@ import {
   DVault,
   ErrorFactory,
   IDataStore,
+  IDendronError,
   NoteProps,
   NotePropsByIdDict,
   NotePropsMeta,
+  ResultAsync,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { URI } from "vscode-uri";
@@ -113,6 +116,12 @@ export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
     return {
       data: key,
     };
+  }
+
+  query(
+    _opts: any
+  ): ResultAsync<NotePropsMeta[], IDendronError<StatusCodes | undefined>> {
+    throw new Error("Method not implemented.");
   }
 
   static prisma() {

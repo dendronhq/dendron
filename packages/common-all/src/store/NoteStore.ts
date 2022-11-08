@@ -1,18 +1,19 @@
 import _ from "lodash";
 import { URI, Utils } from "vscode-uri";
-import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
+import { ERROR_SEVERITY, ERROR_STATUS, StatusCodes } from "../constants";
 import { NoteUtils } from "../dnode";
-import { DendronError } from "../error";
+import { DendronError, IDendronError } from "../error";
 import {
   DNoteLoc,
   NoteProps,
   NotePropsMeta,
+  QueryNotesOpts,
   RespV3,
   WriteNoteMetaOpts,
   WriteNoteOpts,
 } from "../types";
 import { FindNoteOpts } from "../types/FindNoteOpts";
-import { genHash, isNotUndefined } from "../utils";
+import { genHash, isNotUndefined, ResultAsync } from "../utils";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";
@@ -250,5 +251,14 @@ export class NoteStore implements INoteStore<string> {
     // TODO: implement
     const test = oldLoc.fname + newLoc.fname;
     return { data: test };
+  }
+
+  /**
+   * See {@link INoteStore.queryMetadata}
+   */
+  queryMetadata(
+    opts: QueryNotesOpts
+  ): ResultAsync<NotePropsMeta[], IDendronError<StatusCodes | undefined>> {
+    return this._metadataStore.query(opts);
   }
 }

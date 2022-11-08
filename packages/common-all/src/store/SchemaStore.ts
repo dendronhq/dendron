@@ -1,8 +1,14 @@
+import { ResultAsync } from "neverthrow";
 import { URI, Utils } from "vscode-uri";
-import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";
+import { ERROR_SEVERITY, ERROR_STATUS, StatusCodes } from "../constants";
 import { SchemaUtils } from "../dnode";
-import { DendronError } from "../error";
-import { RespV3, SchemaModuleProps, WriteSchemaOpts } from "../types";
+import { DendronError, IDendronError } from "../error";
+import {
+  QuerySchemaOpts,
+  RespV3,
+  SchemaModuleProps,
+  WriteSchemaOpts,
+} from "../types";
 import { VaultUtils } from "../vault";
 import { IDataStore } from "./IDataStore";
 import { IFileStore } from "./IFileStore";
@@ -144,5 +150,14 @@ export class SchemaStore implements ISchemaStore<string> {
     }
 
     return this._metadataStore.delete(key);
+  }
+
+  /**
+   * See {@link ISchemaStore.queryMetadata}
+   */
+  queryMetadata(
+    opts: QuerySchemaOpts
+  ): ResultAsync<SchemaModuleProps[], IDendronError<StatusCodes | undefined>> {
+    return this._metadataStore.query(opts);
   }
 }

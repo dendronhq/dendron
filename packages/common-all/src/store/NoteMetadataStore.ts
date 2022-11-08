@@ -1,10 +1,16 @@
 import _ from "lodash";
-import { ERROR_STATUS, ERROR_SEVERITY } from "../constants";
+import { ERROR_STATUS, ERROR_SEVERITY, StatusCodes } from "../constants";
 import { DendronError } from "../error";
+import { FuseEngine } from "../FuseEngine";
 import { NoteFnameDictUtils } from "../noteDictsUtils";
-import { NotePropsMeta, NotePropsByFnameDict, RespV3 } from "../types";
+import {
+  NotePropsMeta,
+  NotePropsByFnameDict,
+  RespV3,
+  QueryNotesOpts,
+} from "../types";
 import { FindNoteOpts } from "../types/FindNoteOpts";
-import { cleanName, isNotUndefined } from "../utils";
+import { cleanName, isNotUndefined, ResultAsync } from "../utils";
 import { VaultUtils } from "../vault";
 import { INoteMetadataStore } from "./IMetadataStore";
 
@@ -17,15 +23,18 @@ export class NoteMetadataStore implements INoteMetadataStore {
    * Map of noteFname -> list of noteIds. Since fname is not unique across vaults, there can be multiple ids with the same fname
    */
   private _noteIdsByFname: NotePropsByFnameDict;
+  private _fuseEngine: FuseEngine;
 
-  constructor() {
+  constructor(fuseEngine: FuseEngine) {
     this._noteMetadataById = {};
     this._noteIdsByFname = {};
+    this._fuseEngine = fuseEngine;
   }
 
   dispose() {
     this._noteMetadataById = {};
     this._noteIdsByFname = {};
+    this._fuseEngine.replaceNotesIndex({});
   }
 
   /**
@@ -71,6 +80,11 @@ export class NoteMetadataStore implements INoteMetadataStore {
     }
 
     if (vault) {
+      // Need to ignore this because the engine stringifies this property, so the types are incorrect.
+      // @ts-ignore
+      if (vault?.selfContained === "true" || vault?.selfContained === "false") {
+        vault.selfContained = vault.selfContained === "true";
+      }
       noteMetadata = noteMetadata.filter((note) =>
         VaultUtils.isEqualV2(note.vault, vault)
       );
@@ -95,7 +109,10 @@ export class NoteMetadataStore implements INoteMetadataStore {
     const maybeNote = this._noteMetadataById[data.id];
 
     if (maybeNote) {
+      // Fuse has no update. Must remove first
+      this._fuseEngine.removeNoteFromIndex(maybeNote);
       if (cleanName(maybeNote.fname) === cleanName(data.fname)) {
+        this._fuseEngine.addNoteToIndex(data);
         this._noteMetadataById[data.id] = data;
         return { data: key };
       } else {
@@ -105,6 +122,7 @@ export class NoteMetadataStore implements INoteMetadataStore {
     }
     this._noteMetadataById[data.id] = data;
     NoteFnameDictUtils.add(data, this._noteIdsByFname);
+    this._fuseEngine.addNoteToIndex(data);
 
     return { data: key };
   }
@@ -118,9 +136,22 @@ export class NoteMetadataStore implements INoteMetadataStore {
     const maybeNote = this._noteMetadataById[key];
     if (maybeNote) {
       NoteFnameDictUtils.delete(maybeNote, this._noteIdsByFname);
+      this._fuseEngine.removeNoteFromIndex(maybeNote);
     }
     delete this._noteMetadataById[key];
 
     return { data: key };
+  }
+
+  /**
+   * See {@link IDataStore.query}
+   */
+  query(
+    opts: QueryNotesOpts
+  ): ResultAsync<NotePropsMeta[], DendronError<StatusCodes | undefined>> {
+    const items = this._fuseEngine.queryNote({
+      ...opts,
+    }) as NotePropsMeta[];
+    return ResultAsync.fromSafePromise(Promise.resolve(items));
   }
 }

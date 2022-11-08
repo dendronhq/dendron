@@ -1,5 +1,6 @@
 import {
   ERROR_STATUS,
+  FuseEngine,
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
@@ -19,7 +20,11 @@ describe("GIVEN NoteStore", () => {
       async ({ vaults, wsRoot, engine }) => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
 
@@ -104,13 +109,75 @@ describe("GIVEN NoteStore", () => {
     );
   });
 
-  test("WHEN writing a note, THEN get and getMetadata should retrieve same note", async () => {
+  test("WHEN workspace contains notes, THEN queryMetadata should return correct notes", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, engine }) => {
+        const noteStore = new NoteStore(
+          new NodeJSFileStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
+          URI.file(wsRoot)
+        );
+
+        const engineNotes = await engine.findNotesMeta({ excludeStub: false });
+        engineNotes.forEach(async (noteMeta) => {
+          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
+        });
+
+        // Test NoteStore.query
+        let queryResp = await noteStore.queryMetadata({
+          qs: "foo.ch1",
+          originalQS: "foo.ch1",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(1);
+          expect(results[0].fname).toEqual("foo.ch1");
+        });
+
+        // Test NoteStore.find empty query returns root notes
+        queryResp = await noteStore.queryMetadata({ qs: "", originalQS: "" });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(3);
+          expect(results[0].fname).toEqual("root");
+          expect(results[1].fname).toEqual("root");
+          expect(results[2].fname).toEqual("root");
+        });
+
+        // Test NoteStore.find multiple matches
+        queryResp = await noteStore.queryMetadata({
+          qs: "fo",
+          originalQS: "fo",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(2);
+          expect(results[0].fname).toEqual("foo");
+          expect(results[1].fname).toEqual("foo.ch1");
+        });
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      }
+    );
+  });
+
+  test("WHEN writing a note, THEN get, getMetadata, and queryMetadata should retrieve same note", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
 
@@ -123,6 +190,14 @@ describe("GIVEN NoteStore", () => {
 
         let note = await noteStore.get(newNote.id);
         expect(note.data).toBeFalsy();
+        let queryResp = await noteStore.queryMetadata({
+          qs: "foobar",
+          originalQS: "foobar",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(0);
+        });
         await noteStore.write({ key: newNote.id, note: newNote });
 
         // Make sure note is written to filesystem
@@ -139,6 +214,17 @@ describe("GIVEN NoteStore", () => {
         // Test NoteStore.getMetadata
         const noteMetadata = await noteStore.getMetadata(newNote.id);
         expect(noteMetadata.data!.fname).toEqual(newNote.fname);
+
+        // Test NoteStore.queryMetadata
+        queryResp = await noteStore.queryMetadata({
+          qs: "foobar",
+          originalQS: "foobar",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(1);
+          expect(results[0].fname).toEqual("foobar");
+        });
       },
       {
         expect,
@@ -152,7 +238,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -210,7 +300,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -226,12 +320,32 @@ describe("GIVEN NoteStore", () => {
         const note = await noteStore.get(newNote.id);
         expect(note.data!.fname).toEqual(newNote.fname);
 
+        // Test NoteStore.queryMetadata
+        let queryResp = await noteStore.queryMetadata({
+          qs: "foobar",
+          originalQS: "foobar",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(1);
+          expect(results[0].fname).toEqual("foobar");
+        });
+
         // Test NoteStore.delete
         const deleteResp = await noteStore.delete(newNote.id);
         expect(deleteResp.data).toBeTruthy();
 
         const note2 = await noteStore.get(newNote.id);
         expect(note2.error?.status).toEqual(ERROR_STATUS.CONTENT_NOT_FOUND);
+
+        queryResp = await noteStore.queryMetadata({
+          qs: "foobar",
+          originalQS: "foobar",
+        });
+        expect(queryResp.isOk()).toBeTruthy();
+        queryResp.map((results) => {
+          expect(results.length).toEqual(0);
+        });
       },
       {
         expect,
@@ -245,7 +359,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -295,7 +413,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -342,7 +464,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -368,7 +494,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -429,7 +559,11 @@ describe("GIVEN NoteStore", () => {
         const vault = vaults[0];
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
         const newNote = await NoteTestUtilsV4.createNote({
@@ -483,7 +617,11 @@ describe("GIVEN NoteStore", () => {
       async ({ wsRoot, engine }) => {
         const noteStore = new NoteStore(
           new NodeJSFileStore(),
-          new NoteMetadataStore(),
+          new NoteMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.file(wsRoot)
         );
 

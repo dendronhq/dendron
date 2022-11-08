@@ -1,5 +1,6 @@
 import {
   ERROR_STATUS,
+  FuseEngine,
   SchemaMetadataStore,
   SchemaStore,
   URI,
@@ -18,7 +19,11 @@ describe("GIVEN SchemaStore", () => {
         const vault = vaults[0];
         const schemaStore = new SchemaStore(
           new NodeJSFileStore(),
-          new SchemaMetadataStore(),
+          new SchemaMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.parse(wsRoot)
         );
         const newSchema = await NoteTestUtilsV4.createSchema({
@@ -55,7 +60,11 @@ describe("GIVEN SchemaStore", () => {
         const vault = vaults[0];
         const schemaStore = new SchemaStore(
           new NodeJSFileStore(),
-          new SchemaMetadataStore(),
+          new SchemaMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.parse(wsRoot)
         );
         const newSchema = await NoteTestUtilsV4.createSchema({
@@ -90,7 +99,11 @@ describe("GIVEN SchemaStore", () => {
         const vault = vaults[0];
         const schemaStore = new SchemaStore(
           new NodeJSFileStore(),
-          new SchemaMetadataStore(),
+          new SchemaMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.parse(wsRoot)
         );
         const newSchema = await NoteTestUtilsV4.createSchema({
@@ -119,7 +132,11 @@ describe("GIVEN SchemaStore", () => {
         const vault = vaults[0];
         const schemaStore = new SchemaStore(
           new NodeJSFileStore(),
-          new SchemaMetadataStore(),
+          new SchemaMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.parse(wsRoot)
         );
         const newSchema = await NoteTestUtilsV4.createSchema({
@@ -167,7 +184,11 @@ describe("GIVEN SchemaStore", () => {
       async ({ wsRoot, engine }) => {
         const schemaStore = new SchemaStore(
           new NodeJSFileStore(),
-          new SchemaMetadataStore(),
+          new SchemaMetadataStore(
+            new FuseEngine({
+              fuzzThreshold: 0.2,
+            })
+          ),
           URI.parse(wsRoot)
         );
 

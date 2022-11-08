@@ -36,7 +36,7 @@ export class NoteController {
     const engine = ws
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
-    return engine.queryNotes({ ...opts, originalQS: opts.qs });
+    return engine.queryNotes(opts.opts);
   }
 
   async info(): Promise<EngineInfoResp> {

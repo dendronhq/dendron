@@ -11,6 +11,7 @@ import {
   NotePropsMeta,
   NoteStore,
   NoteUtils,
+  FuseEngine,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
 import { ILookupProvider } from "../../commands/lookup/ILookupProvider";
@@ -36,6 +37,11 @@ export async function setupTestEngineContainer() {
   const vaults = await getVaults();
 
   await setupHierarchyForLookupTests(vaults, wsRoot);
+  const noteMetadataStore = new NoteMetadataStore(
+    new FuseEngine({
+      fuzzThreshold: 0.2,
+    })
+  );
 
   container.register<EngineEventEmitter>("EngineEventEmitter", {
     useToken: "ReducedDEngine",
@@ -59,13 +65,9 @@ export async function setupTestEngineContainer() {
     useClass: VSCodeFileStore,
   });
 
-  container.register<IDataStore<string, NotePropsMeta>>(
-    "IDataStore",
-    {
-      useClass: NoteMetadataStore,
-    },
-    { lifecycle: Lifecycle.Singleton }
-  );
+  container.register<IDataStore<string, NotePropsMeta>>("IDataStore", {
+    useValue: noteMetadataStore,
+  });
 
   container.register("wsRoot", { useValue: wsRoot });
   container.register("vaults", { useValue: vaults });

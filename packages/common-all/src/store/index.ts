@@ -6,8 +6,6 @@ export * from "./NoteStore";
 export * from "./ISchemaStore";
 export * from "./SchemaMetadataStore";
 export * from "./SchemaStore";
-export * from "./FuseMetadataStore";
 export * from "./IMetadataStore";
-export * from "./IDataQuery";
 export * from "./IConfigStore";
 export * from "./ConfigStore";

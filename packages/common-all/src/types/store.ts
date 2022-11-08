@@ -3,6 +3,7 @@ import { SchemaModuleProps } from "./typesv2";
 
 // Types used on the store layer
 
+//--- NoteProps
 export type WriteNoteOpts<K> = {
   key: K;
   note: NoteProps;
@@ -11,6 +12,11 @@ export type WriteNoteOpts<K> = {
 export type WriteNoteMetaOpts<K> = {
   key: K;
   noteMeta: NotePropsMeta;
+};
+
+//--- Schemas
+export type QuerySchemaOpts = {
+  qs: string;
 };
 
 export type WriteSchemaOpts<K> = {

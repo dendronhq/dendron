@@ -308,7 +308,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         if (mode !== ProcMode.IMPORT && value.startsWith(TAGS_HIERARCHY)) {
           const { color: maybeColor, type: colorType } = NoteUtils.color({
             fname: value,
-            note: noteToRender,
+            note,
             vault,
           });
           const enableRandomlyColoredTagsConfig =

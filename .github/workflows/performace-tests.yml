@@ -1,6 +1,12 @@
 name: performance testing
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - release/*
+      - early-seed/*
+
+  workflow_dispatch:
 
 env:
   BINARY_CACHE_INDEX: 23 # Rev this if we need a new node cache

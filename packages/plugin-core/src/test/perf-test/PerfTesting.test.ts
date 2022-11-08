@@ -14,6 +14,7 @@ import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { RenameNoteCommand } from "../../commands/RenameNoteCommand";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
@@ -31,7 +32,7 @@ suite("Performance testing", function () {
             const git = new Git({
               localUrl: wsRoot,
               remoteUrl:
-                "https://github.com/Harshita-mindfire/10000-markdown-files.git",
+                "https://github.com/dendronhq/10000-markdown-files.git",
             });
             await git.clone();
           },
@@ -54,29 +55,31 @@ suite("Performance testing", function () {
             Object.keys(perflogs).forEach((log) => {
               console.log(log, "------------->", perflogs[log], "\n");
             });
-            const headers = {
-              Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
-              "Content-Type": "application/json",
-            };
-            const data = {
-              records: [
-                {
-                  fields: {
-                    date: Time.now().toLocaleString(),
-                    commitHash: process.env.GITHUB_SHA,
-                    githubRef: process.env.GITHUB_REF,
-                    flag: `enableEngineV3: ${enableEngineV3}`,
-                    os: os.platform(),
-                    ...perflogs,
+            if (process.env.AIRTABLE_API_KEY) {
+              const headers = {
+                Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+                "Content-Type": "application/json",
+              };
+              const data = {
+                records: [
+                  {
+                    fields: {
+                      date: Time.now().toLocaleString(),
+                      commitHash: process.env.GITHUB_SHA,
+                      githubRef: process.env.GITHUB_REF,
+                      testParameters: `enableEngineV3: ${enableEngineV3}`,
+                      os: os.platform(),
+                      ...perflogs,
+                    },
                   },
-                },
-              ],
-            };
-            await axios.post(
-              `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PerformanceData`,
-              data,
-              { headers }
-            );
+                ],
+              };
+              await axios.post(
+                `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/PerformanceData`,
+                data,
+                { headers }
+              );
+            }
             perflogs = {};
           });
           test("engine init duration", async () => {
@@ -225,6 +228,42 @@ suite("Performance testing", function () {
             perflogs.refactorHierarchy = end - start;
             const notes = await engine.findNotesMeta({ fname });
             expect(notes.length).toEqual(0);
+          });
+          test("Rename Note", async () => {
+            const { vaults, engine } = ExtensionProvider.getDWorkspace();
+            const vault = vaults[1];
+            const fname = "abkhazian.opcw";
+            const newFname = "renamed-note";
+            const note1 = (
+              await engine.findNotes({
+                fname,
+                vault,
+              })
+            )[0];
+            const extension = ExtensionProvider.getExtension();
+            await extension.wsUtils.openNote(note1);
+            const cmd = new RenameNoteCommand(extension);
+            const vaultName = VaultUtils.getName(vault);
+            const start = performance.now();
+            await cmd.execute({
+              moves: [
+                {
+                  oldLoc: {
+                    fname,
+                    vaultName,
+                  },
+                  newLoc: {
+                    fname: newFname,
+                    vaultName,
+                  },
+                },
+              ],
+            });
+            const end = performance.now();
+            perflogs.renameNoteDuration = end - start;
+            const note = (await engine.findNotesMeta({ fname: newFname }))[0];
+            expect(note).toNotEqual(undefined);
+            expect(note.vault).toEqual(vault);
           });
         }
       );

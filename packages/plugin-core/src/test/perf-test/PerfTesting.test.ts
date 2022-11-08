@@ -22,7 +22,7 @@ import { describeSingleWS } from "../testUtilsV3";
 let perflogs: { [key: string]: number } = {};
 
 suite("Performance testing", function () {
-  describe("10000 notes perf testing", () => {
+  describe("10000+ notes performance testing", () => {
     [false, true].forEach((enableEngineV3) => {
       describeSingleWS(
         `WHEN enableEngineV3 is ${enableEngineV3}`,

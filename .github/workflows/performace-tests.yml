@@ -3,9 +3,12 @@ name: performance testing
 on:
   push:
     branches:
+      - master
       - release/*
-      - early-seed/*
-
+  pull_request:
+    branches:
+      - "*"
+      - "*/*"
   workflow_dispatch:
 
 env:

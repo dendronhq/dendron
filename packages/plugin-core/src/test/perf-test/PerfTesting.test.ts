@@ -138,6 +138,8 @@ suite("Performance testing", function () {
             const updatedNote = (await engine.findNotesMeta({ fname }))[0];
             expect(updatedNote.title).toEqual("Update Note");
           });
+
+          //Note Links: https://github.dev/dendronhq/10000-markdown-files/note-with-links.md
           test("render note with 20 links", async () => {
             const { engine, vaults } = ExtensionProvider.getDWorkspace();
             const fname = "note-with-links";
@@ -151,6 +153,8 @@ suite("Performance testing", function () {
             expect(resp.error).toEqual(undefined);
             expect(resp.data).toNotEqual(undefined);
           });
+
+          //Above note with 0 links: https://github.dev/dendronhq/10000-markdown-files/abiogenetic.nutlet.md
           test("render note with 0 links", async () => {
             const { engine } = ExtensionProvider.getDWorkspace();
             const fname = "abiogenetic.nutlet";
@@ -159,6 +163,30 @@ suite("Performance testing", function () {
             const resp = await engine.renderNote(noteToRender);
             const end = performance.now();
             perflogs.renderNoteDuration = end - start;
+            expect(resp.error).toEqual(undefined);
+            expect(resp.data).toNotEqual(undefined);
+          });
+          //https://github.dev/dendronhq/10000-markdown-files/a.cappella.magnetic.recorder.md
+          test("render note with nested noteRefs", async () => {
+            const { engine } = ExtensionProvider.getDWorkspace();
+            const fname = "a.cappella.magnetic.recorder";
+            const noteToRender = (await engine.findNotes({ fname }))[0];
+            const start = performance.now();
+            const resp = await engine.renderNote(noteToRender);
+            const end = performance.now();
+            perflogs.renderNoteWithNestedRefs = end - start;
+            expect(resp.error).toEqual(undefined);
+            expect(resp.data).toNotEqual(undefined);
+          });
+          //https://github.dev/dendronhq/10000-markdown-files/rich-formatting.md
+          test("render note with rich formatting", async () => {
+            const { engine } = ExtensionProvider.getDWorkspace();
+            const fname = "rich-formatting";
+            const noteToRender = (await engine.findNotes({ fname }))[0];
+            const start = performance.now();
+            const resp = await engine.renderNote(noteToRender);
+            const end = performance.now();
+            perflogs.renderNoteWithRichFormatting = end - start;
             expect(resp.error).toEqual(undefined);
             expect(resp.data).toNotEqual(undefined);
           });

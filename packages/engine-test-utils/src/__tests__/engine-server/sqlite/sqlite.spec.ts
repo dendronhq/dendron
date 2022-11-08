@@ -8,9 +8,6 @@ import {
 import { URI } from "vscode-uri";
 
 describe("GIVEN sqlite store", () => {
-  // afterEach(async () => {
-  //   await SQLiteMetadataStore.prisma().$disconnect();
-  // });
   jest.setTimeout(10e6);
 
   test("WHEN playground THEN nothing is verified", async () => {
@@ -30,7 +27,8 @@ describe("GIVEN sqlite store", () => {
     const db = await SqliteFactory.init(
       wsRoot,
       [vault1],
-      new NodeJSFileStore()
+      new NodeJSFileStore(),
+      "/Users/jyeung/code/dendron/dendron/dendron.test3.db"
     );
 
     // await new Promise<void>((resolve) => {

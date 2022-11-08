@@ -20,7 +20,6 @@ export class SqliteFactory {
     const _db = await new Promise<Database>((resolve) => {
       const db = new Database(dbname ?? "dendron.test3.db", (err) => {
         if (err) {
-          debugger;
           console.log(err);
         }
 
@@ -33,18 +32,10 @@ export class SqliteFactory {
     await NotePropsTableUtils.createTable(_db);
 
     // Now create tables with relations
-    await LinksTableUtils.createTable(_db);
+    const result = await LinksTableUtils.createTable(_db);
+    debugger;
     await VaultNotesTableUtils.createTable(_db);
     await SchemaNotesTableUtils.createTable(_db);
-
-    // await Promise.all(
-    //   vaults.map((vault) => {
-    //     return VaultsTableUtils.insert(_db, {
-    //       name: vault.name ?? "vault",
-    //       fsPath: vault.fsPath,
-    //     });
-    //   })
-    // );
 
     await Promise.all(
       vaults.map(async (vault) => {
@@ -81,17 +72,37 @@ export class SqliteFactory {
     return _db;
   }
 
-  // static async createIndices(db: Database) {
-  //   db.run(
-  //     `CREATE INDEX IF NOT EXISTS idx_NoteProps_fname
-  //   ON NoteProps (fname);`,
-  //     (err) => {
-  //       if (!err) {
-  //         resolve();
-  //       }
-  //     }
-  //   );
-  // }
+  public static async initNoNotes(dbname?: string) {
+    const _db = await new Promise<Database>((resolve) => {
+      const db = new Database(dbname ?? ":memory:", (err) => {
+        if (err) {
+          debugger;
+          console.log(err);
+        }
+
+        resolve(db);
+      });
+    });
+
+    // Create the relation-less tables first (vaults and NoteProps);
+    await VaultsTableUtils.createTable(_db);
+    await NotePropsTableUtils.createTable(_db);
+
+    // Now create tables with relations
+    await LinksTableUtils.createTable(_db);
+    await VaultNotesTableUtils.createTable(_db);
+    await SchemaNotesTableUtils.createTable(_db);
+
+    await new Promise<void>((resolve) => {
+      _db.run("PRAGMA foreign_keys = ON", (err) => {
+        if (!err) {
+          resolve();
+        }
+      });
+    });
+
+    return _db;
+  }
 
   static initSync() {
     const _db = new Database("dendron.test3.db");

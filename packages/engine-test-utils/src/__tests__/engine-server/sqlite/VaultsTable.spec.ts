@@ -45,4 +45,20 @@ describe("GIVEN a Vaults Sqlite Table", () => {
     const insertResultTwo = await VaultsTableUtils.insert(db, testVault);
     expect(insertResultTwo.isErr()).toBeTruthy();
   });
+
+  test("WHEN a non-existent Vaults row is retrieved THEN the appropriate error is returned", async () => {
+    const tableRes = await VaultsTableUtils.createTable(db);
+    expect(tableRes.isErr()).toBeFalsy();
+
+    const dbResult = await VaultsTableUtils.getIdByFsPath(
+      db,
+      "nonExistentPath"
+    );
+
+    expect(dbResult.isErr()).toBeTruthy();
+
+    dbResult.mapErr((e) => {
+      expect(e.message).toEqual("No vault with fsPath nonExistentPath found.");
+    });
+  });
 });

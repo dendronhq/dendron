@@ -33,9 +33,10 @@ export async function parseAllNoteFilesForSqlite(
   files: string[],
   vault: DVault,
   db: Database,
-  root: string, // TODO: Remove, base this on vault fsPath
+  root: string,
   schemas: SchemaModuleDict
 ) {
+  debugger;
   await addVaultToDb(vault, db);
 
   const vaultIdResp = await VaultsTableUtils.getIdByFsPath(db, vault.fsPath);
@@ -48,126 +49,115 @@ export async function parseAllNoteFilesForSqlite(
     return; // TODO: Throw
   }
 
-  // TODO: Handle Deleted Notes
+  const uno = process.hrtime();
 
+  // Get the content from all files and calculate their hashes
+  const fileStateData = files.map((file) => {
+    const content = fs.readFileSync(path.join(root, file), {
+      encoding: "utf8",
+    });
+    const { name } = path.parse(file);
+
+    return { fname: cleanName(name), contentHash: genHash(content), content };
+  });
+
+  const durationOne = getDurationMilliseconds(uno);
+
+  console.log(`Duration Reading Files: ${durationOne} ms`);
+
+  const contentDictionary: { [key: string]: string } = {};
+  for (const data of fileStateData) {
+    contentDictionary[data.fname] = data.content;
+  }
+  // debugger;
+  // Compute Added Files
+  const prio = process.hrtime();
   // const deletedFiles = ;
   const addedFileResp = await getAddedFiles(db, files, vaultId);
+
+  console.log(
+    `Duration Finding Added Files via DB: ${getDurationMilliseconds(prio)} ms`
+  );
 
   if (addedFileResp.isErr()) {
     return; // TODO: Throw
   }
 
-  // const addedNotes = await Promise.all(
-  //   addedFileResp.value.map(async (file) => {
-  //     const content = await fs.readFile(path.join(root, file), {
-  //       encoding: "utf8",
-  //     });
+  const addedNotes: NoteProps[] = addedFileResp.value.map((fname) => {
+    const content = contentDictionary[fname];
 
-  //     const { name } = path.parse(file);
+    const props = content2Note({ content, fname, vault });
+    props.contentHash = genHash(content);
 
-  //     const props = content2Note({ content, fname: name, vault });
-  //     props.contentHash = genHash(content);
+    return props;
+  });
 
-  //     return props;
-  //   })
-  // );
+  // Compute Updated Notes
+  const dos = process.hrtime();
 
-  // const updatedNotes = _.compact(
-  //   await Promise.all(
-  //     files.map(async (file) => {
-  //       const content = await fs.readFile(path.join(root, file), {
-  //         encoding: "utf8",
-  //       });
-
-  //       const sig = genHash(content);
-  //       const { name } = path.parse(file);
-
-  //       const getHashResp = await NotePropsTableUtils.getHashByFnameAndVaultId(
-  //         db,
-  //         name,
-  //         vaultId
-  //       );
-
-  //       if (getHashResp.isOk() && getHashResp.value === sig) {
-  //         return undefined;
-  //       }
-
-  //       return content2Note({ content, fname: name, vault });
-  //     })
-  //   )
-  // );
-
-  const addedNotes: NoteProps[] = [];
-  const updatedNotes: NoteProps[] = [];
-
-  const uno = process.hrtime();
-
-  const timingData = await Promise.all(
-    files.map(async (file) => {
-      const one = process.hrtime();
-
-      const content = fs.readFileSync(path.join(root, file), {
-        encoding: "utf8",
-      });
-
-      const durationOne = getDurationMilliseconds(one);
-      const two = process.hrtime();
-
-      const sig = genHash(content);
-      const { name } = path.parse(file);
-
-      const getHashResp = await NotePropsTableUtils.getHashByFnameAndVaultId(
-        db,
-        cleanName(name),
-        vaultId
-      );
-
-      const durationTwo = getDurationMilliseconds(two);
-      const three = process.hrtime();
-
-      if (getHashResp.isErr()) {
-        return; // TODO: report error
-      }
-
-      if (getHashResp.value === null) {
-        const props = content2Note({ content, fname: name, vault });
-        props.contentHash = sig;
-        addedNotes.push(props);
-      } else if (getHashResp.value !== sig) {
-        const props = content2Note({ content, fname: name, vault });
-        props.contentHash = sig;
-        updatedNotes.push(props);
-      }
-
-      const durationThree = getDurationMilliseconds(three);
-
-      return {
-        durationOne,
-        durationTwo,
-        durationThree,
-      };
-    })
-  );
-  console.log(`Total Data Points: ${timingData.length}`);
-  console.log(
-    `Duration One Mean: ${_.mean(timingData.map((data) => data?.durationOne))}`
-  );
-  console.log(
-    `Duration Two Mean: ${_.mean(timingData.map((data) => data?.durationTwo))}`
-  );
-  console.log(
-    `Duration Three Mean: ${_.mean(
-      timingData.map((data) => data?.durationThree)
-    )}`
-  );
-
-  debugger;
+  const res = await getUpdatedFiles(db, fileStateData, vaultId);
 
   console.log(
-    `Duration for Figuring out New/Updated Notes: ${getDurationMilliseconds(
-      uno
+    `Duration getUpdatedFiles in DB: ${getDurationMilliseconds(dos)} ms`
+  );
+
+  if (res.isErr()) {
+    return; // TODO: Exception handling
+  }
+
+  const abc = process.hrtime();
+  const updatedNotes: NoteProps[] = res.value.map((fname) => {
+    const content = contentDictionary[fname];
+
+    const props = content2Note({ content, fname, vault });
+    props.contentHash = genHash(content);
+
+    return props;
+  });
+
+  console.log(
+    `Duration mapping updatedNotes to NoteProps : ${getDurationMilliseconds(
+      abc
     )} ms`
   );
+
+  const def = process.hrtime();
+  if (updatedNotes.length > 0) {
+    // We need to delete all links from updated notes, since they will get re-processed
+    const linkDeleteRes = await deleteLinksForUpdatedNotes(
+      db,
+      updatedNotes.map((props) => props.fname),
+      vaultId
+    );
+
+    if (linkDeleteRes.isErr()) {
+      return; // TODO: Exception handling
+    }
+  }
+
+  console.log(
+    `Duration deleteLinksForUpdatedNotes in DB : ${getDurationMilliseconds(
+      def
+    )} ms`
+  );
+
+  const hijk = process.hrtime();
+  // Handle deleted notes:
+  const deleteRes = await deleteRemovedFilesFromDB(
+    db,
+    Object.keys(contentDictionary),
+    vaultId
+  );
+
+  console.log(
+    `Duration deleteRemovedFilesFromDB in DB : ${getDurationMilliseconds(
+      hijk
+    )} ms`
+  );
+
+  if (deleteRes.isErr()) {
+    return; // TODO: Exception handling
+  }
 
   // Schemas - only needs to be processed for added notes.
   const dicts = NoteDictsUtils.createNoteDicts(addedNotes);
@@ -192,11 +182,37 @@ export async function parseAllNoteFilesForSqlite(
     `Duration for ProcessNoteProps: ${getDurationMilliseconds(one)} ms`
   );
 
+  // We need to do additional processing on updated links if any of them have had their ID's changed.
+  if (updatedNotes.length > 0) {
+    // This step must be done AFTER the updated notes have been added, or else the foreign key constraint on the Links table will fail.
+    const updateLinksForChangedNoteIdResult = await updateLinksForChangedNoteId(
+      db,
+      updatedNotes,
+      vaultId
+    );
+    if (updateLinksForChangedNoteIdResult.isErr()) {
+      debugger;
+      return; // TODO: Exception handling
+    }
+
+    // If any updated notes had an ID change, then we also need to delete any references to the old ID in NoteProps, Parent-child links and VaultNotes:
+    const purgeChangedIdsResult = await purgeDBForUpdatedNotesWithChangedNoteId(
+      db,
+      updatedNotes,
+      vaultId
+    );
+    if (purgeChangedIdsResult.isErr()) {
+      debugger;
+      return; // TODO: Exception handling
+    }
+  }
+
   await bulkProcessParentLinks(db, allNotesToProcess);
   await bulkProcessOtherLinks(db, allNotesToProcess, {} as DendronConfig);
 
   console.log(`Duration for ProcessLinks: ${getDurationMilliseconds(two)} ms`);
 
+  debugger;
   console.log(
     `New Notes: ${addedNotes.length}. Updated Notes: ${updatedNotes.length}`
   );
@@ -259,6 +275,9 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
 
 async function bulkProcessParentLinks(db: Database, notes: NoteProps[]) {
   const data = notes.map((note) => {
+    if (note.fname === "root") {
+      return undefined;
+    }
     const potentialParentName = note.fname.split(".").slice(0, -1).join(".");
 
     // If it's a top level domain, then add it as a child of the root node.
@@ -277,7 +296,7 @@ async function bulkProcessParentLinks(db: Database, notes: NoteProps[]) {
     }
   });
 
-  await LinksTableUtils.bulkInsertLinkWithSourceAsFname(db, data);
+  await LinksTableUtils.bulkInsertLinkWithSourceAsFname(db, _.compact(data));
 }
 
 async function bulkProcessOtherLinks(
@@ -311,34 +330,6 @@ async function bulkProcessOtherLinks(
       return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, data);
     })
   );
-
-  // This way does only 1 INSERT call:
-  // const dataArray: any[] = [];
-
-  // notes.map((note) => {
-  //   const links = LinkUtils.findLinksFromBody({ note, config });
-
-  //   const data = links
-  //     .filter(
-  //       (link) =>
-  //         link.type === "ref" ||
-  //         link.type === "frontmatterTag" ||
-  //         link.type === "wiki" ||
-  //         link.type === "md"
-  //     )
-  //     .map((link) => {
-  //       return {
-  //         sourceId: note.id,
-  //         sinkFname: link.to!.fname!,
-  //         linkType: link.type as LinkType,
-  //         payload: link,
-  //       };
-  //     });
-
-  //   dataArray.push(...data);
-  // });
-
-  // return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, dataArray);
 }
 
 function deleteRemovedFilesFromDB(
@@ -350,22 +341,55 @@ function deleteRemovedFilesFromDB(
 
   // TODO: What if all values are deleted?
 
+  // NOTE: When doing this table-diffing kind of operation on a VALUES list,
+  // EXCEPT is much much faster than doing a LEFT OUTER JOIN (50ms vs 15 seconds
+  // on 15,000 values) in SQLite
   const sql = `
-DELETE FROM NoteProps AS Outer
+    DELETE FROM NoteProps AS Outer
+    WHERE EXISTS
+    (
+      WITH T(fname) as 
+      (VALUES ${values})
+      SELECT NoteProps.id
+      FROM 
+      (SELECT fname
+      FROM NoteProps
+      EXCEPT
+      SELECT fname
+      FROM T) AS A
+      JOIN NoteProps ON A.fname = NoteProps.fname
+      JOIN VaultNotes ON NoteProps.id = VaultNotes.noteId
+      WHERE VaultId = ${vaultId}
+      AND Outer.id = NoteProps.id
+    )`;
+
+  return executeSqlWithVoidResult(db, sql);
+}
+
+function deleteLinksForUpdatedNotes(
+  db: Database,
+  updatedNoteFnames: string[],
+  vaultId: number
+): ResultAsync<void, SqliteError> {
+  const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
+
+  const sql = `
+DELETE FROM Links AS Outer
 WHERE EXISTS
 (
   WITH T(fname) as 
   (VALUES ${values})
-  SELECT NoteProps.id
-  FROM VaultNotes
-  JOIN NoteProps ON VaultNotes.noteId = NoteProps.id
-  LEFT OUTER JOIN T on NoteProps.fname = T.fname
-  WHERE T.fname IS NULL
+  SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
+  FROM T
+  JOIN NoteProps ON NoteProps.fname = T.fname
+  JOIN Links ON NoteProps.Id = Links.source
+  JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+  WHERE Links.linkType != 1 -- Not Parent-Children Links
   AND VaultId = ${vaultId}
-  AND Outer.id = NoteProps.id
+  AND Links.source = Outer.source
 )
   `;
-
+  debugger;
   return executeSqlWithVoidResult(db, sql);
 }
 
@@ -375,17 +399,17 @@ function getAddedFiles(
   vaultId: number
 ): ResultAsync<string[], SqliteError> {
   const values = allFiles
-    .map((fsPath) => `('${path.parse(fsPath).name}','${fsPath}')`)
+    .map((fsPath) => `('${cleanName(path.parse(fsPath).name)}')`)
     .join(",");
 
   const sql = `
-  WITH T(fname, fullPath) as 
+  WITH T(fname) as 
   (VALUES ${values})
-  SELECT T.fullPath
+  SELECT T.fname
   FROM T
-  LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname
-  LEFT OUTER JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id
-  WHERE NoteProps.fname IS NULL OR vaultId != ${vaultId}
+  LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname 
+  LEFT OUTER JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id 
+  WHERE NoteProps.fname IS NULL OR (NoteProps.fname IS NOT NULL AND vaultId != ${vaultId})
   `;
 
   const prom = new Promise<string[]>((resolve, reject) => {
@@ -393,12 +417,153 @@ function getAddedFiles(
       if (err) {
         reject(err.message);
       } else {
-        resolve(rows.map((row) => row.fullPath));
+        resolve(rows.map((row) => row.fname));
       }
     });
   });
 
   return ResultAsync.fromPromise(prom, (e) => {
     return e as SqliteError;
+  });
+}
+
+function purgeDBForUpdatedNotesWithChangedNoteId(
+  db: Database,
+  updatedNotes: NotePropsMeta[],
+  vaultId: number
+): ResultAsync<void, SqliteError> {
+  const values = updatedNotes
+    .map((props) => `('${props.fname}','${props.id}')`)
+    .join(",");
+
+  const sql = `
+    DELETE FROM NoteProps AS Outer
+    WHERE EXISTS
+    (
+      WITH T(fname, id) AS
+      (VALUES ${values})
+      SELECT T.fname, T.id AS UpdatedId, NoteProps.id
+      FROM T
+      JOIN NoteProps ON T.fname = NoteProps.fname
+      JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+      WHERE vaultId = ${vaultId}
+      AND T.id != NoteProps.id
+      AND Outer.id = NoteProps.id
+    )`;
+
+  return executeSqlWithVoidResult(db, sql);
+}
+
+function updateLinksForChangedNoteId(
+  db: Database,
+  updatedNotes: NotePropsMeta[],
+  vaultId: number
+): ResultAsync<void, SqliteError> {
+  const values = updatedNotes
+    .map((props) => `('${props.fname}','${props.id}')`)
+    .join(",");
+
+  const sql = `
+  UPDATE Links
+  SET sink = UpdatedIds.newId
+  FROM 
+  (
+    WITH T(fname, id) AS
+      (VALUES ${values})
+      SELECT T.id AS newId, NoteProps.id AS oldId
+      FROM T
+      JOIN NoteProps ON T.fname = NoteProps.fname
+      JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+      WHERE vaultId = ${vaultId}
+      AND T.id != NoteProps.id
+  ) AS UpdatedIds
+  WHERE Links.sink = UpdatedIds.oldId`;
+
+  return executeSqlWithVoidResult(db, sql);
+}
+
+function getUpdatedFiles(
+  db: Database,
+  allFiles: { fname: string; contentHash: string }[],
+  vaultId: number
+): ResultAsync<string[], SqliteError> {
+  const values = allFiles
+    .map((data) => `('${data.fname}','${data.contentHash}')`)
+    .join(",");
+
+  // const sql = `
+  // WITH T(fname, hash) AS
+  // (VALUES ${values})
+  // SELECT NoteProps.fname FROM T
+  // JOIN NoteProps ON T.fname = NoteProps.fname
+  // JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+  // WHERE hash != contentHash
+  // AND vaultId = ${vaultId}
+  // `;
+
+  // const sql = `
+  // SELECT fname
+  // FROM
+  // (
+  // WITH T(fname, hash) AS
+  // (VALUES ${values})
+  // SELECT NoteProps.fname, NoteProps.Id FROM T
+  // JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
+  // ) AS first
+  // JOIN VaultNotes ON first.Id = VaultNotes.noteId
+  // WHERE vaultId = ${vaultId}
+  // `;
+
+  const sql = `
+  WITH T(fname, hash) AS
+  (VALUES ${values})
+  SELECT NoteProps.fname, NoteProps.id FROM T
+  JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
+  `;
+
+  const prom = new Promise<any[]>((resolve, reject) => {
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err.message);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+
+  return ResultAsync.fromPromise(prom, (e) => {
+    return e as SqliteError;
+  }).andThen((updatedRows) => {
+    if (updatedRows.length === 0) {
+      return ResultAsync.fromPromise(Promise.resolve([]), (e) => {
+        return e as SqliteError;
+      });
+    }
+
+    const values = updatedRows
+      .map((data) => `('${data.fname}','${data.id}')`)
+      .join(",");
+
+    const sql2 = `
+  WITH T(fname, id) AS
+  (VALUES ${values})
+  SELECT T.fname FROM T
+  JOIN VaultNotes ON T.Id = VaultNotes.noteId
+  WHERE vaultId = ${vaultId}
+  `;
+
+    const prom = new Promise<any[]>((resolve, reject) => {
+      db.all(sql2, (err, rows) => {
+        if (err) {
+          reject(err.message);
+        } else {
+          resolve(rows.map((row) => row.fname));
+        }
+      });
+    });
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
+    });
   });
 }

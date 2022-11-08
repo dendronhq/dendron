@@ -15,7 +15,7 @@ export class VaultsTableUtils {
     const sql = `
     CREATE TABLE IF NOT EXISTS Vaults (
       id INTEGER PRIMARY KEY,
-      name TEXT,
+    name TEXT,
       fsPath TEXT
     )`;
 
@@ -39,8 +39,10 @@ export class VaultsTableUtils {
       db.get(sql, (err, row) => {
         if (err) {
           reject(err.message);
-        } else {
+        } else if (row) {
           resolve(row.id);
+        } else {
+          reject(new Error(`No vault with fsPath ${fsPath} found.`));
         }
       });
     });

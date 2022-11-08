@@ -43,7 +43,17 @@ CREATE TABLE IF NOT EXISTS Links (
   FOREIGN KEY(sink) REFERENCES NoteProps(id) ON DELETE CASCADE
 ) WITHOUT ROWID;`;
 
-    return executeSqlWithVoidResult(db, sql);
+    const idx = `CREATE INDEX IF NOT EXISTS idx_Links_source ON Links (source)`;
+
+    const idx2 = `CREATE INDEX IF NOT EXISTS idx_Links_sink ON Links (sink)`;
+
+    return executeSqlWithVoidResult(db, sql)
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, idx);
+      })
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, idx2);
+      });
   }
 
   public static insert(

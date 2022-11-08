@@ -775,15 +775,18 @@ export class LookupControllerV3 implements ILookupControllerV3 {
             config,
           })
             .filter((link) => {
-              return (
-                link.to?.fname?.toLowerCase() ===
-                  sourceNote.fname.toLowerCase() &&
-                link.to?.anchorHeader &&
-                anchorNamesToUpdate.includes(link.to.anchorHeader)
-              );
+              const fnameMatch =
+                link.to?.fname?.toLocaleLowerCase() ===
+                sourceNote.fname.toLowerCase();
+              if (!fnameMatch) return false;
+
+              if (!link.to?.anchorHeader) return false;
+              const anchorHeader = link.to.anchorHeader.startsWith("^")
+                ? link.to.anchorHeader.substring(1)
+                : link.to.anchorHeader;
+              return anchorNamesToUpdate.includes(anchorHeader);
             })
             .map((link) => LinkUtils.dlink2DNoteLink(link));
-
           const resp = await LinkUtils.updateLinksInNote({
             linksToUpdate,
             note: noteToUpdate,

@@ -713,6 +713,9 @@ export function hasAnchorsToUpdate(
 
     if (processed.includes("#")) {
       const [_fname, anchor] = processed.split("#");
+      if (anchor.startsWith("^")) {
+        return anchorNamesToUpdate.includes(anchor.substring(1));
+      }
       return anchorNamesToUpdate.includes(anchor);
     } else {
       return false;

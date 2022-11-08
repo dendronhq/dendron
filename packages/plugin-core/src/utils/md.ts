@@ -676,7 +676,7 @@ function getFrontmatterEndingOffsetPosition(input: string): number | undefined {
  * @param input
  * @returns
  */
-function getOneIndexedFrontmatterEndingLineNumber(
+export function getOneIndexedFrontmatterEndingLineNumber(
   input: string
 ): number | undefined {
   const offset = getFrontmatterEndingOffsetPosition(input);

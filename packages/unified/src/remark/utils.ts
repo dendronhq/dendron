@@ -999,9 +999,12 @@ export class LinkUtils {
             vaultName: VaultUtils.getName(destNote.vault),
           },
           data: {
-            ...oldLink.data,
             // preserve the cross vault status or add it if necessary
             xvault: isXVault,
+            // if the link was originally a sameFile link,
+            // we need to flip this so the new link correctly
+            // renders as regular wikilink
+            sameFile: note.id === destNote.fname,
           },
         };
 

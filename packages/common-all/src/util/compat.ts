@@ -46,6 +46,30 @@ export function getTextRange(text: string, range: VSRange): string {
   return lines.join("\n");
 }
 
+/**
+ * Similar to doing a `delete` on an `editor.edit()`, except it works with strings.
+ */
+export function deleteTextRange(text: string, range: VSRange): string {
+  const { start, end } = range;
+  const lines = text.split("\n");
+  const processed = lines
+    .map((line, index) => {
+      if (index === start.line) {
+        return line.substring(0, start.character);
+      } else if (index > start.line && index < end.line) {
+        return undefined;
+      } else if (index === end.line) {
+        return line.substring(end.character);
+      } else {
+        return line;
+      }
+    })
+    .filter((maybeLine): maybeLine is string => {
+      return maybeLine !== undefined;
+    });
+  return processed.join("\n");
+}
+
 export function newRange(
   startLine: number,
   startCharacter: number,

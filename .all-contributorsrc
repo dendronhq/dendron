@@ -2302,6 +2302,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "triplem",
+      "name": "Markus M. May",
+      "avatar_url": "https://avatars.githubusercontent.com/u/160079?v=4",
+      "profile": "https://github.com/triplem",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

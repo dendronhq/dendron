@@ -5,7 +5,7 @@ import { ConfigReadOpts, IConfigStore } from "./IConfigStore";
 import { IFileStore } from "./IFileStore";
 import { CONSTANTS } from "../constants";
 import { ConfigUtils, DeepPartial } from "../utils";
-import { DendronConfig, DendronConfigValue, DVault } from "../types";
+import { DendronConfig, DendronConfigValue } from "../types";
 import * as YamlUtils from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
 import _ from "lodash";
@@ -71,7 +71,7 @@ export class ConfigStore implements IConfigStore {
     return this.readFromFS(path);
   }
 
-  private searchOverride() {
+  searchOverride() {
     const workspaceOverridePath = Utils.joinPath(
       this._wsRoot,
       CONSTANTS.DENDRON_LOCAL_CONFIG_FILE
@@ -97,31 +97,9 @@ export class ConfigStore implements IConfigStore {
   }
 
   write(payload: DendronConfig) {
-    // TODO: once the store methods are mirrored to the engine,
-    // move this filtering logic out of store implementation.
-    const processedPayload = this.searchOverride()
-      .andThen((overrideConfig) => {
-        const vaultsFromOverride = overrideConfig.workspace?.vaults as DVault[];
-        const payloadDifference: DendronConfig = {
-          ...payload,
-          workspace: {
-            ...payload.workspace,
-            vaults: _.differenceWith(
-              payload.workspace.vaults,
-              vaultsFromOverride,
-              _.isEqual
-            ),
-          },
-        };
-        return okAsync(payloadDifference);
-      })
-      .orElse(() => okAsync(payload));
-
-    return processedPayload.andThen((payload) =>
-      YamlUtils.toStr(payload)
-        .asyncAndThen((endPayload) => this.writeToFS(this.path, endPayload))
-        .map(() => payload)
-    );
+    return YamlUtils.toStr(payload)
+      .asyncAndThen((endPayload) => this.writeToFS(this.path, endPayload))
+      .map(() => payload);
   }
 
   private writeToFS(uri: URI, content: string) {

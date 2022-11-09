@@ -4,6 +4,7 @@ module.exports = {
     browser: true,
     es6: true,
     jest: true,
+    jasmine: true,
   },
   extends: [
     "plugin:react/recommended",

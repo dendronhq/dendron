@@ -23,8 +23,7 @@ export class VaultNotesTableUtils {
       FOREIGN KEY(vaultId) REFERENCES Vaults(id) ON DELETE CASCADE,
       FOREIGN KEY(noteId) REFERENCES NoteProps(id) ON DELETE CASCADE);`;
 
-    // const idx = `CREATE INDEX IF NOT EXISTS idx_VaultNotes_noteId ON VaultNotes (noteId)`;
-    const idx = `CREATE INDEX IF NOT EXISTS idx_VaultNotes_vaultIdnoteId ON VaultNotes (vaultId, noteId)`;
+    const idx = `CREATE INDEX IF NOT EXISTS idx_VaultNotes_noteId ON VaultNotes (noteId)`;
 
     return executeSqlWithVoidResult(db, sql).andThen(() => {
       return executeSqlWithVoidResult(db, idx);

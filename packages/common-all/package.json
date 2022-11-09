@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.116.2",
+  "version": "0.117.0",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -64,6 +64,7 @@
     "@types/nanoid-dictionary": "^4.2.0",
     "@types/normalize-path": "^3.0.0",
     "@types/node": "13.11.0",
+    "@types/normalize-path": "^3.0.0",
     "@types/semver": "^7.3.4",
     "@types/title": "^3.4.1",
     "@types/unist": "^2.0.3",

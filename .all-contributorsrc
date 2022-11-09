@@ -2293,6 +2293,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "wookiefriseur",
+      "name": "Mat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8905319?v=4",
+      "profile": "https://dotmat.de",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

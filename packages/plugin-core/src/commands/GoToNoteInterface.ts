@@ -19,6 +19,7 @@ export type GoToNoteCommandOpts = {
   column?: ViewColumn;
   /** added for contextual UI analytics. */
   source?: string;
+  originNote?: NoteProps;
 };
 export { GoToNoteCommandOpts as GotoNoteCommandOpts };
 

@@ -1,6 +1,7 @@
 import {
   assertUnreachable,
   Awaited,
+  BacklinkUtils,
   ConfigUtils,
   DNoteAnchorBasic,
   getSlugger,
@@ -173,6 +174,9 @@ export class GotoNoteCommand extends BasicCommand<
       return null;
     }
     opts.vault = selectedVault;
+
+    // this is needed to populate the new note's backlink after it is created
+    opts.originNote = await this.wsUtils.getActiveNote();
     return opts;
   }
 
@@ -313,6 +317,13 @@ export class GotoNoteCommand extends BasicCommand<
               },
             });
             note = _.merge(newNote, overrides || {});
+            const { originNote } = opts;
+            if (originNote) {
+              this.addBacklinkPointingToOrigin({
+                originNote,
+                note,
+              });
+            }
             await client.writeNote(note);
 
             // check if we should send meeting note telemetry.
@@ -377,5 +388,26 @@ export class GotoNoteCommand extends BasicCommand<
     const { fname, validationResp } = opts;
     const message = `Cannot create note ${fname}: ${validationResp.reason}`;
     window.showErrorMessage(message);
+  }
+
+  /**
+   * Given an origin note and a newly created note,
+   * add a backlink that points to the origin note
+   * to newly created note's link metadata
+   */
+  private addBacklinkPointingToOrigin(opts: {
+    originNote: NoteProps;
+    note: NoteProps;
+  }) {
+    const { originNote, note } = opts;
+    const originLinks = originNote.links;
+
+    const linkToNote = originLinks.find(
+      (link) => link.to?.fname === note.fname
+    );
+    if (linkToNote) {
+      const backlinkToOrigin = BacklinkUtils.createFromDLink(linkToNote);
+      if (backlinkToOrigin) note.links.push(backlinkToOrigin);
+    }
   }
 }

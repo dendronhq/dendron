@@ -161,6 +161,52 @@ suite("GotoNote", function () {
     );
 
     describeMultiWS(
+      "WHEN goto new note with valid filename",
+      {
+        preSetupHook: async (opts) => {
+          const { vaults, wsRoot } = opts;
+          await NoteTestUtilsV4.createNote({
+            fname: "origin",
+            vault: vaults[0],
+            wsRoot,
+            body: "[[new-note]]",
+          });
+        },
+      },
+      () => {
+        test("THEN note is created", async () => {
+          const cmd = createGoToNoteCmd();
+          const engine = ExtensionProvider.getEngine();
+          const { vaults } = ExtensionProvider.getDWorkspace();
+          const originNote = (await engine.getNote("origin")).data;
+          const out = await cmd.run({
+            originNote,
+            qs: "new-note",
+            vault: vaults[0],
+          });
+          expect(out).toBeTruthy();
+          const newNote = (
+            await engine.findNotes({
+              fname: "new-note",
+              vault: vaults[0],
+            })
+          )[0];
+          expect(newNote).toBeTruthy();
+          expect(newNote.links.length).toEqual(1);
+          expect(_.pick(newNote.links[0], "from", "type", "value")).toEqual({
+            from: {
+              fname: "origin",
+              id: "origin",
+              vaultName: "vault1",
+            },
+            type: "backlink",
+            value: "new-note",
+          });
+        });
+      }
+    );
+
+    describeMultiWS(
       "WHEN goto note with template",
       {
         preSetupHook,

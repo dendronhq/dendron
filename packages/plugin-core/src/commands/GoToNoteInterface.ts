@@ -19,6 +19,12 @@ export type GoToNoteCommandOpts = {
   column?: ViewColumn;
   /** added for contextual UI analytics. */
   source?: string;
+  /**
+   * the note which go to originates from.
+   * this is populated in the process of running the command
+   * and should not be passed in outside of tests.
+   */
+  originNote?: NoteProps;
 };
 export { GoToNoteCommandOpts as GotoNoteCommandOpts };
 

@@ -1,10 +1,12 @@
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { ConfigReadOpts, ConfigStore, IFileStore } from "../store";
-import { okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
-import { DeepPartial } from "../utils";
+import { ConfigUtils, DeepPartial } from "../utils";
 import { DendronError } from "../error";
+import * as YamlUtils from "../yaml";
+import { DConfigLegacy } from "../oneoff/ConfigCompat";
 
 export type ConfigServiceOpts = {
   wsRoot: URI;
@@ -22,8 +24,8 @@ export class ConfigService {
   private _configStore: ConfigStore;
   private _fileStore: IFileStore;
 
-  get path(): URI {
-    return this._configStore.path;
+  get configPath(): URI {
+    return this._configStore.configPath;
   }
 
   /** static */
@@ -67,30 +69,68 @@ export class ConfigService {
   }
 
   readRaw() {
-    return this._configStore.readRaw();
+    return this._configStore.readConfig();
   }
 
-  read(opts?: ConfigReadOpts) {
-    return this._configStore.read(opts);
+  readConfig(opts?: ConfigReadOpts) {
+    const { applyOverride } = _.defaults(opts, { applyOverride: false });
+    if (!applyOverride) {
+      return this.readWithDefaults();
+    } else {
+      return this.readWithOverrides();
+    }
   }
 
-  write(payload: DendronConfig) {
-    return this.cleanWritePayload(payload).andThen(this._configStore.write);
+  writeConfig(payload: DendronConfig) {
+    return this.cleanWritePayload(payload).andThen(
+      this._configStore.writeConfig
+    );
   }
 
   get(key: string, opts?: ConfigReadOpts) {
-    return this._configStore.get(key, opts);
+    return this.readConfig(opts).map((config) => _.get(config, key));
   }
 
   update(key: string, value: DendronConfigValue) {
-    return this._configStore.update(key, value);
+    return this.readConfig().andThen((config) => {
+      const prevValue = _.get(config, key);
+      const updatedConfig = _.set(config, key, value);
+      return this.writeConfig(updatedConfig).map(() => prevValue);
+    });
   }
 
   delete(key: string) {
-    return this._configStore.delete(key);
+    return this.readConfig().andThen((config) => {
+      const prevValue = _.get(config, key);
+      if (prevValue === undefined) {
+        return errAsync(new DendronError({ message: `${key} does not exist` }));
+      }
+      _.unset(config, key);
+      return this.writeConfig(config).map(() => prevValue);
+    });
   }
 
   /** helpers */
+
+  private readWithDefaults() {
+    return this.readRaw().andThen((rawConfig) => {
+      const cleanConfig = DConfigLegacy.configIsV4(rawConfig)
+        ? DConfigLegacy.v4ToV5(rawConfig)
+        : _.defaultsDeep(rawConfig, ConfigUtils.genDefaultConfig());
+      return ConfigUtils.parse(cleanConfig);
+    });
+  }
+
+  private readWithOverrides() {
+    return this.searchOverride()
+      .orElse(() => this.readWithDefaults())
+      .andThen(ConfigUtils.validateLocalConfig)
+      .andThen((override) =>
+        this.readWithDefaults().map((config) =>
+          ConfigUtils.mergeConfig(config, override)
+        )
+      );
+  }
 
   /**
    * Given a write payload,
@@ -100,12 +140,23 @@ export class ConfigService {
    * @returns cleaned payload
    */
   private cleanWritePayload(payload: DendronConfig) {
-    return this._configStore
-      .searchOverride()
+    return this.searchOverride()
       .andThen((overrideConfig) => {
         return this.excludeOverrideVaults(payload, overrideConfig);
       })
       .orElse(() => okAsync(payload));
+  }
+
+  private searchOverride() {
+    return this._configStore
+      .readOverride("workspace")
+      .orElse(() => {
+        return this._configStore
+          .readOverride("global")
+          .orElse(() => okAsync(""));
+      })
+      .andThen(YamlUtils.fromStr)
+      .andThen(ConfigUtils.parsePartial);
   }
 
   /**

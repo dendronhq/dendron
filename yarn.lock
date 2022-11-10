@@ -3823,6 +3823,13 @@
   dependencies:
     tslib "^2.4.0"
 
+"@swc/helpers@^0.4.11":
+  version "0.4.12"
+  resolved "https://registry.npmjs.org/@swc/helpers/-/helpers-0.4.12.tgz#203243e78cff3c87c081c97ae548ab33e2503573"
+  integrity sha512-R6RmwS9Dld5lNvwKlPn62+piU+WDG1sMfsnfJioXCciyko/gZ0DQ4Mqglhq1iGU1nQ/RcGkAwfMH+elMSkJH3Q==
+  dependencies:
+    tslib "^2.4.0"
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"
@@ -27246,6 +27253,13 @@ zen-observable@^0.8.0:
   version "0.8.15"
   resolved "https://registry.npmjs.org/zen-observable/-/zen-observable-0.8.15.tgz#96415c512d8e3ffd920afd3889604e30b9eaac15"
   integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
+
+zod-validation-error@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/zod-validation-error/-/zod-validation-error-0.2.1.tgz#d855c8bba835f43692756670d407453424a7ba5b"
+  integrity sha512-zGg6P5EHi5V0dvyEeC8HBZd2pzp7QDKTngkSWgWunljrY+0SHkHyjI519D+u8/37BHkGHAFseWgnZ2Uq8LNFKg==
+  dependencies:
+    "@swc/helpers" "^0.4.11"
 
 zod@3.19.1:
   version "3.19.1"

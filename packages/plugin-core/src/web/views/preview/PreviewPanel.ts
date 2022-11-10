@@ -1,9 +1,15 @@
 import {
   assertUnreachable,
+  ConfigUtils,
+  DendronASTDest,
+  DendronConfig,
   DendronEditorViewKey,
   DLogger,
   DMessageEnum,
+  DVault,
   getWebEditorViewEntry,
+  isWebUri,
+  memoize,
   NoteProps,
   NoteUtils,
   NoteViewMessage,
@@ -11,6 +17,13 @@ import {
   OnUpdatePreviewHTMLData,
   OnUpdatePreviewHTMLMsg,
 } from "@dendronhq/common-all";
+import {
+  DendronASTTypes,
+  Image,
+  makeImageUrlFullPath,
+  MDUtilsV5,
+  visit,
+} from "@dendronhq/unified";
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
@@ -52,8 +65,11 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     @inject("wsRoot") private wsRoot: URI,
     private wsUtils: WSUtilsWeb,
     private webViewUtils: WebViewUtils,
-    @inject("IPreviewPanelConfig") private config: IPreviewPanelConfig,
-    @inject("INoteRenderer") private noteRenderer: INoteRenderer
+    // @inject("IPreviewPanelConfig")
+    // private previewPanelConfig: IPreviewPanelConfig,
+    @inject("INoteRenderer") private noteRenderer: INoteRenderer,
+    @inject("vaults") private vaults: DVault[], // TODO: Add Vaults, Config
+    @inject("DendronConfig") private dendronConfig: DendronConfig
   ) {
     this._linkHandler = linkHandler;
     this._textDocumentService = textDocumentService;
@@ -98,11 +114,13 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       );
 
       const webViewAssets = this.webViewUtils.getJsAndCss();
+      const initialTheme =
+        ConfigUtils.getPreview(this.dendronConfig).theme || "";
       const html = await this.webViewUtils.getWebviewContent({
         ...webViewAssets,
         name,
         panel: this._panel,
-        initialTheme: this.config.theme || "",
+        initialTheme,
       });
 
       this._panel.webview.html = html;
@@ -300,37 +318,40 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    * The results of this is cached based on the note content hash, so repeated
    * calls should not be excessively expensive.
    */
-  // private rewriteImageUrls = memoize({
-  //   fn: (note: NoteProps, panel: vscode.WebviewPanel) => {
-  //     const parser = MDUtilsV5.procRemarkFull({
-  //       dest: DendronASTDest.MD_DENDRON,
-  //       engine: this._ext.getEngine(),
-  //       fname: note.fname,
-  //       vault: note.vault,
-  //     });
-  //     const tree = parser.parse(note.body);
-  //     // ^preview-rewrites-images
-  //     visit(
-  //       tree,
-  //       [DendronASTTypes.IMAGE, DendronASTTypes.EXTENDED_IMAGE],
-  //       (image: Image) => {
-  //         if (!isWebUri(image.url)) {
-  //           makeImageUrlFullPath({ node: image, proc: parser });
-  //           image.url = panel.webview
-  //             .asWebviewUri(vscode.Uri.file(image.url))
-  //             .toString();
-  //         }
-  //       }
-  //     );
-  //     return {
-  //       ...note,
-  //       body: parser.stringify(tree),
-  //     };
-  //   },
-  //   keyFn: (note) => note.id,
-  //   shouldUpdate: (previous, current) =>
-  //     previous.contentHash !== current.contentHash,
-  // });
+  private rewriteImageUrls = memoize({
+    fn: (note: NoteProps, panel: vscode.WebviewPanel) => {
+      const parser = MDUtilsV5.procRemarkFull({
+        noteToRender: note,
+        dest: DendronASTDest.MD_DENDRON,
+        fname: note.fname,
+        vault: note.vault,
+        config: this.dendronConfig,
+        wsRoot: this.wsRoot.fsPath,
+        vaults: this.vaults,
+      });
+      const tree = parser.parse(note.body);
+      // ^preview-rewrites-images
+      visit(
+        tree,
+        [DendronASTTypes.IMAGE, DendronASTTypes.EXTENDED_IMAGE],
+        (image: Image) => {
+          if (!isWebUri(image.url)) {
+            makeImageUrlFullPath({ node: image, proc: parser });
+            image.url = panel.webview
+              .asWebviewUri(vscode.Uri.file(image.url))
+              .toString();
+          }
+        }
+      );
+      return {
+        ...note,
+        body: parser.stringify(tree),
+      };
+    },
+    keyFn: (note) => note.id,
+    shouldUpdate: (previous, current) =>
+      previous.contentHash !== current.contentHash,
+  });
 
   /**
    * Notify preview webview panel to display latest contents
@@ -357,8 +378,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           textDocument
         );
       }
-      // TODO: Add back once mdutils works in web ext.
-      // note = this.rewriteImageUrls(note, panel);
+      note = this.rewriteImageUrls(note, panel);
 
       let html = "";
       const resp = await this.noteRenderer.renderNote({

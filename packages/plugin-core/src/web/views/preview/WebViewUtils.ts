@@ -1,5 +1,6 @@
 import {
   APIUtils,
+  CONSTANTS,
   // CONSTANTS,
   DendronEditorViewKey,
   // DendronError,
@@ -123,16 +124,17 @@ export class WebViewUtils {
     const themes = ["light", "dark"];
     const themeMap: { [key: string]: string } = {};
 
-    // const customThemePath = Utils.joinPath(
-    //   this.wsRoot,
-    //   CONSTANTS.CUSTOM_THEME_CSS
-    // );
-    // TODO: Add back functionality
-    // if (await fs.pathExists(customThemePath)) {
-    //   themeMap["custom"] = panel.webview
-    //     .asWebviewUri(vscode.Uri.file(customThemePath))
-    //     .toString();
-    // }
+    const customThemePath = Utils.joinPath(
+      this.wsRoot,
+      CONSTANTS.CUSTOM_THEME_CSS
+    );
+
+    // TODO: Verify if this correctly checks that the path is valid.
+    if (await vscode.workspace.fs.stat(customThemePath)) {
+      themeMap["custom"] = panel.webview
+        .asWebviewUri(customThemePath)
+        .toString();
+    }
 
     themes.map((th) => {
       themeMap[th] = panel.webview

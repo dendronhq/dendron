@@ -1,8 +1,9 @@
 import { IDendronExtension } from "../../dendronExtensionInterface";
 import { PreviewLinkHandler } from "./PreviewLinkHandler";
 import { PreviewProxy } from "./PreviewProxy";
-import { PreviewPanel } from "./PreviewPanel";
+// import { PreviewPanel } from "./PreviewPanel";
 import { TextDocumentServiceFactory } from "../../services/TextDocumentServiceFactory";
+import { PreviewPanel } from "../../web/views/preview/PreviewPanel";
 
 /**
  * NOTE: This class is meant to only be used in _extension.ts/workspace.ts, or in
@@ -21,6 +22,7 @@ export class PreviewPanelFactory {
 
     // if preview panel doesn't exist yet, create a new one.
     if (!PreviewPanelFactory._preview) {
+      // TODO: Fix up the parameters to this constructor.
       PreviewPanelFactory._preview = new PreviewPanel({
         extension,
         linkHandler: new PreviewLinkHandler(extension),

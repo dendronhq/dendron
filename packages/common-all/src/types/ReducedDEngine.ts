@@ -17,4 +17,5 @@ export type ReducedDEngine = Pick<
   | "writeNote"
   | "renameNote"
   | "queryNotes"
+  | "renderNote"
 >;

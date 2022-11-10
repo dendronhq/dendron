@@ -326,6 +326,7 @@ export async function _activate(
         wsRoot: maybeWsRoot,
         vaults: wsImpl.vaults,
         engine: resp.data.engine,
+        config: resp.data.workspace.config,
       });
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });

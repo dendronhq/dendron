@@ -1,7 +1,6 @@
 import {
   APIUtils,
   CONSTANTS,
-  // CONSTANTS,
   DendronEditorViewKey,
   // DendronError,
   DendronTreeViewKey,

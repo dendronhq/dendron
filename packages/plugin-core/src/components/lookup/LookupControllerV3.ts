@@ -15,6 +15,8 @@ import {
   NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
+  VSRange,
+  deleteTextRange,
 } from "@dendronhq/common-all";
 import { HistoryService, WorkspaceUtils } from "@dendronhq/engine-server";
 import { LinkUtils } from "@dendronhq/unified";
@@ -26,7 +28,11 @@ import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { clipboard } from "../../utils";
-import { findReferences, hasAnchorsToUpdate } from "../../utils/md";
+import {
+  findReferences,
+  getOneIndexedFrontmatterEndingLineNumber,
+  hasAnchorsToUpdate,
+} from "../../utils/md";
 import { VersionProvider } from "../../versionProvider";
 import { LookupPanelView } from "../../views/LookupPanelView";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -770,20 +776,24 @@ export class LookupControllerV3 implements ILookupControllerV3 {
               vault,
             })
           )[0];
+
           const linksToUpdate = LinkUtils.findLinksFromBody({
             note: noteToUpdate,
             config,
           })
             .filter((link) => {
-              return (
-                link.to?.fname?.toLowerCase() ===
-                  sourceNote.fname.toLowerCase() &&
-                link.to?.anchorHeader &&
-                anchorNamesToUpdate.includes(link.to.anchorHeader)
-              );
+              const fnameMatch =
+                link.to?.fname?.toLocaleLowerCase() ===
+                sourceNote.fname.toLowerCase();
+              if (!fnameMatch) return false;
+
+              if (!link.to?.anchorHeader) return false;
+              const anchorHeader = link.to.anchorHeader.startsWith("^")
+                ? link.to.anchorHeader.substring(1)
+                : link.to.anchorHeader;
+              return anchorNamesToUpdate.includes(anchorHeader);
             })
             .map((link) => LinkUtils.dlink2DNoteLink(link));
-
           const resp = await LinkUtils.updateLinksInNote({
             linksToUpdate,
             note: noteToUpdate,
@@ -848,14 +858,36 @@ export class LookupControllerV3 implements ILookupControllerV3 {
               ),
               alias: { mode: "title" },
             });
+            // TODO: editor.edit API is prone to race conditions in our case
+            // because we also change files directly through the engine.
+            // remove the use of `editor.edit` and switch to processing the text
+            // and doing an `engine.writeNote()` call instead.
             await editor?.edit((builder) => {
               if (!_.isUndefined(selection) && !selection.isEmpty) {
                 builder.replace(selection, `!${link}`);
               }
             });
-            await editor?.document.save();
           } else {
-            await VSCodeUtils.deleteRange(document, range as vscode.Range);
+            const activeNote = await ext.wsUtils.getNoteFromDocument(document);
+            if (activeNote && range) {
+              const activeNoteBody = activeNote?.body;
+              const fmOffset =
+                getOneIndexedFrontmatterEndingLineNumber(document.getText()) ||
+                1;
+              const vsRange: VSRange = {
+                start: {
+                  line: range.start.line - fmOffset,
+                  character: range.start.character,
+                },
+                end: {
+                  line: range.end.line - fmOffset,
+                  character: range.end.character,
+                },
+              };
+              const processed = deleteTextRange(activeNoteBody, vsRange);
+              activeNote.body = processed;
+              await ext.getEngine().writeNote(activeNote);
+            }
           }
         }
         return note;

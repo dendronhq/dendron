@@ -6,7 +6,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import path from "path";
-import { PreviewPanel } from "../../web/views/preview/PreviewPanel";
+import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
 
 async function makeTestNote({
   previewPanel,

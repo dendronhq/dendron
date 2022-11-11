@@ -36,7 +36,7 @@ import {
   IPreviewPanelConfig,
 } from "../views/preview/IPreviewPanelConfig";
 import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
-import { PreviewPanel } from "../views/preview/PreviewPanel";
+import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getFuseEngine } from "./getFuseEngine";

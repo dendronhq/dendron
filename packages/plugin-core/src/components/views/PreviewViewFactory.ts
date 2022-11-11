@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import { PreviewPanel } from "../../web/views/preview/PreviewPanel";
+import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
 import { PreviewProxy } from "./PreviewProxy";
 
 /**

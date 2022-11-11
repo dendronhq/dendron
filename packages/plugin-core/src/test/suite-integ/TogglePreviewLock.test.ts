@@ -7,7 +7,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
-import { PreviewPanel } from "../../web/views/preview/PreviewPanel";
+import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
 
 suite("GIVEN TogglePreviewLock", function () {
   let previewPanel: PreviewPanel;

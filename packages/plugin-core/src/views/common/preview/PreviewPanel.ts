@@ -33,9 +33,9 @@ import { URI } from "vscode-uri";
 import { type IPreviewLinkHandler } from "../../../components/views/IPreviewLinkHandler";
 import { type PreviewProxy } from "../../../components/views/PreviewProxy";
 import { type ITextDocumentService } from "../../../services/ITextDocumentService";
-import { isPathInWorkspace } from "../../utils/isPathInWorkspace";
-import { WSUtilsWeb } from "../../utils/WSUtils";
-import { WebViewUtils } from "./WebViewUtils";
+import { isPathInWorkspace } from "../../../web/utils/isPathInWorkspace";
+import { WSUtilsWeb } from "../../../web/utils/WSUtils";
+import { WebViewUtils } from "../../../web/views/preview/WebViewUtils";
 
 /**
  * This is the default implementation of PreviewProxy. It contains a singleton

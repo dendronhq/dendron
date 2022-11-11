@@ -170,7 +170,7 @@ export class WebViewUtils {
   }
 
   /**
-   * @deprecated Use `{@link WebviewUtils.getWebviewContent}`
+   * @deprecated Use `{@link WebViewUtils.getWebviewContent}`
    * @param param0
    * @returns
    */

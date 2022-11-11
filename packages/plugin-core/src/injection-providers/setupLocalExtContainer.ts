@@ -12,7 +12,7 @@ import { EngineAPIService } from "../services/EngineAPIService";
 import { MetadataSvcTreeViewConfig } from "../views/node/treeview/MetadataSvcTreeViewConfig";
 import { ITreeViewConfig } from "../views/common/treeview/ITreeViewConfig";
 import { PreviewProxy } from "../components/views/PreviewProxy";
-import { PreviewPanel } from "../web/views/preview/PreviewPanel";
+import { PreviewPanel } from "../views/common/preview/PreviewPanel";
 import { IPreviewLinkHandler } from "../components/views/IPreviewLinkHandler";
 import { PreviewLinkHandler } from "../components/views/PreviewLinkHandler";
 import { ITextDocumentService } from "../services/ITextDocumentService";

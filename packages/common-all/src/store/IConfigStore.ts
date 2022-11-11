@@ -1,6 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import { IDendronError } from "../error";
-import { DendronConfig, DendronConfigValue } from "../types";
+import { DendronConfig } from "../types";
 import { DeepPartial } from "../utils";
 
 export type ConfigValue = string | number | object;

@@ -1,59 +1,21 @@
-import {
-  DendronConfig,
-  DendronPublishingConfig,
-  DVault,
-  NoteProps,
-} from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import assert from "assert";
 import { container } from "tsyringe";
 import { DendronEngineV3Web } from "../../../engine/DendronEngineV3Web";
-import { PluginNoteRenderer } from "../../../engine/PluginNoteRenderer";
 import { setupTestEngineContainer } from "../../helpers/setupTestEngineContainer";
 
-async function initializeTest(): Promise<PluginNoteRenderer> {
-  const pubConfig: DendronPublishingConfig = {
-    copyAssets: false,
-    siteHierarchies: [],
-    enableSiteLastModified: false,
-    siteRootDir: "",
-    enableFrontmatterTags: false,
-    enableHashesForFMTags: false,
-    writeStubs: false,
-    seo: {
-      title: undefined,
-      description: undefined,
-      author: undefined,
-      twitter: undefined,
-      image: undefined,
-    },
-    github: {
-      cname: undefined,
-      enableEditLink: false,
-      editLinkText: undefined,
-      editBranch: undefined,
-      editViewMode: undefined,
-      editRepository: undefined,
-    },
-    enablePrettyLinks: false,
-  };
-
-  const config: DendronConfig = {
-    version: 5,
-    publishing: pubConfig,
-  } as DendronConfig;
-
+async function initializeTest() {
   await setupTestEngineContainer();
 
   const engine = container.resolve(DendronEngineV3Web);
 
   await engine.init();
-
-  return new PluginNoteRenderer(config, engine, []);
+  return engine;
 }
 
-suite("GIVEN a PluginNoteRenderer", () => {
+suite("GIVEN renderNote is run", () => {
   test("WHEN a basic note is rendered THEN the right HTML is returned", async () => {
-    const renderer = await initializeTest();
+    const engine = await initializeTest();
 
     const vault: DVault = {
       fsPath: "foo",
@@ -76,7 +38,7 @@ suite("GIVEN a PluginNoteRenderer", () => {
       vault,
     } as NoteProps;
 
-    const result = await renderer.renderNote({ id: "foo", note: testNote });
+    const result = await engine.renderNote({ id: "foo", note: testNote });
     assert.strictEqual(
       result.data,
       '<h1 id="foo">foo</h1>\n<p>this is the body</p>'
@@ -84,7 +46,7 @@ suite("GIVEN a PluginNoteRenderer", () => {
   });
 
   test("WHEN a wikilink is rendered THEN the HTML contains the proper link info", async () => {
-    const renderer = await initializeTest();
+    const engine = await initializeTest();
 
     const vault: DVault = {
       fsPath: "foo",
@@ -107,7 +69,7 @@ suite("GIVEN a PluginNoteRenderer", () => {
       vault,
     } as NoteProps;
 
-    const result = await renderer.renderNote({ id: "foo", note: testNote });
+    const result = await engine.renderNote({ id: "foo", note: testNote });
     assert(result.data?.includes(`<a href="bar.html">Bar</a>`));
   });
 });

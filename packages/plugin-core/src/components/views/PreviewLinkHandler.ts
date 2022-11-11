@@ -107,6 +107,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
           fname: noteData.note.fname,
           vault: noteData.note.vault,
           note: noteData.note,
+          // Avoid replacing the preview
           column: vscode.ViewColumn.One,
           anchor: noteData.anchor,
         });

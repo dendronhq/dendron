@@ -20,7 +20,6 @@ export class PreviewPanelFactory {
 
     // if preview panel doesn't exist yet, create a new one.
     if (!PreviewPanelFactory._preview) {
-      // TODO: Fix up the parameters to this constructor.
       PreviewPanelFactory._preview = container.resolve(PreviewPanel);
     }
 

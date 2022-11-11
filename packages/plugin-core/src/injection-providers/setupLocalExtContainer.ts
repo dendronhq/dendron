@@ -55,6 +55,7 @@ export async function setupLocalExtContainer(opts: {
   container.register<PreviewProxy>("PreviewProxy", {
     useClass: PreviewPanel,
   });
+  //TODO: add real value
   container.register<number>("port", {
     useValue: 1,
   });

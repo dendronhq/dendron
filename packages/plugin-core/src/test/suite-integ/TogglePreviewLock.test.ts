@@ -24,7 +24,7 @@ suite("GIVEN TogglePreviewLock", function () {
 
   describeSingleWS(
     "WHEN locking preview from the command bar",
-    { timeout: 1e6 },
+    { timeout: 5e3 },
     () => {
       beforeEach(() => {
         previewPanel.unlock(); // reset

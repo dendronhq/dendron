@@ -298,8 +298,6 @@ module.exports = function (webpackEnv) {
       ],
     },
     resolve: {
-      // Prefer `main` over `module`
-      mainFields: ["main", "module"],
       // This allows you to set a fallback for where webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
@@ -431,6 +429,7 @@ module.exports = function (webpackEnv) {
               test: /\.(js|mjs)$/,
               exclude: /@babel(?:\/|\\{1,2})runtime/,
               loader: require.resolve("babel-loader"),
+              type: "javascript/auto",
               options: {
                 babelrc: false,
                 configFile: false,

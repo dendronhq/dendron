@@ -2,6 +2,7 @@ import { Database } from "sqlite3";
 
 export enum SqliteTableNames {
   NoteProps = "NoteProps",
+  NotePropsFts = "NoteProps_fts",
   Links = "Links",
   Vaults = "Vaults",
   VaultNotes = "VaultNotes",

@@ -1,6 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-empty-function */
-
 import { DLink, DNodePointer } from "@dendronhq/common-all";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
@@ -33,15 +30,15 @@ export class LinksTableRow {
 export class LinksTableUtils {
   public static createTable(db: Database): ResultAsync<void, SqliteError> {
     const sql = `
-CREATE TABLE IF NOT EXISTS Links (
-  source TEXT NOT NULL,
-  sink TEXT NOT NULL,
-  linkType INTEGER,
-  payload TEXT,
-  PRIMARY KEY (source, sink, linkType),
-  FOREIGN KEY(source) REFERENCES NoteProps(id) ON DELETE CASCADE,
-  FOREIGN KEY(sink) REFERENCES NoteProps(id) ON DELETE CASCADE
-) WITHOUT ROWID;`;
+    CREATE TABLE IF NOT EXISTS Links (
+      source TEXT NOT NULL,
+      sink TEXT NOT NULL,
+      linkType INTEGER,
+      payload TEXT,
+      PRIMARY KEY (source, sink, linkType),
+      FOREIGN KEY(source) REFERENCES NoteProps(id) ON DELETE CASCADE,
+      FOREIGN KEY(sink) REFERENCES NoteProps(id) ON DELETE CASCADE
+    ) WITHOUT ROWID;`;
 
     const idx = `CREATE INDEX IF NOT EXISTS idx_Links_source ON Links (source)`;
 
@@ -108,16 +105,16 @@ CREATE TABLE IF NOT EXISTS Links (
       .join(",");
 
     const sql = `
-INSERT INTO Links (source, sink, linkType, payload)
-WITH T(fname, sink, linkType, payload) as 
-(VALUES ${values})
-SELECT NoteProps.id, T.sink, T.linkType, T.payload FROM T
-JOIN NoteProps ON T.fname = NoteProps.fname
-  `;
+      INSERT INTO Links (source, sink, linkType, payload)
+      WITH T(fname, sink, linkType, payload) AS
+      (VALUES ${values})
+      SELECT NoteProps.id, T.sink, T.linkType, T.payload FROM T
+      JOIN NoteProps ON T.fname = NoteProps.fname`;
 
     return executeSqlWithVoidResult(db, sql);
   }
 
+  // TODO: This also needs to take into account Vault - same is true for other methods here as well.
   static insertLinkWithSourceAsFname(
     db: Database,
     sinkId: string,
@@ -187,23 +184,23 @@ JOIN NoteProps ON T.fname = NoteProps.fname
     payload: DLink
   ): ResultAsync<void, SqliteError> {
     const sql = `
-INSERT INTO Links (source, sink, linkType, payload)
-SELECT '${sourceId}', id, ${LinksTableUtils.getSQLValueForLinkType(
+      INSERT INTO Links (source, sink, linkType, payload)
+      SELECT '${sourceId}', id, ${LinksTableUtils.getSQLValueForLinkType(
       linkType
     )}, '${JSON.stringify(payload) ?? {}}'
-FROM NoteProps
-WHERE fname = '${sinkFname}'`;
+      FROM NoteProps
+      WHERE fname = '${sinkFname}'`;
 
     return executeSqlWithVoidResult(db, sql);
   }
 
   public static getChildren(
     db: Database,
-    key: string
+    noteId: string
   ): ResultAsync<DNodePointer[], SqliteError> {
     const childrenSql = `
     SELECT sink FROM Links
-    WHERE source = '${key}' AND linkType = 1`;
+    WHERE source = '${noteId}' AND linkType = 1`;
 
     const prom = new Promise<DNodePointer[]>((resolve, reject) => {
       db.all(childrenSql, (err, rows) => {
@@ -223,11 +220,11 @@ WHERE fname = '${sinkFname}'`;
 
   public static getParent(
     db: Database,
-    key: string
+    noteId: string
   ): ResultAsync<DNodePointer | null, SqliteError> {
     const parentSql = `
     SELECT source FROM Links
-    where sink = '${key}' AND linkType = 1`;
+    where sink = '${noteId}' AND linkType = 1`;
 
     const prom = new Promise<DNodePointer | null>((resolve, reject) => {
       db.get(parentSql, (err, row) => {

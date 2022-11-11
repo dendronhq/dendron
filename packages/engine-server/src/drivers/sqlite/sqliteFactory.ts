@@ -1,145 +1,120 @@
-import { DVault, IFileStore } from "@dendronhq/common-all";
-import { Database } from "sqlite3";
-import { parseAllNoteFilesForSqlite } from "../file";
-import { SqliteMetadataStore } from "./SqliteMetadataStore";
-import { LinksTableUtils } from "./tables/LinksTable";
-import { NotePropsTableUtils } from "./tables/NotePropsTable";
-import { SchemaNotesTableUtils } from "./tables/SchemaNotesTable";
-import { VaultNotesTableUtils } from "./tables/VaultNotesTable";
-import { VaultsTableUtils } from "./tables/VaultsTable";
-import { URI } from "vscode-uri";
+import { DVault, IFileStore, ResultAsync } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { Database } from "sqlite3";
+import { URI } from "vscode-uri";
+import { parseAllNoteFilesForSqlite } from "../file";
+import { executeSqlWithVoidResult } from "./tables";
+import { LinksTableUtils } from "./tables/LinksTableUtils";
+import { NotePropsFtsTableUtils } from "./tables/NotePropsFtsTableUtils";
+import { NotePropsTableUtils } from "./tables/NotePropsTableUtils";
+import { SchemaNotesTableUtils } from "./tables/SchemaNotesTableUtils";
+import { VaultNotesTableUtils } from "./tables/VaultNotesTableUtils";
+import { VaultsTableUtils } from "./tables/VaultsTableUtils";
 
+/**
+ * Factory methods to create a SQLite database
+ */
 export class SqliteFactory {
-  public static async init(
+  /**
+   * This creates a SQLite database AND also initializes it with all notes that
+   * are a part of the passed in vaults
+   * @param wsRoot
+   * @param vaults
+   * @param fileStore
+   * @param dbFilePath - path of the db file. Use :memory: to use an in-memory database
+   * @returns
+   */
+  public static createInitializedDB(
     wsRoot: string,
     vaults: DVault[],
     fileStore: IFileStore,
-    dbname?: string
-  ) {
-    const _db = await new Promise<Database>((resolve) => {
-      const db = new Database(dbname ?? "dendron.test3.db", (err) => {
+    dbFilePath: string
+  ): ResultAsync<Database, Error> {
+    return SqliteFactory.createEmptyDB(dbFilePath).andThen((db) => {
+      const results = ResultAsync.combine(
+        // Initialize Each Vault
+        vaults.map((vault) => {
+          const vaultPath = vault2Path({ vault, wsRoot });
+          // Get list of files from the filesystem for the vault
+          return ResultAsync.fromPromise(
+            fileStore.readDir({
+              root: URI.parse(vaultPath),
+              include: ["*.md"],
+            }),
+            (e) => {
+              return e;
+            }
+          ).map((maybeFiles) => {
+            // And parse them
+            return parseAllNoteFilesForSqlite(
+              maybeFiles.data!,
+              vault,
+              db,
+              vaultPath,
+              {} // TODO: Add in schemaModuleDict
+            );
+          });
+        })
+      );
+
+      return results.map(() => {
+        return db;
+      });
+    }) as ResultAsync<Database, Error>;
+  }
+
+  /**
+   * This method will create a sqlite database with the table schema created,
+   * but no initial data is added. Useful for tests.
+   * @param dbFilePath - path of the db file. Use :memory: to use an in-memory database
+   * @returns
+   */
+  public static createEmptyDB(
+    dbFilePath: string
+  ): ResultAsync<Database, Error> {
+    const prom = new Promise<Database>((resolve, reject) => {
+      const db = new Database(dbFilePath, (err) => {
         if (err) {
-          console.log(err);
+          reject(err.message);
         }
 
         resolve(db);
       });
     });
 
-    // Create the relation-less tables first (vaults and NoteProps);
-    await VaultsTableUtils.createTable(_db);
-    await NotePropsTableUtils.createTable(_db);
-
-    // Now create tables with relations
-    const result = await LinksTableUtils.createTable(_db);
-    debugger;
-    await VaultNotesTableUtils.createTable(_db);
-    await SchemaNotesTableUtils.createTable(_db);
-
-    await Promise.all(
-      vaults.map(async (vault) => {
-        const vpath = vault2Path({ vault, wsRoot });
-        // Get list of files from filesystem
-        const maybeFiles = await fileStore.readDir({
-          root: URI.parse(vpath),
-          include: ["*.md"],
-        });
-
-        if (maybeFiles.error) {
-          //
-        }
-
-        // TODO: Add in schemaModuleDict
-        return parseAllNoteFilesForSqlite(
-          maybeFiles.data!,
-          vault,
-          _db,
-          vpath,
-          {}
-        );
-      })
-    );
-
-    await new Promise<void>((resolve) => {
-      _db.run("PRAGMA foreign_keys = ON", (err) => {
-        if (!err) {
-          resolve();
-        }
-      });
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as Error;
+    }).andThen((db) => {
+      // First create the relation-less tables first (vaults and NoteProps):
+      return (
+        VaultsTableUtils.createTable(db)
+          .andThen(() => {
+            return NotePropsTableUtils.createTable(db);
+          })
+          .andThen(() => {
+            return LinksTableUtils.createTable(db);
+          })
+          // Now create tables with relations
+          .andThen(() => {
+            return VaultNotesTableUtils.createTable(db);
+          })
+          .andThen(() => {
+            return SchemaNotesTableUtils.createTable(db);
+          })
+          .andThen(() => {
+            return NotePropsFtsTableUtils.createTable(db);
+          })
+          .andThen(() => {
+            return NotePropsFtsTableUtils.createTable(db);
+          })
+          .andThen(() => {
+            // Enable Foreign Key relationships
+            return executeSqlWithVoidResult(db, "PRAGMA foreign_keys = ON");
+          })
+          .map(() => {
+            return db;
+          })
+      );
     });
-
-    return _db;
-  }
-
-  public static async initNoNotes(dbname?: string) {
-    const _db = await new Promise<Database>((resolve) => {
-      const db = new Database(dbname ?? ":memory:", (err) => {
-        if (err) {
-          debugger;
-          console.log(err);
-        }
-
-        resolve(db);
-      });
-    });
-
-    // Create the relation-less tables first (vaults and NoteProps);
-    await VaultsTableUtils.createTable(_db);
-    await NotePropsTableUtils.createTable(_db);
-
-    // Now create tables with relations
-    await LinksTableUtils.createTable(_db);
-    await VaultNotesTableUtils.createTable(_db);
-    await SchemaNotesTableUtils.createTable(_db);
-
-    await new Promise<void>((resolve) => {
-      _db.run("PRAGMA foreign_keys = ON", (err) => {
-        if (!err) {
-          resolve();
-        }
-      });
-    });
-
-    return _db;
-  }
-
-  static initSync() {
-    const _db = new Database("dendron.test3.db");
-
-    // Create the relation-less tables first (vaults and NoteProps);
-    VaultsTableUtils.createTable(_db);
-    NotePropsTableUtils.createTable(_db);
-
-    // Now create tables with relations
-    LinksTableUtils.createTable(_db);
-    VaultNotesTableUtils.createTable(_db);
-
-    return _db;
-  }
-
-  static createMetadataStore(): SqliteMetadataStore {
-    const db = SqliteFactory.initSync();
-
-    return new SqliteMetadataStore(db, []);
-  }
-
-  static async createMetadataStoreForTest(
-    vaults: DVault[],
-    store: IFileStore,
-    wsRoot: string
-  ): Promise<SqliteMetadataStore> {
-    const db = await SqliteFactory.init(wsRoot, vaults, store, ":memory:");
-
-    // await Promise.all(
-    //   vaults.map((vault) => {
-    //     return VaultsTableUtils.insert(db, {
-    //       name: vault.name ?? "vault",
-    //       fsPath: vault.fsPath,
-    //     });
-    //   })
-    // );
-
-    return new SqliteMetadataStore(db, vaults);
   }
 }

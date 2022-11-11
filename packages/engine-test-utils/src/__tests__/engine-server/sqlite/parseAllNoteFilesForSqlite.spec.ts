@@ -17,8 +17,6 @@ import { Database } from "sqlite3";
 import { SqliteTableNames, SqliteTestUtils } from "./SqliteTestUtils";
 
 describe("GIVEN a sqlite store about to be initialized", () => {
-  jest.setTimeout(10e6);
-
   let db: Database;
 
   const testDir = tmpDir().name;
@@ -96,12 +94,12 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   beforeEach(() => {
-    return SqliteFactory
-      .initNoNotes
-      // "/Users/jyeung/code/dendron/dendron/packages/engine-test-utils/dendron.test4.db"
-      ()
-      .then((_db) => {
+    return SqliteFactory.createEmptyDB(":memory:")
+      .map((_db) => {
         db = _db;
+      })
+      .mapErr((err) => {
+        throw err;
       });
   });
 
@@ -833,9 +831,7 @@ async function validateNotePropInDB(
 ): Promise<Ok<NotePropsTableRow, any>> {
   const result = await NotePropsTableUtils.getById(db, noteId);
 
-  debugger;
   expect(result.isOk()).toBeTruthy();
-
   if (result.isOk()) {
     expect(result.value.id).toEqual(noteId);
     expect(result.value.fname).toEqual(noteId);

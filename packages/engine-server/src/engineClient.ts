@@ -56,7 +56,7 @@ import _ from "lodash";
 import {
   NoteIndexLightProps,
   SQLiteMetadataStore,
-} from "./drivers/SQLiteMetadataStore";
+} from "./drivers/PrismaSQLiteMetadataStore";
 import { HistoryService } from "./history";
 import { EngineUtils } from "./utils";
 

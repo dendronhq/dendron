@@ -1,13 +1,15 @@
-/* eslint-disable no-empty-function */
-/* eslint-disable no-useless-constructor */
 import {
   DendronError,
   DVault,
+  ERROR_SEVERITY,
+  ERROR_STATUS,
   FindNoteOpts,
   IDataStore,
   IDendronError,
   NotePropsMeta,
+  QueryNotesOpts,
   RespV3,
+  StatusCodes,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { err, ok, Result, ResultAsync } from "neverthrow";
@@ -16,12 +18,13 @@ import {
   LinksTableRow,
   LinksTableUtils,
   LinkType,
+  NotePropsFtsTableUtils,
   NotePropsTableUtils,
   VaultNotesTableRow,
   VaultNotesTableUtils,
   VaultsTableUtils,
 } from "./tables";
-import { SchemaNotesTableUtils } from "./tables/SchemaNotesTable";
+import { SchemaNotesTableUtils } from "./tables/SchemaNotesTableUtils";
 
 export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   constructor(private _db: Database, private _vaults: DVault[]) {}
@@ -39,7 +42,12 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
       };
     } else {
       return {
-        error: new DendronError({ message: "Something went wrong with get" }), // TODO: Refine
+        // Parity error message with NoteMetadataStore
+        error: DendronError.createFromStatus({
+          status: ERROR_STATUS.CONTENT_NOT_FOUND,
+          message: `NoteProps metadata not found for key ${key}.`,
+          severity: ERROR_SEVERITY.MINOR,
+        }),
       };
     }
   }
@@ -243,6 +251,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
     // Now add links
     await Promise.all(
       data.links.map((link) => {
+        // TODO: Compute the to destination from the contents of the link, i.e. [[foo]]
         return LinksTableUtils.insert(
           this._db,
           new LinksTableRow(data.id, link.to!.id!, link.type as LinkType, link) // TODO: Get rid of to!.id! after Tuling's change.
@@ -290,5 +299,48 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         error: result.error,
       };
     }
+  }
+
+  query(
+    opts: QueryNotesOpts
+  ): ResultAsync<NotePropsMeta[], IDendronError<StatusCodes | undefined>> {
+    // Special case: return all root notes
+    if (opts.qs === "") {
+      const result = NotePropsTableUtils.getByFname(this._db, "root");
+
+      return result.andThen((rows) => {
+        const ids = rows.map((row) => row.id);
+
+        const mappingResult = ids.map((id) => {
+          return this._get(id);
+        });
+
+        return ResultAsync.combine(mappingResult);
+      }) as ResultAsync<
+        NotePropsMeta[],
+        IDendronError<StatusCodes | undefined>
+      >;
+    }
+    // if (qs === "") {
+    //   const results = this.notesIndex.search("root");
+    //   items = _.map(
+    //     _.filter(results, (ent) => ent.item.fname === "root"),
+    //     (ent) => ent.item
+    //   );
+    //   /// seearch eveyrthing
+    // } else if (qs === "*") {
+    //   // @ts-ignore
+    //   items = this.notesIndex._docs as NoteProps[];
+    // }
+
+    const res = NotePropsFtsTableUtils.query(this._db, opts.qs);
+
+    return res.andThen((ids) => {
+      const mappingResult = ids.map((id) => {
+        return this._get(id);
+      });
+
+      return ResultAsync.combine(mappingResult);
+    }) as ResultAsync<NotePropsMeta[], IDendronError<StatusCodes | undefined>>;
   }
 }

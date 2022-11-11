@@ -37,7 +37,7 @@ import path from "path";
 import { createCacheEntry, EngineUtils } from "../../utils";
 import { ParserBase } from "./parseBase";
 import { NotesFileSystemCache } from "../../cache/notesFileSystemCache";
-import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
+import { SQLiteMetadataStore } from "../PrismaSQLiteMetadataStore";
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo

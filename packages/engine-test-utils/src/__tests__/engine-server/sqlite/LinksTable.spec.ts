@@ -10,7 +10,6 @@ import { Database } from "sqlite3";
 describe("GIVEN a Links Sqlite Table", () => {
   let db: Database;
   beforeEach(() => {
-    // db = new Database("/Users/jyeung/code/dendron/dendron/dendron-tests.db");
     db = new Database(":memory:");
   });
   afterEach(() => {
@@ -246,20 +245,6 @@ describe("GIVEN a Links Sqlite Table", () => {
       });
   });
 
-  test("WHEN inserting data with insertLinkWithSourceAsFname() with an invalid source fname THEN the appropriate error is generated", async () => {
-    await setupDb();
-
-    const insertResult = await LinksTableUtils.insertLinkWithSourceAsFname(
-      db,
-      "sink",
-      "invalid-source-fname",
-      "child"
-    );
-
-    // Currently doesn't return an error.
-    // expect(insertResult.isErr()).toBeTruthy();
-  });
-
   test("WHEN inserting data with bulkInsertLinkWithSourceAsFname() THEN the appropriate parent-child links can be retrieved", async () => {
     await setupDb();
 
@@ -298,8 +283,6 @@ describe("GIVEN a Links Sqlite Table", () => {
       });
   });
 
-  // test("WHEN inserting data with bulkInsertLinkWithSourceAsFname() with an invalid source fname THEN the appropriate error is generated", async () => {});
-
   test("WHEN inserting data with insertLinkWithSinkAsFname() THEN the appropriate forward link can be retrieved", async () => {
     await setupDb();
 
@@ -337,8 +320,6 @@ describe("GIVEN a Links Sqlite Table", () => {
         expect(links[0]).toEqual(payload);
       });
   });
-
-  // test("WHEN inserting data with insertLinkWithSinkAsFname() with an invalid sink fname THEN the appropriate error is generated", async () => {});
 
   test("WHEN inserting data with bulkInsertLinkWithSinkAsFname() THEN the appropriate forward links can be retrieved", async () => {
     await setupDb();
@@ -381,8 +362,6 @@ describe("GIVEN a Links Sqlite Table", () => {
         expect(links[0]).toEqual(payload);
       });
   });
-
-  // test("WHEN inserting data with bulkInsertLinkWithSinkAsFname() with an invalid sink fname THEN the appropriate error is generated", async () => {});
 
   //  Deletion Tests
   test("WHEN a key is deleted from the Links Table THEN all links with that key as a source can no longer be retrieved", async () => {

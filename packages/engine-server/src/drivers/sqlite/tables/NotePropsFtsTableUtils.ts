@@ -1,6 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-empty-function */
-
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
@@ -10,35 +7,50 @@ import { executeSqlWithVoidResult } from "./SQLiteUtils";
  * FTS5 Virtual Table for Full-Text-Search over fname column in NoteProps. This
  * is to power lookup.
  */
-export class NotePropsFtsTable {
+export class NotePropsFtsTableUtils {
   static createTable(db: Database): ResultAsync<void, SqliteError> {
+    // The Sqlite library doesn't appear to be able to execute multiple SQL
+    // statements in the same block, so they must be separated into different
+    // db.run() statements.
     const sql = `
     CREATE VIRTUAL TABLE IF NOT EXISTS NoteProps_fts USING fts5(content=[NoteProps], id UNINDEXED, fname);
+    `;
 
-    CREATE TRIGGER IF NOT EXISTS NoteProps_after_insert AFTER INSERT ON NoteProps
+    const sql2 = `CREATE TRIGGER IF NOT EXISTS NoteProps_after_insert AFTER INSERT ON NoteProps
     BEGIN
       INSERT INTO NoteProps_fts(id, fname) VALUES (new.id, new.fname);
       INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');
-    END;
-    
-    CREATE TRIGGER IF NOT EXISTS NoteProps_after_update AFTER UPDATE ON NoteProps
+    END;`;
+
+    const sql3 = `CREATE TRIGGER IF NOT EXISTS NoteProps_after_update AFTER UPDATE ON NoteProps
     BEGIN
       UPDATE NoteProps_fts
       SET fname = new.fname
       WHERE id = new.id;
       INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');
-    END;
-    
-    CREATE TRIGGER IF NOT EXISTS NoteProps_after_delete AFTER DELETE ON NoteProps
+    END;`;
+
+    const sql4 = `CREATE TRIGGER IF NOT EXISTS NoteProps_after_delete AFTER DELETE ON NoteProps
     BEGIN
-      DELETE FROM notes_fts WHERE id=old.id;
+      DELETE FROM NoteProps_fts WHERE id=old.id;
       INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');
-    END;
+    END;`;
 
-    INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');
-    `;
+    const sql5 = `INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return executeSqlWithVoidResult(db, sql)
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, sql2);
+      })
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, sql3);
+      })
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, sql4);
+      })
+      .andThen(() => {
+        return executeSqlWithVoidResult(db, sql5);
+      });
   }
 
   /**
@@ -47,11 +59,11 @@ export class NotePropsFtsTable {
    * @param query
    * @returns list of noteIDs that are matches
    */
-  static search(
+  static query(
     db: Database,
     query: string
   ): ResultAsync<string[], SqliteError> {
-    query = NotePropsFtsTable.transformQuery(query).join(" ");
+    query = NotePropsFtsTableUtils.transformQuery(query).join(" ");
 
     const sql = `SELECT id FROM NoteProps_fts WHERE fname MATCH 'NEAR(${query})'`;
 

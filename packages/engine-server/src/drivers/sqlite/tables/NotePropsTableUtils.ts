@@ -1,5 +1,3 @@
-/* eslint-disable no-empty-function */
-/* eslint-disable no-useless-constructor */
 import { NotePropsMeta } from "@dendronhq/common-all";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
@@ -89,6 +87,35 @@ export class NotePropsTableUtils {
     });
   }
 
+  /**
+   * Get all rows by fname
+   * @param db
+   * @param fname
+   * @returns
+   */
+  public static getByFname(
+    db: Database,
+    fname: string
+  ): ResultAsync<NotePropsTableRow[], SqliteError> {
+    const sql = `SELECT * FROM NoteProps WHERE fname = '${fname}'`;
+
+    const prom = new Promise<NotePropsTableRow[]>((resolve, reject) => {
+      db.all(sql, (err, rows) => {
+        if (err) {
+          reject(err.message);
+        } else if (!rows) {
+          reject(new Error(`No rows with fname ${fname} found`));
+        } else {
+          resolve(rows as NotePropsTableRow[]);
+        }
+      });
+    });
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
+    });
+  }
+
   public static getHashByFnameAndVaultId(
     db: Database,
     fname: string,
@@ -145,36 +172,35 @@ export class NotePropsTableUtils {
 
   private static getSQLInsertString(props: NotePropsMeta): string {
     const sql = `
-INSERT INTO NoteProps (id, fname, title, description, updated, created, anchors, stub, custom, contentHash, color, image, traits)
-VALUES (
-  ${getSQLValueString(props.id)},
-  ${getSQLValueString(props.fname)},
-  ${getSQLValueString(props.title)},
-  ${getSQLValueString(props.desc)},
-  ${getIntegerString(props.updated)},
-  ${getIntegerString(props.created)},
-  ${getJSONString(props.anchors)},
-  ${getSQLBoolean(props.stub)},
-  ${getJSONString(props.custom)},
-  ${getSQLValueString(props.contentHash)},
-  ${getSQLValueString(props.color)},
-  ${getJSONString(props.image)},
-  ${getJSONString(props.traits)})
-ON CONFLICT(id) DO UPDATE
-SET
-fname = ${getSQLValueString(props.fname)},
-title = ${getSQLValueString(props.title)},
-description = ${getSQLValueString(props.desc)},
-updated = ${getIntegerString(props.updated)},
-created = ${getIntegerString(props.created)},
-anchors = ${getJSONString(props.anchors)},
-stub = ${getSQLBoolean(props.stub)},
-custom = ${getJSONString(props.custom)},
-contentHash = ${getSQLValueString(props.contentHash)},
-color = ${getSQLValueString(props.color)},
-image = ${getJSONString(props.image)},
-traits = ${getJSONString(props.traits)}
-  `;
+    INSERT INTO NoteProps (id, fname, title, description, updated, created, anchors, stub, custom, contentHash, color, image, traits)
+    VALUES (
+      ${getSQLValueString(props.id)},
+      ${getSQLValueString(props.fname)},
+      ${getSQLValueString(props.title)},
+      ${getSQLValueString(props.desc)},
+      ${getIntegerString(props.updated)},
+      ${getIntegerString(props.created)},
+      ${getJSONString(props.anchors)},
+      ${getSQLBoolean(props.stub)},
+      ${getJSONString(props.custom)},
+      ${getSQLValueString(props.contentHash)},
+      ${getSQLValueString(props.color)},
+      ${getJSONString(props.image)},
+      ${getJSONString(props.traits)})
+    ON CONFLICT(id) DO UPDATE
+    SET
+      fname = ${getSQLValueString(props.fname)},
+      title = ${getSQLValueString(props.title)},
+      description = ${getSQLValueString(props.desc)},
+      updated = ${getIntegerString(props.updated)},
+      created = ${getIntegerString(props.created)},
+      anchors = ${getJSONString(props.anchors)},
+      stub = ${getSQLBoolean(props.stub)},
+      custom = ${getJSONString(props.custom)},
+      contentHash = ${getSQLValueString(props.contentHash)},
+      color = ${getSQLValueString(props.color)},
+      image = ${getJSONString(props.image)},
+      traits = ${getJSONString(props.traits)}`;
     return sql;
   }
 }

@@ -1,6 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-empty-function */
-
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";

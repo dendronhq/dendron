@@ -92,7 +92,6 @@ import {
 import _ from "lodash";
 import path from "path";
 import { NotesFileSystemCache } from "./cache/notesFileSystemCache";
-import { SqliteFactory, SqliteMetadataStore } from "./drivers";
 import { NoteParserV2 } from "./drivers/file/NoteParserV2";
 import { SchemaParser } from "./drivers/file/schemaParser";
 import { NodeJSFileStore } from "./store";
@@ -160,91 +159,6 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       schemaStore: new SchemaStore(
         fileStore,
         new SchemaMetadataStore(fuseEngine),
-        URI.parse(wsRoot)
-      ),
-      fileStore,
-      logger: LOGGER,
-      config,
-    });
-  }
-
-  static async create2({
-    wsRoot,
-    logger,
-  }: {
-    logger?: DLogger;
-    wsRoot: string;
-  }) {
-    const LOGGER = logger || createLogger();
-    const { error, data: config } =
-      DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
-    if (error) {
-      LOGGER.error(stringifyError(error));
-    }
-
-    const queryStore = new FuseQueryStore();
-    const fileStore = new NodeJSFileStore();
-
-    const vaults = ConfigUtils.getVaults(config);
-    const sqliteDb = await SqliteFactory.init(
-      wsRoot,
-      ConfigUtils.getVaults(config),
-      fileStore,
-      "/Users/jyeung/code/dendron/dendron/dendron.test.plugin.db"
-      // ":memory:"
-      // "dendron.test-plugin.db"
-    );
-    const sqliteMetadataStore = new SqliteMetadataStore(sqliteDb, vaults);
-
-    return new DendronEngineV3({
-      wsRoot,
-      vaults: ConfigUtils.getVaults(config),
-      queryStore,
-      noteStore: new NoteStore(
-        fileStore,
-        sqliteMetadataStore,
-        URI.file(wsRoot)
-      ),
-      schemaStore: new SchemaStore(
-        fileStore,
-        new SchemaMetadataStore(),
-        URI.parse(wsRoot)
-      ),
-      fileStore,
-      logger: LOGGER,
-      config,
-    });
-  }
-
-  static createWithSQLiteMetadataStore({
-    wsRoot,
-    logger,
-  }: {
-    logger?: DLogger;
-    wsRoot: string;
-  }) {
-    const LOGGER = logger || createLogger();
-    const { error, data: config } =
-      DConfig.readConfigAndApplyLocalOverrideSync(wsRoot);
-    if (error) {
-      LOGGER.error(stringifyError(error));
-    }
-
-    const queryStore = new FuseQueryStore();
-    const fileStore = new NodeJSFileStore();
-
-    return new DendronEngineV3({
-      wsRoot,
-      vaults: ConfigUtils.getVaults(config),
-      queryStore,
-      noteStore: new NoteStore(
-        fileStore,
-        new NoteMetadataStore(),
-        URI.file(wsRoot)
-      ),
-      schemaStore: new SchemaStore(
-        fileStore,
-        new SchemaMetadataStore(),
         URI.parse(wsRoot)
       ),
       fileStore,

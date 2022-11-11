@@ -14,7 +14,7 @@ import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LinkUtils } from "@dendronhq/unified";
 import fs from "fs-extra";
 import _ from "lodash";
-import { ResultAsync } from "neverthrow";
+import { err, ok, Result, ResultAsync } from "neverthrow";
 import path from "path";
 import { Database } from "sqlite3";
 import {
@@ -24,9 +24,9 @@ import {
   VaultsTableUtils,
 } from "../sqlite";
 import { SqliteError } from "../sqlite/SqliteError";
-import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTable";
-import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTable";
-import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTable";
+import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTableUtils";
+import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTableUtils";
+import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
 
 // This needs to do one vault at a time.
 export async function parseAllNoteFilesForSqlite(
@@ -35,8 +35,7 @@ export async function parseAllNoteFilesForSqlite(
   db: Database,
   root: string,
   schemas: SchemaModuleDict
-) {
-  debugger;
+): Promise<Result<null, any>> {
   await addVaultToDb(vault, db);
 
   const vaultIdResp = await VaultsTableUtils.getIdByFsPath(db, vault.fsPath);
@@ -46,7 +45,7 @@ export async function parseAllNoteFilesForSqlite(
   if (vaultIdResp.isOk()) {
     vaultId = vaultIdResp.value;
   } else {
-    return; // TODO: Throw
+    return err(vaultIdResp.error);
   }
 
   const uno = process.hrtime();
@@ -69,10 +68,8 @@ export async function parseAllNoteFilesForSqlite(
   for (const data of fileStateData) {
     contentDictionary[data.fname] = data.content;
   }
-  // debugger;
   // Compute Added Files
   const prio = process.hrtime();
-  // const deletedFiles = ;
   const addedFileResp = await getAddedFiles(db, files, vaultId);
 
   console.log(
@@ -80,7 +77,7 @@ export async function parseAllNoteFilesForSqlite(
   );
 
   if (addedFileResp.isErr()) {
-    return; // TODO: Throw
+    return err(addedFileResp.error);
   }
 
   const addedNotes: NoteProps[] = addedFileResp.value.map((fname) => {
@@ -95,18 +92,18 @@ export async function parseAllNoteFilesForSqlite(
   // Compute Updated Notes
   const dos = process.hrtime();
 
-  const res = await getUpdatedFiles(db, fileStateData, vaultId);
+  const getUpdatedFilesResp = await getUpdatedFiles(db, fileStateData, vaultId);
 
   console.log(
     `Duration getUpdatedFiles in DB: ${getDurationMilliseconds(dos)} ms`
   );
 
-  if (res.isErr()) {
-    return; // TODO: Exception handling
+  if (getUpdatedFilesResp.isErr()) {
+    return err(getUpdatedFilesResp.error);
   }
 
   const abc = process.hrtime();
-  const updatedNotes: NoteProps[] = res.value.map((fname) => {
+  const updatedNotes: NoteProps[] = getUpdatedFilesResp.value.map((fname) => {
     const content = contentDictionary[fname];
 
     const props = content2Note({ content, fname, vault });
@@ -131,7 +128,7 @@ export async function parseAllNoteFilesForSqlite(
     );
 
     if (linkDeleteRes.isErr()) {
-      return; // TODO: Exception handling
+      return err(linkDeleteRes.error);
     }
   }
 
@@ -156,7 +153,7 @@ export async function parseAllNoteFilesForSqlite(
   );
 
   if (deleteRes.isErr()) {
-    return; // TODO: Exception handling
+    return err(deleteRes.error);
   }
 
   // Schemas - only needs to be processed for added notes.
@@ -191,8 +188,7 @@ export async function parseAllNoteFilesForSqlite(
       vaultId
     );
     if (updateLinksForChangedNoteIdResult.isErr()) {
-      debugger;
-      return; // TODO: Exception handling
+      return err(updateLinksForChangedNoteIdResult.error);
     }
 
     // If any updated notes had an ID change, then we also need to delete any references to the old ID in NoteProps, Parent-child links and VaultNotes:
@@ -202,20 +198,28 @@ export async function parseAllNoteFilesForSqlite(
       vaultId
     );
     if (purgeChangedIdsResult.isErr()) {
-      debugger;
-      return; // TODO: Exception handling
+      return err(purgeChangedIdsResult.error);
     }
   }
 
-  await bulkProcessParentLinks(db, allNotesToProcess);
+  const bulkProcessParentLinksResult = await bulkProcessParentLinks(
+    db,
+    allNotesToProcess
+  );
+
+  if (bulkProcessParentLinksResult.isErr()) {
+    return err(bulkProcessParentLinksResult.error);
+  }
+
   await bulkProcessOtherLinks(db, allNotesToProcess, {} as DendronConfig);
 
   console.log(`Duration for ProcessLinks: ${getDurationMilliseconds(two)} ms`);
 
-  debugger;
   console.log(
     `New Notes: ${addedNotes.length}. Updated Notes: ${updatedNotes.length}`
   );
+
+  return ok(null);
 }
 
 // TODO: Probably move this out of note parser
@@ -273,7 +277,10 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
   }
 }
 
-async function bulkProcessParentLinks(db: Database, notes: NoteProps[]) {
+function bulkProcessParentLinks(
+  db: Database,
+  notes: NoteProps[]
+): ResultAsync<void, SqliteError> {
   const data = notes.map((note) => {
     if (note.fname === "root") {
       return undefined;
@@ -296,7 +303,7 @@ async function bulkProcessParentLinks(db: Database, notes: NoteProps[]) {
     }
   });
 
-  await LinksTableUtils.bulkInsertLinkWithSourceAsFname(db, _.compact(data));
+  return LinksTableUtils.bulkInsertLinkWithSourceAsFname(db, _.compact(data));
 }
 
 async function bulkProcessOtherLinks(
@@ -307,7 +314,6 @@ async function bulkProcessOtherLinks(
   // This method does one INSERT per note:
   return Promise.all(
     notes.map((note) => {
-      // const allLinks: DLink[] = [];
       const links = LinkUtils.findLinksFromBody({ note, config });
 
       const data = links
@@ -321,7 +327,7 @@ async function bulkProcessOtherLinks(
         .map((link) => {
           return {
             sourceId: note.id,
-            sinkFname: link.to!.fname!,
+            sinkFname: link.to!.fname!, // TODO: Doesn't work.
             linkType: link.type as LinkType,
             payload: link,
           };
@@ -389,7 +395,6 @@ WHERE EXISTS
   AND Links.source = Outer.source
 )
   `;
-  debugger;
   return executeSqlWithVoidResult(db, sql);
 }
 

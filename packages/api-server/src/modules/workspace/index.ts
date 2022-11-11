@@ -1,15 +1,22 @@
 import {
+  ConfigService,
   DEngineInitResp,
   error2PlainObject,
   ERROR_SEVERITY,
   NoteDictsUtils,
+  URI,
   WorkspaceInitRequest,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
-import { DendronEngineV2, DendronEngineV3 } from "@dendronhq/engine-server";
+import {
+  DendronEngineV2,
+  DendronEngineV3,
+  NodeJSFileStore,
+} from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
 import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
+import { homedir } from "os";
 
 export class WorkspaceController {
   static singleton?: WorkspaceController;
@@ -29,6 +36,11 @@ export class WorkspaceController {
     const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
+      ConfigService.instance({
+        wsRoot: URI.file(uri),
+        homeDir: URI.file(homedir()),
+        fileStore: new NodeJSFileStore(),
+      });
       engine = DendronEngineV3.create({
         wsRoot: uri,
         logger,

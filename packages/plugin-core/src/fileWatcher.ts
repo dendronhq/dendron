@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   ContextualUIEvents,
   DVault,
   ErrorUtils,

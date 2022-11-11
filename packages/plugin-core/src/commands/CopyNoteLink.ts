@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
   genUUIDInsecure,
   isBlockAnchor,
@@ -156,7 +157,15 @@ export class CopyNoteLinkCommand
       doEndAnchor: false,
     });
 
-    const config = DConfig.readConfigSync(engine.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    console.log({ configReadResult });
+    if (configReadResult.isErr()) {
+      window.showErrorMessage(configReadResult.error.message);
+      return;
+    }
+    const config = configReadResult.value;
+    console.log({ config });
+
     const aliasMode = ConfigUtils.getAliasMode(config);
 
     return {

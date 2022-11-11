@@ -87,7 +87,7 @@ export class ConfigService {
    * @returns DendronConfig
    */
   readConfig(opts?: ConfigReadOpts) {
-    const { applyOverride } = _.defaults(opts, { applyOverride: false });
+    const { applyOverride } = _.defaults(opts, { applyOverride: true });
     if (!applyOverride) {
       return this.readWithDefaults();
     } else {

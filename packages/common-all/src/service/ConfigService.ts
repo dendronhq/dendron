@@ -64,14 +64,28 @@ export class ConfigService {
 
   /** public */
 
+  /**
+   * Given defaults to use, apply defaults and create `dendron.yml`
+   * @param defaults partial DendronConfig that holds desired default values
+   * @returns created config
+   */
   createConfig(defaults?: DeepPartial<DendronConfig>) {
     return this._configStore.createConfig(defaults);
   }
 
+  /**
+   * read config from dendron.yml without any modifications
+   * @returns Partial<DendronConfig>
+   */
   readRaw() {
     return this._configStore.readConfig();
   }
 
+  /**
+   * read config from dendron.yml
+   * @param opts applyOverride?
+   * @returns DendronConfig
+   */
   readConfig(opts?: ConfigReadOpts) {
     const { applyOverride } = _.defaults(opts, { applyOverride: false });
     if (!applyOverride) {
@@ -81,17 +95,38 @@ export class ConfigService {
     }
   }
 
+  /**
+   * Given a payload, clean up override content if exists, and write to dendron.yml
+   * @param payload DendronConfig
+   * @returns cleaned DendronConfig that was written
+   */
   writeConfig(payload: DendronConfig) {
-    return this.cleanWritePayload(payload).andThen(
-      this._configStore.writeConfig
-    );
+    return this.cleanWritePayload(payload).andThen((payload) => {
+      return this._configStore.writeConfig(payload);
+    });
   }
 
-  get(key: string, opts?: ConfigReadOpts) {
+  /**
+   * Given a key, get the value of key
+   * @param key key of DendronConfig
+   * @param opts applyOverride?
+   * @returns value of key
+   */
+  getConfig(key: string, opts?: ConfigReadOpts) {
     return this.readConfig(opts).map((config) => _.get(config, key));
   }
 
-  update(key: string, value: DendronConfigValue) {
+  /**
+   * Given an key and value, update the value of key with given value
+   * key is an object path (e.g. `commands.lookup.note.leaveTrace`)
+   *
+   * note: this currently does not do validation for the resulting config object.
+   *
+   * @param key key of DendronConfig
+   * @param value value to use for update of key
+   * @returns value of key before update
+   */
+  updateConfig(key: string, value: DendronConfigValue) {
     return this.readConfig().andThen((config) => {
       const prevValue = _.get(config, key);
       const updatedConfig = _.set(config, key, value);
@@ -99,7 +134,13 @@ export class ConfigService {
     });
   }
 
-  delete(key: string) {
+  /**
+   * Given a key, unset the key from config object
+   * key is an object path (e.g. `commands.lookup.note.leaveTrace`)
+   * @param key key of DendronConfig
+   * @returns value of key before deletion
+   */
+  deleteConfig(key: string) {
     return this.readConfig().andThen((config) => {
       const prevValue = _.get(config, key);
       if (prevValue === undefined) {
@@ -112,6 +153,11 @@ export class ConfigService {
 
   /** helpers */
 
+  /**
+   * Read raw config and apply defaults.
+   * If raw config is v4, convert to v5 config before applying defaults
+   * @returns DendronConfig
+   */
   private readWithDefaults() {
     return this.readRaw().andThen((rawConfig) => {
       const cleanConfig = DConfigLegacy.configIsV4(rawConfig)
@@ -121,6 +167,11 @@ export class ConfigService {
     });
   }
 
+  /**
+   * Read raw config, apply defaults, and merge override content.
+   * if override isn't found, identical to {@link ConfigService.readWithDefaults}
+   * @returns DendronConfig
+   */
   private readWithOverrides() {
     return this.searchOverride()
       .orElse(() => this.readWithDefaults())
@@ -147,6 +198,11 @@ export class ConfigService {
       .orElse(() => okAsync(payload));
   }
 
+  /**
+   * Search for override config from both workspace or home directory.
+   * workspace override config takes precedence.
+   * @returns override config
+   */
   private searchOverride() {
     return this._configStore
       .readOverride("workspace")

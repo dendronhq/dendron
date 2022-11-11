@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GIVEN ConfigService WHEN instance already exists WHEN createConfig is called THEN new config is created 1`] = `
+Object {
+  "commands": Object {
+    "copyNoteLink": Object {
+      "aliasMode": "title",
+    },
+    "insertNoteIndex": Object {
+      "enableMarker": false,
+    },
+    "insertNoteLink": Object {
+      "aliasMode": "none",
+      "enableMultiSelect": false,
+    },
+    "lookup": Object {
+      "note": Object {
+        "bubbleUpCreateNew": true,
+        "confirmVaultOnCreate": true,
+        "fuzzThreshold": 0.2,
+        "leaveTrace": false,
+        "selectionMode": "extract",
+        "vaultSelectionModeOnCreate": "smart",
+      },
+    },
+    "randomNote": Object {},
+    "templateHierarchy": "template",
+  },
+  "dev": Object {
+    "enablePreviewV2": true,
+  },
+  "preview": Object {
+    "automaticallyShowPreview": false,
+    "enableFMTitle": true,
+    "enableFrontmatterTags": true,
+    "enableHashesForFMTags": false,
+    "enableKatex": true,
+    "enableNoteTitleForLink": true,
+    "enablePrettyRefs": true,
+  },
+  "publishing": Object {
+    "copyAssets": true,
+    "enableFMTitle": true,
+    "enableFrontmatterTags": true,
+    "enableHashesForFMTags": false,
+    "enableKatex": true,
+    "enableNoteTitleForLink": true,
+    "enablePrettyLinks": true,
+    "enablePrettyRefs": true,
+    "enableRandomlyColoredTags": true,
+    "enableSiteLastModified": true,
+    "enableTaskNotes": true,
+    "github": Object {
+      "editBranch": "main",
+      "editLinkText": "Edit this page on GitHub",
+      "editViewMode": "tree",
+      "enableEditLink": true,
+    },
+    "searchMode": "search",
+    "seo": Object {
+      "description": "Personal Knowledge Space",
+      "title": "Dendron",
+    },
+    "siteHierarchies": Array [
+      "root",
+    ],
+    "siteRootDir": "docs",
+    "writeStubs": false,
+  },
+  "version": 5,
+  "workspace": Object {
+    "enableAutoCreateOnDefinition": false,
+    "enableAutoFoldFrontmatter": false,
+    "enableEditorDecorations": true,
+    "enableFullHierarchyNoteTitle": false,
+    "enableHashTags": true,
+    "enableRemoteVaultInit": true,
+    "enableUserTags": true,
+    "enableXVaultWikiLink": false,
+    "graph": Object {
+      "createStub": false,
+      "zoomSpeed": 1,
+    },
+    "journal": Object {
+      "addBehavior": "childOfDomain",
+      "dailyDomain": "daily",
+      "dateFormat": "y.MM.dd",
+      "name": "journal",
+    },
+    "maxNoteLength": 204800,
+    "maxPreviewsCached": 10,
+    "scratch": Object {
+      "addBehavior": "asOwnDomain",
+      "dateFormat": "y.MM.dd.HHmmss",
+      "name": "scratch",
+    },
+    "task": Object {
+      "addBehavior": "asOwnDomain",
+      "createTaskSelectionType": "selection2link",
+      "dateFormat": "y.MM.dd",
+      "name": "task",
+      "prioritySymbols": Object {
+        "H": "high",
+        "L": "low",
+        "M": "medium",
+      },
+      "statusSymbols": Object {
+        "": " ",
+        "assigned": "a",
+        "blocked": "b",
+        "delegated": "l",
+        "done": "x",
+        "dropped": "d",
+        "moved": "m",
+        "pending": "y",
+        "wip": "w",
+      },
+      "taskCompleteStatus": Array [
+        "done",
+        "x",
+      ],
+      "todoIntegration": false,
+    },
+    "vaults": Array [],
+    "workspaceVaultSyncMode": "noCommit",
+  },
+}
+`;

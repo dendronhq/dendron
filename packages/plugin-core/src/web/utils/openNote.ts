@@ -1,8 +1,16 @@
-import { DNoteAnchorBasic, DVault, VaultUtils } from "@dendronhq/common-all";
+import {
+  assertUnreachable,
+  DNoteAnchorBasic,
+  DVault,
+  getSlugger,
+  NotePropsMeta,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { Position, Selection, TextEditor, ViewColumn } from "vscode";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
 import { AnchorUtils } from "@dendronhq/unified";
+import _ from "lodash";
 
 export async function openNote({
   wsRoot,
@@ -10,10 +18,12 @@ export async function openNote({
   vault,
   anchor,
   column,
+  note,
 }: {
   wsRoot: URI;
   fname: string;
   vault: DVault;
+  note: NotePropsMeta;
   anchor?: DNoteAnchorBasic;
   column?: ViewColumn;
 }) {
@@ -25,12 +35,14 @@ export async function openNote({
   const editor = await vscode.window.showTextDocument(doc, column);
 
   if (anchor) {
-    trySelectRevealNonNoteAnchor(editor, anchor);
+    const pos = findAnchorPos({ anchor, note });
+    editor.selection = new Selection(pos, pos);
+    editor.revealRange(editor.selection);
   }
 }
 
 // Borrowed from WSUtilsV2.ts
-async function trySelectRevealNonNoteAnchor(
+export async function trySelectRevealNonNoteAnchor(
   editor: TextEditor,
   anchor: DNoteAnchorBasic
 ): Promise<void> {
@@ -56,3 +68,29 @@ async function trySelectRevealNonNoteAnchor(
     editor.revealRange(editor.selection);
   }
 }
+
+// Borrowed from GoToNote.ts
+export const findAnchorPos = (opts: {
+  anchor: DNoteAnchorBasic;
+  note: NotePropsMeta;
+}): Position => {
+  const { anchor: findAnchor, note } = opts;
+  let key: string;
+  switch (findAnchor.type) {
+    case "line":
+      return new Position(findAnchor.line - 1, 0);
+    case "block":
+      key = `^${findAnchor.value}`;
+      break;
+    case "header":
+      key = getSlugger().slug(findAnchor.value);
+      break;
+    default:
+      assertUnreachable(findAnchor);
+  }
+
+  const found = note.anchors[key];
+
+  if (_.isUndefined(found)) return new Position(0, 0);
+  return new Position(found.line, found.column);
+};

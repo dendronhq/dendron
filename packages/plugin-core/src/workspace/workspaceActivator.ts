@@ -572,7 +572,7 @@ export class WorkspaceActivator {
     }): Promise<RespV3<boolean>> {
     const ctx = "WorkspaceActivator:activate";
     // setup services
-    context.subscriptions.push(TextDocumentServiceFactory.create(ext));
+    context.subscriptions.push(TextDocumentServiceFactory.create());
 
     // Reload
     WSUtils.showActivateProgress();

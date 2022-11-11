@@ -70,7 +70,6 @@ export class TogglePreviewCommand extends InputArgCommand<
       note = await ExtensionProvider.getWSUtils().getActiveNote();
     }
     await this._panel.show();
-
     if (note) {
       await this._panel.show(note);
       return { note };

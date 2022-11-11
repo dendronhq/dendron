@@ -67,6 +67,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
           wsRoot: this.wsRoot,
           fname: noteData.note.fname,
           vault: noteData.note.vault,
+          note: noteData.note,
           column: vscode.ViewColumn.One,
           anchor: noteData.anchor,
         });

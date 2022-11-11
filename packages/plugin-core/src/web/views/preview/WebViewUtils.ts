@@ -128,11 +128,16 @@ export class WebViewUtils {
       CONSTANTS.CUSTOM_THEME_CSS
     );
 
-    // TODO: Verify if this correctly checks that the path is valid.
-    if (await vscode.workspace.fs.stat(customThemePath)) {
-      themeMap["custom"] = panel.webview
-        .asWebviewUri(customThemePath)
-        .toString();
+    try {
+      // Referred from: https://github.com/microsoft/vscode-extension-samples/blob/0b3a31bf2bdd388ac4fdc0ccea2fb1315abfe3e3/fsconsumer-sample/src/extension.ts#L14
+      if (await vscode.workspace.fs.stat(customThemePath)) {
+        themeMap["custom"] = panel.webview
+          .asWebviewUri(customThemePath)
+          .toString();
+      }
+    } catch {
+      // TODO: add logger
+      console.log("theme does not exists");
     }
 
     themes.map((th) => {

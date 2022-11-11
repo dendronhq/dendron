@@ -769,7 +769,7 @@ export class DendronExtension implements IDendronExtension {
 
     const windowWatcher = new WindowWatcher({
       extension: this,
-      previewProxy: PreviewPanelFactory.create(this),
+      previewProxy: PreviewPanelFactory.create(),
     });
 
     windowWatcher.activate();

@@ -5,7 +5,6 @@ import {
   VaultUtils,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
-import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import vscode from "vscode";
 import { URI, Utils } from "vscode-uri";

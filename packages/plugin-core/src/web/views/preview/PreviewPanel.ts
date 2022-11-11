@@ -4,6 +4,7 @@ import {
   DendronASTDest,
   DendronConfig,
   DendronEditorViewKey,
+  DendronError,
   DLogger,
   DMessageEnum,
   DVault,
@@ -16,6 +17,7 @@ import {
   NoteViewMessageEnum,
   OnUpdatePreviewHTMLData,
   OnUpdatePreviewHTMLMsg,
+  ReducedDEngine,
 } from "@dendronhq/common-all";
 import {
   DendronASTTypes,
@@ -31,9 +33,8 @@ import { URI } from "vscode-uri";
 import { type IPreviewLinkHandler } from "../../../components/views/IPreviewLinkHandler";
 import { type PreviewProxy } from "../../../components/views/PreviewProxy";
 import { type ITextDocumentService } from "../../../services/ITextDocumentService";
-import { type INoteRenderer } from "../../engine/INoteRenderer";
+import { isPathInWorkspace } from "../../utils/isPathInWorkspace";
 import { WSUtilsWeb } from "../../utils/WSUtils";
-import { type IPreviewPanelConfig } from "./IPreviewPanelConfig";
 import { WebViewUtils } from "./WebViewUtils";
 
 /**
@@ -65,11 +66,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     @inject("wsRoot") private wsRoot: URI,
     private wsUtils: WSUtilsWeb,
     private webViewUtils: WebViewUtils,
-    // @inject("IPreviewPanelConfig")
-    // private previewPanelConfig: IPreviewPanelConfig,
-    @inject("INoteRenderer") private noteRenderer: INoteRenderer,
-    @inject("vaults") private vaults: DVault[], // TODO: Add Vaults, Config
-    @inject("DendronConfig") private dendronConfig: DendronConfig
+    @inject("vaults") private vaults: DVault[],
+    @inject("DendronConfig") private dendronConfig: DendronConfig,
+    @inject("ReducedDEngine") private engine: ReducedDEngine
   ) {
     this._linkHandler = linkHandler;
     this._textDocumentService = textDocumentService;
@@ -280,17 +279,16 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             return;
           }
 
-          // TODO: Add check back
-          // const textDocument = editor.document;
-          // if (
-          //   !WorkspaceUtils.isPathInWorkspace({
-          //     wsRoot,
-          //     vaults,
-          //     fpath: textDocument.uri.fsPath,
-          //   })
-          // ) {
-          //   return;
-          // }
+          const textDocument = editor.document;
+          if (
+            isPathInWorkspace({
+              wsRoot: this.wsRoot,
+              vaults: this.vaults,
+              fsPath: textDocument.uri,
+            })
+          ) {
+            return;
+          }
 
           const maybeNote = await this.wsUtils.getNoteFromDocument(
             editor.document
@@ -379,9 +377,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         );
       }
       note = this.rewriteImageUrls(note, panel);
-
       let html = "";
-      const resp = await this.noteRenderer.renderNote({
+      const resp = await this.engine.renderNote({
         id: note.id,
         note,
       });
@@ -462,4 +459,16 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   }
 
   private initWithNote: NoteProps | undefined;
+  // eslint-disable-next-line camelcase
+  __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
+    return {
+      rewriteImageUrls: (note: NoteProps) => {
+        if (!this._panel)
+          throw new DendronError({
+            message: "Panel used before being initalized",
+          });
+        return this.rewriteImageUrls(note, this._panel);
+      },
+    };
+  }
 }

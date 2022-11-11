@@ -2,7 +2,9 @@ import {
   BacklinkUtils,
   ConsoleLogger,
   DeleteNoteResp,
+  DendronASTDest,
   DendronCompositeError,
+  DendronConfig,
   DendronError,
   DNodeUtils,
   DVault,
@@ -27,8 +29,11 @@ import {
   NotePropsByIdDict,
   NotePropsMeta,
   NoteUtils,
+  ProcFlavor,
   ReducedDEngine,
   RenameNoteResp,
+  RenderNoteOpts,
+  RenderNoteResp,
   RespV2,
   RespV3,
   RespWithOptError,
@@ -39,6 +44,11 @@ import _ from "lodash";
 import { inject, singleton } from "tsyringe";
 import { URI, Utils } from "vscode-uri";
 import { NoteParserV2 } from "./NoteParserV2";
+import {
+  getParsingDependencyDicts,
+  MDUtilsV5,
+  MDUtilsV5Web,
+} from "@dendronhq/unified";
 
 @singleton()
 export class DendronEngineV3Web
@@ -52,7 +62,9 @@ export class DendronEngineV3Web
     @inject("wsRoot") wsRootURI: URI,
     @inject("vaults") vaults: DVault[],
     @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
-    @inject("INoteStore") noteStore: INoteStore<string>
+    @inject("INoteStore") noteStore: INoteStore<string>,
+    @inject("DendronConfig")
+    private publishingConfig: DendronConfig // why is this call publishingConfig?
   ) {
     super({
       logger: new ConsoleLogger(),
@@ -518,5 +530,79 @@ export class DendronEngineV3Web
     } else {
       return this.findClosestAncestor(dirname, vault);
     }
+  }
+
+  async renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp> {
+    try {
+      const data = await this._renderNote({
+        note: opts.note!, // TODO: get rid of !
+        flavor: opts.flavor || ProcFlavor.PREVIEW,
+        dest: opts.dest || DendronASTDest.HTML,
+      });
+
+      return { data };
+    } catch (error) {
+      return {
+        error: new DendronError({
+          message: `Unable to render note ${
+            opts.note!.fname
+          } in ${VaultUtils.getName(opts.note!.vault)}`,
+          payload: error,
+        }),
+      };
+    }
+  }
+
+  private async _renderNote({
+    note,
+    flavor,
+    dest,
+  }: {
+    note: NoteProps;
+    flavor: ProcFlavor;
+    dest: DendronASTDest;
+  }): Promise<string> {
+    const noteCacheForRenderDict = await getParsingDependencyDicts(
+      note,
+      this,
+      this.publishingConfig,
+      this.vaults
+    );
+
+    // Also include children to render the 'children' hierarchy at the footer of the page:
+    await Promise.all(
+      note.children.map(async (childId) => {
+        // TODO: Can we use a bulk get API instead (if/when it exists) to speed
+        // up fetching time
+        const childNote = await this.getNote(childId);
+
+        if (childNote.data) {
+          NoteDictsUtils.add(childNote.data, noteCacheForRenderDict);
+        }
+      })
+    );
+
+    let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
+    if (dest === DendronASTDest.HTML) {
+      proc = MDUtilsV5Web.procRehypeWeb(
+        {
+          noteToRender: note,
+          fname: note.fname,
+          vault: note.vault,
+          config: this.publishingConfig,
+          noteCacheForRenderDict,
+        },
+        { flavor }
+      );
+    } else {
+      // Only support Preview rendering right now:
+      return "Only HTML Rendering is supported right now.";
+    }
+
+    const serialized = NoteUtils.serialize(note);
+    const payload = await proc.process(serialized);
+
+    const renderedNote = payload.toString();
+    return renderedNote;
   }
 }

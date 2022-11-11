@@ -327,7 +327,11 @@ export async function _activate(
         vaults: wsImpl.vaults,
         engine: resp.data.engine,
         config: resp.data.workspace.config,
+        context,
       });
+
+      // preview commands requires tsyringe dependencies to be registered beforehand
+      _setupPreviewCommands(context);
       // initialize Segment client
       AnalyticsUtils.setupSegmentWithCacheFlush({ context, ws: wsImpl });
 
@@ -451,7 +455,7 @@ export async function _activate(
         note &&
         ws.workspaceService?.config.preview?.automaticallyShowPreview
       ) {
-        await PreviewPanelFactory.create(getExtension()).show(note);
+        await PreviewPanelFactory.create().show(note);
       }
       StartupUtils.showUninstallMarkdownLinksExtensionMessage();
       return true;
@@ -649,36 +653,6 @@ async function _setupCommands({
       );
     }
 
-    const preview = PreviewPanelFactory.create(ext);
-
-    if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW.key)) {
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.TOGGLE_PREVIEW.key,
-          sentryReportingCallback(async (args) => {
-            if (args === undefined) {
-              args = {};
-            }
-            await new TogglePreviewCommand(preview).run(args);
-          })
-        )
-      );
-    }
-
-    if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key)) {
-      context.subscriptions.push(
-        vscode.commands.registerCommand(
-          DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key,
-          sentryReportingCallback(async (args) => {
-            if (args === undefined) {
-              args = {};
-            }
-            await new TogglePreviewLockCommand(preview).run(args);
-          })
-        )
-      );
-    }
-
     if (!existingCommands.includes(DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key)) {
       context.subscriptions.push(
         vscode.commands.registerCommand(
@@ -760,6 +734,39 @@ async function _setupCommands({
           const cmd = new SeedBrowseCommand(panel);
 
           return cmd.run();
+        })
+      )
+    );
+  }
+}
+
+async function _setupPreviewCommands(context: vscode.ExtensionContext) {
+  const existingCommands = await vscode.commands.getCommands();
+  const preview = PreviewPanelFactory.create();
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TOGGLE_PREVIEW.key,
+        sentryReportingCallback(async (args) => {
+          if (args === undefined) {
+            args = {};
+          }
+          await new TogglePreviewCommand(preview).run(args);
+        })
+      )
+    );
+  }
+
+  if (!existingCommands.includes(DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.TOGGLE_PREVIEW_LOCK.key,
+        sentryReportingCallback(async (args) => {
+          if (args === undefined) {
+            args = {};
+          }
+          await new TogglePreviewLockCommand(preview).run(args);
         })
       )
     );

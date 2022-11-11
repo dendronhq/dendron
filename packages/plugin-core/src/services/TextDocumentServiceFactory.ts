@@ -1,7 +1,6 @@
-import { IDendronExtension } from "../dendronExtensionInterface";
 import { TextDocumentService } from "./node/TextDocumentService";
-import { workspace } from "vscode";
 import { ITextDocumentService } from "./ITextDocumentService";
+import { container } from "tsyringe";
 
 export class TextDocumentServiceFactory {
   private static _textDocumentService: ITextDocumentService | undefined;
@@ -9,13 +8,11 @@ export class TextDocumentServiceFactory {
   /**
    * Instantiate TextDocumentService to be used in _extension.ts/workspace.ts
    */
-  public static create(extension: IDendronExtension): ITextDocumentService {
+  public static create(): ITextDocumentService {
     // Simple singleton implementation
     if (!TextDocumentServiceFactory._textDocumentService) {
-      TextDocumentServiceFactory._textDocumentService = new TextDocumentService(
-        extension,
-        workspace.onDidSaveTextDocument
-      );
+      TextDocumentServiceFactory._textDocumentService =
+        container.resolve(TextDocumentService);
     }
 
     return TextDocumentServiceFactory._textDocumentService;

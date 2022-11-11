@@ -6,6 +6,7 @@ import {
   extractNoteChangeEntriesByType,
   VaultUtils,
   NoteUtils,
+  URI,
 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
@@ -18,6 +19,7 @@ import { afterEach, describe } from "mocha";
 import * as vscode from "vscode";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { TextDocumentService } from "../../services/node/TextDocumentService";
+import { ConsoleLogger } from "../../web/utils/ConsoleLogger";
 import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,
@@ -41,9 +43,13 @@ async function openAndEdit(fname: string) {
 }
 
 function setupTextDocumentService() {
+  const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
   const textDocumentService = new TextDocumentService(
-    ExtensionProvider.getExtension(),
-    vscode.workspace.onDidSaveTextDocument
+    vscode.workspace.onDidSaveTextDocument,
+    URI.file(wsRoot),
+    vaults,
+    engine,
+    new ConsoleLogger()
   );
   const { onDidSave } =
     textDocumentService.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
@@ -80,13 +86,15 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return note with updated text", (done) => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
           const textToAppend = "new text here";
-          const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
           const note = NoteUtils.create({
             fname: "alpha",
             vault: vaults[0],
@@ -138,11 +146,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return note with updated links", (done) => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-          const { vaults } = ExtensionProvider.getDWorkspace();
           const foo = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],
@@ -188,11 +199,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should not be called", (done) => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-          const { vaults } = ExtensionProvider.getDWorkspace();
           const currentNote = NoteUtils.create({
             fname: "beta",
             vault: vaults[0],
@@ -231,13 +245,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return original note", (done) => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-
-          const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
           const note = NoteUtils.create({
             fname: "beta",
             vault: vaults[0],
@@ -273,12 +288,15 @@ suite("TextDocumentService", function testSuite() {
 
     describeSingleWS("WHEN the contents don't match any notes", {}, () => {
       test("THEN processTextDocumentChangeEvent should return undefined", (done) => {
+        const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
         textDocumentService = new TextDocumentService(
-          ExtensionProvider.getExtension(),
-          vscode.workspace.onDidSaveTextDocument
+          vscode.workspace.onDidSaveTextDocument,
+          URI.file(wsRoot),
+          vaults,
+          engine,
+          new ConsoleLogger()
         );
         const textToAppend = "new text here";
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
 
         NoteTestUtilsV4.createNote({
           fname: "blahblah123",
@@ -341,12 +359,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN update engine events should be fired", (done) => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-          const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
           const testNoteProps = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],
@@ -532,11 +552,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN onDidSave should return original note and engine note contents should be untouched", async () => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-          const engine = ExtensionProvider.getEngine();
           const testNoteProps = (await engine.getNote("foo")).data!;
           const editor = await ExtensionProvider.getWSUtils().openNote(
             testNoteProps
@@ -561,11 +584,14 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN onDidSave should return undefined and engine note contents should be untouched", async () => {
+          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
           textDocumentService = new TextDocumentService(
-            ExtensionProvider.getExtension(),
-            vscode.workspace.onDidSaveTextDocument
+            vscode.workspace.onDidSaveTextDocument,
+            URI.file(wsRoot),
+            vaults,
+            engine,
+            new ConsoleLogger()
           );
-          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const testNoteProps = await NoteTestUtilsV4.createNote({
             fname: "blahblah123",
             body: `[[beta]]`,

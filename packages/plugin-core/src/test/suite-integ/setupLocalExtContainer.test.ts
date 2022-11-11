@@ -1,11 +1,13 @@
 import assert from "assert";
 import _ from "lodash";
 import { container } from "tsyringe";
+import { URI } from "vscode-uri";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { setupLocalExtContainer } from "../../injection-providers/setupLocalExtContainer";
 import { EngineAPIService } from "../../services/EngineAPIService";
 import { NativeTreeView } from "../../views/common/treeview/NativeTreeView";
 import { describeSingleWS } from "../testUtilsV3";
+import * as vscode from "vscode";
 
 /**
  * This test suite ensures that all objects in main (_extension.ts) can be
@@ -19,9 +21,18 @@ suite(
       { timeout: 1e6 },
       () => {
         test("THEN valid objects are returned without exceptions", async () => {
-          const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const { vaults, wsRoot, config } = ExtensionProvider.getDWorkspace();
           const engine = ExtensionProvider.getEngine() as EngineAPIService;
-          await setupLocalExtContainer({ wsRoot, vaults, engine });
+          await setupLocalExtContainer({
+            wsRoot,
+            vaults,
+            engine,
+            config,
+            context: {
+              extensionUri: URI.parse("dummy"),
+              subscriptions: [] as vscode.Disposable[],
+            } as vscode.ExtensionContext,
+          });
           try {
             const obj = container.resolve(NativeTreeView);
             assert(!_.isUndefined(obj));

@@ -6,7 +6,7 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import path from "path";
-import { PreviewPanel } from "../../components/views/PreviewPanel";
+import { PreviewPanel } from "../../web/views/preview/PreviewPanel";
 
 async function makeTestNote({
   previewPanel,
@@ -44,9 +44,7 @@ suite("GIVEN PreviewPanel", function () {
       )[0];
       expect(note).toBeTruthy();
       await ExtensionProvider.getWSUtils().openNote(note!);
-      previewPanel = PreviewPanelFactory.create(
-        ExtensionProvider.getExtension()
-      ) as PreviewPanel; // overriding the type here to get the function to expose internals
+      previewPanel = PreviewPanelFactory.create() as PreviewPanel; // overriding the type here to get the function to expose internals
       previewPanel.show(note);
     });
 

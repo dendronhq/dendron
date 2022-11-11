@@ -32,7 +32,7 @@ const writeWorkspaceOverride = (wsRoot: string) => {
       vaults: [
         {
           fsPath: "bar",
-          name: "foo",
+          name: "bar",
         },
       ],
     },

@@ -3,6 +3,8 @@ import {
   InstallStatus,
   DendronConfig,
   Time,
+  ConfigService,
+  asyncLoopOneAtATime,
 } from "@dendronhq/common-all";
 import {
   DEPRECATED_PATHS,
@@ -60,7 +62,7 @@ async function inactiveMessageTest(opts: {
 
 function getDefaultConfig() {
   const defaultConfig: DendronConfig = {
-    ...ConfigUtils.genDefaultConfig(),
+    ...ConfigUtils.genLatestConfig(),
   };
   defaultConfig.workspace.vaults = VAULTS.MULTI_VAULT_WITH_THREE_VAULTS();
   return defaultConfig;
@@ -76,6 +78,7 @@ suite("GIVEN local config", () => {
       "AND given additional vaults in local config",
       {
         preActivateHook: async ({ wsRoot }) => {
+          // TODO: switch to config service
           await DConfig.writeLocalConfig({
             wsRoot,
             config: { workspace: { vaults: localVaults } },
@@ -84,13 +87,14 @@ suite("GIVEN local config", () => {
         },
       },
       () => {
-        test("THEN engine should load with extra workspace", () => {
-          const ext = ExtensionProvider.getExtension();
+        test("THEN engine should load with extra workspace", async () => {
           const _defaultConfig = getDefaultConfig();
           _defaultConfig.workspace.vaults = localVaults.concat(
             defaultConfig.workspace.vaults
           );
-          const config = ext.getDWorkspace().config;
+          const config = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           expect(config).toEqual(_defaultConfig);
         });
       }
@@ -212,9 +216,10 @@ suite("missing default config detection", () => {
       timeout: 1e5,
     },
     () => {
-      test("THEN missing defaults are detected", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(ws.wsRoot);
+      test("THEN missing defaults are detected", async () => {
+        const config = (
+          await ConfigService.instance().readRaw()
+        )._unsafeUnwrap();
         expect(config.workspace?.workspaceVaultSyncMode).toEqual(undefined);
         const out = ConfigUtils.detectMissingDefaults({ config });
         expect(out.needsBackfill).toBeTruthy();
@@ -236,24 +241,27 @@ suite("missing default config detection", () => {
         },
       },
       () => {
-        test("THEN prompted to add missing defaults", () => {
+        test("THEN prompted to add missing defaults", async () => {
           const ext = ExtensionProvider.getExtension();
-          const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-            ext,
-            extensionInstallStatus: InstallStatus.UPGRADED,
-          });
+          const out =
+            await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+              ext,
+              extensionInstallStatus: InstallStatus.UPGRADED,
+            });
           expect(out).toBeTruthy();
         });
       }
     );
 
     describeMultiWS("AND not missing default key", {}, () => {
-      test("THEN not prompted to add missing defaults", () => {
+      test("THEN not prompted to add missing defaults", async () => {
         const ext = ExtensionProvider.getExtension();
-        const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-          ext,
-          extensionInstallStatus: InstallStatus.UPGRADED,
-        });
+        const out = await StartupUtils.shouldDisplayMissingDefaultConfigMessage(
+          {
+            ext,
+            extensionInstallStatus: InstallStatus.UPGRADED,
+          }
+        );
         expect(out).toBeFalsy();
       });
     });
@@ -270,16 +278,16 @@ suite("missing default config detection", () => {
         },
       },
       () => {
-        test("THEN not prompted to add missing defaults", () => {
+        test("THEN not prompted to add missing defaults", async () => {
           const ext = ExtensionProvider.getExtension();
-          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-            (extensionInstallStatus) => {
-              const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage(
-                {
+          await asyncLoopOneAtATime(
+            [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+            async (extensionInstallStatus) => {
+              const out =
+                await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
                   ext,
                   extensionInstallStatus,
-                }
-              );
+                });
               expect(out).toBeFalsy();
             }
           );
@@ -288,14 +296,16 @@ suite("missing default config detection", () => {
     );
 
     describeMultiWS("AND not missing default key", {}, () => {
-      test("THEN not prompted to add missing defaults", () => {
+      test("THEN not prompted to add missing defaults", async () => {
         const ext = ExtensionProvider.getExtension();
-        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-          (extensionInstallStatus) => {
-            const out = StartupUtils.shouldDisplayMissingDefaultConfigMessage({
-              ext,
-              extensionInstallStatus,
-            });
+        await asyncLoopOneAtATime(
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+          async (extensionInstallStatus) => {
+            const out =
+              await StartupUtils.shouldDisplayMissingDefaultConfigMessage({
+                ext,
+                extensionInstallStatus,
+              });
             expect(out).toBeFalsy();
           }
         );
@@ -316,9 +326,10 @@ suite("deprecated config detection", () => {
       timeout: 1e5,
     },
     () => {
-      test("THEN deprecated key is detected", () => {
-        const ws = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(ws.wsRoot);
+      test("THEN deprecated key is detected", async () => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect((config.dev as any).enableWebUI).toBeTruthy();
         const out = ConfigUtils.detectDeprecatedConfigs({
           config,
@@ -341,9 +352,9 @@ suite("deprecated config detection", () => {
         timeout: 1e5,
       },
       () => {
-        test("THEN prompted to remove deprecated config", () => {
+        test("THEN prompted to remove deprecated config", async () => {
           const ext = ExtensionProvider.getExtension();
-          const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
+          const out = await StartupUtils.shouldDisplayDeprecatedConfigMessage({
             ext,
             extensionInstallStatus: InstallStatus.UPGRADED,
           });
@@ -353,9 +364,9 @@ suite("deprecated config detection", () => {
     );
 
     describeMultiWS("AND deprecated key doesn't exist", {}, () => {
-      test("THEN not prompted to remove deprecated config", () => {
+      test("THEN not prompted to remove deprecated config", async () => {
         const ext = ExtensionProvider.getExtension();
-        const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
+        const out = await StartupUtils.shouldDisplayDeprecatedConfigMessage({
           ext,
           extensionInstallStatus: InstallStatus.UPGRADED,
         });
@@ -376,14 +387,16 @@ suite("deprecated config detection", () => {
         timeout: 1e5,
       },
       () => {
-        test("THEN not prompted to remove deprecated config", () => {
+        test("THEN not prompted to remove deprecated config", async () => {
           const ext = ExtensionProvider.getExtension();
-          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-            (extensionInstallStatus) => {
-              const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
-                ext,
-                extensionInstallStatus,
-              });
+          await asyncLoopOneAtATime(
+            [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+            async (extensionInstallStatus) => {
+              const out =
+                await StartupUtils.shouldDisplayDeprecatedConfigMessage({
+                  ext,
+                  extensionInstallStatus,
+                });
               expect(out).toBeFalsy();
             }
           );
@@ -392,14 +405,17 @@ suite("deprecated config detection", () => {
     );
 
     describeMultiWS("AND deprecated key doesn't exist", {}, () => {
-      test("THEN not prompted to remove deprecated config", () => {
+      test("THEN not prompted to remove deprecated config", async () => {
         const ext = ExtensionProvider.getExtension();
-        [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL].forEach(
-          (extensionInstallStatus) => {
-            const out = StartupUtils.shouldDisplayDeprecatedConfigMessage({
-              ext,
-              extensionInstallStatus,
-            });
+        await asyncLoopOneAtATime(
+          [InstallStatus.NO_CHANGE, InstallStatus.INITIAL_INSTALL],
+          async (extensionInstallStatus) => {
+            const out = await StartupUtils.shouldDisplayDeprecatedConfigMessage(
+              {
+                ext,
+                extensionInstallStatus,
+              }
+            );
             expect(out).toBeFalsy();
           }
         );
@@ -425,25 +441,17 @@ suite("duplicate config entry detection", () => {
       },
     },
     () => {
-      test("THEN duplicate entry is detected", () => {
-        const ext = ExtensionProvider.getExtension();
+      test("THEN duplicate entry is detected", async () => {
+        const out = await StartupUtils.getDuplicateKeysMessage();
 
-        const out = StartupUtils.getDuplicateKeysMessage({
-          ext,
-        });
-
-        expect(out.includes("duplicated mapping key")).toBeTruthy();
+        expect(out && out.includes("duplicated mapping key")).toBeTruthy();
       });
     }
   );
 
   describeMultiWS("GIVEN dendron.yml without duplicate config", {}, () => {
-    test("THEN duplicate entry is not detected", () => {
-      const ext = ExtensionProvider.getExtension();
-
-      const out = StartupUtils.getDuplicateKeysMessage({
-        ext,
-      });
+    test("THEN duplicate entry is not detected", async () => {
+      const out = await StartupUtils.getDuplicateKeysMessage();
 
       expect(out).toEqual(undefined);
     });

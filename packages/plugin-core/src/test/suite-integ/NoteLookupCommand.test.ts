@@ -13,8 +13,9 @@ import {
   SchemaUtils,
   Time,
   VaultUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
-import { DConfig, tmpDir, vault2Path } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV4,
   FileTestUtils,
@@ -875,6 +876,7 @@ suite("NoteLookupCommand", function () {
         ctx,
         preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ wsRoot, vaults }) => {
+          // TODO: rewrite this whole test with `describMultiWS` once we remove `DConfig`.
           withConfig(
             (config) => {
               ConfigUtils.setNoteLookupProps(
@@ -1572,7 +1574,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, wsRoot, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1582,9 +1584,11 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          const dateFormat = ConfigUtils.getJournal(
-            DConfig.readConfigSync(wsRoot)
-          ).dateFormat;
+          const dateFormat = (
+            await ConfigService.instance().getConfig(
+              "workspace.journal.dateFormat"
+            )
+          )._unsafeUnwrap();
           expect(dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(dateFormat);
@@ -1706,7 +1710,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, wsRoot, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1717,9 +1721,11 @@ suite("NoteLookupCommand", function () {
             noConfirm: true,
           })) as CommandOutput;
 
-          const dateFormat = ConfigUtils.getJournal(
-            DConfig.readConfigSync(wsRoot)
-          ).dateFormat;
+          const dateFormat = (
+            await ConfigService.instance().getConfig(
+              "workspace.journal.dateFormat"
+            )
+          )._unsafeUnwrap();
           expect(dateFormat).toEqual("y.MM.dd");
           // quickpick value should be `foo.journal.yyyy.mm.dd`
           const today = Time.now().toFormat(dateFormat);
@@ -2091,6 +2097,7 @@ suite("NoteLookupCommand", function () {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
         onInit: async ({ wsRoot, vaults, engine }) => {
+          // TODO: rewrite this whole test with `describMultiWS` once we remove `DConfig`.
           withConfig(
             (config) => {
               ConfigUtils.setNoteLookupProps(config, "leaveTrace", true);
@@ -2327,7 +2334,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, wsRoot, engine }) => {
+        onInit: async ({ vaults, engine }) => {
           const { controller, cmd } = await prepareCommandFunc({
             vaults,
             engine,
@@ -2344,9 +2351,11 @@ suite("NoteLookupCommand", function () {
           expect(journalBtn.pressed).toBeTruthy();
           expect(selection2linkBtn.pressed).toBeTruthy();
 
-          const dateFormat = ConfigUtils.getJournal(
-            DConfig.readConfigSync(wsRoot)
-          ).dateFormat;
+          const dateFormat = (
+            await ConfigService.instance().getConfig(
+              "workspace.journal.dateFormat"
+            )
+          )._unsafeUnwrap();
           const today = Time.now().toFormat(dateFormat);
           expect(controller.quickPick.value).toEqual(
             `foo.journal.${today}.foo-body`
@@ -2502,16 +2511,18 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ vaults, wsRoot, engine }) => {
+          onInit: async ({ vaults, engine }) => {
             const { selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
               noteType: LookupNoteTypeEnum.journal,
             });
 
-            const dateFormat = ConfigUtils.getJournal(
-              DConfig.readConfigSync(wsRoot)
-            ).dateFormat;
+            const dateFormat = (
+              await ConfigService.instance().getConfig(
+                "workspace.journal.dateFormat"
+              )
+            )._unsafeUnwrap();
             const today = Time.now().toFormat(dateFormat);
             const newNote = (
               await engine.findNotes({

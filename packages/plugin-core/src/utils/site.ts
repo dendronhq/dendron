@@ -1,10 +1,10 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
   DendronPublishingConfig,
   getStage,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,
@@ -63,8 +63,13 @@ export class NextJSPublishUtils {
       enrichedOpts = { podChoice, config: podConfig };
     }
     if (getStage() !== "prod") {
-      const config = DConfig.readConfigSync(wsRoot);
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       const publishingConfig = ConfigUtils.getPublishing(config);
+
       if (enrichedOpts?.config && !publishingConfig.siteUrl) {
         _.set(
           enrichedOpts.config.overrides as Partial<DendronPublishingConfig>,

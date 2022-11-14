@@ -1,6 +1,7 @@
 import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
 
 import {
+  ConfigService,
   CONSTANTS,
   DWorkspaceV2,
   getStage,
@@ -11,6 +12,7 @@ import {
   GRAPH_THEME_TEST,
   InstallStatus,
   isDisposable,
+  URI,
   VSCodeEvents,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
@@ -23,6 +25,7 @@ import {
 import {
   HistoryService,
   MetadataService,
+  NodeJSFileStore,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -311,6 +314,11 @@ export async function _activate(
       if (!maybeWsRoot) {
         return false;
       }
+      ConfigService.instance({
+        wsRoot: URI.file(maybeWsRoot),
+        homeDir: URI.file(os.homedir()),
+        fileStore: new NodeJSFileStore(),
+      });
       const resp = await activator.init({
         ext: ws,
         context,

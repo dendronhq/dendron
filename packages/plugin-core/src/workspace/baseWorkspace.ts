@@ -32,7 +32,9 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
     this.assetUri = assetUri;
   }
 
-  // TODO: optimize to not read every time
+  // TODO: with `ConfigService` this has to change so that it returns a promise.
+  // some parts of our code that does `getDWorkspace().config` can't be async
+  // this needs to be addressed before we can truly remove DConfig
   get config(): DendronConfig {
     const { data, error } = DConfig.readConfigAndApplyLocalOverrideSync(
       this.wsRoot

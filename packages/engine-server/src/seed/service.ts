@@ -91,7 +91,13 @@ export class SeedService {
     // workspace that is open is the one being modified in addSeedMetadata(), VS
     // Code will reload the current window and the seed cloning may not execute.
     if (!metaOnly) {
-      seedPath = await this.cloneSeed({ seed: seedOrError });
+      try {
+        seedPath = await this.cloneSeed({ seed: seedOrError });
+      } catch (err: any) {
+        return {
+          error: err,
+        };
+      }
     }
     await this.addSeedMetadata({
       seed: seedOrError,

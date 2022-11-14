@@ -13,8 +13,9 @@ import {
   memoize,
   DendronError,
   ConfigUtils,
+  ConfigService,
+  DendronConfig,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import {
   DendronASTTypes,
@@ -326,13 +327,17 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    * calls should not be excessively expensive.
    */
   private rewriteImageUrls = memoize({
-    fn: (note: NoteProps, panel: vscode.WebviewPanel) => {
+    fn: (
+      note: NoteProps,
+      panel: vscode.WebviewPanel,
+      config: DendronConfig
+    ) => {
       const parser = MDUtilsV5.procRemarkFull({
         noteToRender: note,
         dest: DendronASTDest.MD_DENDRON,
         fname: note.fname,
         vault: note.vault,
-        config: DConfig.readConfigSync(this._ext.getDWorkspace().wsRoot, true),
+        config,
         wsRoot: this._ext.getDWorkspace().wsRoot,
         vaults: this._ext.getDWorkspace().vaults,
       });
@@ -386,7 +391,16 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           textDocument
         );
       }
-      note = this.rewriteImageUrls(note, panel);
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        Logger.error({
+          ctx: "sendRefreshMessage",
+          error: configReadResult.error,
+        });
+        return;
+      }
+      const config = configReadResult.value;
+      note = this.rewriteImageUrls(note, panel, config);
 
       try {
         return panel.webview.postMessage({
@@ -456,12 +470,12 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   // eslint-disable-next-line camelcase
   __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
     return {
-      rewriteImageUrls: (note: NoteProps) => {
+      rewriteImageUrls: (note: NoteProps, config: DendronConfig) => {
         if (!this._panel)
           throw new DendronError({
             message: "Panel used before being initalized",
           });
-        return this.rewriteImageUrls(note, this._panel);
+        return this.rewriteImageUrls(note, this._panel, config);
       },
     };
   }

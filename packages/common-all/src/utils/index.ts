@@ -1022,7 +1022,7 @@ export class ConfigUtils {
   }
 
   static detectMissingDefaults(opts: {
-    config: Partial<DendronConfig>;
+    config: DeepPartial<DendronConfig>;
     defaultConfig?: DendronConfig;
   }): {
     needsBackfill: boolean;
@@ -1042,7 +1042,7 @@ export class ConfigUtils {
   }
 
   static detectDeprecatedConfigs(opts: {
-    config: Partial<DendronConfig>;
+    config: DeepPartial<DendronConfig>;
     deprecatedPaths: string[];
   }): string[] {
     const { config, deprecatedPaths } = opts;

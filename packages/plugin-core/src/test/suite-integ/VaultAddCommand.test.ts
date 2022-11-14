@@ -9,6 +9,7 @@ import {
   SchemaUtils,
   VaultUtils,
   WorkspaceType,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -132,7 +133,9 @@ suite("VaultAddCommand", function () {
         await cmd.run();
         const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const workspaces = ConfigUtils.getWorkspace(config).workspaces;
         expect(workspaces).toEqual({
           [wsName]: {
@@ -200,7 +203,9 @@ suite("VaultAddCommand", function () {
           });
           await cmd.run();
 
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           const workspaces = ConfigUtils.getWorkspace(config).workspaces;
           expect(workspaces).toEqual({
             [wsName]: {
@@ -486,7 +491,9 @@ describe("GIVEN a workspace with local override", function () {
         expect(preRunConfigWithOverride.workspace.vaults.length).toEqual(2);
 
         // dendron.yml should have one vault;
-        const preRunConfig = DConfig.readConfigSync(wsRoot);
+        const preRunConfig = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect(preRunConfig.workspace.vaults.length).toEqual(1);
         const cmd = new VaultAddCommand();
         stubVaultInput({
@@ -498,7 +505,9 @@ describe("GIVEN a workspace with local override", function () {
         });
         await cmd.run();
         // dendron.yml should now have two vault
-        const postRunConfig = DConfig.readConfigSync(wsRoot);
+        const postRunConfig = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect(postRunConfig.workspace.vaults.length).toEqual(2);
         // config + override should have three vaults
         const postRunConfigWithOverride =
@@ -545,8 +554,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -616,8 +626,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -717,8 +728,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -798,8 +810,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         });
 
         test("THEN the vault was added to the workspace config correctly", async () => {
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
             vname: vaultName,
@@ -868,8 +881,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
@@ -887,8 +901,10 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
         );
@@ -937,8 +953,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),

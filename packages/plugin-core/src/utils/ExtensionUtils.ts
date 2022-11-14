@@ -1,6 +1,7 @@
 import { launchv2, ServerUtils } from "@dendronhq/api-server";
 import {
   ConfigEvents,
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
@@ -13,7 +14,6 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   getDurationMilliseconds,
   SegmentClient,
 } from "@dendronhq/common-server";
@@ -498,12 +498,14 @@ export class ExtensionUtils {
       _.set(trackProps, "ageOfCodeInstallInWeeks", ageOfCodeInstallInWeeks);
     }
 
-    const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
-    if (maybeLocalConfig.data) {
+    const searchOverrideResult =
+      await ConfigService.instance().searchOverride();
+    if (searchOverrideResult.isOk()) {
+      const overrideConfig = searchOverrideResult.value;
       trackProps.hasLocalConfig = true;
-      if (maybeLocalConfig.data.workspace.vaults) {
+      if (overrideConfig.workspace?.vaults) {
         trackProps.numLocalConfigVaults =
-          maybeLocalConfig.data.workspace.vaults.length;
+          overrideConfig.workspace.vaults.length;
       }
     }
 

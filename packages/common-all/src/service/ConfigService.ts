@@ -15,6 +15,7 @@ export type ConfigServiceOpts = {
   // i.e. only pass it in for NodeJSFileStore
   homeDir: URI | undefined;
   fileStore: IFileStore;
+  forceNew?: boolean;
 };
 
 export class ConfigService {
@@ -31,7 +32,7 @@ export class ConfigService {
   /** static */
 
   static instance(opts?: ConfigServiceOpts) {
-    if (_.isUndefined(this._singleton)) {
+    if (_.isUndefined(this._singleton) || opts?.forceNew) {
       if (ConfigService.isConfigServiceOpts(opts)) {
         this._singleton = new ConfigService(opts);
       } else {
@@ -203,7 +204,7 @@ export class ConfigService {
    * workspace override config takes precedence.
    * @returns override config
    */
-  private searchOverride() {
+  searchOverride() {
     return this._configStore
       .readOverride("workspace")
       .orElse(() => {

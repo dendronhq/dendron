@@ -1,11 +1,12 @@
 import {
   Awaited,
+  ConfigService,
   ConfigUtils,
   DVault,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, findNonNoteFile } from "@dendronhq/common-server";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -39,7 +40,13 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     refAtPos: NonNullable<Awaited<ReturnType<typeof getReferenceAtPosition>>>
   ) {
     const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-    const config = DConfig.readConfigSync(wsRoot);
+
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+
     const noAutoCreateOnDefinition =
       !ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
     if (noAutoCreateOnDefinition) {

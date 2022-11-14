@@ -5,6 +5,7 @@ import {
   VaultUtils,
   BacklinkPanelSortOrder,
   NotePropsMeta,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
@@ -27,7 +28,6 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { MockEngineEvents } from "./MockEngineEvents";
-import { DConfig } from "@dendronhq/common-server";
 
 type BacklinkWithChildren = Backlink & { children?: Backlink[] | undefined };
 
@@ -672,13 +672,14 @@ suite("BacklinksTreeDataProvider", function () {
       let backlinksTreeDataProvider: BacklinksTreeDataProvider;
       let mockEvents: MockEngineEvents;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         mockEvents = new MockEngineEvents();
+        const isLinkCandidateEnabled = (
+          await ConfigService.instance().getConfig("dev.enableLinkCandidates")
+        )._unsafeUnwrap();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
           mockEvents,
-          DConfig.readConfigSync(
-            ExtensionProvider.getDWorkspace().wsRoot
-          ).dev?.enableLinkCandidates
+          isLinkCandidateEnabled
         );
 
         updateSortOrder = sinon

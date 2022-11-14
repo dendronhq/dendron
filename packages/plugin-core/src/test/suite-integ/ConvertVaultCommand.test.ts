@@ -1,4 +1,4 @@
-import { DConfig, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import { Git } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS_MULTI, GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
@@ -14,6 +14,7 @@ import {
   FOLDERS,
   DendronConfig,
   VaultUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
 import { ExtensionProvider } from "../../ExtensionProvider";
 
@@ -49,8 +50,9 @@ suite("GIVEN ConvertVaultCommand", function () {
       });
 
       test("THEN updates config", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as DendronConfig;
+        const config = (
+          await ConfigService.instance().readRaw()
+        )._unsafeUnwrap() as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
           url: remote,
@@ -86,8 +88,9 @@ suite("GIVEN ConvertVaultCommand", function () {
         });
 
         test("THEN updates config", async () => {
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as DendronConfig;
+          const config = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap() as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
@@ -150,8 +153,9 @@ suite("GIVEN ConvertVaultCommand", function () {
       });
 
       test("THEN updates config", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as DendronConfig;
+        const config = (
+          await ConfigService.instance().readRaw()
+        )._unsafeUnwrap() as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toEqual({
           type: "git",
           url: remote,
@@ -200,8 +204,9 @@ suite("GIVEN ConvertVaultCommand", function () {
         });
 
         test("THEN updates config", async () => {
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as DendronConfig;
+          const config = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap() as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
         });
 
@@ -253,8 +258,9 @@ suite("GIVEN ConvertVaultCommand", function () {
 
       test("THEN conversion fails mid-operation", async () => {
         // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getRaw(wsRoot) as DendronConfig;
+        const config = (
+          await ConfigService.instance().readRaw()
+        )._unsafeUnwrap() as DendronConfig;
         expect(ConfigUtils.getVaults(config)[0].remote).toBeFalsy();
       });
 
@@ -278,8 +284,9 @@ suite("GIVEN ConvertVaultCommand", function () {
 
         test("THEN the conversion completes", async () => {
           // config is updated after the remote is fully set up, so if the config has been updated we know that we were able to set up and push to remote
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getRaw(wsRoot) as DendronConfig;
+          const config = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap() as DendronConfig;
           expect(ConfigUtils.getVaults(config)[0].remote).toBeTruthy();
         });
       });

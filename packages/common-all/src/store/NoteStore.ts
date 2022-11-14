@@ -49,18 +49,33 @@ export class NoteStore implements INoteStore<string> {
     if (metadata.error) {
       return { error: metadata.error };
     }
-
     // If note is a stub, return stub note
     if (metadata.data.stub) {
       return {
         data: { ...metadata.data, body: "" },
       };
     }
+
+    // vault.fsPath that comes from local overrides can be absolute paths (e.g. if scope is global).
+    // need to slice the absolute portion off to correctly resolve.
+    // if a relative path comes in, this will do nothing and work as intended
+    const processedVault = metadata.data.vault.fsPath.startsWith(
+      this._wsRoot.fsPath
+    )
+      ? {
+          ...metadata.data.vault,
+          fsPath: metadata.data.vault.fsPath.slice(this._wsRoot.fsPath.length),
+        }
+      : metadata.data.vault;
+
     const uri = Utils.joinPath(
       this._wsRoot,
-      VaultUtils.getRelPath(metadata.data.vault),
+      VaultUtils.getRelPath({
+        ...processedVault,
+      }),
       metadata.data.fname + ".md"
     );
+
     const nonMetadata = await this._fileStore.read(uri);
     if (nonMetadata.error) {
       return { error: nonMetadata.error };

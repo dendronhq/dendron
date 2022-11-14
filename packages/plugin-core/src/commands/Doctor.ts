@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -46,7 +47,6 @@ import { KeybindingUtils } from "../KeybindingUtils";
 import { QuickPickHierarchySelector } from "../components/lookup/HierarchySelector";
 import { PodUIControls } from "../components/pods/PodControls";
 import { RemarkUtils } from "@dendronhq/unified";
-import { DConfig } from "@dendronhq/common-server";
 
 const md = _md();
 type Finding = {
@@ -620,9 +620,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             .showInformationMessage(message, OPEN_CONFIG)
             .then(async (resp) => {
               if (resp === OPEN_CONFIG) {
-                const configPath = DConfig.configPath(wsRoot);
-                const configUri = Uri.file(configPath);
-                await VSCodeUtils.openFileInEditor(configUri);
+                const configPath = ConfigService.instance().configPath;
+                await VSCodeUtils.openFileInEditor(configPath);
 
                 const backupUri = Uri.file(out.resp.backupPath);
                 await VSCodeUtils.openFileInEditor(backupUri, {

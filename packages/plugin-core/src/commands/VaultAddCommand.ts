@@ -6,14 +6,13 @@ import {
   DVault,
   DWorkspace,
   FOLDERS,
-  DendronConfig,
   SelfContainedVault,
   VaultRemoteSource,
   VaultUtils,
   WorkspaceEvents,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   GitUtils,
   pathForVaultRoot,
   simpleGit,
@@ -382,8 +381,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           path.join(vaultRootPath, CONSTANTS.DENDRON_CONFIG_FILE)
         )
       ) {
-        const vaultConfig = DConfig.getRaw(vaultRootPath) as DendronConfig;
-        if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
+        const configReadResult = await ConfigService.instance().readConfig();
+        if (configReadResult.isErr()) {
+          throw configReadResult.error;
+        }
+        const config = configReadResult.value;
+        if (ConfigUtils.getVaults(config)?.length > 1) {
           await AnalyticsUtils.trackForNextRun(
             WorkspaceEvents.TransitiveDepsWarningShow
           );

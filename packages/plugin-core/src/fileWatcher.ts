@@ -1,5 +1,4 @@
 import {
-  ConfigService,
   ContextualUIEvents,
   DVault,
   ErrorUtils,
@@ -131,7 +130,6 @@ export class FileWatcher {
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.
       }
-
       await EngineUtils.refreshNoteLinksAndAnchors({
         note,
         fmChangeOnly: false,

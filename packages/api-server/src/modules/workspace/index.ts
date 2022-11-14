@@ -34,9 +34,12 @@ export class WorkspaceController {
     const ctx = "WorkspaceController:init";
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });
+    // until we roll out engine v3 as default, we can't remove this line.
+    // TODO: remove once `enableEngineV3` is deprecated.
     const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
+      // possibly the earliest point we can instantiate `ConfigService`
       ConfigService.instance({
         wsRoot: URI.file(uri),
         homeDir: URI.file(homedir()),

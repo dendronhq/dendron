@@ -48,6 +48,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { after, afterEach, before, beforeEach, describe } from "mocha";
 import os from "os";
+import { performance } from "perf_hooks";
 import sinon from "sinon";
 import {
   CancellationToken,
@@ -622,6 +623,8 @@ export function describeSingleWS(
      * See [[Breakpoints|dendron://dendron.docs/pkg.plugin-core.qa.debug#breakpoints]] for more details
      */
     timeout?: number;
+    // added to calculate activation time for performance testing
+    perflogs?: { [key: string]: number };
   },
   fn: (ctx: ExtensionContext) => void
 ) {
@@ -633,12 +636,15 @@ export function describeSingleWS(
     before(async () => {
       setupWorkspaceStubs({ ...opts, ctx });
       await setupLegacyWorkspace(opts);
+      const start = performance.now();
       await _activate(ctx, {
         skipLanguageFeatures: true,
         skipInteractiveElements: true,
         skipMigrations: true,
         skipTreeView: true,
       });
+      const end = performance.now();
+      if (opts.perflogs) opts.perflogs.activationTime = end - start;
     });
 
     const result = fn(ctx);

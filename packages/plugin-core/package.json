@@ -1508,7 +1508,8 @@
     "package-web": "webpack --mode production --devtool hidden-source-map --config webpack.webext.js",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ~/dendron-20/",
     "test-in-browser": "mkdir -p testOutput && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js --headless testOutput",
-    "download-sqlite-binary": "node-pre-gyp install"
+    "download-sqlite-binary": "node-pre-gyp install",
+    "perf-test": "node ./out/src/test/runPerfTest.js"
   },
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.123.0",

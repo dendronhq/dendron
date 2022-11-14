@@ -24,7 +24,10 @@ export function run(): Promise<void> {
         return e(err);
       }
       // Add files to the test suite
-      files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
+      files.forEach((f) => {
+        if (!f.includes("PerfTesting.test"))
+          mocha.addFile(path.resolve(testsRoot, f));
+      });
       console.log(`running tests on ${files}`);
 
       try {

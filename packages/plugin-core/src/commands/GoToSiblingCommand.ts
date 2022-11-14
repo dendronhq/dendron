@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   DEngineClient,
   DNodeUtils,
   DWorkspaceV2,
@@ -8,7 +9,6 @@ import {
   ReducedDEngine,
   RespV3,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
@@ -63,7 +63,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     let siblingNote: NotePropsMeta;
     // If the active note is a journal note, get the sibling note based on the chronological order
-    if (await this.canBeHandledAsJournalNote(note, workspace.wsRoot)) {
+    if (await this.canBeHandledAsJournalNote(note)) {
       const resp = await this.getSiblingForJournalNote(
         workspace.engine,
         note,
@@ -97,8 +97,7 @@ export class GoToSiblingCommand extends BasicCommand<
   }
 
   private async canBeHandledAsJournalNote(
-    note: NotePropsMeta,
-    wsRoot: string
+    note: NotePropsMeta
   ): Promise<boolean> {
     const markedAsJournalNote =
       NoteUtils.getNoteTraits(note).includes("journalNote");
@@ -106,8 +105,13 @@ export class GoToSiblingCommand extends BasicCommand<
 
     // Check the date format for journal note. Only when date format of journal notes is default,
     // navigate chronologically
-    const config = DConfig.readConfigSync(wsRoot);
-    const dateFormat = config.workspace.journal.dateFormat;
+    const configGetResult = await ConfigService.instance().getConfig(
+      "workspace.journal.dateFormat"
+    );
+    if (configGetResult.isErr()) {
+      throw configGetResult.error;
+    }
+    const dateFormat = configGetResult.value;
     return dateFormat === "y.MM.dd";
   }
 

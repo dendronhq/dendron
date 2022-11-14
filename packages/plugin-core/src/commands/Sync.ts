@@ -1,5 +1,6 @@
 import {
   ConfigEvents,
+  ConfigService,
   ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
@@ -64,13 +65,27 @@ export async function detectOutOfDateSeeds({
           await AnalyticsUtils.trackForNextRun(
             ConfigEvents.OutdatedSeedVaultMessageAccept
           );
+          // TODO: move `BackupService` to common-all, add `.createBackup` to `ConfigService`
           await DConfig.createBackup(wsRoot, "update-seed");
-          const config = DConfig.getOrCreate(wsRoot);
+
+          const configReadResult = await ConfigService.instance().readConfig();
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
+
           ConfigUtils.updateVault(config, seedVault, (vault) => {
             vault.fsPath = info.root;
             return vault;
           });
-          await DConfig.writeConfig({ wsRoot, config });
+
+          const configWriteResult = await ConfigService.instance().writeConfig(
+            config
+          );
+          if (configWriteResult.isErr()) {
+            throw configWriteResult.error;
+          }
+
           VSCodeUtils.reloadWindow();
         }
       }

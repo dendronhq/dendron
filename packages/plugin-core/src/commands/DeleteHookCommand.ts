@@ -1,5 +1,4 @@
-import { DHookType, IDendronError } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
+import { ConfigService, DHookType, IDendronError } from "@dendronhq/common-all";
 import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { window } from "vscode";
@@ -45,12 +44,31 @@ export class DeleteHookCommand extends BasicCommand<
       fs.removeSync(scriptPath);
     }
 
-    const config = HookUtils.removeFromConfig({
-      config: DConfig.readConfigSync(wsRoot),
+    const configService = ConfigService.instance();
+    const configReadResult = await configService.readConfig();
+    if (configReadResult.isErr()) {
+      const error = configReadResult.error;
+      this.L.error(error);
+      return { error };
+    }
+
+    const config = configReadResult.value;
+
+    const configWritePayload = HookUtils.removeFromConfig({
+      config,
       hookId: hookName,
       hookType: DHookType.onCreate,
     });
-    await DConfig.writeConfig({ wsRoot, config });
+
+    const configWriteResult = await configService.writeConfig(
+      configWritePayload
+    );
+    if (configWriteResult.isErr()) {
+      const error = configWriteResult.error;
+      this.L.error(error);
+      return { error };
+    }
+
     window.showInformationMessage(`hook ${hookName} removed`);
     await new ReloadIndexCommand().run();
     return;

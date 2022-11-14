@@ -10,7 +10,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, isInsidePath } from "@dendronhq/common-server";
+import { isInsidePath } from "@dendronhq/common-server";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
@@ -158,13 +158,11 @@ export class CopyNoteLinkCommand
     });
 
     const configReadResult = await ConfigService.instance().readConfig();
-    console.log({ configReadResult });
     if (configReadResult.isErr()) {
       window.showErrorMessage(configReadResult.error.message);
       return;
     }
     const config = configReadResult.value;
-    console.log({ config });
 
     const aliasMode = ConfigUtils.getAliasMode(config);
 
@@ -250,6 +248,7 @@ export class CopyNoteLinkCommand
     let anchor;
     if (note) {
       const out = await this.createNoteLink(editor, note);
+      if (out === undefined) return;
       link = out.link;
       anchor = out.anchor;
       type = "note";

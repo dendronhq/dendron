@@ -1,0 +1,97 @@
+name: performance testing
+
+on:
+  push:
+    branches:
+      - release/*
+      - early-seed/*
+
+  workflow_dispatch:
+
+env:
+  BINARY_CACHE_INDEX: 23 # Rev this if we need a new node cache
+
+jobs:
+  test:
+    environment: plugin-development
+    strategy:
+      # Allow other matrix jobs to continue after one fails, allowing us to
+      # isolate platform-specific issues.
+      fail-fast: false
+
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node-version:
+          - 16.x
+        include:
+          - os: macos-latest
+            env: env
+            versions: ""
+          - os: ubuntu-latest
+            env: env
+            versions: ""
+          # Running natively under Windows requires some further work on paths
+          # and file access patterns.
+          - os: windows-latest
+            env: Get-ChildItem Env:\
+            versions: choco --version
+
+    timeout-minutes: 40
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Gather environment data
+        run: |
+          ${{ matrix.env }}
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "${{ matrix.node-version }}"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+
+      - name: Restore typescript lib cache
+        uses: actions/cache@v3
+        id: ts-cache
+        with:
+          path: |
+            packages/*/lib/*
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ env.BINARY_CACHE_INDEX }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.BINARY_CACHE_INDEX }}
+
+      - name: Bootstrap
+        run: yarn bootstrap:bootstrap
+        shell: bash
+
+      - name: Build
+        run: yarn bootstrap:buildCI
+        shell: bash
+
+      - name: Typecheck
+        run: yarn lerna:typecheck
+        shell: bash
+
+      - name: Start Xvfb
+        if: runner.os == 'Linux'
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo 'DISPLAY=:99.0' >>$GITHUB_ENV
+      - name: Run tests
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          GITHUB_SHA: $GITHUB_SHA
+          GITHUB_REF: $GITHUB_REF
+        run: yarn ci:test:plugin-perf
+        timeout-minutes: 45

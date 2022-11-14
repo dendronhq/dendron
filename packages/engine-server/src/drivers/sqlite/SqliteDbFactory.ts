@@ -15,7 +15,7 @@ import { VaultsTableUtils } from "./tables/VaultsTableUtils";
 /**
  * Factory methods to create a SQLite database
  */
-export class SqliteFactory {
+export class SqliteDbFactory {
   /**
    * This creates a SQLite database AND also initializes it with all notes that
    * are a part of the passed in vaults
@@ -31,7 +31,7 @@ export class SqliteFactory {
     fileStore: IFileStore,
     dbFilePath: string
   ): ResultAsync<Database, Error> {
-    return SqliteFactory.createEmptyDB(dbFilePath).andThen((db) => {
+    return SqliteDbFactory.createEmptyDB(dbFilePath).andThen((db) => {
       const results = ResultAsync.combine(
         // Initialize Each Vault
         vaults.map((vault) => {

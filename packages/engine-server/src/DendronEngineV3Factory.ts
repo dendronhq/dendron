@@ -11,7 +11,7 @@ import { createLogger, DConfig } from "@dendronhq/common-server";
 import path from "path";
 import { URI } from "vscode-uri";
 import { DendronEngineV3 } from "./DendronEngineV3";
-import { SqliteFactory, SqliteMetadataStore } from "./drivers/sqlite";
+import { SqliteDbFactory, SqliteMetadataStore } from "./drivers/sqlite";
 import { NodeJSFileStore } from "./store";
 
 /**
@@ -50,7 +50,7 @@ export class DendronEngineV3Factory {
     // TODO: Consolidate this path somewhere in a constants.ts file:
     const dbFilePath = path.join(wsRoot, "dendron.metadata.db");
 
-    const dbResult = await SqliteFactory.createInitializedDB(
+    const dbResult = await SqliteDbFactory.createInitializedDB(
       wsRoot,
       ConfigUtils.getVaults(config),
       fileStore,

@@ -182,6 +182,11 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    */
   async isLockedAndDirty(): Promise<boolean> {
     const note = await this.wsUtils.getActiveNote();
+    console.log(
+      "************** inside isLockedAndDirty ************************",
+      note,
+      await this.wsUtils.getActiveNote()
+    );
     return this.isLocked() && note?.id !== this._lockedEditorNoteId;
   }
 

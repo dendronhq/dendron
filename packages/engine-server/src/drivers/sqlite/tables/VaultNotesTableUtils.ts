@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "./SQLiteUtils";
+import { executeSqlWithVoidResult } from "../SQLiteUtils";
 
 export class VaultNotesTableRow {
   constructor(public vaultId: number, public noteId: string) {}

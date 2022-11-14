@@ -3,7 +3,8 @@ import { vault2Path } from "@dendronhq/common-server";
 import { Database } from "sqlite3";
 import { URI } from "vscode-uri";
 import { parseAllNoteFilesForSqlite } from "../file";
-import { executeSqlWithVoidResult } from "./tables";
+import { executeSqlWithVoidResult } from "./SQLiteUtils";
+import { HierarchyTableUtils } from "./tables";
 import { LinksTableUtils } from "./tables/LinksTableUtils";
 import { NotePropsFtsTableUtils } from "./tables/NotePropsFtsTableUtils";
 import { NotePropsTableUtils } from "./tables/NotePropsTableUtils";
@@ -99,6 +100,9 @@ export class SqliteFactory {
             return VaultNotesTableUtils.createTable(db);
           })
           .andThen(() => {
+            return HierarchyTableUtils.createTable(db);
+          })
+          .andThen(() => {
             return SchemaNotesTableUtils.createTable(db);
           })
           .andThen(() => {
@@ -115,6 +119,6 @@ export class SqliteFactory {
             return db;
           })
       );
-    });
+    }) as ResultAsync<Database, Error>;
   }
 }

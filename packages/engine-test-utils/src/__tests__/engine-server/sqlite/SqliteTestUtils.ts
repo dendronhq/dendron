@@ -6,6 +6,7 @@ export enum SqliteTableNames {
   Links = "Links",
   Vaults = "Vaults",
   VaultNotes = "VaultNotes",
+  Hierarchy = "Hierarchy",
 }
 
 export class SqliteTestUtils {

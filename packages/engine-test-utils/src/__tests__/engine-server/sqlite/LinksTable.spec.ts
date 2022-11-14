@@ -86,6 +86,7 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "source",
       sink: "sink",
       type: "wiki",
+      linkValue: "sink",
       payload,
     };
 
@@ -124,6 +125,7 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "invalid-source",
       sink: "sink",
       type: "wiki",
+      linkValue: "sink",
       payload,
     };
 
@@ -139,6 +141,7 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "source",
       sink: "invalid-sink",
       type: "wiki",
+      linkValue: "invalid-sink",
       payload,
     };
 
@@ -151,144 +154,12 @@ describe("GIVEN a Links Sqlite Table", () => {
     });
   });
 
-  test("WHEN Links data is inserted as an update THEN the updated row is retrieved", async () => {
-    await setupDb();
-
-    const payload: DLink = {
-      type: "wiki",
-      value: "original-value",
-      from: {
-        fname: undefined,
-        id: undefined,
-        vaultName: undefined,
-        uri: undefined,
-        anchorHeader: undefined,
-      },
-    };
-
-    const updatedPayload: DLink = {
-      type: "wiki",
-      value: "updated-value",
-      from: {
-        fname: undefined,
-        id: undefined,
-        vaultName: undefined,
-        uri: undefined,
-        anchorHeader: undefined,
-      },
-    };
-
-    const linksRow: LinksTableRow = {
-      source: "source",
-      sink: "sink",
-      type: "wiki",
-      payload,
-    };
-
-    const updatedLinksRow: LinksTableRow = {
-      source: "source",
-      sink: "sink",
-      type: "wiki",
-      payload: updatedPayload,
-    };
-
-    await LinksTableUtils.insert(db, linksRow);
-    const insertUpdatedResult = await LinksTableUtils.insert(
-      db,
-      updatedLinksRow
-    );
-    expect(insertUpdatedResult.isErr()).toBeFalsy();
-
-    const getLinksResult = await LinksTableUtils.getAllDLinks(db, "source");
-    getLinksResult
-      .mapErr((e) => {
-        fail(e);
-      })
-      .map((links) => {
-        expect(links.length).toEqual(1);
-
-        expect(links[0]).toEqual(updatedPayload);
-      });
-  });
-
-  test("WHEN inserting data with insertLinkWithSourceAsFname() THEN the appropriate parent-child link can be retrieved", async () => {
-    await setupDb();
-
-    const insertResult = await LinksTableUtils.insertLinkWithSourceAsFname(
-      db,
-      "sink",
-      "source-fname",
-      "child"
-    );
-
-    expect(insertResult.isErr()).toBeFalsy();
-
-    const getParentResult = await LinksTableUtils.getParent(db, "sink");
-
-    getParentResult
-      .mapErr((e) => {
-        fail(e);
-      })
-      .map((parent) => {
-        expect(parent).toEqual("source");
-      });
-
-    const getChildResult = await LinksTableUtils.getChildren(db, "source");
-
-    getChildResult
-      .mapErr((e) => {
-        fail(e);
-      })
-      .map((children) => {
-        expect(children.length).toEqual(1);
-        expect(children[0]).toEqual("sink");
-      });
-  });
-
-  test("WHEN inserting data with bulkInsertLinkWithSourceAsFname() THEN the appropriate parent-child links can be retrieved", async () => {
-    await setupDb();
-
-    const insertResult = await LinksTableUtils.bulkInsertLinkWithSourceAsFname(
-      db,
-      [
-        {
-          sinkId: "sink",
-          sourceFname: "source-fname",
-          linkType: "child",
-        },
-      ]
-    );
-
-    expect(insertResult.isErr()).toBeFalsy();
-
-    const getParentResult = await LinksTableUtils.getParent(db, "sink");
-
-    getParentResult
-      .mapErr((e) => {
-        fail(e);
-      })
-      .map((parent) => {
-        expect(parent).toEqual("source");
-      });
-
-    const getChildResult = await LinksTableUtils.getChildren(db, "source");
-
-    getChildResult
-      .mapErr((e) => {
-        fail(e);
-      })
-      .map((children) => {
-        expect(children.length).toEqual(1);
-        expect(children[0]).toEqual("sink");
-      });
-  });
-
   test("WHEN inserting data with insertLinkWithSinkAsFname() THEN the appropriate forward link can be retrieved", async () => {
     await setupDb();
 
     const payload: DLink = {
       type: "wiki",
-      value: "",
+      value: "sink-fname",
       from: {
         fname: undefined,
         id: undefined,
@@ -303,6 +174,7 @@ describe("GIVEN a Links Sqlite Table", () => {
       "source",
       "sink-fname",
       "wiki",
+      payload.value,
       payload
     );
 
@@ -326,7 +198,7 @@ describe("GIVEN a Links Sqlite Table", () => {
 
     const payload: DLink = {
       type: "wiki",
-      value: "",
+      value: "sink-fname",
       from: {
         fname: undefined,
         id: undefined,
@@ -343,6 +215,7 @@ describe("GIVEN a Links Sqlite Table", () => {
           sourceId: "source",
           sinkFname: "sink-fname",
           linkType: "wiki",
+          linkValue: payload.value,
           payload,
         },
       ]

@@ -2,6 +2,7 @@ import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { note2File, tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
+  HierarchyTableUtils,
   LinksTableUtils,
   NotePropsTableRow,
   NotePropsTableUtils,
@@ -87,6 +88,24 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       NoteTestUtilsV4.createNote({
         vault: testVault,
         wsRoot: testDir,
+        fname: "noteref-a",
+        body: "![[a]]",
+      }),
+      NoteTestUtilsV4.createNote({
+        vault: testVault,
+        wsRoot: testDir,
+        fname: "link-candidate",
+        body: "a",
+      }),
+      NoteTestUtilsV4.createNote({
+        vault: testVault,
+        wsRoot: testDir,
+        fname: "unresolved-wikilink",
+        body: "[[points-to-nowhere]]",
+      }),
+      NoteTestUtilsV4.createNote({
+        vault: testVault,
+        wsRoot: testDir,
         fname: "wikilink-to-self",
         body: "[[wikilink-to-self]]",
       }),
@@ -94,6 +113,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   beforeEach(() => {
+    // If you need to debug locally, change this to a fully qualified file path.
+    // You can then connect to the db file to examine table state.
     return SqliteFactory.createEmptyDB(":memory:")
       .map((_db) => {
         db = _db;
@@ -292,6 +313,115 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(1);
   });
 
+  test("WHEN a note with a note ref is added THEN an entry is added to the links table", async () => {
+    // Set the initial DB state:
+    await parseAllNoteFilesForSqlite(
+      ["a.md", "noteref-a.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "noteref-a", testVault);
+
+    const result = await LinksTableUtils.getAllDLinks(db, "noteref-a");
+    expect(result.isOk()).toBeTruthy();
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const wikilink = result.value[0];
+      expect(wikilink.type).toEqual("ref");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("noteref-a");
+      expect(wikilink.to?.fname).toEqual("a");
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(2);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test.skip("WHEN a note with a note candidate is added THEN an entry is added to the links table", async () => {
+    // Set the initial DB state:
+    await parseAllNoteFilesForSqlite(
+      ["a.md", "link-candidate.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "link-candidate", testVault);
+
+    const result = await LinksTableUtils.getAllDLinks(db, "link-candidate");
+    expect(result.isOk()).toBeTruthy();
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const wikilink = result.value[0];
+      expect(wikilink.type).toEqual("linkCandidate");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("link-candidate");
+      expect(wikilink.to?.fname).toEqual("a");
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(2);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test("WHEN a note with an unresolved wikilink is added THEN an entry is still added to the links table", async () => {
+    // Set the initial DB state:
+    await parseAllNoteFilesForSqlite(
+      ["a.md", "unresolved-wikilink.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "unresolved-wikilink", testVault);
+
+    const result = await LinksTableUtils.getAllDLinks(
+      db,
+      "unresolved-wikilink"
+    );
+    expect(result.isOk()).toBeTruthy();
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const wikilink = result.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("points-to-nowhere");
+      expect(wikilink.from.id).toEqual("unresolved-wikilink");
+      expect(wikilink.to?.fname).toEqual("points-to-nowhere");
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(2);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test.skip("WHEN a note with an unresolved wikilink is added AND the wikilink is later resolved THEN the entry in the links table has source and sinks properly populated", async () => {});
+
   // Parent Child Link Tests:
   test("WHEN a parent and child note are added THEN a child entry is added to the links table", async () => {
     // Set the initial DB state:
@@ -306,7 +436,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     await validateNotePropInDB(db, "a", testVault);
     await validateNotePropInDB(db, "a.ch1", testVault);
 
-    const result = await LinksTableUtils.getChildren(db, "a");
+    const result = await HierarchyTableUtils.getChildren(db, "a");
 
     if (result.isOk()) {
       expect(result.value.length).toEqual(1);
@@ -320,7 +450,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(2);
 
     expect(
-      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
     ).toEqual(1);
   });
 
@@ -338,7 +468,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     await validateNotePropInDB(db, "a.ch1", testVault);
     await validateNotePropInDB(db, "a.ch1.gch1", testVault);
 
-    const result = await LinksTableUtils.getChildren(db, "a");
+    const result = await HierarchyTableUtils.getChildren(db, "a");
 
     if (result.isOk()) {
       expect(result.value.length).toEqual(1);
@@ -347,7 +477,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       expect(child).toEqual("a.ch1");
     }
 
-    const resultTwo = await LinksTableUtils.getChildren(db, "a.ch1");
+    const resultTwo = await HierarchyTableUtils.getChildren(db, "a.ch1");
 
     if (resultTwo.isOk()) {
       expect(resultTwo.value.length).toEqual(1);
@@ -361,7 +491,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(3);
 
     expect(
-      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
     ).toEqual(2);
   });
 
@@ -380,7 +510,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     await validateNotePropInDB(db, "b", testVault);
     await validateNotePropInDB(db, "c", testVault);
 
-    const result = await LinksTableUtils.getChildren(db, "root");
+    const result = await HierarchyTableUtils.getChildren(db, "root");
 
     expect(result.isOk()).toBeTruthy();
 
@@ -392,15 +522,15 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       expect(result.value[2]).toEqual("c");
     }
 
-    const parentAResult = await LinksTableUtils.getParent(db, "a");
+    const parentAResult = await HierarchyTableUtils.getParent(db, "a");
     expect(parentAResult.isOk()).toBeTruthy();
     if (parentAResult.isOk()) expect(parentAResult.value).toEqual("root");
 
-    const parentBResult = await LinksTableUtils.getParent(db, "b");
+    const parentBResult = await HierarchyTableUtils.getParent(db, "b");
     expect(parentBResult.isOk()).toBeTruthy();
     if (parentBResult.isOk()) expect(parentBResult.value).toEqual("root");
 
-    const parentCResult = await LinksTableUtils.getParent(db, "c");
+    const parentCResult = await HierarchyTableUtils.getParent(db, "c");
     expect(parentCResult.isOk()).toBeTruthy();
     if (parentCResult.isOk()) expect(parentCResult.value).toEqual("root");
 
@@ -409,7 +539,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(4);
 
     expect(
-      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
     ).toEqual(3);
   });
 
@@ -628,7 +758,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
     await validateNotePropInDB(db, "a", testVault);
 
-    const result = await LinksTableUtils.getChildren(db, "a");
+    const result = await HierarchyTableUtils.getChildren(db, "a");
 
     expect(result.isOk()).toBeTruthy();
     if (result.isOk()) {
@@ -659,7 +789,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
     await validateNotePropInDB(db, "a.ch1", testVault);
 
-    const result = await LinksTableUtils.getParent(db, "a.ch1");
+    const result = await HierarchyTableUtils.getParent(db, "a.ch1");
 
     expect(result.isOk()).toBeTruthy();
     if (result.isOk()) {
@@ -766,7 +896,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     }
 
     // Validate children of root is updated:
-    const childrenResult = await LinksTableUtils.getChildren(db, "root");
+    const childrenResult = await HierarchyTableUtils.getChildren(db, "root");
 
     expect(childrenResult.isOk()).toBeTruthy();
 
@@ -778,7 +908,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     }
 
     // Validate parent of a.ch1 is updated:
-    const parentAResult = await LinksTableUtils.getParent(db, newNoteId);
+    const parentAResult = await HierarchyTableUtils.getParent(db, newNoteId);
     expect(parentAResult.isOk()).toBeTruthy();
     if (parentAResult.isOk()) expect(parentAResult.value).toEqual("root");
 

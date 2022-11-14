@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "./SQLiteUtils";
+import { executeSqlWithVoidResult } from "../SQLiteUtils";
 
 export class VaultsTableRow {
   constructor(public id: number, public name: string, public fsPath: string) {}
@@ -12,7 +12,7 @@ export class VaultsTableUtils {
     const sql = `
     CREATE TABLE IF NOT EXISTS Vaults (
       id INTEGER PRIMARY KEY,
-    name TEXT,
+      name TEXT,
       fsPath TEXT
     )`;
 

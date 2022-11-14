@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "./SQLiteUtils";
+import { executeSqlWithVoidResult } from "../SQLiteUtils";
 
 /**
  * FTS5 Virtual Table for Full-Text-Search over fname column in NoteProps. This

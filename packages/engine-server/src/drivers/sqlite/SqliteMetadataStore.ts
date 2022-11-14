@@ -15,6 +15,7 @@ import _ from "lodash";
 import { err, ok, Result, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import {
+  HierarchyTableUtils,
   LinksTableRow,
   LinksTableUtils,
   LinkType,
@@ -57,9 +58,9 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
 
     const getDLinksResult = LinksTableUtils.getAllDLinks(this._db, key);
 
-    const getChildrenResult = LinksTableUtils.getChildren(this._db, key);
+    const getChildrenResult = HierarchyTableUtils.getChildren(this._db, key);
 
-    const getParentResult = LinksTableUtils.getParent(this._db, key);
+    const getParentResult = HierarchyTableUtils.getParent(this._db, key);
 
     const getVaultResult = VaultNotesTableUtils.getVaultFsPathForNoteId(
       this._db,
@@ -251,10 +252,13 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
     // Now add links
     await Promise.all(
       data.links.map((link) => {
-        // TODO: Compute the to destination from the contents of the link, i.e. [[foo]]
-        return LinksTableUtils.insert(
+        return LinksTableUtils.insertLinkWithSinkAsFname(
           this._db,
-          new LinksTableRow(data.id, link.to!.id!, link.type as LinkType, link) // TODO: Get rid of to!.id! after Tuling's change.
+          data.id,
+          link.value,
+          link.type as LinkType,
+          link.value,
+          link
         );
       })
     );

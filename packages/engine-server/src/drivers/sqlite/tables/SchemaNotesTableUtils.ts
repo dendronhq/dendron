@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult, getSQLValueString } from "./SQLiteUtils";
+import { executeSqlWithVoidResult, getSQLValueString } from "../SQLiteUtils";
 
 export class SchemaNotesTableRow {
   constructor(

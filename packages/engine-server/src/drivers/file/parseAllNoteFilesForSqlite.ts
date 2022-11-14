@@ -19,6 +19,7 @@ import path from "path";
 import { Database } from "sqlite3";
 import {
   executeSqlWithVoidResult,
+  HierarchyTableUtils,
   VaultNotesTableRow,
   VaultNotesTableUtils,
   VaultsTableUtils,
@@ -204,7 +205,8 @@ export async function parseAllNoteFilesForSqlite(
 
   const bulkProcessParentLinksResult = await bulkProcessParentLinks(
     db,
-    allNotesToProcess
+    allNotesToProcess,
+    vaultId
   );
 
   if (bulkProcessParentLinksResult.isErr()) {
@@ -279,7 +281,8 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
 
 function bulkProcessParentLinks(
   db: Database,
-  notes: NoteProps[]
+  notes: NoteProps[],
+  vaultId: number
 ): ResultAsync<void, SqliteError> {
   const data = notes.map((note) => {
     if (note.fname === "root") {
@@ -290,20 +293,22 @@ function bulkProcessParentLinks(
     // If it's a top level domain, then add it as a child of the root node.
     if (potentialParentName === "") {
       return {
-        sinkId: note.id,
-        sourceFname: "root",
+        childId: note.id,
+        parentFname: "root",
         linkType: "child" as LinkType,
+        vaultId,
       };
     } else {
       return {
-        sinkId: note.id,
-        sourceFname: potentialParentName,
+        childId: note.id,
+        parentFname: potentialParentName,
         linkType: "child" as LinkType,
+        vaultId,
       };
     }
   });
 
-  return LinksTableUtils.bulkInsertLinkWithSourceAsFname(db, _.compact(data));
+  return HierarchyTableUtils.bulkInsertWithParentAsFname(db, _.compact(data));
 }
 
 async function bulkProcessOtherLinks(
@@ -316,6 +321,7 @@ async function bulkProcessOtherLinks(
     notes.map((note) => {
       const links = LinkUtils.findLinksFromBody({ note, config });
 
+      debugger;
       const data = links
         .filter(
           (link) =>
@@ -329,6 +335,7 @@ async function bulkProcessOtherLinks(
             sourceId: note.id,
             sinkFname: link.to!.fname!, // TODO: Doesn't work.
             linkType: link.type as LinkType,
+            linkValue: link.value,
             payload: link,
           };
         });
@@ -379,6 +386,7 @@ function deleteLinksForUpdatedNotes(
 ): ResultAsync<void, SqliteError> {
   const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
 
+  debugger;
   const sql = `
 DELETE FROM Links AS Outer
 WHERE EXISTS
@@ -390,8 +398,7 @@ WHERE EXISTS
   JOIN NoteProps ON NoteProps.fname = T.fname
   JOIN Links ON NoteProps.Id = Links.source
   JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
-  WHERE Links.linkType != 1 -- Not Parent-Children Links
-  AND VaultId = ${vaultId}
+  WHERE VaultId = ${vaultId}
   AND Links.source = Outer.source
 )
   `;

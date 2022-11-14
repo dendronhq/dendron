@@ -12,9 +12,9 @@ import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 
 /**
- * This function contains tests that are common to NoteStore. They can be
- * reused by tests that are using different configurations of NoteStore (for
- * example, SqliteMetadataStore vs NoteMetadataStore)
+ * This function runs all tests that are common to NoteStore. They can be reused
+ * by tests that are using different configurations of NoteStore (for example,
+ * SqliteMetadataStore vs NoteMetadataStore)
  * */
 export function runAllNoteStoreTests(
   noteStoreFactory: (

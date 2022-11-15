@@ -26,6 +26,7 @@ export type NoteData = {
 
 export type DendronCommonProps = Partial<NoteData> & {
   dendronRouter: DendronRouterProps;
+  note?: NoteProps;
 };
 export type DendronPageWithNoteDataProps = NoteData & DendronCommonProps;
 

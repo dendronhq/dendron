@@ -1,12 +1,24 @@
 import { Breadcrumb } from "antd";
 import _ from "lodash";
 import React from "react";
-import { TreeUtils } from "@dendronhq/common-all";
+import { NoteProps, NotePropsByIdDict } from "@dendronhq/common-all";
 import { useNoteActive } from "../utils/hooks";
 import { getNoteUrl } from "../utils/links";
 import { useCombinedSelector } from "../features";
 import { DendronCommonProps, verifyNoteData } from "../utils/types";
 import Link from "next/link";
+
+function getBreadcrumb(
+  noteDict: NotePropsByIdDict,
+  noteId?: string
+): NoteProps[] {
+  const note = noteId ? noteDict[noteId] : undefined;
+  const noteParent = note?.parent ? noteDict[note.parent] : undefined;
+  return [
+    ...(noteParent ? getBreadcrumb(noteDict, noteParent.id) : []),
+    ...(note ? [note] : []),
+  ];
+}
 
 export function DendronBreadCrumb(props: DendronCommonProps) {
   const ide = useCombinedSelector((state) => state.ide);
@@ -25,11 +37,7 @@ export function DendronBreadCrumb(props: DendronCommonProps) {
     return null;
   }
 
-  const noteIdPareents = TreeUtils.getAllParents({
-    child2parent: tree?.child2parent ?? {},
-    noteId: noteActive.id,
-  }).concat(noteActive.id);
-  const noteParents = noteIdPareents.map((noteId) => props.notes[noteId]);
+  const noteParents = getBreadcrumb(props.notes, props.note?.id);
 
   return (
     <Breadcrumb style={{ margin: "16px 0" }}>

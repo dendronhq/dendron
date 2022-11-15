@@ -355,7 +355,7 @@ export function parseSidebarConfig(
   input: unknown
 ): Result<SidebarConfig, IDendronError> {
   if (Array.isArray(input)) {
-    const x = input.map((maybeSidebarItem) => {
+    const resultList = input.map((maybeSidebarItem) => {
       const { type } = maybeSidebarItem;
       switch (type) {
         case "note":
@@ -388,7 +388,7 @@ export function parseSidebarConfig(
           );
       }
     });
-    return Result.combine(x);
+    return Result.combine(resultList);
   }
 
   return err(new DendronError({ message: "Sidebar object is not an array" }));

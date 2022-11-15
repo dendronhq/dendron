@@ -34,7 +34,7 @@ export class NotePropsTableUtils {
    * @param db
    * @returns
    */
-  public static createTable(db: Database): ResultAsync<void, SqliteError> {
+  public static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
       CREATE TABLE IF NOT EXISTS NoteProps (
         id TEXT NOT NULL PRIMARY KEY,
@@ -154,7 +154,7 @@ export class NotePropsTableUtils {
   public static insert(
     db: Database,
     row: NotePropsMeta
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = this.getSQLInsertString(row);
 
     return executeSqlWithVoidResult(db, sql);
@@ -163,7 +163,7 @@ export class NotePropsTableUtils {
   public static delete(
     db: Database,
     key: string
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `DELETE FROM NoteProps
     WHERE id = '${key}'`;
 

@@ -12,7 +12,7 @@ export class SchemaNotesTableRow {
 }
 
 export class SchemaNotesTableUtils {
-  static createTable(db: Database): ResultAsync<void, SqliteError> {
+  static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS SchemaNotes (
       noteId TEXT NOT NULL,
@@ -27,7 +27,7 @@ export class SchemaNotesTableUtils {
   static insert(
     db: Database,
     row: SchemaNotesTableRow
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `
     INSERT OR IGNORE INTO SchemaNotes (noteId, moduleId, schemaId)
     VALUES (
@@ -35,12 +35,12 @@ export class SchemaNotesTableUtils {
       ${getSQLValueString(row.moduleId)},
       ${getSQLValueString(row.schemaId)})`;
 
-    const prom = new Promise<void>((resolve, reject) => {
+    const prom = new Promise<null>((resolve, reject) => {
       db.run(sql, (err) => {
         if (err) {
           reject(err.message);
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });

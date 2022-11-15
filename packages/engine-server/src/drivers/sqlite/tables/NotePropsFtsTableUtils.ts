@@ -8,7 +8,7 @@ import { executeSqlWithVoidResult } from "../SQLiteUtils";
  * is to power lookup.
  */
 export class NotePropsFtsTableUtils {
-  static createTable(db: Database): ResultAsync<void, SqliteError> {
+  static createTable(db: Database): ResultAsync<null, SqliteError> {
     // The Sqlite library doesn't appear to be able to execute multiple SQL
     // statements in the same block, so they must be separated into different
     // db.run() statements.

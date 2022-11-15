@@ -8,8 +8,8 @@ import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import { runEngineTestV5 } from "../../../engine";
-import { ENGINE_HOOKS } from "../../../presets";
+import { runEngineTestV5 } from "./engine";
+import { ENGINE_HOOKS } from "./presets";
 
 /**
  * This function runs all tests that are common to NoteStore. They can be reused

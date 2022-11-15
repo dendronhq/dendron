@@ -30,13 +30,13 @@ export function getSQLBoolean(value: boolean | undefined): string {
 export function executeSqlWithVoidResult(
   db: Database,
   sql: string
-): ResultAsync<void, SqliteError> {
-  const prom = new Promise<void>((resolve, reject) => {
+): ResultAsync<null, SqliteError> {
+  const prom = new Promise<null>((resolve, reject) => {
     db.run(sql, (err) => {
       if (err) {
         reject(err.message);
       } else {
-        resolve();
+        resolve(null);
       }
     });
   });

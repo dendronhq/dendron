@@ -14,7 +14,6 @@ import {
   SchemaUtils,
   string2Note,
 } from "@dendronhq/common-all";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
 import {
   DendronASTNode,
   DendronASTTypes,
@@ -48,7 +47,8 @@ export async function parseAllNoteFilesForSqlite(
   vault: DVault,
   db: Database,
   root: string,
-  schemas: SchemaModuleDict
+  schemas: SchemaModuleDict,
+  enableLinkCandidates: boolean = false
 ): Promise<Result<null, any>> {
   await addVaultToDb(vault, db);
 
@@ -62,8 +62,6 @@ export async function parseAllNoteFilesForSqlite(
     return err(vaultIdResp.error);
   }
 
-  const uno = process.hrtime();
-
   // Get the content from all files and calculate their hashes
   const fileStateData = files.map((file) => {
     const content = fs.readFileSync(path.join(root, file), {
@@ -74,21 +72,13 @@ export async function parseAllNoteFilesForSqlite(
     return { fname: cleanName(name), contentHash: genHash(content), content };
   });
 
-  const durationOne = getDurationMilliseconds(uno);
-
-  console.log(`Duration Reading Files: ${durationOne} ms`);
-
   const contentDictionary: { [key: string]: string } = {};
   for (const data of fileStateData) {
     contentDictionary[data.fname] = data.content;
   }
-  // Compute Added Files
-  const prio = process.hrtime();
-  const addedFileResp = await getAddedFiles(db, files, vaultId);
 
-  console.log(
-    `Duration Finding Added Files via DB: ${getDurationMilliseconds(prio)} ms`
-  );
+  // Compute Added Files
+  const addedFileResp = await getAddedFiles(db, files, vaultId);
 
   if (addedFileResp.isErr()) {
     return err(addedFileResp.error);
@@ -97,42 +87,28 @@ export async function parseAllNoteFilesForSqlite(
   const addedNotes: NoteProps[] = addedFileResp.value.map((fname) => {
     const content = contentDictionary[fname];
 
-    const props = content2Note({ content, fname, vault });
+    const props = string2Note({ content, fname: cleanName(fname), vault });
     props.contentHash = genHash(content);
 
     return props;
   });
 
   // Compute Updated Notes
-  const dos = process.hrtime();
-
   const getUpdatedFilesResp = await getUpdatedFiles(db, fileStateData, vaultId);
-
-  console.log(
-    `Duration getUpdatedFiles in DB: ${getDurationMilliseconds(dos)} ms`
-  );
 
   if (getUpdatedFilesResp.isErr()) {
     return err(getUpdatedFilesResp.error);
   }
 
-  const abc = process.hrtime();
   const updatedNotes: NoteProps[] = getUpdatedFilesResp.value.map((fname) => {
     const content = contentDictionary[fname];
 
-    const props = content2Note({ content, fname, vault });
+    const props = string2Note({ content, fname: cleanName(fname), vault });
     props.contentHash = genHash(content);
 
     return props;
   });
 
-  console.log(
-    `Duration mapping updatedNotes to NoteProps : ${getDurationMilliseconds(
-      abc
-    )} ms`
-  );
-
-  const def = process.hrtime();
   if (updatedNotes.length > 0) {
     // We need to delete all links from updated notes, since they will get re-processed
     const linkDeleteRes = await deleteLinksForUpdatedNotes(
@@ -146,24 +122,11 @@ export async function parseAllNoteFilesForSqlite(
     }
   }
 
-  console.log(
-    `Duration deleteLinksForUpdatedNotes in DB : ${getDurationMilliseconds(
-      def
-    )} ms`
-  );
-
-  const hijk = process.hrtime();
   // Handle deleted notes:
   const deleteRes = await deleteRemovedFilesFromDB(
     db,
     Object.keys(contentDictionary),
     vaultId
-  );
-
-  console.log(
-    `Duration deleteRemovedFilesFromDB in DB : ${getDurationMilliseconds(
-      hijk
-    )} ms`
   );
 
   if (deleteRes.isErr()) {
@@ -180,7 +143,6 @@ export async function parseAllNoteFilesForSqlite(
 
   const allNotesToProcess = addedNotes.concat(updatedNotes);
 
-  const one = process.hrtime();
   // TODO: Bulk Insert
   await Promise.all(
     allNotesToProcess.map((note) => {
@@ -188,12 +150,8 @@ export async function parseAllNoteFilesForSqlite(
     })
   );
 
-  const two = process.hrtime();
-  console.log(
-    `Duration for ProcessNoteProps: ${getDurationMilliseconds(one)} ms`
-  );
-
-  // We need to do additional processing on updated links if any of them have had their ID's changed.
+  // We need to do additional processing on updated links if any of them have
+  // had their ID's changed.
   if (updatedNotes.length > 0) {
     // This step must be done AFTER the updated notes have been added, or else the foreign key constraint on the Links table will fail.
     const updateLinksForChangedNoteIdResult = await updateLinksForChangedNoteId(
@@ -205,7 +163,8 @@ export async function parseAllNoteFilesForSqlite(
       return err(updateLinksForChangedNoteIdResult.error);
     }
 
-    // If any updated notes had an ID change, then we also need to delete any references to the old ID in NoteProps, Parent-child links and VaultNotes:
+    // If any updated notes had an ID change, then we also need to delete any
+    // references to the old ID in NoteProps, Parent-child links and VaultNotes:
     const purgeChangedIdsResult = await purgeDBForUpdatedNotesWithChangedNoteId(
       db,
       updatedNotes,
@@ -255,50 +214,19 @@ export async function parseAllNoteFilesForSqlite(
   }
 
   await bulkProcessOtherLinks(db, allNotesToProcess, {} as DendronConfig);
-  console.log(`Duration for ProcessLinks: ${getDurationMilliseconds(two)} ms`);
 
-  const three = process.hrtime();
-  // TODO: Surround with check on if note candidates are enabled.
-  await bulkProcessLinkCandidates(db, allNotesToProcess, {} as DendronConfig);
-  console.log(
-    `Duration for Process LinkCandidates: ${getDurationMilliseconds(three)} ms`
-  );
-
-  console.log(
-    `New Notes: ${addedNotes.length}. Updated Notes: ${updatedNotes.length}`
-  );
+  if (enableLinkCandidates) {
+    await bulkProcessLinkCandidates(db, allNotesToProcess, {} as DendronConfig);
+  }
 
   return ok(null);
 }
 
-// TODO: Probably move this out of note parser
 async function addVaultToDb(vault: DVault, db: Database) {
   return VaultsTableUtils.insert(db, {
     name: vault.name ?? "vault",
     fsPath: vault.fsPath,
   });
-}
-
-/**
- * Given a fpath, attempt to convert raw file contents into a NoteProp
- *
- * Look up metadata from cache. If contenthash hasn't changed, use metadata from cache.
- * Otherwise, reconstruct metadata from scratch
- *
- * @returns NoteProp associated with fpath
- */
-function content2Note({
-  content,
-  fname,
-  vault,
-}: {
-  content: any;
-  fname: string;
-  vault: DVault;
-}): NoteProps {
-  // If hash is different, then we update all links and anchors ^link-anchor
-  const note = string2Note({ content, fname: cleanName(fname), vault });
-  return note;
 }
 
 async function processNoteProps(note: NotePropsMeta, db: Database) {
@@ -330,7 +258,7 @@ function bulkProcessParentLinks(
   db: Database,
   notes: NoteProps[],
   vaultId: number
-): ResultAsync<void, SqliteError> {
+): ResultAsync<null, SqliteError> {
   const data = notes.map((note) => {
     if (note.fname === "root") {
       return undefined;
@@ -356,7 +284,7 @@ function bulkProcessParentLinks(
   });
 
   if (data.length === 0) {
-    return okAsync(null) as unknown as ResultAsync<void, SqliteError>; // TODO, switch to ResultAsync<null> everywhere...
+    return okAsync(null);
   }
 
   return HierarchyTableUtils.bulkInsertWithParentAsFname(db, _.compact(data));
@@ -463,7 +391,6 @@ async function bulkProcessLinkCandidates(
             position,
             to: {
               fname: word,
-              // vaultName: VaultUtils.getName(candidate.vault),
             },
           });
         });
@@ -487,7 +414,7 @@ function deleteRemovedFilesFromDB(
   db: Database,
   remainingFiles: string[],
   vaultId: number
-): ResultAsync<void, SqliteError> {
+): ResultAsync<null, SqliteError> {
   const values = remainingFiles.map((fname) => `('${fname}')`).join(",");
 
   // TODO: What if all values are deleted?
@@ -521,7 +448,7 @@ function deleteLinksForUpdatedNotes(
   db: Database,
   updatedNoteFnames: string[],
   vaultId: number
-): ResultAsync<void, SqliteError> {
+): ResultAsync<null, SqliteError> {
   const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
 
   const sql = `
@@ -579,7 +506,7 @@ function purgeDBForUpdatedNotesWithChangedNoteId(
   db: Database,
   updatedNotes: NotePropsMeta[],
   vaultId: number
-): ResultAsync<void, SqliteError> {
+): ResultAsync<null, SqliteError> {
   const values = updatedNotes
     .map((props) => `('${props.fname}','${props.id}')`)
     .join(",");
@@ -606,7 +533,7 @@ function updateLinksForChangedNoteId(
   db: Database,
   updatedNotes: NotePropsMeta[],
   vaultId: number
-): ResultAsync<void, SqliteError> {
+): ResultAsync<null, SqliteError> {
   const values = updatedNotes
     .map((props) => `('${props.fname}','${props.id}')`)
     .join(",");
@@ -640,11 +567,11 @@ function getUpdatedFiles(
     .join(",");
 
   const sql = `
-  WITH T(fname, hash) AS
-  (VALUES ${values})
-  SELECT NoteProps.fname, NoteProps.id FROM T
-  JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
-  `;
+    WITH T(fname, hash) AS
+    (VALUES ${values})
+    SELECT NoteProps.fname, NoteProps.id FROM T
+    JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
+    `;
 
   const prom = new Promise<any[]>((resolve, reject) => {
     db.all(sql, (err, rows) => {
@@ -670,12 +597,11 @@ function getUpdatedFiles(
       .join(",");
 
     const sql2 = `
-  WITH T(fname, id) AS
-  (VALUES ${values})
-  SELECT T.fname FROM T
-  JOIN VaultNotes ON T.Id = VaultNotes.noteId
-  WHERE vaultId = ${vaultId}
-  `;
+      WITH T(fname, id) AS
+      (VALUES ${values})
+      SELECT T.fname FROM T
+      JOIN VaultNotes ON T.Id = VaultNotes.noteId
+      WHERE vaultId = ${vaultId}`;
 
     const prom = new Promise<any[]>((resolve, reject) => {
       db.all(sql2, (err, rows) => {

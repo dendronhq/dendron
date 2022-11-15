@@ -4,7 +4,7 @@ import {
   SqliteDbFactory,
   SqliteMetadataStore,
 } from "@dendronhq/engine-server";
-import { runAllNoteStoreTests } from "./noteStore.common";
+import { runAllNoteStoreTests } from "../../../noteStore.common";
 
 async function createNoteStoreUsingSqliteMetadataStore(
   wsRoot: string,
@@ -16,6 +16,7 @@ async function createNoteStoreUsingSqliteMetadataStore(
     wsRoot,
     vaults,
     fileStore,
+    // "/Users/jyeung/code/dendron/dendron/dendron.test4.db"
     ":memory:" // This special DB name tells sqlite to create the db in-memory
   );
 

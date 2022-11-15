@@ -11,7 +11,7 @@ export class VaultNotesTableRow {
  * Utilities for read/write on the VaultNotes Table in sqlite
  */
 export class VaultNotesTableUtils {
-  static createTable(db: Database): ResultAsync<void, SqliteError> {
+  static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS VaultNotes (
       vaultId INTEGER NOT NULL,
@@ -58,7 +58,7 @@ export class VaultNotesTableUtils {
   static insert(
     db: Database,
     row: VaultNotesTableRow
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `
       INSERT INTO VaultNotes (vaultId, noteId)
       VALUES (
@@ -72,7 +72,7 @@ export class VaultNotesTableUtils {
   static delete(
     db: Database,
     row: VaultNotesTableRow
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `
       DELETE FROM VaultNotes
       WHERE vaultId = ${row.vaultId} AND noteId = '${row.noteId}';`;

@@ -8,7 +8,7 @@ export class VaultsTableRow {
 }
 
 export class VaultsTableUtils {
-  static createTable(db: Database): ResultAsync<void, SqliteError> {
+  static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS Vaults (
       id INTEGER PRIMARY KEY,
@@ -52,7 +52,7 @@ export class VaultsTableUtils {
   static insert(
     db: Database,
     row: Omit<VaultsTableRow, "id">
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `
       INSERT INTO Vaults (name, fsPath)
       VALUES (

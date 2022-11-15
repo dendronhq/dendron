@@ -15,8 +15,8 @@ import _ from "lodash";
 import { err, ok, Result, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import {
+  HierarchyTableRow,
   HierarchyTableUtils,
-  LinksTableRow,
   LinksTableUtils,
   LinkType,
   NotePropsFtsTableUtils,
@@ -279,18 +279,18 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
     // Now add children
     await Promise.all(
       data.children.map((child) => {
-        return LinksTableUtils.insert(
+        return HierarchyTableUtils.insert(
           this._db,
-          new LinksTableRow(data.id, child, "child")
+          new HierarchyTableRow(data.id, child)
         );
       })
     );
 
     // Now add the parent-> child link (where this note is the child):
     if (data.parent) {
-      await LinksTableUtils.insert(
+      await HierarchyTableUtils.insert(
         this._db,
-        new LinksTableRow(data.parent, data.id, "child")
+        new HierarchyTableRow(data.parent, data.id)
       );
     }
 

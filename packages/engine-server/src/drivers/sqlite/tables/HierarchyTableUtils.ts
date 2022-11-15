@@ -13,7 +13,7 @@ export class HierarchyTableRow {
 }
 
 export class HierarchyTableUtils {
-  public static createTable(db: Database): ResultAsync<void, SqliteError> {
+  public static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS Hierarchy (
       parent TEXT NOT NULL,
@@ -36,12 +36,23 @@ export class HierarchyTableUtils {
       });
   }
 
+  public static insert(
+    db: Database,
+    row: HierarchyTableRow
+  ): ResultAsync<null, SqliteError> {
+    const sql = `
+    INSERT INTO Hierarchy (parent, child)
+    VALUES (('${row.parent}', '${row.child}'))`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
   public static insertWithParentAsFname(
     db: Database,
     childId: string,
     parentFname: string,
     vaultId: number
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     return this.bulkInsertWithParentAsFname(db, [
       { childId, parentFname, vaultId },
     ]);
@@ -54,7 +65,7 @@ export class HierarchyTableUtils {
       parentFname: string;
       vaultId: number;
     }[]
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const values = data
       .map((d) => `('${d.childId}', '${d.parentFname}', ${d.vaultId})`)
       .join(",");

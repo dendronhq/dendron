@@ -7,7 +7,10 @@ import {
   SqliteDbFactory,
 } from "@dendronhq/engine-server";
 import { Database } from "sqlite3";
-import { SqliteTableNames, SqliteTestUtils } from "./SqliteTestUtils";
+import {
+  SqliteTableNames,
+  SqliteTestUtils,
+} from "../../../utils/SqliteTestUtils";
 
 describe("GIVEN a sqlite store about to be initialized", () => {
   jest.setTimeout(10e6);

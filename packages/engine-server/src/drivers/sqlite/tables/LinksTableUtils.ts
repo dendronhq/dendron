@@ -34,7 +34,7 @@ export type LinksTableRowWithSinkAsFname = Omit<LinksTableRow, "sink"> & {
 };
 
 export class LinksTableUtils {
-  public static createTable(db: Database): ResultAsync<void, SqliteError> {
+  public static createTable(db: Database): ResultAsync<null, SqliteError> {
     const sql = `
     CREATE TABLE IF NOT EXISTS Links (
       source TEXT NOT NULL,
@@ -64,7 +64,7 @@ export class LinksTableUtils {
   public static insert(
     db: Database,
     row: LinksTableRow
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const sql = `
     INSERT INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
     VALUES (
@@ -78,7 +78,7 @@ export class LinksTableUtils {
       )})
       `;
 
-    const prom = new Promise<void>((resolve, reject) => {
+    const prom = new Promise<null>((resolve, reject) => {
       db.run(sql, (err) => {
         if (err) {
           if (
@@ -93,7 +93,7 @@ export class LinksTableUtils {
             reject(err.message);
           }
         } else {
-          resolve();
+          resolve(null);
         }
       });
     });
@@ -106,7 +106,7 @@ export class LinksTableUtils {
   static bulkInsertLinkWithSinkAsFname(
     db: Database,
     data: LinksTableRowWithSinkAsFname[]
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const values = data
       .map(
         (d) =>
@@ -133,7 +133,7 @@ export class LinksTableUtils {
   static bulkInsertLinkCandidatesWithSinkAsFname(
     db: Database,
     data: LinksTableRowWithSinkAsFname[]
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const values = data
       .map(
         (d) =>
@@ -160,7 +160,7 @@ export class LinksTableUtils {
   static InsertLinksThatBecameAmbiguous(
     db: Database,
     data: { fname: string; id: string }[]
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const values = data
       .map((d) => `(${getSQLValueString(d.fname)},${getSQLValueString(d.id)})`)
       .join(",");
@@ -184,7 +184,7 @@ export class LinksTableUtils {
   public static insertLinkWithSinkAsFname(
     db: Database,
     data: LinksTableRowWithSinkAsFname
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, [data]);
   }
 
@@ -241,7 +241,7 @@ export class LinksTableUtils {
     });
   }
 
-  static delete(db: Database, source: string): ResultAsync<void, SqliteError> {
+  static delete(db: Database, source: string): ResultAsync<null, SqliteError> {
     const sql = `
       DELETE FROM Links
       WHERE source = '${source}'`;
@@ -253,7 +253,7 @@ export class LinksTableUtils {
     db: Database,
     addedNotes: NotePropsMeta[],
     vaultNameOfNotesGettingAdded: string
-  ): ResultAsync<void, SqliteError> {
+  ): ResultAsync<null, SqliteError> {
     const values = addedNotes
       .map(
         (props) =>

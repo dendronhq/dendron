@@ -6,7 +6,7 @@ import {
   URI,
 } from "@dendronhq/common-all";
 import { NodeJSFileStore } from "@dendronhq/engine-server";
-import { runAllNoteStoreTests } from "./noteStore.common";
+import { runAllNoteStoreTests } from "../../../noteStore.common";
 
 function createNoteStoreUsingNoteMetadataStore(
   wsRoot: string

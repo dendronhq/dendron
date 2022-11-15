@@ -433,7 +433,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       testVault,
       db,
       testDir,
-      {}
+      {},
+      true // enableLinkCandidates
     );
 
     await validateNotePropInDB(db, "a", testVault);

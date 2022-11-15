@@ -1,11 +1,12 @@
 import {
+  DVault,
   ERROR_STATUS,
   NoteMetadataStore,
   NotePropsMeta,
   NoteStore,
   URI,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { NodeJSFileStore } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -504,5 +505,58 @@ describe("GIVEN NoteStore", () => {
         expect,
       }
     );
+  });
+
+  describe("AND absolute vault path", () => {
+    const wsRoot = tmpDir().name;
+    // giving absolute fsPath for vault
+    // to simulate the case where we try to .get() a note
+    // when there is a local override vault
+    // coming from home directory, which usually
+    // would be specified with absolute path
+    const vaultsWithAbsoluteFsPath: DVault[] = [
+      {
+        fsPath: `${wsRoot}`,
+        selfContained: true,
+        name: "vault",
+      },
+    ];
+    test("WHEN get note, then correctly retrieve note by key", async () => {
+      await runEngineTestV5(
+        async ({ wsRoot, engine }) => {
+          const noteStore = new NoteStore(
+            new NodeJSFileStore(),
+            new NoteMetadataStore(
+              new FuseEngine({
+                fuzzThreshold: 0.2,
+              })
+            ),
+            URI.file(wsRoot)
+          );
+          const engineNotes = await engine.findNotesMeta({
+            excludeStub: false,
+          });
+          const rootNote = engineNotes[0];
+          engineNotes.forEach(async (noteMeta) => {
+            await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
+          });
+
+          const resp = await noteStore.get(rootNote.id);
+          expect(resp.error).toBeFalsy();
+          expect(_.omit(resp.data, "body")).toEqual(rootNote);
+        },
+        {
+          expect,
+          wsRoot,
+          vaults: vaultsWithAbsoluteFsPath,
+          modConfigCb: (config) => {
+            config.dev = {
+              enableEngineV3: true,
+            };
+            return config;
+          },
+        }
+      );
+    });
   });
 });

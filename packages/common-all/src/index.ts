@@ -38,6 +38,7 @@ export * from "./sidebar";
 export * from "./parse";
 export * from "./BacklinkUtils";
 export * from "./DLinkUtils";
+export * from "./service";
 export * as YamlUtils from "./yaml";
 export * as GitUtils from "./git";
 

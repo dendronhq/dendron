@@ -43,6 +43,7 @@ type PageProps = {
   noteIndex: NoteProps;
   config: DendronConfig;
   body?: string;
+  note?: NoteProps;
 };
 
 function AppContainer(appProps: AppProps & { pageProps: PageProps }) {
@@ -121,6 +122,7 @@ function DendronApp({
         {...noteData}
         noteIndex={pageProps.noteIndex}
         dendronRouter={dendronRouter}
+        note={pageProps.note}
       >
         <Head>
           <link rel="icon" href={getAssetUrl("/favicon.ico")} />

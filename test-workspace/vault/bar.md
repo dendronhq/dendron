@@ -4,6 +4,7 @@ title: bar
 desc: ""
 updated: 1623792527635
 created: 1595170096361
+nav_exclude_children: true
 ---
 
 Bar one

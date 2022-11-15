@@ -4,7 +4,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   NotePropsFtsTableUtils,
   parseAllNoteFilesForSqlite,
-  SqliteFactory,
+  SqliteDbFactory,
 } from "@dendronhq/engine-server";
 import { Database } from "sqlite3";
 import { SqliteTableNames, SqliteTestUtils } from "./SqliteTestUtils";
@@ -54,7 +54,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   beforeEach(() => {
-    return SqliteFactory.createEmptyDB(":memory:")
+    return SqliteDbFactory.createEmptyDB(":memory:")
       .map((_db) => {
         db = _db;
       })

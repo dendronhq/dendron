@@ -1,22 +1,35 @@
 import {
   cleanName,
+  DendronASTDest,
   DendronConfig,
+  DLink,
   DVault,
   genHash,
   NoteDictsUtils,
   NoteProps,
   NotePropsMeta,
+  NoteUtils,
+  Position,
   SchemaModuleDict,
   SchemaUtils,
   string2Note,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { LinkUtils } from "@dendronhq/unified";
+import {
+  DendronASTNode,
+  DendronASTTypes,
+  LinkUtils,
+  MDUtilsV5,
+  ProcMode,
+  visit,
+} from "@dendronhq/unified";
 import fs from "fs-extra";
 import _ from "lodash";
-import { err, ok, Result, ResultAsync } from "neverthrow";
+import { Text } from "mdast";
+import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import path from "path";
 import { Database } from "sqlite3";
+import { Parent } from "unist";
 import {
   executeSqlWithVoidResult,
   HierarchyTableUtils,
@@ -203,6 +216,34 @@ export async function parseAllNoteFilesForSqlite(
     }
   }
 
+  // For any added notes, check if this caused a previously unresolved
+  // wikilink/ref to now become a properly resolved link. If so, go ahead and
+  // update it in the Links table.
+  if (addedNotes.length > 0 && vault.name) {
+    const updateUnresolvedLinksForAddedNotesResult =
+      await LinksTableUtils.updateUnresolvedLinksForAddedNotes(
+        db,
+        addedNotes,
+        vault.name
+      );
+
+    if (updateUnresolvedLinksForAddedNotesResult.isErr()) {
+      return err(updateUnresolvedLinksForAddedNotesResult.error);
+    }
+
+    const insertLinksThatBecameAmbiguousResult =
+      await LinksTableUtils.InsertLinksThatBecameAmbiguous(
+        db,
+        addedNotes.map((props) => {
+          return { fname: props.fname, id: props.id };
+        })
+      );
+
+    if (insertLinksThatBecameAmbiguousResult.isErr()) {
+      return err(insertLinksThatBecameAmbiguousResult.error);
+    }
+  }
+
   const bulkProcessParentLinksResult = await bulkProcessParentLinks(
     db,
     allNotesToProcess,
@@ -214,8 +255,14 @@ export async function parseAllNoteFilesForSqlite(
   }
 
   await bulkProcessOtherLinks(db, allNotesToProcess, {} as DendronConfig);
-
   console.log(`Duration for ProcessLinks: ${getDurationMilliseconds(two)} ms`);
+
+  const three = process.hrtime();
+  // TODO: Surround with check on if note candidates are enabled.
+  await bulkProcessLinkCandidates(db, allNotesToProcess, {} as DendronConfig);
+  console.log(
+    `Duration for Process LinkCandidates: ${getDurationMilliseconds(three)} ms`
+  );
 
   console.log(
     `New Notes: ${addedNotes.length}. Updated Notes: ${updatedNotes.length}`
@@ -308,6 +355,10 @@ function bulkProcessParentLinks(
     }
   });
 
+  if (data.length === 0) {
+    return okAsync(null) as unknown as ResultAsync<void, SqliteError>; // TODO, switch to ResultAsync<null> everywhere...
+  }
+
   return HierarchyTableUtils.bulkInsertWithParentAsFname(db, _.compact(data));
 }
 
@@ -321,7 +372,6 @@ async function bulkProcessOtherLinks(
     notes.map((note) => {
       const links = LinkUtils.findLinksFromBody({ note, config });
 
-      debugger;
       const data = links
         .filter(
           (link) =>
@@ -331,16 +381,104 @@ async function bulkProcessOtherLinks(
             link.type === "md"
         )
         .map((link) => {
+          // If the to fname isn't defined, then it can't be processed.
+          if (!link.to?.fname) {
+            return undefined;
+          }
           return {
-            sourceId: note.id,
-            sinkFname: link.to!.fname!, // TODO: Doesn't work.
-            linkType: link.type as LinkType,
-            linkValue: link.value,
+            source: note.id,
+            type: link.type as LinkType,
+            sinkFname: link.to.fname,
+            sinkVaultName: link.to.vaultName,
             payload: link,
           };
         });
 
-      return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, data);
+      return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, _.compact(data));
+    })
+  );
+}
+
+async function bulkProcessLinkCandidates(
+  db: Database,
+  notes: NoteProps[],
+  config: DendronConfig
+) {
+  // This method does one INSERT per note:
+  return Promise.all(
+    notes.map((note) => {
+      const content = note.body;
+
+      const remark = MDUtilsV5.procRemarkParse(
+        { mode: ProcMode.FULL },
+        {
+          noteToRender: note,
+          fname: note.fname,
+          vault: note.vault,
+          dest: DendronASTDest.MD_DENDRON,
+          config,
+        }
+      );
+      const ast = remark.parse(content) as DendronASTNode;
+
+      const textNodes: Text[] = [];
+      visit(
+        ast,
+        [DendronASTTypes.TEXT],
+        (node: Text, _index: number, parent: Parent | undefined) => {
+          if (parent?.type === "paragraph" || parent?.type === "tableCell") {
+            textNodes.push(node);
+          }
+        }
+      );
+      const linkCandidates: DLink[] = [];
+      _.map(textNodes, (textNode: Text) => {
+        const value = textNode.value as string;
+
+        value.split(/\s+/).map((word) => {
+          const startColumn = value.indexOf(word) + 1;
+          const endColumn = startColumn + word.length;
+
+          const position: Position = {
+            start: {
+              line: textNode.position!.start.line,
+              column: startColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + startColumn - 1
+                : undefined,
+            },
+            end: {
+              line: textNode.position!.start.line,
+              column: endColumn,
+              offset: textNode.position!.start.offset
+                ? textNode.position!.start.offset + endColumn - 1
+                : undefined,
+            },
+          };
+
+          linkCandidates.push({
+            type: "linkCandidate",
+            from: NoteUtils.toNoteLoc(note),
+            value: value.trim(),
+            position,
+            to: {
+              fname: word,
+              // vaultName: VaultUtils.getName(candidate.vault),
+            },
+          });
+        });
+      });
+
+      const data = linkCandidates.map((dlink) => {
+        return {
+          source: note.id,
+          sinkFname: dlink.value,
+          type: "linkCandidate" as LinkType,
+          payload: dlink,
+        };
+      });
+
+      return LinksTableUtils.bulkInsertLinkCandidatesWithSinkAsFname(db, data);
     })
   );
 }
@@ -386,22 +524,20 @@ function deleteLinksForUpdatedNotes(
 ): ResultAsync<void, SqliteError> {
   const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
 
-  debugger;
   const sql = `
-DELETE FROM Links AS Outer
-WHERE EXISTS
-(
-  WITH T(fname) as 
-  (VALUES ${values})
-  SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
-  FROM T
-  JOIN NoteProps ON NoteProps.fname = T.fname
-  JOIN Links ON NoteProps.Id = Links.source
-  JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
-  WHERE VaultId = ${vaultId}
-  AND Links.source = Outer.source
-)
-  `;
+    DELETE FROM Links AS Outer
+    WHERE EXISTS
+    (
+      WITH T(fname) as 
+      (VALUES ${values})
+      SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
+      FROM T
+      JOIN NoteProps ON NoteProps.fname = T.fname
+      JOIN Links ON NoteProps.Id = Links.source
+      JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+      WHERE VaultId = ${vaultId}
+      AND Links.source = Outer.source
+    )`;
   return executeSqlWithVoidResult(db, sql);
 }
 
@@ -502,29 +638,6 @@ function getUpdatedFiles(
   const values = allFiles
     .map((data) => `('${data.fname}','${data.contentHash}')`)
     .join(",");
-
-  // const sql = `
-  // WITH T(fname, hash) AS
-  // (VALUES ${values})
-  // SELECT NoteProps.fname FROM T
-  // JOIN NoteProps ON T.fname = NoteProps.fname
-  // JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
-  // WHERE hash != contentHash
-  // AND vaultId = ${vaultId}
-  // `;
-
-  // const sql = `
-  // SELECT fname
-  // FROM
-  // (
-  // WITH T(fname, hash) AS
-  // (VALUES ${values})
-  // SELECT NoteProps.fname, NoteProps.Id FROM T
-  // JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
-  // ) AS first
-  // JOIN VaultNotes ON first.Id = VaultNotes.noteId
-  // WHERE vaultId = ${vaultId}
-  // `;
 
   const sql = `
   WITH T(fname, hash) AS

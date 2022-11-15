@@ -1,7 +1,7 @@
 import { DVault, INoteStore, NoteStore, URI } from "@dendronhq/common-all";
 import {
   NodeJSFileStore,
-  SqliteFactory,
+  SqliteDbFactory,
   SqliteMetadataStore,
 } from "@dendronhq/engine-server";
 import { runAllNoteStoreTests } from "./noteStore.common";
@@ -12,7 +12,7 @@ async function createNoteStoreUsingSqliteMetadataStore(
 ): Promise<INoteStore<string>> {
   const fileStore = new NodeJSFileStore();
 
-  const dbResult = await SqliteFactory.createInitializedDB(
+  const dbResult = await SqliteDbFactory.createInitializedDB(
     wsRoot,
     vaults,
     fileStore,

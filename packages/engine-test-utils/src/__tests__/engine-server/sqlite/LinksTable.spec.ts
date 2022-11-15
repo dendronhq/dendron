@@ -86,7 +86,6 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "source",
       sink: "sink",
       type: "wiki",
-      linkValue: "sink",
       payload,
     };
 
@@ -125,7 +124,6 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "invalid-source",
       sink: "sink",
       type: "wiki",
-      linkValue: "sink",
       payload,
     };
 
@@ -141,7 +139,6 @@ describe("GIVEN a Links Sqlite Table", () => {
       source: "source",
       sink: "invalid-sink",
       type: "wiki",
-      linkValue: "invalid-sink",
       payload,
     };
 
@@ -169,14 +166,12 @@ describe("GIVEN a Links Sqlite Table", () => {
       },
     };
 
-    const insertResult = await LinksTableUtils.insertLinkWithSinkAsFname(
-      db,
-      "source",
-      "sink-fname",
-      "wiki",
-      payload.value,
-      payload
-    );
+    const insertResult = await LinksTableUtils.insertLinkWithSinkAsFname(db, {
+      source: "source",
+      sinkFname: "sink-fname",
+      type: "wiki",
+      payload,
+    });
 
     expect(insertResult.isErr()).toBeFalsy();
 
@@ -212,10 +207,9 @@ describe("GIVEN a Links Sqlite Table", () => {
       db,
       [
         {
-          sourceId: "source",
+          source: "source",
           sinkFname: "sink-fname",
-          linkType: "wiki",
-          linkValue: payload.value,
+          type: "wiki",
           payload,
         },
       ]

@@ -252,16 +252,29 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
     // Now add links
     await Promise.all(
       data.links.map((link) => {
-        return LinksTableUtils.insertLinkWithSinkAsFname(
-          this._db,
-          data.id,
-          link.value,
-          link.type as LinkType,
-          link.value,
-          link
-        );
+        return LinksTableUtils.insertLinkWithSinkAsFname(this._db, {
+          source: data.id,
+          sinkFname: link.value,
+          type: link.type as LinkType,
+          sinkVaultName: link.to?.vaultName,
+          payload: link,
+        });
       })
     );
+
+    // Potentially any unresolved links now are resolved with the addition of this note
+    if (data.vault.name) {
+      await LinksTableUtils.updateUnresolvedLinksForAddedNotes(
+        this._db,
+        [data],
+        data.vault.name
+      );
+    }
+
+    // Potentially some links became ambiguous
+    await LinksTableUtils.InsertLinksThatBecameAmbiguous(this._db, [
+      { fname: data.fname, id: data.id },
+    ]);
 
     // Now add children
     await Promise.all(

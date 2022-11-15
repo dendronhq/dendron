@@ -1,4 +1,4 @@
-import { DVault, NoteUtils } from "@dendronhq/common-all";
+import { DVault, NoteUtils, Position } from "@dendronhq/common-all";
 import { note2File, tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
@@ -7,7 +7,7 @@ import {
   NotePropsTableRow,
   NotePropsTableUtils,
   parseAllNoteFilesForSqlite,
-  SqliteFactory,
+  SqliteDbFactory,
   VaultNotesTableUtils,
   VaultsTableUtils,
 } from "@dendronhq/engine-server";
@@ -18,6 +18,8 @@ import { Database } from "sqlite3";
 import { SqliteTableNames, SqliteTestUtils } from "./SqliteTestUtils";
 
 describe("GIVEN a sqlite store about to be initialized", () => {
+  jest.setTimeout(10e6);
+
   let db: Database;
 
   const testDir = tmpDir().name;
@@ -33,9 +35,16 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     selfContained: false,
   };
 
+  const testVaultThree: DVault = {
+    name: "testVaultThree",
+    fsPath: "testVaultThree",
+    selfContained: false,
+  };
+
   beforeAll(() => {
-    // Create the test vault directory:
+    // Create the test vault directories:
     fs.ensureDirSync(path.join(testDir, testVaultTwo.fsPath));
+    fs.ensureDirSync(path.join(testDir, testVaultThree.fsPath));
 
     return Promise.all([
       // Special Root Note
@@ -71,12 +80,6 @@ describe("GIVEN a sqlite store about to be initialized", () => {
         wsRoot: testDir,
         fname: "a.ch1.gch1",
       }),
-      // Basic Note in Second Vault
-      NoteTestUtilsV4.createNote({
-        vault: testVaultTwo,
-        wsRoot: testDir,
-        fname: "vault-two-note",
-      }),
 
       // Notes with Links
       NoteTestUtilsV4.createNote({
@@ -109,19 +112,75 @@ describe("GIVEN a sqlite store about to be initialized", () => {
         fname: "wikilink-to-self",
         body: "[[wikilink-to-self]]",
       }),
+
+      // Basic Note in Second Vault
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "vault-two-note",
+      }),
+
+      // Same fname as in Vault 1
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "a",
+        id: "a-vault-two",
+      }),
+
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "cross-vault-link",
+        body: "[[b]]",
+      }),
+
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "cross-vault-link-candidate",
+        body: "b",
+      }),
+
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "cross-vault-link-with-vault-qualifier",
+        body: "[[dendron://testVaultThree/a]]",
+      }),
+
+      NoteTestUtilsV4.createNote({
+        vault: testVaultTwo,
+        wsRoot: testDir,
+        fname: "cross-vault-link-ambiguous",
+        body: "[[a]]",
+      }),
+
+      // 3-time replicated note name "a" in third vault
+      NoteTestUtilsV4.createNote({
+        vault: testVaultThree,
+        wsRoot: testDir,
+        fname: "a",
+        id: "a-vault-three",
+      }),
     ]);
   });
 
   beforeEach(() => {
     // If you need to debug locally, change this to a fully qualified file path.
     // You can then connect to the db file to examine table state.
-    return SqliteFactory.createEmptyDB(":memory:")
-      .map((_db) => {
-        db = _db;
-      })
-      .mapErr((err) => {
-        throw err;
-      });
+    return (
+      SqliteDbFactory.createEmptyDB(":memory:")
+        // SqliteDbFactory.createEmptyDB(
+        //   "/Users/jyeung/code/dendron/dendron/dendron.test4.db"
+        // )
+        .map((_db) => {
+          db = _db;
+        })
+        .mapErr((err) => {
+          throw err;
+        })
+    );
   });
 
   afterEach(() => {
@@ -258,6 +317,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     const result = await LinksTableUtils.getAllDLinks(db, "wikilink-a");
     expect(result.isOk()).toBeTruthy();
 
+    let wikilinkPosition;
     if (result.isOk()) {
       expect(result.value.length).toEqual(1);
 
@@ -266,7 +326,23 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       expect(wikilink.value).toEqual("a");
       expect(wikilink.from.id).toEqual("wikilink-a");
       expect(wikilink.to?.fname).toEqual("a");
-      // TODO: Add check for wikilink.to.id
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlink:
+    const backlinkResult = await LinksTableUtils.getAllDLinks(db, "a");
+    expect(backlinkResult.isOk()).toBeTruthy();
+
+    if (backlinkResult.isOk()) {
+      expect(backlinkResult.value.length).toEqual(1);
+
+      const backlink = backlinkResult.value[0];
+      expect(backlink.type).toEqual("backlink");
+      expect(backlink.value).toEqual("a");
+      expect(backlink.from.id).toEqual("wikilink-a");
+      expect(backlink.from.fname).toEqual("wikilink-a");
+      expect(backlink.from.vaultName).toEqual("testVault");
+      expect(backlink.position).toEqual(wikilinkPosition);
     }
 
     expect(
@@ -347,7 +423,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(1);
   });
 
-  test.skip("WHEN a note with a note candidate is added THEN an entry is added to the links table", async () => {
+  test("WHEN a note with a note candidate is added THEN an entry is added to the links table", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["a.md", "link-candidate.md"],
@@ -420,7 +496,67 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(1);
   });
 
-  test.skip("WHEN a note with an unresolved wikilink is added AND the wikilink is later resolved THEN the entry in the links table has source and sinks properly populated", async () => {});
+  test("WHEN a note with an unresolved wikilink is added AND the wikilink is later resolved THEN the entry in the links table has source and sinks properly populated", async () => {
+    // Set the initial DB state. Wikilink-a is unresolved.
+    await parseAllNoteFilesForSqlite(
+      ["wikilink-a.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    // Now it gets resolved since a got added.
+    await parseAllNoteFilesForSqlite(
+      ["a.md", "wikilink-a.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "wikilink-a", testVault);
+
+    const result = await LinksTableUtils.getAllDLinks(db, "wikilink-a");
+    expect(result.isOk()).toBeTruthy();
+
+    let wikilinkPosition;
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const wikilink = result.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("wikilink-a");
+      expect(wikilink.to?.fname).toEqual("a");
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlink:
+    const backlinkResult = await LinksTableUtils.getAllDLinks(db, "a");
+    expect(backlinkResult.isOk()).toBeTruthy();
+
+    if (backlinkResult.isOk()) {
+      expect(backlinkResult.value.length).toEqual(1);
+
+      const backlink = backlinkResult.value[0];
+      expect(backlink.type).toEqual("backlink");
+      expect(backlink.value).toEqual("a");
+      expect(backlink.from.id).toEqual("wikilink-a");
+      expect(backlink.from.fname).toEqual("wikilink-a");
+      expect(backlink.from.vaultName).toEqual("testVault");
+      expect(backlink.position).toEqual(wikilinkPosition);
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(2);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
 
   // Parent Child Link Tests:
   test("WHEN a parent and child note are added THEN a child entry is added to the links table", async () => {
@@ -454,7 +590,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(1);
   });
 
-  test("WHEN parent, child, and grandchild notes are added THEN two child entries are added to the links table", async () => {
+  test("WHEN parent, child, and grandchild notes are added THEN two child entries are added to the hierarchy table", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["a.md", "a.ch1.md", "a.ch1.gch1.md"],
@@ -495,7 +631,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(2);
   });
 
-  test("WHEN a root note is present THEN all top level notes appear as root children in the Links Table", async () => {
+  test("WHEN a root note is present THEN all top level notes appear as root children in the Hierarchy Table", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["root.md", "a.md", "b.md", "c.md"],
@@ -743,7 +879,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(1);
   });
 
-  test("WHEN a child note has been deleted THEN the parent-child link is deleted from the Links table", async () => {
+  test("WHEN a child note has been deleted THEN the parent-child row is deleted from the Hierarchy table", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["a.md", "a.ch1.md"],
@@ -774,7 +910,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(0);
   });
 
-  test("WHEN a parent note has been deleted THEN the parent-child link is deleted from the Links table", async () => {
+  test("WHEN a parent note has been deleted THEN the parent-child row is deleted from the Hierarchy table", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["a.md", "a.ch1.md"],
@@ -853,9 +989,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(2);
   });
 
-  // WHEN you have notes in two vaults with the same FNAME... + a bunch of other cases around this scenario
-
-  test("WHEN you change the ID of an existing note THEN Links, VaultNotes, and NoteProp tables are all updated correctly", async () => {
+  test.skip("WHEN you change the ID of an existing note THEN Links, VaultNotes, and NoteProp tables are all updated correctly", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(
       ["a.md", "a.ch1.md", "wikilink-a.md", "root.md"],
@@ -866,7 +1000,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     );
 
     // Now change A's ID:
-    const newNoteId = "a-modified";
+    const newNoteId = "a-modified"; // TODO: Don't modify 'a' note - messes up subsequent tests
     const note = NoteUtils.create({
       vault: testVault,
       created: 1,
@@ -951,6 +1085,415 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.VaultNotes)
     ).toEqual(4);
   });
+
+  // Multi-Vault Scenarios
+  test("WHEN you have notes in two vaults with the same fname THEN Links, VaultNotes, and NoteProp tables are all correctly populated", async () => {
+    // Set the initial DB state:
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.md", "a.ch1.md", "wikilink-a.md", "root.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    expect(parseResult.isOk()).toBeTruthy();
+
+    const parseResult2 = await parseAllNoteFilesForSqlite(
+      ["a.md"],
+      testVaultTwo,
+      db,
+      path.join(testDir, testVaultTwo.fsPath),
+      {}
+    );
+    expect(parseResult2.isOk()).toBeTruthy();
+
+    // Validate 'A' is modified
+    const result = await NotePropsTableUtils.getById(db, "a");
+    expect(result.isOk()).toBeTruthy();
+
+    if (result.isOk()) {
+      expect(result.value.id).toEqual("a");
+      expect(result.value.fname).toEqual("a");
+    }
+
+    // Validate children of root is updated:
+    const childrenResult = await HierarchyTableUtils.getChildren(db, "root");
+
+    expect(childrenResult.isOk()).toBeTruthy();
+
+    if (childrenResult.isOk()) {
+      expect(childrenResult.value.length).toEqual(2);
+
+      expect(childrenResult.value.includes("a")).toBeTruthy();
+      expect(childrenResult.value.includes("a-vault-two")).toBeFalsy();
+    }
+
+    // Validate parent of a.ch1 points to the vault 1 note "a"
+    const parentAResult = await HierarchyTableUtils.getParent(db, "a.ch1");
+    expect(parentAResult.isOk()).toBeTruthy();
+    if (parentAResult.isOk()) expect(parentAResult.value).toEqual("a");
+
+    // Validate forward wikilink of wikilink-a is updated:
+    const wikiLinkResult = await LinksTableUtils.getAllDLinks(db, "wikilink-a");
+    expect(wikiLinkResult.isOk()).toBeTruthy();
+
+    if (wikiLinkResult.isOk()) {
+      expect(wikiLinkResult.value.length).toEqual(1);
+
+      const wikilink = wikiLinkResult.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("wikilink-a");
+      expect(wikilink.to?.fname).toEqual("a");
+    }
+
+    // Validate the VaultNotes table is properly updated:
+    const resVaultNote = await VaultNotesTableUtils.getVaultFsPathForNoteId(
+      db,
+      "a"
+    );
+
+    expect(resVaultNote.isOk()).toBeTruthy();
+
+    if (resVaultNote.isOk()) {
+      expect(resVaultNote.value).toEqual(testVault.fsPath);
+    }
+
+    // Now do the validation on vault 2 state:
+    const vault2GetResult = await NotePropsTableUtils.getById(
+      db,
+      "a-vault-two"
+    );
+
+    expect(vault2GetResult.isOk()).toBeTruthy();
+
+    if (vault2GetResult.isOk()) {
+      expect(vault2GetResult.value.id).toEqual("a-vault-two");
+      expect(vault2GetResult.value.fname).toEqual("a");
+    }
+
+    // Validate no parent for vault 2 note A
+    const parentA2Result = await HierarchyTableUtils.getParent(
+      db,
+      "a-vault-two"
+    );
+    expect(parentA2Result.isOk()).toBeTruthy();
+    if (parentA2Result.isOk()) expect(parentA2Result.value).toBeFalsy();
+
+    // Validate no children for vault 2 note A
+    // Validate children of root is updated:
+    const childrenResult2 = await HierarchyTableUtils.getChildren(
+      db,
+      "a-vault-two"
+    );
+
+    expect(childrenResult2.isOk()).toBeTruthy();
+
+    if (childrenResult2.isOk()) {
+      expect(childrenResult2.value.length).toEqual(0);
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(5);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.VaultNotes)
+    ).toEqual(5);
+  });
+
+  test("WHEN you have two vaults with cross-vault links AND the source vault is initialized first THEN the cross-vault links are properly resolved in the Links Table", async () => {
+    // Initialize the vault that contains the note with the cross-vault link
+    // first. We need to make sure that during init of 2nd vault, it goes back
+    // and populates the sink id field of the row in the links table
+    const parseResultVault2 = await parseAllNoteFilesForSqlite(
+      ["cross-vault-link.md"],
+      testVaultTwo,
+      db,
+      path.join(testDir, testVaultTwo.fsPath),
+      {}
+    );
+    expect(parseResultVault2.isOk()).toBeTruthy();
+
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["b.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    expect(parseResult.isOk()).toBeTruthy();
+
+    // Validate forward wikilink of wikilink-a is updated:
+    const wikiLinkResult = await LinksTableUtils.getAllDLinks(
+      db,
+      "cross-vault-link"
+    );
+    expect(wikiLinkResult.isOk()).toBeTruthy();
+
+    let wikilinkPosition;
+
+    if (wikiLinkResult.isOk()) {
+      expect(wikiLinkResult.value.length).toEqual(1);
+
+      const wikilink = wikiLinkResult.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("b");
+      expect(wikilink.from.id).toEqual("cross-vault-link");
+      expect(wikilink.to?.fname).toEqual("b");
+
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlink:
+    const backlinkResult = await LinksTableUtils.getAllDLinks(db, "b");
+    expect(backlinkResult.isOk()).toBeTruthy();
+
+    if (backlinkResult.isOk()) {
+      expect(backlinkResult.value.length).toEqual(1);
+
+      const backlink = backlinkResult.value[0];
+      expect(backlink.type).toEqual("backlink");
+      expect(backlink.value).toEqual("b");
+      expect(backlink.from.id).toEqual("cross-vault-link");
+      expect(backlink.from.fname).toEqual("cross-vault-link");
+      expect(backlink.from.vaultName).toEqual("testVaultTwo");
+      expect(backlink.position).toEqual(wikilinkPosition);
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test("WHEN you have two vaults with cross-vault links AND the sink vault is initialized first THEN the cross-vault links are properly resolved in the Links Table", async () => {
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["b.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    expect(parseResult.isOk()).toBeTruthy();
+
+    // Set the initial DB state:
+    const parseResultVault2 = await parseAllNoteFilesForSqlite(
+      ["cross-vault-link.md"],
+      testVaultTwo,
+      db,
+      path.join(testDir, testVaultTwo.fsPath),
+      {}
+    );
+    expect(parseResultVault2.isOk()).toBeTruthy();
+
+    // Validate forward wikilink of wikilink-a is updated:
+    const wikiLinkResult = await LinksTableUtils.getAllDLinks(
+      db,
+      "cross-vault-link"
+    );
+    expect(wikiLinkResult.isOk()).toBeTruthy();
+
+    let wikilinkPosition;
+
+    if (wikiLinkResult.isOk()) {
+      expect(wikiLinkResult.value.length).toEqual(1);
+
+      const wikilink = wikiLinkResult.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("b");
+      expect(wikilink.from.id).toEqual("cross-vault-link");
+      expect(wikilink.to?.fname).toEqual("b");
+
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlink:
+    const backlinkResult = await LinksTableUtils.getAllDLinks(db, "b");
+    expect(backlinkResult.isOk()).toBeTruthy();
+
+    if (backlinkResult.isOk()) {
+      expect(backlinkResult.value.length).toEqual(1);
+
+      const backlink = backlinkResult.value[0];
+      expect(backlink.type).toEqual("backlink");
+      expect(backlink.value).toEqual("b");
+      expect(backlink.from.id).toEqual("cross-vault-link");
+      expect(backlink.from.fname).toEqual("cross-vault-link");
+      expect(backlink.from.vaultName).toEqual("testVaultTwo");
+      expect(backlink.position).toEqual(wikilinkPosition);
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test("WHEN you have a cross vault wikilink with fully qualified vault syntax THEN the cross-vault link sink points to the note in the correct vault in the Links Table", async () => {
+    // Initialize the vault that contains the note with the cross-vault link
+    // first. We need to make sure that during init of 2nd vault, it goes back
+    // and populates the sink id field of the row in the links table
+    const parseResultVault2 = await parseAllNoteFilesForSqlite(
+      ["cross-vault-link-with-vault-qualifier.md"],
+      testVaultTwo,
+      db,
+      path.join(testDir, testVaultTwo.fsPath),
+      {}
+    );
+    expect(parseResultVault2.isOk()).toBeTruthy();
+
+    // Setup Vault 1 First
+    const parseResultVault1 = await parseAllNoteFilesForSqlite(
+      ["a.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    expect(parseResultVault1.isOk()).toBeTruthy();
+
+    // Now finally setup vault 3 - the correct sink note is here.
+    const parseResultVault3 = await parseAllNoteFilesForSqlite(
+      ["a.md"],
+      testVaultThree,
+      db,
+      path.join(testDir, testVaultThree.fsPath),
+      {}
+    );
+    expect(parseResultVault3.isOk()).toBeTruthy();
+
+    // Validate forward wikilink of wikilink-a is updated:
+    const wikiLinkResult = await LinksTableUtils.getAllDLinks(
+      db,
+      "cross-vault-link-with-vault-qualifier"
+    );
+    expect(wikiLinkResult.isOk()).toBeTruthy();
+
+    let wikilinkPosition;
+
+    if (wikiLinkResult.isOk()) {
+      expect(wikiLinkResult.value.length).toEqual(1);
+
+      const wikilink = wikiLinkResult.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("cross-vault-link-with-vault-qualifier");
+      expect(wikilink.to?.fname).toEqual("a");
+      expect(wikilink.to?.vaultName).toEqual("testVaultThree");
+      expect(wikilink.xvault).toBeTruthy();
+
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlink for vault 3 note a:
+    const backlinkResult = await LinksTableUtils.getAllDLinks(
+      db,
+      "a-vault-three"
+    );
+    expect(backlinkResult.isOk()).toBeTruthy();
+
+    if (backlinkResult.isOk()) {
+      expect(backlinkResult.value.length).toEqual(1);
+
+      const backlink = backlinkResult.value[0];
+      expect(backlink.type).toEqual("backlink");
+      expect(backlink.value).toEqual("a");
+      expect(backlink.from.id).toEqual("cross-vault-link-with-vault-qualifier");
+      expect(backlink.from.fname).toEqual(
+        "cross-vault-link-with-vault-qualifier"
+      );
+      expect(backlink.from.vaultName).toEqual("testVaultTwo");
+      expect(backlink.position).toEqual(wikilinkPosition);
+    }
+
+    // Validate no backlink exists for vault 1 note a:
+    const backlinkResultVault1 = await LinksTableUtils.getAllDLinks(db, "a");
+    expect(backlinkResultVault1.isOk()).toBeTruthy();
+
+    if (backlinkResultVault1.isOk()) {
+      expect(backlinkResultVault1.value.length).toEqual(0);
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(1);
+  });
+
+  test("WHEN you have an ambiguous cross vault wikilink that can resolve to multiple vaults THEN a link exists to each potential sink", async () => {
+    const parseResultVault2 = await parseAllNoteFilesForSqlite(
+      ["cross-vault-link-ambiguous.md", "a.md"],
+      testVaultTwo,
+      db,
+      path.join(testDir, testVaultTwo.fsPath),
+      {}
+    );
+
+    expect(parseResultVault2.isOk()).toBeTruthy();
+
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+    expect(parseResult.isOk()).toBeTruthy();
+
+    const parseResultVault3 = await parseAllNoteFilesForSqlite(
+      ["a.md"],
+      testVaultThree,
+      db,
+      path.join(testDir, testVaultThree.fsPath),
+      {}
+    );
+
+    expect(parseResultVault3.isOk()).toBeTruthy();
+    // Validate forward wikilink of wikilink-a is updated:
+    const wikiLinkResult = await LinksTableUtils.getAllDLinks(
+      db,
+      "cross-vault-link-ambiguous"
+    );
+    expect(wikiLinkResult.isOk()).toBeTruthy();
+    let wikilinkPosition: Position | undefined;
+
+    if (wikiLinkResult.isOk()) {
+      expect(wikiLinkResult.value.length).toEqual(1);
+
+      const wikilink = wikiLinkResult.value[0];
+      expect(wikilink.type).toEqual("wiki");
+      expect(wikilink.value).toEqual("a");
+      expect(wikilink.from.id).toEqual("cross-vault-link-ambiguous");
+      expect(wikilink.to?.fname).toEqual("a");
+      expect(wikilink.to?.vaultName).toBeFalsy();
+
+      wikilinkPosition = wikilink.position;
+    }
+
+    // Validate backlinks. A backlink should exist for all 3 notes with fname "a":
+    await Promise.all(
+      ["a", "a-vault-two", "a-vault-three"].map(async (noteId) => {
+        const backlinkResult = await LinksTableUtils.getAllDLinks(db, noteId);
+        expect(backlinkResult.isOk()).toBeTruthy();
+
+        if (backlinkResult.isOk()) {
+          expect(backlinkResult.value.length).toEqual(1);
+
+          const backlink = backlinkResult.value[0];
+          expect(backlink.type).toEqual("backlink");
+          expect(backlink.value).toEqual("a");
+          expect(backlink.from.id).toEqual("cross-vault-link-ambiguous");
+          expect(backlink.from.fname).toEqual("cross-vault-link-ambiguous");
+          expect(backlink.from.vaultName).toEqual("testVaultTwo");
+          expect(backlink.position).toEqual(wikilinkPosition);
+        }
+      })
+    );
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
+    ).toEqual(3);
+  });
+
+  // WHEN you have two vaults with cross-vault link candidates, THEN the cross-vault links candidates are properly resolved in the Links Table
 });
 
 // Helper validation functions

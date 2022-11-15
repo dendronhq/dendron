@@ -1,4 +1,5 @@
-import { DLink } from "@dendronhq/common-all";
+import { DLink, NotePropsMeta } from "@dendronhq/common-all";
+import _ from "lodash";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
@@ -22,10 +23,15 @@ export class LinksTableRow {
     public source: string, // NOTE: These are ID's, not fnames!
     public sink: string, // NOTE: These are ID's, not fnames!
     public type: LinkType,
-    public linkValue?: string,
+    public sinkFname?: string,
+    public sinkVaultName?: string,
     public payload?: DLink
   ) {}
 }
+
+export type LinksTableRowWithSinkAsFname = Omit<LinksTableRow, "sink"> & {
+  sinkFname: string;
+};
 
 export class LinksTableUtils {
   public static createTable(db: Database): ResultAsync<void, SqliteError> {
@@ -34,12 +40,13 @@ export class LinksTableUtils {
       source TEXT NOT NULL,
       sink TEXT,
       linkType INTEGER,
-      linkValue TEXT,
+      sinkFname TEXT, -- DNoteLoc property
+      sinkVaultName TEXT, -- DNoteLoc property
       payload TEXT,
-      PRIMARY KEY (source, linkType, linkValue, payload),
+      PRIMARY KEY (source, sink, payload),
       FOREIGN KEY(source) REFERENCES NoteProps(id) ON DELETE CASCADE,
-      FOREIGN KEY(sink) REFERENCES NoteProps(id) ON DELETE CASCADE
-    ) WITHOUT ROWID;`;
+      FOREIGN KEY(sink) REFERENCES NoteProps(id) ON DELETE SET NULL
+    )`;
 
     const idx = `CREATE INDEX IF NOT EXISTS idx_Links_source ON Links (source)`;
 
@@ -58,7 +65,18 @@ export class LinksTableUtils {
     db: Database,
     row: LinksTableRow
   ): ResultAsync<void, SqliteError> {
-    const sql = this.getSQLInsertString(row);
+    const sql = `
+    INSERT INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
+    VALUES (
+      ${getSQLValueString(row.source)},
+      ${getSQLValueString(row.sink)},
+      ${getIntegerString(LinksTableUtils.getSQLValueForLinkType(row.type))},
+      ${getSQLValueString(row.sinkFname)},
+      ${getSQLValueString(row.sinkVaultName)},
+      ${getSQLValueString(
+        row.payload ? JSON.stringify(row.payload) : undefined
+      )})
+      `;
 
     const prom = new Promise<void>((resolve, reject) => {
       db.run(sql, (err) => {
@@ -87,31 +105,73 @@ export class LinksTableUtils {
 
   static bulkInsertLinkWithSinkAsFname(
     db: Database,
-    data: {
-      sourceId: string;
-      sinkFname: string;
-      linkType: LinkType;
-      linkValue: string;
-      payload?: DLink;
-    }[]
+    data: LinksTableRowWithSinkAsFname[]
   ): ResultAsync<void, SqliteError> {
     const values = data
       .map(
         (d) =>
-          `('${d.sourceId}','${
+          `('${d.source}','${
             d.sinkFname
-          }',${LinksTableUtils.getSQLValueForLinkType(d.linkType)},'${
-            d.linkValue
-          }',${d.payload ? "'" + JSON.stringify(d.payload) + "'" : "NULL"})`
+          }',${LinksTableUtils.getSQLValueForLinkType(
+            d.type
+          )},${getSQLValueString(d.sinkFname)},${getSQLValueString(
+            d.sinkVaultName
+          )},${d.payload ? "'" + JSON.stringify(d.payload) + "'" : "NULL"})`
       )
       .join(",");
 
     const sql = `
-      INSERT OR IGNORE INTO Links (source, sink, linkType, linkValue, payload)
-      WITH T(source, fname, linkType, linkValue, payload) AS 
+      INSERT OR IGNORE INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
+      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS 
       (VALUES ${values})
-      SELECT T.source, NoteProps.id, T.linkType, T.linkValue, T.payload FROM T
+      SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
       LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
+  static bulkInsertLinkCandidatesWithSinkAsFname(
+    db: Database,
+    data: LinksTableRowWithSinkAsFname[]
+  ): ResultAsync<void, SqliteError> {
+    const values = data
+      .map(
+        (d) =>
+          `('${d.source}','${
+            d.sinkFname
+          }',${LinksTableUtils.getSQLValueForLinkType(
+            d.type
+          )},${getSQLValueString(d.sinkFname)},${getSQLValueString(
+            d.sinkVaultName
+          )},${d.payload ? "'" + JSON.stringify(d.payload) + "'" : "NULL"})`
+      )
+      .join(",");
+
+    const sql = `
+      INSERT OR IGNORE INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
+      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS 
+      (VALUES ${values})
+      SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
+      JOIN NoteProps ON T.fname = NoteProps.fname`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
+  static InsertLinksThatBecameAmbiguous(
+    db: Database,
+    data: { fname: string; id: string }[]
+  ): ResultAsync<void, SqliteError> {
+    const values = data
+      .map((d) => `(${getSQLValueString(d.fname)},${getSQLValueString(d.id)})`)
+      .join(",");
+
+    const sql = `
+      INSERT OR IGNORE INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
+      WITH T(fname, id) AS
+      (VALUES ${values})
+      SELECT Links.source, T.id, Links.linkType, Links.sinkFname, Links.sinkVaultName, Links.payload
+      FROM T
+      JOIN Links ON Links.sinkFname = T.fname AND Links.sinkVaultName IS NULL`;
 
     return executeSqlWithVoidResult(db, sql);
   }
@@ -120,24 +180,12 @@ export class LinksTableUtils {
    * Use this method when you have the ID of the source and the fname of the
    * sink. This method will lookup into the NoteProps table to get ID's for the
    * sink (if any valid ID's exist). This is
-   * @param db
-   * @param sourceId
-   * @param sinkFname
-   * @param linkType
-   * @param payload
-   * @returns
    */
   public static insertLinkWithSinkAsFname(
     db: Database,
-    sourceId: string,
-    sinkFname: string,
-    linkType: LinkType,
-    linkValue: string,
-    payload: DLink
+    data: LinksTableRowWithSinkAsFname
   ): ResultAsync<void, SqliteError> {
-    return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, [
-      { sourceId, sinkFname, linkType, linkValue, payload },
-    ]);
+    return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, [data]);
   }
 
   /**
@@ -168,20 +216,22 @@ export class LinksTableUtils {
             if (row.source === noteId && row.payload) {
               dlinks.push(JSON.parse(row.payload as unknown as string)); // TODO - prolly need to change type in LinksTableRow to string instead of DLink
             } else if (row.sink === noteId) {
-              const dlink: DLink = JSON.parse(row.payload as unknown as string);
+              const link: DLink = JSON.parse(row.payload as unknown as string);
 
-              // TODO: Check to see how to properly translate a forward link to a backlink
               const backlink: DLink = {
                 type: "backlink",
-                value: dlink.value,
-                from: dlink.from,
+                value: link.value,
+                position: link.position,
+                from: link.from,
               };
 
               dlinks.push(backlink);
             }
           });
 
-          resolve(dlinks);
+          // An ambigious wikilink will have multiple entries in the links
+          // table, so we need to dedupe here:
+          resolve(_.uniqWith(dlinks, _.isEqual));
         }
       });
     });
@@ -199,6 +249,35 @@ export class LinksTableUtils {
     return executeSqlWithVoidResult(db, sql);
   }
 
+  public static updateUnresolvedLinksForAddedNotes(
+    db: Database,
+    addedNotes: NotePropsMeta[],
+    vaultNameOfNotesGettingAdded: string
+  ): ResultAsync<void, SqliteError> {
+    const values = addedNotes
+      .map(
+        (props) =>
+          `('${props.fname}','${props.id}','${vaultNameOfNotesGettingAdded}')`
+      )
+      .join(",");
+
+    // TODO: Handle cross-vault link syntax in the linkValue
+    const sql = `
+    UPDATE Links
+    SET sink = AddedNotes.newId
+    FROM 
+    (
+      WITH T(fname, id, vaultName) AS
+        (VALUES ${values})
+        SELECT T.id AS newId, Links.source, links.payload
+        FROM T
+        JOIN Links ON Links.sinkFname = T.fname AND Links.sink IS NULL AND (Links.sinkVaultName = T.vaultName OR Links.sinkVaultName IS NULL)
+    ) AS AddedNotes
+    WHERE Links.source = AddedNotes.source
+    AND Links.payload = AddedNotes.payload`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
   static getSQLValueForLinkType(type: LinkType): number {
     switch (type) {
       case "wiki":
@@ -212,21 +291,5 @@ export class LinksTableUtils {
       default:
         return 0;
     }
-  }
-
-  private static getSQLInsertString(props: LinksTableRow): string {
-    const sql = `
-      INSERT INTO Links (source, sink, linkType, linkValue, payload)
-      VALUES (
-        ${getSQLValueString(props.source)},
-        ${getSQLValueString(props.sink)},
-        ${getIntegerString(LinksTableUtils.getSQLValueForLinkType(props.type))},
-        ${getSQLValueString(props.linkValue)},
-        ${getSQLValueString(
-          props.payload ? JSON.stringify(props.payload) : undefined
-        )})
-        `;
-
-    return sql;
   }
 }

@@ -1,19 +1,17 @@
-import { CONSTANTS, ConfigUtils } from "@dendronhq/common-all";
-import { DConfig, readYAML, writeYAML } from "@dendronhq/common-server";
+import { ConfigUtils, ConfigService } from "@dendronhq/common-all";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import path from "path";
 
 function genDefaultConfig() {
   return ConfigUtils.genDefaultConfig();
 }
 
 const WRITE = {
-  NEW_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
+  NEW_CONFIG: new TestPresetEntryV4(async () => {
     const config = genDefaultConfig();
     ConfigUtils.setPublishProp(config, "copyAssets", false);
-    await DConfig.writeConfig({ wsRoot, config });
-    const cpath = path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
-    const configOnFile = readYAML(cpath);
+    const configOnFile = (
+      await ConfigService.instance().writeConfig(config)
+    )._unsafeUnwrap();
     return [
       {
         actual: configOnFile,
@@ -24,10 +22,11 @@ const WRITE = {
 };
 
 const GET = {
-  DEFAULT_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
-    const cpath = path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
-    writeYAML(cpath, genDefaultConfig());
-    const config = DConfig.readConfigSync(wsRoot);
+  DEFAULT_CONFIG: new TestPresetEntryV4(async () => {
+    const config = (
+      await ConfigService.instance().createConfig()
+    )._unsafeUnwrap();
+
     return [
       {
         actual: config,

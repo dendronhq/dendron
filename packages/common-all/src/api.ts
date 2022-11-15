@@ -322,11 +322,10 @@ export class DendronAPI extends API {
     });
   }
 
-  configGet(req: WorkspaceRequest): Promise<RespV3<DendronConfig>> {
+  configGet(): Promise<RespV3<DendronConfig>> {
     return this._makeRequest({
       path: "config/get",
       method: "get",
-      qs: req,
     });
   }
 

@@ -7,7 +7,10 @@ describe.skip("connector", () => {
   test("basic: direct init", async () => {
     await runEngineTestV5(
       async ({ wsRoot }) => {
-        const connector = EngineConnector.getOrCreate({ wsRoot, force: true });
+        const connector = await EngineConnector.getOrCreate({
+          wsRoot,
+          force: true,
+        });
         await connector.init();
         const engineNotes = await connector.engine.findNotesMeta({
           excludeStub: false,
@@ -41,7 +44,7 @@ describe.skip("connector", () => {
         expect,
         createEngine: createEngineFromServer,
         preSetupHook: async (opts) => {
-          connector = EngineConnector.getOrCreate({
+          connector = await EngineConnector.getOrCreate({
             wsRoot: opts.wsRoot,
             force: true,
           });

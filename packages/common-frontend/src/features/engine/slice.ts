@@ -59,7 +59,7 @@ export const initNotes = createAsyncThunk(
  */
 export const syncConfig = createAsyncThunk(
   "engine/syncConfig",
-  async ({ url, ws }: { url: string; ws: string }, { dispatch }) => {
+  async ({ url }: { url: string }, { dispatch }) => {
     const logger = createLogger("syncConfigThunk");
     const endpoint = url;
     const api = new DendronApiV2({
@@ -68,7 +68,7 @@ export const syncConfig = createAsyncThunk(
       logger,
     });
     logger.info({ state: "pre:initConfig" });
-    const resp = await api.configGet({ ws });
+    const resp = await api.configGet();
     logger.info({ state: "post:initConfig" });
     if (resp.error) {
       dispatch(setError(stringifyError(resp.error)));

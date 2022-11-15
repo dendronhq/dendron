@@ -79,7 +79,7 @@ export async function setupEngine(
   // in memory
   if (useLocalEngine) {
     const engine = newEngine
-      ? DendronEngineV3.create({ wsRoot, logger })
+      ? await DendronEngineV3.create({ wsRoot, logger })
       : DendronEngineV2.create({ wsRoot, logger });
     const out = await engine.init();
     if (out.error) {
@@ -103,7 +103,7 @@ export async function setupEngine(
       enginePort,
       init,
     });
-    const engineConnector = EngineConnector.getOrCreate({
+    const engineConnector = await EngineConnector.getOrCreate({
       wsRoot,
     });
     await engineConnector.init({
@@ -126,7 +126,7 @@ export async function setupEngine(
       attach: opts.attach,
       init,
     });
-    const engineConnector = EngineConnector.getOrCreate({
+    const engineConnector = await EngineConnector.getOrCreate({
       wsRoot,
     });
     await engineConnector.init({

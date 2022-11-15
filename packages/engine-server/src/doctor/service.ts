@@ -1,6 +1,7 @@
 import {
   assertInvalidState,
   asyncLoopOneAtATime,
+  ConfigService,
   ConfigUtils,
   DendronError,
   DEngineClient,
@@ -234,8 +235,16 @@ export class DoctorService implements Disposable {
     switch (action) {
       case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
         const { wsRoot } = engine;
-        const rawConfig = DConfig.getRaw(wsRoot);
-        const config = DConfig.readConfigSync(wsRoot);
+        const configReadRawResult = await ConfigService.instance().readRaw();
+        if (configReadRawResult.isErr()) {
+          throw configReadRawResult.error;
+        }
+        const rawConfig = configReadRawResult.value;
+        const configReadResult = await ConfigService.instance().readConfig();
+        if (configReadResult.isErr()) {
+          throw configReadResult.error;
+        }
+        const config = configReadResult.value;
         const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
           config: rawConfig,
           deprecatedPaths: DEPRECATED_PATHS,
@@ -257,7 +266,12 @@ export class DoctorService implements Disposable {
             _.unset(configDeepCopy, path);
           });
 
-          await DConfig.writeConfig({ wsRoot, config: configDeepCopy });
+          const configWriteResult = await ConfigService.instance().writeConfig(
+            configDeepCopy
+          );
+          if (configWriteResult.isErr()) {
+            throw configWriteResult.error;
+          }
 
           return {
             exit: true,
@@ -271,7 +285,12 @@ export class DoctorService implements Disposable {
       }
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const { wsRoot } = engine;
-        const rawConfig = DConfig.getRaw(wsRoot);
+        const configReadRawResult = await ConfigService.instance().readRaw();
+        if (configReadRawResult.isErr()) {
+          throw configReadRawResult.error;
+        }
+        const rawConfig = configReadRawResult.value;
+
         const detectOut = ConfigUtils.detectMissingDefaults({
           config: rawConfig,
         });
@@ -291,7 +310,11 @@ export class DoctorService implements Disposable {
             }
 
             // write config
-            await DConfig.writeConfig({ wsRoot, config: backfilledConfig });
+            const configWriteResult =
+              await ConfigService.instance().writeConfig(backfilledConfig);
+            if (configWriteResult.isErr()) {
+              throw configWriteResult.error;
+            }
             return {
               exit: true,
               resp: {
@@ -312,6 +335,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
+          const configReadResult = await ConfigService.instance().readConfig();
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
           const proc = MDUtilsV5._procRemark(
             {
               mode: ProcMode.IMPORT,
@@ -322,7 +350,7 @@ export class DoctorService implements Disposable {
               noteToRender: note,
               fname: note.fname,
               vault: note.vault,
-              config: DConfig.readConfigSync(engine.wsRoot),
+              config,
             }
           );
           const newBody = await proc()
@@ -343,6 +371,11 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
+          const configReadResult = await ConfigService.instance().readConfig();
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
           const proc = MDUtilsV5._procRemark(
             {
               mode: ProcMode.IMPORT,
@@ -353,7 +386,7 @@ export class DoctorService implements Disposable {
               noteToRender: note,
               fname: note.fname,
               vault: note.vault,
-              config: DConfig.readConfigSync(engine.wsRoot),
+              config,
             }
           );
           const newBody = await proc()
@@ -525,7 +558,7 @@ export class DoctorService implements Disposable {
           }
 
           await asyncLoopOneAtATime(vaultsToFix, async (vault) => {
-            const config = workspaceService.config;
+            const config = await workspaceService.config;
             this.L.info({
               ctx,
               vaultName: VaultUtils.getName(vault),

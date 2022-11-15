@@ -453,11 +453,9 @@ export async function _activate(
         action: "activate",
       });
       // If automaticallyShowPreview = true, display preview panel on start up
+      const config = await ws.workspaceService?.config;
       const note = await WSUtils.getActiveNote();
-      if (
-        note &&
-        ws.workspaceService?.config.preview?.automaticallyShowPreview
-      ) {
+      if (note && config && config.preview?.automaticallyShowPreview) {
         await PreviewPanelFactory.create(getExtension()).show(note);
       }
       StartupUtils.showUninstallMarkdownLinksExtensionMessage();

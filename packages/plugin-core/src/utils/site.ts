@@ -21,15 +21,6 @@ import { ExportPodCommand } from "../commands/ExportPod";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
 
-export const getSiteRootDirPath = () => {
-  const ws = ExtensionProvider.getDWorkspace();
-  const wsRoot = ws.wsRoot;
-  const config = ws.config;
-  const siteRootDir = ConfigUtils.getPublishing(config).siteRootDir;
-  const sitePath = path.join(wsRoot, siteRootDir);
-  return sitePath;
-};
-
 export class NextJSPublishUtils {
   static async prepareNextJSExportPod() {
     const ws = ExtensionProvider.getDWorkspace();

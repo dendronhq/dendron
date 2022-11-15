@@ -12,6 +12,7 @@ import {
 } from "@dendronhq/unified";
 import _ from "lodash";
 import {
+  ConfigService,
   ConfigUtils,
   NoteDictsUtils,
   NoteProps,
@@ -30,7 +31,6 @@ import {
 import { TestConfigUtils } from "../../..";
 import { TestUnifiedUtils } from "../../../utils";
 import { getOpts, runTestCases } from "./v5/utils";
-import { DConfig } from "@dendronhq/common-server";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
@@ -193,13 +193,10 @@ describe("hashtag", () => {
               vault,
               wsRoot,
             });
-            TestConfigUtils.withConfig(
-              (config) => {
-                ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
-                return config;
-              },
-              { wsRoot: opts.wsRoot }
-            );
+            await TestConfigUtils.withConfig((config) => {
+              ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
+              return config;
+            });
           },
         })
       );
@@ -207,12 +204,15 @@ describe("hashtag", () => {
 
     const SIMPLE = createProcTests({
       name: "simple",
-      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(hashtag);
         return { resp };
@@ -258,12 +258,15 @@ describe("hashtag", () => {
       test("with color", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#color`);
             await checkVFile(
@@ -288,12 +291,15 @@ describe("hashtag", () => {
       test("when enableRandomlyGeneratedColors is false, only uses explicit colors", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#color #uncolored`);
             await checkVFile(
@@ -316,17 +322,14 @@ describe("hashtag", () => {
                 wsRoot,
                 vault: vaults[0],
               });
-              TestConfigUtils.withConfig(
-                (config) => {
-                  ConfigUtils.setPublishProp(
-                    config,
-                    "enableRandomlyColoredTags",
-                    false
-                  );
-                  return config;
-                },
-                { wsRoot }
-              );
+              await TestConfigUtils.withConfig((config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "enableRandomlyColoredTags",
+                  false
+                );
+                return config;
+              });
             },
           }
         );
@@ -335,12 +338,15 @@ describe("hashtag", () => {
       test("with color cascading from parent, self missing", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -365,12 +371,15 @@ describe("hashtag", () => {
       test("with color cascading from parent, self exists", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -400,12 +409,15 @@ describe("hashtag", () => {
       test("overrides color cascading from parent", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -436,12 +448,15 @@ describe("hashtag", () => {
 
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
-      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(
           "[#dendron](https://twitter.com/hashtag/dendron)"
@@ -464,7 +479,10 @@ describe("hashtag", () => {
     describe("WHEN disabled in config", () => {
       test("THEN hashtags don't get parsed or processed", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot, vaults }) => {
+          async ({ engine, vaults }) => {
+            const config = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
             const proc = MDUtilsV5.procRehypeFull(
               {
                 noteToRender: (
@@ -474,7 +492,7 @@ describe("hashtag", () => {
                   })
                 )[0]!,
                 vault: vaults[0],
-                config: DConfig.readConfigSync(wsRoot),
+                config,
                 fname: "root",
               },
               {}
@@ -485,14 +503,11 @@ describe("hashtag", () => {
           },
           {
             expect,
-            preSetupHook: async ({ wsRoot }) => {
-              TestConfigUtils.withConfig(
-                (config) => {
-                  ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
-                  return config;
-                },
-                { wsRoot }
-              );
+            preSetupHook: async () => {
+              await TestConfigUtils.withConfig((config) => {
+                ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
+                return config;
+              });
             },
           }
         );

@@ -26,8 +26,9 @@ import {
   DendronConfig,
   asyncLoopOneAtATime,
   SchemaModuleDict,
+  ConfigService,
 } from "@dendronhq/common-all";
-import { DConfig, DLogger, vault2Path } from "@dendronhq/common-server";
+import { DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -105,7 +106,11 @@ export class NoteParserV2 {
     this.logger.info({ ctx, msg: "enter", vault });
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
-    const config = DConfig.readConfigSync(this.engine.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const errors: IDendronError<any>[] = [];
 
     // get root note

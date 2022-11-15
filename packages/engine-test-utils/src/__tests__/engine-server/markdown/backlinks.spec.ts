@@ -1,5 +1,4 @@
-import { ConfigUtils } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
+import { ConfigService, ConfigUtils } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { runEngineTestV5, TestConfigUtils } from "../../..";
@@ -8,8 +7,10 @@ describe("backlinks", () => {
   describe("frontmatter tags", () => {
     test("single", async () => {
       await runEngineTestV5(
-        async ({ wsRoot, vaults, engine }) => {
-          const config = DConfig.readConfigSync(wsRoot);
+        async ({ vaults, engine }) => {
+          const config = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           const vault = vaults[0];
           const noteToRender = (
             await engine.findNotes({ fname: "tags.test", vault })
@@ -53,17 +54,14 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
-            TestConfigUtils.withConfig(
-              (config) => {
-                const DefaultConfig = ConfigUtils.genDefaultConfig();
-                ConfigUtils.setVaults(
-                  DefaultConfig,
-                  ConfigUtils.getVaults(config)
-                );
-                return DefaultConfig;
-              },
-              { wsRoot: opts.wsRoot }
-            );
+            await TestConfigUtils.withConfig((config) => {
+              const DefaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setVaults(
+                DefaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return DefaultConfig;
+            });
           },
         }
       );
@@ -71,8 +69,10 @@ describe("backlinks", () => {
 
     test("multiple", async () => {
       await runEngineTestV5(
-        async ({ wsRoot, vaults, engine }) => {
-          const config = DConfig.readConfigSync(wsRoot);
+        async ({ vaults, engine }) => {
+          const config = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           const vault = vaults[0];
           const noteToRender = (
             await engine.findNotes({ fname: "tags.test", vault })
@@ -128,17 +128,6 @@ describe("backlinks", () => {
               vault,
               wsRoot,
             });
-            // TestConfigUtils.withConfig(
-            //   (config) => {
-            //     const DefaultConfig = ConfigUtils.genDefaultConfig();
-            //     ConfigUtils.setVaults(
-            //       DefaultConfig,
-            //       ConfigUtils.getVaults(config)
-            //     );
-            //     return DefaultConfig;
-            //   },
-            //   { wsRoot: opts.wsRoot }
-            // );
           },
         }
       );
@@ -147,8 +136,10 @@ describe("backlinks", () => {
   //
   test("hashtag", async () => {
     await runEngineTestV5(
-      async ({ wsRoot, vaults, engine }) => {
-        const config = DConfig.readConfigSync(wsRoot);
+      async ({ vaults, engine }) => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = vaults[0];
         const noteToRender = (
           await engine.findNotes({ fname: "tags.test", vault })

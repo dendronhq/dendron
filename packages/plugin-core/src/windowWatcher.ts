@@ -105,10 +105,8 @@ export class WindowWatcher {
 
       // If automatically show preview is enabled, then open the preview
       // whenever text editor changed, as long as it's not already opened:
-      if (
-        this._extension.workspaceService?.config.preview
-          ?.automaticallyShowPreview
-      ) {
+      const { config } = this._extension.getDWorkspace();
+      if (config.preview?.automaticallyShowPreview) {
         if (!this._preview.isOpen()) {
           await this._preview.show();
         }

@@ -230,7 +230,7 @@ suite("BacklinksTreeDataProvider", function () {
     () => {
       test("THEN finds the backlink candidate for that note", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+        const isLinkCandidateEnabled = (await TestConfigUtils.getConfig()).dev
           ?.enableLinkCandidates;
         expect(isLinkCandidateEnabled).toBeTruthy();
 
@@ -272,7 +272,7 @@ suite("BacklinksTreeDataProvider", function () {
     () => {
       test("THEN finds the backlink candidate for all notes", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const isLinkCandidateEnabled = TestConfigUtils.getConfig({ wsRoot }).dev
+        const isLinkCandidateEnabled = (await TestConfigUtils.getConfig()).dev
           ?.enableLinkCandidates;
         expect(isLinkCandidateEnabled).toBeTruthy();
 

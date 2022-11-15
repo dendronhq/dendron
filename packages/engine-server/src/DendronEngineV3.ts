@@ -1,6 +1,7 @@
 import {
   BacklinkUtils,
   Cache,
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   DeleteSchemaResp,
@@ -76,7 +77,6 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  DConfig,
   DLogger,
   getDurationMilliseconds,
   NodeJSUtils,
@@ -135,9 +135,19 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     this._schemaStore = props.schemaStore;
   }
 
-  static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
+  static async create({
+    wsRoot,
+    logger,
+  }: {
+    logger?: DLogger;
+    wsRoot: string;
+  }) {
     const LOGGER = logger || createLogger();
-    const config = DConfig.readConfigSync(wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     const fileStore = new NodeJSFileStore();
     const fuseEngine = new FuseEngine({
@@ -167,7 +177,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const defaultResp = {
       notes: {},
       schemas: {},
@@ -307,7 +321,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       note: NoteUtils.toLogObj(note),
     });
 
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     // Update links/anchors based on note body
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
@@ -621,7 +639,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const notesToUpdate = linkNotesResp
       .map((resp) => {
         if (resp.error) {
@@ -904,7 +926,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           }),
         };
       }
-      const config = DConfig.readConfigSync(this.wsRoot);
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       const blocks = await RemarkUtils.extractBlocks({
         note,
         config,
@@ -948,7 +974,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           ),
         };
       });
-      const config = DConfig.readConfigSync(this.wsRoot);
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,
@@ -1477,7 +1507,11 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
@@ -1550,7 +1584,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
   }
 }
 
-export const createEngineV3 = ({ wsRoot }: WorkspaceOpts) => {
-  const engine = DendronEngineV3.create({ wsRoot });
+export const createEngineV3 = async ({ wsRoot }: WorkspaceOpts) => {
+  const engine = await DendronEngineV3.create({ wsRoot });
   return engine as DEngineClient;
 };

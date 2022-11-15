@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { SubProcessExitType } from "@dendronhq/api-server";
 import * as Sentry from "@sentry/node";
 import {
+  ConfigService,
   CONSTANTS,
   DendronError,
   DVault,
@@ -366,12 +367,12 @@ function togglePluginActiveContext(enabled: boolean) {
   VSCodeUtils.setContext(DendronContext.HAS_CUSTOM_MARKDOWN_VIEW, enabled);
 }
 
-function updateEngineAPI(
+async function updateEngineAPI(
   port: number | string,
   ext: IDendronExtension
-): EngineAPIService {
+): Promise<EngineAPIService> {
   // set engine api ^9dr6chh7ah9v
-  const svc = EngineAPIService.createEngine({
+  const svc = await EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,
     vaults: ext.getDWorkspace().vaults,
@@ -466,7 +467,11 @@ export class WorkspaceActivator {
     Logger.info({ ctx: `${ctx}:postSetupTraits`, wsRoot });
     const currentVersion = DendronExtension.version();
     const wsService = new WorkspaceService({ wsRoot });
-    const dendronConfig = workspace.config;
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const dendronConfig = configReadResult.value;
     const stateService = new StateService({
       globalState: context.globalState,
       workspaceState: context.workspaceState,
@@ -534,7 +539,8 @@ export class WorkspaceActivator {
     Logger.info({ ctx: `${ctx}:postWsServiceInitialize`, wsRoot });
 
     // check for vaults with duplicates
-    const respNoDupVault = await checkNoDuplicateVaultNames(wsService.vaults);
+    const vaults = await wsService.vaults;
+    const respNoDupVault = await checkNoDuplicateVaultNames(vaults);
     if (!respNoDupVault) {
       return {
         error: ErrorFactory.createInvalidStateError({
@@ -549,7 +555,7 @@ export class WorkspaceActivator {
     // setup engine
     const port = await this.verifyOrStartServerProcess({ ext, wsService });
     Logger.info({ ctx: `${ctx}:verifyOrStartServerProcess`, port });
-    const engine = updateEngineAPI(port, ext);
+    const engine = await updateEngineAPI(port, ext);
     Logger.info({ ctx: `${ctx}:exit` });
 
     return { data: { workspace, engine, wsService } };
@@ -603,7 +609,8 @@ export class WorkspaceActivator {
       };
     }
 
-    ExtensionUtils.setWorkspaceContextOnActivate(wsService.config);
+    const config = await wsService.config;
+    ExtensionUtils.setWorkspaceContextOnActivate(config);
     MetadataService.instance().setDendronWorkspaceActivated();
     Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
 
@@ -644,20 +651,32 @@ export class WorkspaceActivator {
 
   async initCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const ws = new DendronCodeWorkspace({
       wsRoot,
       logUri: context.logUri,
       assetUri,
+      config,
     });
     return ws;
   }
 
   async initNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const ws = new DendronNativeWorkspace({
       wsRoot,
       logUri: context.logUri,
       assetUri,
+      config,
     });
     return ws;
   }

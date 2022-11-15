@@ -1,48 +1,41 @@
 import {
+  ConfigUtils,
   DendronConfig,
   DendronError,
   DEngineClient,
   DVault,
   DWorkspaceV2,
   WorkspaceType,
-  ConfigUtils,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import * as vscode from "vscode";
-import { Logger } from "../logger";
 
 export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   public wsRoot: string;
   public type = WorkspaceType.NATIVE;
   public logUri: vscode.Uri;
   public assetUri: vscode.Uri;
+  protected _config: DendronConfig;
   protected _engine?: DEngineClient;
 
   constructor({
     wsRoot,
     logUri,
     assetUri,
+    config,
   }: {
     wsRoot: string;
     logUri: vscode.Uri;
     assetUri: vscode.Uri;
+    config: DendronConfig;
   }) {
     this.wsRoot = wsRoot;
     this.logUri = logUri;
     this.assetUri = assetUri;
+    this._config = config;
   }
 
-  // TODO: with `ConfigService` this has to change so that it returns a promise.
-  // some parts of our code that does `getDWorkspace().config` can't be async
-  // this needs to be addressed before we can truly remove DConfig
   get config(): DendronConfig {
-    const { data, error } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
-    if (error) {
-      Logger.error({ error });
-    }
-    return data;
+    return this.config;
   }
 
   // TODO: optimize to not read every time

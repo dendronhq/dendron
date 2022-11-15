@@ -24,7 +24,6 @@ import {
   SchemaUtils,
   SeedEntry,
   SelfContainedVault,
-  stringifyError,
   Time,
   VaultUtils,
   WorkspaceSettings,
@@ -201,13 +200,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return DConfig.getOrCreate(wsRoot);
   }
 
-  get config(): DendronConfig {
-    // TODO: don't read all the time but cache
-    const { error, data } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
-    if (error) this.logger.error(stringifyError(error));
-    return data;
+  get config(): PromiseLike<DendronConfig> {
+    return ConfigService.instance()
+      .readConfig()
+      .then((res) => {
+        if (res.isErr()) {
+          throw res.error;
+        }
+        return res.value;
+      });
   }
 
   get seedService(): SeedService {
@@ -215,8 +216,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   // NOTE: this is not accurate until the workspace is initialized
-  get vaults(): DVault[] {
-    return this.config.workspace.vaults;
+  get vaults(): PromiseLike<DVault[]> {
+    return this.config.then((config) => config.workspace.vaults);
   }
 
   async setConfig(config: DendronConfig) {
@@ -293,7 +294,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     // if we are updating the config, we should make sure
     // we don't include the local overrides
     if (config === undefined) {
-      config = this.config;
+      config = await this.config;
       if (updateConfig) {
         config = DConfig.readConfigSync(this.wsRoot);
       }
@@ -635,11 +636,11 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     return newVault;
   }
 
-  markVaultAsRemoteInConfig(
+  async markVaultAsRemoteInConfig(
     targetVault: DVault,
     remoteUrl: string
   ): Promise<void> {
-    const config = this.config;
+    const config = await this.config;
     const vaults = ConfigUtils.getVaults(config);
     ConfigUtils.setVaults(
       config,
@@ -700,7 +701,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       });
     }
 
-    const config = this.config;
+    const config = await this.config;
     ConfigUtils.updateVault(config, targetVault, (vault) => {
       vault.remote = {
         type: "git",
@@ -765,7 +766,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       force: true /* It's OK if dir doesn't exist */,
     });
     // Update `dendron.yml`, removing the remote from the converted vault
-    const config = this.config;
+    const config = await this.config;
 
     ConfigUtils.updateVault(config, targetVault, (vault) => {
       delete vault.remote;
@@ -826,7 +827,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     let workspaceVaultSyncConfig = this.verifyVaultSyncConfigs(vaults);
     if (_.isUndefined(workspaceVaultSyncConfig)) {
       if (await WorkspaceService.isWorkspaceVault(root)) {
-        workspaceVaultSyncConfig = ConfigUtils.getWorkspace(this.config)
+        const config = await this.config;
+        workspaceVaultSyncConfig = ConfigUtils.getWorkspace(config)
           .workspaceVaultSyncMode as DVaultSync;
         // default for workspace vaults
         if (_.isUndefined(workspaceVaultSyncConfig)) {
@@ -957,12 +959,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       onSyncVaultsProgress: () => {},
       onSyncVaultsEnd: () => {},
     });
-    const initializeRemoteVaults = ConfigUtils.getWorkspace(
-      this.config
-    ).enableRemoteVaultInit;
+    const config = await this.config;
+    const initializeRemoteVaults =
+      ConfigUtils.getWorkspace(config).enableRemoteVaultInit;
     if (initializeRemoteVaults) {
       const { didClone } = await this.syncVaults({
-        config: this.config,
+        config,
         progressIndicator: onSyncVaultsProgress,
       });
       if (didClone) {
@@ -987,7 +989,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     // we don't include the local overrides
     const config = updateConfig
       ? DConfig.readConfigSync(this.wsRoot)
-      : this.config;
+      : await this.config;
 
     const vaults = ConfigUtils.getVaults(config);
     const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {
@@ -1341,7 +1343,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   async getAllReposVaults(): Promise<Map<string, DVault[]>> {
     const reposVaults = new Map<string, DVault[]>();
-    const vaults = ConfigUtils.getVaults(this.config);
+    const config = await this.config;
+    const vaults = ConfigUtils.getVaults(config);
     await Promise.all(
       vaults.map(async (vault) => {
         const repo = await this.getVaultRepo(vault);
@@ -1551,7 +1554,8 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * Remove all vault caches in workspace
    */
   async removeVaultCaches() {
-    const vaults = ConfigUtils.getVaults(this.config);
+    const config = await this.config;
+    const vaults = ConfigUtils.getVaults(config);
     await Promise.all(
       vaults.map((vault) => {
         return removeCache(vault2Path({ wsRoot: this.wsRoot, vault }));

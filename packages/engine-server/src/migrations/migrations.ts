@@ -1,4 +1,8 @@
-import { DendronError, ConfigUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  ConfigUtils,
+  ConfigService,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { Migrations } from "./types";
 import { MigrationUtils, PATH_MAP } from "./utils";
@@ -30,7 +34,11 @@ export const CONFIG_MIGRATIONS: Migrations = {
         }
 
         const defaultV5Config = ConfigUtils.genDefaultConfig();
-        const rawDendronConfig = DConfig.getRaw(wsService.wsRoot);
+        const configReadRawResult = await ConfigService.instance().readRaw();
+        if (configReadRawResult.isErr()) {
+          throw configReadRawResult.error;
+        }
+        const rawDendronConfig = configReadRawResult.value;
 
         // remove all null properties
         const cleanDendronConfig = MigrationUtils.deepCleanObjBy(

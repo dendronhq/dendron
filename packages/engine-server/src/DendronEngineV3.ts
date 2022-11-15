@@ -1318,7 +1318,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           alias = undefined;
         }
         // for user tag links, we'll have to regenerate the alias
-        if (newLoc.fname.startsWith(USERS_HIERARCHY)) {
+        if (link.type !== "ref" && newLoc.fname.startsWith(USERS_HIERARCHY)) {
           const fnameWithoutTag = newLoc.fname.slice(USERS_HIERARCHY.length);
           alias = `@${fnameWithoutTag}`;
         } else if (oldLink.from.fname.startsWith(USERS_HIERARCHY)) {

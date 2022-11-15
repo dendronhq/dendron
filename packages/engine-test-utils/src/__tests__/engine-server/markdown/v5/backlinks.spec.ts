@@ -168,7 +168,6 @@ describe("GIVEN dendron.yml default", () => {
             },
           },
           preSetupHook: async (opts) => {
-            const { wsRoot } = opts;
             await ENGINE_HOOKS.setupLinks(opts);
             await TestConfigUtils.withConfig((config) => {
               ConfigUtils.setPublishProp(config, "siteHierarchies", ["alpha"]);

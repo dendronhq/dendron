@@ -5,7 +5,6 @@ import {
   NoteProps,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
@@ -188,7 +187,7 @@ describe("RemarkUtils and LinkUtils", () => {
   describe("findLinksFromBody", () => {
     testWithEngine(
       "one link",
-      async ({ engine, wsRoot }) => {
+      async ({ engine }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
           await ConfigService.instance().readConfig()
@@ -211,7 +210,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "empty link",
-      async ({ engine, wsRoot }) => {
+      async ({ engine }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
           await ConfigService.instance().readConfig()
@@ -234,7 +233,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "xvault link",
-      async ({ engine, wsRoot }) => {
+      async ({ engine }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
           await ConfigService.instance().readConfig()
@@ -265,7 +264,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "hashtag link",
-      async ({ engine, wsRoot }) => {
+      async ({ engine }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
           await ConfigService.instance().readConfig()
@@ -288,7 +287,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("note ref", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ engine }) => {
           const note = (await engine.getNote("foo.one-id")).data!;
           const config = (
             await ConfigService.instance().readConfig()
@@ -395,7 +394,7 @@ describe("RemarkUtils and LinkUtils", () => {
   describe("updateLink", () => {
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ engine }) => {
           const note = (await engine.getNote("foo.one-id")).data!;
           const config = (
             await ConfigService.instance().readConfig()
@@ -437,7 +436,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("only link", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
             const note = (await engine.getNote("foo")).data!;
             const config = (
               await ConfigService.instance().readConfig()
@@ -467,7 +466,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("link no space", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
             const idx = 1;
             const newLine = "nospace[[bar]]";
             const note = (await engine.getNote("foo")).data!;
@@ -499,7 +498,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("link onespace", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot }) => {
+          async ({ engine }) => {
             const idx = 2;
             const newLine = "onespace [[bar]]";
             const note = (await engine.getNote("foo")).data!;
@@ -535,7 +534,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -570,7 +569,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -605,7 +604,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("nested list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -643,7 +642,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -681,7 +680,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("existing anchors", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -732,7 +731,7 @@ describe("RemarkUtils and LinkUtils", () => {
     test("header", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async ({ wsRoot }) => {
+        async () => {
           expect(note).toBeTruthy();
           const config = (
             await ConfigService.instance().readConfig()
@@ -900,7 +899,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ engine }) => {
           const config = (
             await ConfigService.instance().readConfig()
           )._unsafeUnwrap();
@@ -923,7 +922,7 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("multiple link candidates in one paragraph", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot }) => {
+        async ({ engine }) => {
           const note = (await engine.getNote("baz")).data!;
           const config = (
             await ConfigService.instance().readConfig()

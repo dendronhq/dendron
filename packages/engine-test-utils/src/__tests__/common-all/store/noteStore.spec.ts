@@ -14,7 +14,6 @@ import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
 import fs from "fs-extra";
-import path from "path";
 
 describe("GIVEN NoteStore", () => {
   test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
@@ -646,7 +645,7 @@ describe("GIVEN NoteStore", () => {
     );
   });
 
-  describe.only("AND absolute vault path", () => {
+  describe("AND absolute vault path", () => {
     const wsRoot = tmpDir().name;
     // giving absolute fsPath for vault
     // to simulate the case where we try to .get() a note

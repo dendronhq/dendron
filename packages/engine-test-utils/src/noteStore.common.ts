@@ -4,7 +4,7 @@ import {
   INoteStore,
   NotePropsMeta,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -33,6 +33,7 @@ export function runAllNoteStoreTests(
   retrieveMetadataOnlyTest(noteStoreFactory);
   bulkWriteMetadataTest(noteStoreFactory);
   deleteRootNoteTest(noteStoreFactory);
+  getNoteWithAbsolutePathVault(noteStoreFactory);
 }
 
 function findAndFindMetadataTest(
@@ -664,6 +665,58 @@ function deleteRootNoteTest(
       },
       {
         expect,
+      }
+    );
+  });
+}
+
+function getNoteWithAbsolutePathVault(
+  noteStoreFactory: (
+    wsRoot: string,
+    vaults: DVault[]
+  ) => Promise<INoteStore<string>>
+) {
+  const wsRoot = tmpDir().name;
+  // giving absolute fsPath for vault
+  // to simulate the case where we try to .get() a note
+  // when there is a local override vault
+  // coming from home directory, which usually
+  // would be specified with absolute path
+  const vaultsWithAbsoluteFsPath: DVault[] = [
+    {
+      fsPath: `${wsRoot}`,
+      selfContained: true,
+      name: "vault",
+    },
+  ];
+
+  test("WHEN get note, then correctly retrieve note by key", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const engineNotes = await engine.findNotesMeta({
+          excludeStub: false,
+        });
+        const rootNote = engineNotes[0];
+        engineNotes.forEach(async (noteMeta) => {
+          await noteStore.writeMetadata({ key: noteMeta.id, noteMeta });
+        });
+
+        const resp = await noteStore.get(rootNote.id);
+        expect(resp.error).toBeFalsy();
+        expect(resp.data?.id).toEqual(rootNote.id);
+        expect(resp.data?.fname).toEqual(rootNote.fname);
+      },
+      {
+        expect,
+        wsRoot,
+        vaults: vaultsWithAbsoluteFsPath,
+        modConfigCb: (config) => {
+          config.dev = {
+            enableEngineV3: true,
+          };
+          return config;
+        },
       }
     );
   });

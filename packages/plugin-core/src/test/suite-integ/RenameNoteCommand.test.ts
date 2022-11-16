@@ -66,4 +66,61 @@ suite("RenameNoteCommand", function () {
       expect(updatedSomeNote.body).toEqual("[[foo]]");
     });
   });
+  describeMultiWS("GIVEN a note with reference to user note", {}, () => {
+    test("WHEN renamed THEN note ref should not break", async () => {
+      const extension = ExtensionProvider.getExtension();
+      const { vaults, wsRoot } = extension.getDWorkspace();
+      const engine = extension.getEngine();
+      const oldNote = await NoteTestUtilsV4.createNoteWithEngine({
+        fname: "user.one",
+        body: "note body",
+        vault: vaults[0],
+        engine,
+        wsRoot,
+      });
+
+      await NoteTestUtilsV4.createNoteWithEngine({
+        fname: "some-note",
+        body: "![[user.one]]",
+        vault: vaults[0],
+        wsRoot,
+        engine,
+      });
+      await extension.wsUtils.openNote(oldNote);
+      const cmd = new RenameNoteCommand(extension);
+      const vaultName = VaultUtils.getName(vaults[0]);
+      await cmd.execute({
+        moves: [
+          {
+            oldLoc: {
+              fname: oldNote.fname,
+              vaultName,
+            },
+            newLoc: {
+              fname: "user.two",
+              vaultName,
+            },
+          },
+        ],
+        nonInteractive: true,
+        initialValue: "user.two",
+      });
+      // note `user.one` is renamed to `user.two`, `some-note`'s reference to `![[user.one]]` is updated to `![[user.two]]`
+      const newNote = (
+        await engine.findNotes({
+          vault: vaults[0],
+          fname: "user.two",
+        })
+      )[0];
+      expect(newNote).toBeTruthy();
+
+      const updatedSomeNote = (
+        await engine.findNotes({
+          vault: vaults[0],
+          fname: "some-note",
+        })
+      )[0];
+      expect(updatedSomeNote.body).toEqual("![[user.two]]");
+    });
+  });
 });

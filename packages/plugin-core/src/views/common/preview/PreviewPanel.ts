@@ -286,7 +286,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
 
           const textDocument = editor.document;
           if (
-            isPathInWorkspace({
+            !isPathInWorkspace({
               wsRoot: this.wsRoot,
               vaults: this.vaults,
               fsPath: textDocument.uri,

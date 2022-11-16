@@ -1317,7 +1317,8 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           // And if this used to be a frontmatter tag, the alias being undefined will force it to be removed because a frontmatter tag can't point to something outside of tags hierarchy.
           alias = undefined;
         }
-        // for user tag links, we'll have to regenerate the alias
+        // for user tag links, we'll have to regenerate the alias.
+        // added link.type !==ref check because syntax like !@john doesn't work as a note ref
         if (link.type !== "ref" && newLoc.fname.startsWith(USERS_HIERARCHY)) {
           const fnameWithoutTag = newLoc.fname.slice(USERS_HIERARCHY.length);
           alias = `@${fnameWithoutTag}`;

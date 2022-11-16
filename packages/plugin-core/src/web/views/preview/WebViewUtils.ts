@@ -137,7 +137,6 @@ export class WebViewUtils {
       }
     } catch {
       // TODO: add logger
-      console.log("theme does not exists");
     }
 
     themes.map((th) => {

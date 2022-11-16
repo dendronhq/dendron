@@ -20,6 +20,7 @@ export class WSUtilsWeb {
 
   getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
+    console.log("*********wsRoot in web utils*****", this.wsRoot.fsPath);
     const vault = VaultUtils.getVaultByFilePath({
       wsRoot: normalizeUnixPath(this.wsRoot.fsPath),
       vaults: this.vaults,

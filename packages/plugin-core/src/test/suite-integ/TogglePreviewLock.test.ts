@@ -51,6 +51,10 @@ suite("GIVEN TogglePreviewLock", function () {
           await previewPanel.show(note1);
         });
         test("THEN preview should be locked and pristine", async () => {
+          console.log(
+            "******wsRoot in testcase***",
+            ExtensionProvider.getDWorkspace().wsRoot
+          );
           await cmd.run();
           expect(await previewPanel.isLockedAndDirty()).toBeFalsy();
         });

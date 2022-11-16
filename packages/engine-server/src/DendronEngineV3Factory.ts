@@ -1,5 +1,6 @@
 import {
   ConfigUtils,
+  CONSTANTS,
   DLogger,
   FuseEngine,
   NoteStore,
@@ -47,8 +48,7 @@ export class DendronEngineV3Factory {
 
     const vaults = ConfigUtils.getVaults(config);
 
-    // TODO: Consolidate this path somewhere in a constants.ts file:
-    const dbFilePath = path.join(wsRoot, "dendron.metadata.db");
+    const dbFilePath = path.join(wsRoot, CONSTANTS.DENDRON_DB_FILE);
 
     const dbResult = await SqliteDbFactory.createInitializedDB(
       wsRoot,

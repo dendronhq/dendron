@@ -323,6 +323,15 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     let noteProps: NoteProps[];
     const config = DConfig.readConfigSync(this.wsRoot);
+    if (this._config.dev?.enableEngineV3) {
+      return (
+        await this.api.noteQuery({
+          opts,
+          ws: this.wsRoot,
+        })
+      ).data!;
+    }
+
     if (config.workspace.metadataStore === "sqlite") {
       try {
         const resp = await SQLiteMetadataStore.search(qs);
@@ -341,13 +350,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         });
         noteProps = [];
       }
-    } else if (this._config.dev?.enableEngineV3) {
-      noteProps = (
-        await this.api.noteQuery({
-          opts,
-          ws: this.wsRoot,
-        })
-      ).data!;
     } else {
       noteIndexProps = this.fuseEngine.queryNote({
         qs,

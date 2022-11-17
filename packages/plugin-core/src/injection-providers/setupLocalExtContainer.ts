@@ -18,6 +18,7 @@ import { PreviewLinkHandler } from "../components/views/PreviewLinkHandler";
 import { ITextDocumentService } from "../services/ITextDocumentService";
 import { TextDocumentService } from "../services/node/TextDocumentService";
 import { ConsoleLogger } from "../web/utils/ConsoleLogger";
+import { EngineUtils, openPortFile } from "@dendronhq/engine-server";
 
 export async function setupLocalExtContainer(opts: {
   wsRoot: string;
@@ -27,6 +28,12 @@ export async function setupLocalExtContainer(opts: {
   context: vscode.ExtensionContext;
 }) {
   const { wsRoot, engine, vaults, config, context } = opts;
+  const fpath = EngineUtils.getPortFilePathForWorkspace({ wsRoot });
+  const port = openPortFile({ fpath });
+
+  container.register<number>("port", {
+    useValue: port,
+  });
   container.register<EngineEventEmitter>("EngineEventEmitter", {
     useToken: "ReducedDEngine",
   });
@@ -55,10 +62,7 @@ export async function setupLocalExtContainer(opts: {
   container.register<PreviewProxy>("PreviewProxy", {
     useClass: PreviewPanel,
   });
-  //TODO: add real value
-  container.register<number>("port", {
-    useValue: 1,
-  });
+
   container.register<URI>("extensionUri", {
     useValue: context.extensionUri,
   });

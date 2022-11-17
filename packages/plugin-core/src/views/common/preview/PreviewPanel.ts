@@ -472,6 +472,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     };
   }
 
+  // TODO: delete this when tsyringe is better adopted on local side
   // eslint-disable-next-line camelcase
   _DO_NOT_USE_EXPOSED_FOR_TESTING_wsUtilsWeb() {
     return this.wsUtils;

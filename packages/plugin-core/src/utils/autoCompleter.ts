@@ -157,7 +157,7 @@ export class AutoCompleter {
       // Even if the user has not selected an item with arrow keys the focus
       // of the drop down will be on the first item hence we only want to switch
       // the active item if we detect that arrow key selection has happened.
-      if (_.isEmpty(fnames) || candidate !== fnames[0]) {
+      if (!_.isEqual(_quickPick.activeItems[0], _quickPick.items[0])) {
         activeItemValue = candidate;
       }
     }

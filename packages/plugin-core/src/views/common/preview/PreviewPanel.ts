@@ -471,4 +471,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
       },
     };
   }
+
+  // eslint-disable-next-line camelcase
+  _DO_NOT_USE_EXPOSED_FOR_TESTING_wsUtilsWeb() {
+    return this.wsUtils;
+  }
 }

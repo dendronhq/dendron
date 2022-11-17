@@ -8,6 +8,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
+import sinon from "sinon";
 
 suite("GIVEN TogglePreviewLock", function () {
   let previewPanel: PreviewPanel;
@@ -50,11 +51,10 @@ suite("GIVEN TogglePreviewLock", function () {
           await ExtensionProvider.getWSUtils().openNote(note1);
           await previewPanel.show(note1);
         });
-        test("THEN preview should be locked and pristine", async () => {
-          console.log(
-            "******wsRoot in testcase***",
-            ExtensionProvider.getDWorkspace().wsRoot
-          );
+        test.only("THEN preview should be locked and pristine", async () => {
+          const wsUtils =
+            previewPanel._DO_NOT_USE_EXPOSED_FOR_TESTING_wsUtilsWeb();
+          sinon.stub(wsUtils, "getNoteFromDocument").resolves([note1]);
           await cmd.run();
           expect(await previewPanel.isLockedAndDirty()).toBeFalsy();
         });

@@ -112,7 +112,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
     if (result.isOk()) {
       expect(result.value.length).toEqual(3);
-      expect(result.value).toEqual(["a", "a.ch1", "a.ch2"]);
+      expect(result.value.sort()).toEqual(["a", "a.ch1", "a.ch2"].sort());
     }
 
     expect(

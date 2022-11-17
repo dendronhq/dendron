@@ -692,8 +692,11 @@ function getNoteWithAbsolutePathVault(
 
   test("WHEN get note, then correctly retrieve note by key", async () => {
     await runEngineTestV5(
-      async ({ wsRoot, vaults, engine }) => {
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+      async ({ wsRoot, engine }) => {
+        const noteStore = await noteStoreFactory(
+          wsRoot,
+          vaultsWithAbsoluteFsPath
+        );
         const engineNotes = await engine.findNotesMeta({
           excludeStub: false,
         });

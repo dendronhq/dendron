@@ -21,6 +21,7 @@ suite("GIVEN TogglePreviewLock", function () {
 
   afterEach(async () => {
     await VSCodeUtils.closeAllEditors();
+    sinon.restore();
   });
 
   describeSingleWS(
@@ -84,6 +85,9 @@ suite("GIVEN TogglePreviewLock", function () {
               await previewPanel.show(note2);
             });
             test("THEN preview should be locked and dirty", async () => {
+              const wsUtils =
+                previewPanel._DO_NOT_USE_EXPOSED_FOR_TESTING_wsUtilsWeb();
+              sinon.stub(wsUtils, "getNoteFromDocument").resolves([note2]);
               expect(await previewPanel.isLockedAndDirty()).toBeTruthy();
             });
           });

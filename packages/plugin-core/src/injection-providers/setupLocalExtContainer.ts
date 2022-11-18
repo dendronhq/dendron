@@ -6,7 +6,7 @@ import {
   EngineEventEmitter,
   URI,
 } from "@dendronhq/common-all";
-import { container } from "tsyringe";
+import { container, Lifecycle } from "tsyringe";
 import * as vscode from "vscode";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { MetadataSvcTreeViewConfig } from "../views/node/treeview/MetadataSvcTreeViewConfig";
@@ -49,10 +49,15 @@ export async function setupLocalExtContainer(opts: {
   container.register<IPreviewLinkHandler>("IPreviewLinkHandler", {
     useClass: PreviewLinkHandler,
   });
-  container.register<ITextDocumentService>("ITextDocumentService", {
-    useClass: TextDocumentService,
-  });
+  container.register<ITextDocumentService>(
+    "ITextDocumentService",
+    {
+      useClass: TextDocumentService,
+    },
+    { lifecycle: Lifecycle.Singleton }
+  );
 
+  // TODO: add logge that adds log to dendron.log
   container.register<DLogger>("logger", {
     useClass: ConsoleLogger,
   });

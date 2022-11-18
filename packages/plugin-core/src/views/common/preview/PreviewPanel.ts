@@ -47,11 +47,9 @@ import { WebViewUtils } from "../../../web/views/preview/WebViewUtils";
 @injectable()
 export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   private _panel: vscode.WebviewPanel | undefined;
-  private _textDocumentService: ITextDocumentService;
   private _onDidChangeActiveTextEditor: vscode.Disposable | undefined =
     undefined;
   private _onTextChanged: vscode.Disposable | undefined = undefined;
-  private _linkHandler: IPreviewLinkHandler;
   private _lockedEditorNoteId: string | undefined;
 
   /**
@@ -60,8 +58,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
    * Implementation to handle preview link clicked events
    */
   constructor(
-    @inject("IPreviewLinkHandler") linkHandler: IPreviewLinkHandler,
-    @inject("ITextDocumentService") textDocumentService: ITextDocumentService,
+    @inject("IPreviewLinkHandler") private _linkHandler: IPreviewLinkHandler,
+    @inject("ITextDocumentService")
+    private _textDocumentService: ITextDocumentService,
     @inject("logger") private logger: DLogger,
     @inject("wsRoot") private wsRoot: URI,
     private wsUtils: WSUtilsWeb,
@@ -69,10 +68,7 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     @inject("vaults") private vaults: DVault[],
     @inject("DendronConfig") private dendronConfig: DendronConfig,
     @inject("ReducedDEngine") private engine: ReducedDEngine
-  ) {
-    this._linkHandler = linkHandler;
-    this._textDocumentService = textDocumentService;
-  }
+  ) {}
 
   /**
    * Show the preview.

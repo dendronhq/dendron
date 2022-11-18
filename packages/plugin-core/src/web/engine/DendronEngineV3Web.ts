@@ -64,7 +64,7 @@ export class DendronEngineV3Web
     @inject("IFileStore") private fileStore: IFileStore, // TODO: Engine shouldn't be aware of FileStore. Currently still needed because of Init Logic
     @inject("INoteStore") noteStore: INoteStore<string>,
     @inject("DendronConfig")
-    private publishingConfig: DendronConfig // why is this call publishingConfig?
+    private dendronConfig: DendronConfig
   ) {
     super({
       logger: new ConsoleLogger(),
@@ -534,12 +534,14 @@ export class DendronEngineV3Web
 
   async renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp> {
     try {
+      if (!opts.note) {
+        throw new DendronError({ message: "note not found" });
+      }
       const data = await this._renderNote({
-        note: opts.note!, // TODO: get rid of !
+        note: opts.note,
         flavor: opts.flavor || ProcFlavor.PREVIEW,
         dest: opts.dest || DendronASTDest.HTML,
       });
-
       return { data };
     } catch (error) {
       return {
@@ -565,7 +567,7 @@ export class DendronEngineV3Web
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
       this,
-      this.publishingConfig,
+      this.dendronConfig,
       this.vaults
     );
 
@@ -589,7 +591,7 @@ export class DendronEngineV3Web
           noteToRender: note,
           fname: note.fname,
           vault: note.vault,
-          config: this.publishingConfig,
+          config: this.dendronConfig,
           noteCacheForRenderDict,
         },
         { flavor }

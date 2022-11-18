@@ -51,7 +51,10 @@ suite("GIVEN TogglePreviewLock", function () {
           await ExtensionProvider.getWSUtils().openNote(note1);
           await previewPanel.show(note1);
         });
-        test.only("THEN preview should be locked and pristine", async () => {
+        test("THEN preview should be locked and pristine", async () => {
+          /* This stub is added to fix an issue where test cases and 
+          container.resolve() take different values for wsRoot, resulting in 
+          undefined results for getNoteFromDocument. */
           const wsUtils =
             previewPanel._DO_NOT_USE_EXPOSED_FOR_TESTING_wsUtilsWeb();
           sinon.stub(wsUtils, "getNoteFromDocument").resolves([note1]);

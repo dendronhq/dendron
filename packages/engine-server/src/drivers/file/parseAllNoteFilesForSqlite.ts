@@ -5,6 +5,7 @@ import {
   DLink,
   DVault,
   genHash,
+  genUUID,
   NoteDictsUtils,
   NoteProps,
   NotePropsMeta,
@@ -13,6 +14,7 @@ import {
   SchemaModuleDict,
   SchemaUtils,
   string2Note,
+  Time,
 } from "@dendronhq/common-all";
 import {
   DendronASTNode,
@@ -41,7 +43,18 @@ import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTableUtils";
 import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTableUtils";
 import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
 
-// This needs to do one vault at a time.
+/**
+ * Given the files in a particular vault, process all of them to update the
+ * Sqlite database appropriately
+ * @param files - the fsPaths of all note files to be processed
+ * @param vault - the vault in which these files belong. To process multiple
+ * vaults, call this function multiple times, once for each vault.
+ * @param db
+ * @param root
+ * @param schemas
+ * @param enableLinkCandidates
+ * @returns
+ */
 export async function parseAllNoteFilesForSqlite(
   files: string[],
   vault: DVault,
@@ -50,6 +63,7 @@ export async function parseAllNoteFilesForSqlite(
   schemas: SchemaModuleDict,
   enableLinkCandidates: boolean = false
 ): Promise<Result<null, any>> {
+  // Add the vault to the DB if it doesn't exist yet
   await addVaultToDb(vault, db);
 
   const vaultIdResp = await VaultsTableUtils.getIdByFsPath(db, vault.fsPath);
@@ -77,13 +91,14 @@ export async function parseAllNoteFilesForSqlite(
     contentDictionary[data.fname] = data.content;
   }
 
-  // Compute Added Files
+  // Compute which files are newly added (as compared with the current db state)
   const addedFileResp = await getAddedFiles(db, files, vaultId);
 
   if (addedFileResp.isErr()) {
     return err(addedFileResp.error);
   }
 
+  // Calculate content hashes for all newly added files
   const addedNotes: NoteProps[] = addedFileResp.value.map((fname) => {
     const content = contentDictionary[fname];
 
@@ -93,7 +108,7 @@ export async function parseAllNoteFilesForSqlite(
     return props;
   });
 
-  // Compute Updated Notes
+  // Compute which files were updated by examining hashes (as compared with the current db state)
   const getUpdatedFilesResp = await getUpdatedFiles(db, fileStateData, vaultId);
 
   if (getUpdatedFilesResp.isErr()) {
@@ -122,7 +137,7 @@ export async function parseAllNoteFilesForSqlite(
     }
   }
 
-  // Handle deleted notes:
+  // For all deleted notes, remove them from the DB
   const deleteRes = await deleteRemovedFilesFromDB(
     db,
     Object.keys(contentDictionary),
@@ -143,6 +158,7 @@ export async function parseAllNoteFilesForSqlite(
 
   const allNotesToProcess = addedNotes.concat(updatedNotes);
 
+  // Now add entries into the NoteProps table for all added and updated notes
   // TODO: Bulk Insert
   await Promise.all(
     allNotesToProcess.map((note) => {
@@ -153,7 +169,8 @@ export async function parseAllNoteFilesForSqlite(
   // We need to do additional processing on updated links if any of them have
   // had their ID's changed.
   if (updatedNotes.length > 0) {
-    // This step must be done AFTER the updated notes have been added, or else the foreign key constraint on the Links table will fail.
+    // NOTE: This step must be done AFTER the updated notes have been added, or
+    // else the foreign key constraint on the Links table will fail.
     const updateLinksForChangedNoteIdResult = await updateLinksForChangedNoteId(
       db,
       updatedNotes,
@@ -201,9 +218,41 @@ export async function parseAllNoteFilesForSqlite(
     if (insertLinksThatBecameAmbiguousResult.isErr()) {
       return err(insertLinksThatBecameAmbiguousResult.error);
     }
+
+    // For all added notes, add any hierarchy stubs that are necessary to
+    // establish a fully connected hierarchy tree. NOTE: Hierarchy stubs need to
+    // be added PRIOR to parent link processing.
+    const addHierarchyStubsForAddedNotesResult = await addAncestorStubs(
+      db,
+      addedNotes,
+      vaultId
+    );
+
+    if (addHierarchyStubsForAddedNotesResult.isErr()) {
+      return err(addHierarchyStubsForAddedNotesResult.error);
+    } else {
+      // We also need to process any added stubs to properly setup the hierarchy
+      // table, so add them to the list of notes to process
+      allNotesToProcess.push(...addHierarchyStubsForAddedNotesResult.value);
+    }
+
+    // Stubs that got replaced by real notes require additional processing - we
+    // must delete the stub notes being replaced and also replace their
+    // parent->child links in the hierarchy table with the newly added non-stub
+    // versions
+    const processReplacedStubsResult = await processReplacedStubs(
+      db,
+      addedNotes,
+      vaultId
+    );
+
+    if (processReplacedStubsResult.isErr()) {
+      return err(processReplacedStubsResult.error);
+    }
   }
 
-  const bulkProcessParentLinksResult = await bulkProcessParentLinks(
+  // For all added/updated notes, add their child->parent linkages now
+  const bulkProcessParentLinksResult = await processParentLinks(
     db,
     allNotesToProcess,
     vaultId
@@ -213,7 +262,8 @@ export async function parseAllNoteFilesForSqlite(
     return err(bulkProcessParentLinksResult.error);
   }
 
-  await bulkProcessOtherLinks(db, allNotesToProcess, {} as DendronConfig);
+  // For all added/updated notes, process their links (wikilinks, refs, etc.)
+  await processForwardLinks(db, allNotesToProcess, {} as DendronConfig);
 
   if (enableLinkCandidates) {
     await bulkProcessLinkCandidates(db, allNotesToProcess, {} as DendronConfig);
@@ -222,10 +272,116 @@ export async function parseAllNoteFilesForSqlite(
   return ok(null);
 }
 
+// Helper Functions
+
 async function addVaultToDb(vault: DVault, db: Database) {
   return VaultsTableUtils.insert(db, {
-    name: vault.name ?? "vault",
+    name: vault.name ?? vault.fsPath,
     fsPath: vault.fsPath,
+  });
+}
+
+function getAddedFiles(
+  db: Database,
+  allFiles: string[],
+  vaultId: number
+): ResultAsync<string[], SqliteError> {
+  if (allFiles.length === 0) {
+    return okAsync([]);
+  }
+
+  const values = allFiles
+    .map((fsPath) => `('${cleanName(path.parse(fsPath).name)}')`)
+    .join(",");
+
+  const sql = `
+  WITH T(fname) as 
+  (VALUES ${values})
+  SELECT T.fname
+  FROM T
+  LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname 
+  LEFT OUTER JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id 
+  WHERE NoteProps.fname IS NULL OR (NoteProps.fname IS NOT NULL AND vaultId != ${vaultId}) OR NoteProps.stub = 1
+  `;
+
+  const prom = new Promise<string[]>((resolve, reject) => {
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err.message);
+      } else {
+        resolve(rows.map((row) => row.fname));
+      }
+    });
+  });
+
+  return ResultAsync.fromPromise(prom, (e) => {
+    return e as SqliteError;
+  });
+}
+
+function getUpdatedFiles(
+  db: Database,
+  allFiles: { fname: string; contentHash: string }[],
+  vaultId: number
+): ResultAsync<string[], SqliteError> {
+  if (allFiles.length === 0) {
+    return okAsync([]);
+  }
+
+  const values = allFiles
+    .map((data) => `('${data.fname}','${data.contentHash}')`)
+    .join(",");
+
+  const sql = `
+    WITH T(fname, hash) AS
+    (VALUES ${values})
+    SELECT NoteProps.fname, NoteProps.id FROM T
+    JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
+    `;
+
+  const prom = new Promise<any[]>((resolve, reject) => {
+    db.all(sql, (err, rows) => {
+      if (err) {
+        reject(err.message);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+
+  return ResultAsync.fromPromise(prom, (e) => {
+    return e as SqliteError;
+  }).andThen((updatedRows) => {
+    if (updatedRows.length === 0) {
+      return ResultAsync.fromPromise(Promise.resolve([]), (e) => {
+        return e as SqliteError;
+      });
+    }
+
+    const values = updatedRows
+      .map((data) => `('${data.fname}','${data.id}')`)
+      .join(",");
+
+    const sql2 = `
+      WITH T(fname, id) AS
+      (VALUES ${values})
+      SELECT T.fname FROM T
+      JOIN VaultNotes ON T.Id = VaultNotes.noteId
+      WHERE vaultId = ${vaultId}`;
+
+    const prom = new Promise<any[]>((resolve, reject) => {
+      db.all(sql2, (err, rows) => {
+        if (err) {
+          reject(err.message);
+        } else {
+          resolve(rows.map((row) => row.fname));
+        }
+      });
+    });
+
+    return ResultAsync.fromPromise(prom, (e) => {
+      return e as SqliteError;
+    });
   });
 }
 
@@ -254,7 +410,7 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
   }
 }
 
-function bulkProcessParentLinks(
+function processParentLinks(
   db: Database,
   notes: NoteProps[],
   vaultId: number
@@ -277,7 +433,7 @@ function bulkProcessParentLinks(
       return {
         childId: note.id,
         parentFname: potentialParentName,
-        linkType: "child" as LinkType,
+        linkType: "child" as LinkType, // TODO: Remove, no longer necessary
         vaultId,
       };
     }
@@ -290,40 +446,44 @@ function bulkProcessParentLinks(
   return HierarchyTableUtils.bulkInsertWithParentAsFname(db, _.compact(data));
 }
 
-async function bulkProcessOtherLinks(
+async function processForwardLinks(
   db: Database,
   notes: NoteProps[],
   config: DendronConfig
 ) {
-  // This method does one INSERT per note:
   return Promise.all(
-    notes.map((note) => {
-      const links = LinkUtils.findLinksFromBody({ note, config });
+    notes
+      .filter((note) => !note.stub)
+      .map((note) => {
+        const links = LinkUtils.findLinksFromBody({ note, config });
 
-      const data = links
-        .filter(
-          (link) =>
-            link.type === "ref" ||
-            link.type === "frontmatterTag" ||
-            link.type === "wiki" ||
-            link.type === "md"
-        )
-        .map((link) => {
-          // If the to fname isn't defined, then it can't be processed.
-          if (!link.to?.fname) {
-            return undefined;
-          }
-          return {
-            source: note.id,
-            type: link.type as LinkType,
-            sinkFname: link.to.fname,
-            sinkVaultName: link.to.vaultName,
-            payload: link,
-          };
-        });
+        const data = links
+          .filter(
+            (link) =>
+              link.type === "ref" ||
+              link.type === "frontmatterTag" ||
+              link.type === "wiki" ||
+              link.type === "md"
+          )
+          .map((link) => {
+            // If the to fname isn't defined, then it can't be processed.
+            if (!link.to?.fname) {
+              return undefined;
+            }
+            return {
+              source: note.id,
+              type: link.type as LinkType,
+              sinkFname: link.to.fname,
+              sinkVaultName: link.to.vaultName,
+              payload: link,
+            };
+          });
 
-      return LinksTableUtils.bulkInsertLinkWithSinkAsFname(db, _.compact(data));
-    })
+        return LinksTableUtils.bulkInsertLinkWithSinkAsFname(
+          db,
+          _.compact(data)
+        );
+      })
   );
 }
 
@@ -410,85 +570,145 @@ async function bulkProcessLinkCandidates(
   );
 }
 
-function deleteRemovedFilesFromDB(
+/**
+ * If a stub got replaced by a real note, we need to do several things:
+ * 1. Update all stub->children rows in the Hierarchy table with the real note's
+ *    ID as the parent. parent->stub replacement doesn't need to be handled
+ *    here, because it will get added during bulkProcessParentLinks() later.
+ * 2. Delete the stubs from the NoteProps table.
+ * @param db
+ * @param addedNotes - all notes that are getting added (regardless of whether
+ * they replace a stub or not, the checking is done within this function)
+ * @param vaultId
+ * @returns
+ */
+function processReplacedStubs(
   db: Database,
-  remainingFiles: string[],
+  addedNotes: NoteProps[],
   vaultId: number
 ): ResultAsync<null, SqliteError> {
-  const values = remainingFiles.map((fname) => `('${fname}')`).join(",");
+  if (addedNotes.length === 0) {
+    return okAsync(null);
+  }
 
-  // TODO: What if all values are deleted?
+  const values = addedNotes.map((d) => `('${d.fname}', '${d.id}')`).join(",");
 
-  // NOTE: When doing this table-diffing kind of operation on a VALUES list,
-  // EXCEPT is much much faster than doing a LEFT OUTER JOIN (50ms vs 15 seconds
-  // on 15,000 values) in SQLite
-  const sql = `
-    DELETE FROM NoteProps AS Outer
-    WHERE EXISTS
-    (
-      WITH T(fname) as 
+  // First, detect which added notes are replacing stubs
+  const sql1 = `
+    WITH T(fname, id) AS
+    (VALUES ${values})
+    SELECT NoteProps.id AS stubId, T.id AS newId
+    FROM NoteProps
+    JOIN T ON T.fname = NoteProps.fname AND NoteProps.stub = 1
+    JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId AND VaultNotes.vaultId = ${vaultId}`;
+
+  const prom = new Promise<{ stubId: string; newId: string }[]>(
+    (resolve, reject) => {
+      db.all(sql1, (err, rows) => {
+        if (err) {
+          reject(err.message);
+        } else {
+          resolve(rows);
+        }
+      });
+    }
+  );
+
+  return ResultAsync.fromPromise(prom, (e) => {
+    return e as SqliteError;
+  }).andThen((replacedStubs) => {
+    // If no stubs are being replaced, nothing needs to be done.
+    if (replacedStubs.length === 0) {
+      return okAsync(null);
+    }
+
+    const values = replacedStubs
+      .map((d) => `('${d.stubId}', '${d.newId}')`)
+      .join(",");
+
+    // Update all stub->children links in the hierarchy table:
+    const sql2 = `
+      WITH T(oldId, newId) AS
       (VALUES ${values})
-      SELECT NoteProps.id
-      FROM 
-      (SELECT fname
-      FROM NoteProps
-      EXCEPT
-      SELECT fname
-      FROM T) AS A
-      JOIN NoteProps ON A.fname = NoteProps.fname
-      JOIN VaultNotes ON NoteProps.id = VaultNotes.noteId
-      WHERE VaultId = ${vaultId}
-      AND Outer.id = NoteProps.id
-    )`;
-
-  return executeSqlWithVoidResult(db, sql);
-}
-
-function deleteLinksForUpdatedNotes(
-  db: Database,
-  updatedNoteFnames: string[],
-  vaultId: number
-): ResultAsync<null, SqliteError> {
-  const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
-
-  const sql = `
-    DELETE FROM Links AS Outer
-    WHERE EXISTS
-    (
-      WITH T(fname) as 
-      (VALUES ${values})
-      SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
+      UPDATE Hierarchy
+      SET parent = T.newId
       FROM T
-      JOIN NoteProps ON NoteProps.fname = T.fname
-      JOIN Links ON NoteProps.Id = Links.source
-      JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
-      WHERE VaultId = ${vaultId}
-      AND Links.source = Outer.source
-    )`;
-  return executeSqlWithVoidResult(db, sql);
+      WHERE T.oldId = Hierarchy.parent`;
+
+    return executeSqlWithVoidResult(db, sql2).andThen(() => {
+      const values = replacedStubs.map((d) => `('${d.stubId}')`).join(",");
+
+      // Finally, delete any replaced stubs from NoteProps:
+      const sql3 = `
+        DELETE FROM NoteProps
+        WHERE EXISTS
+        (
+          WITH T(oldId) AS
+          (VALUES ${values})
+          SELECT T.oldId
+          FROM T
+          WHERE T.oldId = NoteProps.id
+        );`;
+
+      return executeSqlWithVoidResult(db, sql3);
+    });
+  });
 }
 
-function getAddedFiles(
+/**
+ * For any notes that are added, we need to make sure that we also add any stubs
+ * necessary at ancestor positions to fill in the hierarchy
+ * @param db
+ * @param addedNotes
+ * @param vaultId
+ * @returns an array of NoteProps that contains all stubs that were added.
+ */
+function addAncestorStubs(
   db: Database,
-  allFiles: string[],
+  addedNotes: NoteProps[],
   vaultId: number
-): ResultAsync<string[], SqliteError> {
-  const values = allFiles
-    .map((fsPath) => `('${cleanName(path.parse(fsPath).name)}')`)
-    .join(",");
+): ResultAsync<NoteProps[], SqliteError> {
+  let potentialStubNames: string[] = [];
 
-  const sql = `
-  WITH T(fname) as 
-  (VALUES ${values})
-  SELECT T.fname
-  FROM T
-  LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname 
-  LEFT OUTER JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id 
-  WHERE NoteProps.fname IS NULL OR (NoteProps.fname IS NOT NULL AND vaultId != ${vaultId})
-  `;
+  addedNotes.forEach((note) => {
+    if (note.fname === "root") {
+      return;
+    }
+
+    const potentialParentNames = note.fname
+      .split(".")
+      .slice(0, -1)
+      .map((_value, index, array) => {
+        return array.slice(0, index + 1).join(".");
+      });
+
+    potentialStubNames.push(...potentialParentNames);
+  });
+
+  if (potentialStubNames.length === 0) {
+    return okAsync([]);
+  }
+
+  potentialStubNames = _.uniq(potentialStubNames);
+
+  const stubNameValues = potentialStubNames.map((d) => `('${d}')`).join(",");
+
+  // Of all potential stub name values, figure out which ones don't exist as
+  // real notes already. The ones that don't exist are the only ones we need to
+  // add.
+  const sql1 = `
+    WITH T(fname) AS
+    (VALUES ${stubNameValues})
+    SELECT fname
+    FROM T
+    EXCEPT
+    SELECT fname
+    FROM VaultNotes
+    JOIN NoteProps ON noteId = id
+    WHERE vaultId = ${vaultId}`;
 
   const prom = new Promise<string[]>((resolve, reject) => {
-    db.all(sql, (err, rows) => {
+    db.all(sql1, (err, rows) => {
       if (err) {
         reject(err.message);
       } else {
@@ -499,9 +719,66 @@ function getAddedFiles(
 
   return ResultAsync.fromPromise(prom, (e) => {
     return e as SqliteError;
-  });
+  })
+    .andThen((stubsToAdd) => {
+      // If all potentialStubNames already exist as real notes (or previously
+      // created stubs), nothing needs to be done.
+      if (stubsToAdd.length === 0) {
+        return okAsync([]);
+      }
+
+      // Generate a random ID for any stubs that need to be added
+      const stubProps = stubsToAdd.map((fname) => {
+        return { fname, id: genUUID() };
+      });
+
+      const stubInsertionValues = stubProps
+        .map((d) => `('${d.id}', '${d.fname}')`)
+        .join(",");
+
+      // Now do the insertion into NoteProps, with stub set to 1 (true)
+      const sql2 = `
+        INSERT INTO NoteProps (id, fname, stub)
+        WITH T(id, fname) AS
+        (VALUES ${stubInsertionValues})
+        SELECT T.id, T.fname, 1 FROM T -- 1 here means stub = true`;
+
+      return executeSqlWithVoidResult(db, sql2).map(() => stubProps);
+    })
+    .andThen((stubProps) => {
+      if (stubProps.length === 0) {
+        return okAsync([]);
+      }
+
+      // We also need to add stub notes into VaultNotes:
+      return VaultNotesTableUtils.bulkInsert(
+        db,
+        stubProps.map((prop) => {
+          return { vaultId, noteId: prop.id };
+        })
+      ).map(() => {
+        return stubProps.map((fname) => {
+          return {
+            ...fname,
+            title: "",
+            desc: "",
+            created: Time.now().toMillis(),
+            updated: Time.now().toMillis(),
+            stub: true,
+          } as NoteProps;
+        });
+      });
+    });
 }
 
+/**
+ * For all updated notes that had an ID change, delete the entries in the db
+ * associated with the old ID.
+ * @param db
+ * @param updatedNotes
+ * @param vaultId
+ * @returns
+ */
 function purgeDBForUpdatedNotesWithChangedNoteId(
   db: Database,
   updatedNotes: NotePropsMeta[],
@@ -529,6 +806,14 @@ function purgeDBForUpdatedNotesWithChangedNoteId(
   return executeSqlWithVoidResult(db, sql);
 }
 
+/**
+ * If any links pointed to a note that changed ID's, those links need to be
+ * updated.
+ * @param db
+ * @param updatedNotes
+ * @param vaultId
+ * @returns
+ */
 function updateLinksForChangedNoteId(
   db: Database,
   updatedNotes: NotePropsMeta[],
@@ -557,64 +842,75 @@ function updateLinksForChangedNoteId(
   return executeSqlWithVoidResult(db, sql);
 }
 
-function getUpdatedFiles(
+function deleteRemovedFilesFromDB(
   db: Database,
-  allFiles: { fname: string; contentHash: string }[],
+  remainingFiles: string[],
   vaultId: number
-): ResultAsync<string[], SqliteError> {
-  const values = allFiles
-    .map((data) => `('${data.fname}','${data.contentHash}')`)
-    .join(",");
+): ResultAsync<null, SqliteError> {
+  let sql;
+
+  if (remainingFiles.length === 0) {
+    sql = `
+    DELETE FROM NoteProps AS Outer
+    WHERE EXISTS
+    (
+      SELECT NoteProps.id
+      FROM NoteProps
+      JOIN VaultNotes ON NoteProps.id = VaultNotes.noteId
+      WHERE VaultId = ${vaultId}
+      AND Outer.id = NoteProps.id
+    )`;
+
+    return executeSqlWithVoidResult(db, sql);
+  } else {
+    const values = remainingFiles.map((fname) => `('${fname}')`).join(",");
+
+    // NOTE: When doing this table-diffing kind of operation on a VALUES list,
+    // EXCEPT is much much faster than doing a LEFT OUTER JOIN (50ms vs 15 seconds
+    // on 15,000 values) in SQLite
+    sql = `
+      DELETE FROM NoteProps AS Outer
+      WHERE EXISTS
+      (
+        WITH T(fname) as 
+        (VALUES ${values})
+        SELECT NoteProps.id
+        FROM 
+        (SELECT fname
+        FROM NoteProps
+        EXCEPT
+        SELECT fname
+        FROM T) AS A
+        JOIN NoteProps ON A.fname = NoteProps.fname
+        JOIN VaultNotes ON NoteProps.id = VaultNotes.noteId
+        WHERE VaultId = ${vaultId}
+        AND Outer.id = NoteProps.id
+      )`;
+  }
+
+  return executeSqlWithVoidResult(db, sql);
+}
+
+function deleteLinksForUpdatedNotes(
+  db: Database,
+  updatedNoteFnames: string[],
+  vaultId: number
+): ResultAsync<null, SqliteError> {
+  const values = updatedNoteFnames.map((fname) => `('${fname}')`).join(",");
 
   const sql = `
-    WITH T(fname, hash) AS
-    (VALUES ${values})
-    SELECT NoteProps.fname, NoteProps.id FROM T
-    JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
-    `;
-
-  const prom = new Promise<any[]>((resolve, reject) => {
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  }).andThen((updatedRows) => {
-    if (updatedRows.length === 0) {
-      return ResultAsync.fromPromise(Promise.resolve([]), (e) => {
-        return e as SqliteError;
-      });
-    }
-
-    const values = updatedRows
-      .map((data) => `('${data.fname}','${data.id}')`)
-      .join(",");
-
-    const sql2 = `
-      WITH T(fname, id) AS
+    DELETE FROM Links AS Outer
+    WHERE EXISTS
+    (
+      WITH T(fname) as 
       (VALUES ${values})
-      SELECT T.fname FROM T
-      JOIN VaultNotes ON T.Id = VaultNotes.noteId
-      WHERE vaultId = ${vaultId}`;
-
-    const prom = new Promise<any[]>((resolve, reject) => {
-      db.all(sql2, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        } else {
-          resolve(rows.map((row) => row.fname));
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
-  });
+      SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
+      FROM T
+      JOIN NoteProps ON NoteProps.fname = T.fname
+      JOIN Links ON NoteProps.Id = Links.source
+      JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId
+      WHERE VaultId = ${vaultId}
+      AND Links.source = Outer.source
+    )`;
+  return executeSqlWithVoidResult(db, sql);
 }

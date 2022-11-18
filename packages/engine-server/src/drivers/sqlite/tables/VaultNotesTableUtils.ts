@@ -69,6 +69,21 @@ export class VaultNotesTableUtils {
     return executeSqlWithVoidResult(db, sql);
   }
 
+  static bulkInsert(
+    db: Database,
+    rows: VaultNotesTableRow[]
+  ): ResultAsync<null, SqliteError> {
+    const values = rows
+      .map((row) => `('${row.vaultId}', '${row.noteId}')`)
+      .join(",");
+
+    const sql = `
+      INSERT INTO VaultNotes (vaultId, noteId)
+      VALUES ${values}`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
   static delete(
     db: Database,
     row: VaultNotesTableRow

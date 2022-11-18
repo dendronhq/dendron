@@ -47,6 +47,21 @@ export class HierarchyTableUtils {
     return executeSqlWithVoidResult(db, sql);
   }
 
+  public static bulkInsert(
+    db: Database,
+    rows: HierarchyTableRow[]
+  ): ResultAsync<null, SqliteError> {
+    const values = rows
+      .map((row) => `('${row.parent}', '${row.child}')`)
+      .join(",");
+
+    const sql = `
+    INSERT INTO Hierarchy (parent, child)
+    VALUES ${values}`;
+
+    return executeSqlWithVoidResult(db, sql);
+  }
+
   public static insertWithParentAsFname(
     db: Database,
     childId: string,

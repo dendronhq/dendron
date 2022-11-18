@@ -563,15 +563,17 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   // Parent Child Link Tests:
-  test("WHEN a parent and child note are added THEN a child entry is added to the links table", async () => {
+  test("WHEN a parent and child note are added THEN a child entry is added to the hierarchy table", async () => {
     // Set the initial DB state:
-    await parseAllNoteFilesForSqlite(
+    const parseResult = await parseAllNoteFilesForSqlite(
       ["a.md", "a.ch1.md"],
       testVault,
       db,
       testDir,
       {}
     );
+
+    expect(parseResult.isOk()).toBeTruthy();
 
     await validateNotePropInDB(db, "a", testVault);
     await validateNotePropInDB(db, "a.ch1", testVault);
@@ -681,6 +683,223 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     expect(
       await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
     ).toEqual(3);
+  });
+
+  test("WHEN parent and grandchild notes are added THEN a child is added as a stub in NoteProps and properly connected in the hierarchy table", async () => {
+    // Set the initial DB state, the middle 'a.ch1.md' note is missing
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.md", "a.ch1.gch1.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResult.isOk()).toBeTruthy();
+
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "a.ch1.gch1", testVault);
+
+    // The ID's on stub notes are random, so we need to use getByFname here.
+    const byFnameResult = await NotePropsTableUtils.getByFname(db, "a.ch1");
+
+    expect(byFnameResult.isOk()).toBeTruthy();
+
+    let ch1Id: string | undefined;
+
+    if (byFnameResult.isOk()) {
+      expect(byFnameResult.value.length).toEqual(1);
+      expect(byFnameResult.value[0].fname).toEqual("a.ch1");
+      expect(byFnameResult.value[0].stub).toBeTruthy();
+      ch1Id = byFnameResult.value[0].id;
+    }
+
+    const result = await HierarchyTableUtils.getChildren(db, "a");
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const child = result.value[0];
+      expect(child).toEqual(ch1Id);
+    }
+
+    const resultTwo = await HierarchyTableUtils.getChildren(db, ch1Id!);
+
+    if (resultTwo.isOk()) {
+      expect(resultTwo.value.length).toEqual(1);
+
+      const child = resultTwo.value[0];
+      expect(child).toEqual("a.ch1.gch1");
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(3);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
+    ).toEqual(2);
+  });
+
+  test("WHEN parent and grandparent are both stubs THEN both are added as stubs in NoteProps and properly connected in the hierarchy table", async () => {
+    // Set the initial DB state, multiple ancestors 'a.md' and 'a.ch1.md' are missing
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.ch1.gch1.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResult.isOk()).toBeTruthy();
+
+    await validateNotePropInDB(db, "a.ch1.gch1", testVault);
+
+    // The ID's on stub notes are random, so we need to use getByFname here.
+    const parentByFnameResult = await NotePropsTableUtils.getByFname(
+      db,
+      "a.ch1"
+    );
+
+    expect(parentByFnameResult.isOk()).toBeTruthy();
+
+    let parentId: string | undefined;
+
+    if (parentByFnameResult.isOk()) {
+      expect(parentByFnameResult.value.length).toEqual(1);
+      expect(parentByFnameResult.value[0].fname).toEqual("a.ch1");
+      expect(parentByFnameResult.value[0].stub).toBeTruthy();
+      parentId = parentByFnameResult.value[0].id;
+    }
+
+    const grandparentByFnameResult = await NotePropsTableUtils.getByFname(
+      db,
+      "a"
+    );
+
+    expect(grandparentByFnameResult.isOk()).toBeTruthy();
+
+    let grandparentId: string | undefined;
+
+    if (grandparentByFnameResult.isOk()) {
+      expect(grandparentByFnameResult.value.length).toEqual(1);
+      expect(grandparentByFnameResult.value[0].fname).toEqual("a");
+      expect(grandparentByFnameResult.value[0].stub).toBeTruthy();
+      grandparentId = grandparentByFnameResult.value[0].id;
+    }
+
+    const result = await HierarchyTableUtils.getChildren(db, grandparentId!);
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const child = result.value[0];
+      expect(child).toEqual(parentId);
+    }
+
+    const resultTwo = await HierarchyTableUtils.getChildren(db, parentId!);
+
+    if (resultTwo.isOk()) {
+      expect(resultTwo.value.length).toEqual(1);
+
+      const child = resultTwo.value[0];
+      expect(child).toEqual("a.ch1.gch1");
+    }
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(3);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
+    ).toEqual(2);
+  });
+
+  test("WHEN a stub note gets replaced by a real note THEN the ancestral chain is properly connected in the hierarchy table", async () => {
+    // Set the initial DB state, a.ch1 gets generated as a stub.
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.md", "a.ch1.gch1.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResult.isOk()).toBeTruthy();
+
+    // Now replace the a.ch1 stub with a real note
+    const parseResultTwo = await parseAllNoteFilesForSqlite(
+      ["a.md", "a.ch1.md", "a.ch1.gch1.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResultTwo.isOk()).toBeTruthy();
+
+    await validateNotePropInDB(db, "a", testVault);
+    await validateNotePropInDB(db, "a.ch1", testVault);
+    await validateNotePropInDB(db, "a.ch1.gch1", testVault);
+
+    const result = await HierarchyTableUtils.getChildren(db, "a");
+
+    if (result.isOk()) {
+      expect(result.value.length).toEqual(1);
+
+      const child = result.value[0];
+      expect(child).toEqual("a.ch1");
+    }
+
+    const resultTwo = await HierarchyTableUtils.getChildren(db, "a.ch1");
+
+    if (resultTwo.isOk()) {
+      expect(resultTwo.value.length).toEqual(1);
+
+      const child = resultTwo.value[0];
+      expect(child).toEqual("a.ch1.gch1");
+    }
+
+    // Make sure all the stub rows are properly cleaned up:
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(3);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
+    ).toEqual(2);
+  });
+
+  test("WHEN a note with parent and grandparent stubs is deleted THEN stubs in the ancestral tree also get deleted", async () => {
+    // Set the initial DB state, multiple ancestors 'a.md' and 'a.ch1.md' are missing
+    const parseResult = await parseAllNoteFilesForSqlite(
+      ["a.ch1.gch1.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResult.isOk()).toBeTruthy();
+
+    // Now delete the grandchild note:
+    const parseResultTwo = await parseAllNoteFilesForSqlite(
+      [],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(parseResultTwo.isOk()).toBeTruthy();
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(0);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
+    ).toEqual(0);
   });
 
   // Note Update Tests:

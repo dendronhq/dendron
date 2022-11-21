@@ -3,6 +3,7 @@ import {
   DendronASTDest,
   DendronConfig,
   DLink,
+  DLogger,
   DVault,
   genHash,
   genUUID,
@@ -61,8 +62,12 @@ export async function parseAllNoteFilesForSqlite(
   db: Database,
   root: string,
   schemas: SchemaModuleDict,
-  enableLinkCandidates: boolean = false
+  enableLinkCandidates: boolean = false,
+  logger?: DLogger
 ): Promise<Result<null, any>> {
+  logger?.info("inside parseAllNoteFilesForSqlite");
+
+  // debugger;
   // Add the vault to the DB if it doesn't exist yet
   await addVaultToDb(vault, db);
 
@@ -195,12 +200,12 @@ export async function parseAllNoteFilesForSqlite(
   // For any added notes, check if this caused a previously unresolved
   // wikilink/ref to now become a properly resolved link. If so, go ahead and
   // update it in the Links table.
-  if (addedNotes.length > 0 && vault.name) {
+  if (addedNotes.length > 0) {
     const updateUnresolvedLinksForAddedNotesResult =
       await LinksTableUtils.updateUnresolvedLinksForAddedNotes(
         db,
         addedNotes,
-        vault.name
+        vault.name ?? vault.fsPath
       );
 
     if (updateUnresolvedLinksForAddedNotesResult.isErr()) {
@@ -295,14 +300,17 @@ function getAddedFiles(
     .join(",");
 
   const sql = `
-  WITH T(fname) as 
-  (VALUES ${values})
-  SELECT T.fname
-  FROM T
-  LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname 
-  LEFT OUTER JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id 
-  WHERE NoteProps.fname IS NULL OR (NoteProps.fname IS NOT NULL AND vaultId != ${vaultId}) OR NoteProps.stub = 1
-  `;
+    WITH T(fname) as 
+    (VALUES ${values})
+    SELECT T.fname
+    FROM T
+    EXCEPT
+    SELECT NoteProps.fname
+    FROM NoteProps
+	  JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id 
+    WHERE vaultId = ${vaultId}
+    AND NoteProps.stub = 0
+    `;
 
   const prom = new Promise<string[]>((resolve, reject) => {
     db.all(sql, (err, rows) => {
@@ -733,15 +741,17 @@ function addAncestorStubs(
       });
 
       const stubInsertionValues = stubProps
-        .map((d) => `('${d.id}', '${d.fname}')`)
+        .map(
+          (d) => `('${d.id}', '${d.fname}', '${NoteUtils.genTitle(d.fname)}')`
+        )
         .join(",");
 
       // Now do the insertion into NoteProps, with stub set to 1 (true)
       const sql2 = `
-        INSERT INTO NoteProps (id, fname, stub)
-        WITH T(id, fname) AS
+        INSERT INTO NoteProps (id, fname, title, stub)
+        WITH T(id, fname, title) AS
         (VALUES ${stubInsertionValues})
-        SELECT T.id, T.fname, 1 FROM T -- 1 here means stub = true`;
+        SELECT T.id, T.fname, T.title, 1 FROM T -- 1 here means stub = true`;
 
       return executeSqlWithVoidResult(db, sql2).map(() => stubProps);
     })
@@ -884,6 +894,7 @@ function deleteRemovedFilesFromDB(
         JOIN NoteProps ON A.fname = NoteProps.fname
         JOIN VaultNotes ON NoteProps.id = VaultNotes.noteId
         WHERE VaultId = ${vaultId}
+        AND (NoteProps.stub != 1)
         AND Outer.id = NoteProps.id
       )`;
   }

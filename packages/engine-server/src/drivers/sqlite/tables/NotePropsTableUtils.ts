@@ -39,7 +39,7 @@ export class NotePropsTableUtils {
       CREATE TABLE IF NOT EXISTS NoteProps (
         id TEXT NOT NULL PRIMARY KEY,
         fname TEXT NOT NULL,
-        title TEXT,
+        title TEXT NOT NULL,
         description TEXT,
         updated INTEGER,
         created INTEGER,

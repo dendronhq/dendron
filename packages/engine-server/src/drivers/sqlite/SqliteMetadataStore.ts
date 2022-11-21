@@ -264,34 +264,59 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
 
     // Potentially any unresolved links now are resolved with the addition of this note
     if (data.vault.name) {
-      await LinksTableUtils.updateUnresolvedLinksForAddedNotes(
-        this._db,
-        [data],
-        data.vault.name
-      );
+      const updateUnresolvedLinksForAddedNotesResult =
+        await LinksTableUtils.updateUnresolvedLinksForAddedNotes(
+          this._db,
+          [data],
+          data.vault.name
+        );
+
+      if (updateUnresolvedLinksForAddedNotesResult.isErr()) {
+        return {
+          error: updateUnresolvedLinksForAddedNotesResult.error,
+        };
+      }
     }
 
     // Potentially some links became ambiguous
-    await LinksTableUtils.InsertLinksThatBecameAmbiguous(this._db, [
-      { fname: data.fname, id: data.id },
-    ]);
+    const insertLinksThatBecameAmbiguousResult =
+      await LinksTableUtils.InsertLinksThatBecameAmbiguous(this._db, [
+        { fname: data.fname, id: data.id },
+      ]);
+
+    if (insertLinksThatBecameAmbiguousResult.isErr()) {
+      return {
+        error: insertLinksThatBecameAmbiguousResult.error,
+      };
+    }
 
     // Now add children
     await Promise.all(
-      data.children.map((child) => {
-        return HierarchyTableUtils.insert(
+      data.children.map(async (child) => {
+        const childInsertResult = await HierarchyTableUtils.insert(
           this._db,
           new HierarchyTableRow(data.id, child)
         );
+
+        if (childInsertResult.isErr()) {
+          // TODO: Handle
+        }
+        return childInsertResult;
       })
     );
 
     // Now add the parent-> child link (where this note is the child):
     if (data.parent) {
-      await HierarchyTableUtils.insert(
+      const parentInsertResult = await HierarchyTableUtils.insert(
         this._db,
         new HierarchyTableRow(data.parent, data.id)
       );
+
+      if (parentInsertResult.isErr()) {
+        return {
+          error: parentInsertResult.error,
+        };
+      }
     }
 
     if (data.schema) {

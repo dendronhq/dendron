@@ -230,6 +230,22 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   // Note Setup Tests:
+  test("WHEN initializing an empty workspace THEN initialization still succeeds and the database is empty", async () => {
+    const response = await parseAllNoteFilesForSqlite(
+      [],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(response.isOk()).toBeTruthy();
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(0);
+  });
+
   test("WHEN sqlite init is performed on a simple note THEN note is present in the NoteProps and VaultNotes tables", async () => {
     await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
 
@@ -1162,6 +1178,42 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     expect(
       await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Links)
     ).toEqual(0);
+  });
+
+  test("WHEN all notes have been deleted THEN initialization still succeeds and the database is empty apart from the Vaults Table", async () => {
+    await parseAllNoteFilesForSqlite(
+      ["a.md", "b.md"],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    const response = await parseAllNoteFilesForSqlite(
+      [],
+      testVault,
+      db,
+      testDir,
+      {}
+    );
+
+    expect(response.isOk()).toBeTruthy();
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.NoteProps)
+    ).toEqual(0);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.VaultNotes)
+    ).toEqual(0);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Hierarchy)
+    ).toEqual(0);
+
+    expect(
+      await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Vaults)
+    ).toEqual(1);
   });
 
   // Tests for more complicated scenarios:

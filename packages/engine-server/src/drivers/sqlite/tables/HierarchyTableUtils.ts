@@ -1,19 +1,18 @@
 import { DNodePointer } from "@dendronhq/common-all";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
 import { executeSqlWithVoidResult } from "../SQLiteUtils";
 
 export class HierarchyTableRow {
-  constructor(
-    // NOTE: These are ID's, not fnames!
-    public parent: string,
-    public child: string
-  ) {}
+  constructor(public parentId: string, public childId: string) {}
 }
 
 export class HierarchyTableUtils {
   public static createTable(db: Database): ResultAsync<null, SqliteError> {
+    // The DELETE CASCADE makes it such that whenever the foreign key note is
+    // deleted in the NoteProps table, the corresponding rows are also deleted
+    // in this Hierarchy table.
     const sql = `
     CREATE TABLE IF NOT EXISTS Hierarchy (
       parent TEXT NOT NULL,
@@ -41,8 +40,8 @@ export class HierarchyTableUtils {
     row: HierarchyTableRow
   ): ResultAsync<null, SqliteError> {
     const sql = `
-    INSERT INTO Hierarchy (parent, child)
-    VALUES (('${row.parent}', '${row.child}'))`;
+    INSERT OR IGNORE INTO Hierarchy (parent, child)
+    VALUES ('${row.parentId}', '${row.childId}')`;
 
     return executeSqlWithVoidResult(db, sql);
   }
@@ -51,12 +50,16 @@ export class HierarchyTableUtils {
     db: Database,
     rows: HierarchyTableRow[]
   ): ResultAsync<null, SqliteError> {
+    if (rows.length === 0) {
+      return okAsync(null);
+    }
+
     const values = rows
-      .map((row) => `('${row.parent}', '${row.child}')`)
+      .map((row) => `('${row.parentId}', '${row.childId}')`)
       .join(",");
 
     const sql = `
-    INSERT INTO Hierarchy (parent, child)
+    INSERT OR IGNORE Hierarchy (parent, child)
     VALUES ${values}`;
 
     return executeSqlWithVoidResult(db, sql);
@@ -81,6 +84,10 @@ export class HierarchyTableUtils {
       vaultId: number;
     }[]
   ): ResultAsync<null, SqliteError> {
+    if (data.length === 0) {
+      return okAsync(null);
+    }
+
     const values = data
       .map((d) => `('${d.childId}', '${d.parentFname}', ${d.vaultId})`)
       .join(",");

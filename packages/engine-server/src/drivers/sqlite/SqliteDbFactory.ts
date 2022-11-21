@@ -1,4 +1,9 @@
-import { DVault, IFileStore, ResultAsync } from "@dendronhq/common-all";
+import {
+  DLogger,
+  DVault,
+  IFileStore,
+  ResultAsync,
+} from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { Database } from "sqlite3";
 import { URI } from "vscode-uri";
@@ -29,7 +34,8 @@ export class SqliteDbFactory {
     wsRoot: string,
     vaults: DVault[],
     fileStore: IFileStore,
-    dbFilePath: string
+    dbFilePath: string,
+    logger?: DLogger
   ): ResultAsync<Database, Error> {
     return SqliteDbFactory.createEmptyDB(dbFilePath).andThen((db) => {
       const results = ResultAsync.combine(
@@ -52,7 +58,9 @@ export class SqliteDbFactory {
               vault,
               db,
               vaultPath,
-              {} // TODO: Add in schemaModuleDict
+              {}, // TODO: Add in schemaModuleDict
+              false,
+              logger
             );
           });
         })
@@ -104,9 +112,6 @@ export class SqliteDbFactory {
           })
           .andThen(() => {
             return SchemaNotesTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            return NotePropsFtsTableUtils.createTable(db);
           })
           .andThen(() => {
             return NotePropsFtsTableUtils.createTable(db);

@@ -28,6 +28,8 @@ import {
   ReducedDEngine,
   RenameNoteOpts,
   RenameNoteResp,
+  RenderNoteOpts,
+  RenderNoteResp,
   RespV3,
   WriteNoteResp,
 } from "../types";
@@ -483,4 +485,9 @@ export abstract class EngineV3Base implements ReducedDEngine {
     }
     return [];
   }
+
+  /**
+   * See {@link DEngine.renderNote}
+   */
+  abstract renderNote(opts: RenderNoteOpts): Promise<RenderNoteResp>;
 }

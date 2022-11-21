@@ -1,6 +1,6 @@
 import {
   APIUtils,
-  // CONSTANTS,
+  CONSTANTS,
   DendronEditorViewKey,
   // DendronError,
   DendronTreeViewKey,
@@ -123,16 +123,21 @@ export class WebViewUtils {
     const themes = ["light", "dark"];
     const themeMap: { [key: string]: string } = {};
 
-    // const customThemePath = Utils.joinPath(
-    //   this.wsRoot,
-    //   CONSTANTS.CUSTOM_THEME_CSS
-    // );
-    // TODO: Add back functionality
-    // if (await fs.pathExists(customThemePath)) {
-    //   themeMap["custom"] = panel.webview
-    //     .asWebviewUri(vscode.Uri.file(customThemePath))
-    //     .toString();
-    // }
+    const customThemePath = Utils.joinPath(
+      this.wsRoot,
+      CONSTANTS.CUSTOM_THEME_CSS
+    );
+
+    try {
+      // Referred from: https://github.com/microsoft/vscode-extension-samples/blob/0b3a31bf2bdd388ac4fdc0ccea2fb1315abfe3e3/fsconsumer-sample/src/extension.ts#L14
+      if (await vscode.workspace.fs.stat(customThemePath)) {
+        themeMap["custom"] = panel.webview
+          .asWebviewUri(customThemePath)
+          .toString();
+      }
+    } catch {
+      // TODO: add logger
+    }
 
     themes.map((th) => {
       themeMap[th] = panel.webview

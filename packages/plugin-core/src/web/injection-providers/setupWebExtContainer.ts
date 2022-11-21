@@ -27,8 +27,6 @@ import { TreeViewDummyConfig } from "../../views/common/treeview/TreeViewDummyCo
 import { ILookupProvider } from "../commands/lookup/ILookupProvider";
 import { NoteLookupProvider } from "../commands/lookup/NoteLookupProvider";
 import { DendronEngineV3Web } from "../engine/DendronEngineV3Web";
-import { INoteRenderer } from "../engine/INoteRenderer";
-import { PluginNoteRenderer } from "../engine/PluginNoteRenderer";
 import { VSCodeFileStore } from "../engine/store/VSCodeFileStore";
 import { ConsoleLogger } from "../utils/ConsoleLogger";
 import {
@@ -36,7 +34,7 @@ import {
   IPreviewPanelConfig,
 } from "../views/preview/IPreviewPanelConfig";
 import { PreviewLinkHandler } from "../views/preview/PreviewLinkHandler";
-import { PreviewPanel } from "../views/preview/PreviewPanel";
+import { PreviewPanel } from "../../views/common/preview/PreviewPanel";
 import { getAssetsPrefix } from "./getAssetsPrefix";
 import { getEnablePrettlyLinks } from "./getEnablePrettlyLinks";
 import { getFuseEngine } from "./getFuseEngine";
@@ -167,10 +165,6 @@ export async function setupWebExtContainer(context: vscode.ExtensionContext) {
   // it's a dependency in some util methods.
   container.register<number>("port", {
     useValue: 1,
-  });
-
-  container.register<INoteRenderer>("INoteRenderer", {
-    useClass: PluginNoteRenderer,
   });
 
   const config = await getWorkspaceConfig(wsRoot);

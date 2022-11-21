@@ -2,7 +2,9 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
+  ReducedDEngine,
   string2Note,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DConfig, DLogger } from "@dendronhq/common-server";
@@ -15,10 +17,10 @@ import {
   TextDocument,
   TextDocumentChangeEvent,
 } from "vscode";
-import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { ITextDocumentService } from "../ITextDocumentService";
 import { EditorUtils } from "../../utils/EditorUtils";
+import { inject, injectable } from "tsyringe";
 
 /**
  * This service keeps client state note state synchronized with the engine
@@ -27,21 +29,23 @@ import { EditorUtils } from "../../utils/EditorUtils";
  * See [[Note Sync Service|dendron://dendron.docs/pkg.plugin-core.ref.note-sync-service]] for
  * additional docs
  */
+@injectable()
 export class TextDocumentService implements ITextDocumentService {
-  private L: DLogger;
-
   _textDocumentEventHandle: Disposable;
-  _extension: IDendronExtension;
 
   /**
    *
-   * @param ext Instance of IDendronExtension
    * @param textDocumentEvent - Event returning TextDocument, such as
    * vscode.workspace.OnDidSaveTextDocument. This call is not debounced
    */
-  constructor(ext: IDendronExtension, textDocumentEvent: Event<TextDocument>) {
+  constructor(
+    @inject("textDocumentEvent") textDocumentEvent: Event<TextDocument>,
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("vaults") private vaults: DVault[],
+    @inject("ReducedDEngine") private engine: ReducedDEngine,
+    @inject("logger") private L: DLogger
+  ) {
     this.L = Logger;
-    this._extension = ext;
     this._textDocumentEventHandle = textDocumentEvent(this.onDidSave, this);
   }
 
@@ -78,8 +82,8 @@ export class TextDocumentService implements ITextDocumentService {
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       fmChangeOnly,
-      engine: this._extension.getEngine(),
-      config: DConfig.readConfigSync(this._extension.getDWorkspace().wsRoot),
+      engine: this.engine,
+      config: DConfig.readConfigSync(this.wsRoot.fsPath),
     });
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });
@@ -99,22 +103,24 @@ export class TextDocumentService implements ITextDocumentService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
     if (
-      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+      !WorkspaceUtils.isPathInWorkspace({
+        wsRoot: this.wsRoot.fsPath,
+        vaults: this.vaults,
+        fpath: uri.fsPath,
+      })
     ) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });
-    const engine = this._extension.getEngine();
     const vault = VaultUtils.getVaultByFilePath({
-      vaults: engine.vaults,
-      wsRoot,
+      vaults: this.vaults,
+      wsRoot: this.wsRoot.fsPath,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = (await engine.findNotes({ fname, vault }))[0];
+    const noteHydrated = (await this.engine.findNotes({ fname, vault }))[0];
     if (_.isUndefined(noteHydrated)) {
       return;
     }
@@ -137,7 +143,7 @@ export class TextDocumentService implements ITextDocumentService {
       vault,
     });
 
-    const resp = await engine.writeNote(props, { metaOnly: true });
+    const resp = await this.engine.writeNote(props, { metaOnly: true });
 
     // This altering of response type is only for maintaining test compatibility
     if (resp.data && resp.data.length > 0) {
@@ -162,9 +168,12 @@ export class TextDocumentService implements ITextDocumentService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
     if (
-      !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
+      !WorkspaceUtils.isPathInWorkspace({
+        wsRoot: this.wsRoot.fsPath,
+        vaults: this.vaults,
+        fpath: uri.fsPath,
+      })
     ) {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
@@ -188,13 +197,12 @@ export class TextDocumentService implements ITextDocumentService {
     }
 
     this.L.debug({ ctx, uri: uri.fsPath });
-    const engine = this._extension.getEngine();
     const vault = VaultUtils.getVaultByFilePath({
-      vaults: engine.vaults,
-      wsRoot: this._extension.getEngine().wsRoot,
+      vaults: this.vaults,
+      wsRoot: this.wsRoot.fsPath,
       fsPath: uri.fsPath,
     });
-    const noteHydrated = (await engine.findNotes({ fname, vault }))[0];
+    const noteHydrated = (await this.engine.findNotes({ fname, vault }))[0];
     if (_.isUndefined(noteHydrated)) {
       return;
     }

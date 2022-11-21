@@ -20,6 +20,8 @@ import {
   WriteNoteResp,
   type ReducedDEngine,
   FuseEngine,
+  RenderNoteOpts,
+  RenderNoteResp,
 } from "@dendronhq/common-all";
 
 export class MockEngineAPIService implements ReducedDEngine {
@@ -127,5 +129,8 @@ export class MockEngineAPIService implements ReducedDEngine {
 
     const data = resp.data as NoteProps;
     return Promise.resolve([data]);
+  }
+  renderNote(_opts: RenderNoteOpts): Promise<RenderNoteResp> {
+    throw new Error("Method not implemented.");
   }
 }

@@ -1,33 +1,38 @@
 import {
-  DEngineClient,
   DNoteAnchorBasic,
+  DVault,
   ErrorFactory,
   isVSCodeCommandUri,
   isWebUri,
   NotePropsMeta,
   NoteViewMessage,
+  ReducedDEngine,
   TutorialEvents,
+  URI,
 } from "@dendronhq/common-all";
 import { FileExtensionUtils, findNonNoteFile } from "@dendronhq/common-server";
-import path from "path";
-import * as vscode from "vscode";
-import { IDendronExtension } from "../../dendronExtensionInterface";
-import { Logger } from "../../logger";
-import { QuickPickUtil } from "../../utils/quickPick";
-import { VSCodeUtils } from "../../vsCodeUtils";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
-import { PluginFileUtils } from "../../utils/files";
-import { GotoNoteCommand } from "../../commands/GotoNote";
+import path from "path";
+import { inject, injectable } from "tsyringe";
+import * as vscode from "vscode";
+import { Logger } from "../../logger";
 import { AnalyticsUtils } from "../../utils/analytics";
 import { ExtensionUtils } from "../../utils/ExtensionUtils";
+import { PluginFileUtils } from "../../utils/files";
+import { QuickPickUtil } from "../../utils/quickPick";
+import { VSCodeUtils } from "../../vsCodeUtils";
+import {
+  openNote,
+  trySelectRevealNonNoteAnchor,
+} from "../../web/utils/openNote";
 import { IPreviewLinkHandler, LinkType } from "./IPreviewLinkHandler";
 
 /**
  * Default implementation for handling link clicks in preview
  */
+@injectable()
 export class PreviewLinkHandler implements IPreviewLinkHandler {
-  private _ext: IDendronExtension;
   /**
    * set of tutorial note ids that we will allow tracking of link clicked events.
    * TODO: consolidate tracking of tutorial ids to a central place
@@ -35,10 +40,11 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
    *       add a way to register callbacks to the link handler in the future
    */
   private _trackAllowedIds = ExtensionUtils.getTutorialIds();
-
-  constructor(ext: IDendronExtension) {
-    this._ext = ext;
-  }
+  constructor(
+    @inject("wsRoot") private wsRoot: URI,
+    @inject("ReducedDEngine") private engine: ReducedDEngine,
+    @inject("vaults") private vaults: DVault[]
+  ) {}
 
   public async onLinkClicked({
     data,
@@ -91,16 +97,16 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     try {
       const noteData = await this.getNavigationTargetNoteForWikiLink({
         data,
-        engine: this._ext.getEngine(),
+        engine: this.engine,
       });
 
       if (noteData.note) {
         // Found a note, open that
-        const cmd = new GotoNoteCommand(this._ext);
-
-        await cmd.execute({
-          qs: noteData.note.fname,
+        await openNote({
+          wsRoot: this.wsRoot,
+          fname: noteData.note.fname,
           vault: noteData.note.vault,
+          note: noteData.note,
           // Avoid replacing the preview
           column: vscode.ViewColumn.One,
           anchor: noteData.anchor,
@@ -111,15 +117,14 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       Logger.debug({ ctx, error: ErrorFactory.wrapIfNeeded(err) });
     }
     // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
-    const { wsRoot, vaults } = this._ext.getDWorkspace();
     const currentNote = data?.id
-      ? (await this._ext.getEngine().getNoteMeta(data.id)).data
+      ? (await this.engine.getNoteMeta(data.id)).data
       : undefined;
     const { fullPath } =
       (await findNonNoteFile({
         fpath: path.normalize(uri.fsPath),
-        vaults,
-        wsRoot,
+        vaults: this.vaults,
+        wsRoot: this.wsRoot.fsPath,
         currentVault: currentNote?.vault,
       })) || {};
     if (fullPath) {
@@ -135,7 +140,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
         );
         if (!_.isEmpty(uri.fragment) && editor) {
           const anchor = AnchorUtils.string2anchor(uri.fragment);
-          await this._ext.wsUtils.trySelectRevealNonNoteAnchor(editor, anchor);
+          await trySelectRevealNonNoteAnchor(editor, anchor);
         }
         return LinkType.TEXT;
       } else {
@@ -163,7 +168,7 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
     engine,
   }: {
     data: NoteViewMessage["data"];
-    engine: DEngineClient;
+    engine: ReducedDEngine;
   }): Promise<{
     note: NotePropsMeta | undefined;
     anchor: DNoteAnchorBasic | undefined;

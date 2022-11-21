@@ -12,6 +12,8 @@ import {
   NoteStore,
   NoteUtils,
   FuseEngine,
+  DendronConfig,
+  DendronPublishingConfig,
 } from "@dendronhq/common-all";
 import { container, Lifecycle } from "tsyringe";
 import { ILookupProvider } from "../../commands/lookup/ILookupProvider";
@@ -87,6 +89,11 @@ export async function setupTestEngineContainer() {
 
   container.register<ITreeViewConfig>("ITreeViewConfig", {
     useClass: TreeViewDummyConfig,
+  });
+
+  const config = getConfig();
+  container.register<DendronConfig>("DendronConfig", {
+    useValue: config as DendronConfig,
   });
 }
 
@@ -184,4 +191,38 @@ async function createNote(opts: CreateNoteOptsV4) {
     await note2File({ note, vault, wsRoot });
   }
   return note;
+}
+
+function getConfig(): DendronConfig {
+  const pubConfig: DendronPublishingConfig = {
+    copyAssets: false,
+    siteHierarchies: [],
+    enableSiteLastModified: false,
+    siteRootDir: "",
+    enableFrontmatterTags: false,
+    enableHashesForFMTags: false,
+    writeStubs: false,
+    seo: {
+      title: undefined,
+      description: undefined,
+      author: undefined,
+      twitter: undefined,
+      image: undefined,
+    },
+    github: {
+      cname: undefined,
+      enableEditLink: false,
+      editLinkText: undefined,
+      editBranch: undefined,
+      editViewMode: undefined,
+      editRepository: undefined,
+    },
+    enablePrettyLinks: false,
+  };
+
+  const config: DendronConfig = {
+    version: 5,
+    publishing: pubConfig,
+  } as DendronConfig;
+  return config;
 }

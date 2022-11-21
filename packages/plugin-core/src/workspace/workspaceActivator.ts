@@ -31,7 +31,6 @@ import { IDendronExtension } from "../dendronExtensionInterface";
 import { Logger } from "../logger";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { StateService } from "../services/stateService";
-import { TextDocumentServiceFactory } from "../services/TextDocumentServiceFactory";
 import { AnalyticsUtils, sentryReportingCallback } from "../utils/analytics";
 import { ExtensionUtils } from "../utils/ExtensionUtils";
 import { StartupUtils } from "../utils/StartupUtils";
@@ -46,6 +45,7 @@ import { CreateNoteCommand } from "../commands/CreateNoteCommand";
 import { container } from "tsyringe";
 import { NativeTreeView } from "../views/common/treeview/NativeTreeView";
 import SparkMD5 from "spark-md5";
+import { TextDocumentService } from "../services/node/TextDocumentService";
 
 function _setupTreeViewCommands(
   treeView: NativeTreeView,
@@ -572,7 +572,7 @@ export class WorkspaceActivator {
     }): Promise<RespV3<boolean>> {
     const ctx = "WorkspaceActivator:activate";
     // setup services
-    context.subscriptions.push(TextDocumentServiceFactory.create(ext));
+    context.subscriptions.push(container.resolve(TextDocumentService));
 
     // Reload
     WSUtils.showActivateProgress();

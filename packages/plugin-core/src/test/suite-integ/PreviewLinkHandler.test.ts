@@ -1,4 +1,9 @@
-import { NoteProps, NotePropsMeta, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteProps,
+  NotePropsMeta,
+  URI,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { before, beforeEach, describe, it } from "mocha";
 import path from "path";
@@ -11,7 +16,6 @@ import {
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { QuickPickUtil } from "../../utils/quickPick";
 import { VSCodeUtils } from "../../vsCodeUtils";
-import { MockDendronExtension } from "../MockDendronExtension";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, setupBeforeAfter } from "../testUtilsV3";
 import fs from "fs-extra";
@@ -67,6 +71,7 @@ suite("PreviewLinkHandler", () => {
           },
         });
       },
+      timeout: 5e3,
     },
     () => {
       let note: NotePropsMeta;
@@ -81,8 +86,11 @@ suite("PreviewLinkHandler", () => {
 
       describe("WHEN clicking on an wikilink", () => {
         test("THEN the clicked note is opened", async () => {
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -100,8 +108,12 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND the link is to a header", () => {
           test("THEN the note is opened at that header", async () => {
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const out = await handler.onLinkClicked({
               data: {
@@ -123,8 +135,12 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND the link is to a block anchor", () => {
           test("THEN the note is opened at that block", async () => {
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const out = await handler.onLinkClicked({
               data: {
@@ -146,8 +162,12 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND if the link is to a missing note", () => {
           test("THEN nothing happens", async () => {
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const openWithDefaultApp = sinon.stub(
               ShowPreviewAssetOpener,
@@ -169,8 +189,12 @@ suite("PreviewLinkHandler", () => {
             const showChooseNote = sinon
               .stub(QuickPickUtil, "showChooseNote")
               .returns(Promise.resolve(testNoteAmbiguous));
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const out = await handler.onLinkClicked({
               data: {
@@ -195,8 +219,11 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -222,13 +249,15 @@ suite("PreviewLinkHandler", () => {
         });
 
         test("THEN it is opened with the default app", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
           const openWithDefaultApp = sinon.stub(
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -258,13 +287,15 @@ suite("PreviewLinkHandler", () => {
         });
 
         test("THEN it is opened with the default app", async () => {
-          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const openWithDefaultApp = sinon.stub(
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -292,8 +323,11 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -333,8 +367,11 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
+          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
-            ExtensionProvider.getExtension()
+            URI.file(wsRoot),
+            engine,
+            vaults
           );
           const out = await handler.onLinkClicked({
             data: {
@@ -357,8 +394,12 @@ suite("PreviewLinkHandler", () => {
               ShowPreviewAssetOpener,
               "openWithDefaultApp"
             );
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const out = await handler.onLinkClicked({
               data: {
@@ -385,8 +426,12 @@ suite("PreviewLinkHandler", () => {
               ShowPreviewAssetOpener,
               "openWithDefaultApp"
             );
+            const { wsRoot, vaults, engine } =
+              ExtensionProvider.getDWorkspace();
             const handler = new PreviewLinkHandler(
-              ExtensionProvider.getExtension()
+              URI.file(wsRoot),
+              engine,
+              vaults
             );
             const out = await handler.onLinkClicked({
               data: {
@@ -413,8 +458,11 @@ suite("PreviewLinkHandler", () => {
   describe(`extractNoteIdFromHref`, () => {
     describe(`WHEN id is present`, () => {
       it("AND with header anchor THEN extract id", () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const linkHandler = new PreviewLinkHandler(
-          new MockDendronExtension({})
+          URI.file(wsRoot),
+          engine,
+          vaults
         );
         const actual = linkHandler.extractNoteIdFromHref({
           id: "id1",
@@ -425,8 +473,11 @@ suite("PreviewLinkHandler", () => {
       });
 
       it("AND without the header anchor THEN extract id", () => {
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const linkHandler = new PreviewLinkHandler(
-          new MockDendronExtension({})
+          URI.file(wsRoot),
+          engine,
+          vaults
         );
 
         const actual = linkHandler.extractNoteIdFromHref({
@@ -442,8 +493,11 @@ suite("PreviewLinkHandler", () => {
         // have some guid like ids in our test workspace right now so to make those
         // notes happy, and in case some older id generation used guid looking identifers.
 
+        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
         const linkHandler = new PreviewLinkHandler(
-          new MockDendronExtension({})
+          URI.file(wsRoot),
+          engine,
+          vaults
         );
 
         const actual = linkHandler.extractNoteIdFromHref({
@@ -456,8 +510,12 @@ suite("PreviewLinkHandler", () => {
     });
 
     it(`WHEN id not present in href THEN default onto passed in id`, () => {
-      const linkHandler = new PreviewLinkHandler(new MockDendronExtension({}));
-
+      const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      const linkHandler = new PreviewLinkHandler(
+        URI.file(wsRoot),
+        engine,
+        vaults
+      );
       const actual = linkHandler.extractNoteIdFromHref({
         id: "id1",
         href: "http://localhost:3005/vscode/note-preview.html?ws=WS-VALUE&port=3005#head2",

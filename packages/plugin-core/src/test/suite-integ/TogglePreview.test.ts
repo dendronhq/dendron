@@ -15,9 +15,7 @@ suite("GIVEN TogglePreview", function () {
   let cmd: TogglePreviewCommand;
 
   beforeEach(() => {
-    cmd = new TogglePreviewCommand(
-      PreviewPanelFactory.create(ExtensionProvider.getExtension())
-    );
+    cmd = new TogglePreviewCommand(PreviewPanelFactory.create());
   });
 
   // After each test, run Toggle Preview to close the preview panel

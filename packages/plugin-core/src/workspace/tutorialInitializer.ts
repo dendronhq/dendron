@@ -154,9 +154,7 @@ export class TutorialInitializer
       await vscode.window.showTextDocument(rootUri);
 
       if (getStage() !== "test") {
-        const preview = PreviewPanelFactory.create(
-          ExtensionProvider.getExtension()
-        );
+        const preview = PreviewPanelFactory.create();
         // TODO: HACK to wait for existing preview to be ready
         setTimeout(async () => {
           await new TogglePreviewCommand(preview).execute();

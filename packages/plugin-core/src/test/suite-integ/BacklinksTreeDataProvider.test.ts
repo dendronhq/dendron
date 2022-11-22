@@ -674,9 +674,9 @@ suite("BacklinksTreeDataProvider", function () {
       let updateSortOrder: sinon.SinonStub;
       let backlinksTreeDataProvider: BacklinksTreeDataProvider;
       let mockEvents: MockEngineEvents;
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
 
       beforeEach(async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         mockEvents = new MockEngineEvents();
         const isLinkCandidateEnabled = (
           await ConfigService.instance().getConfig(

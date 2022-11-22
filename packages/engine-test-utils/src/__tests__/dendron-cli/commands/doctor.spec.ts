@@ -784,7 +784,7 @@ describe("GIVEN fixRemoteVaults", () => {
               engine,
               action,
             });
-            const configAfter = await TestConfigUtils.getConfig();
+            const configAfter = await TestConfigUtils.getConfig({ wsRoot });
             const vaultsAfter = ConfigUtils.getVaults(configAfter);
             const vaultAfter = VaultUtils.getVaultByName({
               vaults: vaultsAfter,
@@ -813,7 +813,7 @@ describe("GIVEN fixRemoteVaults", () => {
 
           await runDoctor({ action, engine, wsRoot });
 
-          const configAfter = await TestConfigUtils.getConfig();
+          const configAfter = await TestConfigUtils.getConfig({ wsRoot });
           const vaultsAfter = ConfigUtils.getVaults(configAfter);
           const vaultAfter = VaultUtils.getVaultByName({
             vaults: vaultsAfter,
@@ -839,7 +839,7 @@ describe("GIVEN fixRemoteVaults", () => {
 
           await runDoctor({ action, engine, wsRoot });
 
-          const configAfter = await TestConfigUtils.getConfig();
+          const configAfter = await TestConfigUtils.getConfig({ wsRoot });
           const vaultsAfter = ConfigUtils.getVaults(configAfter);
           const vaultAfter = VaultUtils.getVaultByName({
             vaults: vaultsAfter,

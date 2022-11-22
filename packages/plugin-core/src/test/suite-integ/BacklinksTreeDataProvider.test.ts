@@ -231,8 +231,9 @@ suite("BacklinksTreeDataProvider", function () {
     () => {
       test("THEN finds the backlink candidate for that note", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const isLinkCandidateEnabled = (await TestConfigUtils.getConfig()).dev
-          ?.enableLinkCandidates;
+        const isLinkCandidateEnabled = (
+          await TestConfigUtils.getConfig({ wsRoot })
+        ).dev?.enableLinkCandidates;
         expect(isLinkCandidateEnabled).toBeTruthy();
 
         const noteWithTarget = (
@@ -273,8 +274,9 @@ suite("BacklinksTreeDataProvider", function () {
     () => {
       test("THEN finds the backlink candidate for all notes", async () => {
         const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
-        const isLinkCandidateEnabled = (await TestConfigUtils.getConfig()).dev
-          ?.enableLinkCandidates;
+        const isLinkCandidateEnabled = (
+          await TestConfigUtils.getConfig({ wsRoot })
+        ).dev?.enableLinkCandidates;
         expect(isLinkCandidateEnabled).toBeTruthy();
 
         // Check the backlinks for both notes

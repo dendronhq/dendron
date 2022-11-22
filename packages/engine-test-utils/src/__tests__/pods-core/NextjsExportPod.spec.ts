@@ -80,19 +80,24 @@ async function createAssetsInVault({
 }
 
 const setupConfig = async ({
+  wsRoot,
   siteConfig,
 }: {
+  wsRoot: string;
   siteConfig?: Partial<DendronPublishingConfig>;
 }) => {
-  await TestConfigUtils.withConfig((config) => {
-    ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-    const mergedPublishingConfig = _.merge(
-      config.publishing,
-      siteConfig
-    ) as DendronPublishingConfig;
-    ConfigUtils.overridePublishingConfig(config, mergedPublishingConfig);
-    return config;
-  });
+  await TestConfigUtils.withConfig(
+    (config) => {
+      ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
+      const mergedPublishingConfig = _.merge(
+        config.publishing,
+        siteConfig
+      ) as DendronPublishingConfig;
+      ConfigUtils.overridePublishingConfig(config, mergedPublishingConfig);
+      return config;
+    },
+    { wsRoot }
+  );
 };
 
 describe("GIVEN NextExport pod", () => {
@@ -147,13 +152,16 @@ describe("GIVEN NextExport pod", () => {
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
-              await TestConfigUtils.withConfig((config) => {
-                config.dev = {
-                  ...config.dev,
-                  enableExperimentalIFrameNoteRef: true,
-                };
-                return config;
-              });
+              await TestConfigUtils.withConfig(
+                (config) => {
+                  config.dev = {
+                    ...config.dev,
+                    enableExperimentalIFrameNoteRef: true,
+                  };
+                  return config;
+                },
+                { wsRoot: opts.wsRoot }
+              );
             },
           }
         );
@@ -192,13 +200,16 @@ describe("GIVEN NextExport pod", () => {
                 },
               });
 
-              await TestConfigUtils.withConfig((config) => {
-                config.dev = {
-                  ...config.dev,
-                  enableExperimentalIFrameNoteRef: true,
-                };
-                return config;
-              });
+              await TestConfigUtils.withConfig(
+                (config) => {
+                  config.dev = {
+                    ...config.dev,
+                    enableExperimentalIFrameNoteRef: true,
+                  };
+                  return config;
+                },
+                { wsRoot: opts.wsRoot }
+              );
             },
           }
         );
@@ -437,17 +448,20 @@ describe("GIVEN NextExport pod", () => {
                   return note;
                 }
               );
-              await TestConfigUtils.withConfig((config) => {
-                const vaults = ConfigUtils.getVaults(config);
-                const vault2 = vaults.find((ent) => ent.fsPath === "vault2");
-                vault2!.visibility = DVaultVisibility.PRIVATE;
-                ConfigUtils.setPublishProp(
-                  config,
-                  "siteUrl",
-                  "https://foo.com"
-                );
-                return config;
-              });
+              await TestConfigUtils.withConfig(
+                (config) => {
+                  const vaults = ConfigUtils.getVaults(config);
+                  const vault2 = vaults.find((ent) => ent.fsPath === "vault2");
+                  vault2!.visibility = DVaultVisibility.PRIVATE;
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "siteUrl",
+                    "https://foo.com"
+                  );
+                  return config;
+                },
+                { wsRoot: opts.wsRoot }
+              );
             },
           }
         );
@@ -485,10 +499,13 @@ describe("GIVEN nextjs export", () => {
         expect,
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
         },
       }
     );
@@ -515,10 +532,17 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -546,15 +570,22 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              ConfigUtils.setPublishProp(
-                config,
-                "assetsPrefix",
-                "/customPrefix"
-              );
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                ConfigUtils.setPublishProp(
+                  config,
+                  "assetsPrefix",
+                  "/customPrefix"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -585,10 +616,17 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -623,10 +661,13 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -742,15 +783,20 @@ describe("GIVEN nextjs export", () => {
                 "![[public.subnote-2]]",
               ].join("\n"),
             });
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteHierarchies", ["public"]);
-              ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -793,14 +839,17 @@ describe("GIVEN nextjs export", () => {
                 "![[public]]",
               ].join("\n"),
             });
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -835,15 +884,24 @@ describe("GIVEN nextjs export", () => {
               wsRoot,
               body: ["public content", "![[public]]"].join("\n"),
             });
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteHierarchies", ["public"]);
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -909,14 +967,17 @@ describe("GIVEN nextjs export", () => {
               wsRoot,
               body: ["Level five"].join("\n"),
             });
-            await TestConfigUtils.withConfig((config) => {
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -969,15 +1030,24 @@ describe("GIVEN nextjs export", () => {
               body: ["one"].join("\n"),
             });
 
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteHierarchies", ["public"]);
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );
@@ -1033,15 +1103,24 @@ describe("GIVEN nextjs export", () => {
               body: ["one", "![[private#anchor2]]"].join("\n"),
             });
 
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "siteHierarchies", ["public"]);
-              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                  "public",
+                ]);
+                ConfigUtils.setPublishProp(
+                  config,
+                  "siteUrl",
+                  "https://foo.com"
+                );
+                config.dev = {
+                  ...config.dev,
+                  enableExperimentalIFrameNoteRef: true,
+                };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );

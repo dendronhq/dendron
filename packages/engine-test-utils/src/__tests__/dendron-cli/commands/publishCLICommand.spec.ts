@@ -137,10 +137,13 @@ describe("WHEN run `dendron publish build`", () => {
     test("THEN show error", async () => {
       await runEngineTestV5(
         async ({ wsRoot }) => {
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setPublishProp(config, "assetsPrefix", "foo");
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "assetsPrefix", "foo");
+              return config;
+            },
+            { wsRoot }
+          );
           await evalPublishCmd({
             cmd,
             wsRoot,

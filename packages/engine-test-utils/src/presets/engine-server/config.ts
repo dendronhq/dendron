@@ -6,11 +6,11 @@ function genDefaultConfig() {
 }
 
 const WRITE = {
-  NEW_CONFIG: new TestPresetEntryV4(async () => {
+  NEW_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
     const config = genDefaultConfig();
     ConfigUtils.setPublishProp(config, "copyAssets", false);
     const configOnFile = (
-      await ConfigService.instance().writeConfig(config)
+      await ConfigService.instance().writeConfig(URI.file(wsRoot), config)
     )._unsafeUnwrap();
     return [
       {

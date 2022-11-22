@@ -89,11 +89,18 @@ suite("InsertNoteIndex", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ engine }) => {
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setWorkspaceProp(config, "enableXVaultWikiLink", true);
-            return config;
-          });
+        onInit: async ({ engine, wsRoot }) => {
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setWorkspaceProp(
+                config,
+                "enableXVaultWikiLink",
+                true
+              );
+              return config;
+            },
+            { wsRoot }
+          );
 
           const foo = (await engine.getNoteMeta("foo")).data!;
           const cmd = new InsertNoteIndexCommand(
@@ -124,13 +131,16 @@ suite("InsertNoteIndex", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ engine }) => {
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setCommandsProp(config, "insertNoteIndex", {
-              enableMarker: true,
-            });
-            return config;
-          });
+        onInit: async ({ engine, wsRoot }) => {
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setCommandsProp(config, "insertNoteIndex", {
+                enableMarker: true,
+              });
+              return config;
+            },
+            { wsRoot }
+          );
 
           const foo = (await engine.getNoteMeta("foo")).data!;
           const cmd = new InsertNoteIndexCommand(

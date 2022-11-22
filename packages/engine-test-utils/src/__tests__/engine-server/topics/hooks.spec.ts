@@ -99,19 +99,22 @@ describe("engine", () => {
       initHooks: true,
       preSetupHook: async ({ wsRoot }) => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
-        await TestConfigUtils.withConfig((config) => {
-          const hooks: DHookDict = {
-            onCreate: [
-              {
-                id: "hello",
-                pattern: "*",
-                type: "js",
-              },
-            ],
-          };
-          ConfigUtils.setHooks(config, hooks);
-          return config;
-        });
+        await TestConfigUtils.withConfig(
+          (config) => {
+            const hooks: DHookDict = {
+              onCreate: [
+                {
+                  id: "hello",
+                  pattern: "*",
+                  type: "js",
+                },
+              ],
+            };
+            ConfigUtils.setHooks(config, hooks);
+            return config;
+          },
+          { wsRoot }
+        );
       },
     }
   );
@@ -140,24 +143,27 @@ describe("engine", () => {
       preSetupHook: async ({ wsRoot }) => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
         writeJSHook({ wsRoot, fname: "goodbye", canary: "goodbye" });
-        await TestConfigUtils.withConfig((config) => {
-          const hooks: DHookDict = {
-            onCreate: [
-              {
-                id: "hello",
-                pattern: "*",
-                type: "js",
-              },
-              {
-                id: "goodbye",
-                pattern: "*",
-                type: "js",
-              },
-            ],
-          };
-          ConfigUtils.setHooks(config, hooks);
-          return config;
-        });
+        await TestConfigUtils.withConfig(
+          (config) => {
+            const hooks: DHookDict = {
+              onCreate: [
+                {
+                  id: "hello",
+                  pattern: "*",
+                  type: "js",
+                },
+                {
+                  id: "goodbye",
+                  pattern: "*",
+                  type: "js",
+                },
+              ],
+            };
+            ConfigUtils.setHooks(config, hooks);
+            return config;
+          },
+          { wsRoot }
+        );
       },
     }
   );
@@ -188,19 +194,22 @@ describe("engine", () => {
           path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
           "hello"
         );
-        await TestConfigUtils.withConfig((config) => {
-          const hooks: DHookDict = {
-            onCreate: [
-              {
-                id: "hello",
-                pattern: "*",
-                type: "js",
-              },
-            ],
-          };
-          ConfigUtils.setHooks(config, hooks);
-          return config;
-        });
+        await TestConfigUtils.withConfig(
+          (config) => {
+            const hooks: DHookDict = {
+              onCreate: [
+                {
+                  id: "hello",
+                  pattern: "*",
+                  type: "js",
+                },
+              ],
+            };
+            ConfigUtils.setHooks(config, hooks);
+            return config;
+          },
+          { wsRoot }
+        );
       },
     }
   );
@@ -233,19 +242,22 @@ describe("engine", () => {
           "content.js"
         );
         fs.writeFileSync(hookPath, axiosHookPayload);
-        await TestConfigUtils.withConfig((config) => {
-          const hooks: DHookDict = {
-            onCreate: [
-              {
-                id: "content",
-                pattern: "*",
-                type: "js",
-              },
-            ],
-          };
-          ConfigUtils.setHooks(config, hooks);
-          return config;
-        });
+        await TestConfigUtils.withConfig(
+          (config) => {
+            const hooks: DHookDict = {
+              onCreate: [
+                {
+                  id: "content",
+                  pattern: "*",
+                  type: "js",
+                },
+              ],
+            };
+            ConfigUtils.setHooks(config, hooks);
+            return config;
+          },
+          { wsRoot }
+        );
       },
     }
   );
@@ -283,19 +295,22 @@ describe("engine", () => {
             path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
             "hello"
           );
-          await TestConfigUtils.withConfig((config) => {
-            const hooks: DHookDict = {
-              onCreate: [
-                {
-                  id: "hello",
-                  pattern: "daily.*",
-                  type: "js",
-                },
-              ],
-            };
-            ConfigUtils.setHooks(config, hooks);
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              const hooks: DHookDict = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "daily.*",
+                    type: "js",
+                  },
+                ],
+              };
+              ConfigUtils.setHooks(config, hooks);
+              return config;
+            },
+            { wsRoot }
+          );
         },
       }
     );
@@ -326,19 +341,22 @@ describe("engine", () => {
         createEngine: createEngineFromServer,
         preSetupHook: async ({ wsRoot }) => {
           writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
-          await TestConfigUtils.withConfig((config) => {
-            const hooks: DHookDict = {
-              onCreate: [
-                {
-                  id: "hello",
-                  pattern: "*",
-                  type: "js",
-                },
-              ],
-            };
-            ConfigUtils.setHooks(config, hooks);
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              const hooks: DHookDict = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              ConfigUtils.setHooks(config, hooks);
+              return config;
+            },
+            { wsRoot }
+          );
         },
       }
     );
@@ -357,20 +375,23 @@ describe("remote engine", () => {
         initHooks: true,
         expect,
         createEngine: createEngineFromServer,
-        preSetupHook: async () => {
-          await TestConfigUtils.withConfig((config) => {
-            const hooks: DHookDict = {
-              onCreate: [
-                {
-                  id: "hello",
-                  pattern: "*",
-                  type: "js",
-                },
-              ],
-            };
-            ConfigUtils.setHooks(config, hooks);
-            return config;
-          });
+        preSetupHook: async ({ wsRoot }) => {
+          await TestConfigUtils.withConfig(
+            (config) => {
+              const hooks: DHookDict = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              ConfigUtils.setHooks(config, hooks);
+              return config;
+            },
+            { wsRoot }
+          );
         },
       }
     );
@@ -401,19 +422,22 @@ describe("remote engine", () => {
             fname: "hello",
             hookPayload: TestHookUtils.genBadJsHookPayload(),
           });
-          await TestConfigUtils.withConfig((config) => {
-            const hooks: DHookDict = {
-              onCreate: [
-                {
-                  id: "hello",
-                  pattern: "*",
-                  type: "js",
-                },
-              ],
-            };
-            ConfigUtils.setHooks(config, hooks);
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              const hooks: DHookDict = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              ConfigUtils.setHooks(config, hooks);
+              return config;
+            },
+            { wsRoot }
+          );
         },
       }
     );

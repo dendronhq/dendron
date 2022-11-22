@@ -57,10 +57,17 @@ describe("GIVEN noteRef plugin", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setPublishProp(config, "assetsPrefix", "/some-prefix");
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(
+                config,
+                "assetsPrefix",
+                "/some-prefix"
+              );
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
         },
       })
     );
@@ -117,10 +124,13 @@ describe("GIVEN noteRef plugin", () => {
             wsRoot: opts.wsRoot,
             props: { id: "alpha-id" },
           });
-          await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
-            return config;
-          });
+          await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
+              return config;
+            },
+            { wsRoot: opts.wsRoot }
+          );
         },
       })
     );

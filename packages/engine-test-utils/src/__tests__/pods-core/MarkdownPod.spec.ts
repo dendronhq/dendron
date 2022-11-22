@@ -1,6 +1,7 @@
 import {
   ConfigService,
   ConfigUtils,
+  URI,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -157,19 +158,22 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        const config = await TestConfigUtils.withConfig((config) => {
-          const defaultConfig = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setProp(
-            defaultConfig,
-            "publishing",
-            createPublishingConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            })
-          );
-          ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-          return defaultConfig;
-        });
+        const config = await TestConfigUtils.withConfig(
+          (config) => {
+            const defaultConfig = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setProp(
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
+          },
+          { wsRoot }
+        );
         const resp = await pod.execute({
           engine,
           vaults,
@@ -195,24 +199,27 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        const config = await TestConfigUtils.withConfig((config) => {
-          const defaultConfig = ConfigUtils.genDefaultConfig();
-          ConfigUtils.setWorkspaceProp(
-            defaultConfig,
-            "enableXVaultWikiLink",
-            true
-          );
-          ConfigUtils.setProp(
-            defaultConfig,
-            "publishing",
-            createPublishingConfig({
-              siteHierarchies: ["test-wikilink-to-url"],
-              siteRootDir: "docs",
-            })
-          );
-          ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-          return defaultConfig;
-        });
+        const config = await TestConfigUtils.withConfig(
+          (config) => {
+            const defaultConfig = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setWorkspaceProp(
+              defaultConfig,
+              "enableXVaultWikiLink",
+              true
+            );
+            ConfigUtils.setProp(
+              defaultConfig,
+              "publishing",
+              createPublishingConfig({
+                siteHierarchies: ["test-wikilink-to-url"],
+                siteRootDir: "docs",
+              })
+            );
+            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
+            return defaultConfig;
+          },
+          { wsRoot }
+        );
 
         const resp = await pod.execute({
           engine,
@@ -249,7 +256,7 @@ describe("markdown publish pod", () => {
         });
         const seedId = TestSeedUtils.defaultSeedId();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vaultsConfig = ConfigUtils.getVaults(config);
         engine.vaults = vaultsConfig;

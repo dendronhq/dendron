@@ -6,6 +6,7 @@ import {
   Time,
   ConfigUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createFileWatcher,
@@ -78,7 +79,9 @@ export class EngineConnector {
     force?: boolean;
   }) {
     if (!this._ENGINE_CONNECTOR || force) {
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }

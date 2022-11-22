@@ -17,6 +17,7 @@ import {
   NoteDictsUtils,
   NoteProps,
   ProcFlavor,
+  URI,
 } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -193,10 +194,13 @@ describe("hashtag", () => {
               vault,
               wsRoot,
             });
-            await TestConfigUtils.withConfig((config) => {
-              ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
+                return config;
+              },
+              { wsRoot }
+            );
           },
         })
       );
@@ -204,9 +208,9 @@ describe("hashtag", () => {
 
     const SIMPLE = createProcTests({
       name: "simple",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -258,9 +262,9 @@ describe("hashtag", () => {
       test("with color", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
@@ -291,9 +295,9 @@ describe("hashtag", () => {
       test("when enableRandomlyGeneratedColors is false, only uses explicit colors", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
@@ -322,14 +326,17 @@ describe("hashtag", () => {
                 wsRoot,
                 vault: vaults[0],
               });
-              await TestConfigUtils.withConfig((config) => {
-                ConfigUtils.setPublishProp(
-                  config,
-                  "enableRandomlyColoredTags",
-                  false
-                );
-                return config;
-              });
+              await TestConfigUtils.withConfig(
+                (config) => {
+                  ConfigUtils.setPublishProp(
+                    config,
+                    "enableRandomlyColoredTags",
+                    false
+                  );
+                  return config;
+                },
+                { wsRoot }
+              );
             },
           }
         );
@@ -338,9 +345,9 @@ describe("hashtag", () => {
       test("with color cascading from parent, self missing", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
@@ -371,9 +378,9 @@ describe("hashtag", () => {
       test("with color cascading from parent, self exists", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
@@ -409,9 +416,9 @@ describe("hashtag", () => {
       test("overrides color cascading from parent", async () => {
         let note: NoteProps;
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
@@ -448,9 +455,9 @@ describe("hashtag", () => {
 
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -479,9 +486,9 @@ describe("hashtag", () => {
     describe("WHEN disabled in config", () => {
       test("THEN hashtags don't get parsed or processed", async () => {
         await runEngineTestV5(
-          async ({ engine, vaults }) => {
+          async ({ engine, vaults, wsRoot }) => {
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const proc = MDUtilsV5.procRehypeFull(
               {
@@ -503,11 +510,14 @@ describe("hashtag", () => {
           },
           {
             expect,
-            preSetupHook: async () => {
-              await TestConfigUtils.withConfig((config) => {
-                ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
-                return config;
-              });
+            preSetupHook: async ({ wsRoot }) => {
+              await TestConfigUtils.withConfig(
+                (config) => {
+                  ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
+                  return config;
+                },
+                { wsRoot }
+              );
             },
           }
         );

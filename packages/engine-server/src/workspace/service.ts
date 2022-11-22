@@ -202,7 +202,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   get config(): PromiseLike<DendronConfig> {
     return ConfigService.instance()
-      .readConfig()
+      .readConfig(URI.file(this.wsRoot))
       .then((res) => {
         if (res.isErr()) {
           throw res.error;
@@ -221,7 +221,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   async setConfig(config: DendronConfig) {
-    await ConfigService.instance().writeConfig(config);
+    await ConfigService.instance().writeConfig(URI.file(this.wsRoot), config);
   }
 
   setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {

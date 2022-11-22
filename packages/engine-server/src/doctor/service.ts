@@ -272,6 +272,7 @@ export class DoctorService implements Disposable {
           });
 
           const configWriteResult = await ConfigService.instance().writeConfig(
+            URI.file(wsRoot),
             configDeepCopy
           );
           if (configWriteResult.isErr()) {
@@ -318,7 +319,10 @@ export class DoctorService implements Disposable {
 
             // write config
             const configWriteResult =
-              await ConfigService.instance().writeConfig(backfilledConfig);
+              await ConfigService.instance().writeConfig(
+                URI.file(wsRoot),
+                backfilledConfig
+              );
             if (configWriteResult.isErr()) {
               throw configWriteResult.error;
             }
@@ -342,7 +346,9 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const configReadResult = await ConfigService.instance().readConfig();
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(engine.wsRoot)
+          );
           if (configReadResult.isErr()) {
             throw configReadResult.error;
           }
@@ -378,7 +384,9 @@ export class DoctorService implements Disposable {
       case DoctorActionsEnum.HI_TO_H2: {
         doctorAction = async (note: NoteProps) => {
           const changes: NoteChangeEntry[] = [];
-          const configReadResult = await ConfigService.instance().readConfig();
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(engine.wsRoot)
+          );
           if (configReadResult.isErr()) {
             throw configReadResult.error;
           }

@@ -1200,7 +1200,9 @@ export class FileStorage implements DStore {
       msg: "enter",
       note: NoteUtils.toLogObj(note),
     });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

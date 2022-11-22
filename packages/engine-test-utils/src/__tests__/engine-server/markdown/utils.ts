@@ -5,6 +5,7 @@ import {
   DVault,
   NoteDictsUtils,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
 import {
   AssertUtils,
@@ -114,7 +115,9 @@ export const createProcForTest = async (opts: {
         useId: opts.useIdAsLink,
       },
     },
-    config: (await ConfigService.instance().readConfig())._unsafeUnwrap(),
+    config: (
+      await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
+    )._unsafeUnwrap(),
     vaults: engine.vaults,
   };
   if (dest === DendronASTDest.HTML) {
@@ -255,7 +258,7 @@ export const createProcCompileTests = (opts: {
               async (presetOpts) => {
                 const { wsRoot, vaults: optsVaults, engine } = presetOpts;
                 const config = (
-                  await ConfigService.instance().readConfig()
+                  await ConfigService.instance().readConfig(URI.file(wsRoot))
                 )._unsafeUnwrap();
                 const vaults = config.workspace.vaults ?? optsVaults;
                 const vault = vaults[0];
@@ -386,7 +389,9 @@ export const processTextV2 = async (opts: ProcessTextV2Opts) => {
   const { engine, text, fname, vault, configOverride } = opts;
   const config =
     configOverride ||
-    (await ConfigService.instance().readConfig())._unsafeUnwrap();
+    (
+      await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
+    )._unsafeUnwrap();
   const noteToRender = (await engine.findNotes({ fname, vault }))[0];
   const noteCacheForRenderDict = await getParsingDependencyDicts(
     noteToRender,

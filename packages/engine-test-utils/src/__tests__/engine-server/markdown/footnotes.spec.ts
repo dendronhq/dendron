@@ -1,4 +1,4 @@
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,
@@ -12,9 +12,9 @@ import { createProcForTest, createProcTests } from "./utils";
 describe("footnotes", () => {
   const BASIC = createProcTests({
     name: "basic",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
@@ -60,9 +60,9 @@ describe("footnotes", () => {
 
   const UNUSED = createProcTests({
     name: "unused footnote",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
@@ -105,9 +105,9 @@ describe("footnotes", () => {
 
   const WITH_LINK = createProcTests({
     name: "footnote containing link",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
@@ -187,7 +187,7 @@ describe("footnotes", () => {
       });
 
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,

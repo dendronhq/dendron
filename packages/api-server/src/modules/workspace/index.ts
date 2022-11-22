@@ -16,7 +16,7 @@ import {
 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
-import { getDurationMilliseconds } from "@dendronhq/common-server";
+import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
 import { homedir } from "os";
 
 export class WorkspaceController {
@@ -36,17 +36,7 @@ export class WorkspaceController {
     logger.info({ ctx, msg: "enter", uri });
     // until we roll out engine v3 as default, we can't remove this line.
     // TODO: remove once `enableEngineV3` is deprecated.
-
-    const configReadResult = await ConfigService.instance().readConfig();
-    if (configReadResult.isErr()) {
-      logger.error({
-        ctx,
-        msg: "failed reading config",
-        error: configReadResult.error,
-      });
-      return { data: {} as DEngineInitPayload, error: configReadResult.error };
-    }
-    const config = configReadResult.value;
+    const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
       // possibly the earliest point we can instantiate `ConfigService`
@@ -86,7 +76,9 @@ export class WorkspaceController {
   async sync({ ws }: WorkspaceSyncRequest): Promise<DEngineInitResp> {
     const engine = await getWSEngine({ ws });
     const notes = await engine.findNotes({ excludeStub: false });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
     const data = {
       notes: NoteDictsUtils.createNotePropsByIdDict(notes),
       vaults: engine.vaults,

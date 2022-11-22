@@ -143,7 +143,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     wsRoot: string;
   }) {
     const LOGGER = logger || createLogger();
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -177,7 +179,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
    * Does not throw error but returns it
    */
   async init(): Promise<DEngineInitResp> {
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -321,7 +325,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
       note: NoteUtils.toLogObj(note),
     });
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -639,7 +645,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     const linkNotesResp = await this._noteStore.bulkGet(notesReferencingOld);
 
     // update note body of all notes that have changed
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -926,7 +934,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           }),
         };
       }
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(this.wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }
@@ -974,7 +984,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           ),
         };
       });
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(this.wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }
@@ -1507,7 +1519,9 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

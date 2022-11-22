@@ -18,7 +18,7 @@ import {
   createProcTests,
   ProcTests,
 } from "./utils";
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
@@ -139,9 +139,9 @@ describe("user tags", () => {
 
     const SIMPLE = createProcTests({
       name: "simple",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -190,9 +190,9 @@ describe("user tags", () => {
 
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -225,9 +225,9 @@ describe("user tags", () => {
   describe("WHEN disabled in config", () => {
     test("THEN user tags don't get parsed or processed", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, vaults, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const proc = MDUtilsV5.procRehypeFull(
             {
@@ -246,11 +246,14 @@ describe("user tags", () => {
         },
         {
           expect,
-          preSetupHook: async () => {
-            await TestConfigUtils.withConfig((config) => {
-              config.workspace!.enableUserTags = false;
-              return config;
-            });
+          preSetupHook: async ({ wsRoot }) => {
+            await TestConfigUtils.withConfig(
+              (config) => {
+                config.workspace!.enableUserTags = false;
+                return config;
+              },
+              { wsRoot }
+            );
           },
         }
       );

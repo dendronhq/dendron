@@ -2,6 +2,7 @@ import {
   asyncLoopOneAtATime,
   ConfigService,
   DEngineClient,
+  URI,
 } from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
@@ -49,7 +50,9 @@ async function canShowDiff(opts: {
 }): Promise<boolean> {
   const { engine, filePath } = opts;
   const { vaults } = engine;
-  const configReadResult = await ConfigService.instance().readConfig();
+  const configReadResult = await ConfigService.instance().readConfig(
+    URI.file(engine.wsRoot)
+  );
   if (configReadResult.isErr()) {
     throw configReadResult.error;
   }

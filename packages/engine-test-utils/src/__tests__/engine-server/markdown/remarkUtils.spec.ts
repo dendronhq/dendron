@@ -3,6 +3,7 @@ import {
   DEngineClient,
   DLink,
   NoteProps,
+  URI,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -187,10 +188,10 @@ describe("RemarkUtils and LinkUtils", () => {
   describe("findLinksFromBody", () => {
     testWithEngine(
       "one link",
-      async ({ engine }) => {
+      async ({ engine, wsRoot }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
@@ -210,10 +211,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "empty link",
-      async ({ engine }) => {
+      async ({ engine, wsRoot }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
@@ -233,10 +234,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "xvault link",
-      async ({ engine }) => {
+      async ({ engine, wsRoot }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
@@ -264,10 +265,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
     testWithEngine(
       "hashtag link",
-      async ({ engine }) => {
+      async ({ engine, wsRoot }) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const links = LinkUtils.findLinksFromBody({ note, config });
         expect(links).toMatchSnapshot();
@@ -287,10 +288,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("note ref", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, wsRoot }) => {
           const note = (await engine.getNote("foo.one-id")).data!;
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const links = LinkUtils.findLinksFromBody({ note, config });
           expect(links).toMatchSnapshot();
@@ -339,7 +340,7 @@ describe("RemarkUtils and LinkUtils", () => {
       const getLinks = async (engine: DEngineClient, filter: LinkFilter) => {
         const note = (await engine.getNote("foo")).data!;
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
         )._unsafeUnwrap();
         const links = LinkUtils.findLinksFromBody({
           note,
@@ -394,10 +395,10 @@ describe("RemarkUtils and LinkUtils", () => {
   describe("updateLink", () => {
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, wsRoot }) => {
           const note = (await engine.getNote("foo.one-id")).data!;
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const links = LinkUtils.findLinksFromBody({ note, config });
           const link = LinkUtils.dlink2DNoteLink(links[0]);
@@ -436,10 +437,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("only link", async () => {
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const note = (await engine.getNote("foo")).data!;
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[0]);
@@ -466,12 +467,12 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("link no space", async () => {
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const idx = 1;
             const newLine = "nospace[[bar]]";
             const note = (await engine.getNote("foo")).data!;
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
@@ -498,12 +499,12 @@ describe("RemarkUtils and LinkUtils", () => {
 
       test("link onespace", async () => {
         await runEngineTestV5(
-          async ({ engine }) => {
+          async ({ engine, wsRoot }) => {
             const idx = 2;
             const newLine = "onespace [[bar]]";
             const note = (await engine.getNote("foo")).data!;
             const config = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
             const links = LinkUtils.findLinksFromBody({ note, config });
             const link = LinkUtils.dlink2DNoteLink(links[idx]);
@@ -534,10 +535,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("paragraphs", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -569,10 +570,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -604,10 +605,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("nested list", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -642,10 +643,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("table", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -680,10 +681,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("existing anchors", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -731,10 +732,10 @@ describe("RemarkUtils and LinkUtils", () => {
     test("header", async () => {
       let note: NoteProps | undefined;
       await runEngineTestV5(
-        async () => {
+        async ({ wsRoot }) => {
           expect(note).toBeTruthy();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const blocks = await RemarkUtils.extractBlocks({
             note: note!,
@@ -899,9 +900,9 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const note = (await engine.getNote("bar")).data!;
           const linkCandidates = await LinkUtils.findLinkCandidates({
@@ -922,10 +923,10 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("multiple link candidates in one paragraph", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, wsRoot }) => {
           const note = (await engine.getNote("baz")).data!;
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const linkCandidates = await LinkUtils.findLinkCandidates({
             note,
@@ -943,9 +944,9 @@ describe("RemarkUtils and LinkUtils", () => {
 
     test("only works for direct child of paragraph and table cell", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
+        async ({ engine, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const note = (await engine.getNote("nodes")).data!;
           const linkCandidates = await LinkUtils.findLinkCandidates({
@@ -969,7 +970,7 @@ describe("h1ToTitle", () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
 
         const noteToRender = await NoteTestUtilsV4.createNote({

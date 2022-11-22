@@ -69,8 +69,9 @@ function stubQuickPick(vault: DVault) {
 }
 
 async function getConfig() {
+  const { wsRoot } = ExtensionProvider.getDWorkspace();
   return (
-    await ConfigService.instance().readRaw()
+    await ConfigService.instance().readRaw(URI.file(wsRoot))
   )._unsafeUnwrap() as DendronConfig;
 }
 

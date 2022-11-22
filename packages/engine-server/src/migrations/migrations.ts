@@ -2,6 +2,7 @@ import {
   DendronError,
   ConfigUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Migrations } from "./types";
@@ -34,7 +35,9 @@ export const CONFIG_MIGRATIONS: Migrations = {
         }
 
         const defaultV5Config = ConfigUtils.genDefaultConfig();
-        const configReadRawResult = await ConfigService.instance().readRaw();
+        const configReadRawResult = await ConfigService.instance().readRaw(
+          URI.file(wsService.wsRoot)
+        );
         if (configReadRawResult.isErr()) {
           throw configReadRawResult.error;
         }

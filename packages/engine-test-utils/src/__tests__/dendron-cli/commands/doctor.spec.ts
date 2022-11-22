@@ -2,6 +2,7 @@ import {
   ConfigService,
   ConfigUtils,
   ErrorUtils,
+  URI,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -859,7 +860,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
           const rawConfigBefore = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(rawConfigBefore.workspace?.workspaceVaultSyncMode).toBeFalsy();
           const out = await runDoctor({
@@ -871,7 +872,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
           const backupPathExists = await fs.pathExists(out.resp.backupPath);
           expect(backupPathExists).toBeTruthy();
           const rawConfig = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           const defaultConfig = ConfigUtils.genDefaultConfig();
           expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(
@@ -895,7 +896,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
           const rawConfigBefore = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(
             rawConfigBefore.workspace?.workspaceVaultSyncMode
@@ -907,7 +908,7 @@ describe("GIVEN addMissingDefaultConfigs", () => {
           });
           expect(out).toEqual({ exit: true });
           const rawConfig = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(rawConfigBefore).toEqual(rawConfig);
 
@@ -936,7 +937,7 @@ describe("GIVEN removeDeprecatedConfigs", () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
           const rawConfigBefore = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect((rawConfigBefore.dev as any).enableWebUI).toBeTruthy();
           const out = await runDoctor({
@@ -948,7 +949,7 @@ describe("GIVEN removeDeprecatedConfigs", () => {
           const backupPathExists = await fs.pathExists(out.resp.backupPath);
           expect(backupPathExists).toBeTruthy();
           const rawConfigAfter = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(_.has(rawConfigAfter.dev, "enableWebUI")).toBeFalsy();
         },
@@ -969,7 +970,7 @@ describe("GIVEN removeDeprecatedConfigs", () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
           const rawConfigBefore = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(_.has(rawConfigBefore.dev, "enableWebUI")).toBeFalsy();
           const out = await runDoctor({
@@ -979,7 +980,7 @@ describe("GIVEN removeDeprecatedConfigs", () => {
           });
           expect(out).toEqual({ exit: true });
           const rawConfig = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(rawConfigBefore).toEqual(rawConfig);
 

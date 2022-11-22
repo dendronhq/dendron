@@ -24,11 +24,7 @@ import {
   NoteDictsUtils,
   ConfigService,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  simpleGit,
-  SimpleGitResetMode,
-} from "@dendronhq/common-server";
+import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
 import {
   getParsingDependencyDicts,

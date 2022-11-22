@@ -17,7 +17,6 @@ import {
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
-  DConfig,
   getDurationMilliseconds,
 } from "@dendronhq/common-server";
 import {

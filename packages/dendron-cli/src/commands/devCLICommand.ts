@@ -216,7 +216,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             payload.numNotes
         );
         this.print(`creating ${numNotes} ${key} notes...`);
-        const vault = svc.vaults[_.random(0, vaultTotal - 1)];
+        const vault = (await svc.vaults)[_.random(0, vaultTotal - 1)];
         const notes: NoteProps[] = await Promise.all(
           _.times(numNotes, async (i) => {
             return NoteUtils.create({ fname: `${key}.${i}`, vault });

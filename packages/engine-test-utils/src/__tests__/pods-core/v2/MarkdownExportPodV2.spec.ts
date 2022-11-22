@@ -4,6 +4,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
@@ -32,7 +33,9 @@ const setupPod = async (setupOpts: {
   publishConfigOverride?: Partial<DendronConfig["publishing"]>;
 }) => {
   const { opts, fname, podConfigOpts } = setupOpts;
-  const config = (await ConfigService.instance().readConfig())._unsafeUnwrap();
+  const config = (
+    await ConfigService.instance().readConfig(URI.file(opts.engine.wsRoot))
+  )._unsafeUnwrap();
   if (config.publishing) {
     config.publishing.siteUrl = "https://foo.com";
   }

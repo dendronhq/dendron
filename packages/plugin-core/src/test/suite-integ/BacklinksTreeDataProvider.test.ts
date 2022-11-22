@@ -6,6 +6,7 @@ import {
   BacklinkPanelSortOrder,
   NotePropsMeta,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   NOTE_PRESETS_V4,
@@ -671,11 +672,15 @@ suite("BacklinksTreeDataProvider", function () {
       let updateSortOrder: sinon.SinonStub;
       let backlinksTreeDataProvider: BacklinksTreeDataProvider;
       let mockEvents: MockEngineEvents;
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
 
       beforeEach(async () => {
         mockEvents = new MockEngineEvents();
         const isLinkCandidateEnabled = (
-          await ConfigService.instance().getConfig("dev.enableLinkCandidates")
+          await ConfigService.instance().getConfig(
+            URI.file(wsRoot),
+            "dev.enableLinkCandidates"
+          )
         )._unsafeUnwrap();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
           mockEvents,

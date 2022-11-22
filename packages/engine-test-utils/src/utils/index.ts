@@ -7,6 +7,7 @@ import {
   WorkspaceType,
   normalizeUnixPath,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
@@ -97,7 +98,10 @@ const getWorkspaceFolders = (wsRoot: string) => {
 export async function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
   const vaultsConfig = (
-    await ConfigService.instance().getConfig("workspace.vaults")
+    await ConfigService.instance().getConfig(
+      URI.file(wsRoot),
+      "workspace.vaults"
+    )
   )._unsafeUnwrap();
   expect(_.sortBy(vaultsConfig, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])

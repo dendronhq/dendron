@@ -14,6 +14,7 @@ import {
   Time,
   VaultUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -1574,7 +1575,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, engine, wsRoot }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1586,6 +1587,7 @@ suite("NoteLookupCommand", function () {
 
           const dateFormat = (
             await ConfigService.instance().getConfig(
+              URI.file(wsRoot),
               "workspace.journal.dateFormat"
             )
           )._unsafeUnwrap();
@@ -1710,7 +1712,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, engine, wsRoot }) => {
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           // with journal note modifier enabled,
@@ -1723,6 +1725,7 @@ suite("NoteLookupCommand", function () {
 
           const dateFormat = (
             await ConfigService.instance().getConfig(
+              URI.file(wsRoot),
               "workspace.journal.dateFormat"
             )
           )._unsafeUnwrap();
@@ -2334,7 +2337,7 @@ suite("NoteLookupCommand", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ vaults, engine }) => {
+        onInit: async ({ vaults, engine, wsRoot }) => {
           const { controller, cmd } = await prepareCommandFunc({
             vaults,
             engine,
@@ -2353,6 +2356,7 @@ suite("NoteLookupCommand", function () {
 
           const dateFormat = (
             await ConfigService.instance().getConfig(
+              URI.file(wsRoot),
               "workspace.journal.dateFormat"
             )
           )._unsafeUnwrap();
@@ -2511,7 +2515,7 @@ suite("NoteLookupCommand", function () {
           preSetupHook: async ({ wsRoot, vaults }) => {
             await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
           },
-          onInit: async ({ vaults, engine }) => {
+          onInit: async ({ vaults, engine, wsRoot }) => {
             const { selectedText, cmd } = await prepareCommandFunc({
               vaults,
               engine,
@@ -2520,6 +2524,7 @@ suite("NoteLookupCommand", function () {
 
             const dateFormat = (
               await ConfigService.instance().getConfig(
+                URI.file(wsRoot),
                 "workspace.journal.dateFormat"
               )
             )._unsafeUnwrap();

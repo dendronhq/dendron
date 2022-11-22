@@ -2,7 +2,7 @@ import { BackupKeyEnum, BackupService } from "@dendronhq/common-server";
 import { runEngineTestV5 } from "../..";
 import path from "path";
 import fs from "fs-extra";
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 
 describe("GIVEN BackupService", () => {
   test("THEN returns correct backup root", async () => {
@@ -57,7 +57,9 @@ describe("GIVEN BackupService", () => {
             const root = backupService.backupRoot;
             expect(fs.existsSync(root)).toBeFalsy();
 
-            const configPath = ConfigService.instance().configPath.toString();
+            const configPath = ConfigService.instance()
+              .configPath(URI.file(wsRoot))
+              .toString();
             const backupResp = await backupService.backup({
               key: BackupKeyEnum.config,
               pathToBackup: configPath,

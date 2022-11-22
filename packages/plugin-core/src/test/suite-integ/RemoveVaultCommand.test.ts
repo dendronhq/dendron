@@ -7,6 +7,7 @@ import {
   NoteUtils,
   SchemaUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -299,7 +300,10 @@ suite("GIVEN RemoveVaultCommand", function () {
 
   describeSingleWS("WHEN there's only one vault left after remove", {}, () => {
     test("THEN duplicateNoteBehavior is omitted", async () => {
-      const configPath = ConfigService.instance().configPath.toString();
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const configPath = ConfigService.instance()
+        .configPath(URI.file(wsRoot))
+        .toString();
 
       // add a second vault
       const vault2 = "vault2";

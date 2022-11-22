@@ -9,6 +9,7 @@ import {
   MigrationEvents,
   SurveyEvents,
   Time,
+  URI,
   VSCodeEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
@@ -179,7 +180,10 @@ export class StartupUtils {
               status: ConfirmStatus.accepted,
             }
           );
-          const configPath = ConfigService.instance().configPath.toString();
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const configPath = ConfigService.instance()
+            .configPath(URI.file(wsRoot))
+            .toString();
           const configUri = vscode.Uri.file(configPath);
 
           const message = opts.message;

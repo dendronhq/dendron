@@ -35,7 +35,7 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   }
 
   get config(): DendronConfig {
-    return this.config;
+    return this._config;
   }
 
   // TODO: optimize to not read every time

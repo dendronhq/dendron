@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { ConfigStore, IFileStore } from "../store";
-import { errAsync, okAsync } from "neverthrow";
+import { errAsync, ok, okAsync } from "neverthrow";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
 import { ConfigUtils, DeepPartial } from "../utils";
 import { DendronError } from "../error";
@@ -179,13 +179,15 @@ export class ConfigService {
    */
   private readWithOverrides(wsRoot: URI) {
     return this.searchOverride(wsRoot)
-      .orElse(() => this.readWithDefaults(wsRoot))
       .andThen(ConfigUtils.validateLocalConfig)
-      .andThen((override) =>
-        this.readWithDefaults(wsRoot).map((config) =>
-          ConfigUtils.mergeConfig(config, override)
-        )
-      );
+      .andThen((override) => {
+        return this.readWithDefaults(wsRoot).map((config) => {
+          return ConfigUtils.mergeConfig(config, override);
+        });
+      })
+      .orElse(() => {
+        return this.readWithDefaults(wsRoot);
+      });
   }
 
   /**

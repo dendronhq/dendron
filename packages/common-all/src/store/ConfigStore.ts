@@ -35,7 +35,7 @@ export class ConfigStore implements IConfigStore {
 
   readConfig(wsRoot: URI) {
     return this.readFromFS(this.configPath(wsRoot))
-      .andThen(YamlUtils.fromStr)
+      .andThen((str) => YamlUtils.fromStr(str, true))
       .andThen(ConfigUtils.parsePartial);
   }
 

@@ -14,6 +14,7 @@ import {
   NoteFnameDictUtils,
   NoteProps,
   Position,
+  URI,
   ValidateFnameResp,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -620,7 +621,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
             .showInformationMessage(message, OPEN_CONFIG)
             .then(async (resp) => {
               if (resp === OPEN_CONFIG) {
-                const configPath = ConfigService.instance().configPath;
+                const configPath = ConfigService.instance().configPath(
+                  URI.file(wsRoot)
+                );
                 await VSCodeUtils.openFileInEditor(configPath);
 
                 const backupUri = Uri.file(out.resp.backupPath);

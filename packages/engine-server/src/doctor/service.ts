@@ -18,6 +18,7 @@ import {
   NoteProps,
   NoteUtils,
   ProcFlavor,
+  URI,
   ValidateFnameResp,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -235,12 +236,16 @@ export class DoctorService implements Disposable {
     switch (action) {
       case DoctorActionsEnum.REMOVE_DEPRECATED_CONFIGS: {
         const { wsRoot } = engine;
-        const configReadRawResult = await ConfigService.instance().readRaw();
+        const configReadRawResult = await ConfigService.instance().readRaw(
+          URI.file(wsRoot)
+        );
         if (configReadRawResult.isErr()) {
           throw configReadRawResult.error;
         }
         const rawConfig = configReadRawResult.value;
-        const configReadResult = await ConfigService.instance().readConfig();
+        const configReadResult = await ConfigService.instance().readConfig(
+          URI.file(wsRoot)
+        );
         if (configReadResult.isErr()) {
           throw configReadResult.error;
         }
@@ -285,7 +290,9 @@ export class DoctorService implements Disposable {
       }
       case DoctorActionsEnum.ADD_MISSING_DEFAULT_CONFIGS: {
         const { wsRoot } = engine;
-        const configReadRawResult = await ConfigService.instance().readRaw();
+        const configReadRawResult = await ConfigService.instance().readRaw(
+          URI.file(wsRoot)
+        );
         if (configReadRawResult.isErr()) {
           throw configReadRawResult.error;
         }

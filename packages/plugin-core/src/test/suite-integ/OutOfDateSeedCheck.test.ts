@@ -17,6 +17,7 @@ import {
   FOLDERS,
   DendronConfig,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { PluginTestSeedUtils } from "../utils/TestSeedUtils";
 
@@ -67,8 +68,9 @@ suite("GIVEN out of date seed check", function () {
     });
 
     test("THEN seed config is correctly updated", async () => {
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
       const config = (
-        await ConfigService.instance().readRaw()
+        await ConfigService.instance().readRaw(URI.file(wsRoot))
       )._unsafeUnwrap() as DendronConfig;
       const seed = ConfigUtils.getVaults(config).find(
         (vault) => vault.seed === seedKey

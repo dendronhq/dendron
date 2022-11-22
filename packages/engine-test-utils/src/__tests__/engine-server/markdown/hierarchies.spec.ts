@@ -3,6 +3,7 @@ import {
   DendronConfig,
   NoteDictsUtils,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
@@ -95,9 +96,9 @@ describe("hierarchies", () => {
 
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const rawConfig = (
-        await ConfigService.instance().readRaw()
+        await ConfigService.instance().readRaw(URI.file(wsRoot))
       )._unsafeUnwrap() as DendronConfig;
       const config: DendronConfig = {
         ...rawConfig,
@@ -193,9 +194,9 @@ describe("hierarchies", () => {
 
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const rawConfig = (
-        await ConfigService.instance().readRaw()
+        await ConfigService.instance().readRaw(URI.file(wsRoot))
       )._unsafeUnwrap() as DendronConfig;
       const config: DendronConfig = {
         ...rawConfig,

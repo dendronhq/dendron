@@ -12,6 +12,7 @@ import {
   WorkspaceEvents,
   DendronConfig,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   GitUtils,
@@ -422,7 +423,9 @@ export class AddExistingVaultCommand extends BasicCommand<
           path.join(vaultRootPath, CONSTANTS.DENDRON_CONFIG_FILE)
         )
       ) {
-        const configReadResult = await ConfigService.instance().readRaw();
+        const configReadResult = await ConfigService.instance().readRaw(
+          URI.file(opts.wsRoot)
+        );
         if (configReadResult.isErr()) {
           throw configReadResult.error;
         }

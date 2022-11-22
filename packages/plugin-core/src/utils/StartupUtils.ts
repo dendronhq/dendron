@@ -145,7 +145,7 @@ export class StartupUtils {
   static async showDuplicateConfigEntryMessageIfNecessary(opts: {
     ext: IDendronExtension;
   }) {
-    const message = await StartupUtils.getDuplicateKeysMessage();
+    const message = await StartupUtils.getDuplicateKeysMessage(opts.ext);
     if (message !== undefined) {
       StartupUtils.showDuplicateConfigEntryMessage({
         ...opts,
@@ -154,8 +154,11 @@ export class StartupUtils {
     }
   }
 
-  static async getDuplicateKeysMessage() {
-    const configReadRawResult = await ConfigService.instance().readRaw();
+  static async getDuplicateKeysMessage(ext: IDendronExtension) {
+    const { wsRoot } = ext.getDWorkspace();
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(wsRoot)
+    );
     if (configReadRawResult.isErr()) {
       return configReadRawResult.error.message;
     }
@@ -253,8 +256,11 @@ export class StartupUtils {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
   }): Promise<boolean> {
+    const { wsRoot } = opts.ext.getDWorkspace();
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
-      const configReadRawResult = await ConfigService.instance().readRaw();
+      const configReadRawResult = await ConfigService.instance().readRaw(
+        URI.file(wsRoot)
+      );
       if (configReadRawResult.isErr()) {
         return false;
       }
@@ -307,8 +313,11 @@ export class StartupUtils {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
   }): Promise<boolean> {
+    const { wsRoot } = opts.ext.getDWorkspace();
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
-      const configReadRawResult = await ConfigService.instance().readRaw();
+      const configReadRawResult = await ConfigService.instance().readRaw(
+        URI.file(wsRoot)
+      );
       if (configReadRawResult.isErr()) {
         return false;
       }

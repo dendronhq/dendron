@@ -5,6 +5,7 @@ import {
   Time,
   ConfigService,
   asyncLoopOneAtATime,
+  URI,
 } from "@dendronhq/common-all";
 import {
   DEPRECATED_PATHS,
@@ -217,8 +218,9 @@ suite("missing default config detection", () => {
     },
     () => {
       test("THEN missing defaults are detected", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readRaw()
+          await ConfigService.instance().readRaw(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(config.workspace?.workspaceVaultSyncMode).toEqual(undefined);
         const out = ConfigUtils.detectMissingDefaults({ config });

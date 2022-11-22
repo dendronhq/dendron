@@ -3,6 +3,7 @@ import {
   ConfigService,
   ConfigUtils,
   DendronConfig,
+  URI,
   WorkspaceType,
 } from "@dendronhq/common-all";
 import sinon from "sinon";
@@ -28,8 +29,9 @@ suite("RunMigrationCommand", function () {
         expect(ext.type).toEqual(WorkspaceType.CODE);
 
         // testing for explicitly delete key.
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const rawConfig = (
-          await ConfigService.instance().readRaw()
+          await ConfigService.instance().readRaw(URI.file(wsRoot))
         )._unsafeUnwrap() as DendronConfig;
         expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
 
@@ -63,8 +65,9 @@ suite("RunMigrationCommand", function () {
           const cmd = new RunMigrationCommand(ext);
           expect(ext.type).toEqual(WorkspaceType.NATIVE);
           // testing for explicitly delete key.
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const rawConfig = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap() as DendronConfig;
           expect(_.isUndefined(rawConfig.commands?.lookup)).toBeTruthy();
 

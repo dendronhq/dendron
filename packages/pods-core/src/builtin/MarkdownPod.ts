@@ -7,6 +7,7 @@ import {
   genUUIDInsecure,
   NoteProps,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
@@ -559,7 +560,9 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine.vaults
     );
 
-    const configReadRawResult = await ConfigService.instance().readRaw();
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(engine.wsRoot)
+    );
     if (configReadRawResult.isErr()) {
       throw configReadRawResult.error;
     }

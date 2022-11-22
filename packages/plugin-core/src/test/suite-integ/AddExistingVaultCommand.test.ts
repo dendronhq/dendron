@@ -5,6 +5,7 @@ import {
   VaultUtils,
   DendronConfig,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { readYAMLAsync, tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
@@ -62,7 +63,7 @@ suite("AddExistingVaultCommand", function () {
           );
           await cmd.run();
           const rawConfig = (
-            await ConfigService.instance().readRaw()
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
           )._unsafeUnwrap() as DendronConfig;
           const workspaces = ConfigUtils.getWorkspace(rawConfig).workspaces;
           expect(workspaces).toEqual({

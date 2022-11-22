@@ -18,6 +18,7 @@ import {
   DendronConfig,
   VaultUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
@@ -369,7 +370,7 @@ async function verifyVaultNotMigrated({
   expect(await fs.pathExists(notesFolder)).toBeFalsy();
   // and the vault should NOT be marked as self contained in the config
   const config = (
-    await ConfigService.instance().readRaw()
+    await ConfigService.instance().readRaw(URI.file(wsRoot))
   )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath
@@ -406,7 +407,7 @@ async function verifyVaultHasMigrated({
   expect(await fs.pathExists(path.join(vaultFolder, "root.md"))).toBeFalsy();
   // and the vault should be marked as self contained in the config
   const config = (
-    await ConfigService.instance().readRaw()
+    await ConfigService.instance().readRaw(URI.file(wsRoot))
   )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath

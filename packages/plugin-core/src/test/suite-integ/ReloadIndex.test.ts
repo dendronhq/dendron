@@ -10,7 +10,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { test, before } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { ConfigService, VaultUtils } from "@dendronhq/common-all";
+import { ConfigService, URI, VaultUtils } from "@dendronhq/common-all";
 import { MessageItem, window } from "vscode";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -200,13 +200,20 @@ suite("GIVEN ReloadIndex", function () {
     "WHEN a self contained vault is misconfigured",
     {
       selfContained: true,
-      postSetupHook: async () => {
+      postSetupHook: async ({ wsRoot }) => {
         const vaults = (
-          await ConfigService.instance().getConfig("workspace.vaults")
+          await ConfigService.instance().getConfig(
+            URI.file(wsRoot),
+            "workspace.vaults"
+          )
         )._unsafeUnwrap();
         expect(vaults.length).toEqual(1);
         delete vaults[0].selfContained;
-        await ConfigService.instance().updateConfig("workspace.vaults", vaults);
+        await ConfigService.instance().updateConfig(
+          URI.file(wsRoot),
+          "workspace.vaults",
+          vaults
+        );
       },
     },
     () => {

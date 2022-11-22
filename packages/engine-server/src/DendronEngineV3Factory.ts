@@ -58,6 +58,7 @@ export class DendronEngineV3Factory {
     );
 
     if (dbResult.isErr()) {
+      logger?.error(`Error in createWithSqliteStore: ${dbResult.error}`);
       throw dbResult.error;
     }
 

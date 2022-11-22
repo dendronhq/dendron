@@ -51,7 +51,8 @@ export class WorkspaceController {
       });
     }
 
-    // SQLite doesn't need to do engine.init()
+    // TODO: SQLite doesn't need to do engine.init(), apart from schema setup
+    // (which currently doesn't work if Sqlite is enabled)
     if (config.dev?.enableEngineV3 && config.dev?.useSqlite) {
       await putWS({ ws: uri, engine });
       return {} as DEngineInitResp;

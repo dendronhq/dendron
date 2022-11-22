@@ -46,7 +46,11 @@ import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
 
 /**
  * Given the files in a particular vault, process all of them to update the
- * Sqlite database appropriately
+ * Sqlite database appropriately. This function will take into account existing
+ * database state to perform a 'delta initialization' by only making
+ * modifications to the db state based on changes that happened in the file
+ * system while the database was offline (i.e. the user did not have Dendron
+ * running.)
  * @param files - the fsPaths of all note files to be processed
  * @param vault - the vault in which these files belong. To process multiple
  * vaults, call this function multiple times, once for each vault.
@@ -65,9 +69,9 @@ export async function parseAllNoteFilesForSqlite(
   enableLinkCandidates: boolean = false,
   logger?: DLogger
 ): Promise<Result<null, any>> {
-  logger?.info("inside parseAllNoteFilesForSqlite");
+  const ctx = "parseAllNoteFilesForSqlite";
+  logger?.info({ ctx, msg: "pre:parseAllNoteFilesForSqlite" });
 
-  // debugger;
   // Add the vault to the DB if it doesn't exist yet
   await addVaultToDb(vault, db);
 
@@ -274,6 +278,7 @@ export async function parseAllNoteFilesForSqlite(
     await bulkProcessLinkCandidates(db, allNotesToProcess, {} as DendronConfig);
   }
 
+  logger?.info({ ctx, msg: "post:parseAllNoteFilesForSqlite" });
   return ok(null);
 }
 

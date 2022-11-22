@@ -167,8 +167,13 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       };
     }
     if (!resp.data) {
-      return {} as DEngineInitResp;
-      // throw new DendronError({ message: "no data" });
+      // TODO SQLite - sqlite impl doesn't return data from init; eventually no
+      // implementations should. To converge later
+      if (this._config.dev?.useSqlite) {
+        return {} as DEngineInitResp;
+      } else {
+        throw new DendronError({ message: "no data" });
+      }
     }
     const { notes, config } = resp.data;
     this._config = config;

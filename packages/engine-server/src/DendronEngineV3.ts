@@ -786,7 +786,8 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     } else {
       await this._schemaStore.delete(id);
     }
-    // TODO: rework this to make more efficient
+    // TODO Sqlite : rework this to make more efficient - shouldn't need to
+    // re-init after a schema delete.
     return this.init();
   }
 

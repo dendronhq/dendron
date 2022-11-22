@@ -1264,6 +1264,9 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     ).toEqual(2);
   });
 
+  // TODO Sqlite - modify this test such that it doesn't change contents of
+  // 'a.md' (otherwise it'll interfere with other tests) and then re-enable the
+  // test.
   test.skip("WHEN you change the ID of an existing note THEN Links, VaultNotes, and NoteProp tables are all updated correctly", async () => {
     // Set the initial DB state:
     await parseAllNoteFilesForSqlite(

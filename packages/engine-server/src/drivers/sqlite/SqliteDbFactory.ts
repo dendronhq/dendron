@@ -9,13 +9,12 @@ import { Database } from "sqlite3";
 import { URI } from "vscode-uri";
 import { parseAllNoteFilesForSqlite } from "../file";
 import { executeSqlWithVoidResult } from "./SQLiteUtils";
-import { HierarchyTableUtils } from "./tables";
+import { HierarchyTableUtils, VaultsTableUtils } from "./tables";
 import { LinksTableUtils } from "./tables/LinksTableUtils";
 import { NotePropsFtsTableUtils } from "./tables/NotePropsFtsTableUtils";
 import { NotePropsTableUtils } from "./tables/NotePropsTableUtils";
 import { SchemaNotesTableUtils } from "./tables/SchemaNotesTableUtils";
 import { VaultNotesTableUtils } from "./tables/VaultNotesTableUtils";
-import { VaultsTableUtils } from "./tables/VaultsTableUtils";
 
 /**
  * Factory methods to create a SQLite database
@@ -95,35 +94,25 @@ export class SqliteDbFactory {
       return e as Error;
     }).andThen((db) => {
       // First create the relation-less tables first (vaults and NoteProps):
-      return (
-        VaultsTableUtils.createTable(db)
-          .andThen(() => {
-            return NotePropsTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            return LinksTableUtils.createTable(db);
-          })
+      return ResultAsync.combine([
+        VaultsTableUtils.createTable(db),
+        NotePropsTableUtils.createTable(db),
+        LinksTableUtils.createTable(db),
+      ])
+        .andThen(() => {
           // Now create tables with relations
-          .andThen(() => {
-            return VaultNotesTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            return HierarchyTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            return SchemaNotesTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            return NotePropsFtsTableUtils.createTable(db);
-          })
-          .andThen(() => {
-            // Enable Foreign Key relationships
-            return executeSqlWithVoidResult(db, "PRAGMA foreign_keys = ON");
-          })
-          .map(() => {
-            return db;
-          })
-      );
-    }) as ResultAsync<Database, Error>;
+          return ResultAsync.combine([
+            VaultNotesTableUtils.createTable(db),
+            HierarchyTableUtils.createTable(db),
+            SchemaNotesTableUtils.createTable(db),
+            NotePropsFtsTableUtils.createTable(db),
+            // Enable Foreign Key relationships:
+            executeSqlWithVoidResult(db, "PRAGMA foreign_keys = ON"),
+          ]);
+        })
+        .map(() => {
+          return db;
+        });
+    });
   }
 }

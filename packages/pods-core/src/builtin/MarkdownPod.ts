@@ -9,12 +9,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  cleanFileName,
-  DConfig,
-  readMD,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -484,14 +479,14 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           if (configReadResult.isErr()) {
             throw configReadResult.error;
           }
-          const config = configReadResult.value;
+          const dendronConfig = configReadResult.value;
           const proc = MDUtilsV5.procRemarkFull({
             noteToRender: note,
             fname: note.fname,
             vault: note.vault,
             vaults: engine.vaults,
             dest: DendronASTDest.MD_DENDRON,
-            config: DConfig.readConfigSync(engine.wsRoot),
+            config: dendronConfig,
             wsRoot: engine.wsRoot,
           });
 

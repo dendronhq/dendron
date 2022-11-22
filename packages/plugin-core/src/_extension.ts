@@ -315,7 +315,6 @@ export async function _activate(
         return false;
       }
       ConfigService.instance({
-        wsRoot: URI.file(maybeWsRoot),
         homeDir: URI.file(os.homedir()),
         fileStore: new NodeJSFileStore(),
       });

@@ -1,4 +1,4 @@
-import { ConfigUtils, ConfigService } from "@dendronhq/common-all";
+import { ConfigUtils, ConfigService, URI } from "@dendronhq/common-all";
 import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 
 function genDefaultConfig() {
@@ -22,9 +22,9 @@ const WRITE = {
 };
 
 const GET = {
-  DEFAULT_CONFIG: new TestPresetEntryV4(async () => {
+  DEFAULT_CONFIG: new TestPresetEntryV4(async ({ wsRoot }) => {
     const config = (
-      await ConfigService.instance().createConfig()
+      await ConfigService.instance().createConfig(URI.file(wsRoot))
     )._unsafeUnwrap();
 
     return [

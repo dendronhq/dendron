@@ -210,7 +210,6 @@ export async function setupLegacyWorkspace(
   await fs.ensureDir(wsRoot);
   if (copts.workspaceType === WorkspaceType.CODE) stubWorkspaceFile(wsRoot);
   ConfigService.instance({
-    wsRoot: URI.file(wsRoot),
     homeDir: URI.file(os.homedir()),
     fileStore: new NodeJSFileStore(),
     forceNew: true,
@@ -279,7 +278,6 @@ export async function setupLegacyWorkspaceMulti(
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   new StateService(opts.ctx!); // eslint-disable-line no-new
   ConfigService.instance({
-    wsRoot: URI.file(wsRoot),
     homeDir: URI.file(os.homedir()),
     fileStore: new NodeJSFileStore(),
     forceNew: true,
@@ -320,9 +318,13 @@ export async function setupLegacyWorkspaceMulti(
 
   // update config
   let config: DendronConfig;
-  const configReadResult = await ConfigService.instance().readConfig();
+  const configReadResult = await ConfigService.instance().readConfig(
+    URI.file(wsRoot)
+  );
   if (configReadResult.isErr()) {
-    config = (await ConfigService.instance().createConfig())._unsafeUnwrap();
+    config = (
+      await ConfigService.instance().createConfig(URI.file(wsRoot))
+    )._unsafeUnwrap();
   } else {
     config = configReadResult.value;
   }
@@ -330,7 +332,7 @@ export async function setupLegacyWorkspaceMulti(
     config = await TestConfigUtils.withConfig(copts.modConfigCb);
   }
   ConfigUtils.setVaults(config, vaults);
-  await ConfigService.instance().writeConfig(config);
+  await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
   await postSetupHook({
     wsRoot,
     vaults,

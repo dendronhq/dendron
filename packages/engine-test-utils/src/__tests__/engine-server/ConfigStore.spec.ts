@@ -21,13 +21,9 @@ describe("ConfigStore", () => {
     test("WHEN createConfig, then create new config and persist", async () => {
       const homeDir = tmpDir().name;
       const wsRoot = tmpDir().name;
-      const configStore = new ConfigStore(
-        fileStore,
-        URI.file(wsRoot),
-        URI.file(homeDir)
-      );
+      const configStore = new ConfigStore(fileStore, URI.file(homeDir));
 
-      const createResult = await configStore.createConfig();
+      const createResult = await configStore.createConfig(URI.file(wsRoot));
       if (createResult.isErr()) {
         throw createResult.error;
       }
@@ -56,13 +52,9 @@ describe("ConfigStore", () => {
       ensureFileSync(configPath);
       writeYAML(configPath, initialConfig);
 
-      const configStore = new ConfigStore(
-        fileStore,
-        URI.file(wsRoot),
-        URI.file(homeDir)
-      );
+      const configStore = new ConfigStore(fileStore, URI.file(homeDir));
 
-      const readConfigResult = await configStore.readConfig();
+      const readConfigResult = await configStore.readConfig(URI.file(wsRoot));
       if (readConfigResult.isErr()) {
         throw readConfigResult.error;
       }
@@ -104,13 +96,12 @@ describe("ConfigStore", () => {
         workspaceOverridePayload
       );
       test("AND workspace mode, then read override from workspace root", async () => {
-        const configStore = new ConfigStore(
-          fileStore,
-          URI.file(wsRoot),
-          URI.file(homeDir)
-        );
+        const configStore = new ConfigStore(fileStore, URI.file(homeDir));
 
-        const readOverrideResult = await configStore.readOverride("workspace");
+        const readOverrideResult = await configStore.readOverride(
+          URI.file(wsRoot),
+          "workspace"
+        );
         expect(readOverrideResult.isOk()).toBeTruthy();
         expect(readOverrideResult._unsafeUnwrap()).toEqual(
           YAML.dump(workspaceOverridePayload, {
@@ -120,13 +111,12 @@ describe("ConfigStore", () => {
         );
       });
       test("AND global mode, then read override from homeDir", async () => {
-        const configStore = new ConfigStore(
-          fileStore,
-          URI.file(wsRoot),
-          URI.file(homeDir)
-        );
+        const configStore = new ConfigStore(fileStore, URI.file(homeDir));
 
-        const readOverrideResult = await configStore.readOverride("global");
+        const readOverrideResult = await configStore.readOverride(
+          URI.file(wsRoot),
+          "global"
+        );
         expect(readOverrideResult.isOk()).toBeTruthy();
         expect(readOverrideResult._unsafeUnwrap()).toEqual(
           YAML.dump(globalOverridePayload, {
@@ -140,11 +130,7 @@ describe("ConfigStore", () => {
     test("WHEN writeConfig, then write given config and persist", async () => {
       const homeDir = tmpDir().name;
       const wsRoot = tmpDir().name;
-      const configStore = new ConfigStore(
-        fileStore,
-        URI.file(wsRoot),
-        URI.file(homeDir)
-      );
+      const configStore = new ConfigStore(fileStore, URI.file(homeDir));
 
       const defaultConfig = ConfigUtils.genDefaultConfig();
       const payload: DendronConfig = {
@@ -160,7 +146,10 @@ describe("ConfigStore", () => {
         },
       };
 
-      const writeResult = await configStore.writeConfig(payload);
+      const writeResult = await configStore.writeConfig(
+        URI.file(wsRoot),
+        payload
+      );
       expect(writeResult.isOk()).toBeTruthy();
       const config = writeResult._unsafeUnwrap();
       expect(config).toMatchSnapshot();

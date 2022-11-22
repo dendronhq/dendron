@@ -15,6 +15,7 @@ import {
   ConfigUtils,
   ConfigService,
   DendronConfig,
+  URI,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import {
@@ -27,6 +28,7 @@ import {
 import _ from "lodash";
 import * as vscode from "vscode";
 import { IDendronExtension } from "../../dendronExtensionInterface";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
 import { ITextDocumentService } from "../../services/ITextDocumentService";
 import { sentryReportingCallback } from "../../utils/analytics";
@@ -391,7 +393,10 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           textDocument
         );
       }
-      const configReadResult = await ConfigService.instance().readConfig();
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
       if (configReadResult.isErr()) {
         Logger.error({
           ctx: "sendRefreshMessage",

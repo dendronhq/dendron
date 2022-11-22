@@ -19,6 +19,7 @@ import {
   NoteUtils,
   VaultUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
@@ -241,8 +242,11 @@ export class MoveHeaderCommand extends BasicCommand<
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = ExtensionProvider.getEngine();
+    const { wsRoot } = engine;
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -581,6 +585,7 @@ export class MoveHeaderCommand extends BasicCommand<
     const ctx = "MoveHeaderCommand";
     this.L.info({ ctx, opts });
     const { origin, nodesToMove, engine } = opts;
+    const { wsRoot } = engine;
 
     const dest = opts.dest as NoteProps;
 
@@ -616,7 +621,9 @@ export class MoveHeaderCommand extends BasicCommand<
     );
     const foundReferences = await findReferences(origin.fname);
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

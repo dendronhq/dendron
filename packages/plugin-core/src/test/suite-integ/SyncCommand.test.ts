@@ -5,6 +5,7 @@ import {
   NoteUtils,
   VaultUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -1278,9 +1279,11 @@ async function checkoutNewBranch(wsRoot: string, branch: string) {
 /** Override the config option in `dendron.yml`, then add commit that change. */
 async function changeConfig(wsRoot: string, overridePath: string, value: any) {
   // Get old config, and override it with the new config
-  const config = (await ConfigService.instance().readConfig())._unsafeUnwrap();
+  const config = (
+    await ConfigService.instance().readConfig(URI.file(wsRoot))
+  )._unsafeUnwrap();
   const override = _.set(config, overridePath, value);
-  await ConfigService.instance().writeConfig(override);
+  await ConfigService.instance().writeConfig(URI.file(wsRoot), override);
 
   // Commit this change, otherwise it will be a tracked file with changes which breaks git pull
   const git = new Git({ localUrl: wsRoot });

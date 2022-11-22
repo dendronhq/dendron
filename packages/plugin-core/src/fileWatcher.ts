@@ -5,6 +5,7 @@ import {
   ErrorUtils,
   NoteProps,
   NoteUtils,
+  URI,
   VaultUtils,
   WorkspaceOpts,
   WorkspaceType,
@@ -131,7 +132,9 @@ export class FileWatcher {
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.
       }
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(engine.wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }

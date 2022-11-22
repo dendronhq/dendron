@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   DVault,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { findNonNoteFile } from "@dendronhq/common-server";
@@ -41,7 +42,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
   ) {
     const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

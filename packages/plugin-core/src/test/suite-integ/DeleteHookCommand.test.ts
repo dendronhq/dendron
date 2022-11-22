@@ -1,4 +1,4 @@
-import { ConfigService, ConfigUtils } from "@dendronhq/common-all";
+import { ConfigService, ConfigUtils, URI } from "@dendronhq/common-all";
 import { HookUtils } from "@dendronhq/engine-server";
 import { ENGINE_HOOKS } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -29,7 +29,7 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: true,
           });
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const hooks = ConfigUtils.getHooks(config);
           expect(hooks).toEqual({
@@ -67,7 +67,7 @@ suite(DENDRON_COMMANDS.DELETE_HOOK.key, function () {
             shouldDeleteScript: false,
           });
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const hooks = ConfigUtils.getHooks(config);
           expect(hooks).toEqual({

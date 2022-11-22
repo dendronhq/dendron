@@ -5,6 +5,7 @@ import {
   NoteProps,
   NoteUtils,
   string2Note,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { EngineUtils, WorkspaceUtils } from "@dendronhq/engine-server";
@@ -20,6 +21,7 @@ import { IDendronExtension } from "../../dendronExtensionInterface";
 import { Logger } from "../../logger";
 import { ITextDocumentService } from "../ITextDocumentService";
 import { EditorUtils } from "../../utils/EditorUtils";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 /**
  * This service keeps client state note state synchronized with the engine
@@ -76,7 +78,10 @@ export class TextDocumentService implements ITextDocumentService {
         keepBackLinks: true,
       },
     });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

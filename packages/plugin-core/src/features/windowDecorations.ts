@@ -14,6 +14,7 @@ import {
   NotePropsMeta,
   NoteUtils,
   ProcFlavor,
+  URI,
 } from "@dendronhq/common-all";
 import {
   DecorationHashTag,
@@ -282,7 +283,9 @@ export async function updateDecorations(editor: TextEditor): Promise<{
   try {
     const ctx = "updateDecorations";
     const engine = ExtensionProvider.getEngine();
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

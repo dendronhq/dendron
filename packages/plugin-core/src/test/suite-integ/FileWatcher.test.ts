@@ -9,7 +9,7 @@ import * as vscode from "vscode";
 import { FileWatcher } from "../../fileWatcher";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 
 suite("GIVEN FileWatcher", function () {
   let watcher: FileWatcher;
@@ -31,7 +31,7 @@ suite("GIVEN FileWatcher", function () {
               wsRoot,
             });
             const dendronConfig = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
 
             watcher = new FileWatcher({
@@ -77,7 +77,7 @@ suite("GIVEN FileWatcher", function () {
               wsRoot,
             });
             const dendronConfig = (
-              await ConfigService.instance().readConfig()
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
             )._unsafeUnwrap();
 
             watcher = new FileWatcher({

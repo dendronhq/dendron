@@ -231,8 +231,9 @@ suite("GIVEN ReloadIndex", function () {
         // Should reload window after fixing so the plugin picks up new vault config
         expect(reloadWindow.calledOnce).toBeTruthy();
         // The config should be updated to mark the vault as self contained
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const configAfter = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(configAfter.workspace.vaults[0].selfContained).toBeTruthy();
       });

@@ -467,7 +467,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       if (vault.name) selfContainedVaultConfig.name = vault.name;
 
       // create dendron.yml
-      await ConfigService.instance().createConfig({
+      await ConfigService.instance().createConfig(URI.file(vaultPath), {
         dev: {
           enableSelfContainedVaults: true,
         },
@@ -1121,7 +1121,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
     // this creates `dendron.yml`
-    await ConfigService.instance().createConfig();
+    await ConfigService.instance().createConfig(URI.file(wsRoot));
     // add gitignore
     WorkspaceService.createGitIgnore(wsRoot);
     if (opts.createCodeWorkspace) {

@@ -51,7 +51,6 @@ export class WorkspaceController {
     if (config.dev?.enableEngineV3) {
       // possibly the earliest point we can instantiate `ConfigService`
       ConfigService.instance({
-        wsRoot: URI.file(uri),
         homeDir: URI.file(homedir()),
         fileStore: new NodeJSFileStore(),
       });

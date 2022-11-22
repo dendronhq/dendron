@@ -27,6 +27,7 @@ import {
   asyncLoopOneAtATime,
   SchemaModuleDict,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { DLogger, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -106,7 +107,9 @@ export class NoteParserV2 {
     this.logger.info({ ctx, msg: "enter", vault });
     // Keep track of which notes in cache no longer exist
     const unseenKeys = this.cache.getCacheEntryKeys();
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.engine.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

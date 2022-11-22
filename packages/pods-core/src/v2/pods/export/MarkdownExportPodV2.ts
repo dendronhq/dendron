@@ -14,6 +14,7 @@ import {
   RespV2,
   VaultUtils,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
@@ -74,7 +75,9 @@ export class MarkdownExportPodV2
     const { destination, exportScope } = this._config;
     const ctx = "exportNotes";
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this._engine.wsRoot)
+    );
     if (configReadResult.isErr()) {
       return {
         data: {},

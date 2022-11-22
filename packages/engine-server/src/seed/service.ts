@@ -10,6 +10,7 @@ import {
   ConfigUtils,
   SeedVault,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -125,7 +126,9 @@ export class SeedService {
     onUpdatedWorkspace?: () => Promise<void>;
   }) {
     const ws = new WorkspaceService({ wsRoot });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

@@ -476,7 +476,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           //notes in same level with note
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
-          const configReadResult = await ConfigService.instance().readConfig();
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(wsRoot)
+          );
           if (configReadResult.isErr()) {
             throw configReadResult.error;
           }

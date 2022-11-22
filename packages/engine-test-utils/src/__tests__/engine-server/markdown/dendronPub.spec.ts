@@ -9,6 +9,7 @@ import {
   VaultUtils,
   WorkspaceOpts,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
@@ -480,9 +481,9 @@ describe("GIVEN dendronPub", () => {
 
 describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("prefix", () => {
-    testWithEngine("imagePrefix", async ({ vaults, engine }) => {
+    testWithEngine("imagePrefix", async ({ vaults, engine, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const out = proc({
         noteToRender: (await engine.getNote("foo")).data!,
@@ -501,9 +502,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     testWithEngine(
       "imagePrefix with forward slash",
-      async ({ vaults, engine }) => {
+      async ({ vaults, engine, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const out = proc({
           noteToRender: (await engine.getNote("foo")).data!,
@@ -524,7 +525,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
   testWithEngine("in IMPORT mode", async ({ vaults, wsRoot }) => {
     const config = (
-      await ConfigService.instance().readConfig()
+      await ConfigService.instance().readConfig(URI.file(wsRoot))
     )._unsafeUnwrap();
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.IMPORT },
@@ -541,8 +542,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       flavor: ProcFlavor;
     }) => {
       const { engine, vaults, flavor } = opts;
+      const { wsRoot } = engine;
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const out = await proc({
         noteToRender: (await engine.getNote("has.fmtags")).data!,
@@ -563,8 +565,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       flavor: ProcFlavor;
     }) => {
       const { engine, vaults, flavor } = opts;
+      const { wsRoot } = engine;
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const out = await proc({
         noteToRender: (await engine.getNote("no.fmtags")).data!,
@@ -675,22 +678,25 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
                     vault: vaults[0],
                     props: { tags: ["first", "second"] },
                   });
-                  await TestConfigUtils.withConfig((config) => {
-                    if (flavor === ProcFlavor.PUBLISHING) {
-                      ConfigUtils.setPublishProp(
-                        config,
-                        "enableHashesForFMTags",
-                        true
-                      );
-                    } else {
-                      ConfigUtils.setPreviewProps(
-                        config,
-                        "enableHashesForFMTags",
-                        true
-                      );
-                    }
-                    return config;
-                  });
+                  await TestConfigUtils.withConfig(
+                    (config) => {
+                      if (flavor === ProcFlavor.PUBLISHING) {
+                        ConfigUtils.setPublishProp(
+                          config,
+                          "enableHashesForFMTags",
+                          true
+                        );
+                      } else {
+                        ConfigUtils.setPreviewProps(
+                          config,
+                          "enableHashesForFMTags",
+                          true
+                        );
+                      }
+                      return config;
+                    },
+                    { wsRoot }
+                  );
                 },
                 expect,
               }
@@ -711,22 +717,25 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             },
             {
               preSetupHook: async ({ wsRoot, vaults }) => {
-                await TestConfigUtils.withConfig((c) => {
-                  if (flavor === ProcFlavor.PUBLISHING) {
-                    ConfigUtils.setPublishProp(
-                      c,
-                      "enableFrontmatterTags",
-                      false
-                    );
-                  } else {
-                    ConfigUtils.setPreviewProps(
-                      c,
-                      "enableFrontmatterTags",
-                      false
-                    );
-                  }
-                  return c;
-                });
+                await TestConfigUtils.withConfig(
+                  (c) => {
+                    if (flavor === ProcFlavor.PUBLISHING) {
+                      ConfigUtils.setPublishProp(
+                        c,
+                        "enableFrontmatterTags",
+                        false
+                      );
+                    } else {
+                      ConfigUtils.setPreviewProps(
+                        c,
+                        "enableFrontmatterTags",
+                        false
+                      );
+                    }
+                    return c;
+                  },
+                  { wsRoot }
+                );
                 await NoteTestUtilsV4.createNote({
                   fname: "has.fmtags",
                   wsRoot,
@@ -745,13 +754,13 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
   describe("note reference", () => {
     test("basic", async () => {
       await runEngineTestV5(
-        async ({ vaults, engine }) => {
+        async ({ vaults, engine, wsRoot }) => {
           const references: NoteProps[] = [(await engine.getNote("foo")).data!];
           const noteCacheForRenderDict =
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -807,7 +816,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -868,7 +877,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -907,9 +916,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("nonexistent", async () => {
       await runEngineTestV5(
-        async ({ vaults, engine }) => {
+        async ({ vaults, engine, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -959,7 +968,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1013,7 +1022,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1055,9 +1064,9 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
 
     test("fail: with vault prefix", async () => {
       await runEngineTestV5(
-        async ({ vaults, engine }) => {
+        async ({ vaults, engine, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1119,7 +1128,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1164,7 +1173,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       await runEngineTestV5(
         async ({ wsRoot, vaults, engine }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1229,7 +1238,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
             NoteDictsUtils.createNoteDicts(references);
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const out = await proc({
             noteToRender: (await engine.getNote("ref")).data!,
@@ -1277,7 +1286,7 @@ describe("GIVEN dendronPub (old tests - need to be migrated)", () => {
       await runEngineTestV5(
         async ({ wsRoot, vaults, engine }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const references: NoteProps[] = [
             await NoteTestUtilsV4.createNote({

@@ -51,6 +51,7 @@ import {
   QueryNotesResp,
   ConfigService,
   DendronConfig,
+  URI,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -100,7 +101,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       apiPath: "api",
       logger,
     });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(ws)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -336,7 +339,9 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     let noteProps: NoteProps[];
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

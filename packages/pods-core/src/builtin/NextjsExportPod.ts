@@ -495,7 +495,9 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const { dest, engine, wsRoot, config: podConfig } = opts;
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

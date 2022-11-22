@@ -39,9 +39,9 @@ describe("hierarchies", () => {
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
   const BASIC = createProcTests({
     name: "BASIC",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       config.publishing.enableHierarchyDisplay = true;
       const noteToRender = (
@@ -144,9 +144,9 @@ describe("hierarchies", () => {
 
   const NO_HIERARCHY_VIA_FM = createProcTests({
     name: "NO_HIERARCHY_VIA_FM",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
@@ -249,9 +249,9 @@ describe("hierarchies", () => {
 
   const SKIP_LEVELS = createProcTests({
     name: "SKIP_LEVELS",
-    setupFunc: async ({ engine, vaults, extra }) => {
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
       const config = (
-        await ConfigService.instance().readConfig()
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
       )._unsafeUnwrap();
       const noteToRender = (
         await engine.findNotes({ fname: "daily", vault: vaults[0] })

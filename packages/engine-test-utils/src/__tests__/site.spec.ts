@@ -7,6 +7,7 @@ import {
   NoteProps,
   NotePropsByIdDict,
   ReducedDEngine,
+  URI,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -94,20 +95,26 @@ describe("SiteUtils", () => {
     test("write stub", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo", "foobar"],
-                siteRootDir,
-                writeStubs: true,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo", "foobar"],
+                  siteRootDir,
+                  writeStubs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config,
@@ -140,20 +147,26 @@ describe("SiteUtils", () => {
     test("no write stub", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo", "foobar"],
-                siteRootDir,
-                writeStubs: false,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo", "foobar"],
+                  siteRootDir,
+                  writeStubs: false,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
 
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(4);
@@ -184,21 +197,27 @@ describe("SiteUtils", () => {
   describe("per note config", () => {
     test("blacklist note", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                enablePrettyRefs: true,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  enablePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(1);
           await checkNotes({
@@ -227,21 +246,27 @@ describe("SiteUtils", () => {
 
     test("nav_exclude", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                enablePrettyRefs: true,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  enablePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(2);
           await checkNotes({
@@ -276,21 +301,24 @@ describe("SiteUtils", () => {
 
     test("implicit siteIndex", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            ConfigUtils.setPublishProp(config, "siteHierarchies", [
-              "foo",
-              "bar",
-            ]);
-            ConfigUtils.unsetPublishProp(config, "siteIndex");
-            ConfigUtils.setPublishProp(
-              config,
-              "siteUrl",
-              "https://localhost:8080"
-            );
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              ConfigUtils.setPublishProp(config, "siteHierarchies", [
+                "foo",
+                "bar",
+              ]);
+              ConfigUtils.unsetPublishProp(config, "siteIndex");
+              ConfigUtils.setPublishProp(
+                config,
+                "siteUrl",
+                "https://localhost:8080"
+              );
 
-            return config;
-          });
+              return config;
+            },
+            { wsRoot }
+          );
 
           const { domains } = await SiteUtils.filterByConfig({
             engine,
@@ -313,26 +341,32 @@ describe("SiteUtils", () => {
 
     test("root, publish all with dup", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["root"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  root: {
-                    publishByDefault: true,
+        async ({ engine, vaults, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["root"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  config: {
+                    root: {
+                      publishByDefault: true,
+                    },
                   },
-                },
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
 
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
@@ -367,26 +401,32 @@ describe("SiteUtils", () => {
 
     test("root, publish none with dup", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["root"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                hierarchy: {
-                  root: {
-                    publishByDefault: false,
+        async ({ engine, vaults, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["root"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  hierarchy: {
+                    root: {
+                      publishByDefault: false,
+                    },
                   },
-                },
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           await checkNotes({
             filteredNotes: notes,
@@ -405,21 +445,27 @@ describe("SiteUtils", () => {
 
     test("one hierarchy", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                enablePrettyRefs: true,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  enablePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config,
@@ -441,26 +487,32 @@ describe("SiteUtils", () => {
     // TODO
     test.skip("one hierarchy, dups with list override", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo"],
-                siteRootDir,
-                ...dupNote(["vault2", "fooVault", "vault3"]),
-                config: {
-                  root: {
-                    publishByDefault: true,
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo"],
+                  siteRootDir,
+                  ...dupNote(["vault2", "fooVault", "vault3"]),
+                  config: {
+                    root: {
+                      publishByDefault: true,
+                    },
                   },
-                },
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config,
@@ -495,21 +547,27 @@ describe("SiteUtils", () => {
 
     test("mult hierarchy", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo", "bar"],
-                siteRootDir,
-                enablePrettyRefs: true,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo", "bar"],
+                  siteRootDir,
+                  enablePrettyRefs: true,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           await checkNotes({
             filteredNotes: notes,
@@ -531,29 +589,35 @@ describe("SiteUtils", () => {
     // TODO: fix
     test.skip("mult hierarchy, diff publishByDefault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["foo", "bar"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  foo: {
-                    publishByDefault: {
-                      vault1: true,
-                      vault2: false,
+        async ({ engine, vaults, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["foo", "bar"],
+                  siteRootDir,
+                  ...dupNote(vaults[0]),
+                  config: {
+                    foo: {
+                      publishByDefault: {
+                        vault1: true,
+                        vault2: false,
+                      },
                     },
                   },
-                },
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           await checkNotes({
             filteredNotes: notes,
@@ -581,20 +645,26 @@ describe("SiteUtils", () => {
 
     test("skip levels", async () => {
       await runEngineTestV5(
-        async ({ engine }) => {
-          const config = await TestConfigUtils.withConfig((config) => {
-            const defaultConfig = ConfigUtils.genDefaultConfig();
-            ConfigUtils.setProp(
-              defaultConfig,
-              "publishing",
-              createPublishingConfig({
-                siteHierarchies: ["daily"],
-                siteRootDir,
-              })
-            );
-            ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
-            return defaultConfig;
-          });
+        async ({ engine, wsRoot }) => {
+          const config = await TestConfigUtils.withConfig(
+            (config) => {
+              const defaultConfig = ConfigUtils.genDefaultConfig();
+              ConfigUtils.setProp(
+                defaultConfig,
+                "publishing",
+                createPublishingConfig({
+                  siteHierarchies: ["daily"],
+                  siteRootDir,
+                })
+              );
+              ConfigUtils.setVaults(
+                defaultConfig,
+                ConfigUtils.getVaults(config)
+              );
+              return defaultConfig;
+            },
+            { wsRoot }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.values(notes).map((ent) => ent.fname)).toEqual([
             "daily",
@@ -631,9 +701,9 @@ describe("SiteUtils", () => {
 
     test("blacklist vault", async () => {
       await runEngineTestV5(
-        async ({ engine, vaults }) => {
+        async ({ engine, vaults, wsRoot }) => {
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
@@ -660,31 +730,35 @@ describe("SiteUtils", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-            await TestConfigUtils.withConfig((config) => {
-              const vaults = ConfigUtils.getVaults(config);
-              const bvault = vaults.find((ent) => ent.fsPath === "vault2");
-              bvault!.visibility = DVaultVisibility.PRIVATE;
-              const defaultConfig = ConfigUtils.genDefaultConfig();
-              ConfigUtils.setProp(
-                defaultConfig,
-                "publishing",
-                createPublishingConfig({
-                  siteHierarchies: ["root"],
-                  siteRootDir,
-                  ...dupNote(opts.vaults[0]),
-                  config: {
-                    root: {
-                      publishByDefault: true,
+            const { wsRoot } = opts;
+            await TestConfigUtils.withConfig(
+              (config) => {
+                const vaults = ConfigUtils.getVaults(config);
+                const bvault = vaults.find((ent) => ent.fsPath === "vault2");
+                bvault!.visibility = DVaultVisibility.PRIVATE;
+                const defaultConfig = ConfigUtils.genDefaultConfig();
+                ConfigUtils.setProp(
+                  defaultConfig,
+                  "publishing",
+                  createPublishingConfig({
+                    siteHierarchies: ["root"],
+                    siteRootDir,
+                    ...dupNote(opts.vaults[0]),
+                    config: {
+                      root: {
+                        publishByDefault: true,
+                      },
                     },
-                  },
-                })
-              );
-              ConfigUtils.setVaults(
-                defaultConfig,
-                ConfigUtils.getVaults(config)
-              );
-              return defaultConfig;
-            });
+                  })
+                );
+                ConfigUtils.setVaults(
+                  defaultConfig,
+                  ConfigUtils.getVaults(config)
+                );
+                return defaultConfig;
+              },
+              { wsRoot }
+            );
           },
         }
       );

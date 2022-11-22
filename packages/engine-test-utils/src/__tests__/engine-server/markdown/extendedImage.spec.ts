@@ -1,4 +1,4 @@
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import {
   ExtendedImage,
@@ -104,9 +104,9 @@ describe("extendedImage", () => {
   describe("rendering", () => {
     const SINGLE_STYLE_PROP = createProcTests({
       name: "single style prop",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -167,9 +167,9 @@ describe("extendedImage", () => {
 
     const NO_ALT = createProcTests({
       name: "no alt",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -226,9 +226,9 @@ describe("extendedImage", () => {
 
     const MULTIPLE_STYLE_PROPS = createProcTests({
       name: "multiple style props",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,

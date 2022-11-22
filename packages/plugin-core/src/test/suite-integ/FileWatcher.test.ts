@@ -64,10 +64,13 @@ suite("GIVEN FileWatcher", function () {
           ctx,
           postSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-            await TestConfigUtils.withConfig((config) => {
-              config.dev = { ...config.dev, forceWatcherType: "engine" };
-              return config;
-            });
+            await TestConfigUtils.withConfig(
+              (config) => {
+                config.dev = { ...config.dev, forceWatcherType: "engine" };
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
           onInit: async ({ vaults, wsRoot, engine }) => {
             await NoteTestUtilsV4.createNote({

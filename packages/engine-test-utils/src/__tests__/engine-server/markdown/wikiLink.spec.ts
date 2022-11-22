@@ -1,4 +1,4 @@
-import { ConfigService } from "@dendronhq/common-all";
+import { ConfigService, URI } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
@@ -104,9 +104,9 @@ describe("wikiLinks", () => {
 
     const REGULAR_CASE = createProcTests({
       name: "regular",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -138,9 +138,9 @@ describe("wikiLinks", () => {
     const linkWithAnchor = "[[foo#one]]";
     const WITH_ANCHOR = createProcTests({
       name: "WITH_ANCHOR",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -172,9 +172,9 @@ describe("wikiLinks", () => {
     const linkWithBlockAnchor = "[[foo#^block]]";
     const WITH_BLOCK_ANCHOR = createProcTests({
       name: "WITH_BLOCK_ANCHOR",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -205,9 +205,9 @@ describe("wikiLinks", () => {
 
     const WITH_SAME_FILE_BLOCK_ANCHOR = createProcTests({
       name: "WITH_SAME_FILE_BLOCK_ANCHOR",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
@@ -242,9 +242,9 @@ describe("wikiLinks", () => {
     const linkWithExtension = "[[foo.md]]";
     const WITH_EXTENSION = createProcTests({
       name: "WITH_EXTENSION",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -276,9 +276,9 @@ describe("wikiLinks", () => {
     const linkWithAlias = `[[bar doesn't foo|foo]]`;
     const WITH_ALIAS = createProcTests({
       name: "WITH_ALIAS",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -310,9 +310,9 @@ describe("wikiLinks", () => {
     const linkWithAliasHash = `[[#bar|foo]]`;
     const WITH_ALIAS_HASH = createProcTests({
       name: "WITH_ALIAS_HASH",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -344,9 +344,9 @@ describe("wikiLinks", () => {
     const linkWithAliasApostrophe = `[[Coulomb's Constant|kb.note.20211011124050]]`;
     const WITH_ALIAS_APOSTROPHE = createProcTests({
       name: "WITH_ALIAS_APOSTROPHE",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -382,9 +382,9 @@ describe("wikiLinks", () => {
 
     const WITH_ID_AS_LINK = createProcTests({
       name: "WITH_ID_AS_LINK",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -420,9 +420,9 @@ describe("wikiLinks", () => {
     const linkWithSpaceAndAlias = `[[bar|foo bar]]`;
     const WITH_SPACE_AND_ALIAS = createProcTests({
       name: "WITH_SPACE_AND_ALIAS",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -449,9 +449,9 @@ describe("wikiLinks", () => {
     const linkFromSameVaultWithAlias = "[[bar|dendron://vault1/foo]]";
     const WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS = createProcTests({
       name: "WITH_XVAULT_LINK_TO_SAME_VAULT_AND_ALIAS",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -483,9 +483,9 @@ describe("wikiLinks", () => {
     const linkFromSameVault = "[[dendron://vault1/foo]]";
     const WITH_XVAULT_LINK_TO_SAME_VAULT = createProcTests({
       name: "WITH_XVAULT_LINK_TO_SAME_VAULT",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,
@@ -517,9 +517,9 @@ describe("wikiLinks", () => {
     const linkFromOtherVault = "[[dendron://vault2/foo]]";
     const WITH_XVAULT_LINK_TO_OTHER_VAULT = createProcTests({
       name: "WITH_XVAULT_LINK_TO_OTHER_VAULT",
-      setupFunc: async ({ engine, vaults, extra }) => {
+      setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const proc = await createProcForTest({
           engine,

@@ -3,6 +3,7 @@ import {
   ConfigUtils,
   NoteDictsUtils,
   NoteProps,
+  URI,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -56,7 +57,7 @@ async function createProc(
   opts: Parameters<TestPresetEntryV4["testFunc"]>[0],
   procOverride?: Partial<Parameters<typeof MDUtilsV5.procRemarkFull>[0]>
 ) {
-  const { engine, vaults, extra } = opts;
+  const { engine, vaults, extra, wsRoot } = opts;
 
   const procData = _.defaults(procOverride, {
     noteToRender: (await engine.getNote("foo")).data!,
@@ -66,7 +67,9 @@ async function createProc(
     config:
       procOverride && procOverride.config
         ? procOverride.config
-        : (await ConfigService.instance().readConfig())._unsafeUnwrap(),
+        : (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap(),
   });
   if (procData.dest === DendronASTDest.HTML) {
     return MDUtilsV5.procRehypeFull(procData);

@@ -29,14 +29,6 @@ jobs:
           - plugin
 
         include:
-          - os: macos-latest
-            env: env
-            versions: ""
-          - os: ubuntu-latest
-            env: env
-            versions: ""
-          # Running natively under Windows requires some further work on paths
-          # and file access patterns.
           - os: windows-latest
             env: Get-ChildItem Env:\
             versions: choco --version
@@ -86,4 +78,3 @@ jobs:
         run: |
           pwd
           ls -l ./node_modules/sqlite3/lib/binding
-          ls -l ./dendron/dendron/node_modules/sqlite3/lib/binding

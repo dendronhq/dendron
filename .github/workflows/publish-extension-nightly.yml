@@ -88,7 +88,11 @@ jobs:
 
       - name: Build the VSIX
         run: |
-          yarn build:patch:local:ci:nightly ${{ env.PUBLISHING_TARGET }}
+          yarn build:patch:local:ci:nightly:extensionTarget ${{ env.PUBLISHING_TARGET }}
+
+      - name: Build the VSIX w/o Target
+        run: |
+          yarn build:patch:local:ci:nightly
 
       - name: Check for VSIX
         run: |

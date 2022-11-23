@@ -65,6 +65,7 @@
     "build:patch:local:ci": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local BUILD_ENV=ci USE_IN_MEMORY_REGISTRY=1 ./bootstrap/scripts/buildPatch.sh",
     "build:patch:local:ci:nightly": "./bootstrap/scripts/buildNightly.sh",
     "build:patch:local:ci:enterprise": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=local BUILD_ENV=ci USE_IN_MEMORY_REGISTRY=1 EXT_TYPE=enterprise ./bootstrap/scripts/buildPatch.sh",
+    "build:patch:local:ci:nightly:extensionTarget": "EXTENSION_TARGET_SET=set ./bootstrap/scripts/buildNightly.sh",
     "build:patch:remote": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=remote ./bootstrap/scripts/buildPatch.sh",
     "build:patch:remote:ci": "cross-env UPGRADE_TYPE=patch PUBLISH_ENDPOINT=remote BUILD_ENV=ci ./bootstrap/scripts/buildPatch.sh",
     "build:minor:local": "cross-env UPGRADE_TYPE=minor PUBLISH_ENDPOINT=local ./bootstrap/scripts/buildPatch.sh",

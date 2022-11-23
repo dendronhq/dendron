@@ -1491,7 +1491,7 @@
     "build:dev": "yarn webpack",
     "build:prod": "yarn webpack:prod && ./scripts/varSub.sh && yarn package-web",
     "compile": "tsc -p tsconfig.build.json ",
-    "test": "node ./out/src/test/runTestInteg.js",
+    "test": "node -p 'process.arch' && node ./out/src/test/runTestInteg.js",
     "test-web": "node ./out/src/web/test/runWebIntegTest.js",
     "format": "echo nop",
     "vscode:uninstall": "node ./out/src/scripts/uninstallHook.js",

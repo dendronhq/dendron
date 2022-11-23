@@ -42,7 +42,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
     }
 
     const ext = ExtensionProvider.getExtension();
-    const config = ext.getDWorkspace().config.toString();
+    const config = (await ext.getDWorkspace().config).toString();
     const port = ext.port;
 
     let wsFile: string;

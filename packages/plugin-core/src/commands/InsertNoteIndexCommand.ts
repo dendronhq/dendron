@@ -1,4 +1,10 @@
-import { ConfigUtils, NotePropsMeta, NoteUtils } from "@dendronhq/common-all";
+import {
+  ConfigService,
+  ConfigUtils,
+  NotePropsMeta,
+  NoteUtils,
+  URI,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { window } from "vscode";
 import { DendronClientUtilsV2 } from "../clientUtils";
@@ -29,22 +35,24 @@ export class InsertNoteIndexCommand extends BasicCommand<
 
   // TODO: make this into a util once the cli version is implemented.
   // NOTE: the marker flag is not exposed to the plugin yet.
-  genNoteIndex(
+  async genNoteIndex(
     notes: NotePropsMeta[],
     opts: {
       marker?: boolean;
     }
   ) {
-    const listItems = notes.map((note) => {
-      const link = NoteUtils.createWikiLink({
-        note,
-        useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
-          this._ext.getEngine()
-        ),
-        alias: { mode: "title" },
-      });
-      return `- ${link}`;
-    });
+    const listItems = await Promise.all(
+      notes.map(async (note) => {
+        const link = NoteUtils.createWikiLink({
+          note,
+          useVaultPrefix: await DendronClientUtilsV2.shouldUseVaultPrefix(
+            this._ext.getEngine()
+          ),
+          alias: { mode: "title" },
+        });
+        return `- ${link}`;
+      })
+    );
     let payload = ["## Index", listItems.join("\n")];
     if (opts.marker) {
       payload = [
@@ -78,13 +86,19 @@ export class InsertNoteIndexCommand extends BasicCommand<
       window.showInformationMessage("This note does not have any child notes.");
       return opts;
     }
-    const { config } = this._ext.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     const insertNoteIndexConfig =
       ConfigUtils.getCommands(config).insertNoteIndex;
     const maybeMarker = insertNoteIndexConfig.enableMarker;
 
-    const noteIndex = this.genNoteIndex(children, {
+    const noteIndex = await this.genNoteIndex(children, {
       marker: opts.marker ? opts.marker : maybeMarker,
     });
     const current = maybeEditor.selection;

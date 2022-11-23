@@ -491,7 +491,9 @@ export class WorkspaceWatcher {
       msg: "enter",
       fname: NoteUtils.uri2Fname(editor.document.uri),
     });
-    const { vaults, wsRoot } = this._extension.getDWorkspace();
+    const ws = this._extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const fpath = editor.document.uri.fsPath;
 
     // don't apply actions to non-dendron notes
@@ -501,7 +503,7 @@ export class WorkspaceWatcher {
     }
 
     WorkspaceWatcher.moveCursorPastFrontmatter(editor);
-    const config = this._extension.getDWorkspace().config;
+    const config = await ws.config;
     if (ConfigUtils.getWorkspace(config).enableAutoFoldFrontmatter) {
       await this.foldFrontmatter();
     }

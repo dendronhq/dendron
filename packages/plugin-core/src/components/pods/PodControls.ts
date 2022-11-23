@@ -395,7 +395,7 @@ export class PodUIControls {
    *
    */
   public static async promptForVaultSelection(): Promise<DVault | undefined> {
-    const { vaults } = ExtensionProvider.getDWorkspace();
+    const vaults = await ExtensionProvider.getDWorkspace().vaults;
     if (vaults.length === 1) return vaults[0];
 
     const vaultQuickPick = await VSCodeUtils.showQuickPick(

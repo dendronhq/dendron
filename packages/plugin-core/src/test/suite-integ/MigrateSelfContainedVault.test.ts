@@ -95,7 +95,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
 
         showErrorMessage = sinon.stub(window, "showErrorMessage");
         reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         showQuickPick = stubMigrateQuickPick(
           VaultUtils.getName(vaults[0]),
           MigrateVaultContinueOption.cancel
@@ -191,7 +191,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );
@@ -279,7 +279,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );
@@ -318,7 +318,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );

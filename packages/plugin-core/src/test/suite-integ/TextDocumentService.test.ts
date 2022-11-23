@@ -86,7 +86,7 @@ suite("TextDocumentService", function testSuite() {
           );
           const textToAppend = "new text here";
           const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const note = NoteUtils.create({
             fname: "alpha",
             vault: vaults[0],
@@ -142,7 +142,7 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const foo = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],
@@ -192,7 +192,7 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const currentNote = NoteUtils.create({
             fname: "beta",
             vault: vaults[0],
@@ -237,7 +237,7 @@ suite("TextDocumentService", function testSuite() {
           );
 
           const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const note = NoteUtils.create({
             fname: "beta",
             vault: vaults[0],
@@ -346,7 +346,7 @@ suite("TextDocumentService", function testSuite() {
             vscode.workspace.onDidSaveTextDocument
           );
           const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const testNoteProps = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],
@@ -496,7 +496,7 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN the fm-tag should remain unchanged", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const fname = "fm-tag";
           const { onDidSave } = setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);

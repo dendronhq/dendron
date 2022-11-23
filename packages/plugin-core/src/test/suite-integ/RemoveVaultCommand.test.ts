@@ -93,7 +93,7 @@ suite("GIVEN RemoveVaultCommand", function () {
 
   describeMultiWS("WHEN removing a workspace vault", {}, () => {
     test("THEN the vault is removed", async () => {
-      const { vaults } = ExtensionProvider.getDWorkspace();
+      const vaults = await ExtensionProvider.getDWorkspace().vaults;
       const remoteVaultName = "remoteVault";
       const remoteWsName = "remoteWs";
       const vaultsRemote = [{ fsPath: remoteVaultName }];

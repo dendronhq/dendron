@@ -60,7 +60,7 @@ suite("BaseExportPodCommand", function () {
             ExtensionProvider.getExtension()
           );
 
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const testNote = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],
@@ -102,7 +102,7 @@ suite("BaseExportPodCommand", function () {
             ExtensionProvider.getExtension()
           );
 
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const testNote = NoteUtils.create({
             fname: "foo",
             vault: vaults[0],

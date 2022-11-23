@@ -55,7 +55,7 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const testNote = NoteUtils.create({
           fname: "foo",
           vault: vaults[0],
@@ -314,7 +314,7 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const testNote = NoteUtils.create({
           fname: "foo",
           vault: vaults[0],

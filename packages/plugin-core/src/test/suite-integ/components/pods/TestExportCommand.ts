@@ -28,7 +28,7 @@ export class TestExportPodCommand extends BaseExportPodCommand<
     getHierarchy(): Promise<{ hierarchy: string; vault: DVault } | undefined> {
       return new Promise<{ hierarchy: string; vault: DVault } | undefined>(
         (resolve) => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           resolve({ hierarchy: "foo", vault: vaults[0] });
         }
       );

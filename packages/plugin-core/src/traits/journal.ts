@@ -29,6 +29,7 @@ export class JournalNote implements NoteTrait {
         const dailyJournalDomain = journalConfig.dailyDomain;
         const { noteName: fname } = DendronClientUtilsV2.genNoteName(
           LookupNoteTypeEnum.journal,
+          config,
           {
             overrides: { domain: dailyJournalDomain },
           }

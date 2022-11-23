@@ -291,7 +291,7 @@ suite("WorkspaceWatcher", function () {
           extension,
           windowWatcher,
         });
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const fooNote = NoteUtils.create({
           fname: "foo.one",
           vault: vaults[0],

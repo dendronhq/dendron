@@ -11,8 +11,8 @@ import { DummyTelemetryClient } from "../../../../telemetry/common/DummyTelemetr
 import { ILookupProvider } from "../../../commands/lookup/ILookupProvider";
 import {
   LookupAcceptPayload,
-  LookupQuickpickFactory,
-} from "../../../commands/lookup/LookupQuickpickFactory";
+  LookupController,
+} from "../../../commands/lookup/LookupController";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
 
 require("mocha/mocha");
@@ -27,7 +27,7 @@ suite("GIVEN a NoteLookupCmd", () => {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+    } as unknown as LookupController;
 
     const showLookupFake = sinon.fake.resolves(undefined);
     sinon.replace(factory, "showLookup", showLookupFake);
@@ -63,7 +63,7 @@ suite("GIVEN a NoteLookupCmd", () => {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+    } as unknown as LookupController;
 
     const vault: DVault = {
       selfContained: true,
@@ -111,7 +111,7 @@ suite("GIVEN a NoteLookupCmd", () => {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+    } as unknown as LookupController;
 
     const vault: DVault = {
       selfContained: true,

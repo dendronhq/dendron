@@ -10,12 +10,12 @@ import { URI, Utils } from "vscode-uri";
 import { DENDRON_COMMANDS } from "../../constants";
 import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
-import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
+import { LookupController } from "./lookup/LookupController";
 
 @injectable()
 export class NoteLookupCmd {
   constructor(
-    private factory: LookupQuickpickFactory,
+    private factory: LookupController,
     @inject("wsRoot") private wsRoot: URI,
     @inject("ReducedDEngine")
     private engine: ReducedDEngine,

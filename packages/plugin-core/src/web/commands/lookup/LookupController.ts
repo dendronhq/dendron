@@ -2,6 +2,9 @@ import {
   DNodeUtils,
   DVault,
   FuseEngine,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
   NoteLookupUtils,
   NoteQuickInputV2,
   type ReducedDEngine,
@@ -9,20 +12,30 @@ import {
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
-import { Event, QuickPick, QuickPickOptions } from "vscode";
+import { Event, QuickPickOptions } from "vscode";
 import { Utils } from "vscode-uri";
 import { DendronContext } from "../../../constants";
 import { AutoCompleter } from "../../../utils/autoCompleter";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
+import { JournalBtn } from "../../../components/lookup/buttons";
+import { DendronBtn } from "../../../components/lookup/ButtonTypes";
+import { TwoWayBinding } from "../../../utils/TwoWayBinding";
+import { ILookupViewModel } from "../../../components/lookup/LookupViewModel";
+import {
+  DendronWebQuickPick,
+  VaultSelectionMode,
+} from "../../../components/lookup/types";
+import { LookupQuickPickView } from "./LookupQuickPickView";
 
 const CREATE_NEW_LABEL = "Create New";
 
-export type LookupQuickpickFactoryCreateOpts = QuickPickOptions & {
+export type LookupControllerCreateOpts = QuickPickOptions & {
   provider: ILookupProvider;
-  buttons?: vscode.QuickInputButton[];
+  buttons?: DendronBtn[];
   initialValue?: string;
+  noteType?: LookupNoteType;
 };
 
 export type LookupAcceptPayload = {
@@ -31,29 +44,78 @@ export type LookupAcceptPayload = {
 };
 
 @injectable()
-export class LookupQuickpickFactory {
+export class LookupController {
+  private viewModel: ILookupViewModel;
+  private _disposables: vscode.Disposable[] = [];
   constructor(
     @inject("ReducedDEngine") private _engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[],
     @inject("AutoCompleteEvent") private tabAutoCompleteEvent: Event<void>,
     private wsUtils: WSUtilsWeb
-  ) {}
+  ) {
+    this.viewModel = {
+      selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
+        LookupSelectionTypeEnum.none
+      ),
+      vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
+        VaultSelectionMode.auto
+      ),
+      isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
+      isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
+      isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
+      nameModifierMode: new TwoWayBinding<LookupNoteTypeEnum>(
+        LookupNoteTypeEnum.none
+      ),
+      isSplitHorizontally: new TwoWayBinding<boolean>(false),
+    };
+  }
 
   public showLookup(
-    opts: LookupQuickpickFactoryCreateOpts
+    opts: LookupControllerCreateOpts
   ): Promise<LookupAcceptPayload | undefined> {
     let initialValue = opts?.initialValue;
     if (!initialValue) {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
-
-    const qp = this.create({
+    const buttons = [
+      JournalBtn.create({
+        pressed: opts.noteType === LookupNoteTypeEnum.journal,
+      }),
+    ];
+    const qp = this.createQuickPick({
       title: "Lookup Note",
-      buttons: [],
+      buttons,
       provider: opts.provider,
       initialValue,
     });
+    this._disposables.push(new LookupQuickPickView(qp, this.viewModel));
 
+    const journalBtn = _.find(
+      buttons,
+      (value) => value.type === LookupNoteTypeEnum.journal
+    );
+    if (journalBtn) {
+      this._disposables.push(
+        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
+          switch (prevValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn) this.onJournalButtonToggled(false);
+              break;
+            default:
+              break;
+          }
+
+          switch (newValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn) this.onJournalButtonToggled(true);
+              break;
+            case LookupNoteTypeEnum.none:
+              break;
+            default:
+          }
+        })
+      );
+    }
     this.tabAutoCompleteEvent(() => {
       qp.value = AutoCompleter.getAutoCompletedValue(qp);
     });
@@ -117,13 +179,15 @@ export class LookupQuickpickFactory {
         DendronContext.NOTE_LOOK_UP_ACTIVE,
         false
       );
+      this._disposables.forEach((disposable) => disposable.dispose());
     });
     return lookupPromise;
   }
 
-  create(opts: LookupQuickpickFactoryCreateOpts): QuickPick<NoteQuickInputV2> {
+  createQuickPick(
+    opts: LookupControllerCreateOpts
+  ): DendronWebQuickPick<NoteQuickInputV2> {
     const qp = vscode.window.createQuickPick<NoteQuickInputV2>();
-
     let initialized = false; // Not really sure why this is needed. For some reason onDidChangeValue seems to get called before I think the callback is set up.
 
     qp.title = opts.title;
@@ -170,8 +234,9 @@ export class LookupQuickpickFactory {
       qp.items = modifiedItems;
     });
 
-    return qp;
+    return qp as DendronWebQuickPick<NoteQuickInputV2>;
   }
+  onJournalButtonToggled(arg0: boolean) {}
 
   private getInitialValueBasedOnActiveNote() {
     const uri = vscode.window.activeTextEditor?.document.uri;

@@ -214,7 +214,8 @@ export class MoveHeaderCommand extends BasicCommand<
   }) {
     const { engine, quickpick, selectedItems } = opts;
     const vault =
-      (quickpick.vault as DVault) || PickerUtilsV2.getVaultForOpenEditor();
+      (quickpick.vault as DVault) ||
+      (await PickerUtilsV2.getVaultForOpenEditor());
     let dest: NoteProps | undefined;
     if (_.isUndefined(selectedItems)) {
       dest = undefined;

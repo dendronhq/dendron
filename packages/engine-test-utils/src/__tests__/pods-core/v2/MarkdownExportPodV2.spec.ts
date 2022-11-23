@@ -49,7 +49,6 @@ const setupPod = async (setupOpts: {
   const pod = new MarkdownExportPodV2({
     podConfig,
     engine: opts.engine,
-    dendronConfig: config,
   });
   const props = (
     await opts.engine.findNotes({ fname, vault: opts.vaults[0] })
@@ -547,7 +546,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
 
             const props = (
@@ -592,7 +590,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({
               excludeStub: true,
@@ -623,7 +620,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);
@@ -660,7 +656,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);

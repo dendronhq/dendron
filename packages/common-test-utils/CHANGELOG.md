@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.118.0 (2022-11-22)
+
+
+### Bug Fixes
+
+* **workspace:** rename note breaks noteref for user hierarchy ([#3782](https://github.com/dendronhq/dendron/issues/3782)) ([053b949](https://github.com/dendronhq/dendron/commit/053b9492cf1c4c88346210718b3a0c26bec43d05))
+
+
+
+
+
 # 0.117.0 (2022-11-08)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

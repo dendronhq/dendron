@@ -320,20 +320,28 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
+    let noteProps: NoteProps[];
     const config = DConfig.readConfigSync(this.wsRoot);
     if (config.workspace.metadataStore === "sqlite") {
       try {
         const resp = await SQLiteMetadataStore.search(qs);
         noteIndexProps = resp.hits;
+        noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
+        // TODO: hack
+        if (!_.isUndefined(vault)) {
+          noteProps = noteProps.filter((ent) =>
+            VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
+          );
+        }
         this.logger.debug({ ctx: "queryNote", query: resp.query });
       } catch (err) {
         fs.appendFileSync("/tmp/out.log", "ERROR: unable to query note", {
           encoding: "utf8",
         });
-        noteIndexProps = [];
+        noteProps = [];
       }
     } else if (this._config.dev?.enableEngineV3) {
-      noteIndexProps = (
+      noteProps = (
         await this.api.noteQuery({
           opts,
           ws: this.wsRoot,
@@ -345,13 +353,13 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
         onlyDirectChildren,
         originalQS,
       });
-    }
-    let noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
-    // TODO: hack
-    if (!_.isUndefined(vault)) {
-      noteProps = noteProps.filter((ent) =>
-        VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
-      );
+      noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
+      // TODO: hack
+      if (!_.isUndefined(vault)) {
+        noteProps = noteProps.filter((ent) =>
+          VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
+        );
+      }
     }
     return noteProps;
   }
@@ -361,7 +369,8 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    if (_.isUndefined(notes)) {
+    // No-op for v3. TODO: remove after migration
+    if (_.isUndefined(notes) || this._config.dev?.enableEngineV3) {
       return;
     }
 

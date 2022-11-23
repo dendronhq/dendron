@@ -306,6 +306,8 @@ export abstract class EngineV3Base implements ReducedDEngine {
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     // const ctx = "Engine:queryNotes";
     const { vault } = opts;
+    const MAX_LIMIT = 100;
+
     // Need to ignore this because the engine stringifies this property, so the types are incorrect.
     // @ts-ignore
     if (vault?.selfContained === "true" || vault?.selfContained === "false")
@@ -315,23 +317,27 @@ export abstract class EngineV3Base implements ReducedDEngine {
       // TODO: need to return an error
       return [];
     }
-    const items = response.value;
+    let items = response.value;
     if (items.length === 0) {
       return [];
     }
 
-    const notes = await this.noteStore.bulkGet(items.map((ent) => ent.id));
-
-    let modifiedNotes;
-    modifiedNotes = notes
-      .filter((ent) => _.isUndefined(ent.error))
-      .map((resp) => resp.data!);
-
     if (!_.isUndefined(vault)) {
-      modifiedNotes = modifiedNotes.filter((ent) => {
+      items = items.filter((ent) => {
         return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
       });
     }
+
+    // TODO: Support actual pagination if needed. For now, cap results
+    if (items.length > MAX_LIMIT) {
+      items = items.slice(0, MAX_LIMIT);
+    }
+
+    const notes = await this.noteStore.bulkGet(items.map((ent) => ent.id));
+
+    const modifiedNotes = notes
+      .filter((ent) => _.isUndefined(ent.error))
+      .map((resp) => resp.data!);
 
     return modifiedNotes;
   }

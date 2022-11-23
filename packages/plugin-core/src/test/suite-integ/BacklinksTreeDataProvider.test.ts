@@ -38,7 +38,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkPanelSortOrder) => {
   const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
     mockEvents,
-    ExtensionProvider.getDWorkspace().config.dev?.enableLinkCandidates
+    (await ExtensionProvider.getDWorkspace().config).dev?.enableLinkCandidates
   );
 
   if (sortOrder) {
@@ -153,7 +153,9 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = (await engine.getNote("alpha")).data!;
         await ExtensionProvider.getWSUtils().openNote(note);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
@@ -190,7 +192,9 @@ suite("BacklinksTreeDataProvider", function () {
       test("THEN calculating backlinks from cache returns same number of backlinks", async () => {
         // re-initialize engine from cache
         await new ReloadIndexCommand().run();
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = (await engine.getNote("alpha")).data!;
         await ExtensionProvider.getWSUtils().openNote(note);
 
@@ -230,7 +234,9 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       test("THEN finds the backlink candidate for that note", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const isLinkCandidateEnabled = (
           await TestConfigUtils.getConfig({ wsRoot })
         ).dev?.enableLinkCandidates;
@@ -273,7 +279,9 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       test("THEN finds the backlink candidate for all notes", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const isLinkCandidateEnabled = (
           await TestConfigUtils.getConfig({ wsRoot })
         ).dev?.enableLinkCandidates;
@@ -338,7 +346,9 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       test("THEN backlink sort order is correct", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         function buildVault1Path(fileName: string) {
           return vscode.Uri.file(
             path.join(wsRoot, vaults[1].fsPath, fileName)
@@ -372,7 +382,9 @@ suite("BacklinksTreeDataProvider", function () {
       });
 
       test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = (await engine.getNote("alpha")).data!;
         await ExtensionProvider.getWSUtils().openNote(note);
         const { out } = await getRootChildrenBacklinksAsPlainObject();
@@ -539,7 +551,9 @@ suite("BacklinksTreeDataProvider", function () {
     },
     () => {
       test("THEN BacklinksTreeDataProvider calculates correct number of backlinks", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
 
         const alpha = (await engine.getNote("alpha")).data!;
         await ExtensionProvider.getWSUtils().openNote(alpha);
@@ -699,58 +713,64 @@ suite("BacklinksTreeDataProvider", function () {
       });
 
       test("AND a note gets created, THEN the data provider refresh event gets invoked", (done) => {
-        const vaults = await ExtensionProvider.getDWorkspace().vaults;
-        const testNoteProps = NoteUtils.create({
-          fname: "foo",
-          vault: vaults[0],
-        });
-        const entry: NoteChangeEntry = {
-          note: testNoteProps,
-          status: "create",
-        };
+        const vaults = ExtensionProvider.getDWorkspace().vaults;
+        vaults.then((vaults) => {
+          const testNoteProps = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
+          const entry: NoteChangeEntry = {
+            note: testNoteProps,
+            status: "create",
+          };
 
-        backlinksTreeDataProvider.onDidChangeTreeData(() => {
-          done();
-        });
+          backlinksTreeDataProvider.onDidChangeTreeData(() => {
+            done();
+          });
 
-        mockEvents.testFireOnNoteChanged([entry]);
+          mockEvents.testFireOnNoteChanged([entry]);
+        });
       });
 
       test("AND a note gets updated, THEN the data provider refresh event gets invoked", (done) => {
-        const vaults = await ExtensionProvider.getDWorkspace().vaults;
-        const testNoteProps = NoteUtils.create({
-          fname: "foo",
-          vault: vaults[0],
-        });
-        const entry: NoteChangeEntry = {
-          prevNote: testNoteProps,
-          note: testNoteProps,
-          status: "update",
-        };
+        const vaults = ExtensionProvider.getDWorkspace().vaults;
+        vaults.then((vaults) => {
+          const testNoteProps = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
+          const entry: NoteChangeEntry = {
+            prevNote: testNoteProps,
+            note: testNoteProps,
+            status: "update",
+          };
 
-        backlinksTreeDataProvider.onDidChangeTreeData(() => {
-          done();
-        });
+          backlinksTreeDataProvider.onDidChangeTreeData(() => {
+            done();
+          });
 
-        mockEvents.testFireOnNoteChanged([entry]);
+          mockEvents.testFireOnNoteChanged([entry]);
+        });
       });
 
       test("AND a note gets deleted, THEN the data provider refresh event gets invoked", (done) => {
-        const vaults = await ExtensionProvider.getDWorkspace().vaults;
-        const testNoteProps = NoteUtils.create({
-          fname: "foo",
-          vault: vaults[0],
-        });
-        const entry: NoteChangeEntry = {
-          note: testNoteProps,
-          status: "delete",
-        };
+        const vaults = ExtensionProvider.getDWorkspace().vaults;
+        vaults.then((vaults) => {
+          const testNoteProps = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
+          });
+          const entry: NoteChangeEntry = {
+            note: testNoteProps,
+            status: "delete",
+          };
 
-        backlinksTreeDataProvider.onDidChangeTreeData(() => {
-          done();
-        });
+          backlinksTreeDataProvider.onDidChangeTreeData(() => {
+            done();
+          });
 
-        mockEvents.testFireOnNoteChanged([entry]);
+          mockEvents.testFireOnNoteChanged([entry]);
+        });
       });
     }
   );

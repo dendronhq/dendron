@@ -82,7 +82,9 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   private async goToNoteLink(noteLink: any): Promise<CommandOutput> {
-    const { vaults, engine } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine } = ws;
+    const vaults = await ws.vaults;
 
     // get vault
     let vault: DVault | undefined;
@@ -140,7 +142,7 @@ export class GotoCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const { wsRoot } = this._ext.getDWorkspace();
 
       if (externalLink.startsWith("asset")) {
-        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+        const vault = await PickerUtilsV2.getVaultForOpenEditor();
         assetPath = path.join(vault2Path({ vault, wsRoot }), externalLink);
       } else {
         assetPath = resolvePath(

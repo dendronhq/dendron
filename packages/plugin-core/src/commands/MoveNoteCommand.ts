@@ -127,7 +127,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (vault) {
       lookupCreateOpts.buttons = [];
     }
-    const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
+    const lc = await extension.lookupControllerFactory.create(lookupCreateOpts);
 
     const provider = extension.noteLookupProviderFactory.create("move", {
       allowNewNote: true,

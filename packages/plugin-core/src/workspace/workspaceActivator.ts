@@ -376,7 +376,7 @@ async function updateEngineAPI(
   const svc = await EngineAPIService.createEngine({
     port,
     enableWorkspaceTrust: vscode.workspace.isTrusted,
-    vaults: ext.getDWorkspace().vaults,
+    vaults: await ext.getDWorkspace().vaults,
     wsRoot: ext.getDWorkspace().wsRoot,
   });
   ext.setEngine(svc);
@@ -441,7 +441,7 @@ export class WorkspaceActivator {
     // --- Setup workspace
     let workspace: DWorkspaceV2;
     if (ext.type === WorkspaceType.NATIVE) {
-      workspace = await this.initNativeWorkspace({ ext, context, wsRoot });
+      workspace = this.initNativeWorkspace({ ext, context, wsRoot });
       if (!workspace) {
         return {
           error: ErrorFactory.createInvalidStateError({
@@ -450,7 +450,7 @@ export class WorkspaceActivator {
         };
       }
     } else {
-      workspace = await this.initCodeWorkspace({ ext, context, wsRoot });
+      workspace = this.initCodeWorkspace({ ext, context, wsRoot });
     }
 
     ext.workspaceImpl = workspace;
@@ -652,38 +652,22 @@ export class WorkspaceActivator {
     return { data: true };
   }
 
-  async initCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
+  initCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
-    const configReadResult = await ConfigService.instance().readConfig(
-      URI.file(wsRoot)
-    );
-    if (configReadResult.isErr()) {
-      throw configReadResult.error;
-    }
-    const config = configReadResult.value;
     const ws = new DendronCodeWorkspace({
       wsRoot,
       logUri: context.logUri,
       assetUri,
-      config,
     });
     return ws;
   }
 
-  async initNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
+  initNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
-    const configReadResult = await ConfigService.instance().readConfig(
-      URI.file(wsRoot)
-    );
-    if (configReadResult.isErr()) {
-      throw configReadResult.error;
-    }
-    const config = configReadResult.value;
     const ws = new DendronNativeWorkspace({
       wsRoot,
       logUri: context.logUri,
       assetUri,
-      config,
     });
     return ws;
   }

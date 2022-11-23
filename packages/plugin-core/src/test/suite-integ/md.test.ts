@@ -26,7 +26,9 @@ suite("WHEN getReferenceAtPosition", function () {
     () => {
       test("THEN initializes correctly", async () => {
         // You can access the workspace inside the test like this:
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const activeNote = (await engine.getNoteMeta(activeNoteName)).data!;
         const editor = await WSUtils.openNote(activeNote);
         const position = new vscode.Position(7, 0);

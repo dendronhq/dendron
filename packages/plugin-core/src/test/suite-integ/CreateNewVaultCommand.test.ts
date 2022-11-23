@@ -40,7 +40,7 @@ suite("CreateNewVault Command", function () {
           sinon.stub(cmd, "gatherDestinationFolder").resolves(vpath);
           await cmd.run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
 
           expect(vaultsAfter.length).toEqual(2);
           expect(
@@ -135,7 +135,9 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

@@ -274,7 +274,7 @@ suite("Lookup Utils Test", function runSuite() {
   });
 });
 
-function createTestLookupController(
+async function createTestLookupController(
   lookupCreateOpts: LookupControllerV3CreateOpts
 ) {
   return ExtensionProvider.getExtension().lookupControllerFactory.create(
@@ -318,7 +318,7 @@ suite("NoteLookupProviderUtils", function () {
 
       describe("WHEN event.done", () => {
         test("THEN returns bare event if onDone callback isn't specified", async () => {
-          const controller = createTestLookupController(lookupCreateOpts);
+          const controller = await createTestLookupController(lookupCreateOpts);
 
           controller.show({
             ...showOpts,
@@ -338,7 +338,7 @@ suite("NoteLookupProviderUtils", function () {
         });
 
         test("THEN returns onDone callback output if onDone is specificed", async () => {
-          const controller = createTestLookupController(lookupCreateOpts);
+          const controller = await createTestLookupController(lookupCreateOpts);
           controller.show({
             ...showOpts,
             nonInteractive: true,
@@ -365,7 +365,7 @@ suite("NoteLookupProviderUtils", function () {
           };
         };
         test("THEN returns undefined in onError is not specified", async () => {
-          const controller = createTestLookupController(lookupCreateOpts);
+          const controller = await createTestLookupController(lookupCreateOpts);
           provider.registerOnAcceptHook(dummyHook);
           controller.show({
             ...showOpts,
@@ -382,7 +382,7 @@ suite("NoteLookupProviderUtils", function () {
         });
 
         test("THEN returns onError callback output if onError is specified", async () => {
-          const controller = createTestLookupController(lookupCreateOpts);
+          const controller = await createTestLookupController(lookupCreateOpts);
           provider.registerOnAcceptHook(dummyHook);
           controller.show({
             ...showOpts,
@@ -405,34 +405,7 @@ suite("NoteLookupProviderUtils", function () {
       describe("WHEN event.changeState", () => {
         test("THEN onChangeState callback output is returned if onChangeState is provided", (done) => {
           const controller = createTestLookupController(lookupCreateOpts);
-          controller.show({
-            ...showOpts,
-            nonInteractive: false,
-          });
-          const result = NoteLookupProviderUtils.subscribe({
-            id: "foo",
-            controller,
-            logger: Logger,
-            onChangeState: () => {
-              return { foo: "custom onChangeState" };
-            },
-          });
-          setTimeout(async () => {
-            HistoryService.instance().add({
-              source: "lookupProvider",
-              action: "changeState",
-              id: "foo",
-              data: { action: "hide" },
-            });
-            expect((await result).foo).toEqual("custom onChangeState");
-
-            controller.onHide();
-            done();
-          }, 1000);
-        });
-        describe("AND action.hide", () => {
-          test("THEN onHide callback output is returned if onHide is provided", (done) => {
-            const controller = createTestLookupController(lookupCreateOpts);
+          controller.then((controller) => {
             controller.show({
               ...showOpts,
               nonInteractive: false,
@@ -441,17 +414,48 @@ suite("NoteLookupProviderUtils", function () {
               id: "foo",
               controller,
               logger: Logger,
-              onHide: () => {
-                return { foo: "custom onHide" };
+              onChangeState: () => {
+                return { foo: "custom onChangeState" };
               },
             });
             setTimeout(async () => {
-              controller.quickPick.hide();
-              expect((await result).foo).toEqual("custom onHide");
+              HistoryService.instance().add({
+                source: "lookupProvider",
+                action: "changeState",
+                id: "foo",
+                data: { action: "hide" },
+              });
+              expect((await result).foo).toEqual("custom onChangeState");
 
               controller.onHide();
               done();
             }, 1000);
+          });
+        });
+        describe("AND action.hide", () => {
+          test("THEN onHide callback output is returned if onHide is provided", (done) => {
+            const controller = createTestLookupController(lookupCreateOpts);
+            controller.then((controller) => {
+              controller.show({
+                ...showOpts,
+                nonInteractive: false,
+              });
+              const result = NoteLookupProviderUtils.subscribe({
+                id: "foo",
+                controller,
+                logger: Logger,
+                onHide: () => {
+                  return { foo: "custom onHide" };
+                },
+              });
+              setTimeout(async () => {
+                controller.quickPick.hide();
+                expect((await result).foo).toEqual("custom onHide");
+
+                controller.onHide();
+                done();
+              }, 1000);
+            });
           });
         });
       });

@@ -24,7 +24,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     fpath: string;
     vault?: DVault;
   }) {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const file = await findNonNoteFile({
       fpath,
       vaults: vault ? [vault] : vaults,
@@ -85,7 +87,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
         return;
       }
 
-      const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot, engine } = ws;
+      const vaults = await ws.vaults;
       const refAtPos = await getReferenceAtPosition({
         document,
         position,

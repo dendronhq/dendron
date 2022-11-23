@@ -286,7 +286,7 @@ export async function getReferenceAtPosition({
   // check if it is a user tag, a regular tag, or a frontmatter tag
   if (!rangeWithLink) {
     const { enableUserTags, enableHashTags } = ConfigUtils.getWorkspace(
-      ExtensionProvider.getDWorkspace().config
+      await ExtensionProvider.getDWorkspace().config
     );
     if (enableHashTags) {
       // if not, it could be a hashtag

@@ -86,34 +86,40 @@ suite("TextDocumentService", function testSuite() {
           );
           const textToAppend = "new text here";
           const engine = ExtensionProvider.getEngine();
-          const vaults = await ExtensionProvider.getDWorkspace().vaults;
-          const note = NoteUtils.create({
-            fname: "alpha",
-            vault: vaults[0],
-          });
-
-          onDidChangeTextDocumentHandler =
-            vscode.workspace.onDidChangeTextDocument(async (event) => {
-              if (event.document.isDirty) {
-                const maybeNote =
-                  await textDocumentService?.processTextDocumentChangeEvent(
-                    event
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const note = NoteUtils.create({
+              fname: "alpha",
+              vault: vaults[0],
+            });
+            onDidChangeTextDocumentHandler =
+              vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document.isDirty) {
+                  const maybeNote =
+                    await textDocumentService?.processTextDocumentChangeEvent(
+                      event
+                    );
+                  expect(maybeNote?.body).toEqual(
+                    "First Line\n" + textToAppend
                   );
-                expect(maybeNote?.body).toEqual("First Line\n" + textToAppend);
-                // Make sure updated has not changed
-                const alphaNote = (await engine.getNoteMeta("alpha")).data!;
-                expect(maybeNote?.updated).toEqual(alphaNote.updated);
-                done();
-              }
-            });
-          ExtensionProvider.getWSUtils()
-            .openNote(note)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const line = editor.document.getText().split("\n").length;
-                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+                  // Make sure updated has not changed
+                  const alphaNote = (await engine.getNoteMeta("alpha")).data!;
+                  expect(maybeNote?.updated).toEqual(alphaNote.updated);
+                  done();
+                }
               });
-            });
+            ExtensionProvider.getWSUtils()
+              .openNote(note)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(
+                    new vscode.Position(line, 0),
+                    textToAppend
+                  );
+                });
+              });
+          });
         });
       }
     );
@@ -142,33 +148,35 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const vaults = await ExtensionProvider.getDWorkspace().vaults;
-          const foo = NoteUtils.create({
-            fname: "foo",
-            vault: vaults[0],
-          });
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const foo = NoteUtils.create({
+              fname: "foo",
+              vault: vaults[0],
+            });
 
-          onDidChangeTextDocumentHandler =
-            vscode.workspace.onDidChangeTextDocument(async (event) => {
-              if (event.document.isDirty) {
-                const maybeNote =
-                  await textDocumentService?.processTextDocumentChangeEvent(
-                    event
-                  );
-                expect(maybeNote?.links.length).toEqual(1);
-                expect(maybeNote?.links[0].type).toEqual("frontmatterTag");
-                expect(maybeNote?.links[0].to?.fname).toEqual("tags.test");
-                done();
-              }
-            });
-          ExtensionProvider.getWSUtils()
-            .openNote(foo)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const pos = new vscode.Position(6, 0);
-                editBuilder.insert(pos, `tags: test\n`);
+            onDidChangeTextDocumentHandler =
+              vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document.isDirty) {
+                  const maybeNote =
+                    await textDocumentService?.processTextDocumentChangeEvent(
+                      event
+                    );
+                  expect(maybeNote?.links.length).toEqual(1);
+                  expect(maybeNote?.links[0].type).toEqual("frontmatterTag");
+                  expect(maybeNote?.links[0].to?.fname).toEqual("tags.test");
+                  done();
+                }
               });
-            });
+            ExtensionProvider.getWSUtils()
+              .openNote(foo)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const pos = new vscode.Position(6, 0);
+                  editBuilder.insert(pos, `tags: test\n`);
+                });
+              });
+          });
         });
       }
     );
@@ -192,26 +200,28 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const vaults = await ExtensionProvider.getDWorkspace().vaults;
-          const currentNote = NoteUtils.create({
-            fname: "beta",
-            vault: vaults[0],
-          });
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const currentNote = NoteUtils.create({
+              fname: "beta",
+              vault: vaults[0],
+            });
 
-          onDidChangeTextDocumentHandler =
-            vscode.workspace.onDidChangeTextDocument(() => {
-              assert(false, "Callback not expected");
-            });
-          ExtensionProvider.getWSUtils()
-            .openNote(currentNote)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const line = editor.document.getText().split("\n").length;
-                editBuilder.insert(new vscode.Position(line, 0), "");
+            onDidChangeTextDocumentHandler =
+              vscode.workspace.onDidChangeTextDocument(() => {
+                assert(false, "Callback not expected");
               });
-            });
-          // Small sleep to ensure callback doesn't fire.
-          waitInMilliseconds(10).then(() => done());
+            ExtensionProvider.getWSUtils()
+              .openNote(currentNote)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(new vscode.Position(line, 0), "");
+                });
+              });
+            // Small sleep to ensure callback doesn't fire.
+            waitInMilliseconds(10).then(() => done());
+          });
         });
       }
     );
@@ -237,36 +247,38 @@ suite("TextDocumentService", function testSuite() {
           );
 
           const engine = ExtensionProvider.getEngine();
-          const vaults = await ExtensionProvider.getDWorkspace().vaults;
-          const note = NoteUtils.create({
-            fname: "beta",
-            vault: vaults[0],
-          });
-
-          onDidChangeTextDocumentHandler =
-            vscode.workspace.onDidChangeTextDocument(async (event) => {
-              if (event.document.isDirty) {
-                // Set content hash to be same as event to enter content no change logic
-                const currentNote = (await engine.getNote("beta")).data!;
-                currentNote.contentHash = genHash(event.document.getText());
-                await engine.writeNote(currentNote, { metaOnly: true });
-
-                const maybeNote =
-                  await textDocumentService?.processTextDocumentChangeEvent(
-                    event
-                  );
-                expect(maybeNote).toEqual(currentNote);
-                done();
-              }
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const note = NoteUtils.create({
+              fname: "beta",
+              vault: vaults[0],
             });
-          ExtensionProvider.getWSUtils()
-            .openNote(note)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const line = editor.document.getText().split("\n").length;
-                editBuilder.insert(new vscode.Position(line, 0), "1");
+
+            onDidChangeTextDocumentHandler =
+              vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document.isDirty) {
+                  // Set content hash to be same as event to enter content no change logic
+                  const currentNote = (await engine.getNote("beta")).data!;
+                  currentNote.contentHash = genHash(event.document.getText());
+                  await engine.writeNote(currentNote, { metaOnly: true });
+
+                  const maybeNote =
+                    await textDocumentService?.processTextDocumentChangeEvent(
+                      event
+                    );
+                  expect(maybeNote).toEqual(currentNote);
+                  done();
+                }
               });
-            });
+            ExtensionProvider.getWSUtils()
+              .openNote(note)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(new vscode.Position(line, 0), "1");
+                });
+              });
+          });
         });
       }
     );
@@ -278,37 +290,43 @@ suite("TextDocumentService", function testSuite() {
           vscode.workspace.onDidSaveTextDocument
         );
         const textToAppend = "new text here";
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
-
-        NoteTestUtilsV4.createNote({
-          fname: "blahblah123",
-          body: `[[beta]]`,
-          vault: vaults[0],
-          wsRoot,
-        }).then((testNoteProps) => {
-          ExtensionProvider.getWSUtils()
-            .openNote(testNoteProps)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const line = editor.document.getText().split("\n").length;
-                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = ws.vaults;
+        vaults.then((vaults) => {
+          NoteTestUtilsV4.createNote({
+            fname: "blahblah123",
+            body: `[[beta]]`,
+            vault: vaults[0],
+            wsRoot,
+          }).then((testNoteProps) => {
+            ExtensionProvider.getWSUtils()
+              .openNote(testNoteProps)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(
+                    new vscode.Position(line, 0),
+                    textToAppend
+                  );
+                });
               });
+          });
+
+          onDidChangeTextDocumentHandler =
+            vscode.workspace.onDidChangeTextDocument(async (event) => {
+              if (event.document.isDirty) {
+                const noteProp = (await engine.getNote("blahblah123")).data;
+                expect(noteProp).toBeFalsy();
+                const maybeNote =
+                  await textDocumentService?.processTextDocumentChangeEvent(
+                    event
+                  );
+                expect(maybeNote).toBeFalsy();
+                done();
+              }
             });
         });
-
-        onDidChangeTextDocumentHandler =
-          vscode.workspace.onDidChangeTextDocument(async (event) => {
-            if (event.document.isDirty) {
-              const noteProp = (await engine.getNote("blahblah123")).data;
-              expect(noteProp).toBeFalsy();
-              const maybeNote =
-                await textDocumentService?.processTextDocumentChangeEvent(
-                  event
-                );
-              expect(maybeNote).toBeFalsy();
-              done();
-            }
-          });
       });
     });
   });
@@ -346,57 +364,62 @@ suite("TextDocumentService", function testSuite() {
             vscode.workspace.onDidSaveTextDocument
           );
           const engine = ExtensionProvider.getEngine();
-          const vaults = await ExtensionProvider.getDWorkspace().vaults;
-          const testNoteProps = NoteUtils.create({
-            fname: "foo",
-            vault: vaults[0],
-          });
-          const textToAppend = "new text here";
-
-          const disposable = subscribeToEngineStateChange(
-            (noteChangeEntries: NoteChangeEntry[]) => {
-              const createEntries = extractNoteChangeEntriesByType(
-                noteChangeEntries,
-                "create"
-              );
-
-              const deleteEntries = extractNoteChangeEntriesByType(
-                noteChangeEntries,
-                "delete"
-              );
-
-              const updateEntries = extractNoteChangeEntriesByType(
-                noteChangeEntries,
-                "update"
-              ) as NoteChangeUpdateEntry[];
-
-              testAssertsInsideCallback(async () => {
-                expect(createEntries.length).toEqual(0);
-                expect(updateEntries.length).toEqual(1);
-                expect(deleteEntries.length).toEqual(0);
-
-                const updateEntry = updateEntries[0];
-
-                expect(updateEntry.note.fname).toEqual("foo");
-                const testNoteProps = (await engine.getNote("foo")).data!;
-                expect(updateEntry.note.body).toEqual(testNoteProps.body);
-                expect(
-                  updateEntry.note.body.includes(textToAppend)
-                ).toBeTruthy();
-                disposable.dispose();
-              }, done);
-            }
-          );
-
-          ExtensionProvider.getWSUtils()
-            .openNote(testNoteProps)
-            .then((editor) => {
-              editor.edit((editBuilder) => {
-                const line = editor.document.getText().split("\n").length;
-                editBuilder.insert(new vscode.Position(line, 0), textToAppend);
-              });
-              editor.document.save();
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const testNoteProps = NoteUtils.create({
+              fname: "foo",
+              vault: vaults[0],
             });
+            const textToAppend = "new text here";
+
+            const disposable = subscribeToEngineStateChange(
+              (noteChangeEntries: NoteChangeEntry[]) => {
+                const createEntries = extractNoteChangeEntriesByType(
+                  noteChangeEntries,
+                  "create"
+                );
+
+                const deleteEntries = extractNoteChangeEntriesByType(
+                  noteChangeEntries,
+                  "delete"
+                );
+
+                const updateEntries = extractNoteChangeEntriesByType(
+                  noteChangeEntries,
+                  "update"
+                ) as NoteChangeUpdateEntry[];
+
+                testAssertsInsideCallback(async () => {
+                  expect(createEntries.length).toEqual(0);
+                  expect(updateEntries.length).toEqual(1);
+                  expect(deleteEntries.length).toEqual(0);
+
+                  const updateEntry = updateEntries[0];
+
+                  expect(updateEntry.note.fname).toEqual("foo");
+                  const testNoteProps = (await engine.getNote("foo")).data!;
+                  expect(updateEntry.note.body).toEqual(testNoteProps.body);
+                  expect(
+                    updateEntry.note.body.includes(textToAppend)
+                  ).toBeTruthy();
+                  disposable.dispose();
+                }, done);
+              }
+            );
+
+            ExtensionProvider.getWSUtils()
+              .openNote(testNoteProps)
+              .then((editor) => {
+                editor.edit((editBuilder) => {
+                  const line = editor.document.getText().split("\n").length;
+                  editBuilder.insert(
+                    new vscode.Position(line, 0),
+                    textToAppend
+                  );
+                });
+                editor.document.save();
+              });
+          });
         });
       }
     );
@@ -565,7 +588,9 @@ suite("TextDocumentService", function testSuite() {
             ExtensionProvider.getExtension(),
             vscode.workspace.onDidSaveTextDocument
           );
-          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const testNoteProps = await NoteTestUtilsV4.createNote({
             fname: "blahblah123",
             body: `[[beta]]`,

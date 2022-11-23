@@ -56,7 +56,7 @@ export class TaskStatusCommand extends BasicCommand<
       const engine = this._ext.getDWorkspace().engine;
       const vault = selection.vaultName
         ? VaultUtils.getVaultByName({
-            vaults: this._ext.getDWorkspace().vaults,
+            vaults: await this._ext.getDWorkspace().vaults,
             vname: selection.vaultName,
           })
         : undefined;
@@ -115,7 +115,8 @@ export class TaskStatusCommand extends BasicCommand<
       // then prompt for the status
       const currentStatus = selectedNote.custom?.status;
       const knownStatuses = Object.entries(
-        ConfigUtils.getTask(this._ext.getDWorkspace().config).statusSymbols
+        ConfigUtils.getTask(await this._ext.getDWorkspace().config)
+          .statusSymbols
       ).filter(
         ([key, value]) =>
           // Don't suggest the current status as an option

@@ -16,6 +16,7 @@ import {
   ConfigService,
   DendronConfig,
   URI,
+  DVault,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import {
@@ -117,7 +118,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
 
       const webViewAssets = WebViewUtils.getJsAndCss();
       const initialTheme =
-        ConfigUtils.getPreview(this._ext.getDWorkspace().config).theme || "";
+        ConfigUtils.getPreview(await this._ext.getDWorkspace().config).theme ||
+        "";
       const html = await WebViewUtils.getWebviewContent({
         ...webViewAssets,
         name,
@@ -288,7 +290,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
             }
 
             const textDocument = editor.document;
-            const { wsRoot, vaults } = this._ext.getDWorkspace();
+            const ws = this._ext.getDWorkspace();
+            const { wsRoot } = ws;
+            const vaults = await ws.vaults;
             if (
               !WorkspaceUtils.isPathInWorkspace({
                 wsRoot,
@@ -332,7 +336,9 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
     fn: (
       note: NoteProps,
       panel: vscode.WebviewPanel,
-      config: DendronConfig
+      config: DendronConfig,
+      wsRoot: string,
+      vaults: DVault[]
     ) => {
       const parser = MDUtilsV5.procRemarkFull({
         noteToRender: note,
@@ -340,8 +346,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         fname: note.fname,
         vault: note.vault,
         config,
-        wsRoot: this._ext.getDWorkspace().wsRoot,
-        vaults: this._ext.getDWorkspace().vaults,
+        wsRoot,
+        vaults,
       });
       const tree = parser.parse(note.body);
       // ^preview-rewrites-images
@@ -393,7 +399,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
           textDocument
         );
       }
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
       const configReadResult = await ConfigService.instance().readConfig(
         URI.file(wsRoot)
       );
@@ -405,7 +412,8 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
         return;
       }
       const config = configReadResult.value;
-      note = this.rewriteImageUrls(note, panel, config);
+      const vaults = await ws.vaults;
+      note = this.rewriteImageUrls(note, panel, config, wsRoot, vaults);
 
       try {
         return panel.webview.postMessage({
@@ -475,12 +483,17 @@ export class PreviewPanel implements PreviewProxy, vscode.Disposable {
   // eslint-disable-next-line camelcase
   __DO_NOT_USE_IN_PROD_exposePropsForTesting() {
     return {
-      rewriteImageUrls: (note: NoteProps, config: DendronConfig) => {
+      rewriteImageUrls: (
+        note: NoteProps,
+        config: DendronConfig,
+        wsRoot: string,
+        vaults: DVault[]
+      ) => {
         if (!this._panel)
           throw new DendronError({
             message: "Panel used before being initalized",
           });
-        return this.rewriteImageUrls(note, this._panel, config);
+        return this.rewriteImageUrls(note, this._panel, config, wsRoot, vaults);
       },
     };
   }

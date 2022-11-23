@@ -25,7 +25,7 @@ export class TaskCompleteCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const complete: string | undefined = ConfigUtils.getTask(
-      this._ext.getDWorkspace().config
+      await this._ext.getDWorkspace().config
     ).taskCompleteStatus[0];
 
     if (complete === undefined) {

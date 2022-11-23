@@ -51,20 +51,16 @@ export class MarkdownExportPodV2
 {
   private _config: RunnableMarkdownV2PodConfig;
   private _engine: DEngineClient;
-  private _dendronConfig: DendronConfig;
 
   constructor({
     podConfig,
     engine,
-    dendronConfig,
   }: {
     podConfig: RunnableMarkdownV2PodConfig;
     engine: DEngineClient;
-    dendronConfig: DendronConfig;
   }) {
     this._config = podConfig;
     this._engine = engine;
-    this._dendronConfig = dendronConfig;
   }
 
   async exportNotes(
@@ -234,6 +230,7 @@ export class MarkdownExportPodV2
       addFrontmatterTitle,
     } = this._config;
     const engine = this._engine;
+
     const workspaceConfig = ConfigUtils.getWorkspace(config);
     workspaceConfig.enableUserTags = convertUserNotesToLinks;
     workspaceConfig.enableHashTags = convertTagNotesToLinks;
@@ -270,14 +267,10 @@ export class MarkdownExportPodV2
       vaults: engine.vaults,
       wsRoot: engine.wsRoot,
     });
-    if (this._config.wikiLinkToURL && !_.isUndefined(this._dendronConfig)) {
+
+    if (this._config.wikiLinkToURL && !_.isUndefined(config)) {
       remark = remark.use(
-        RemarkUtils.convertWikiLinkToNoteUrl(
-          note,
-          [],
-          this._engine,
-          this._dendronConfig
-        )
+        RemarkUtils.convertWikiLinkToNoteUrl(note, [], this._engine, config)
       );
     } else {
       remark = remark.use(RemarkUtils.convertLinksFromDotNotation(note, []));

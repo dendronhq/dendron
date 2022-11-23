@@ -62,7 +62,9 @@ suite("GIVEN ConvertVaultCommand", function () {
       });
 
       test("THEN the folder is a git repository", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const git = new Git({ localUrl: path.join(wsRoot, vaults[0].fsPath) });
         expect(await git.getRemote()).toEqual("origin");
         expect(await git.getCurrentBranch()).toBeTruthy();
@@ -98,7 +100,9 @@ suite("GIVEN ConvertVaultCommand", function () {
         });
 
         test("THEN the folder is NOT a git repository", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const git = new Git({
             localUrl: path.join(wsRoot, vaults[0].fsPath),
           });
@@ -167,7 +171,9 @@ suite("GIVEN ConvertVaultCommand", function () {
       });
 
       test("THEN the vault is moved to the right folder", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vault = vaults[0];
         expect(
           await fs.pathExists(
@@ -179,7 +185,9 @@ suite("GIVEN ConvertVaultCommand", function () {
       });
 
       test("THEN the folder is a git repository", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const git = new Git({ localUrl: path.join(wsRoot, vaults[0].fsPath) });
         expect(await git.getRemote()).toEqual("origin");
         expect(await git.getCurrentBranch()).toBeTruthy();
@@ -216,7 +224,9 @@ suite("GIVEN ConvertVaultCommand", function () {
         });
 
         test("THEN the vault is moved to the right folder", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const vault = vaults[0];
           expect(
             await fs.pathExists(
@@ -231,7 +241,9 @@ suite("GIVEN ConvertVaultCommand", function () {
         });
 
         test("THEN the folder is NOT a git repository", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const git = new Git({
             localUrl: path.join(wsRoot, vaults[0].fsPath),
           });

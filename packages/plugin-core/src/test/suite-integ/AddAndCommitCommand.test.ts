@@ -62,7 +62,9 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
     },
     () => {
       test("THEN skip committing files AND show merge conflict message", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         await GitTestUtils.createRemoteRepoWithRebaseConflict(
           wsRoot,
           vaults,
@@ -97,7 +99,9 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
     },
     () => {
       test("THEN skip committing files AND show rebase conflict message", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const { git, fpath } =
           await GitTestUtils.createRemoteRepoWithRebaseConflict(
             wsRoot,
@@ -139,7 +143,9 @@ suite("GIVEN Workspace Add And Commit command is run", function () {
     },
     () => {
       test("THEN Dendron commit files successfully", async () => {
-        const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         // Create a new note so there are some changes

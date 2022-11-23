@@ -22,7 +22,9 @@ async function makeTestNote({
   body: string;
   genRandomId?: boolean;
 }): Promise<NoteProps> {
-  const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  const ws = ExtensionProvider.getDWorkspace();
+  const { engine, wsRoot } = ws;
+  const vaults = await ws.vaults;
   const note = await NoteTestUtilsV4.createNoteWithEngine({
     engine,
     wsRoot,
@@ -37,7 +39,7 @@ async function makeTestNote({
     URI.file(wsRoot)
   );
   const config = configReadResult._unsafeUnwrap();
-  const newNote = rewriteImageUrls(note, config);
+  const newNote = rewriteImageUrls(note, config, wsRoot, vaults);
   // The function shouldn't modify the existing note
   expect(newNote !== note).toBeTruthy();
   return newNote;
@@ -47,7 +49,9 @@ suite("GIVEN PreviewPanel", function () {
   describeSingleWS("WHEN opening a note", {}, () => {
     let previewPanel: PreviewPanel;
     before(async () => {
-      const { engine, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine } = ws;
+      const vaults = await ws.vaults;
       const note = (
         await engine.findNotes({ fname: "root", vault: vaults[0] })
       )[0];

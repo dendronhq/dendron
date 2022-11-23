@@ -450,7 +450,7 @@ export class CreateSchemaFromHierarchyCommand extends BasicCommand<
     }
 
     const currDocumentFSPath = activeTextEditor.document.uri.fsPath;
-    const vault = PluginVaultUtils.getVaultByNotePath({
+    const vault = await PluginVaultUtils.getVaultByNotePath({
       fsPath: currDocumentFSPath,
     });
     const hierLvlOpts = await UserQueries.promptUserToSelectHierarchyLevel(

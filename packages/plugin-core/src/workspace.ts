@@ -118,7 +118,7 @@ export function resolveRelToWSRoot(fpath: string): string {
 }
 
 /** Given file uri that is within a vault within the current workspace returns the vault. */
-export function getVaultFromUri(fileUri: Uri) {
+export async function getVaultFromUri(fileUri: Uri) {
   return WSUtilsV2.instance().getVaultFromUri(fileUri);
 }
 

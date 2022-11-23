@@ -88,14 +88,15 @@ export class TutorialInitializer
     }, 1000 * 60 * 3);
   }
 
-  private getAnalyticsPayloadFromDocument(opts: {
+  private async getAnalyticsPayloadFromDocument(opts: {
     document: vscode.TextDocument;
     ws: DWorkspaceV2;
-  }): TutorialNoteViewedPayload {
+  }): Promise<TutorialNoteViewedPayload> {
     const { document, ws } = opts;
     const tutorialType = TutorialInitializer.getTutorialType();
     const fsPath = document.uri.fsPath;
-    const { vaults, wsRoot } = ws;
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const vault = VaultUtils.getVaultByFilePath({ vaults, wsRoot, fsPath });
     const resp = file2Note(fsPath, vault);
     if (ErrorUtils.isErrorResp(resp)) {
@@ -118,12 +119,12 @@ export class TutorialInitializer
     // Register a special analytics handler for the tutorial:
     // This needs to be registered before we open any tutorial note.
     // Otherwise some events may be lost and not reported properly.
-    const disposable = vscode.window.onDidChangeActiveTextEditor((e) => {
+    const disposable = vscode.window.onDidChangeActiveTextEditor(async (e) => {
       const document = e?.document;
 
       if (document !== undefined) {
         try {
-          const payload = this.getAnalyticsPayloadFromDocument({
+          const payload = await this.getAnalyticsPayloadFromDocument({
             document,
             ws: opts.ws,
           });
@@ -144,7 +145,8 @@ export class TutorialInitializer
 
     ExtensionProvider.getExtension().context.subscriptions.push(disposable);
 
-    const { wsRoot, vaults } = opts.ws;
+    const { wsRoot } = opts.ws;
+    const vaults = await opts.ws.vaults;
     const vaultRelPath = VaultUtils.getRelPath(vaults[0]);
     const rootUri = vscode.Uri.file(
       path.join(wsRoot, vaultRelPath, "tutorial.md")

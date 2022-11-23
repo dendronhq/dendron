@@ -29,7 +29,9 @@ function isTextDecorated(
 }
 
 async function getNote(opts: { fname: string }) {
-  const { engine, vaults } = ExtensionProvider.getDWorkspace();
+  const ws = ExtensionProvider.getDWorkspace();
+  const { engine } = ws;
+  const vaults = await ws.vaults;
   const { fname } = opts;
 
   const note = (await engine.findNotesMeta({ fname, vault: vaults[0] }))[0];
@@ -652,7 +654,9 @@ suite("GIVEN a text document with decorations", function () {
 
     describeMultiWS("AND frontmatter is not visible", {}, () => {
       before(async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "foo",
           vault: vaults[0],

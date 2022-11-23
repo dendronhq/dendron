@@ -13,7 +13,7 @@ export interface IWSUtilsV2 {
     document: vscode.TextDocument
   ): Promise<undefined | NoteProps>;
 
-  getVaultFromDocument(document: vscode.TextDocument): DVault;
+  getVaultFromDocument(document: vscode.TextDocument): Promise<DVault>;
 
   tryGetNoteFromDocument(
     document: vscode.TextDocument
@@ -26,9 +26,9 @@ export interface IWSUtilsV2 {
 
   getActiveNote(): Promise<NoteProps | undefined>;
 
-  getVaultFromUri(fileUri: Uri): DVault;
+  getVaultFromUri(fileUri: Uri): Promise<DVault>;
 
-  getVaultFromPath(fsPath: string): DVault;
+  getVaultFromPath(fsPath: string): Promise<DVault>;
 
   getNoteFromPath(fsPath: string): Promise<NoteProps | undefined>;
 

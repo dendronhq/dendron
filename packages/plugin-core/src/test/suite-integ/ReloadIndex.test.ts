@@ -20,7 +20,9 @@ suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files are missing", {}, () => {
     let rootFiles: string[] = [];
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
       rootFiles = [
         path.join(vaultDir, "root.md"),
@@ -41,7 +43,9 @@ suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files exist", {}, () => {
     let rootFiles: string[] = [];
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
       rootFiles = [
         path.join(vaultDir, "root.md"),
@@ -76,7 +80,9 @@ suite("GIVEN ReloadIndex", function () {
       Parameters<typeof VSCodeUtils["showMessage"]>
     >;
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       await NoteTestUtilsV4.createNote({
         fname: firstNote,
         vault: vaults[0],
@@ -121,7 +127,9 @@ suite("GIVEN ReloadIndex", function () {
         Parameters<typeof VSCodeUtils["showMessage"]>
       >;
       before(async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         await NoteTestUtilsV4.createNote({
           fname: firstNote,
           vault: vaults[0],
@@ -176,7 +184,9 @@ suite("GIVEN ReloadIndex", function () {
 
   describeMultiWS("WHEN there is a single vault missing", {}, () => {
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultPath = vault2Path({ vault: vaults[0], wsRoot });
       await fs.rm(vaultPath, { recursive: true, maxRetries: 2 });
     });

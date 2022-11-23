@@ -353,7 +353,9 @@ export abstract class BaseExportPodCommand<
       return;
     }
 
-    const { vaults, engine, wsRoot } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot, engine } = ws;
+    const vaults = await ws.vaults;
 
     const vault = VaultUtils.getVaultByFilePath({
       vaults,

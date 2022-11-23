@@ -43,7 +43,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
       },
       () => {
         test("decorators are updated", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot,
@@ -84,7 +86,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
-            vaults: ExtensionProvider.getDWorkspace().vaults,
+            vaults: await ExtensionProvider.getDWorkspace().vaults,
             context: ctx,
           });
 
@@ -97,7 +99,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
 
           watcher.activate();
 
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
@@ -122,7 +126,7 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           const mockExtension = new MockDendronExtension({
             engine: ExtensionProvider.getEngine(),
             wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
-            vaults: ExtensionProvider.getDWorkspace().vaults,
+            vaults: await ExtensionProvider.getDWorkspace().vaults,
             context: ctx,
           });
 
@@ -134,7 +138,9 @@ suite("WindowWatcher: GIVEN the dendron extension is running", function () {
           });
           watcher.activate();
 
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const vaultPath = VaultUtils.getRelPath(vaults[0]);
           const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);

@@ -152,7 +152,7 @@ export class GotoNoteCommand extends BasicCommand<
   private async setOptsFromNewNote(opts: GoToNoteCommandOpts) {
     // Depending on the config, we can either
     // automatically pick the vault or we'll prompt for it.
-    const { config } = this.extension.getDWorkspace();
+    const config = await this.extension.getDWorkspace().config;
     const confirmVaultSetting =
       ConfigUtils.getLookup(config).note.confirmVaultOnCreate;
 
@@ -161,7 +161,7 @@ export class GotoNoteCommand extends BasicCommand<
         ? VaultSelectionMode.smart
         : VaultSelectionMode.alwaysPrompt;
 
-    const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+    const currentVault = await PickerUtilsV2.getVaultForOpenEditor();
     const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
       vault: currentVault,
       fname: opts.qs!,
@@ -181,7 +181,7 @@ export class GotoNoteCommand extends BasicCommand<
 
     if (opts.qs && !opts.vault) {
       // Special case: some code expects GotoNote to default to current vault if qs is provided but vault isn't
-      opts.vault = PickerUtilsV2.getVaultForOpenEditor();
+      opts.vault = await PickerUtilsV2.getVaultForOpenEditor();
       return opts;
     }
 
@@ -195,7 +195,7 @@ export class GotoNoteCommand extends BasicCommand<
     if (!opts.qs) opts = await this.getQs(opts, link);
     if (!opts.vault && link.vaultName)
       opts.vault = VaultUtils.getVaultByNameOrThrow({
-        vaults: this.extension.getDWorkspace().vaults,
+        vaults: await this.extension.getDWorkspace().vaults,
         vname: link.vaultName,
       });
     if (!opts.anchor && link.anchorHeader) opts.anchor = link.anchorHeader;

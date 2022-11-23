@@ -72,7 +72,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault should not have migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultNotMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -114,7 +116,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault should not have migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultNotMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -214,14 +218,18 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
 
       test("THEN the logoPath is updated to account for the moved asset", async () => {
-        const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const config = await ws.config;
         const logoPath = ConfigUtils.getPublishing(config).logoPath;
         expect(logoPath).toBeTruthy();
         // If the logoPath was not updated, then we won't find the asset file there
@@ -231,7 +239,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the git folders/files are handled correctly", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await fs.pathExists(
             path.join(pathForVaultRoot({ vault: vaults[0], wsRoot }), ".git")
@@ -302,7 +312,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -341,7 +353,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();

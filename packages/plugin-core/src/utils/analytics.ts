@@ -226,7 +226,7 @@ export class AnalyticsUtils {
    * Setup segment client
    * Also setup cache flushing in case of missed uploads
    */
-  static setupSegmentWithCacheFlush({
+  static async setupSegmentWithCacheFlush({
     context,
     ws,
   }: {
@@ -237,7 +237,7 @@ export class AnalyticsUtils {
       const segmentResidualCacheDir = context.globalStorageUri.fsPath;
       fs.ensureDir(segmentResidualCacheDir);
 
-      setupSegmentClient({
+      await setupSegmentClient({
         ws,
         cachePath: path.join(
           segmentResidualCacheDir,

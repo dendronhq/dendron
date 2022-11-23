@@ -47,7 +47,7 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    ExtensionProvider.getDWorkspace().config.dev || {};
+    (await ExtensionProvider.getDWorkspace().config).dev || {};
   // const ctx = "startServer";
   const maybePort =
     ExtensionProvider.getExtension()
@@ -305,12 +305,9 @@ export class ExtensionUtils {
   }) {
     const engine = ext.getEngine();
     const workspace = ext.getDWorkspace();
-    const {
-      wsRoot,
-      vaults,
-      type: workspaceType,
-      config: dendronConfig,
-    } = workspace;
+    const { wsRoot, type: workspaceType } = workspace;
+    const vaults = await workspace.vaults;
+    const dendronConfig = await workspace.config;
     const notes = await engine.findNotesMeta({ excludeStub: false });
     let numNotes = notes.length;
 

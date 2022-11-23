@@ -51,7 +51,9 @@ suite("Delete Command", function () {
     () => {
       test("THEN delete the note", async () => {
         const engine = ExtensionProvider.getEngine();
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const barUri = Utils.joinPath(
           vscode.Uri.file(wsRoot),

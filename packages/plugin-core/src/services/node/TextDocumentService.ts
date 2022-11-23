@@ -110,7 +110,10 @@ export class TextDocumentService implements ITextDocumentService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    const ws = this._extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
+
     if (
       !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
     ) {
@@ -173,7 +176,9 @@ export class TextDocumentService implements ITextDocumentService {
     const uri = document.uri;
     const fname = path.basename(uri.fsPath, ".md");
 
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    const ws = this._extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (
       !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
     ) {

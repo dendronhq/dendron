@@ -47,7 +47,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",
     });
-    const lc = extension.lookupControllerFactory.create({
+    const lc = await extension.lookupControllerFactory.create({
       nodeType: "note",
       disableVaultSelection: true,
       extraButtons: [MultiSelectBtn.create({ pressed: copts.multiSelect })],

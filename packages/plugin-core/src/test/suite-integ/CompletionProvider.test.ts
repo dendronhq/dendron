@@ -39,7 +39,9 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide completions", async () => {
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
@@ -126,7 +128,9 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide correct completion", async () => {
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
@@ -182,7 +186,9 @@ suite("completionProvider", function () {
     },
     () => {
       test("THEN provide correct completions", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         // Open a note, add [[]]
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
@@ -240,7 +246,9 @@ suite("completionProvider", function () {
     () => {
       describe("WHEN only @ symbol", () => {
         test("THEN provide all completions", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotesMeta({
@@ -278,7 +286,9 @@ suite("completionProvider", function () {
 
       describe("WHEN a few characters typed", () => {
         test("THEN provide specific completion", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
               await engine.findNotesMeta({
@@ -311,7 +321,9 @@ suite("completionProvider", function () {
     () => {
       let items: CompletionItem[] | undefined;
       before(async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
           (
             await engine.findNotesMeta({
@@ -361,7 +373,9 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN doesn't provide outside wikilink", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           // Open a note, add [[]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
@@ -406,7 +420,9 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
@@ -456,7 +472,9 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
@@ -566,7 +584,9 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           // Open a note, add [[test2#^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (
@@ -635,7 +655,9 @@ suite("completionProvider", function () {
       },
       () => {
         test("THEN provide correct completions", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           // Open a note, add [[^]]
           await new WSUtilsV2(ExtensionProvider.getExtension()).openNote(
             (

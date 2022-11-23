@@ -620,7 +620,9 @@ suite("NoteLookupCommand", function () {
 
         test("AND create new with template", async () => {
           const extension = ExtensionProvider.getExtension();
-          const { vaults, engine } = extension.getDWorkspace();
+          const ws = extension.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
 
@@ -632,7 +634,7 @@ suite("NoteLookupCommand", function () {
               }),
             ],
           });
-          const lc = extension.lookupControllerFactory.create({
+          const lc = await extension.lookupControllerFactory.create({
             nodeType: "note",
           });
           const lp = extension.noteLookupProviderFactory.create("lookup", {
@@ -672,7 +674,9 @@ suite("NoteLookupCommand", function () {
 
         test("AND create new with template, but cancelled or nothing selected", async () => {
           const extension = ExtensionProvider.getExtension();
-          const { vaults, engine } = extension.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
 
@@ -684,7 +688,7 @@ suite("NoteLookupCommand", function () {
               }),
             ],
           });
-          const lc = extension.lookupControllerFactory.create({
+          const lc = await extension.lookupControllerFactory.create({
             nodeType: "note",
           });
           const lp = extension.noteLookupProviderFactory.create("lookup", {
@@ -800,7 +804,9 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN a note is created and stub property is removed", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const cmd = new NoteLookupCommand();
           const vault = TestEngineUtils.vault1(vaults);
           stubVaultPick(vaults);
@@ -849,7 +855,9 @@ suite("NoteLookupCommand", function () {
         onInit: async ({ vaults, wsRoot }) => {
           const vault = _.find(vaults, { fsPath: "vault2" });
           const cmd = new NoteLookupCommand();
-          sinon.stub(PickerUtilsV2, "getVaultForOpenEditor").returns(vault!);
+          sinon
+            .stub(PickerUtilsV2, "getVaultForOpenEditor")
+            .returns(Promise.resolve(vault!));
 
           const opts = (await cmd.run({
             noConfirm: true,
@@ -1004,7 +1012,9 @@ suite("NoteLookupCommand", function () {
             initialValue: "food.ch2",
             noConfirm: true,
           });
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
 
           const newNote = (
             await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
@@ -1057,7 +1067,9 @@ suite("NoteLookupCommand", function () {
             initialValue: "food.ch2",
             noConfirm: true,
           });
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
 
           const newNote = (
             await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
@@ -1120,7 +1132,9 @@ suite("NoteLookupCommand", function () {
             initialValue: "food.ch2",
             noConfirm: true,
           });
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
 
           const newNote = (
             await engine.findNotes({ fname: "food.ch2", vault: vaults[0] })
@@ -1177,7 +1191,9 @@ suite("NoteLookupCommand", function () {
         });
 
         test("AND user picks from prompted vault, THEN template body gets applied to new note", async () => {
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
 
           // Pick vault 2
           showQuickPick.onFirstCall().returns(
@@ -1252,7 +1268,9 @@ suite("NoteLookupCommand", function () {
         });
 
         test("AND user escapes from prompted vault, THEN no template gets applied to new note", async () => {
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
 
           // Escape out, leading to undefined note
           showQuickPick.onFirstCall().returns(Promise.resolve(undefined));
@@ -1979,7 +1997,9 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN it produces a valid string", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const fooNoteEditor = await ExtensionProvider.getWSUtils().openNote(

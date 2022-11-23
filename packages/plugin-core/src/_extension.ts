@@ -331,7 +331,7 @@ export async function _activate(
       // setup extension container
       setupLocalExtContainer({
         wsRoot: maybeWsRoot,
-        vaults: wsImpl.vaults,
+        vaults: await wsImpl.vaults,
         engine: resp.data.engine,
       });
       // initialize Segment client
@@ -373,7 +373,7 @@ export async function _activate(
         ctx: ctx + ":postSetupWorkspace",
         platform,
         extensions,
-        vaults: wsImpl.vaults,
+        vaults: await wsImpl.vaults,
       });
 
       // --- Start Initializating the Engine

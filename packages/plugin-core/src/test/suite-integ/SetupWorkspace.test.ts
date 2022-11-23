@@ -209,7 +209,9 @@ suite("GIVEN SetupWorkspace Command", function () {
       },
       () => {
         test("THEN Dendron initializes", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           // check for meta
           const fpath = getWSMetaFilePath({ wsRoot });
           const meta = openWSMetaFile({ fpath });
@@ -242,7 +244,9 @@ suite("GIVEN SetupWorkspace Command", function () {
       () => {
         // Question mark because I'm not sure what this test is actually testing for.
         test("THEN it still initializes?", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const vault = path.join(wsRoot, VaultUtils.getRelPath(vaults[0]));
           expect(fs.readdirSync(vault)).toEqual(
             [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())

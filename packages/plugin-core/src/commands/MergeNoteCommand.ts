@@ -59,12 +59,14 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.extension = ext;
   }
 
-  private createLookupController(): ILookupControllerV3 {
+  private async createLookupController(): Promise<ILookupControllerV3> {
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: true,
     };
-    const controller = this.extension.lookupControllerFactory.create(opts);
+    const controller = await this.extension.lookupControllerFactory.create(
+      opts
+    );
     return controller;
   }
 
@@ -99,7 +101,7 @@ export class MergeNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async gatherInputs(opts: CommandOpts): Promise<CommandOpts | undefined> {
-    const lc = this.createLookupController();
+    const lc = await this.createLookupController();
     const activeNote = await this.extension.wsUtils.getActiveNote();
     const provider = this.createLookupProvider({
       activeNote,

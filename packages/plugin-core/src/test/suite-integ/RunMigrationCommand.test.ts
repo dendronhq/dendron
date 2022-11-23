@@ -42,7 +42,7 @@ suite("RunMigrationCommand", function () {
 
         expect(out![0].data.wsConfig).toNotEqual(undefined);
 
-        const config = ext.getDWorkspace().config;
+        const config = await ext.getDWorkspace().config;
         const lookupConfig = ConfigUtils.getLookup(config);
         expect(lookupConfig.note.selectionMode).toEqual("extract");
       });
@@ -80,7 +80,7 @@ suite("RunMigrationCommand", function () {
           expect(out![0].data.wsConfig).toEqual(undefined);
 
           // test for existence of default key in the place where it was deleted.
-          const config = ext.getDWorkspace().config;
+          const config = await ext.getDWorkspace().config;
           const lookupConfig = ConfigUtils.getLookup(config);
           expect(lookupConfig.note.selectionMode).toEqual("extract");
         });

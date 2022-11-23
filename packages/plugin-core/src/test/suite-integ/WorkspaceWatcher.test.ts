@@ -126,7 +126,9 @@ suite("WorkspaceWatcher", function () {
     },
     () => {
       test("WHEN user renames a file outside of dendron rename command, THEN all of its references are also updated", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const previewProxy = new MockPreviewProxy();
         const extension = ExtensionProvider.getExtension();
 
@@ -185,7 +187,9 @@ suite("WorkspaceWatcher", function () {
     },
     () => {
       test("WHEN user renames a file outside of dendron rename command, THEN the title of fileName is also updated", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const previewProxy = new MockPreviewProxy();
         const extension = ExtensionProvider.getExtension();
 
@@ -392,7 +396,9 @@ suite("WorkspaceWatcher", function () {
       () => {
         let note: NoteProps;
         before(async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           note = await NoteTestUtilsV4.createNoteWithEngine({
             engine,
             fname: "test",
@@ -425,7 +431,9 @@ suite("WorkspaceWatcher", function () {
       () => {
         let note: NoteProps;
         before(async () => {
-          const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           note = await NoteTestUtilsV4.createNoteWithEngine({
             engine,
             fname: "test",

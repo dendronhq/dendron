@@ -45,7 +45,9 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto note", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = vaults[0];
           const note = (await engine.getNoteMeta("foo")).data!;
           const { note: out } = (await createGoToNoteCmd().run({
@@ -70,7 +72,9 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN get note", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = vaults[0];
           const note = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
           expect(_.pick(note, ["fname", "stub"])).toEqual({
@@ -864,7 +868,9 @@ suite("GotoNote", function () {
     describe("GIVEN non-note files", () => {
       describeMultiWS("WHEN used on a link to a non-note file", { ctx }, () => {
         before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           await fs.writeFile(
             path.join(wsRoot, "test.txt"),
             "Et voluptatem autem sunt."
@@ -884,7 +890,9 @@ suite("GotoNote", function () {
         });
 
         test("THEN opens the non-note file", async () => {
-          const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const note = await NoteTestUtilsV4.createNoteWithEngine({
             wsRoot,
             vault: vaults[0],
@@ -906,8 +914,9 @@ suite("GotoNote", function () {
 
         describe("AND the link doesn't include a slash", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -932,8 +941,9 @@ suite("GotoNote", function () {
 
         describe("AND the link starts with assets", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -962,8 +972,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1007,8 +1018,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1053,8 +1065,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1091,7 +1104,9 @@ suite("GotoNote", function () {
         const notename = "test.note";
         let openWithDefaultApp: sinon.SinonStub<[string], Promise<void>>;
         before(async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const note = await NoteTestUtilsV4.createNoteWithEngine({
             wsRoot,
             vault: vaults[0],
@@ -1127,8 +1142,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],

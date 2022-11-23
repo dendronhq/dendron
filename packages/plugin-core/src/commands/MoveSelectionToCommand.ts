@@ -97,7 +97,7 @@ export class MoveSelectionToCommand extends BasicCommand<
     return;
   }
 
-  private createLookupController(): ILookupControllerV3 {
+  private async createLookupController(): Promise<ILookupControllerV3> {
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: true,
@@ -106,7 +106,9 @@ export class MoveSelectionToCommand extends BasicCommand<
       ],
       title: "Move Selection To...",
     };
-    const controller = this.extension.lookupControllerFactory.create(opts);
+    const controller = await this.extension.lookupControllerFactory.create(
+      opts
+    );
     return controller;
   }
 
@@ -177,7 +179,7 @@ export class MoveSelectionToCommand extends BasicCommand<
 
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const lookupCmd = new NoteLookupCommand();
-    const controller = this.createLookupController();
+    const controller = await this.createLookupController();
     const activeNote = await this.extension.wsUtils.getActiveNote();
     const { selection, text: selectionText } = VSCodeUtils.getSelection();
     await this.prepareProxyMetricPayload({

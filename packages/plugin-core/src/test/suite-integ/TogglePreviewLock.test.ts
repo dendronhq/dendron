@@ -39,7 +39,9 @@ suite("GIVEN TogglePreviewLock", function () {
       let note1: NoteProps;
       let note2: NoteProps;
       beforeEach(async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         note1 = await NoteTestUtilsV4.createNoteWithEngine({
           engine,
           wsRoot,
@@ -64,8 +66,9 @@ suite("GIVEN TogglePreviewLock", function () {
 
         describe("AND changing note", () => {
           beforeEach(async () => {
-            const { engine, wsRoot, vaults } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             note2 = await NoteTestUtilsV4.createNoteWithEngine({
               engine,
               wsRoot,

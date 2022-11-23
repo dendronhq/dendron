@@ -20,7 +20,9 @@ suite("GIVEN a InstrumentedWrapperCommand", function () {
     },
     () => {
       test("THEN the returned command is executable by vscode.commands.executeCommand", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
 
         const fooPath = path.join(wsRoot, vaults[0].fsPath, "foo.md");
         const commandArgs: InstrumentedWrapperCommandArgs = {
@@ -56,7 +58,9 @@ suite("GIVEN a InstrumentedWrapperCommand", function () {
         const TEST_EVENT = "TestEvent";
         const analyticsStub = sinon.stub(AnalyticsUtils, "track");
 
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
 
         const fooPath = path.join(wsRoot, vaults[0].fsPath, "foo.md");
         const commandArgs: InstrumentedWrapperCommandArgs = {

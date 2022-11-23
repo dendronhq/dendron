@@ -33,7 +33,7 @@ suite("MoveSelectionToCommand", function () {
       () => {
         test("THEN selection is moved to destination, selection is replaced, and backlinks are updated", async () => {
           const extension = ExtensionProvider.getExtension();
-          const { vaults } = extension.getDWorkspace();
+          const vaults = await extension.getDWorkspace().vaults;
           await extension.wsUtils.openNote(activeNote);
           const editor = vscode.window.activeTextEditor;
           const cmd = new MoveSelectionToCommand(extension);
@@ -97,7 +97,7 @@ suite("MoveSelectionToCommand", function () {
       () => {
         test("THEN selection is moved to destination, selection is replaced, and backlinks are updated", async () => {
           const extension = ExtensionProvider.getExtension();
-          const { vaults } = extension.getDWorkspace();
+          const vaults = await extension.getDWorkspace().vaults;
           await extension.wsUtils.openNote(activeNote);
           const editor = vscode.window.activeTextEditor;
           const cmd = new MoveSelectionToCommand(extension);

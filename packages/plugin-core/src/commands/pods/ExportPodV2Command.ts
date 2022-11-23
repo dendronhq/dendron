@@ -41,7 +41,8 @@ export class ExportPodV2Command extends BaseCommand<
    */
   async gatherInputs(args?: GatherOpts): Promise<CommandInput | undefined> {
     // added check to return if export pod v2 is not enabled in dev config and is run using pod keyboard shortcuts
-    const { config } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const config = await ws.config;
     if (!config.dev?.enableExportPodV2) {
       return;
     }

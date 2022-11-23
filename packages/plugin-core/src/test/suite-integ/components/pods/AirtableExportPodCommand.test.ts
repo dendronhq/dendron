@@ -12,7 +12,9 @@ import { DendronError, ErrorFactory } from "@dendronhq/common-all";
 
 suite("AirtableExportCommand", function () {
   const setUpPod = async () => {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const notePath = path.join(
       vault2Path({ vault: vaults[0], wsRoot }),
       "root.md"
@@ -72,7 +74,9 @@ suite("AirtableExportCommand", function () {
         test("THEN new airtable id should be appended in the note frontmatter", async () => {
           const extension = ExtensionProvider.getExtension();
           const cmd = new AirtableExportPodCommand(extension);
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const { config } = await setUpPod();
           const note = getNoteFromTextEditor();
           note.custom = {

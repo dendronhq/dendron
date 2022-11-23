@@ -71,7 +71,9 @@ suite("PreviewLinkHandler", () => {
     () => {
       let note: NotePropsMeta;
       beforeEach(async () => {
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         note = (
           await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
         )[0];
@@ -211,7 +213,9 @@ suite("PreviewLinkHandler", () => {
 
       describe("WHEN clicking on an asset inside a vault", () => {
         before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const assetsPath = path.join(
             wsRoot,
             VaultUtils.getRelPath(vaults[0]),
@@ -222,7 +226,9 @@ suite("PreviewLinkHandler", () => {
         });
 
         test("THEN it is opened with the default app", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const openWithDefaultApp = sinon.stub(
             ShowPreviewAssetOpener,
             "openWithDefaultApp"

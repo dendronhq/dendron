@@ -216,7 +216,9 @@ suite("CopyNoteRef", function () {
       },
       () => {
         test("THEN create xvault link", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"
@@ -241,7 +243,9 @@ suite("CopyNoteRef", function () {
       },
       () => {
         test("THEN create xvault link", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "foo.md"

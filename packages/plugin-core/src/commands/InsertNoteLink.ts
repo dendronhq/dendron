@@ -38,7 +38,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const extension = ExtensionProvider.getExtension();
-    const config = extension.getDWorkspace().config;
+    const config = await extension.getDWorkspace().config;
     const insertNoteLinkConfig = ConfigUtils.getCommands(config).insertNoteLink;
     const aliasModeConfig = insertNoteLinkConfig.aliasMode;
     const multiSelectConfig = insertNoteLinkConfig.enableMultiSelect;

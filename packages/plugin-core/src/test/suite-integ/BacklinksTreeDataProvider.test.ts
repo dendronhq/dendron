@@ -699,7 +699,7 @@ suite("BacklinksTreeDataProvider", function () {
       });
 
       test("AND a note gets created, THEN the data provider refresh event gets invoked", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const testNoteProps = NoteUtils.create({
           fname: "foo",
           vault: vaults[0],
@@ -717,7 +717,7 @@ suite("BacklinksTreeDataProvider", function () {
       });
 
       test("AND a note gets updated, THEN the data provider refresh event gets invoked", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const testNoteProps = NoteUtils.create({
           fname: "foo",
           vault: vaults[0],
@@ -736,7 +736,7 @@ suite("BacklinksTreeDataProvider", function () {
       });
 
       test("AND a note gets deleted, THEN the data provider refresh event gets invoked", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const testNoteProps = NoteUtils.create({
           fname: "foo",
           vault: vaults[0],

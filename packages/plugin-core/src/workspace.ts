@@ -12,6 +12,7 @@ import {
   WorkspaceType,
   BacklinkPanelSortOrder,
   DefaultMap,
+  DendronConfig,
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
@@ -326,7 +327,8 @@ export class DendronExtension implements IDendronExtension {
     if (!this.isActive()) {
       return false;
     }
-    const { wsRoot, vaults } = this.getDWorkspace();
+    const { wsRoot } = this.getDWorkspace();
+    const vaults = await this.getDWorkspace().vaults;
     return WorkspaceUtils.isDendronNote({
       wsRoot,
       vaults,
@@ -467,14 +469,15 @@ export class DendronExtension implements IDendronExtension {
   getWorkspaceSettingOrDefault({
     wsConfigKey,
     dendronConfigKey,
+    dendronConfig,
   }: {
     wsConfigKey: keyof DendronWorkspaceSettings;
     dendronConfigKey: string;
+    dendronConfig: DendronConfig;
   }) {
-    const config = getDWorkspace().config;
     // user already using new value
-    if (_.get(config, dendronConfigKey)) {
-      return _.get(config, dendronConfigKey);
+    if (_.get(dendronConfig, dendronConfigKey)) {
+      return _.get(dendronConfig, dendronConfigKey);
     }
     // migrate value from workspace setting. if not exist, migrate from new default
     const out = _.get(
@@ -547,7 +550,8 @@ export class DendronExtension implements IDendronExtension {
         );
 
         // backlinks
-        const backlinkTreeView = this.setupBacklinkTreeView();
+        const config = await ExtensionProvider.getDWorkspace().config;
+        const backlinkTreeView = this.setupBacklinkTreeView(config);
 
         // Tip of the Day
         const tipOfDayView = this.setupTipOfTheDayView();
@@ -575,13 +579,13 @@ export class DendronExtension implements IDendronExtension {
     );
   }
 
-  private setupBacklinkTreeView() {
+  private setupBacklinkTreeView(config: DendronConfig) {
     const ctx = "setupBacklinkTreeView";
     Logger.info({ ctx, msg: "init:backlinks" });
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       this.getEngine(),
-      this.getDWorkspace().config.dev?.enableLinkCandidates
+      config.dev?.enableLinkCandidates
     );
 
     const backlinkTreeView = vscode.window.createTreeView(
@@ -762,7 +766,9 @@ export class DendronExtension implements IDendronExtension {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (!wsRoot) {
       throw new Error(`rootDir not set when activating Watcher`);
     }

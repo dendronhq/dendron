@@ -26,7 +26,7 @@ suite("GIVEN ConvertVaultCommand", function () {
     () => {
       let remote: string;
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -70,7 +70,7 @@ suite("GIVEN ConvertVaultCommand", function () {
 
       describe("AND converting that back to a local vault", () => {
         before(async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -120,7 +120,7 @@ suite("GIVEN ConvertVaultCommand", function () {
     () => {
       let remote: string;
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -187,7 +187,7 @@ suite("GIVEN ConvertVaultCommand", function () {
 
       describe("AND converting that back to a local vault", () => {
         before(async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("local");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -246,7 +246,7 @@ suite("GIVEN ConvertVaultCommand", function () {
     { preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti },
     () => {
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
         sinon.stub(cmd, "gatherType").resolves("remote");
         sinon.stub(cmd, "gatherVault").resolves(vaults[0]);
@@ -272,7 +272,7 @@ suite("GIVEN ConvertVaultCommand", function () {
 
       describe("AND running the conversion command again", () => {
         before(async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const cmd = new ConvertVaultCommand(ExtensionProvider.getExtension());
           sinon.stub(cmd, "gatherType").resolves("remote");
           sinon.stub(cmd, "gatherVault").resolves(vaults[0]);

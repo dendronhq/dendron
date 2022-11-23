@@ -1,6 +1,8 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
+  DendronConfig,
   DendronError,
   DEngineClient,
   DNodeUtils,
@@ -10,6 +12,7 @@ import {
   NoteUtils,
   SchemaModuleProps,
   Time,
+  URI,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -75,13 +78,13 @@ export class DendronClientUtilsV2 {
       | LookupNoteTypeEnum.journal
       | LookupNoteTypeEnum.scratch
       | LookupNoteTypeEnum.task,
+    config: DendronConfig,
     opts?: CreateFnameOpts
   ): {
     noteName: string;
     prefix: string;
   } {
     // gather inputs
-    const config = ExtensionProvider.getDWorkspace().config;
 
     let dateFormat: string;
     let addBehavior: NoteAddBehavior;
@@ -93,15 +96,18 @@ export class DendronClientUtilsV2 {
           ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchDateFormat",
             dendronConfigKey: "workspace.scratch.dateFormat",
+            dendronConfig: config,
           });
         addBehavior =
           ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
             wsConfigKey: "dendron.defaultScratchAddBehavior",
             dendronConfigKey: "workspace.scratch.addBehavior",
+            dendronConfig: config,
           });
         name = ExtensionProvider.getExtension().getWorkspaceSettingOrDefault({
           wsConfigKey: "dendron.defaultScratchName",
           dendronConfigKey: "workspace.scratch.name",
+          dendronConfig: config,
         });
         break;
       }
@@ -163,10 +169,16 @@ export class DendronClientUtilsV2 {
     return smod;
   };
 
-  static shouldUseVaultPrefix(engine: DEngineClient) {
-    const config = ExtensionProvider.getDWorkspace().config;
-    const enableXVaultWikiLink =
-      ConfigUtils.getWorkspace(config).enableXVaultWikiLink;
+  static async shouldUseVaultPrefix(engine: DEngineClient) {
+    const configGetResult = await ConfigService.instance().getConfig(
+      URI.file(engine.wsRoot),
+      "workspace.enableXVaultWikiLink"
+    );
+    if (configGetResult.isErr()) {
+      throw configGetResult.error;
+    }
+
+    const enableXVaultWikiLink = configGetResult.value;
     const useVaultPrefix =
       _.size(engine.vaults) > 1 &&
       _.isBoolean(enableXVaultWikiLink) &&

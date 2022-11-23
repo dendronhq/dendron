@@ -164,7 +164,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     if (this.trait.OnCreate?.setVault) {
       try {
         const vaultName = this.trait.OnCreate.setVault();
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         vault = vaults.find((vault) => VaultUtils.getName(vault) === vaultName);
         if (!vault) {
           VSCodeUtils.showMessage(

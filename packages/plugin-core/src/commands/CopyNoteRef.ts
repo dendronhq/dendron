@@ -112,7 +112,9 @@ export class CopyNoteRefCommand extends BasicCommand<
     const { engine } = ExtensionProvider.getDWorkspace();
     const note = (await engine.findNotesMeta({ fname, vault }))[0];
     if (note) {
-      const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
+      const useVaultPrefix = await DendronClientUtilsV2.shouldUseVaultPrefix(
+        engine
+      );
       const link = await this.buildLink({
         note,
         useVaultPrefix,

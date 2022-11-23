@@ -589,7 +589,7 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN create new item has name of quickpick value", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -739,7 +739,7 @@ suite("NoteLookupCommand", function () {
       },
       () => {
         test("THEN its title generation should not break", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const cmd = new NoteLookupCommand();
           stubVaultPick(vaults);
           const opts = (await cmd.run({
@@ -2784,7 +2784,7 @@ suite("NoteLookupCommand", function () {
         test("stub note that was accepted is created with the schema applied", async () => {
           VSCodeUtils.closeAllEditors();
           const cmd = new NoteLookupCommand();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           stubVaultPick(vaults);
           const engine = ExtensionProvider.getEngine();
           await cmd.run({

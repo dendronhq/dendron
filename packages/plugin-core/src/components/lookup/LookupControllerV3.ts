@@ -17,13 +17,14 @@ import {
   TaskNoteUtils,
   VSRange,
   deleteTextRange,
+  ConfigService,
 } from "@dendronhq/common-all";
 import { HistoryService, WorkspaceUtils } from "@dendronhq/engine-server";
 import { LinkUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode";
-import { Utils } from "vscode-uri";
+import { URI, Utils } from "vscode-uri";
 import { DendronClientUtilsV2 } from "../../clientUtils";
 import { ExtensionProvider } from "../../ExtensionProvider";
 import { Logger } from "../../logger";
@@ -177,7 +178,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     this._quickPick = quickpick;
     // invoke button behaviors
     this._quickPick.buttons = this._initButtons;
-    this.setupViewModelCallbacks();
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+    this.setupViewModelCallbacks({ config });
 
     // Now Create the Views:
     this._disposables.push(
@@ -280,7 +289,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     return;
   }
 
-  private setupViewModelCallbacks(): void {
+  private setupViewModelCallbacks(opts: { config: DendronConfig }): void {
     const ToLinkBtn = this.getButton("selection2link");
     const ExtractBtn = this.getButton("selectionExtract");
     const ToItemsBtn = this.getButton("selection2Items");
@@ -525,12 +534,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     };
   }
 
-  private onJournalButtonToggled(enabled: boolean) {
+  private onJournalButtonToggled(enabled: boolean, config: DendronConfig) {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
         try {
-          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.journal);
+          return DendronClientUtilsV2.genNoteName(
+            LookupNoteTypeEnum.journal,
+            config
+          );
         } catch (error) {
           return { noteName: "", prefix: "" };
         }
@@ -555,12 +567,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
-  private onScratchButtonToggled(enabled: boolean) {
+  private onScratchButtonToggled(enabled: boolean, config: DendronConfig) {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
         try {
-          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.scratch);
+          return DendronClientUtilsV2.genNoteName(
+            LookupNoteTypeEnum.scratch,
+            config
+          );
         } catch (error) {
           return { noteName: "", prefix: "" };
         }
@@ -582,12 +597,15 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     }
   }
 
-  private async onTaskButtonToggled(enabled: boolean) {
+  private async onTaskButtonToggled(enabled: boolean, config: DendronConfig) {
     const quickPick = this._quickPick!;
     if (enabled) {
       quickPick.modifyPickerValueFunc = () => {
         try {
-          return DendronClientUtilsV2.genNoteName(LookupNoteTypeEnum.task);
+          return DendronClientUtilsV2.genNoteName(
+            LookupNoteTypeEnum.task,
+            config
+          );
         } catch (error) {
           return { noteName: "", prefix: "" };
         }
@@ -612,7 +630,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
         note.custom = {
           ...TaskNoteUtils.genDefaultTaskNoteProps(
             note,
-            ConfigUtils.getTask(ExtensionProvider.getDWorkspace().config)
+            ConfigUtils.getTask(await ExtensionProvider.getDWorkspace().config)
           ).custom,
           ...note.custom,
         };

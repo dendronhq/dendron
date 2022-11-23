@@ -98,7 +98,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN note created", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           const { note: out } = (await createGoToNoteCmd().run({
             qs: "foo.ch2",
@@ -142,7 +142,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN note is not created, and error toast is displayed", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           const cmd = createGoToNoteCmd();
           const errorSpy = sinon.spy(
@@ -216,7 +216,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN apply template", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -241,7 +241,7 @@ suite("GotoNote", function () {
       () => {
         test("THEN new note uses that template", async () => {
           // Template is in vault 1. Note is in vault 2
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[1];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -283,7 +283,7 @@ suite("GotoNote", function () {
 
         test("AND user picks from prompted vault, THEN template body gets applied to new note", async () => {
           // Try to create note in vault 3
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[2];
           // Pick vault 2
           showQuickPick.onFirstCall().returns(
@@ -342,7 +342,7 @@ suite("GotoNote", function () {
       () => {
         test("WHEN schema template uses xvault notation, THEN correct template body gets applied to new note", async () => {
           // Try to create note in vault 3
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[2];
           await createGoToNoteCmd().run({
             qs: "food.ch2",
@@ -367,7 +367,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto anchor", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",
@@ -399,7 +399,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto ehader", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "target-note",
@@ -428,7 +428,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto anchor", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",

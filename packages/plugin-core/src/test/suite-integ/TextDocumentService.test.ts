@@ -86,7 +86,9 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return note with updated text", (done) => {
-          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ws;
+          const vaults = await ws.vaults;
           textDocumentService = new TextDocumentService(
             vscode.workspace.onDidSaveTextDocument,
             URI.file(wsRoot),
@@ -146,7 +148,8 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return note with updated links", (done) => {
-          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           textDocumentService = new TextDocumentService(
             vscode.workspace.onDidSaveTextDocument,
             URI.file(wsRoot),
@@ -199,7 +202,8 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should not be called", (done) => {
-          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           textDocumentService = new TextDocumentService(
             vscode.workspace.onDidSaveTextDocument,
             URI.file(wsRoot),
@@ -245,7 +249,8 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN processTextDocumentChangeEvent should return original note", (done) => {
-          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           textDocumentService = new TextDocumentService(
             vscode.workspace.onDidSaveTextDocument,
             URI.file(wsRoot),
@@ -253,6 +258,7 @@ suite("TextDocumentService", function testSuite() {
             engine,
             new ConsoleLogger()
           );
+
           const note = NoteUtils.create({
             fname: "beta",
             vault: vaults[0],
@@ -359,7 +365,8 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN update engine events should be fired", (done) => {
-          const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           textDocumentService = new TextDocumentService(
             vscode.workspace.onDidSaveTextDocument,
             URI.file(wsRoot),
@@ -516,7 +523,7 @@ suite("TextDocumentService", function testSuite() {
       },
       () => {
         test("THEN the fm-tag should remain unchanged", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const fname = "fm-tag";
           const { onDidSave } = setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);

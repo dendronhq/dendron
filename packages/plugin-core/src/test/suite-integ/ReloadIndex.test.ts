@@ -99,7 +99,7 @@ suite("GIVEN ReloadIndex", function () {
     });
 
     test("THEN warns that there are notes with duplicated IDs", async () => {
-      const { vaults } = ExtensionProvider.getDWorkspace();
+      const vaults = await ExtensionProvider.getDWorkspace().vaults;
       expect(showMessage.callCount).toEqual(1);
       expect(showMessage.firstCall.args[1].includes(firstNote)).toBeTruthy();
       expect(showMessage.firstCall.args[1].includes(secondNote)).toBeTruthy();
@@ -154,7 +154,7 @@ suite("GIVEN ReloadIndex", function () {
       });
 
       test("THEN warns multiple times that there are notes with duplicated IDs", async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         expect(showMessage.callCount).toEqual(2);
         expect(showMessage.getCall(0).args[1].includes(firstNote)).toBeTruthy();
         expect(
@@ -183,7 +183,7 @@ suite("GIVEN ReloadIndex", function () {
 
     test("THEN other vaults are still loaded", async () => {
       const engine = await new ReloadIndexCommand().run();
-      const { vaults } = ExtensionProvider.getDWorkspace();
+      const vaults = await ExtensionProvider.getDWorkspace().vaults;
       expect(engine).toBeTruthy();
       const allNotes = await engine?.findNotesMeta({ fname: "root" });
 

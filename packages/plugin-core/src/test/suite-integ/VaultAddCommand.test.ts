@@ -500,7 +500,9 @@ describe("GIVEN a workspace with local override", function () {
 
         // dendron.yml should have one vault;
         const preRunConfig = (
-          await ConfigService.instance().readConfig(URI.file(wsRoot))
+          await ConfigService.instance().readConfig(URI.file(wsRoot), {
+            applyOverride: false,
+          })
         )._unsafeUnwrap();
         expect(preRunConfig.workspace.vaults.length).toEqual(1);
         const cmd = new VaultAddCommand();
@@ -514,7 +516,9 @@ describe("GIVEN a workspace with local override", function () {
         await cmd.run();
         // dendron.yml should now have two vault
         const postRunConfig = (
-          await ConfigService.instance().readConfig(URI.file(wsRoot))
+          await ConfigService.instance().readConfig(URI.file(wsRoot), {
+            applyOverride: false,
+          })
         )._unsafeUnwrap();
         expect(postRunConfig.workspace.vaults.length).toEqual(2);
         // config + override should have three vaults

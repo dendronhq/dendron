@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { ConfigStore, IFileStore } from "../store";
-import { errAsync, ok, okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
 import { ConfigUtils, DeepPartial } from "../utils";
 import { DendronError } from "../error";

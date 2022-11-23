@@ -1,7 +1,9 @@
 import {
+  ConfigService,
   EngagementEvents,
   NoteScrolledSource,
   Time,
+  URI,
 } from "@dendronhq/common-all";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -105,7 +107,16 @@ export class WindowWatcher {
 
       // If automatically show preview is enabled, then open the preview
       // whenever text editor changed, as long as it's not already opened:
-      const config = await this._extension.getDWorkspace().config;
+      // const config = await this._extension.getDWorkspace().config;
+      const { wsRoot } = this._extension.getDWorkspace();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
+
       if (config.preview?.automaticallyShowPreview) {
         if (!this._preview.isOpen()) {
           await this._preview.show();

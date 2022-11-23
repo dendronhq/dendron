@@ -4,87 +4,86 @@
 # release.
 name: Proto
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - chore/sqlite-as-metadata-store
+  workflow_dispatch:
+
+env:
+  BINARY_CACHE_INDEX: 23 # Rev this if we need a new node cache
+
 jobs:
-  build:
-    environment: plugin-development
+  test:
     strategy:
-      fail-fast: true
+      # Allow other matrix jobs to continue after one fails, allowing us to
+      # isolate platform-specific issues.
+      fail-fast: false
 
-    timeout-minutes: 30
+      matrix:
+        os:
+          - windows-latest
+        node-version:
+          - 16.x
+        suite:
+          - plugin
 
-    runs-on: ubuntu-latest
+        include:
+          - os: macos-latest
+            env: env
+            versions: ""
+          - os: ubuntu-latest
+            env: env
+            versions: ""
+          # Running natively under Windows requires some further work on paths
+          # and file access patterns.
+          - os: windows-latest
+            env: Get-ChildItem Env:\
+            versions: choco --version
+
+    timeout-minutes: 40
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Gather environment data
         run: |
+          ${{ matrix.env }}
           node --version
           npm --version
           yarn --version
 
-      - name: Configure Git user
-        run: |
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
-
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version: "${{ matrix.node-version }}"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
 
-      - name: Yarn Setup
-        run: yarn setup
-
-      - name: Set Up Yarn Local Registry
-        run: yarn config set registry http://localhost:4873
-
-      - name: Set Up NPM Local Registry
-        run: npm set registry http://localhost:4873/
-
-      - name: Set Environment Variables
+      # Publish tests won't work if we haven't configured our committer details.
+      - name: Configure Git user
         run: |
-          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}'`" >> $GITHUB_ENV
-          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
-          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
 
-      - name: Build the VSIX
-        run: |
-          yarn build:patch:local:ci
-
-      - name: Check for VSIX
-        run: |
-          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
-          if [ $vsixCount = 1 ]; then
-            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
-            echo "found a single .vsix file named $vsix"
-            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
-            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
-            else
-            echo "error: expected 1 .vsix file, found $vsixCount"
-            exit 1
-          fi
-
-      - name: Upload VSIX Artifact
-        uses: actions/upload-artifact@v2
+      - name: Restore typescript lib cache
+        uses: actions/cache@v3
+        id: ts-cache
         with:
-          name: vsix
-          path: ${{ env.VSIX_RELATIVE_PATH }}
-          if-no-files-found: error
+          path: |
+            packages/*/lib/*
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ env.BINARY_CACHE_INDEX }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.BINARY_CACHE_INDEX }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.DENDRON_BOT_S3_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DENDRON_BOT_S3_ACCESS_KEY }}
-          aws-region: us-east-1
+      - name: Bootstrap
+        run: yarn bootstrap:bootstrap
+        shell: bash
 
-      - name: Publish VSIX to S3
+      - name: View Directory Contents
         run: |
-          BUCKET=org-dendron-public-assets
-          aws s3 cp --acl public-read ${{ env.VSIX_RELATIVE_PATH }} s3://$BUCKET/publish/${{ env.VSIX_FILE_NAME }}
-          echo https://$BUCKET.s3.amazonaws.com/publish/${{ env.VSIX_FILE_NAME }}
+          pwd
+          ls -l ./node_modules/sqlite3/lib/binding
+          ls -l ./dendron/dendron/node_modules/sqlite3/lib/binding

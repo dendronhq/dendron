@@ -1855,7 +1855,8 @@
       "contributions": [
         "doc",
         "code",
-        "tool"
+        "tool",
+        "bug"
       ]
     },
     {

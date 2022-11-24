@@ -1,2 +1,3 @@
 export * from "./file";
-export * from "./SQLiteMetadataStore";
+export * from "./PrismaSQLiteMetadataStore";
+export * from "./sqlite";

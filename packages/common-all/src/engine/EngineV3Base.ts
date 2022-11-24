@@ -1,5 +1,3 @@
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-empty-function */
 import _ from "lodash";
 import { BacklinkUtils } from "../BacklinkUtils";
 import { ERROR_SEVERITY, ERROR_STATUS } from "../constants";

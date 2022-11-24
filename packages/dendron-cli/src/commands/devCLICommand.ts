@@ -1,6 +1,8 @@
 import {
   assertUnreachable,
   CLIEvents,
+  ConfigService,
+  DendronConfig,
   DendronError,
   DVault,
   ERROR_STATUS,
@@ -8,13 +10,9 @@ import {
   NoteUtils,
   stringifyError,
   TimeUtils,
+  URI,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  readYAML,
-  SegmentClient,
-  TelemetryStatus,
-} from "@dendronhq/common-server";
+import { SegmentClient, TelemetryStatus } from "@dendronhq/common-server";
 import {
   MigrationChangeSetStatus,
   MigrationService,
@@ -666,8 +664,16 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     // run it
     const currentVersion = migrationsToRun[0].version;
     const wsService = new WorkspaceService({ wsRoot: opts.wsRoot! });
-    const configPath = DConfig.configPath(opts.wsRoot!);
-    const dendronConfig = readYAML(configPath);
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(opts.wsRoot!)
+    );
+    if (configReadRawResult.isErr()) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_CONFIG,
+        message: "no dendron config found",
+      });
+    }
+    const dendronConfig = configReadRawResult.value as DendronConfig;
     const wsConfig = wsService.getCodeWorkspaceSettingsSync();
     if (_.isUndefined(wsConfig)) {
       throw DendronError.createFromStatus({

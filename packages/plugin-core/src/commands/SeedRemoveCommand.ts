@@ -26,7 +26,7 @@ export class SeedRemoveCommand extends SeedCommandBase<
   private readonly NO_SEEDS_MSG: string = "no seeds in the current workspace";
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const seeds = this.getSeedSvc().getSeedsInWorkspace();
+    const seeds = await this.getSeedSvc().getSeedsInWorkspace();
     if (!seeds || seeds?.length === 0) {
       vscode.window.showInformationMessage(this.NO_SEEDS_MSG);
       return;
@@ -44,7 +44,7 @@ export class SeedRemoveCommand extends SeedCommandBase<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const seeds = this.getSeedSvc().getSeedsInWorkspace();
+    const seeds = await this.getSeedSvc().getSeedsInWorkspace();
     if (!seeds || seeds?.length === 0) {
       return {
         error: new DendronError({

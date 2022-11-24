@@ -6,10 +6,11 @@ import {
   RuntimeUtils,
   DENDRON_EMOJIS,
   ConfigUtils,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  DConfig,
   getDurationMilliseconds,
   SegmentClient,
   TelemetryStatus,
@@ -111,8 +112,14 @@ export abstract class CLICommand<
   async validateConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
 
-    // we shouldn't use ConfigUtils.getProp for cases when `version` doesn't exist.
-    const configVersion = DConfig.getRaw(wsRoot).version;
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(wsRoot)
+    );
+    if (configReadRawResult.isErr()) {
+      this.print(configReadRawResult.error.message);
+      process.exit();
+    }
+    const configVersion = configReadRawResult.value.version;
     const clientVersion = CLIUtils.getClientVersion();
     let validationResp;
     try {

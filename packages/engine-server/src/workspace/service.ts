@@ -197,7 +197,12 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @deprecated: not applicable for self cotnained vaults
    */
   static getOrCreateConfig(wsRoot: string) {
-    return DConfig.getOrCreate(wsRoot);
+    const configRoot = URI.file(wsRoot);
+    return ConfigService.instance()
+      .readConfig(configRoot)
+      .orElse(() => {
+        return ConfigService.instance().createConfig(configRoot);
+      });
   }
 
   get config(): PromiseLike<DendronConfig> {
@@ -246,7 +251,13 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
    * @returns `{vaults}` that have been added
    */
   async addWorkspace({ workspace }: { workspace: DWorkspace }) {
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const allWorkspaces = ConfigUtils.getWorkspace(config).workspaces || {};
     allWorkspaces[workspace.name] = _.omit(workspace, ["name", "vaults"]);
     // update vault
@@ -296,7 +307,14 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     if (config === undefined) {
       config = await this.config;
       if (updateConfig) {
-        config = DConfig.readConfigSync(this.wsRoot);
+        const configReadResult = await ConfigService.instance().readConfig(
+          URI.file(this.wsRoot),
+          { applyOverride: false }
+        );
+        if (configReadResult.isErr()) {
+          throw configReadResult.error;
+        }
+        config = configReadResult.value;
       }
     }
 
@@ -546,7 +564,13 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       path.join(newFolder, FOLDERS.ASSETS)
     );
     // Update the config to mark this vault as self contained
-    const config = DConfig.getRaw(this.wsRoot) as DendronConfig;
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(this.wsRoot)
+    );
+    if (configReadRawResult.isErr()) {
+      throw configReadRawResult.error;
+    }
+    const config = configReadRawResult.value as DendronConfig;
     const configVault = ConfigUtils.getVaults(config).find((confVault) =>
       VaultUtils.isEqualV2(confVault, vault)
     );
@@ -569,7 +593,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
     // All updates to the config are done, finish by writing it
     await DConfig.createBackup(this.wsRoot, backupInfix);
-    await DConfig.writeConfig({ wsRoot: this.wsRoot, config });
+    await ConfigService.instance().writeConfig(URI.file(this.wsRoot), config);
 
     const workspaceService = new WorkspaceService({
       wsRoot: oldFolder,
@@ -596,9 +620,15 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
     } else {
       // There's already a config file in the vault, update the existing one
       await DConfig.createBackup(oldFolder, backupInfix);
-      const config = DConfig.getOrCreate(oldFolder);
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(oldFolder)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       ConfigUtils.setVaults(config, [vaultConfig]);
-      await DConfig.writeConfig({ wsRoot: oldFolder, config });
+      await ConfigService.instance().writeConfig(URI.file(oldFolder), config);
     }
 
     // Create or update the workspace file (dendron.code-workspace) inside the wsRoot/vault
@@ -982,11 +1012,16 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
       updateWorkspace: false,
     });
 
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot),
+      { applyOverride: false }
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
     // if we are updating the config, we should make sure
     // we don't include the local overrides
-    const config = updateConfig
-      ? DConfig.readConfigSync(this.wsRoot)
-      : await this.config;
+    const config = updateConfig ? configReadResult.value : await this.config;
 
     const vaults = ConfigUtils.getVaults(config);
     const vaultsAfterReject = _.reject(vaults, (ent: DVault) => {
@@ -1067,10 +1102,6 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
         await opts.onUpdatedWorkspace();
       }
     }
-  }
-
-  createConfig() {
-    return WorkspaceService.getOrCreateConfig(this.wsRoot);
   }
 
   static async createGitIgnore(wsRoot: string) {
@@ -1230,8 +1261,13 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
 
   static async createFromConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
-    const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
+    const configResult = await WorkspaceService.getOrCreateConfig(wsRoot);
+    if (configResult.isErr()) {
+      ws.dispose();
+      throw configResult.error;
+    }
+    const config = configResult.value;
     const vaults = ConfigUtils.getVaults(config);
     await Promise.all(
       vaults.map(async (vault) => {

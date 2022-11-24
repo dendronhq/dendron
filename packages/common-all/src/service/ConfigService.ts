@@ -27,6 +27,10 @@ export class ConfigService {
     return this._configStore.configPath(wsRoot);
   }
 
+  configOverridePath(wsRoot: URI, scope: "workspace" | "global") {
+    return this._configStore.configOverridePath(wsRoot, scope);
+  }
+
   /** static */
 
   static instance(opts?: ConfigServiceOpts) {
@@ -154,6 +158,14 @@ export class ConfigService {
       _.unset(config, key);
       return this.writeConfig(wsRoot, config).map(() => prevValue);
     });
+  }
+
+  writeOverride(
+    wsRoot: URI,
+    config: DeepPartial<DendronConfig>,
+    mode: "workspace" | "global"
+  ) {
+    return this._configStore.writeOverride(wsRoot, config, mode);
   }
 
   /** helpers */

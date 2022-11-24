@@ -33,7 +33,7 @@ export async function detectOutOfDateSeeds({
   wsRoot: string;
   seedSvc: SeedService;
 }) {
-  const seedVaults = seedSvc.getSeedVaultsInWorkspace();
+  const seedVaults = await seedSvc.getSeedVaultsInWorkspace();
   await Promise.all(
     seedVaults.map(async (seedVault) => {
       const id = seedVault.seed;

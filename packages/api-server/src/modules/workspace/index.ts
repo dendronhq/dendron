@@ -1,19 +1,23 @@
 import {
+  ConfigService,
   DEngineInitResp,
   error2PlainObject,
   ERROR_SEVERITY,
   NoteDictsUtils,
+  URI,
   WorkspaceInitRequest,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-all";
-import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
 import {
   DendronEngineV2,
   DendronEngineV3,
   DendronEngineV3Factory,
+  NodeJSFileStore,
 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
+import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
+import { homedir } from "os";
 
 export class WorkspaceController {
   static singleton?: WorkspaceController;
@@ -33,6 +37,11 @@ export class WorkspaceController {
     const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
+      ConfigService.instance({
+        wsRoot: URI.file(uri),
+        homeDir: URI.file(homedir()),
+        fileStore: new NodeJSFileStore(),
+      });
       if (config.dev?.useSqlite) {
         engine = await DendronEngineV3Factory.createWithSqliteStore({
           wsRoot: uri,
@@ -44,6 +53,10 @@ export class WorkspaceController {
           logger,
         });
       }
+      engine = DendronEngineV3.create({
+        wsRoot: uri,
+        logger,
+      });
     } else {
       engine = DendronEngineV2.create({
         wsRoot: uri,

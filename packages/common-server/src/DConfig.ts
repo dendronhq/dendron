@@ -31,6 +31,9 @@ export enum LocalConfigScope {
 
 let _dendronConfig: DendronConfig | undefined;
 
+/**
+ * @deprecated
+ */
 export class DConfig {
   static createSync({
     wsRoot,

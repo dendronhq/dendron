@@ -7,8 +7,7 @@ import { DVault } from "../types/DVault";
 import { genHash } from "../utils";
 
 /**
- * NOTE: Temporarily duplicated from common-server/filesv2.ts to get Dendron Web
- * Extension working
+ * Convert a string to a set of NoteProps
  * @param calculateHash - when set, add `contentHash` property to the note
  *  Default: false
  * @returns
@@ -47,5 +46,10 @@ export function string2Note({
     vault,
     contentHash,
   });
+
+  // Any note parsed from a real string cannot be a stub - stubs are only
+  // virtual notes to fill in hierarchy gaps.
+  // TODO Sqlite - add this back and fix test snapshots.
+  // note.stub = false;
   return note;
 }

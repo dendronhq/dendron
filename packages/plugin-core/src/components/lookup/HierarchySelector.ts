@@ -30,16 +30,17 @@ export interface HierarchySelector {
  * controller V3.
  */
 export class QuickPickHierarchySelector implements HierarchySelector {
-  getHierarchy(): Promise<{ hierarchy: string; vault: DVault } | undefined> {
+  async getHierarchy(): Promise<
+    { hierarchy: string; vault: DVault } | undefined
+  > {
+    const lookupCreateOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+    };
+    const extension = ExtensionProvider.getExtension();
+    const lc = await extension.lookupControllerFactory.create(lookupCreateOpts);
     return new Promise<{ hierarchy: string; vault: DVault } | undefined>(
       (resolve) => {
-        const lookupCreateOpts: LookupControllerV3CreateOpts = {
-          nodeType: "note",
-          disableVaultSelection: true,
-        };
-        const extension = ExtensionProvider.getExtension();
-        const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
-
         const PROVIDER_ID: string = "HierarchySelector";
 
         const provider = extension.noteLookupProviderFactory.create(

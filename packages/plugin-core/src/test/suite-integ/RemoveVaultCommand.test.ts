@@ -116,7 +116,9 @@ suite("GIVEN RemoveVaultCommand", function () {
 
   describeMultiWS("WHEN removing a regular vault", {}, () => {
     test("THEN the vault is removed", async () => {
-      const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultToRemove = vaults[1];
       sinon.stub(VSCodeUtils, "showQuickPick").resolves({
         // RemoveVaultCommand uses this internally, but TypeScript doesn't recognize it for the stub
@@ -184,7 +186,9 @@ suite("GIVEN RemoveVaultCommand", function () {
       },
       () => {
         test("THEN the vault is removed from dendron.yml, and override is not merged into config", async () => {
-          const { config, wsRoot } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const config = await ws.config;
           const vaultToRemove = { fsPath: "vault2" };
 
           // before remove, we have 4 vaults including the overriden one
@@ -210,7 +214,7 @@ suite("GIVEN RemoveVaultCommand", function () {
 
           // after remove, we have 3 vaults including the overriden one
           const postRunConfigWithOverride =
-            ExtensionProvider.getDWorkspace().config;
+            await ExtensionProvider.getDWorkspace().config;
           expect(postRunConfigWithOverride.workspace.vaults.length).toEqual(3);
         });
       }
@@ -222,7 +226,9 @@ suite("GIVEN RemoveVaultCommand", function () {
     { selfContained: true },
     () => {
       test("THEN the vault is removed", async () => {
-        const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultToRemove = vaults[1];
         sinon.stub(VSCodeUtils, "showQuickPick").resolves({
           // RemoveVaultCommand uses this internally, but TypeScript doesn't recognize it for the stub
@@ -263,7 +269,9 @@ suite("GIVEN RemoveVaultCommand", function () {
     { selfContained: true },
     () => {
       test("THEN the vault is removed", async () => {
-        const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultToRemove = vaults[0];
         sinon.stub(VSCodeUtils, "showQuickPick").resolves({
           // RemoveVaultCommand uses this internally, but TypeScript doesn't recognize it for the stub
@@ -317,7 +325,7 @@ suite("GIVEN RemoveVaultCommand", function () {
       const publishingConfig = ConfigUtils.getPublishing(config);
       expect(publishingConfig.duplicateNoteBehavior).toBeTruthy();
 
-      const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+      const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
       // @ts-ignore
       VSCodeUtils.showQuickPick = () => {
         return { data: vaultsAfter[1] };
@@ -343,7 +351,7 @@ suite("GIVEN RemoveVaultCommand", function () {
       stubVaultInput({ sourceType: "local", sourcePath: vpath3 });
       await new VaultAddCommand().run();
 
-      const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+      const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
 
       const configOrig = await getConfig();
       // check what we are starting from.
@@ -374,7 +382,9 @@ suite("GIVEN RemoveVaultCommand", function () {
   describe("WHEN it's used from the Contextual-UI", () => {
     describeMultiWS("AND it removes a regular vault vault1", {}, () => {
       test("THEN vault1 should be removed from workspace and config", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const args = {
           fsPath: path.join(wsRoot, vaults[1].fsPath),
         };
@@ -392,7 +402,9 @@ suite("GIVEN RemoveVaultCommand", function () {
     });
     describe("AND it removes a remote workspace vault remoteWs", () => {
       test("THEN remoteWs should be removed from workspace and config", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteVaultName = "remoteVault";
         const remoteWsName = "remoteWs";
         const vaultsRemote = [{ fsPath: remoteVaultName }];

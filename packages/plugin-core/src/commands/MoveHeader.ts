@@ -273,7 +273,9 @@ export class MoveHeaderCommand extends BasicCommand<
       vaultSelectCanToggle: false,
     };
     const lc =
-      ExtensionProvider.getExtension().lookupControllerFactory.create(lcOpts);
+      await ExtensionProvider.getExtension().lookupControllerFactory.create(
+        lcOpts
+      );
     return new Promise((resolve) => {
       let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
@@ -383,7 +385,9 @@ export class MoveHeaderCommand extends BasicCommand<
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
 
-    const vault = ExtensionProvider.getWSUtils().getVaultFromUri(location.uri);
+    const vault = await ExtensionProvider.getWSUtils().getVaultFromUri(
+      location.uri
+    );
     return (await engine.findNotes({ fname, vault }))[0];
   }
 

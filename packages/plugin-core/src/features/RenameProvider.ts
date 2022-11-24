@@ -41,7 +41,7 @@ export default class RenameProvider implements vscode.RenameProvider {
     const { label, vaultName, range, ref, refType, refText } = reference;
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
-      : WSUtils.getVaultFromDocument(document);
+      : await WSUtils.getVaultFromDocument(document);
     if (targetVault === undefined) {
       throw new DendronError({
         message: `Cannot rename note with specified vault (${vaultName}). Vault does not exist.`,
@@ -222,7 +222,9 @@ export default class RenameProvider implements vscode.RenameProvider {
         message: "Rename is not supported for non dendron notes",
       });
     }
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
 
     const reference = await getReferenceAtPosition({
       document,

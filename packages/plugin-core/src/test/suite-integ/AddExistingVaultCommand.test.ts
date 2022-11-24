@@ -43,7 +43,9 @@ suite("AddExistingVaultCommand", function () {
           sinon.stub(vscode.commands, "executeCommand").resolves({});
         });
         test("THEN add vault, workspace to the config", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           const gitIgnore = path.join(wsRoot, ".gitignore");
@@ -206,7 +208,9 @@ suite("AddExistingVaultCommand", function () {
         test("THEN the notes in this vault are accessible", async () => {
           // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
           await new ReloadIndexCommand().run();
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = VaultUtils.getVaultByName({
             vaults,
             vname: vaultName,
@@ -360,7 +364,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -436,7 +442,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -592,7 +600,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

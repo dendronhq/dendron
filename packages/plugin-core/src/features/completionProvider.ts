@@ -250,7 +250,7 @@ export const provideCompletionItems = sentryReportingCallback(
     const { wsRoot } = engine;
     let completionItems: CompletionItem[];
     const completionsIncomplete = true;
-    const currentVault = WSUtils.getVaultFromDocument(document);
+    const currentVault = await WSUtils.getVaultFromDocument(document);
 
     if (found?.groups?.hashTag) {
       completionItems = await provideCompletionsForTag({

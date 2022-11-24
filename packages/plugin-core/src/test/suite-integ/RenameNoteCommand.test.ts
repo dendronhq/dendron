@@ -9,7 +9,9 @@ suite("RenameNoteCommand", function () {
   describeMultiWS("GIVEN note with invalid hierarchy", {}, () => {
     test("WHEN renamed to valid hierarchy THEN renamed properly", async () => {
       const extension = ExtensionProvider.getExtension();
-      const { vaults, wsRoot } = extension.getDWorkspace();
+      const ws = extension.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const engine = extension.getEngine();
 
       const invalidNote = await NoteTestUtilsV4.createNoteWithEngine({

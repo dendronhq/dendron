@@ -468,7 +468,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron stashes and restores the changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         // Add everything and push, so that there's no untracked changes
@@ -530,7 +532,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron stashes and restores the changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         // Add everything and push, so that there's no untracked changes
@@ -595,7 +599,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron still restores local changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         // Add everything and push, so that there's no untracked changes
@@ -687,7 +693,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron still restores local changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -786,7 +794,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN rebase works, and Dendron still restores local changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -889,7 +899,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN pull succeeds but there's a merge conflict", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -972,7 +984,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN pull fails, and Dendron restores local changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -1060,7 +1074,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron skips doing stuff", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -1127,7 +1143,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron skips doing stuff", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         const rootNote = (
@@ -1229,7 +1247,9 @@ suite("workspace sync command", function () {
     },
     () => {
       test("THEN Dendron stashes and restores the changes", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
         const vault = vaults[0];
 

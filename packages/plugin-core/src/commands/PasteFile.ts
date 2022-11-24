@@ -61,7 +61,9 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     const uri = editor.document.uri;
     const ext = ExtensionProvider.getExtension();
-    const { vaults, wsRoot } = ext.getDWorkspace();
+    const ws = ext.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (
       !WorkspaceUtils.isPathInWorkspace({ vaults, wsRoot, fpath: uri.fsPath })
     ) {

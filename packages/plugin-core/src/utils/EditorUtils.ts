@@ -296,7 +296,9 @@ export class EditorUtils {
       return;
     const currentLine = editor.document.lineAt(selection.start.line).text;
     if (!currentLine) return;
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const reference = await getReferenceAtPosition({
       document: editor.document,
       position: selection.start,

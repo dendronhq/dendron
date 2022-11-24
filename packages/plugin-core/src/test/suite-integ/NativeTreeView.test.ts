@@ -1414,8 +1414,9 @@ suite("NativeTreeView tests", function () {
         describe("AND created note is top hierarchy", () => {
           test("THEN tree view correctly removes deleted note", async () => {
             const provider = container.resolve(EngineNoteProvider);
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1473,7 +1474,9 @@ suite("NativeTreeView tests", function () {
     describe("AND created note also creates stub parent", () => {
       test("THEN tree view correctly removes deleted note and stub parent", async () => {
         const provider = container.resolve(EngineNoteProvider);
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],
@@ -1532,7 +1535,9 @@ suite("NativeTreeView tests", function () {
     describe("AND created note has stub children", () => {
       test("THEN tree view correctly removes deleted note and replaces it with a stub", async () => {
         const provider = container.resolve(EngineNoteProvider);
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],
@@ -1618,7 +1623,9 @@ suite("NativeTreeView tests", function () {
   });
   describeMultiWS("WHEN deleting note that was just renamed", {}, () => {
     beforeEach(async () => {
-      const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       await NoteTestUtilsV4.createNoteWithEngine({
         wsRoot,
         vault: vaults[0],
@@ -1740,7 +1747,9 @@ suite("NativeTreeView tests", function () {
       test("THEN THEN tree view correctly removes note that was just renamed and deleted and replaces it with a stub", async () => {
         const provider = container.resolve(EngineNoteProvider);
 
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],

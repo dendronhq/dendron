@@ -339,7 +339,7 @@ export class PodUIControls {
     };
 
     const extension = ExtensionProvider.getExtension();
-    const lc = extension.lookupControllerFactory.create(lcOpts);
+    const lc = await extension.lookupControllerFactory.create(lcOpts);
     const provider = extension.noteLookupProviderFactory.create(key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,

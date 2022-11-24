@@ -51,7 +51,9 @@ export class RestoreVaultCommand extends BaseCommand<
 
   async execute(opts: CommandOpts) {
     const ext = ExtensionProvider.getExtension();
-    const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = ws;
+    const vaults = await ws.vaults;
     try {
       const { src } = opts;
       const pod = new SnapshotImportPod();

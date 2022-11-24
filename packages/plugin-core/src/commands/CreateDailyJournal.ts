@@ -118,7 +118,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
         })
       : undefined;
     const vaultPath = vault2Path({
-      vault: maybeVault || PickerUtilsV2.getVaultForOpenEditor(),
+      vault: maybeVault || (await PickerUtilsV2.getVaultForOpenEditor()),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
@@ -200,9 +200,9 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
           vname: journalConfig.dailyVault,
         })
       : undefined;
-    const vault = maybeVault || PickerUtilsV2.getVaultForOpenEditor();
+    const vault = maybeVault || (await PickerUtilsV2.getVaultForOpenEditor());
     const vaultPath = vault2Path({
-      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      vault: await PickerUtilsV2.getVaultForOpenEditor(),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 

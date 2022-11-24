@@ -96,7 +96,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       ],
     };
     const extension = ExtensionProvider.getExtension();
-    const lc = extension.lookupControllerFactory.create(lcOpts);
+    const lc = await extension.lookupControllerFactory.create(lcOpts);
 
     const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,

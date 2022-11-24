@@ -20,7 +20,9 @@ suite("MigrationService", function () {
     currentVersion: string,
     migrations: Migrations[]
   ) {
-    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const config = await ws.config;
     const wsService = new WorkspaceService({ wsRoot });
     const out = await MigrationService.applyMigrationRules({
       currentVersion,

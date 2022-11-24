@@ -60,7 +60,7 @@ export class CopyNoteLinkCommand
   }
 
   private async getUserLinkAnchorPreference(): Promise<"line" | "block"> {
-    const { config } = this.extension.getDWorkspace();
+    const config = await this.extension.getDWorkspace().config;
     let anchorType = ConfigUtils.getNonNoteLinkAnchorType(config);
     if (anchorType === "prompt") {
       // The preferred anchor type is not set, so ask the user if they want line numbers or block anchors
@@ -95,7 +95,9 @@ export class CopyNoteLinkCommand
   }
 
   private async createNonNoteFileLink(editor: TextEditor) {
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     let { fsPath } = editor.document.uri;
     // Find it relative to wsRoot
     fsPath = path.relative(wsRoot, fsPath);
@@ -200,7 +202,7 @@ export class CopyNoteLinkCommand
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const engine = this.extension.getEngine();
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
 
     if (editor.document.isDirty) {
       this._onEngineNoteStateChangedDisposable = this.extension

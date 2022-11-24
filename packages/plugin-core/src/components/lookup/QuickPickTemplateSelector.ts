@@ -16,14 +16,14 @@ import { AutoCompletableRegistrar } from "../../utils/registers/AutoCompletableR
 import { AutoCompleter } from "../../utils/autoCompleter";
 
 export class QuickPickTemplateSelector {
-  getTemplate(opts: {
+  async getTemplate(opts: {
     logger?: DLogger;
     providerId?: string;
   }): Promise<NoteProps | undefined> {
     const logger = opts.logger || Logger;
     const id = opts.providerId || "TemplateSelector";
     const extension = ExtensionProvider.getExtension();
-    const controller = extension.lookupControllerFactory.create({
+    const controller = await extension.lookupControllerFactory.create({
       nodeType: "note",
       buttons: [],
     });
@@ -31,7 +31,7 @@ export class QuickPickTemplateSelector {
       allowNewNote: false,
       forceAsIsPickerValueUsage: true,
     });
-    const config = extension.getDWorkspace().config;
+    const config = await extension.getDWorkspace().config;
 
     const tempPrefix = ConfigUtils.getCommands(config).templateHierarchy;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;

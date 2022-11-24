@@ -33,7 +33,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       engine,
       {
         excludeStub: true,
-        vault: PickerUtilsV2.getVaultForOpenEditor(),
+        vault: await PickerUtilsV2.getVaultForOpenEditor(),
       }
     );
     const nppath = NoteUtils.getFullPath({

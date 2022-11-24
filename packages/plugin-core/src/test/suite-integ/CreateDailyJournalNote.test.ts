@@ -281,7 +281,9 @@ suite("Create Daily Journal Suite", function () {
     () => {
       test("WHEN CreateDailyJournalCommand is executed, then daily journal is created in daily vault with template applied.", async () => {
         const ext = ExtensionProvider.getExtension();
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         stubVaultPick(vaults);
         const cmd = new CreateDailyJournalCommand(ext);
 

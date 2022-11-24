@@ -76,7 +76,9 @@ suite("PreviewLinkHandler", () => {
     () => {
       let note: NotePropsMeta;
       beforeEach(async () => {
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         note = (
           await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
         )[0];
@@ -86,7 +88,9 @@ suite("PreviewLinkHandler", () => {
 
       describe("WHEN clicking on an wikilink", () => {
         test("THEN the clicked note is opened", async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -108,8 +112,9 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND the link is to a header", () => {
           test("THEN the note is opened at that header", async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -135,8 +140,9 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND the link is to a block anchor", () => {
           test("THEN the note is opened at that block", async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -162,8 +168,9 @@ suite("PreviewLinkHandler", () => {
 
         describe("AND if the link is to a missing note", () => {
           test("THEN nothing happens", async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -189,8 +196,9 @@ suite("PreviewLinkHandler", () => {
             const showChooseNote = sinon
               .stub(QuickPickUtil, "showChooseNote")
               .returns(Promise.resolve(testNoteAmbiguous));
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -219,7 +227,9 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -238,7 +248,9 @@ suite("PreviewLinkHandler", () => {
 
       describe("WHEN clicking on an asset inside a vault", () => {
         before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const assetsPath = path.join(
             wsRoot,
             VaultUtils.getRelPath(vaults[0]),
@@ -249,11 +261,13 @@ suite("PreviewLinkHandler", () => {
         });
 
         test("THEN it is opened with the default app", async () => {
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot, engine } = ws;
+          const vaults = await ws.vaults;
           const openWithDefaultApp = sinon.stub(
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -291,7 +305,9 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -323,7 +339,9 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -367,7 +385,9 @@ suite("PreviewLinkHandler", () => {
             ShowPreviewAssetOpener,
             "openWithDefaultApp"
           );
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const handler = new PreviewLinkHandler(
             URI.file(wsRoot),
             engine,
@@ -394,8 +414,9 @@ suite("PreviewLinkHandler", () => {
               ShowPreviewAssetOpener,
               "openWithDefaultApp"
             );
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -426,8 +447,9 @@ suite("PreviewLinkHandler", () => {
               ShowPreviewAssetOpener,
               "openWithDefaultApp"
             );
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine, wsRoot } = ws;
+            const vaults = await ws.vaults;
             const handler = new PreviewLinkHandler(
               URI.file(wsRoot),
               engine,
@@ -457,8 +479,10 @@ suite("PreviewLinkHandler", () => {
 
   describe(`extractNoteIdFromHref`, () => {
     describe(`WHEN id is present`, () => {
-      it("AND with header anchor THEN extract id", () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      it("AND with header anchor THEN extract id", async () => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const linkHandler = new PreviewLinkHandler(
           URI.file(wsRoot),
           engine,
@@ -472,8 +496,10 @@ suite("PreviewLinkHandler", () => {
         expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
       });
 
-      it("AND without the header anchor THEN extract id", () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      it("AND without the header anchor THEN extract id", async () => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const linkHandler = new PreviewLinkHandler(
           URI.file(wsRoot),
           engine,
@@ -488,12 +514,14 @@ suite("PreviewLinkHandler", () => {
         expect(actual).toEqual("FSi3bKWQeQXYTjE1PoTB0");
       });
 
-      it("AND is guid like", () => {
+      it("AND is guid like", async () => {
         // This shouldnt typically happen with the way we currently generate ids but we do
         // have some guid like ids in our test workspace right now so to make those
         // notes happy, and in case some older id generation used guid looking identifers.
 
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const linkHandler = new PreviewLinkHandler(
           URI.file(wsRoot),
           engine,
@@ -509,8 +537,10 @@ suite("PreviewLinkHandler", () => {
       });
     });
 
-    it(`WHEN id not present in href THEN default onto passed in id`, () => {
-      const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+    it(`WHEN id not present in href THEN default onto passed in id`, async () => {
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const linkHandler = new PreviewLinkHandler(
         URI.file(wsRoot),
         engine,

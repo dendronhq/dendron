@@ -39,7 +39,7 @@ export class CreateJournalNoteCommand extends BasicCommand<
     );
     const confirmVaultOnCreate = commandConfig.lookup.note.confirmVaultOnCreate;
     const vaultButtonPressed =
-      VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
+      await VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: !confirmVaultOnCreate,
@@ -51,7 +51,9 @@ export class CreateJournalNoteCommand extends BasicCommand<
       ],
       title: "Create Journal Note",
     };
-    const controller = this.extension.lookupControllerFactory.create(opts);
+    const controller = await this.extension.lookupControllerFactory.create(
+      opts
+    );
     return controller;
   }
 

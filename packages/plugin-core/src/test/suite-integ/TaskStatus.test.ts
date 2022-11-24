@@ -16,7 +16,9 @@ suite("GIVEN TaskStatus", function () {
     let taskNote: NoteProps;
     let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
     before(async () => {
-      const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const extension = ExtensionProvider.getExtension();
       showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
         label: "y",
@@ -66,7 +68,9 @@ suite("GIVEN TaskStatus", function () {
   describeSingleWS("WHEN a broken link is selected", {}, () => {
     let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
     before(async () => {
-      const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const extension = ExtensionProvider.getExtension();
       showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
         label: "y",
@@ -102,7 +106,9 @@ suite("GIVEN TaskStatus", function () {
       let otherTaskNote: NoteProps;
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
       before(async () => {
-        const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
 
         taskNote = await NoteTestUtilsV4.createNoteWithEngine({
@@ -172,7 +178,9 @@ suite("GIVEN TaskStatus", function () {
       let taskNote: NoteProps;
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
       before(async () => {
-        const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
 
         taskNote = await NoteTestUtilsV4.createNoteWithEngine({
@@ -209,7 +217,9 @@ suite("GIVEN TaskStatus", function () {
       let otherNote: NoteProps;
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
       before(async () => {
-        const { engine, vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
 
         otherNote = await NoteTestUtilsV4.createNoteWithEngine({

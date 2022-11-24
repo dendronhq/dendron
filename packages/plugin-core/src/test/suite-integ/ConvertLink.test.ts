@@ -23,7 +23,9 @@ const getReference = async ({
   editor: TextEditor;
   position: vscode.Position;
 }) => {
-  const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  const ws = ExtensionProvider.getDWorkspace();
+  const { wsRoot } = ws;
+  const vaults = await ws.vaults;
   const out = await getReferenceAtPosition({
     document: editor.document,
     position,

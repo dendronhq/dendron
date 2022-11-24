@@ -92,7 +92,7 @@ export class GoToSiblingCommand extends BasicCommand<
     engine: DEngineClient,
     fname: string
   ): Promise<NotePropsMeta | null> {
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const hitNotes = await engine.findNotesMeta({ fname, vault });
     return hitNotes.length !== 0 ? hitNotes[0] : null;
   }

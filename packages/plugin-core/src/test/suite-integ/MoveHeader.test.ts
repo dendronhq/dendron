@@ -125,7 +125,9 @@ suite("MoveHeader", function () {
                 useSameVault: true,
                 nonInteractive: true,
               });
-              const { engine, vaults } = ExtensionProvider.getDWorkspace();
+              const ws = ExtensionProvider.getDWorkspace();
+              const { engine } = ws;
+              const vaults = await ws.vaults;
               const newNote = (
                 await engine.findNotesMeta({
                   fname: "new-note",

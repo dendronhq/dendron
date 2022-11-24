@@ -260,7 +260,7 @@ export class AddExistingVaultCommand extends BasicCommand<
     }
     const sourceType = sourceTypeSelected.label;
 
-    const { config } = this._ext.getDWorkspace();
+    const config = await this._ext.getDWorkspace().config;
     if (config.dev?.enableSelfContainedVaults) {
       return this.gatherVaultSelfContained(sourceType);
     } else {

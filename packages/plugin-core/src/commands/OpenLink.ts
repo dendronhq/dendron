@@ -55,7 +55,7 @@ export class OpenLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const { wsRoot } = ExtensionProvider.getDWorkspace();
 
       if (text.startsWith("asset")) {
-        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+        const vault = await PickerUtilsV2.getVaultForOpenEditor();
         assetPath = path.join(vault2Path({ vault, wsRoot }), text);
       } else {
         assetPath = resolvePath(text, getExtension().rootWorkspace.uri.fsPath);

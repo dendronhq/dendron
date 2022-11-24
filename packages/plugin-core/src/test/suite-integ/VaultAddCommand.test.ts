@@ -60,7 +60,9 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("WHEN running VaultAdd", { timeout: 1e6 }, () => {
       test("THEN add vault to config", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
 
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
@@ -113,7 +115,9 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("WHEN add vault inside workspace", {}, () => {
       test("THEN workspace vault is added", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const { wsRoot: remoteDir } = await setupWS({
           vaults: [{ fsPath: "vault1" }],
           asRemote: true,
@@ -180,7 +184,9 @@ suite("VaultAddCommand", function () {
       {},
       () => {
         test("THEN do right thing", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           // create remote repo
           const remoteDir = tmpDir().name;
           const vaultPath = "vault";
@@ -304,7 +310,7 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           await checkVaults(
             {
               wsRoot,
@@ -343,7 +349,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
 
           expect(vaultsAfter.length).toEqual(2);
           expect(
@@ -376,7 +382,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath });
           await new VaultAddCommand().run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           expect(
             await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
           ).toEqual([
@@ -408,7 +414,7 @@ suite("VaultAddCommand", function () {
           const vpath = tmpDir().name;
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           expect(
             await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
           ).toEqual([
@@ -480,14 +486,15 @@ describe("GIVEN a workspace with local override", function () {
       this.beforeEach(beforeHook);
       test("locally overriden vault is not merged into config", async () => {
         const vaultPath = "vaultRemote";
-        const { wsRoot, config: preRunConfigWithOverride } =
-          ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
         const gitIgnore = path.join(wsRoot, ".gitignore");
         const remoteDir = tmpDir().name;
 
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         await fs.writeFile(gitIgnore, vaultPath);
 
+        const preRunConfigWithOverride = await ws.config;
         // the config that has local override should have two vaults
         expect(preRunConfigWithOverride.workspace.vaults.length).toEqual(2);
 
@@ -512,7 +519,7 @@ describe("GIVEN a workspace with local override", function () {
         expect(postRunConfig.workspace.vaults.length).toEqual(2);
         // config + override should have three vaults
         const postRunConfigWithOverride =
-          ExtensionProvider.getDWorkspace().config;
+          await ExtensionProvider.getDWorkspace().config;
         expect(postRunConfigWithOverride.workspace.vaults.length).toEqual(3);
       });
     }
@@ -578,7 +585,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -648,7 +657,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -751,7 +762,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -833,7 +846,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         test("THEN the notes in this vault are accessible", async () => {
           // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
           await new ReloadIndexCommand().run();
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = VaultUtils.getVaultByName({
             vaults,
             vname: vaultName,
@@ -980,7 +995,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

@@ -141,7 +141,9 @@ export class NotePickerUtils {
   }: {
     engine: DEngineClient;
   }) => {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(engine);
     return Promise.all(
       nodes.map(async (ent) => {
@@ -191,7 +193,9 @@ export class NotePickerUtils {
     note: NoteProps;
     engine: DEngineClient;
   }) {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     return DNodeUtils.enhancePropForQuickInputV3({
       wsRoot,
       props: input.note,
@@ -210,7 +214,9 @@ export class NotePickerUtils {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
     const { picker, transformedQuery, originalQS } = opts;
-    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = ws;
+    const vaults = await ws.vaults;
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 

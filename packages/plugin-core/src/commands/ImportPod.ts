@@ -109,7 +109,9 @@ export class ImportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, msg: "enter", podChoice: opts.podChoice.id });
-    const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = ws;
+    const vaults = await ws.vaults;
     const utilityMethods = {
       getGlobalState,
       updateGlobalState,

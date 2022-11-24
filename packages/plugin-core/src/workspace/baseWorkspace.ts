@@ -1,6 +1,5 @@
 import {
   ConfigService,
-  ConfigUtils,
   DendronConfig,
   DendronError,
   DEngineClient,

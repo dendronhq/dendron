@@ -134,7 +134,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.extension = ext;
   }
 
-  getHierarchy() {
+  async getHierarchy() {
     return new QuickPickHierarchySelector().getHierarchy();
   }
 

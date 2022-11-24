@@ -75,7 +75,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
    */
   private async makeSchemaFileIfNotExisting(): Promise<boolean> {
     const vaultPath = vault2Path({
-      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      vault: await PickerUtilsV2.getVaultForOpenEditor(),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
@@ -145,7 +145,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
         fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
       });
 
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const vaultPath = vault2Path({
       vault,
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,

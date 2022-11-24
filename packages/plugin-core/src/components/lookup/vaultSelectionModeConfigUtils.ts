@@ -7,28 +7,28 @@ import { ExtensionProvider } from "../../ExtensionProvider";
  * selection mode configuration.
  * */
 export class VaultSelectionModeConfigUtils {
-  public static getVaultSelectionMode() {
+  public static async getVaultSelectionMode() {
     if (
-      ConfigUtils.getCommands(ExtensionProvider.getDWorkspace().config).lookup
-        .note.confirmVaultOnCreate
+      ConfigUtils.getCommands(await ExtensionProvider.getDWorkspace().config)
+        .lookup.note.confirmVaultOnCreate
     ) {
-      return this.toVaultSelectionMode(this.configVaultSelectionMode());
+      return this.toVaultSelectionMode(await this.configVaultSelectionMode());
     } else {
       return VaultSelectionMode.smart;
     }
   }
 
-  public static configVaultSelectionMode() {
+  public static async configVaultSelectionMode() {
     const ws = ExtensionProvider.getDWorkspace();
-    const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
+    const lookupConfig = ConfigUtils.getCommands(await ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
     const configMode = noteLookupConfig.vaultSelectionModeOnCreate;
 
     return configMode;
   }
 
-  public static shouldAlwaysPromptVaultSelection() {
-    return this.configVaultSelectionMode() === "alwaysPrompt";
+  public static async shouldAlwaysPromptVaultSelection() {
+    return (await this.configVaultSelectionMode()) === "alwaysPrompt";
   }
 
   private static toVaultSelectionMode(configMode: "smart" | "alwaysPrompt") {

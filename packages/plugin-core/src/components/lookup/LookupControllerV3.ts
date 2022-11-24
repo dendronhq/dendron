@@ -395,13 +395,13 @@ export class LookupControllerV3 implements ILookupControllerV3 {
         this._viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
           switch (prevValue) {
             case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.onJournalButtonToggled(false);
+              if (journalBtn) this.onJournalButtonToggled(false, opts.config);
               break;
             case LookupNoteTypeEnum.scratch:
-              if (scratchBtn) this.onScratchButtonToggled(false);
+              if (scratchBtn) this.onScratchButtonToggled(false, opts.config);
               break;
             case LookupNoteTypeEnum.task:
-              if (taskBtn) this.onTaskButtonToggled(false);
+              if (taskBtn) this.onTaskButtonToggled(false, opts.config);
               break;
             default:
               break;
@@ -409,13 +409,13 @@ export class LookupControllerV3 implements ILookupControllerV3 {
 
           switch (newValue) {
             case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.onJournalButtonToggled(true);
+              if (journalBtn) this.onJournalButtonToggled(true, opts.config);
               break;
             case LookupNoteTypeEnum.scratch:
-              if (scratchBtn) this.onScratchButtonToggled(true);
+              if (scratchBtn) this.onScratchButtonToggled(true, opts.config);
               break;
             case LookupNoteTypeEnum.task:
-              if (taskBtn) this.onTaskButtonToggled(true);
+              if (taskBtn) this.onTaskButtonToggled(true, opts.config);
               break;
             case LookupNoteTypeEnum.none:
               break;
@@ -518,7 +518,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
   }) {
     quickPick.nextPicker = async (opts: { note: NoteProps }) => {
       const { note } = opts;
-      const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+      const currentVault = await PickerUtilsV2.getVaultForOpenEditor();
       const vaultSelection = await PickerUtilsV2.getOrPromptVaultForNewNote({
         vault: currentVault,
         fname: note.fname,
@@ -787,7 +787,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           const fsPath = location.uri;
           const fname = NoteUtils.normalizeFname(Utils.basename(fsPath));
 
-          const vault = wsUtils.getVaultFromUri(location.uri);
+          const vault = await wsUtils.getVaultFromUri(location.uri);
           const noteToUpdate = (
             await engine.findNotes({
               fname,
@@ -843,7 +843,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
     switch (selectionType) {
       case "selectionExtract": {
         if (!_.isUndefined(document)) {
-          const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
+          const lookupConfig = ConfigUtils.getCommands(await ws.config).lookup;
           const noteLookupConfig = lookupConfig.note;
           const leaveTrace = noteLookupConfig.leaveTrace || false;
 
@@ -851,12 +851,13 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           await this.updateBacklinksToAnchorsInSelection({
             selection,
             destNote: note,
-            config: ws.config,
+            config: await ws.config,
           });
 
           const body = note.body + "\n\n" + document.getText(range).trim();
           note.body = body;
-          const { wsRoot, vaults } = ext.getDWorkspace();
+          const { wsRoot } = ext.getDWorkspace();
+          const vaults = await ext.getDWorkspace().vaults;
           // don't delete if original file is not in workspace
           if (
             !WorkspaceUtils.isPathInWorkspace({
@@ -871,7 +872,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
             const editor = VSCodeUtils.getActiveTextEditor();
             const link = NoteUtils.createWikiLink({
               note,
-              useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(
+              useVaultPrefix: await DendronClientUtilsV2.shouldUseVaultPrefix(
                 ExtensionProvider.getEngine()
               ),
               alias: { mode: "title" },

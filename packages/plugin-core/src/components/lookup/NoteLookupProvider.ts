@@ -375,34 +375,39 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         if (results && !results.namespace) {
           const { schema, schemaModule } = results;
           const dirName = queryUpToLastDot;
-          const candidates = schema.children
-            .map((ent) => {
-              const mschema = schemaModule.schemas[ent];
-              if (
-                SchemaUtils.hasSimplePattern(mschema, {
-                  isNotNamespace: true,
-                })
-              ) {
-                const pattern = SchemaUtils.getPattern(mschema, {
-                  isNotNamespace: true,
-                });
-                const fname = [dirName, pattern].join(".");
-                return NoteUtils.fromSchema({
-                  schemaModule,
-                  schemaId: ent,
-                  fname,
-                  vault: PickerUtilsV2.getVaultForOpenEditor(),
-                });
-              }
-              return;
-            })
-            .filter(Boolean) as NoteProps[];
+          const candidates = (
+            await Promise.all(
+              schema.children.map(async (ent) => {
+                const mschema = schemaModule.schemas[ent];
+                if (
+                  SchemaUtils.hasSimplePattern(mschema, {
+                    isNotNamespace: true,
+                  })
+                ) {
+                  const pattern = SchemaUtils.getPattern(mschema, {
+                    isNotNamespace: true,
+                  });
+                  const fname = [dirName, pattern].join(".");
+                  return NoteUtils.fromSchema({
+                    schemaModule,
+                    schemaId: ent,
+                    fname,
+                    vault: await PickerUtilsV2.getVaultForOpenEditor(),
+                  });
+                }
+                return;
+              })
+            )
+          ).filter((ent): ent is NoteProps => ent !== undefined);
+
           let candidatesToAdd = _.differenceBy(
             candidates,
             updatedItems,
             (ent) => ent.fname
           );
-          const { wsRoot, vaults } = this.extension.getDWorkspace();
+          const ws = this.extension.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
 
           candidatesToAdd = sortBySimilarity(
             candidatesToAdd,
@@ -477,7 +482,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           newItems.push(entryCreateNewWithTemplate);
         }
 
-        const bubbleUpCreateNew = ConfigUtils.getLookup(ws.config).note
+        const bubbleUpCreateNew = ConfigUtils.getLookup(await ws.config).note
           .bubbleUpCreateNew;
         if (
           shouldBubbleUpCreateNew({

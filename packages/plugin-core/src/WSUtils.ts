@@ -78,8 +78,10 @@ export class WSUtils {
   /**
     @deprecated. Use same method in {@link WSUtilsV2}
   **/
-  static getVaultFromPath(fsPath: string) {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  static async getVaultFromPath(fsPath: string) {
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     return VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
@@ -95,7 +97,7 @@ export class WSUtils {
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
-      vault = this.getVaultFromPath(fsPath);
+      vault = await this.getVaultFromPath(fsPath);
     } catch (err) {
       // No vault
       return undefined;

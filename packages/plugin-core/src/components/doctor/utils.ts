@@ -26,7 +26,9 @@ export class DoctorUtils {
     if (document.uri.scheme === "git") return;
 
     const extension = ExtensionProvider.getExtension();
-    const { vaults, wsRoot, engine } = extension.getDWorkspace();
+    const ws = extension.getDWorkspace();
+    const { wsRoot, engine } = ws;
+    const vaults = await ws.vaults;
     let vault;
     try {
       vault = VaultUtils.getVaultByFilePath({

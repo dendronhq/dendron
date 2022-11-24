@@ -94,7 +94,7 @@ export class SchemaLookupCommand extends BaseCommand<
     Logger.info({ ctx, opts, msg: "enter" });
     const copts: CommandRunOpts = opts || {};
     const extension = ExtensionProvider.getExtension();
-    this._controller = extension.lookupControllerFactory.create({
+    this._controller = await extension.lookupControllerFactory.create({
       nodeType: "schema",
     });
     this._provider = extension.schemaLookupProviderFactory.create(
@@ -230,7 +230,7 @@ export class SchemaLookupCommand extends BaseCommand<
     const { engine } = ws;
     const vault: DVault = picker.vault
       ? picker.vault
-      : PickerUtilsV2.getVaultForOpenEditor();
+      : await PickerUtilsV2.getVaultForOpenEditor();
     const nodeSchemaModuleNew: SchemaModuleProps =
       SchemaUtils.createModuleProps({
         fname,

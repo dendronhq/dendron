@@ -112,7 +112,9 @@ export class FileWatcher {
 
     try {
       this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,
@@ -180,7 +182,9 @@ export class FileWatcher {
       return;
     }
     try {
-      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,

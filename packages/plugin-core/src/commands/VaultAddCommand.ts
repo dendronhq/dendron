@@ -219,7 +219,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     const sourceType = sourceTypeSelected.label;
 
-    const { config } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const config = await ws.config;
     if (config.dev?.enableSelfContainedVaults) {
       return this.gatherVaultSelfContained(sourceType);
     } else {

@@ -32,7 +32,7 @@ if [ $SCRIPT_EXT_TYPE = "nightly" ]; then
   EXT_TYPE=nightly
 fi
 if [ $SCRIPT_EXT_TYPE = "enterprise" ]; then
-  EXT_TARGET=enterprise
+  EXT_TYPE=enterprise
 fi
 
 if [ -z $FAST ]; then

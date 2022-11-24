@@ -28,6 +28,7 @@ import {
   VaultSelectionMode,
 } from "../../../components/lookup/types";
 import { LookupQuickPickView } from "./LookupQuickPickView";
+import { NoteLookupUtilsWeb } from "../../utils/NoteLookupUtilsWeb";
 
 const CREATE_NEW_LABEL = "Create New";
 
@@ -51,7 +52,8 @@ export class LookupController {
     @inject("ReducedDEngine") private _engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[],
     @inject("AutoCompleteEvent") private tabAutoCompleteEvent: Event<void>,
-    private wsUtils: WSUtilsWeb
+    private wsUtils: WSUtilsWeb,
+    private lookupUtils: NoteLookupUtilsWeb
   ) {
     this.viewModel = {
       selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
@@ -84,7 +86,7 @@ export class LookupController {
     ];
     const qp = this.createQuickPick({
       title: "Lookup Note",
-      buttons,
+      buttons: opts.buttons || buttons,
       provider: opts.provider,
       initialValue,
     });
@@ -99,7 +101,12 @@ export class LookupController {
         this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
           switch (prevValue) {
             case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.onJournalButtonToggled(false);
+              if (journalBtn)
+                this.lookupUtils.onJournalButtonToggled(
+                  false,
+                  qp,
+                  initialValue
+                );
               break;
             default:
               break;
@@ -107,7 +114,7 @@ export class LookupController {
 
           switch (newValue) {
             case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.onJournalButtonToggled(true);
+              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
               break;
             case LookupNoteTypeEnum.none:
               break;
@@ -233,10 +240,9 @@ export class LookupController {
       const modifiedItems = this.addCreateNewOptionIfNecessary(newInput, items);
       qp.items = modifiedItems;
     });
-
+    qp.ignoreFocusOut = true;
     return qp as DendronWebQuickPick<NoteQuickInputV2>;
   }
-  onJournalButtonToggled(arg0: boolean) {}
 
   private getInitialValueBasedOnActiveNote() {
     const uri = vscode.window.activeTextEditor?.document.uri;

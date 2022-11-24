@@ -5,7 +5,6 @@ dev:
   enableSelfContainedVaults: true
   enableEngineV3: true
   enableExperimentalInlineNoteRef: true
-  useSqlite: true
 commands:
   lookup:
     note:

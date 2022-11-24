@@ -5,7 +5,6 @@ import {
   NoteUtils,
   VaultUtils,
   ConfigService,
-  URI,
 } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
@@ -18,7 +17,6 @@ import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
 import { SyncCommand } from "../../commands/Sync";
-import { getExtension } from "../../workspace";
 import { expect } from "../testUtilsv2";
 import {
   describeSingleWS,

@@ -238,7 +238,7 @@ export async function setupLegacyWorkspace(
   // update config
   let config = DConfig.getOrCreate(wsRoot);
   if (isNotUndefined(copts.modConfigCb)) {
-    config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+    config = await TestConfigUtils.withConfig(copts.modConfigCb);
   }
   await DConfig.writeConfig({ wsRoot, config });
 
@@ -327,7 +327,7 @@ export async function setupLegacyWorkspaceMulti(
     config = configReadResult.value;
   }
   if (isNotUndefined(copts.modConfigCb)) {
-    config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+    config = await TestConfigUtils.withConfig(copts.modConfigCb);
   }
   ConfigUtils.setVaults(config, vaults);
   await ConfigService.instance().writeConfig(config);

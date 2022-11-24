@@ -4,6 +4,7 @@ import {
   BulkGetNoteResp,
   BulkWriteNotesOpts,
   BulkWriteNotesResp,
+  ConfigService,
   DeleteNoteResp,
   DendronAPI,
   DEngineClient,
@@ -52,7 +53,7 @@ export class EngineAPIService
   private _engineEventEmitter: EngineEventEmitter;
   private _trustedWorkspace: boolean = true;
 
-  static createEngine({
+  static async createEngine({
     port,
     enableWorkspaceTrust,
     vaults,
@@ -62,7 +63,7 @@ export class EngineAPIService
     enableWorkspaceTrust?: boolean | undefined;
     vaults: DVault[];
     wsRoot: string;
-  }): EngineAPIService {
+  }): Promise<EngineAPIService> {
     const history = HistoryService.instance();
 
     const api = new DendronAPI({
@@ -72,11 +73,18 @@ export class EngineAPIService
       apiPath: "api",
     });
 
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+
     const newClientBase = new DendronEngineClient({
       api,
       vaults,
       ws: wsRoot,
       history,
+      config,
     });
 
     const newSvc = new EngineAPIService({

@@ -1,4 +1,6 @@
 import {
+  ConfigService,
+  DendronConfig,
   DNodeUtils,
   DVault,
   FOLDERS,
@@ -478,6 +480,11 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           //notes in same level with note
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
+          const configReadResult = await ConfigService.instance().readConfig();
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
           const proc = MDUtilsV5.procRemarkFull({
             noteToRender: note,
             fname: note.fname,
@@ -557,7 +564,11 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine.vaults
     );
 
-    const rawConfig = DConfig.readConfigSync(engine.wsRoot);
+    const configReadRawResult = await ConfigService.instance().readRaw();
+    if (configReadRawResult.isErr()) {
+      throw configReadRawResult.error;
+    }
+    const rawConfig = configReadRawResult.value as DendronConfig;
 
     let remark = MDUtilsV5.procRemarkFull({
       noteToRender: note,

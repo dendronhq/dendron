@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   ConfigUtils,
   DendronASTDest,
   DendronConfig,
@@ -13,7 +14,6 @@ import {
   PreSetupHookFunction,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/common-server";
 import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { TestConfigUtils } from "../../../config";
 import { runEngineTestV5 } from "../../../engine";
@@ -450,8 +450,10 @@ describe("noteRefV2", () => {
 
     const REGULAR_CASE = createProcTests({
       name: "regular",
-      setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
-        const config = DConfig.readConfigSync(wsRoot);
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const noteToRender = (
           await engine.findNotes({ fname: "foo", vault: vaults[0] })
         )[0];
@@ -569,8 +571,10 @@ describe("noteRefV2", () => {
     const WITH_FM_TITLE = createProcTests({
       name: "WITH_FM_TITLE",
       setupFunc: async (opts) => {
-        const { engine, wsRoot, vaults } = opts;
-        const config = DConfig.readConfigSync(wsRoot);
+        const { engine, vaults } = opts;
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const configOverride: DendronConfig = {
           ...config,
           publishing: {
@@ -598,8 +602,10 @@ describe("noteRefV2", () => {
     const WITH_NOTE_LINK_TITLE = createProcTests({
       name: "WITH_NOTE_LINK_TITLE",
       setupFunc: async (opts) => {
-        const { engine, wsRoot, vaults } = opts;
-        const config = DConfig.readConfigSync(wsRoot);
+        const { engine, vaults } = opts;
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const configOverride: DendronConfig = {
           ...config,
           publishing: {
@@ -936,8 +942,10 @@ describe("noteRefV2", () => {
 
     const RECURSIVE_TEST_CASES = createProcTests({
       name: "recursive",
-      setupFunc: async ({ wsRoot, extra, vaults, engine }) => {
-        const config = DConfig.readConfigSync(wsRoot);
+      setupFunc: async ({ extra, vaults, engine }) => {
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
@@ -1017,7 +1025,9 @@ describe("noteRefV2", () => {
       name: "wildcard",
       setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
         const note = (await engine.getNote("id.journal")).data!;
-        const config = DConfig.readConfigSync(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
@@ -1142,9 +1152,11 @@ describe("noteRefV2", () => {
     });
     const XVAULT_CASE = createProcTests({
       name: "XVAULT_CASE",
-      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
+      setupFunc: async ({ engine, extra, vaults }) => {
         const note = (await engine.getNote("one")).data!;
-        const config = DConfig.readConfigSync(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const noteCacheForRenderDict = await getParsingDependencyDicts(
           note,
           engine,
@@ -1215,9 +1227,11 @@ describe("noteRefV2", () => {
 
     const WITH_PUBLISHING = createProcTests({
       name: "WITH_PUBLISHING",
-      setupFunc: async ({ engine, wsRoot, extra, vaults }) => {
+      setupFunc: async ({ engine, extra, vaults }) => {
         const note = (await engine.getNote("foo")).data!;
-        const config = DConfig.readConfigSync(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const noteToRender = (
           await engine.findNotes({ fname: "root", vault: vaults[0] })
         )[0];
@@ -1263,13 +1277,10 @@ describe("noteRefV2", () => {
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
         const vault1 = vaults[0];
-        TestConfigUtils.withConfig(
-          (config) => {
-            ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
-            return config;
-          },
-          { wsRoot }
-        );
+        await TestConfigUtils.withConfig((config) => {
+          ConfigUtils.setPublishProp(config, "siteHierarchies", ["foo"]);
+          return config;
+        });
         await NoteTestUtilsV4.createNote({
           fname: "foo",
           vault: vault1,
@@ -2618,21 +2629,14 @@ describe("noteRefV2", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(
-                config,
-                "assetsPrefix",
-                "/some-prefix"
-              );
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
-          );
+          await TestConfigUtils.withConfig((config) => {
+            ConfigUtils.setPublishProp(config, "assetsPrefix", "/some-prefix");
+            config.dev = {
+              ...config.dev,
+              enableExperimentalIFrameNoteRef: true,
+            };
+            return config;
+          });
         },
       })
     );
@@ -2692,17 +2696,14 @@ describe("noteRefV2", () => {
             wsRoot: opts.wsRoot,
             props: { id: "alpha-id" },
           });
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
-              config.dev = {
-                ...config.dev,
-                enableExperimentalIFrameNoteRef: true,
-              };
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
-          );
+          await TestConfigUtils.withConfig((config) => {
+            ConfigUtils.setPublishProp(config, "enablePrettyLinks", true);
+            config.dev = {
+              ...config.dev,
+              enableExperimentalIFrameNoteRef: true,
+            };
+            return config;
+          });
         },
       })
     );

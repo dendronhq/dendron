@@ -3,8 +3,9 @@ import {
   DendronConfig,
   VaultUtils,
   WorkspaceOpts,
+  ConfigService,
 } from "@dendronhq/common-all";
-import { DConfig, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import {
   FileTestUtils,
   NoteTestUtilsV4,
@@ -31,7 +32,7 @@ const setupPod = async (setupOpts: {
   publishConfigOverride?: Partial<DendronConfig["publishing"]>;
 }) => {
   const { opts, fname, podConfigOpts } = setupOpts;
-  const config = DConfig.readConfigSync(opts.engine.wsRoot);
+  const config = (await ConfigService.instance().readConfig())._unsafeUnwrap();
   if (config.publishing) {
     config.publishing.siteUrl = "https://foo.com";
   }

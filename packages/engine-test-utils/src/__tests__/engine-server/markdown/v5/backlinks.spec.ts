@@ -42,10 +42,10 @@ describe("GIVEN dendron.yml default", () => {
   describe("WHEN enableBackLinks = false", () => {
     const setup = async (opts: WorkspaceOpts) => {
       await ENGINE_HOOKS.setupLinks(opts);
-      TestConfigUtils.withConfig((config) => {
+      await TestConfigUtils.withConfig((config) => {
         config.publishing!.enableBackLinks = false;
         return config;
-      }, opts);
+      });
     };
 
     describe("AND WHEN no note override", () => {
@@ -170,23 +170,12 @@ describe("GIVEN dendron.yml default", () => {
           preSetupHook: async (opts) => {
             const { wsRoot } = opts;
             await ENGINE_HOOKS.setupLinks(opts);
-            TestConfigUtils.withConfig(
-              (config) => {
-                ConfigUtils.setPublishProp(config, "siteHierarchies", [
-                  "alpha",
-                ]);
-                ConfigUtils.setPublishProp(
-                  config,
-                  "siteUrl",
-                  "https://foo.com"
-                );
-                ConfigUtils.setPublishProp(config, "siteIndex", "alpha");
-                return config;
-              },
-              {
-                wsRoot,
-              }
-            );
+            await TestConfigUtils.withConfig((config) => {
+              ConfigUtils.setPublishProp(config, "siteHierarchies", ["alpha"]);
+              ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
+              ConfigUtils.setPublishProp(config, "siteIndex", "alpha");
+              return config;
+            });
           },
         })
       );
@@ -227,17 +216,14 @@ describe("GIVEN dendron.yml default", () => {
         preSetupHook: async (opts: any) => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
 
-          TestConfigUtils.withConfig(
-            (config) => {
-              const vaults = ConfigUtils.getVaults(config);
-              const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
-              bvault!.visibility = DVaultVisibility.PRIVATE;
-              const defaultConfig = ConfigUtils.genDefaultConfig();
-              ConfigUtils.setVaults(defaultConfig, vaults);
-              return defaultConfig;
-            },
-            { wsRoot: opts.wsRoot }
-          );
+          await TestConfigUtils.withConfig((config) => {
+            const vaults = ConfigUtils.getVaults(config);
+            const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");
+            bvault!.visibility = DVaultVisibility.PRIVATE;
+            const defaultConfig = ConfigUtils.genDefaultConfig();
+            ConfigUtils.setVaults(defaultConfig, vaults);
+            return defaultConfig;
+          });
 
           const { wsRoot, vaults } = opts;
           await NoteTestUtilsV4.createNote({

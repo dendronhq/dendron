@@ -58,17 +58,10 @@ describe("GIVEN image link", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(
-                config,
-                "assetsPrefix",
-                "/some-prefix"
-              );
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
-          );
+          await TestConfigUtils.withConfig((config) => {
+            ConfigUtils.setPublishProp(config, "assetsPrefix", "/some-prefix");
+            return config;
+          });
         },
       })
     );
@@ -97,17 +90,10 @@ describe("GIVEN image link", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          TestConfigUtils.withConfig(
-            (config) => {
-              ConfigUtils.setPublishProp(
-                config,
-                "assetsPrefix",
-                "/some-prefix"
-              );
-              return config;
-            },
-            { wsRoot: opts.wsRoot }
-          );
+          await TestConfigUtils.withConfig((config) => {
+            ConfigUtils.setPublishProp(config, "assetsPrefix", "/some-prefix");
+            return config;
+          });
         },
       })
     );

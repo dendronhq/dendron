@@ -1,15 +1,11 @@
 import {
+  ConfigService,
   ConfigUtils,
   ErrorUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import {
-  BackupService,
-  DConfig,
-  file2Note,
-  tmpDir,
-} from "@dendronhq/common-server";
+import { BackupService, file2Note, tmpDir } from "@dendronhq/common-server";
 import { DoctorActionsEnum } from "@dendronhq/engine-server";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DoctorCLICommand, DoctorCLICommandOpts } from "@dendronhq/dendron-cli";
@@ -787,7 +783,7 @@ describe("GIVEN fixRemoteVaults", () => {
               engine,
               action,
             });
-            const configAfter = TestConfigUtils.getConfig({ wsRoot });
+            const configAfter = await TestConfigUtils.getConfig();
             const vaultsAfter = ConfigUtils.getVaults(configAfter);
             const vaultAfter = VaultUtils.getVaultByName({
               vaults: vaultsAfter,
@@ -816,7 +812,7 @@ describe("GIVEN fixRemoteVaults", () => {
 
           await runDoctor({ action, engine, wsRoot });
 
-          const configAfter = TestConfigUtils.getConfig({ wsRoot });
+          const configAfter = await TestConfigUtils.getConfig();
           const vaultsAfter = ConfigUtils.getVaults(configAfter);
           const vaultAfter = VaultUtils.getVaultByName({
             vaults: vaultsAfter,
@@ -842,7 +838,7 @@ describe("GIVEN fixRemoteVaults", () => {
 
           await runDoctor({ action, engine, wsRoot });
 
-          const configAfter = TestConfigUtils.getConfig({ wsRoot });
+          const configAfter = await TestConfigUtils.getConfig();
           const vaultsAfter = ConfigUtils.getVaults(configAfter);
           const vaultAfter = VaultUtils.getVaultByName({
             vaults: vaultsAfter,
@@ -862,7 +858,9 @@ describe("GIVEN addMissingDefaultConfigs", () => {
     test("THEN adds missing default and create backup", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(rawConfigBefore.workspace?.workspaceVaultSyncMode).toBeFalsy();
           const out = await runDoctor({
             wsRoot,
@@ -872,7 +870,9 @@ describe("GIVEN addMissingDefaultConfigs", () => {
           expect(out.resp.backupPath).toBeTruthy();
           const backupPathExists = await fs.pathExists(out.resp.backupPath);
           expect(backupPathExists).toBeTruthy();
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           const defaultConfig = ConfigUtils.genDefaultConfig();
           expect(rawConfig.workspace?.workspaceVaultSyncMode).toEqual(
             defaultConfig.workspace.workspaceVaultSyncMode
@@ -894,7 +894,9 @@ describe("GIVEN addMissingDefaultConfigs", () => {
     test("THEN doesn't add missing default and backup is not created", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(
             rawConfigBefore.workspace?.workspaceVaultSyncMode
           ).toBeTruthy();
@@ -904,7 +906,9 @@ describe("GIVEN addMissingDefaultConfigs", () => {
             action,
           });
           expect(out).toEqual({ exit: true });
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(rawConfigBefore).toEqual(rawConfig);
 
           const backupService = new BackupService({ wsRoot });
@@ -931,7 +935,9 @@ describe("GIVEN removeDeprecatedConfigs", () => {
     test("THEN removes deprecated key and create backup", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect((rawConfigBefore.dev as any).enableWebUI).toBeTruthy();
           const out = await runDoctor({
             wsRoot,
@@ -941,7 +947,9 @@ describe("GIVEN removeDeprecatedConfigs", () => {
           expect(out.resp.backupPath).toBeTruthy();
           const backupPathExists = await fs.pathExists(out.resp.backupPath);
           expect(backupPathExists).toBeTruthy();
-          const rawConfigAfter = DConfig.getRaw(wsRoot);
+          const rawConfigAfter = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(_.has(rawConfigAfter.dev, "enableWebUI")).toBeFalsy();
         },
         {
@@ -960,7 +968,9 @@ describe("GIVEN removeDeprecatedConfigs", () => {
     test("THEN config doesn't change and backup is not created.", async () => {
       await runEngineTestV5(
         async ({ wsRoot, engine }) => {
-          const rawConfigBefore = DConfig.getRaw(wsRoot);
+          const rawConfigBefore = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(_.has(rawConfigBefore.dev, "enableWebUI")).toBeFalsy();
           const out = await runDoctor({
             wsRoot,
@@ -968,7 +978,9 @@ describe("GIVEN removeDeprecatedConfigs", () => {
             action,
           });
           expect(out).toEqual({ exit: true });
-          const rawConfig = DConfig.getRaw(wsRoot);
+          const rawConfig = (
+            await ConfigService.instance().readRaw()
+          )._unsafeUnwrap();
           expect(rawConfigBefore).toEqual(rawConfig);
 
           const backupService = new BackupService({ wsRoot });

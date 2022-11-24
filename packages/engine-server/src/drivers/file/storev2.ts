@@ -53,9 +53,9 @@ import {
   VaultUtils,
   WriteNoteResp,
   WriteSchemaResp,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   DLogger,
   file2Note,
   getAllFiles,
@@ -1200,12 +1200,17 @@ export class FileStorage implements DStore {
       msg: "enter",
       note: NoteUtils.toLogObj(note),
     });
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     // Update links/anchors based on note body
     EngineUtils.refreshNoteLinksAndAnchors({
       note,
       engine: this.engine,
-      config: DConfig.readConfigSync(this.wsRoot),
+      config,
     });
 
     let changed: NoteChangeEntry[] = [];

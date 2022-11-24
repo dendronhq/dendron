@@ -9,8 +9,9 @@ import {
   WorkspaceType,
   ConfigUtils,
   SeedVault,
+  ConfigService,
 } from "@dendronhq/common-all";
-import { DConfig, simpleGit, writeYAML } from "@dendronhq/common-server";
+import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -124,7 +125,11 @@ export class SeedService {
     onUpdatedWorkspace?: () => Promise<void>;
   }) {
     const ws = new WorkspaceService({ wsRoot });
-    const config = DConfig.readConfigSync(wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const id = SeedUtils.getSeedId({ ...seed });
 
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};
@@ -184,7 +189,7 @@ export class SeedService {
           wsRoot,
           createCodeWorkspace: true,
         });
-        const config = ws.config;
+        const config = await ws.config;
         await ws.createVault({
           vault: { fsPath: "vault" },
           updateWorkspace: true,
@@ -279,7 +284,7 @@ export class SeedService {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
 
     // remove seed entry
-    const config = ws.config;
+    const config = await ws.config;
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};
     delete seeds[SeedUtils.getSeedId(seed)];
     ConfigUtils.setWorkspaceProp(config, "seeds", seeds);

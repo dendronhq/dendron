@@ -13,6 +13,7 @@ import {
   ResponseUtil,
   RespV2,
   VaultUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
   createDisposableLogger,
@@ -73,7 +74,15 @@ export class MarkdownExportPodV2
     const { logger, dispose } = createDisposableLogger("MarkdownExportV2");
     const { destination, exportScope } = this._config;
     const ctx = "exportNotes";
-    const config = { ...DConfig.readConfigSync(this._engine.wsRoot) };
+
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      return {
+        data: {},
+        error: configReadResult.error,
+      };
+    }
+    const config = configReadResult.value;
 
     if (destination === "clipboard") {
       const exportedNotes = await this.renderNote({ note: notes[0], config });

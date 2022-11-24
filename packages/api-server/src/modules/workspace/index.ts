@@ -1,5 +1,6 @@
 import {
   ConfigService,
+  DEngineInitPayload,
   DEngineInitResp,
   error2PlainObject,
   ERROR_SEVERITY,
@@ -16,7 +17,7 @@ import {
 } from "@dendronhq/engine-server";
 import { getLogger } from "../../core";
 import { getWSEngine, putWS } from "../../utils";
-import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { homedir } from "os";
 
 export class WorkspaceController {
@@ -36,7 +37,17 @@ export class WorkspaceController {
     logger.info({ ctx, msg: "enter", uri });
     // until we roll out engine v3 as default, we can't remove this line.
     // TODO: remove once `enableEngineV3` is deprecated.
-    const config = DConfig.readConfigSync(uri);
+
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      logger.error({
+        ctx,
+        msg: "failed reading config",
+        error: configReadResult.error,
+      });
+      return { data: {} as DEngineInitPayload, error: configReadResult.error };
+    }
+    const config = configReadResult.value;
     let engine;
     if (config.dev?.enableEngineV3) {
       // possibly the earliest point we can instantiate `ConfigService`
@@ -51,15 +62,11 @@ export class WorkspaceController {
           logger,
         });
       } else {
-        engine = DendronEngineV3.create({
+        engine = await DendronEngineV3.create({
           wsRoot: uri,
           logger,
         });
       }
-      engine = DendronEngineV3.create({
-        wsRoot: uri,
-        logger,
-      });
     } else {
       engine = DendronEngineV2.create({
         wsRoot: uri,
@@ -96,13 +103,22 @@ export class WorkspaceController {
   async sync({ ws }: WorkspaceSyncRequest): Promise<DEngineInitResp> {
     const engine = await getWSEngine({ ws });
     const notes = await engine.findNotes({ excludeStub: false });
+    const configReadResult = await ConfigService.instance().readConfig();
+    const data = {
+      notes: NoteDictsUtils.createNotePropsByIdDict(notes),
+      vaults: engine.vaults,
+      wsRoot: engine.wsRoot,
+    } as DEngineInitPayload;
+    if (configReadResult.isErr()) {
+      return {
+        data,
+        error: configReadResult.error,
+      };
+    }
+    data.config = configReadResult.value;
+
     return {
-      data: {
-        notes: NoteDictsUtils.createNotePropsByIdDict(notes),
-        config: DConfig.readConfigSync(engine.wsRoot),
-        vaults: engine.vaults,
-        wsRoot: engine.wsRoot,
-      },
+      data,
     };
   }
 }

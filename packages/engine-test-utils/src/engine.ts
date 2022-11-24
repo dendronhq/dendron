@@ -84,7 +84,7 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
  */
 export async function createEngineV3FromEngine(opts: WorkspaceOpts) {
   return {
-    engine: createEngineV3(opts) as DEngineClient,
+    engine: await createEngineV3(opts),
     port: undefined,
     server: undefined,
   };
@@ -161,7 +161,7 @@ export async function setupWS(opts: {
   ws.createConfig();
   // create dendron.code-workspace
   WorkspaceConfig.write(wsRoot, opts.vaults);
-  let config = ws.config;
+  let config = await ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
       await ws.createVault({ vault, config, updateConfig: false });

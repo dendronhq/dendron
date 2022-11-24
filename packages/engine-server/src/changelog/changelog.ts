@@ -1,5 +1,8 @@
-import { asyncLoopOneAtATime, DEngineClient } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
+import {
+  asyncLoopOneAtATime,
+  ConfigService,
+  DEngineClient,
+} from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
 import fs from "fs-extra";
@@ -45,8 +48,12 @@ async function canShowDiff(opts: {
   filePath: string;
 }): Promise<boolean> {
   const { engine, filePath } = opts;
-  const { vaults, wsRoot } = engine;
-  const config = DConfig.readConfigSync(wsRoot);
+  const { vaults } = engine;
+  const configReadResult = await ConfigService.instance().readConfig();
+  if (configReadResult.isErr()) {
+    throw configReadResult.error;
+  }
+  const config = configReadResult.value;
   const canPublishChecks = await Promise.all(
     vaults.map(async (vault) => {
       if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {

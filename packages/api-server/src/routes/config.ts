@@ -1,4 +1,3 @@
-import { WorkspaceRequest } from "@dendronhq/common-all";
 import { ExpressUtils } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
 import asyncHandler from "express-async-handler";
@@ -11,11 +10,9 @@ const ctx = "config";
 
 router.get(
   "/get",
-  asyncHandler(async (req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     L.info({ ctx, msg: "get:enter" });
-    const resp = await ConfigController.instance().get(
-      req.query as WorkspaceRequest
-    );
+    const resp = await ConfigController.instance().get();
     L.info({ ctx, msg: "get:ext", resp });
     ExpressUtils.setResponse(res, resp);
   })

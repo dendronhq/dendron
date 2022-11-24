@@ -57,9 +57,9 @@ describe("GIVEN BackupService", () => {
             const root = backupService.backupRoot;
             expect(fs.existsSync(root)).toBeFalsy();
 
-            const configPath = ConfigService.instance()
-              .configPath(URI.file(wsRoot))
-              .toString();
+            const configPath = ConfigService.instance().configPath(
+              URI.file(wsRoot)
+            ).fsPath;
             const backupResp = await backupService.backup({
               key: BackupKeyEnum.config,
               pathToBackup: configPath,

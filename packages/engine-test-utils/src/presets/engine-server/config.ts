@@ -30,7 +30,7 @@ const GET = {
     return [
       {
         actual: config,
-        expected: genDefaultConfig(),
+        expected: ConfigUtils.genLatestConfig(),
       },
     ];
   }),

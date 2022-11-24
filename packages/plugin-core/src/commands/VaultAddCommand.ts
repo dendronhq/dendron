@@ -384,7 +384,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         )
       ) {
         const configReadResult = await ConfigService.instance().readConfig(
-          URI.file(opts.wsRoot)
+          URI.file(vaultRootPath)
         );
         if (configReadResult.isErr()) {
           throw configReadResult.error;

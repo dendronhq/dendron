@@ -13,7 +13,6 @@ import {
   DConfig,
   LocalConfigScope,
   note2File,
-  readYAML,
   schemaModuleOpts2File,
   writeYAML,
 } from "@dendronhq/common-server";
@@ -195,7 +194,9 @@ suite("GIVEN RemoveVaultCommand", function () {
           expect(config.workspace.vaults.length).toEqual(4);
           // before remove, dendron.yml has 3 vaults
           const preRunConfig = (
-            await ConfigService.instance().readConfig(URI.file(wsRoot))
+            await ConfigService.instance().readConfig(URI.file(wsRoot), {
+              applyOverride: false,
+            })
           )._unsafeUnwrap();
           expect(preRunConfig.workspace.vaults.length).toEqual(3);
 
@@ -208,7 +209,9 @@ suite("GIVEN RemoveVaultCommand", function () {
 
           // after remove, we have 2 vaults in dendron.yml
           const postRunConfig = (
-            await ConfigService.instance().readConfig(URI.file(wsRoot))
+            await ConfigService.instance().readConfig(URI.file(wsRoot), {
+              applyOverride: false,
+            })
           )._unsafeUnwrap();
           expect(postRunConfig.workspace.vaults.length).toEqual(2);
 
@@ -310,9 +313,6 @@ suite("GIVEN RemoveVaultCommand", function () {
   describeSingleWS("WHEN there's only one vault left after remove", {}, () => {
     test("THEN duplicateNoteBehavior is omitted", async () => {
       const { wsRoot } = ExtensionProvider.getDWorkspace();
-      const configPath = ConfigService.instance()
-        .configPath(URI.file(wsRoot))
-        .toString();
 
       // add a second vault
       const vault2 = "vault2";
@@ -320,7 +320,9 @@ suite("GIVEN RemoveVaultCommand", function () {
       stubVaultInput({ sourceType: "local", sourcePath: vault2 });
       await new VaultAddCommand().run();
 
-      const config = readYAML(configPath) as DendronConfig;
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       // confirm that duplicateNoteBehavior option exists
       const publishingConfig = ConfigUtils.getPublishing(config);
       expect(publishingConfig.duplicateNoteBehavior).toBeTruthy();
@@ -332,7 +334,9 @@ suite("GIVEN RemoveVaultCommand", function () {
       };
       await new RemoveVaultCommand(ExtensionProvider.getExtension()).run();
 
-      const configNew = readYAML(configPath) as DendronConfig;
+      const configNew = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       // confirm that duplicateNoteBehavior setting is gone
       const publishingConfigNew = ConfigUtils.getPublishing(configNew);
       expect(publishingConfigNew.duplicateNoteBehavior).toBeFalsy();

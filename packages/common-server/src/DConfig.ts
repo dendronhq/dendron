@@ -35,6 +35,9 @@ let _dendronConfig: DendronConfig | undefined;
  * @deprecated
  */
 export class DConfig {
+  /**
+   * @deprecated
+   */
   static createSync({
     wsRoot,
     defaults,
@@ -48,10 +51,16 @@ export class DConfig {
     return config;
   }
 
+  /**
+   * @deprecated
+   */
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
+  /**
+   * @deprecated
+   */
   static configOverridePath(wsRoot: string, scope: LocalConfigScope): string {
     const configPath =
       scope === LocalConfigScope.GLOBAL ? os.homedir() : wsRoot;
@@ -59,6 +68,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * Get without filling in defaults
    * @param wsRoot
    */
@@ -71,6 +81,9 @@ export class DConfig {
     return config;
   }
 
+  /**
+   * @deprecated
+   */
   static getOrCreate(
     dendronRoot: string,
     defaults?: DeepPartial<DendronConfig>
@@ -92,15 +105,18 @@ export class DConfig {
     return config;
   }
 
+  /**
+   * @deprecated
+   */
   static getSiteIndex(sconfig: DendronPublishingConfig): string {
     const { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
 
   /**
+   * @deprecated
    * fill in defaults
    */
-
   static cleanPublishingConfig(
     config: DendronPublishingConfig
   ): CleanDendronPublishingConfig {
@@ -152,6 +168,9 @@ export class DConfig {
     };
   }
 
+  /**
+   * @deprecated
+   */
   static setCleanPublishingConfig(opts: {
     config: DendronConfig;
     cleanConfig: DendronPublishingConfig;
@@ -161,6 +180,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * See if a local config file is present
    */
   static searchLocalConfigSync(wsRoot: string): RespV3<DendronConfig> {
@@ -190,6 +210,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * Read configuration
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -221,6 +242,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * Read config and merge with local config
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -265,6 +287,9 @@ export class DConfig {
     };
   }
 
+  /**
+   * @deprecated
+   */
   static writeConfig({
     wsRoot,
     config,
@@ -277,6 +302,9 @@ export class DConfig {
     return writeYAMLAsync(configPath, config);
   }
 
+  /**
+   * @deprecated
+   */
   static writeLocalConfig({
     wsRoot,
     config,
@@ -291,6 +319,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * Sanity check local config properties
    */
   static validateLocalConfig({
@@ -315,6 +344,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated
    * Create a backup of dendron.yml with an optional custom infix string.
    * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
    * `dendron.yyyy.MM.dd.HHmmssS.foo.yml`

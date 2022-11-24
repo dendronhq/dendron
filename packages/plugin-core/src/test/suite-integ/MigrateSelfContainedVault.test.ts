@@ -17,11 +17,12 @@ import {
   FOLDERS,
   DendronConfig,
   VaultUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import { DConfig, pathForVaultRoot } from "@dendronhq/common-server";
+import { pathForVaultRoot } from "@dendronhq/common-server";
 
 function stubMigrateQuickPick(
   vaultSelect: string,
@@ -367,7 +368,9 @@ async function verifyVaultNotMigrated({
   const notesFolder = path.join(vaultFolder, FOLDERS.NOTES);
   expect(await fs.pathExists(notesFolder)).toBeFalsy();
   // and the vault should NOT be marked as self contained in the config
-  const config = DConfig.getRaw(wsRoot) as DendronConfig;
+  const config = (
+    await ConfigService.instance().readRaw()
+  )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath
   );
@@ -402,7 +405,9 @@ async function verifyVaultHasMigrated({
   // and there should be no notes outside the notes folder
   expect(await fs.pathExists(path.join(vaultFolder, "root.md"))).toBeFalsy();
   // and the vault should be marked as self contained in the config
-  const config = DConfig.getRaw(wsRoot) as DendronConfig;
+  const config = (
+    await ConfigService.instance().readRaw()
+  )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath
   );

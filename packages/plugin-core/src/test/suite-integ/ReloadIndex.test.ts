@@ -1,4 +1,4 @@
-import { DConfig, vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -10,7 +10,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { test, before } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { VaultUtils } from "@dendronhq/common-all";
+import { ConfigService, VaultUtils } from "@dendronhq/common-all";
 import { MessageItem, window } from "vscode";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -200,16 +200,17 @@ suite("GIVEN ReloadIndex", function () {
     "WHEN a self contained vault is misconfigured",
     {
       selfContained: true,
-      postSetupHook: async ({ wsRoot }) => {
-        const config = DConfig.getOrCreate(wsRoot);
-        expect(config.workspace.vaults.length).toEqual(1);
-        delete config.workspace.vaults[0].selfContained;
-        await DConfig.writeConfig({ wsRoot, config });
+      postSetupHook: async () => {
+        const vaults = (
+          await ConfigService.instance().getConfig("workspace.vaults")
+        )._unsafeUnwrap();
+        expect(vaults.length).toEqual(1);
+        delete vaults[0].selfContained;
+        await ConfigService.instance().updateConfig("workspace.vaults", vaults);
       },
     },
     () => {
       test("THEN it prompts to fix the config", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
         sinon
           .stub(window, "showWarningMessage")
           // Cast needed because sinon doesn't get which overload we're stubbing
@@ -223,7 +224,9 @@ suite("GIVEN ReloadIndex", function () {
         // Should reload window after fixing so the plugin picks up new vault config
         expect(reloadWindow.calledOnce).toBeTruthy();
         // The config should be updated to mark the vault as self contained
-        const configAfter = DConfig.getOrCreate(wsRoot);
+        const configAfter = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         expect(configAfter.workspace.vaults[0].selfContained).toBeTruthy();
       });
     }

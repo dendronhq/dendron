@@ -1,6 +1,7 @@
 import {
   ALIAS_NAME,
   assertUnreachable,
+  ConfigService,
   DEngineClient,
   DNoteAnchor,
   ERROR_SEVERITY,
@@ -15,7 +16,7 @@ import {
   USERS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, getDurationMilliseconds } from "@dendronhq/common-server";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import {
   AnchorUtils,
   DendronASTDest,
@@ -382,6 +383,11 @@ export const resolveCompletionItem = sentryReportingCallback(
     }
 
     try {
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       // Render a preview of this note
       const proc = MDUtilsV5.procRemarkFull(
         {
@@ -389,7 +395,7 @@ export const resolveCompletionItem = sentryReportingCallback(
           dest: DendronASTDest.MD_REGULAR,
           vault: note.vault,
           fname: note.fname,
-          config: DConfig.readConfigSync(engine.wsRoot, true),
+          config,
           wsRoot,
         },
         {

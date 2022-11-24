@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   ContextualUIEvents,
   DVault,
   ErrorUtils,
@@ -8,7 +9,7 @@ import {
   WorkspaceOpts,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { DConfig, file2Note } from "@dendronhq/common-server";
+import { file2Note } from "@dendronhq/common-server";
 import {
   EngineFileWatcher,
   EngineUtils,
@@ -130,11 +131,16 @@ export class FileWatcher {
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.
       }
+      const configReadResult = await ConfigService.instance().readConfig();
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       await EngineUtils.refreshNoteLinksAndAnchors({
         note,
         fmChangeOnly: false,
         engine,
-        config: DConfig.readConfigSync(engine.wsRoot),
+        config,
       });
       await engine.writeNote(note, { metaOnly: true });
     } catch (err: any) {

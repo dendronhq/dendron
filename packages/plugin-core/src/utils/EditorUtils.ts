@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   DECORATION_TYPES,
   DendronError,
   DEngineClient,
@@ -7,7 +8,6 @@ import {
   genUUIDInsecure,
   NoteProps,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { Heading } from "@dendronhq/engine-server";
 import {
   AnchorUtils,
@@ -238,6 +238,11 @@ export class EditorUtils {
     engine: DEngineClient;
   }): Promise<boolean> {
     const line = editor.document.lineAt(selection.start.line).text;
+    const configReadResult = await ConfigService.instance().readConfig();
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
@@ -245,7 +250,7 @@ export class EditorUtils {
         dest: DendronASTDest.MD_DENDRON,
         vault: note.vault,
         fname: note.fname,
-        config: DConfig.readConfigSync(engine.wsRoot),
+        config,
       }
     );
     const parsedLine = proc.parse(line);

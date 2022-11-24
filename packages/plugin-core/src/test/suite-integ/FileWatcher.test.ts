@@ -1,5 +1,4 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS_MULTI,
   TestConfigUtils,
@@ -10,6 +9,7 @@ import * as vscode from "vscode";
 import { FileWatcher } from "../../fileWatcher";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { ConfigService } from "@dendronhq/common-all";
 
 suite("GIVEN FileWatcher", function () {
   let watcher: FileWatcher;
@@ -30,12 +30,15 @@ suite("GIVEN FileWatcher", function () {
               vault: vaults[0],
               wsRoot,
             });
+            const dendronConfig = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
 
             watcher = new FileWatcher({
               workspaceOpts: {
                 wsRoot,
                 vaults,
-                dendronConfig: DConfig.readConfigSync(wsRoot),
+                dendronConfig,
               },
             });
 
@@ -76,12 +79,15 @@ suite("GIVEN FileWatcher", function () {
               vault: vaults[0],
               wsRoot,
             });
+            const dendronConfig = (
+              await ConfigService.instance().readConfig()
+            )._unsafeUnwrap();
 
             watcher = new FileWatcher({
               workspaceOpts: {
                 wsRoot,
                 vaults,
-                dendronConfig: DConfig.readConfigSync(wsRoot),
+                dendronConfig,
               },
             });
 

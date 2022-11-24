@@ -504,7 +504,7 @@ export class WorkspaceActivator {
     // show interactive elements,
     if (!opts?.skipInteractiveElements) {
       // check for duplicate config keys and prompt for a fix.
-      StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
+      await StartupUtils.showDuplicateConfigEntryMessageIfNecessary({
         ext,
       });
     }

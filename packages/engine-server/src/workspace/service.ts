@@ -1,5 +1,6 @@
 import {
   asyncLoopOneAtATime,
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   DendronConfig,
@@ -219,8 +220,7 @@ export class WorkspaceService implements Disposable, IWorkspaceService {
   }
 
   async setConfig(config: DendronConfig) {
-    const wsRoot = this.wsRoot;
-    return DConfig.writeConfig({ wsRoot, config });
+    await ConfigService.instance().writeConfig(config);
   }
 
   setCodeWorkspaceSettingsSync(config: WorkspaceSettings) {

@@ -39,6 +39,8 @@ export class ConfigureLocalOverride extends BasicCommand<
     }
 
     const dendronRoot = this._ext.getDWorkspace().wsRoot;
+
+    // TODO: add configOverridePath to ConfigService
     const configPath = DConfig.configOverridePath(dendronRoot, configScope);
 
     /* If the config file doesn't exist, create one */

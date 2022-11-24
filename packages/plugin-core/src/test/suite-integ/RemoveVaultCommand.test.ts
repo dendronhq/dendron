@@ -6,6 +6,7 @@ import {
   VaultUtils,
   NoteUtils,
   SchemaUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -66,10 +67,10 @@ function stubQuickPick(vault: DVault) {
   };
 }
 
-function getConfig() {
-  return DConfig.getRaw(
-    ExtensionProvider.getDWorkspace().wsRoot
-  ) as DendronConfig;
+async function getConfig() {
+  return (
+    await ConfigService.instance().readRaw()
+  )._unsafeUnwrap() as DendronConfig;
 }
 
 function getWorkspaceFile() {
@@ -100,7 +101,7 @@ suite("GIVEN RemoveVaultCommand", function () {
       });
       stubQuickPick({ fsPath: remoteVaultName, workspace: remoteWsName });
       await new RemoveVaultCommand(ExtensionProvider.getExtension()).run();
-      const config = getConfig();
+      const config = await getConfig();
       expect(ConfigUtils.getVaults(config)).toEqual(vaults);
       expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});
       expect(
@@ -131,7 +132,7 @@ suite("GIVEN RemoveVaultCommand", function () {
       ).toBeTruthy();
 
       // check that the config updated
-      const config = DConfig.getRaw(wsRoot) as DendronConfig;
+      const config = await getConfig();
       expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
         vaults[0].fsPath,
         vaults[2].fsPath,
@@ -166,6 +167,7 @@ suite("GIVEN RemoveVaultCommand", function () {
           await note2File({ note, vault, wsRoot });
           const schema = SchemaUtils.createRootModule({ vault });
           await schemaModuleOpts2File(schema, vault.fsPath, "root");
+          // TODO: switch to ConfigService
           const overridePath = DConfig.configOverridePath(
             wsRoot,
             LocalConfigScope.WORKSPACE
@@ -180,13 +182,15 @@ suite("GIVEN RemoveVaultCommand", function () {
       },
       () => {
         test("THEN the vault is removed from dendron.yml, and override is not merged into config", async () => {
-          const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+          const { config } = ExtensionProvider.getDWorkspace();
           const vaultToRemove = { fsPath: "vault2" };
 
           // before remove, we have 4 vaults including the overriden one
           expect(config.workspace.vaults.length).toEqual(4);
           // before remove, dendron.yml has 3 vaults
-          const preRunConfig = DConfig.readConfigSync(wsRoot);
+          const preRunConfig = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           expect(preRunConfig.workspace.vaults.length).toEqual(3);
 
           sinon.stub(VSCodeUtils, "showQuickPick").resolves({
@@ -197,7 +201,9 @@ suite("GIVEN RemoveVaultCommand", function () {
           await new RemoveVaultCommand(ExtensionProvider.getExtension()).run();
 
           // after remove, we have 2 vaults in dendron.yml
-          const postRunConfig = DConfig.readConfigSync(wsRoot);
+          const postRunConfig = (
+            await ConfigService.instance().readConfig()
+          )._unsafeUnwrap();
           expect(postRunConfig.workspace.vaults.length).toEqual(2);
 
           // after remove, we have 3 vaults including the overriden one
@@ -232,7 +238,7 @@ suite("GIVEN RemoveVaultCommand", function () {
         ).toBeTruthy();
 
         // check that the config updated
-        const config = DConfig.getRaw(wsRoot) as DendronConfig;
+        const config = await getConfig();
         expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
           vaults[0].fsPath,
           vaults[2].fsPath,
@@ -273,7 +279,7 @@ suite("GIVEN RemoveVaultCommand", function () {
         ).toBeTruthy();
 
         // check that the config updated
-        const config = DConfig.getRaw(wsRoot) as DendronConfig;
+        const config = await getConfig();
         expect(ConfigUtils.getVaults(config).map((ent) => ent.fsPath)).toEqual([
           vaults[1].fsPath,
           vaults[2].fsPath,
@@ -293,8 +299,7 @@ suite("GIVEN RemoveVaultCommand", function () {
 
   describeSingleWS("WHEN there's only one vault left after remove", {}, () => {
     test("THEN duplicateNoteBehavior is omitted", async () => {
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
-      const configPath = DConfig.configPath(wsRoot as string);
+      const configPath = ConfigService.instance().configPath.toString();
 
       // add a second vault
       const vault2 = "vault2";
@@ -322,7 +327,6 @@ suite("GIVEN RemoveVaultCommand", function () {
   });
   describeSingleWS("WHEN a published vault is removed", {}, () => {
     test("THEN the vault is removed from duplicateNoteBehavior payload", async () => {
-      const { wsRoot } = ExtensionProvider.getDWorkspace();
       // add two more vaults
 
       const vpath2 = "vault2";
@@ -336,7 +340,7 @@ suite("GIVEN RemoveVaultCommand", function () {
 
       const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
 
-      const configOrig = DConfig.getRaw(wsRoot) as DendronConfig;
+      const configOrig = await getConfig();
       // check what we are starting from.
       const origVaults = ConfigUtils.getVaults(configOrig);
       expect(origVaults.map((ent) => ent.fsPath)).toEqual([
@@ -351,7 +355,7 @@ suite("GIVEN RemoveVaultCommand", function () {
       };
       await new RemoveVaultCommand(ExtensionProvider.getExtension()).run();
 
-      const config = DConfig.getRaw(wsRoot) as DendronConfig;
+      const config = await getConfig();
 
       // check that "vault2" is gone from payload
       const publishingConfig = ConfigUtils.getPublishing(config);
@@ -372,7 +376,7 @@ suite("GIVEN RemoveVaultCommand", function () {
         await new RemoveVaultCommand(ExtensionProvider.getExtension()).run(
           args
         );
-        const config = getConfig();
+        const config = await getConfig();
         expect(ConfigUtils.getVaults(config)).toNotEqual(vaults);
         expect(
           _.find(getWorkspaceFile().folders, {
@@ -397,7 +401,7 @@ suite("GIVEN RemoveVaultCommand", function () {
         await new RemoveVaultCommand(ExtensionProvider.getExtension()).run(
           args
         );
-        const config = getConfig();
+        const config = await getConfig();
         expect(ConfigUtils.getVaults(config)).toEqual(vaults);
         expect(ConfigUtils.getWorkspace(config).workspaces).toEqual({});
         expect(

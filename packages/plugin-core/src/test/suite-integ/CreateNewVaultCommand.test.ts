@@ -1,11 +1,12 @@
 import {
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   DendronConfig,
   FOLDERS,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, readYAMLAsync, vault2Path } from "@dendronhq/common-server";
+import { readYAMLAsync, vault2Path } from "@dendronhq/common-server";
 import { checkVaults } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { before, describe } from "mocha";
@@ -110,8 +111,9 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig()
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,

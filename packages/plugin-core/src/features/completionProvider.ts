@@ -13,6 +13,7 @@ import {
   NoteProps,
   NotePropsMeta,
   TAGS_HIERARCHY,
+  URI,
   USERS_HIERARCHY,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -383,7 +384,9 @@ export const resolveCompletionItem = sentryReportingCallback(
     }
 
     try {
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }

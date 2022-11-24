@@ -8,6 +8,7 @@ import {
   NoteChangeEntry,
   NotePropsMeta,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { isInsidePath } from "@dendronhq/common-server";
@@ -157,7 +158,9 @@ export class CopyNoteLinkCommand
       doEndAnchor: false,
     });
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
     if (configReadResult.isErr()) {
       window.showErrorMessage(configReadResult.error.message);
       return;

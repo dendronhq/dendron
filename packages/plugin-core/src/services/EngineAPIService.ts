@@ -38,6 +38,7 @@ import {
   RenderNoteOpts,
   RenderNoteResp,
   SchemaModuleProps,
+  URI,
   WriteNoteResp,
   WriteSchemaResp,
 } from "@dendronhq/common-all";
@@ -73,7 +74,9 @@ export class EngineAPIService
       apiPath: "api",
     });
 
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

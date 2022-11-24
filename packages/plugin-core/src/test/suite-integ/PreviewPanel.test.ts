@@ -1,4 +1,9 @@
-import { ConfigService, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  ConfigService,
+  NoteProps,
+  URI,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe, test, before } from "mocha";
 import { PreviewPanelFactory } from "../../components/views/PreviewViewFactory";
@@ -28,7 +33,9 @@ async function makeTestNote({
   });
   const { rewriteImageUrls } =
     previewPanel.__DO_NOT_USE_IN_PROD_exposePropsForTesting();
-  const configReadResult = await ConfigService.instance().readConfig();
+  const configReadResult = await ConfigService.instance().readConfig(
+    URI.file(wsRoot)
+  );
   const config = configReadResult._unsafeUnwrap();
   const newNote = rewriteImageUrls(note, config);
   // The function shouldn't modify the existing note

@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   DendronPublishingConfig,
   getStage,
+  URI,
 } from "@dendronhq/common-all";
 import {
   NextjsExportConfig,
@@ -54,7 +55,9 @@ export class NextJSPublishUtils {
       enrichedOpts = { podChoice, config: podConfig };
     }
     if (getStage() !== "prod") {
-      const configReadResult = await ConfigService.instance().readConfig();
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
       if (configReadResult.isErr()) {
         throw configReadResult.error;
       }

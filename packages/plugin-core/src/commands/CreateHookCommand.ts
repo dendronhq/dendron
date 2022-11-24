@@ -3,6 +3,7 @@ import {
   DendronError,
   DHookType,
   IDendronError,
+  URI,
 } from "@dendronhq/common-all";
 import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -72,7 +73,7 @@ export class CreateHookCommand extends BasicCommand<
     fs.writeFileSync(scriptPath, hookTemplate);
 
     const configService = ConfigService.instance();
-    const configReadResult = await configService.readConfig();
+    const configReadResult = await configService.readConfig(URI.file(wsRoot));
     if (configReadResult.isErr()) {
       const error = configReadResult.error;
       this.L.error(error);
@@ -89,6 +90,7 @@ export class CreateHookCommand extends BasicCommand<
       hookType: DHookType.onCreate,
     });
     const configWriteResult = await configService.writeConfig(
+      URI.file(wsRoot),
       configWritePayload
     );
     if (configWriteResult.isErr()) {

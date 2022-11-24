@@ -2,6 +2,7 @@ import {
   ConfigService,
   ConfigUtils,
   IDendronError,
+  URI,
 } from "@dendronhq/common-all";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { HookUtils } from "@dendronhq/engine-server";
@@ -38,7 +39,7 @@ suite(DENDRON_COMMANDS.CREATE_HOOK.key, function () {
           await new CreateHookCommand().run();
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
 
           const hooksConfig = ConfigUtils.getHooks(config);

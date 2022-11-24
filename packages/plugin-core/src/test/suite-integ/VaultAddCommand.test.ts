@@ -10,6 +10,7 @@ import {
   VaultUtils,
   WorkspaceType,
   ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -134,7 +135,7 @@ suite("VaultAddCommand", function () {
         const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const workspaces = ConfigUtils.getWorkspace(config).workspaces;
         expect(workspaces).toEqual({
@@ -204,7 +205,7 @@ suite("VaultAddCommand", function () {
           await cmd.run();
 
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const workspaces = ConfigUtils.getWorkspace(config).workspaces;
           expect(workspaces).toEqual({
@@ -492,7 +493,7 @@ describe("GIVEN a workspace with local override", function () {
 
         // dendron.yml should have one vault;
         const preRunConfig = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(preRunConfig.workspace.vaults.length).toEqual(1);
         const cmd = new VaultAddCommand();
@@ -506,7 +507,7 @@ describe("GIVEN a workspace with local override", function () {
         await cmd.run();
         // dendron.yml should now have two vault
         const postRunConfig = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(postRunConfig.workspace.vaults.length).toEqual(2);
         // config + override should have three vaults
@@ -554,8 +555,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -626,8 +628,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -728,8 +731,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -810,8 +814,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         });
 
         test("THEN the vault was added to the workspace config correctly", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
@@ -881,8 +886,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = ConfigUtils.getVaults(config).find(
@@ -903,7 +909,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         await new ReloadIndexCommand().run();
         const { engine } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
         )._unsafeUnwrap();
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
@@ -953,8 +959,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({

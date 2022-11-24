@@ -498,8 +498,9 @@ export class ExtensionUtils {
       _.set(trackProps, "ageOfCodeInstallInWeeks", ageOfCodeInstallInWeeks);
     }
 
-    const searchOverrideResult =
-      await ConfigService.instance().searchOverride();
+    const searchOverrideResult = await ConfigService.instance().searchOverride(
+      URI.file(wsRoot)
+    );
     if (searchOverrideResult.isOk()) {
       const overrideConfig = searchOverrideResult.value;
       trackProps.hasLocalConfig = true;

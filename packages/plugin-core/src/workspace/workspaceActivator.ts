@@ -12,6 +12,7 @@ import {
   GitEvents,
   RespV3,
   TreeViewItemLabelTypeEnum,
+  URI,
   VaultUtils,
   VSCodeEvents,
   WorkspaceType,
@@ -467,7 +468,9 @@ export class WorkspaceActivator {
     Logger.info({ ctx: `${ctx}:postSetupTraits`, wsRoot });
     const currentVersion = DendronExtension.version();
     const wsService = new WorkspaceService({ wsRoot });
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -651,7 +654,9 @@ export class WorkspaceActivator {
 
   async initCodeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }
@@ -667,7 +672,9 @@ export class WorkspaceActivator {
 
   async initNativeWorkspace({ context, wsRoot }: WorkspaceActivatorOpts) {
     const assetUri = VSCodeUtils.getAssetUri(context);
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

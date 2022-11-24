@@ -38,7 +38,7 @@ export class TaskCompleteCommand extends BasicCommand<
         { title }
       ).then((pressed) => {
         if (pressed?.title === title) {
-          const openConfig = new ConfigureCommand();
+          const openConfig = new ConfigureCommand(this._ext);
           openConfig.run();
         }
       });

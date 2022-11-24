@@ -7,6 +7,7 @@ import {
   EngineEventEmitter,
   NoteUtils,
   ProcFlavor,
+  URI,
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { MetadataService } from "@dendronhq/engine-server";
@@ -531,7 +532,10 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
     ref: FoundRefT,
     linesOfContext: number
   ): Promise<string> {
-    const configReadResult = await ConfigService.instance().readConfig();
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

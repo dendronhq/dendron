@@ -141,8 +141,9 @@ suite("AddExistingVaultCommand", function () {
         });
 
         test("THEN the vault was added to the workspace config correctly", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
@@ -190,8 +191,9 @@ suite("AddExistingVaultCommand", function () {
         });
 
         test("THEN the vault was added to the workspace config correctly", async () => {
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
@@ -273,8 +275,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -335,8 +338,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -412,8 +416,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -486,9 +491,10 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         await new ReloadIndexCommand().run();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = ConfigUtils.getVaults(config).find(
@@ -509,7 +515,7 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
         await new ReloadIndexCommand().run();
         const { engine } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
         )._unsafeUnwrap();
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
@@ -565,8 +571,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({

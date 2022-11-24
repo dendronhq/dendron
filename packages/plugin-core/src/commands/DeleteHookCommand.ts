@@ -1,4 +1,9 @@
-import { ConfigService, DHookType, IDendronError } from "@dendronhq/common-all";
+import {
+  ConfigService,
+  DHookType,
+  IDendronError,
+  URI,
+} from "@dendronhq/common-all";
 import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { window } from "vscode";
@@ -45,7 +50,7 @@ export class DeleteHookCommand extends BasicCommand<
     }
 
     const configService = ConfigService.instance();
-    const configReadResult = await configService.readConfig();
+    const configReadResult = await configService.readConfig(URI.file(wsRoot));
     if (configReadResult.isErr()) {
       const error = configReadResult.error;
       this.L.error(error);
@@ -61,6 +66,7 @@ export class DeleteHookCommand extends BasicCommand<
     });
 
     const configWriteResult = await configService.writeConfig(
+      URI.file(wsRoot),
       configWritePayload
     );
     if (configWriteResult.isErr()) {

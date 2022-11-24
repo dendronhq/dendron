@@ -4,6 +4,7 @@ import {
   ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -68,7 +69,9 @@ export async function detectOutOfDateSeeds({
           // TODO: move `BackupService` to common-all, add `.createBackup` to `ConfigService`
           await DConfig.createBackup(wsRoot, "update-seed");
 
-          const configReadResult = await ConfigService.instance().readConfig();
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(wsRoot)
+          );
           if (configReadResult.isErr()) {
             throw configReadResult.error;
           }
@@ -80,6 +83,7 @@ export async function detectOutOfDateSeeds({
           });
 
           const configWriteResult = await ConfigService.instance().writeConfig(
+            URI.file(wsRoot),
             config
           );
           if (configWriteResult.isErr()) {

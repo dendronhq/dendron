@@ -7,6 +7,7 @@ import {
   DVault,
   genUUIDInsecure,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
 import { Heading } from "@dendronhq/engine-server";
 import {
@@ -238,7 +239,9 @@ export class EditorUtils {
     engine: DEngineClient;
   }): Promise<boolean> {
     const line = editor.document.lineAt(selection.start.line).text;
-    const configReadResult = await ConfigService.instance().readConfig();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
     if (configReadResult.isErr()) {
       throw configReadResult.error;
     }

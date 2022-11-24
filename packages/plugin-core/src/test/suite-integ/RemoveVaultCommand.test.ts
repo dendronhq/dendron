@@ -184,14 +184,14 @@ suite("GIVEN RemoveVaultCommand", function () {
       },
       () => {
         test("THEN the vault is removed from dendron.yml, and override is not merged into config", async () => {
-          const { config } = ExtensionProvider.getDWorkspace();
+          const { config, wsRoot } = ExtensionProvider.getDWorkspace();
           const vaultToRemove = { fsPath: "vault2" };
 
           // before remove, we have 4 vaults including the overriden one
           expect(config.workspace.vaults.length).toEqual(4);
           // before remove, dendron.yml has 3 vaults
           const preRunConfig = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(preRunConfig.workspace.vaults.length).toEqual(3);
 
@@ -204,7 +204,7 @@ suite("GIVEN RemoveVaultCommand", function () {
 
           // after remove, we have 2 vaults in dendron.yml
           const postRunConfig = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(postRunConfig.workspace.vaults.length).toEqual(2);
 

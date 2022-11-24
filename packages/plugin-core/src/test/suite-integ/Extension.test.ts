@@ -93,8 +93,9 @@ suite("GIVEN local config", () => {
           _defaultConfig.workspace.vaults = localVaults.concat(
             defaultConfig.workspace.vaults
           );
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
           const config = (
-            await ConfigService.instance().readConfig()
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
           )._unsafeUnwrap();
           expect(config).toEqual(_defaultConfig);
         });
@@ -329,8 +330,9 @@ suite("deprecated config detection", () => {
     },
     () => {
       test("THEN deprecated key is detected", async () => {
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
         const config = (
-          await ConfigService.instance().readConfig()
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
         )._unsafeUnwrap();
         expect((config.dev as any).enableWebUI).toBeTruthy();
         const out = ConfigUtils.detectDeprecatedConfigs({
@@ -444,7 +446,9 @@ suite("duplicate config entry detection", () => {
     },
     () => {
       test("THEN duplicate entry is detected", async () => {
-        const out = await StartupUtils.getDuplicateKeysMessage();
+        const out = await StartupUtils.getDuplicateKeysMessage(
+          ExtensionProvider.getExtension()
+        );
 
         expect(out && out.includes("duplicated mapping key")).toBeTruthy();
       });
@@ -453,7 +457,9 @@ suite("duplicate config entry detection", () => {
 
   describeMultiWS("GIVEN dendron.yml without duplicate config", {}, () => {
     test("THEN duplicate entry is not detected", async () => {
-      const out = await StartupUtils.getDuplicateKeysMessage();
+      const out = await StartupUtils.getDuplicateKeysMessage(
+        ExtensionProvider.getExtension()
+      );
 
       expect(out).toEqual(undefined);
     });

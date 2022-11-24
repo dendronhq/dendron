@@ -42,8 +42,10 @@ async function openAndEdit(fname: string) {
   return { editor, engine, note: testNoteProps, textToAppend };
 }
 
-function setupTextDocumentService() {
-  const { wsRoot, engine, vaults } = ExtensionProvider.getDWorkspace();
+async function setupTextDocumentService() {
+  const ws = ExtensionProvider.getDWorkspace();
+  const { wsRoot, engine } = ws;
+  const vaults = await ws.vaults;
   const textDocumentService = new TextDocumentService(
     vscode.workspace.onDidSaveTextDocument,
     URI.file(wsRoot),
@@ -363,7 +365,7 @@ suite("TextDocumentService", function testSuite() {
       () => {
         test("THEN engine note contents should be updated", async () => {
           const fname = "foo";
-          const { onDidSave } = setupTextDocumentService();
+          const { onDidSave } = await setupTextDocumentService();
           const { engine, editor, note, textToAppend } = await openAndEdit(
             fname
           );
@@ -458,7 +460,7 @@ suite("TextDocumentService", function testSuite() {
       () => {
         test("THEN the wikilink and backlink should remain unchanged", async () => {
           const fname = "alpha";
-          const { onDidSave } = setupTextDocumentService();
+          const { onDidSave } = await setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);
           const updatedNote = await onDidSave(editor.document);
 
@@ -509,7 +511,7 @@ suite("TextDocumentService", function testSuite() {
       () => {
         test("THEN the backlink should remain unchanged", async () => {
           const fname = "simple-note-ref.one";
-          const { onDidSave } = setupTextDocumentService();
+          const { onDidSave } = await setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);
           const updatedNote = await onDidSave(editor.document);
 
@@ -547,7 +549,7 @@ suite("TextDocumentService", function testSuite() {
         test("THEN the fm-tag should remain unchanged", async () => {
           const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const fname = "fm-tag";
-          const { onDidSave } = setupTextDocumentService();
+          const { onDidSave } = await setupTextDocumentService();
           const { engine, editor, note } = await openAndEdit(fname);
           const updatedNote = await onDidSave(editor.document);
 

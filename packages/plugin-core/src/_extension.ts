@@ -333,7 +333,7 @@ export async function _activate(
         wsRoot: maybeWsRoot,
         vaults: await wsImpl.vaults,
         engine: resp.data.engine,
-        config: resp.data.workspace.config,
+        config: await resp.data.workspace.config,
         context,
       });
 

@@ -112,8 +112,9 @@ suite("Performance testing", function () {
             perflogs.reloadIndexDuration = end - start;
           });
           test("write note", async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const newNote = await NoteTestUtilsV4.createNote({
               fname: "write-note",
               vault: vaults[0],
@@ -141,7 +142,9 @@ suite("Performance testing", function () {
 
           //Note Links: https://github.dev/dendronhq/10000-markdown-files/note-with-links.md
           test("render note with 20 links", async () => {
-            const { engine, vaults } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine } = ws;
+            const vaults = await ws.vaults;
             const fname = "note-with-links";
             const noteToRender = (
               await engine.findNotes({ fname, vault: vaults[1] })
@@ -191,7 +194,9 @@ suite("Performance testing", function () {
             expect(resp.data).toNotEqual(undefined);
           });
           test("Move note to another vault", async () => {
-            const { vaults, engine } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine } = ws;
+            const vaults = await ws.vaults;
             const vault1 = vaults[0];
             const vault2 = vaults[1];
             const fname = "above-mentioned.cerise";
@@ -226,7 +231,9 @@ suite("Performance testing", function () {
             expect(notes[0].vault).toEqual(vault1);
           });
           test("Refactor hierarchy", async () => {
-            const { vaults, engine } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine } = ws;
+            const vaults = await ws.vaults;
             const cmd = new RefactorHierarchyCommandV2();
             const fname = "aberrant.suspiciousness";
             const note = (
@@ -258,7 +265,9 @@ suite("Performance testing", function () {
             expect(notes.length).toEqual(0);
           });
           test("Rename Note", async () => {
-            const { vaults, engine } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { engine } = ws;
+            const vaults = await ws.vaults;
             const vault = vaults[1];
             const fname = "abkhazian.opcw";
             const newFname = "renamed-note";

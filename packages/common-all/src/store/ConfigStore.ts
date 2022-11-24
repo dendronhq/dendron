@@ -1,4 +1,4 @@
-import { errAsync, ResultAsync } from "neverthrow";
+import { errAsync } from "neverthrow";
 import { DendronError } from "../error";
 import { URI, Utils } from "vscode-uri";
 import { IConfigStore } from "./IConfigStore";

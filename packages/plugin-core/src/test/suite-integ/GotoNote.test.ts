@@ -180,8 +180,9 @@ suite("GotoNote", function () {
       () => {
         test("THEN note is created", async () => {
           const cmd = createGoToNoteCmd();
-          const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const originNote = (await engine.getNote("origin")).data;
           const out = await cmd.run({
             originNote,
@@ -498,7 +499,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced by hashtag", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -534,7 +536,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced by usertag", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -574,7 +577,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -608,7 +612,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -643,7 +648,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));

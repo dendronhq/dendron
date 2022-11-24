@@ -117,9 +117,6 @@ export class PreviewLinkHandler implements IPreviewLinkHandler {
       Logger.debug({ ctx, error: ErrorFactory.wrapIfNeeded(err) });
     }
     // If not, see if there's a matching asset (including in assets folder, outside vaults, or even an absolute path)
-    const ws = this._ext.getDWorkspace();
-    const { wsRoot } = ws;
-    const vaults = await ws.vaults;
     const currentNote = data?.id
       ? (await this.engine.getNoteMeta(data.id)).data
       : undefined;

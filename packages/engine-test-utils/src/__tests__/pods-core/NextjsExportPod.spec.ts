@@ -152,6 +152,7 @@ describe("GIVEN NextExport pod", () => {
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
+              await setupConfig(opts);
               await TestConfigUtils.withConfig(
                 (config) => {
                   config.dev = {
@@ -417,6 +418,7 @@ describe("GIVEN NextExport pod", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
+            await setupConfig(opts);
           },
         }
       );

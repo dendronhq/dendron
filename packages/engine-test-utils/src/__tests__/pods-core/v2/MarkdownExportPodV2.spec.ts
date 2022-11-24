@@ -40,6 +40,10 @@ const setupPod = async (setupOpts: {
     config.publishing.siteUrl = "https://foo.com";
   }
   _.mergeWith(config.publishing, setupOpts.publishConfigOverride);
+  await ConfigService.instance().writeConfig(
+    URI.file(opts.engine.wsRoot),
+    config
+  );
   const podConfig: RunnableMarkdownV2PodConfig = {
     exportScope: PodExportScope.Note,
     destination: "clipboard",

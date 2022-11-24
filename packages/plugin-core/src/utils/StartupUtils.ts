@@ -3,6 +3,7 @@ import {
   ConfigService,
   ConfigUtils,
   ConfirmStatus,
+  CONSTANTS,
   DendronConfig,
   ExtensionEvents,
   InstallStatus,
@@ -39,6 +40,9 @@ import { AnalyticsUtils } from "./analytics";
 // import { ConfigMigrationUtils } from "./ConfigMigration";
 import semver from "semver";
 import os from "os";
+import fs from "fs-extra";
+import path from "path";
+import YAML from "js-yaml";
 
 export class StartupUtils {
   static shouldShowManualUpgradeMessage({
@@ -156,12 +160,16 @@ export class StartupUtils {
 
   static async getDuplicateKeysMessage(ext: IDendronExtension) {
     const { wsRoot } = ext.getDWorkspace();
-    const configReadRawResult = await ConfigService.instance().readRaw(
-      URI.file(wsRoot)
-    );
-    if (configReadRawResult.isErr()) {
-      return configReadRawResult.error.message;
+    try {
+      const content = await fs.readFile(
+        path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
+        { encoding: "utf-8" }
+      );
+      YAML.load(content);
+    } catch (err: any) {
+      return err.message;
     }
+
     return;
   }
 

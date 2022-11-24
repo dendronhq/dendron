@@ -28,10 +28,9 @@ suite("ConfigureLocalOverrideCommand", function () {
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.toLowerCase()
         ).toEqual(
-          ConfigService.instance().configOverridePath(
-            URI.file(wsRoot),
-            "global"
-          )
+          ConfigService.instance()
+            .configOverridePath(URI.file(wsRoot), "global")
+            ?.fsPath.toLowerCase()
         );
       });
     });
@@ -51,10 +50,9 @@ suite("ConfigureLocalOverrideCommand", function () {
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.toLowerCase()
         ).toEqual(
-          ConfigService.instance().configOverridePath(
-            URI.file(wsRoot),
-            "workspace"
-          )
+          ConfigService.instance()
+            .configOverridePath(URI.file(wsRoot), "workspace")
+            ?.fsPath.toLowerCase()
         );
       });
     });

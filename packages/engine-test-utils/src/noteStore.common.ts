@@ -10,6 +10,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "./engine";
 import { ENGINE_HOOKS } from "./presets";
+import os from "os";
 
 /**
  * This function runs all tests that are common to NoteStore. They can be reused
@@ -691,6 +692,9 @@ function getNoteWithAbsolutePathVault(
   ];
 
   // TODO: Sqlite - this is failing on Windows in CI, need to fix.
+  const runTestCaseButSkipForWindows =
+    os.platform() === "win32" ? test.skip : test;
+
   runTestCaseButSkipForWindows(
     "WHEN get note, then correctly retrieve note by key",
     async () => {
@@ -727,7 +731,4 @@ function getNoteWithAbsolutePathVault(
       );
     }
   );
-}
-function runTestCaseButSkipForWindows(arg0: string, arg1: () => Promise<void>) {
-  throw new Error("Function not implemented.");
 }

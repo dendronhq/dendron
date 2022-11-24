@@ -98,7 +98,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         desc: row.description ?? "",
         updated: row.updated,
         created: row.created,
-        anchors: JSON.parse(row.anchors) ?? undefined,
+        anchors: JSON.parse(row.anchors) ?? {},
         stub: row.stub === 1,
         custom: JSON.parse(row.custom) ?? undefined,
         contentHash: row.contentHash,

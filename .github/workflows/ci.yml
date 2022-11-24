@@ -57,7 +57,6 @@ jobs:
           node --version
           npm --version
           yarn --version
-          node -p 'process.arch'
 
       - name: Checkout source
         uses: actions/checkout@v3

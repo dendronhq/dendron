@@ -1,14 +1,15 @@
 import { WorkspaceService } from "@dendronhq/engine-server";
 import {
+  ConfigService,
   DendronError,
   DVault,
   SelfContainedVault,
+  URI,
   VaultRemoteSource,
 } from "@dendronhq/common-all";
 import yargs from "yargs";
 import { CLICommand, CommandCommonProps } from "./base";
 import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
-import { DConfig } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -80,7 +81,16 @@ export class VaultCLICommand extends CLICommand<CommandOpts> {
 
           const wsService = new WorkspaceService({ wsRoot });
           let resp: DVault;
-          if (DConfig.readConfigSync(wsRoot).dev?.enableSelfContainedVaults) {
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(wsRoot)
+          );
+          if (configReadResult.isErr()) {
+            return {
+              error: configReadResult.error,
+            };
+          }
+          const config = configReadResult.value;
+          if (config.dev?.enableSelfContainedVaults) {
             const vault: SelfContainedVault = {
               fsPath: vaultPath,
               selfContained: true,

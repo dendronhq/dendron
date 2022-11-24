@@ -1,5 +1,9 @@
-import { ConfigUtils, NoteDictsUtils } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
+import {
+  ConfigService,
+  ConfigUtils,
+  NoteDictsUtils,
+  URI,
+} from "@dendronhq/common-all";
 import { getParsingDependencyDicts, MDUtilsV5 } from "@dendronhq/unified";
 import { JSONSchemaType } from "ajv";
 import { PublishPod, PublishPodConfig, PublishPodPlantOpts } from "../basev3";
@@ -59,7 +63,13 @@ export class HTMLPublishPod extends PublishPod<HTMLPublishPodConfig> {
       convertUserNotesToLinks = false,
       enablePrettyRefs = true,
     } = config;
-    const econfig = DConfig.readConfigSync(engine.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const econfig = configReadResult.value;
     const overrideConfig = { ...econfig };
 
     const workspaceConfig = ConfigUtils.getWorkspace(overrideConfig);

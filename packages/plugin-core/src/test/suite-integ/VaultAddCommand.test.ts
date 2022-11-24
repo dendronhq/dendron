@@ -13,8 +13,6 @@ import {
   URI,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
-  LocalConfigScope,
   note2File,
   readYAMLAsync,
   schemaModuleOpts2File,
@@ -470,16 +468,16 @@ describe("GIVEN a workspace with local override", function () {
         const schema = SchemaUtils.createRootModule({ vault });
         await schemaModuleOpts2File(schema, vault.fsPath, "root");
         // add it to workspace override
-        const overridePath = DConfig.configOverridePath(
-          wsRoot,
-          LocalConfigScope.WORKSPACE
+        const overridePath = ConfigService.instance().configOverridePath(
+          URI.file(wsRoot),
+          "workspace"
         );
         const overridePayload = {
           workspace: {
             vaults: [{ fsPath: "vault2" }],
           },
         };
-        writeYAML(overridePath, overridePayload);
+        writeYAML(overridePath!.fsPath, overridePayload);
       },
     },
     () => {

@@ -28,6 +28,9 @@ export enum BackupKeyEnum {
 
 export const BACKUP_DIR_NAME = ".backup";
 
+/**
+ * TODO: move to common-all
+ */
 export class BackupService implements Disposable, IBackupService {
   public wsRoot: string;
   public logger: DLogger;

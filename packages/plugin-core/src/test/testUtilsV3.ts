@@ -40,6 +40,7 @@ import {
   Git,
   HistoryService,
   NodeJSFileStore,
+  WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import {
@@ -235,11 +236,15 @@ export async function setupLegacyWorkspace(
   stubWorkspaceFolders(wsRoot, vaults);
 
   // update config
-  let config = DConfig.getOrCreate(wsRoot);
+  const configResult = await WorkspaceService.getOrCreateConfig(wsRoot);
+  if (configResult.isErr()) {
+    throw configResult.error;
+  }
+  let config = configResult.value;
   if (isNotUndefined(copts.modConfigCb)) {
     config = await TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
-  await DConfig.writeConfig({ wsRoot, config });
+  await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
 
   await copts.postSetupHook({
     wsRoot,

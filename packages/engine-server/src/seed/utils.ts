@@ -59,8 +59,14 @@ export class SeedUtils {
     };
   }
 
-  static validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
-    const config = WorkspaceService.getOrCreateConfig(wsRoot);
+  static async validateWorkspaceSeedConversion({ wsRoot }: { wsRoot: string }) {
+    const configResult = await WorkspaceService.getOrCreateConfig(wsRoot);
+    if (configResult.isErr()) {
+      return {
+        error: configResult.error,
+      };
+    }
+    const config = configResult.value;
     const vaults = ConfigUtils.getVaults(config);
     if (vaults.length !== 1) {
       return {

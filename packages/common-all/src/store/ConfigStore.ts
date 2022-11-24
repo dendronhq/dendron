@@ -1,4 +1,4 @@
-import { errAsync } from "neverthrow";
+import { errAsync, ResultAsync } from "neverthrow";
 import { DendronError } from "../error";
 import { URI, Utils } from "vscode-uri";
 import { IConfigStore } from "./IConfigStore";
@@ -16,6 +16,15 @@ export class ConfigStore implements IConfigStore {
 
   configPath(wsRoot: URI): URI {
     return Utils.joinPath(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  }
+
+  configOverridePath(wsRoot: URI, scope: "workspace" | "global") {
+    const root = scope === "workspace" ? wsRoot : this._homeDir;
+    if (root) {
+      return Utils.joinPath(root, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
+    } else {
+      return undefined;
+    }
   }
 
   constructor(fileStore: IFileStore, homeDir: URI | undefined) {
@@ -67,6 +76,26 @@ export class ConfigStore implements IConfigStore {
         this.writeToFS(this.configPath(wsRoot), endPayload)
       )
       .map(() => payload);
+  }
+
+  writeOverride(
+    wsRoot: URI,
+    config: DeepPartial<DendronConfig>,
+    mode: "workspace" | "global"
+  ) {
+    const res = YamlUtils.toStr(config).map((content) => {
+      const writePath = this.configOverridePath(wsRoot, mode);
+      if (writePath) {
+        return this.writeToFS(writePath, content);
+      } else {
+        return errAsync(
+          new DendronError({
+            message: "global override not supported with current file store.",
+          })
+        );
+      }
+    });
+    return res.unwrapOr(() => {});
   }
 
   /** helpers */

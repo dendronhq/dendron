@@ -60,6 +60,8 @@ import {
   GetNoteMetaResp,
   GetNoteResp,
   isNotUndefined,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -262,13 +264,23 @@ export class DendronEngineV2 implements DEngine {
 
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
 
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(this.wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        return {
+          error: configReadResult.error,
+          data: defaultResp,
+        };
+      }
+      const config = configReadResult.value;
       return {
         error,
         data: {
           notes,
           wsRoot: this.wsRoot,
           vaults: this.vaults,
-          config: DConfig.readConfigSync(this.wsRoot),
+          config,
         },
       };
     } catch (error: any) {
@@ -644,7 +656,13 @@ export class DendronEngineV2 implements DEngine {
     dest: DendronASTDest;
   }): Promise<string> {
     let proc: ReturnType<typeof MDUtilsV5["procRehypeFull"]>;
-    const config = DConfig.readConfigSync(this.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     const noteCacheForRenderDict = await getParsingDependencyDicts(
       note,
@@ -695,10 +713,17 @@ export class DendronEngineV2 implements DEngine {
             notesByFname: this.noteFnames,
           });
         } else {
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(this.wsRoot)
+          );
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
           await EngineUtils.refreshNoteLinksAndAnchors({
             note: ent.note,
             engine: this,
-            config: DConfig.readConfigSync(this.wsRoot),
+            config,
           });
           this.store.updateNote(ent.note);
         }
@@ -753,9 +778,18 @@ export class DendronEngineV2 implements DEngine {
           status: ERROR_STATUS.INVALID_STATE,
           message: `${opts.id} does not exist`,
         });
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(this.wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        return {
+          error: configReadResult.error,
+        };
+      }
+      const config = configReadResult.value;
       const blocks = await RemarkUtils.extractBlocks({
         note,
-        config: DConfig.readConfigSync(this.wsRoot, true),
+        config,
       });
       if (opts.filterByAnchorType) {
         _.remove(
@@ -792,7 +826,16 @@ export class DendronEngineV2 implements DEngine {
           ),
         };
       });
-      const config = DConfig.readConfigSync(this.wsRoot, true);
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(this.wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        return {
+          error: configReadResult.error,
+          data: {},
+        };
+      }
+      const config = configReadResult.value;
       const {
         allDecorations: decorations,
         allDiagnostics: diagnostics,

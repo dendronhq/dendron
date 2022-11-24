@@ -79,12 +79,15 @@ suite("GIVEN local config", () => {
       "AND given additional vaults in local config",
       {
         preActivateHook: async ({ wsRoot }) => {
-          // TODO: switch to config service
-          await DConfig.writeLocalConfig({
-            wsRoot,
-            config: { workspace: { vaults: localVaults } },
-            configScope,
-          });
+          await ConfigService.instance().writeOverride(
+            URI.file(wsRoot),
+            {
+              workspace: {
+                vaults: localVaults,
+              },
+            },
+            configScope.toLowerCase() as "workspace" | "global"
+          );
         },
       },
       () => {

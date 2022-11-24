@@ -10,8 +10,6 @@ import {
   URI,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
-  LocalConfigScope,
   note2File,
   schemaModuleOpts2File,
   writeYAML,
@@ -170,17 +168,16 @@ suite("GIVEN RemoveVaultCommand", function () {
           await note2File({ note, vault, wsRoot });
           const schema = SchemaUtils.createRootModule({ vault });
           await schemaModuleOpts2File(schema, vault.fsPath, "root");
-          // TODO: switch to ConfigService
-          const overridePath = DConfig.configOverridePath(
-            wsRoot,
-            LocalConfigScope.WORKSPACE
+          const overridePath = ConfigService.instance().configOverridePath(
+            URI.file(wsRoot),
+            "workspace"
           );
           const overridePayload = {
             workspace: {
               vaults: [{ fsPath: "vault4" }],
             },
           };
-          writeYAML(overridePath, overridePayload);
+          writeYAML(overridePath!.fsPath, overridePayload);
         },
       },
       () => {

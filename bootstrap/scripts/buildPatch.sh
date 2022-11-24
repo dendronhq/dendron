@@ -31,7 +31,7 @@ EXT_TYPE=dendron
 if [ $SCRIPT_EXT_TYPE = "nightly" ]; then
   EXT_TYPE=nightly
 fi
-if [ $SCRIPT_EXT_TARGET = "enterprise" ]; then
+if [ $SCRIPT_EXT_TYPE = "enterprise" ]; then
   EXT_TARGET=enterprise
 fi
 

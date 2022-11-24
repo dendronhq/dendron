@@ -455,7 +455,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     this.print("sync assets...");
     await this.syncAssets(opts);
 
-    this.print(`prep repo... extensionTarget: ${opts.extensionTarget}`);
+    this.print(`prep repo... extensionType: ${opts.extensionType}`);
     await BuildUtils.prepPluginPkg(opts.extensionType);
 
     if (!shouldPublishLocal) {

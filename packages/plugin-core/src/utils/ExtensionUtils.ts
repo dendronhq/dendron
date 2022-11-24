@@ -161,7 +161,6 @@ export class ExtensionUtils {
   }
 
   static isEnterprise(context: vscode.ExtensionContext) {
-    // return context.extension.id === "dendron.@dendronhq/plugin-core";
     return context.extension.id === "dendron.dendron-enterprise";
   }
 

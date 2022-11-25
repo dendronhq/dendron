@@ -15,8 +15,13 @@ import {
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
-import { MIGRATION_ENTRIES, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  MIGRATION_ENTRIES,
+  NodeJSFileStore,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
+import { homedir } from "os";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
 import { CLIUtils } from "../utils/cli";
@@ -227,6 +232,10 @@ export abstract class CLICommand<
         args.wsRoot = configPath;
       }
     }
+    ConfigService.instance({
+      homeDir: URI.file(homedir()),
+      fileStore: new NodeJSFileStore(),
+    });
     if (args.quiet) {
       this.opts.quiet = true;
     }

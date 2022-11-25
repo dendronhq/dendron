@@ -153,7 +153,7 @@ export class NoteStore implements INoteStore<string> {
   async write(opts: WriteNoteOpts<string>): Promise<RespV3<string>> {
     const { key, note } = opts;
     const notePropsMeta: NotePropsMeta = _.omit(note, ["body"]);
-    const content = NoteUtils.serialize(note, { excludeStub: true });
+    const content = NoteUtils.serialize(note);
     const noteMeta = {
       ...notePropsMeta,
       contentHash: genHash(content),

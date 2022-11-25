@@ -192,7 +192,6 @@ export class LookupQuickPickView implements Disposable {
   }
 
   private getButtonFromArray(type: ButtonType, buttons: readonly DendronBtn[]) {
-    //@ts-ignore
     return _.find(buttons, (value) => value.type === type);
   }
 

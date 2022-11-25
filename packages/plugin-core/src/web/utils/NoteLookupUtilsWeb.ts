@@ -17,6 +17,7 @@ import { Utils } from "vscode-uri";
 import { _noteAddBehaviorEnum } from "../../constants";
 import * as vscode from "vscode";
 import { DendronWebQuickPick } from "../../components/lookup/types";
+import { DendronBtn } from "../../components/lookup/ButtonTypes";
 
 type CreateFnameOverrides = {
   domain?: string;
@@ -173,5 +174,9 @@ export class NoteLookupUtilsWeb {
     }
     const selection = editor.selection;
     return editor.document.getText(selection);
+  }
+
+  getButtonFromArray(type: LookupNoteTypeEnum, buttons: DendronBtn[]) {
+    return _.find(buttons, (value) => value.type === type);
   }
 }

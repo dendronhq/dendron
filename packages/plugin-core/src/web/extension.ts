@@ -11,6 +11,7 @@ import { CopyNoteURLCmd } from "./commands/CopyNoteURLCmd";
 import { NoteLookupCmd } from "./commands/NoteLookupCmd";
 import { TogglePreviewCmd } from "./commands/TogglePreviewCmd";
 import { setupWebExtContainer } from "./injection-providers/setupWebExtContainer";
+import { CreateJournalNoteCmd } from "./commands/CreateJournalNoteCmd";
 
 /**
  * This is the entry point for the web extension variant of Dendron
@@ -109,6 +110,16 @@ async function setupCommands(context: vscode.ExtensionContext) {
         DENDRON_COMMANDS.TREEVIEW_GOTO_NOTE.key,
         async (_args: any) => {
           await container.resolve(NoteLookupCmd).run();
+        }
+      )
+    );
+  }
+  if (!existingCommands.includes(CreateJournalNoteCmd.key)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        CreateJournalNoteCmd.key,
+        async (_args: any) => {
+          await container.resolve(CreateJournalNoteCmd).run();
         }
       )
     );

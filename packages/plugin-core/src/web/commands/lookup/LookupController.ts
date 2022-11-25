@@ -79,50 +79,49 @@ export class LookupController {
     if (!initialValue) {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
-    const buttons = [
-      JournalBtn.create({
-        pressed: opts.noteType === LookupNoteTypeEnum.journal,
-      }),
-    ];
+    if (!opts.buttons) {
+      opts.buttons = [
+        JournalBtn.create({
+          pressed: opts.noteType === LookupNoteTypeEnum.journal,
+        }),
+      ];
+    }
     const qp = this.createQuickPick({
       title: "Lookup Note",
-      buttons: opts.buttons || buttons,
+      buttons: opts.buttons,
       provider: opts.provider,
       initialValue,
     });
     this._disposables.push(new LookupQuickPickView(qp, this.viewModel));
 
-    const journalBtn = _.find(
-      buttons,
-      (value) => value.type === LookupNoteTypeEnum.journal
+    const journalBtn = this.lookupUtils.getButtonFromArray(
+      LookupNoteTypeEnum.journal,
+      qp.buttons
     );
-    if (journalBtn) {
-      this._disposables.push(
-        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
-          switch (prevValue) {
-            case LookupNoteTypeEnum.journal:
-              if (journalBtn)
-                this.lookupUtils.onJournalButtonToggled(
-                  false,
-                  qp,
-                  initialValue
-                );
-              break;
-            default:
-              break;
-          }
+    this._disposables.push(
+      this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
+        switch (prevValue) {
+          case LookupNoteTypeEnum.journal:
+            if (journalBtn)
+              this.lookupUtils.onJournalButtonToggled(false, qp, initialValue);
+            break;
+          default:
+            break;
+        }
 
-          switch (newValue) {
-            case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
-              break;
-            case LookupNoteTypeEnum.none:
-              break;
-            default:
-          }
-        })
-      );
-    }
+        switch (newValue) {
+          case LookupNoteTypeEnum.journal:
+            if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
+            break;
+          case LookupNoteTypeEnum.none:
+            break;
+          default:
+        }
+      })
+    );
+
+    this.initializeViewStateFromButtons(opts.buttons);
+
     this.tabAutoCompleteEvent(() => {
       qp.value = AutoCompleter.getAutoCompletedValue(qp);
     });
@@ -225,9 +224,6 @@ export class LookupController {
       });
 
     qp.onDidChangeValue(async (newInput) => {
-      if (!initialized) {
-        return;
-      }
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
         showDirectChildrenOnly: false,
@@ -249,6 +245,25 @@ export class LookupController {
     if (!uri) return "";
     const initialValue = _.trimEnd(Utils.basename(uri), ".md");
     return initialValue;
+  }
+
+  private initializeViewStateFromButtons(buttons: DendronBtn[]) {
+    if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.scratch, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.scratch;
+    } else if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.journal, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
+    } else if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.task, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
+    }
   }
 
   private addCreateNewOptionIfNecessary(

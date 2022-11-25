@@ -10,7 +10,10 @@ import { URI, Utils } from "vscode-uri";
 import { DENDRON_COMMANDS } from "../../constants";
 import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
-import { LookupController } from "./lookup/LookupController";
+import {
+  LookupController,
+  LookupControllerCreateOpts,
+} from "./lookup/LookupController";
 
 @injectable()
 export class NoteLookupCmd {
@@ -23,12 +26,12 @@ export class NoteLookupCmd {
     @inject("ITelemetryClient") private _analytics: ITelemetryClient
   ) {}
 
-  public async run() {
+  public async run(_opts?: LookupControllerCreateOpts) {
     this._analytics.track(DENDRON_COMMANDS.LOOKUP_NOTE.key);
-
-    const result = await this.factory.showLookup({
+    const opts = _opts || {
       provider: this.noteProvider,
-    });
+    };
+    const result = await this.factory.showLookup(opts);
 
     if (!result) {
       return;

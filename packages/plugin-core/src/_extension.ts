@@ -66,7 +66,6 @@ import { Extensions } from "./settings";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { ExtensionUtils } from "./utils/ExtensionUtils";
-import { StartupPrompts } from "./utils/StartupPrompts";
 import { StartupUtils } from "./utils/StartupUtils";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { showWelcome } from "./WelcomeUtils";

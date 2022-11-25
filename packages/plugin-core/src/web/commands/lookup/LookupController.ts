@@ -91,6 +91,7 @@ export class LookupController {
       buttons: opts.buttons,
       provider: opts.provider,
       initialValue,
+      noteType: opts.noteType,
     });
     this._disposables.push(new LookupQuickPickView(qp, this.viewModel));
 
@@ -217,13 +218,14 @@ export class LookupController {
         },
       })
       .then((initialItems) => {
-        if (initialItems) {
+        if (initialItems && !qp.items.length) {
           qp.items = initialItems;
-          initialized = true;
         }
+        initialized = true;
       });
 
     qp.onDidChangeValue(async (newInput) => {
+      if (!initialized && !opts.noteType) return;
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
         showDirectChildrenOnly: false,

@@ -11,6 +11,12 @@ on:
       - "*/*"
   workflow_dispatch:
 
+# If multiple pushes occur in close succession, cancel all CI jobs except the
+# last one to save resources
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   BINARY_CACHE_INDEX: 23 # Rev this if we need a new node cache
 

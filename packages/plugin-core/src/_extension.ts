@@ -588,13 +588,14 @@ async function showWelcomeOrWhatsNew({
       break;
   }
 
+  // NOTE: these two prompts are disabled for now. uncomment to renable when needed.
   // Show lapsed users (users who have installed Dendron but haven't initialied
   // a workspace) a reminder prompt to re-engage them.
-  StartupPrompts.showLapsedUserMessageIfNecessary({ assetUri });
+  // StartupPrompts.showLapsedUserMessageIfNecessary({ assetUri });
 
   // Show inactive users (users who were active on first week but have not used lookup in 2 weeks)
   // a reminder prompt to re-engage them.
-  StartupUtils.showInactiveUserMessageIfNecessary();
+  // StartupUtils.showInactiveUserMessageIfNecessary();
 }
 
 async function _setupCommands({

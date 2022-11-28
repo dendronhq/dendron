@@ -12,10 +12,10 @@ import {
 import { Disposable, QuickInputButton } from "vscode";
 import { ILookupViewModel } from "../../../components/lookup/LookupViewModel";
 import {
-  ButtonType,
   DendronBtn,
   IDendronQuickInputButton,
 } from "../../../components/lookup/ButtonTypes";
+import { NoteLookupUtilsWeb } from "../../utils/NoteLookupUtilsWeb";
 
 /**
  * A 'view' that represents the UI state of the Lookup Quick Pick. This
@@ -29,7 +29,8 @@ export class LookupQuickPickView implements Disposable {
 
   constructor(
     quickPick: DendronWebQuickPick<NoteQuickInputV2>,
-    viewModel: ILookupViewModel
+    viewModel: ILookupViewModel,
+    private lookupUtils: NoteLookupUtilsWeb
   ) {
     this._quickPick = quickPick;
     this._viewState = viewModel;
@@ -47,9 +48,18 @@ export class LookupQuickPickView implements Disposable {
   }
 
   private setupViewModel(): void {
-    const ToLinkBtn = this.getButton("selection2link");
-    const ExtractBtn = this.getButton("selectionExtract");
-    const ToItemsBtn = this.getButton("selection2Items");
+    const ToLinkBtn = this.lookupUtils.getButton(
+      "selection2link",
+      this._quickPick.buttons
+    );
+    const ExtractBtn = this.lookupUtils.getButton(
+      "selectionExtract",
+      this._quickPick.buttons
+    );
+    const ToItemsBtn = this.lookupUtils.getButton(
+      "selection2Items",
+      this._quickPick.buttons
+    );
 
     this._disposables.push(
       this._viewState.selectionState.bind(async (newValue) => {
@@ -93,7 +103,10 @@ export class LookupQuickPickView implements Disposable {
       })
     );
 
-    const vaultSelectionBtn = this.getButton("selectVault");
+    const vaultSelectionBtn = this.lookupUtils.getButton(
+      "selectVault",
+      this._quickPick.buttons
+    );
     if (vaultSelectionBtn !== undefined) {
       this._disposables.push(
         this._viewState.vaultSelectionMode.bind(async (newValue) => {
@@ -104,7 +117,10 @@ export class LookupQuickPickView implements Disposable {
       );
     }
 
-    const multiSelectBtn = this.getButton("multiSelect");
+    const multiSelectBtn = this.lookupUtils.getButton(
+      "multiSelect",
+      this._quickPick.buttons
+    );
     if (multiSelectBtn) {
       this._disposables.push(
         this._viewState.isMultiSelectEnabled.bind(async (newValue) => {
@@ -114,7 +130,10 @@ export class LookupQuickPickView implements Disposable {
       );
     }
 
-    const copyLinkBtn = this.getButton("copyNoteLink");
+    const copyLinkBtn = this.lookupUtils.getButton(
+      "copyNoteLink",
+      this._quickPick.buttons
+    );
     if (copyLinkBtn) {
       this._disposables.push(
         this._viewState.isCopyNoteLinkEnabled.bind(async (enabled) => {
@@ -124,7 +143,10 @@ export class LookupQuickPickView implements Disposable {
       );
     }
 
-    const directChildBtn = this.getButton("directChildOnly");
+    const directChildBtn = this.lookupUtils.getButton(
+      "directChildOnly",
+      this._quickPick.buttons
+    );
     if (directChildBtn) {
       this._disposables.push(
         this._viewState.isApplyDirectChildFilter.bind(async (newValue) => {
@@ -134,9 +156,18 @@ export class LookupQuickPickView implements Disposable {
       );
     }
 
-    const journalBtn = this.getButton(LookupNoteTypeEnum.journal);
-    const scratchBtn = this.getButton(LookupNoteTypeEnum.scratch);
-    const taskBtn = this.getButton(LookupNoteTypeEnum.task);
+    const journalBtn = this.lookupUtils.getButton(
+      LookupNoteTypeEnum.journal,
+      this._quickPick.buttons
+    );
+    const scratchBtn = this.lookupUtils.getButton(
+      LookupNoteTypeEnum.scratch,
+      this._quickPick.buttons
+    );
+    const taskBtn = this.lookupUtils.getButton(
+      LookupNoteTypeEnum.task,
+      this._quickPick.buttons
+    );
 
     this._disposables.push(
       this._viewState.nameModifierMode.bind(async (newValue) => {
@@ -179,7 +210,10 @@ export class LookupQuickPickView implements Disposable {
       })
     );
 
-    const horizontalBtn = this.getButton("horizontal");
+    const horizontalBtn = this.lookupUtils.getButton(
+      "horizontal",
+      this._quickPick.buttons
+    );
     if (horizontalBtn) {
       this._disposables.push(
         this._viewState.isSplitHorizontally.bind(async (splitHorizontally) => {
@@ -189,17 +223,6 @@ export class LookupQuickPickView implements Disposable {
         })
       );
     }
-  }
-
-  private getButtonFromArray(type: ButtonType, buttons: readonly DendronBtn[]) {
-    return _.find(buttons, (value) => value.type === type);
-  }
-
-  private getButton(type: ButtonType): DendronBtn | undefined {
-    if (this._quickPick) {
-      return this.getButtonFromArray(type, this._quickPick.buttons);
-    }
-    return;
   }
 
   private updateButtonsOnQuickPick(...btns: DendronBtn[]): void {
@@ -222,7 +245,10 @@ export class LookupQuickPickView implements Disposable {
     switch (btnType) {
       case LookupSelectionTypeEnum.selection2Items:
         if (
-          this.getButton(LookupSelectionTypeEnum.selection2Items)?.canToggle
+          this.lookupUtils.getButton(
+            LookupSelectionTypeEnum.selection2Items,
+            this._quickPick.buttons
+          )?.canToggle
         ) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
@@ -233,7 +259,12 @@ export class LookupQuickPickView implements Disposable {
         break;
 
       case LookupSelectionTypeEnum.selection2link:
-        if (this.getButton(LookupSelectionTypeEnum.selection2link)?.canToggle) {
+        if (
+          this.lookupUtils.getButton(
+            LookupSelectionTypeEnum.selection2link,
+            this._quickPick.buttons
+          )?.canToggle
+        ) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
             LookupSelectionTypeEnum.selection2link
@@ -244,7 +275,10 @@ export class LookupQuickPickView implements Disposable {
 
       case LookupSelectionTypeEnum.selectionExtract:
         if (
-          this.getButton(LookupSelectionTypeEnum.selectionExtract)?.canToggle
+          this.lookupUtils.getButton(
+            LookupSelectionTypeEnum.selectionExtract,
+            this._quickPick.buttons
+          )?.canToggle
         ) {
           this._viewState.selectionState.value =
             this._viewState.selectionState.value ===
@@ -254,7 +288,10 @@ export class LookupQuickPickView implements Disposable {
         }
         break;
       case "selectVault": {
-        if (this.getButton("selectVault")?.canToggle) {
+        if (
+          this.lookupUtils.getButton("selectVault", this._quickPick.buttons)
+            ?.canToggle
+        ) {
           this._viewState.vaultSelectionMode.value =
             this._viewState.vaultSelectionMode.value ===
             VaultSelectionMode.alwaysPrompt
@@ -264,28 +301,42 @@ export class LookupQuickPickView implements Disposable {
         break;
       }
       case "multiSelect": {
-        if (this.getButton("multiSelect")?.canToggle) {
+        if (
+          this.lookupUtils.getButton("multiSelect", this._quickPick.buttons)
+            ?.canToggle
+        ) {
           this._viewState.isMultiSelectEnabled.value =
             !this._viewState.isMultiSelectEnabled.value;
         }
         break;
       }
       case "copyNoteLink": {
-        if (this.getButton("copyNoteLink")?.canToggle) {
+        if (
+          this.lookupUtils.getButton("copyNoteLink", this._quickPick.buttons)
+            ?.canToggle
+        ) {
           this._viewState.isCopyNoteLinkEnabled.value =
             !this._viewState.isCopyNoteLinkEnabled.value;
         }
         break;
       }
       case "directChildOnly": {
-        if (this.getButton("directChildOnly")?.canToggle) {
+        if (
+          this.lookupUtils.getButton("directChildOnly", this._quickPick.buttons)
+            ?.canToggle
+        ) {
           this._viewState.isApplyDirectChildFilter.value =
             !this._viewState.isApplyDirectChildFilter.value;
         }
         break;
       }
       case LookupNoteTypeEnum.journal: {
-        if (this.getButton(LookupNoteTypeEnum.journal)?.canToggle) {
+        if (
+          this.lookupUtils.getButton(
+            LookupNoteTypeEnum.journal,
+            this._quickPick.buttons
+          )?.canToggle
+        ) {
           this._viewState.nameModifierMode.value =
             this._viewState.nameModifierMode.value ===
             LookupNoteTypeEnum.journal
@@ -295,7 +346,12 @@ export class LookupQuickPickView implements Disposable {
         break;
       }
       case LookupNoteTypeEnum.scratch: {
-        if (this.getButton(LookupNoteTypeEnum.scratch)?.canToggle) {
+        if (
+          this.lookupUtils.getButton(
+            LookupNoteTypeEnum.scratch,
+            this._quickPick.buttons
+          )?.canToggle
+        ) {
           this._viewState.nameModifierMode.value =
             this._viewState.nameModifierMode.value ===
             LookupNoteTypeEnum.scratch
@@ -305,7 +361,12 @@ export class LookupQuickPickView implements Disposable {
         break;
       }
       case LookupNoteTypeEnum.task: {
-        if (this.getButton(LookupNoteTypeEnum.task)?.canToggle) {
+        if (
+          this.lookupUtils.getButton(
+            LookupNoteTypeEnum.task,
+            this._quickPick.buttons
+          )?.canToggle
+        ) {
           this._viewState.nameModifierMode.value =
             this._viewState.nameModifierMode.value === LookupNoteTypeEnum.task
               ? LookupNoteTypeEnum.none
@@ -314,7 +375,10 @@ export class LookupQuickPickView implements Disposable {
         break;
       }
       case "horizontal": {
-        if (this.getButton("horizontal")?.canToggle) {
+        if (
+          this.lookupUtils.getButton("horizontal", this._quickPick.buttons)
+            ?.canToggle
+        ) {
           this._viewState.isSplitHorizontally.value =
             !this._viewState.isSplitHorizontally.value;
         }

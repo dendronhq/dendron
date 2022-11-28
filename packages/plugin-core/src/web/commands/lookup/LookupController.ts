@@ -19,7 +19,10 @@ import { AutoCompleter } from "../../../utils/autoCompleter";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
-import { JournalBtn } from "../../../components/lookup/buttons";
+import {
+  DirectChildFilterBtn,
+  JournalBtn,
+} from "../../../components/lookup/buttons";
 import { DendronBtn } from "../../../components/lookup/ButtonTypes";
 import { TwoWayBinding } from "../../../utils/TwoWayBinding";
 import { ILookupViewModel } from "../../../components/lookup/LookupViewModel";
@@ -84,6 +87,7 @@ export class LookupController {
         JournalBtn.create({
           pressed: opts.noteType === LookupNoteTypeEnum.journal,
         }),
+        DirectChildFilterBtn.create(),
       ];
     }
     const qp = this.createQuickPick({
@@ -93,7 +97,9 @@ export class LookupController {
       initialValue,
       noteType: opts.noteType,
     });
-    this._disposables.push(new LookupQuickPickView(qp, this.viewModel));
+    this._disposables.push(
+      new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
+    );
 
     const journalBtn = this.lookupUtils.getButtonFromArray(
       LookupNoteTypeEnum.journal,
@@ -120,6 +126,26 @@ export class LookupController {
         }
       })
     );
+
+    const directChildBtn = this.lookupUtils.getButton(
+      "directChildOnly",
+      qp.buttons
+    );
+    if (directChildBtn) {
+      this._disposables.push(
+        this.viewModel.isApplyDirectChildFilter.bind(async (newValue) => {
+          const items = await opts.provider.provideItems({
+            pickerValue: qp.value,
+            showDirectChildrenOnly: newValue,
+            workspaceState: {
+              vaults: this.vaults,
+              schemas: {},
+            },
+          });
+          qp.items = items;
+        })
+      );
+    }
 
     this.initializeViewStateFromButtons(opts.buttons);
 
@@ -215,7 +241,7 @@ export class LookupController {
     opts.provider
       .provideItems({
         pickerValue: initialQueryValue,
-        showDirectChildrenOnly: false,
+        showDirectChildrenOnly: this.viewModel.isApplyDirectChildFilter.value,
         workspaceState: {
           vaults: this.vaults,
           schemas: {},
@@ -232,7 +258,7 @@ export class LookupController {
       if (!initialized && !opts.noteType) return;
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
-        showDirectChildrenOnly: false,
+        showDirectChildrenOnly: this.viewModel.isApplyDirectChildFilter.value,
         workspaceState: {
           vaults: this.vaults,
           schemas: {},
@@ -270,6 +296,9 @@ export class LookupController {
     ) {
       this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
     }
+    this.viewModel.isApplyDirectChildFilter.value =
+      !!this.lookupUtils.getButtonFromArray("directChildOnly", buttons)
+        ?.pressed;
   }
 
   private addCreateNewOptionIfNecessary(

@@ -3,6 +3,9 @@ import {
   NoteUtils,
   VaultUtils,
   VSCodeEvents,
+  ConfigUtils,
+  DendronConfig,
+  getJournalTitle,
 } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
@@ -23,7 +26,8 @@ export class NoteLookupCmd {
     @inject("ReducedDEngine")
     private engine: ReducedDEngine,
     @inject("NoteProvider") private noteProvider: ILookupProvider,
-    @inject("ITelemetryClient") private _analytics: ITelemetryClient
+    @inject("ITelemetryClient") private _analytics: ITelemetryClient,
+    @inject("DendronConfig") private config: DendronConfig
   ) {}
 
   public async run(_opts?: LookupControllerCreateOpts) {
@@ -43,9 +47,17 @@ export class NoteLookupCmd {
       result.items.map(async (value) => {
         if (value.label === "Create New") {
           isNew = true;
+          let title;
+          if (this.factory.isJournalButtonPressed()) {
+            const journalDateFormat = ConfigUtils.getJournal(
+              this.config
+            ).dateFormat;
+            title = getJournalTitle(value.fname, journalDateFormat);
+          }
           const newNote = NoteUtils.create({
             fname: value.fname,
             vault: value.vault,
+            title,
           });
 
           // TODO: Add Schema and Template functionality

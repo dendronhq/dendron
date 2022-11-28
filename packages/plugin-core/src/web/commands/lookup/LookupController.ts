@@ -191,6 +191,10 @@ export class LookupController {
     return lookupPromise;
   }
 
+  public isJournalButtonPressed(): boolean {
+    return this.viewModel.nameModifierMode.value === LookupNoteTypeEnum.journal;
+  }
+
   createQuickPick(
     opts: LookupControllerCreateOpts
   ): DendronWebQuickPick<NoteQuickInputV2> {

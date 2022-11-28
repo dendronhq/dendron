@@ -1,10 +1,4 @@
 import { ConfirmStatus, getStage, SurveyEvents } from "@dendronhq/common-all";
-import { AnalyticsUtils } from "./utils/analytics";
-import * as vscode from "vscode";
-import _ from "lodash";
-import { Logger } from "./logger";
-import { resolve } from "path";
-import { VSCodeUtils } from "./vsCodeUtils";
 import {
   InactvieUserMsgStatusEnum,
   InitialSurveyStatusEnum,
@@ -12,6 +6,12 @@ import {
   MetadataService,
   PriorTools,
 } from "@dendronhq/engine-server";
+import _ from "lodash";
+import { resolve } from "path";
+import * as vscode from "vscode";
+import { Logger } from "./logger";
+import { AnalyticsUtils } from "./utils/analytics";
+import { VSCodeUtils } from "./vsCodeUtils";
 
 export class DendronQuickInputSurvey {
   opts: {
@@ -491,6 +491,37 @@ export class LapsedUserPlugDiscordSurvey extends DendronQuickPickSurvey {
 }
 
 export class SurveyUtils {
+  static async showEnterpriseLicenseSurvey() {
+    AnalyticsUtils.track("EnterpriseLicenseSurveyPrompted");
+    return vscode.window
+      .showInformationMessage(
+        "Welcome to Dendron! 🌱",
+        {
+          modal: true,
+          detail: "Please enter your enterprise license key to proceed",
+        },
+        { title: "Enter" }
+      )
+      .then(async (resp) => {
+        if (resp === undefined) {
+          return undefined;
+        }
+        const licenseKey = await vscode.window.showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: "license key",
+          prompt: "Please paste your license key here",
+          title: "License key",
+        });
+        const meta = MetadataService.instance();
+        if (licenseKey !== undefined) {
+          // @ts-ignore
+          meta.setMeta("enterpriseLicense", licenseKey);
+          return true;
+        }
+        return undefined;
+      });
+  }
+
   /**
    * Asks three questions about background, use case, and prior tools used.
    */

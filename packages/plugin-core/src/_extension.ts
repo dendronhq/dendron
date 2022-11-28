@@ -27,11 +27,14 @@ import {
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
 import fs from "fs-extra";
+import _ from "lodash";
 import os from "os";
 import path from "path";
+import semver from "semver";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { ConfigureWithUICommand } from "./commands/ConfigureWithUICommand";
+import { GotoNoteCommand } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { SeedAddCommand } from "./commands/SeedAddCommand";
@@ -41,9 +44,9 @@ import {
 } from "./commands/SeedBrowseCommand";
 import { SeedRemoveCommand } from "./commands/SeedRemoveCommand";
 import { ShowNoteGraphCommand } from "./commands/ShowNoteGraph";
+import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { TogglePreviewCommand } from "./commands/TogglePreview";
 import { TogglePreviewLockCommand } from "./commands/TogglePreviewLock";
-import { ShowSchemaGraphCommand } from "./commands/ShowSchemaGraph";
 import { ConfigureUIPanelFactory } from "./components/views/ConfigureUIPanelFactory";
 import { NoteGraphPanelFactory } from "./components/views/NoteGraphViewFactory";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
@@ -58,12 +61,14 @@ import setupRecentWorkspacesTreeView from "./features/RecentWorkspacesTreeview";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import RenameProvider from "./features/RenameProvider";
-import { KeybindingUtils } from "./KeybindingUtils";
 import { setupLocalExtContainer } from "./injection-providers/setupLocalExtContainer";
+import { KeybindingUtils } from "./KeybindingUtils";
 import { Logger } from "./logger";
 import { StateService } from "./services/stateService";
 import { Extensions } from "./settings";
+import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
 import { FeatureShowcaseToaster } from "./showcase/FeatureShowcaseToaster";
+import { SurveyUtils } from "./survey";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { ExtensionUtils } from "./utils/ExtensionUtils";
 import { StartupPrompts } from "./utils/StartupPrompts";
@@ -74,10 +79,6 @@ import { DendronExtension, getDWorkspace, getExtension } from "./workspace";
 import { TutorialInitializer } from "./workspace/tutorialInitializer";
 import { WorkspaceActivator } from "./workspace/workspaceActivator";
 import { WSUtils } from "./WSUtils";
-import { CreateScratchNoteKeybindingTip } from "./showcase/CreateScratchNoteKeybindingTip";
-import semver from "semver";
-import _ from "lodash";
-import { GotoNoteCommand } from "./commands/GotoNote";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.]+)");
 // === Main
@@ -415,6 +416,24 @@ export async function _activate(
             showcase.showToast();
           }
         }, ONE_MINUTE_IN_MS);
+      }
+      if (ExtensionUtils.isEnterprise(context)) {
+        let resp: boolean | undefined | string = true;
+        while (!ExtensionUtils.hasValidLicense() && resp !== undefined) {
+          // eslint-disable-next-line no-await-in-loop
+          resp = await SurveyUtils.showEnterpriseLicenseSurvey();
+        }
+        if (resp === undefined) {
+          vscode.window.showInformationMessage(
+            "Please reload to enter your license key",
+            {
+              modal: true,
+              detail:
+                "Dendron will be inactive until you enter a license key. You can reload your vscode instance to be prompted again",
+            }
+          );
+          return false;
+        }
       }
     } else {
       // ws not active

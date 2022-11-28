@@ -175,7 +175,7 @@ Dendron sends out a weekly newsletter highlighting:
 
 There are a variety of ways to connect with Dendron devs, contributors, and other members of the Dendron community:
 
-- Join the [Dendron on Discord](https://link.dendron.so/discord) 
+- Join the [Dendron on Discord](https://link.dendron.so/discord)
 - Follow [Dendron on Twitter (`@dendronhq`)](https://link.dendron.so/twitter)
 - Checkout [Dendron on GitHub](https://link.dendron.so/github)
 - Read the [Dendron Blog](https://blog.dendron.so/)
@@ -363,3 +363,5 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 
 See [LICENSE](https://github.com/dendronhq/dendron/blob/master/LICENSE.md) and [NOTICE](https://github.com/dendronhq/dendron/blob/master/NOTICE.md) for more information.
+
+Dendron Enterprise is distributed and licensed separately under the [Dendron Enterprise END-USER LICENSE AGREEMENT](https://github.com/dendronhq/dendron/wiki/Enterprise-EULA)

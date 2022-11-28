@@ -14,6 +14,8 @@ import {
   LookupController,
 } from "../../../commands/lookup/LookupController";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
+import { getWorkspaceConfig } from "../../../injection-providers/getWorkspaceConfig";
+import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 require("mocha/mocha");
 
@@ -21,6 +23,8 @@ suite("GIVEN a NoteLookupCmd", () => {
   test("WHEN the user selects nothing THEN nothing is written to the engine", async () => {
     const wsRoot = vscode.Uri.file("tmp");
 
+    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
+    const config = await getWorkspaceConfig(wsRoot);
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
@@ -42,7 +46,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();
@@ -56,7 +61,8 @@ suite("GIVEN a NoteLookupCmd", () => {
 
   test("WHEN the user selects a note THEN that note is opened", async () => {
     const wsRoot = vscode.Uri.file("tmp");
-
+    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
+    const config = await getWorkspaceConfig(wsRoot);
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
@@ -89,7 +95,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();
@@ -104,13 +111,15 @@ suite("GIVEN a NoteLookupCmd", () => {
 
   test("WHEN Create New is selected THEN a new note is written", async () => {
     const wsRoot = vscode.Uri.file("tmp");
-
+    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
+    const config = await getWorkspaceConfig(wsRoot);
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
       },
+      isJournalButtonPressed: () => false,
     } as unknown as LookupController;
 
     const vault: DVault = {
@@ -123,7 +132,6 @@ suite("GIVEN a NoteLookupCmd", () => {
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
     sinon.replace(factory, "showLookup", showLookupFake);
-
     const openTextDocumentFake = sinon.fake.resolves(undefined);
     sinon.replace(vscode.workspace, "openTextDocument", openTextDocumentFake);
 
@@ -139,7 +147,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();

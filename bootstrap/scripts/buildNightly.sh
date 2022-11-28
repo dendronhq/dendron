@@ -8,7 +8,6 @@ echo "$FOO_PID"
 sleep 10
 
 SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
-SCRIPT_EXT_TYPE=${EXT_TYPE:-dendron}
 echo "building... upgrade: patch, endpoint: local build environment: $SCRIPT_BUILD_ENV"
 
 DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js

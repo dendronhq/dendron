@@ -1,0 +1,77 @@
+# Generates an enterprise image. This image differs by requiring the user to
+# enter an enterprise license on startup.
+name: Create Enterprise Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    environment: plugin-development
+    strategy:
+      fail-fast: true
+
+    timeout-minutes: 30
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gather environment data
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Yarn Setup
+        run: yarn setup
+
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
+
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
+
+      - name: Set Environment Variables
+        run: |
+          echo "DENDRON_RELEASE_VERSION=`cat ./packages/plugin-core/package.json | jq ".version" -r | awk -F. -v OFS=. 'NF>1{$(NF-1)=sprintf("%0*d", length($(NF-1)), ($(NF-1)+1)); $NF=0; print}'`" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+
+      - name: Build the VSIX
+        run: |
+          yarn build:patch:local:ci:enterprise
+
+      - name: Check for VSIX
+        run: |
+          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
+          if [ $vsixCount = 1 ]; then
+            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
+            echo "found a single .vsix file named $vsix"
+            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
+            else
+            echo "error: expected 1 .vsix file, found $vsixCount"
+            exit 1
+          fi
+
+      - name: Upload VSIX Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: vsix
+          path: ${{ env.VSIX_RELATIVE_PATH }}
+          if-no-files-found: error

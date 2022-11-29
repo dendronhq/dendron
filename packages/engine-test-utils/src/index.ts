@@ -17,6 +17,7 @@ export {
   TestSeedUtils,
 } from "./utils";
 export * from "./presets";
+export * from "./audit";
 export {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,

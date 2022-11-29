@@ -1,7 +1,7 @@
-import { ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
-import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "../SQLiteUtils";
+import { SqliteError, SqliteErrorType } from "../SqliteError";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
 
 export class VaultNotesTableRow {
   constructor(public vaultId: number, public noteId: string) {}
@@ -22,8 +22,8 @@ export class VaultNotesTableUtils {
 
     const idx = `CREATE INDEX IF NOT EXISTS idx_VaultNotes_noteId ON VaultNotes (noteId)`;
 
-    return executeSqlWithVoidResult(db, sql).andThen(() => {
-      return executeSqlWithVoidResult(db, idx);
+    return SqliteQueryUtils.run(db, sql).andThen(() => {
+      return SqliteQueryUtils.run(db, idx);
     });
   }
 
@@ -36,22 +36,17 @@ export class VaultNotesTableUtils {
       JOIN Vaults ON Vaults.id = VaultNotes.vaultId
       WHERE noteId = '${noteId}';`;
 
-    const prom = new Promise<string>((resolve, reject) => {
-      db.get(sql, (err, row) => {
-        if (err) {
-          reject(err.message);
-        } else if (!row) {
-          reject(
-            new SqliteError(`No note or vault found for note with ID ${noteId}`)
-          );
-        } else {
-          resolve(row.fsPath);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
+    return SqliteQueryUtils.get(db, sql).andThen((row) => {
+      if (!row) {
+        const err: SqliteError = {
+          type: SqliteErrorType.NoResults,
+          query: sql,
+          name: SqliteErrorType.NoResults,
+          message: `No note or vault found for note with ID ${noteId}`,
+        };
+        return errAsync(err);
+      }
+      return okAsync(row.fsPath as string);
     });
   }
 
@@ -66,7 +61,7 @@ export class VaultNotesTableUtils {
         '${row.noteId}'
       );`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static bulkInsert(
@@ -81,7 +76,7 @@ export class VaultNotesTableUtils {
       INSERT INTO VaultNotes (vaultId, noteId)
       VALUES ${values}`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static delete(
@@ -92,6 +87,6 @@ export class VaultNotesTableUtils {
       DELETE FROM VaultNotes
       WHERE vaultId = ${row.vaultId} AND noteId = '${row.noteId}';`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 }

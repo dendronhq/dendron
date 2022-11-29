@@ -1,7 +1,8 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult, getSQLValueString } from "../SQLiteUtils";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
+import { getSQLValueString } from "../SQLiteUtils";
 
 export class SchemaNotesTableRow {
   constructor(
@@ -21,7 +22,7 @@ export class SchemaNotesTableUtils {
       PRIMARY KEY (noteId, moduleId, schemaId),
       FOREIGN KEY(noteId) REFERENCES NoteProps(id) ON DELETE CASCADE);`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static insert(

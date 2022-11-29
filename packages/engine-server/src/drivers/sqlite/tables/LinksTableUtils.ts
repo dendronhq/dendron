@@ -3,11 +3,8 @@ import _ from "lodash";
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import {
-  executeSqlWithVoidResult,
-  getIntegerString,
-  getSQLValueString,
-} from "../SQLiteUtils";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
+import { getIntegerString, getSQLValueString } from "../SQLiteUtils";
 
 // TODO Should be an enum...
 export type LinkType =
@@ -52,12 +49,12 @@ export class LinksTableUtils {
 
     const idx2 = `CREATE INDEX IF NOT EXISTS idx_Links_sink ON Links (sink)`;
 
-    return executeSqlWithVoidResult(db, sql)
+    return SqliteQueryUtils.run(db, sql)
       .andThen(() => {
-        return executeSqlWithVoidResult(db, idx);
+        return SqliteQueryUtils.run(db, idx);
       })
       .andThen(() => {
-        return executeSqlWithVoidResult(db, idx2);
+        return SqliteQueryUtils.run(db, idx2);
       });
   }
 
@@ -78,29 +75,7 @@ export class LinksTableUtils {
       )})
       `;
 
-    const prom = new Promise<null>((resolve, reject) => {
-      db.run(sql, (err) => {
-        if (err) {
-          if (
-            err.message === "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed"
-          ) {
-            reject(
-              new SqliteError(
-                `NoteProps for either source id ${row.source} or sink id ${row.sink} not found in NoteProps table.`
-              )
-            );
-          } else {
-            reject(err.message);
-          }
-        } else {
-          resolve(null);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static bulkInsertLinkWithSinkAsFname(
@@ -127,7 +102,7 @@ export class LinksTableUtils {
       SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
       LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static bulkInsertLinkCandidatesWithSinkAsFname(
@@ -154,7 +129,7 @@ export class LinksTableUtils {
       SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
       JOIN NoteProps ON T.fname = NoteProps.fname`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   static InsertLinksThatBecameAmbiguous(
@@ -173,7 +148,7 @@ export class LinksTableUtils {
       FROM T
       JOIN Links ON Links.sinkFname = T.fname AND Links.sinkVaultName IS NULL`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   /**
@@ -204,40 +179,30 @@ export class LinksTableUtils {
       FROM Links
       WHERE (source = '${noteId}' OR sink = '${noteId}')`;
 
-    const prom = new Promise<DLink[]>((resolve, reject) => {
+    return SqliteQueryUtils.all(db, sql).map((rows) => {
       const dlinks: DLink[] = [];
 
-      db.all(sql, (err: Error, rows: LinksTableRow[]) => {
-        if (err) {
-          reject(err.message);
-        } else {
-          rows.map((row) => {
-            // Forward Links:
-            if (row.source === noteId && row.payload) {
-              dlinks.push(JSON.parse(row.payload as unknown as string)); // TODO - prolly need to change type in LinksTableRow to string instead of DLink
-            } else if (row.sink === noteId) {
-              const link: DLink = JSON.parse(row.payload as unknown as string);
+      rows.map((row) => {
+        // Forward Links:
+        if (row.source === noteId && row.payload) {
+          dlinks.push(JSON.parse(row.payload as unknown as string)); // TODO - prolly need to change type in LinksTableRow to string instead of DLink
+        } else if (row.sink === noteId) {
+          const link: DLink = JSON.parse(row.payload as unknown as string);
 
-              const backlink: DLink = {
-                type: "backlink",
-                value: link.value,
-                position: link.position,
-                from: link.from,
-              };
+          const backlink: DLink = {
+            type: "backlink",
+            value: link.value,
+            position: link.position,
+            from: link.from,
+          };
 
-              dlinks.push(backlink);
-            }
-          });
-
-          // An ambigious wikilink will have multiple entries in the links
-          // table, so we need to dedupe here:
-          resolve(_.uniqWith(dlinks, _.isEqual));
+          dlinks.push(backlink);
         }
       });
-    });
 
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
+      // An ambiguous wikilink will have multiple entries in the links
+      // table, so we need to dedupe here:
+      return _.uniqWith(dlinks, _.isEqual);
     });
   }
 
@@ -246,7 +211,7 @@ export class LinksTableUtils {
       DELETE FROM Links
       WHERE source = '${source}'`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   public static updateUnresolvedLinksForAddedNotes(
@@ -276,7 +241,7 @@ export class LinksTableUtils {
     WHERE Links.source = AddedNotes.source
     AND Links.payload = AddedNotes.payload`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
   static getSQLValueForLinkType(type: LinkType): number {
     switch (type) {

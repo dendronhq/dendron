@@ -12,7 +12,7 @@ import {
   StatusCodes,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { err, ok, Result, ResultAsync } from "neverthrow";
+import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import {
   HierarchyTableRow,
@@ -81,8 +81,12 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
       getChildrenResult,
       getParentResult,
       getVaultResult,
-    ]).map((results) => {
+    ]).andThen((results) => {
       const row = results[0];
+
+      if (!row) {
+        return errAsync(new Error(`Unable to find NoteProps for id ${key}`));
+      }
       const links = results[1];
       const children = results[2];
       const parent = results[3];
@@ -110,7 +114,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         vault,
       };
 
-      return data;
+      return okAsync(data);
     });
   }
 

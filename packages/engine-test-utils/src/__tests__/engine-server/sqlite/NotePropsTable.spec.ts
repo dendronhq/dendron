@@ -67,6 +67,9 @@ describe("GIVEN a NoteProps Sqlite Table", () => {
         fail(e);
       })
       .map((row) => {
+        if (!row) {
+          fail(`Unable to find row with ID "id" from database`);
+        }
         expect(row.id).toEqual("id");
         expect(row.fname).toEqual("fname");
         expect(row.title).toEqual("title");
@@ -88,10 +91,10 @@ describe("GIVEN a NoteProps Sqlite Table", () => {
 
     const dbResult = await NotePropsTableUtils.getById(db, "imaginary-id");
 
-    expect(dbResult.isErr()).toBeTruthy();
+    expect(dbResult.isOk()).toBeTruthy();
 
-    dbResult.mapErr((e) => {
-      expect(e.message).toEqual("No row with id imaginary-id found");
+    dbResult.map((row) => {
+      expect(row).toEqual(null);
     });
   });
 
@@ -108,6 +111,9 @@ describe("GIVEN a NoteProps Sqlite Table", () => {
         fail(e);
       })
       .map((row) => {
+        if (!row) {
+          fail(`Unable to find row with ID "id" from database`);
+        }
         expect(row.id).toEqual("id");
         expect(row.fname).toEqual("updated-fname");
         expect(row.title).toEqual("updated-title");
@@ -125,10 +131,10 @@ describe("GIVEN a NoteProps Sqlite Table", () => {
     expect(deleteResult.isErr()).toBeFalsy();
 
     const getResult = await NotePropsTableUtils.getById(db, testNoteProp.id);
-    expect(getResult.isErr()).toBeTruthy();
+    expect(getResult.isOk()).toBeTruthy();
 
-    getResult.mapErr((e) => {
-      expect(e.message).toEqual(`No row with id ${testNoteProp.id} found`);
+    getResult.map((noteProps) => {
+      expect(noteProps).toEqual(null);
     });
   });
 });

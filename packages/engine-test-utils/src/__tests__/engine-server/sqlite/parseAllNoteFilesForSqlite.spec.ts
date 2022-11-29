@@ -1250,7 +1250,11 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
     // Validate B is missing
     const resultB = await NotePropsTableUtils.getById(db, "b");
-    expect(resultB.isErr()).toBeTruthy();
+    expect(resultB.isOk()).toBeTruthy();
+
+    resultB.map((row) => {
+      expect(row).toEqual(null);
+    });
 
     // Validate C is present
     await validateNotePropInDB(db, "c", testVault);
@@ -1303,8 +1307,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     expect(result.isOk()).toBeTruthy();
 
     if (result.isOk()) {
-      expect(result.value.id).toEqual(newNoteId);
-      expect(result.value.fname).toEqual("a");
+      expect(result.value?.id).toEqual(newNoteId);
+      expect(result.value?.fname).toEqual("a");
     }
 
     // Validate children of root is updated:
@@ -1390,8 +1394,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     expect(result.isOk()).toBeTruthy();
 
     if (result.isOk()) {
-      expect(result.value.id).toEqual("a");
-      expect(result.value.fname).toEqual("a");
+      expect(result.value?.id).toEqual("a");
+      expect(result.value?.fname).toEqual("a");
     }
 
     // Validate children of root is updated:
@@ -1446,8 +1450,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     expect(vault2GetResult.isOk()).toBeTruthy();
 
     if (vault2GetResult.isOk()) {
-      expect(vault2GetResult.value.id).toEqual("a-vault-two");
-      expect(vault2GetResult.value.fname).toEqual("a");
+      expect(vault2GetResult.value?.id).toEqual("a-vault-two");
+      expect(vault2GetResult.value?.fname).toEqual("a");
     }
 
     // Validate no parent for vault 2 note A
@@ -1784,8 +1788,8 @@ async function validateNotePropInDB(
 
   expect(result.isOk()).toBeTruthy();
   if (result.isOk()) {
-    expect(result.value.id).toEqual(noteId);
-    expect(result.value.fname).toEqual(noteId);
+    expect(result.value?.id).toEqual(noteId);
+    expect(result.value?.fname).toEqual(noteId);
   }
 
   const resVaultNote = await VaultNotesTableUtils.getVaultFsPathForNoteId(

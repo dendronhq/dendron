@@ -4,6 +4,7 @@ import {
   LinksTableUtils,
   NotePropsTableUtils,
   enableForeignKeys,
+  SqliteErrorType,
 } from "@dendronhq/engine-server";
 import { Database } from "sqlite3";
 
@@ -130,9 +131,7 @@ describe("GIVEN a Links Sqlite Table", () => {
     const insertResult = await LinksTableUtils.insert(db, invalidSourceRow);
     expect(insertResult.isErr()).toBeTruthy();
     insertResult.mapErr((e) => {
-      expect(e.message).toEqual(
-        `NoteProps for either source id invalid-source or sink id sink not found in NoteProps table.`
-      );
+      expect(e.type).toEqual(SqliteErrorType.ForeignKeyConstraintViolation);
     });
 
     const invalidSinkRow: LinksTableRow = {
@@ -145,9 +144,7 @@ describe("GIVEN a Links Sqlite Table", () => {
     const insertResultTwo = await LinksTableUtils.insert(db, invalidSinkRow);
     expect(insertResultTwo.isErr()).toBeTruthy();
     insertResultTwo.mapErr((e) => {
-      expect(e.message).toEqual(
-        `NoteProps for either source id source or sink id invalid-sink not found in NoteProps table.`
-      );
+      expect(e.type).toEqual(SqliteErrorType.ForeignKeyConstraintViolation);
     });
   });
 

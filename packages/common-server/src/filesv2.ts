@@ -322,7 +322,7 @@ export async function note2File({
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtils.serialize(note, { excludeStub: true });
+  const payload = NoteUtils.serialize(note);
   const vpath = vault2Path({ vault, wsRoot });
   await fs.writeFile(path.join(vpath, fname + ext), payload);
   return genHash(payload);

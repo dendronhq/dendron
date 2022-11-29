@@ -48,8 +48,7 @@ export function string2Note({
   });
 
   // Any note parsed from a real string cannot be a stub - stubs are only
-  // virtual notes to fill in hierarchy gaps.
-  // TODO Sqlite - add this back and fix test snapshots.
-  // note.stub = false;
-  return note;
+  // virtual notes to fill in hierarchy gaps. Just omit the property - the value
+  // defaults to 'false'
+  return _.omit(note, "stub");
 }

@@ -21,7 +21,7 @@ export async function note2File({
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtils.serialize(note, { excludeStub: true });
+  const payload = NoteUtils.serialize(note);
   const vaultPath = vault2Path({ vault, wsRoot });
   await vscode.workspace.fs.writeFile(
     Utils.joinPath(vaultPath, fname + ext),

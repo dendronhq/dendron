@@ -217,6 +217,9 @@ export class VSCodeUtils {
         storagePath: tmpDir().name,
         globalStoragePath: tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
+        extension: {
+          id: "dummy",
+        },
       } as unknown as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;

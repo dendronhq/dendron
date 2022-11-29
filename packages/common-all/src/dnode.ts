@@ -887,7 +887,6 @@ export class NoteUtils {
     // Separate custom and builtin props
     const builtinProps = _.pick(propsWithTrait, [
       ...Object.values(DNodeExplicitPropsEnum),
-      "stub",
     ]);
 
     const { custom: customProps } = cleanProps;
@@ -895,12 +894,9 @@ export class NoteUtils {
     return meta;
   }
 
-  static serialize(props: NoteProps, opts?: { excludeStub?: boolean }): string {
+  static serialize(props: NoteProps): string {
     const body = props.body;
-    const blacklist = ["parent", "children"];
-    if (opts?.excludeStub) {
-      blacklist.push("stub");
-    }
+    const blacklist = ["parent", "children", "stub"];
     const meta = _.omit(NoteUtils.serializeExplicitProps(props), blacklist);
     // Make sure title and ID are always strings
     meta.title = _.toString(meta.title);

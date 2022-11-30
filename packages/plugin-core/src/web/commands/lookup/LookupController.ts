@@ -22,6 +22,7 @@ import { VaultQuickPick } from "./VaultQuickPick";
 import {
   DirectChildFilterBtn,
   JournalBtn,
+  VaultSelectButton,
 } from "../../../components/lookup/buttons";
 import { DendronBtn } from "../../../components/lookup/ButtonTypes";
 import { TwoWayBinding } from "../../../utils/TwoWayBinding";
@@ -40,6 +41,18 @@ export type LookupControllerCreateOpts = QuickPickOptions & {
   buttons?: DendronBtn[];
   initialValue?: string;
   noteType?: LookupNoteType;
+  /**
+   * When true, don't enable vault selection
+   */
+  disableVaultSelection?: boolean;
+  /* if vault selection isn't disabled,
+   * press button on init if true
+   */
+  vaultButtonPressed?: boolean;
+  /** If vault selection isn't disabled, allow choosing the mode of selection.
+   *  Defaults to true. */
+  vaultSelectCanToggle?: boolean;
+  vaultSelectionMode?: VaultSelectionMode;
 };
 
 export type LookupAcceptPayload = {
@@ -82,20 +95,14 @@ export class LookupController {
     if (!initialValue) {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
-    if (!opts.buttons) {
-      opts.buttons = [
-        JournalBtn.create({
-          pressed: opts.noteType === LookupNoteTypeEnum.journal,
-        }),
-        DirectChildFilterBtn.create(),
-      ];
-    }
     const qp = this.createQuickPick({
       title: "Lookup Note",
       buttons: opts.buttons,
       provider: opts.provider,
       initialValue,
       noteType: opts.noteType,
+      vaultButtonPressed: opts.vaultButtonPressed,
+      disableVaultSelection: opts.disableVaultSelection,
     });
     this._disposables.push(
       new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
@@ -105,27 +112,33 @@ export class LookupController {
       LookupNoteTypeEnum.journal,
       qp.buttons
     );
-    this._disposables.push(
-      this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
-        switch (prevValue) {
-          case LookupNoteTypeEnum.journal:
-            if (journalBtn)
-              this.lookupUtils.onJournalButtonToggled(false, qp, initialValue);
-            break;
-          default:
-            break;
-        }
+    if (journalBtn) {
+      this._disposables.push(
+        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
+          switch (prevValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn)
+                this.lookupUtils.onJournalButtonToggled(
+                  false,
+                  qp,
+                  initialValue
+                );
+              break;
+            default:
+              break;
+          }
 
-        switch (newValue) {
-          case LookupNoteTypeEnum.journal:
-            if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
-            break;
-          case LookupNoteTypeEnum.none:
-            break;
-          default:
-        }
-      })
-    );
+          switch (newValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
+              break;
+            case LookupNoteTypeEnum.none:
+              break;
+            default:
+          }
+        })
+      );
+    }
 
     const directChildBtn = this.lookupUtils.getButton(
       "directChildOnly",
@@ -147,7 +160,20 @@ export class LookupController {
       );
     }
 
-    this.initializeViewStateFromButtons(opts.buttons);
+    // Do we need this in any scenario?
+    // const vaultSelectionBtn = this.lookupUtils.getButton(
+    //   "selectVault",
+    //   qp.buttons
+    // );
+    // if (vaultSelectionBtn) {
+    //   this._disposables.push(
+    //     this.viewModel.vaultSelectionMode.bind(async (newValue) => {
+    //       this.viewModel.vaultSelectionMode.value = newValue;
+    //     })
+    //   );
+    // }
+
+    this.initializeViewStateFromButtons(qp.buttons);
 
     this.tabAutoCompleteEvent(() => {
       qp.value = AutoCompleter.getAutoCompletedValue(qp);
@@ -185,6 +211,7 @@ export class LookupController {
               fname: value.items[0].fname,
               vault: currentNote?.vault ?? this.vaults[0],
               vaults: this.vaults,
+              vaultSelectionMode: this.viewModel.vaultSelectionMode.value,
             });
 
             if (!vault) {
@@ -228,14 +255,38 @@ export class LookupController {
     let initialized = false; // Not really sure why this is needed. For some reason onDidChangeValue seems to get called before I think the callback is set up.
 
     qp.title = opts.title;
-    qp.buttons = opts.buttons ?? [];
 
     // We slice the postfix off until the first dot to show all results at the same
     // level so that when a user types `foo.one`, they will see all results in `foo.*`
     const initialQueryValue = NoteLookupUtils.getQsForCurrentLevel(
       opts.initialValue ?? ""
     );
+    if (!opts.buttons) {
+      opts.buttons = [
+        JournalBtn.create({
+          pressed: opts.noteType === LookupNoteTypeEnum.journal,
+        }),
+        DirectChildFilterBtn.create(),
+      ];
+    }
 
+    // start: multi vault selection check
+    const isMultiVault = this.vaults.length > 1 && !opts.disableVaultSelection;
+    const maybeVaultSelectButtonPressed = _.isUndefined(
+      opts?.vaultButtonPressed
+    )
+      ? isMultiVault
+      : isMultiVault && opts!.vaultButtonPressed;
+    if (isMultiVault) {
+      opts.buttons.push(
+        VaultSelectButton.create({
+          pressed: maybeVaultSelectButtonPressed,
+          canToggle: opts?.vaultSelectCanToggle,
+        })
+      );
+    }
+    qp.buttons = opts.buttons ?? [];
+    // --- end: multi vault selection check
     qp.value = opts.initialValue ?? "";
 
     opts.provider
@@ -299,6 +350,11 @@ export class LookupController {
     this.viewModel.isApplyDirectChildFilter.value =
       !!this.lookupUtils.getButtonFromArray("directChildOnly", buttons)
         ?.pressed;
+
+    this.viewModel.vaultSelectionMode.value =
+      this.lookupUtils.getButtonFromArray("selectVault", buttons)?.pressed
+        ? VaultSelectionMode.alwaysPrompt
+        : VaultSelectionMode.smart;
   }
 
   private addCreateNewOptionIfNecessary(

@@ -6,7 +6,7 @@ import {
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
-import vscode from "vscode";
+import vscode, { window } from "vscode";
 import { URI, Utils } from "vscode-uri";
 
 @injectable()
@@ -73,5 +73,13 @@ export class WSUtilsWeb {
       VaultUtils.getRelPath(vault),
       fname + ".md"
     );
+  }
+
+  public getVaultForOpenEditor(): DVault {
+    const activeDocument = window.activeTextEditor?.document;
+    if (!activeDocument) {
+      return this.vaults[0];
+    }
+    return this.getVaultFromDocument(activeDocument);
   }
 }

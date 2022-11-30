@@ -172,7 +172,8 @@ export class VaultQuickPick {
       allVaults = _.filter(allVaults, (v) => {
         return !_.isEqual(v, vault);
       });
-
+      // TODO: this isn't right. Sometimes vaultSuggestion already has
+      // the value that we are trying to push. This leads to duplicate entries
       allVaults.forEach((wsVault) => {
         vaultSuggestions.push({
           vault: wsVault,

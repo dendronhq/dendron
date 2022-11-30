@@ -10,6 +10,7 @@ import {
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { VaultSelectionMode } from "../../components/lookup/types";
 import { DENDRON_COMMANDS } from "../../constants";
 import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
@@ -35,6 +36,17 @@ export class NoteLookupCmd {
     const opts = _opts || {
       provider: this.noteProvider,
     };
+    const lookupConfig = ConfigUtils.getCommands(this.config).lookup;
+    const noteLookupConfig = lookupConfig.note;
+    if (opts?.vaultSelectionMode) {
+      opts.vaultButtonPressed =
+        opts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt;
+    } else {
+      const vaultSelectionMode = noteLookupConfig.vaultSelectionModeOnCreate;
+      opts.vaultButtonPressed = vaultSelectionMode === "alwaysPrompt";
+    }
+    opts.disableVaultSelection = !noteLookupConfig.confirmVaultOnCreate;
+
     const result = await this.factory.showLookup(opts);
 
     if (!result) {

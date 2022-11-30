@@ -83,7 +83,7 @@ export class ConfigStore implements IConfigStore {
     config: DeepPartial<DendronConfig>,
     mode: "workspace" | "global"
   ) {
-    const res = YamlUtils.toStr(config).map((content) => {
+    return YamlUtils.toStr(config).asyncAndThen((content) => {
       const writePath = this.configOverridePath(wsRoot, mode);
       if (writePath) {
         return this.writeToFS(writePath, content);
@@ -95,7 +95,6 @@ export class ConfigStore implements IConfigStore {
         );
       }
     });
-    return res.unwrapOr(() => {});
   }
 
   /** helpers */

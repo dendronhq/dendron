@@ -14,6 +14,7 @@ export type ConfigServiceOpts = {
   // i.e. only pass it in for NodeJSFileStore
   homeDir: URI | undefined;
   fileStore: IFileStore;
+  // this is strictly for testing purposes.
   forceNew?: boolean;
 };
 

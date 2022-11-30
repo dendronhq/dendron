@@ -671,6 +671,7 @@ export class DevCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       throw DendronError.createFromStatus({
         status: ERROR_STATUS.INVALID_CONFIG,
         message: "no dendron config found",
+        innerError: configReadRawResult.error,
       });
     }
     const dendronConfig = configReadRawResult.value as DendronConfig;

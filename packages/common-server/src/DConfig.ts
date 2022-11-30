@@ -37,6 +37,8 @@ let _dendronConfig: DendronConfig | undefined;
 export class DConfig {
   /**
    * @deprecated
+   * Use {@link ConfigService.configPath} instead
+   * e.g.) const configPath = ConfigService.instance().configPath(URI.file(wsRoot))
    */
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
@@ -44,6 +46,8 @@ export class DConfig {
 
   /**
    * @deprecated
+   * use {@link ConfigService.configOverridePath} instead
+   * e.g.) const overridePath = ConfigService.instance().configOverridePath(URI.file(wsRoot), "workspace")
    */
   static configOverridePath(wsRoot: string, scope: LocalConfigScope): string {
     const configPath =
@@ -53,6 +57,7 @@ export class DConfig {
 
   /**
    * @deprecated
+   * This will be moved to a more suitable location in the near future
    */
   static getSiteIndex(sconfig: DendronPublishingConfig): string {
     const { siteIndex, siteHierarchies } = sconfig;
@@ -62,6 +67,7 @@ export class DConfig {
   /**
    * @deprecated
    * fill in defaults
+   * This will be moved to a more suitable location in the near future
    */
   static cleanPublishingConfig(
     config: DendronPublishingConfig
@@ -116,6 +122,7 @@ export class DConfig {
 
   /**
    * @deprecated
+   * This will be moved to a more suitable location in the near future
    */
   static setCleanPublishingConfig(opts: {
     config: DendronConfig;
@@ -127,6 +134,11 @@ export class DConfig {
 
   /**
    * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.searchOverride} instead
+   * e.g.)
+   * searchOverrideResult = await ConfigService.instance().searchOverride(URI.file(wsRoot))
+   *
    * See if a local config file is present
    */
   static searchLocalConfigSync(wsRoot: string): RespV3<DendronConfig> {
@@ -157,6 +169,11 @@ export class DConfig {
 
   /**
    * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.readConfig} instead
+   * e.g.)
+   * const readResult = await ConfigService.instance().readConfig(URI.file(wsRoot), { applyOverride: false });
+   *
    * Read configuration
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -189,6 +206,11 @@ export class DConfig {
 
   /**
    * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.readConfig} instead
+   * e.g.)
+   * const readResult = await ConfigService.instance().readConfig(URI.file(wsRoot));
+   *
    * Read config and merge with local config
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -235,6 +257,9 @@ export class DConfig {
 
   /**
    * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigUtils.validateLocalConfig} instead
+   *
    * Sanity check local config properties
    */
   static validateLocalConfig({

@@ -55,7 +55,7 @@ export class DendronEngineV3Factory {
       ConfigUtils.getVaults(config),
       fileStore,
       dbFilePath,
-      logger
+      LOGGER
     );
 
     if (dbResult.isErr()) {
@@ -64,6 +64,7 @@ export class DendronEngineV3Factory {
     }
 
     const sqliteMetadataStore = new SqliteMetadataStore(dbResult.value, vaults);
+    await sqliteMetadataStore.initSchema(fileStore, wsRoot, LOGGER);
 
     return new DendronEngineV3({
       wsRoot,

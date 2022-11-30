@@ -80,7 +80,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   // Query Tests:
   test("WHEN sqlite init is performed with a single note THEN it can be queried by fname", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     const result = await NotePropsFtsTableUtils.query(db, "a");
     expect(result.isOk()).toBeTruthy();
@@ -103,8 +103,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "a.ch2.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     const result = await NotePropsFtsTableUtils.query(db, "a");
@@ -124,15 +123,9 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN a note is added THEN the added note can be queried by fname", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     const result = await NotePropsFtsTableUtils.query(db, "b");
     expect(result.isOk()).toBeTruthy();
@@ -151,16 +144,10 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN a note is removed THEN it no longer can be queried by fname", async () => {
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     // Remove B:
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     const result = await NotePropsFtsTableUtils.query(db, "b");
     expect(result.isOk()).toBeTruthy();
@@ -186,7 +173,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN a note is updated to have a different fname THEN only the updated fname is queryable", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     // Now 'change' the note with ID 'a' to have fname 'b'
     const note = NoteUtils.create({
@@ -198,7 +185,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     });
     await note2File({ note, vault: testVault, wsRoot: testDir });
 
-    await parseAllNoteFilesForSqlite(["b.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["b.md"], testVault, db, testDir);
 
     const resultB = await NotePropsFtsTableUtils.query(db, "b");
     expect(resultB.isOk()).toBeTruthy();

@@ -200,7 +200,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   // Vault Setup Tests:
   test("WHEN sqlite init is performed with a single vault THEN vault is present in the Vaults table", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     expect(
       await SqliteTestUtils.getRowCountForTable(db, SqliteTableNames.Vaults)
@@ -208,13 +208,12 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN sqlite init is performed over multiple vaults THEN all vaults are present in the Vaults table", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
     await parseAllNoteFilesForSqlite(
       ["vault-two-note.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
 
     const result = await VaultsTableUtils.getIdByFsPath(db, ".");
@@ -235,8 +234,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       [],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(response.isOk()).toBeTruthy();
@@ -247,7 +245,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN sqlite init is performed on a simple note THEN note is present in the NoteProps and VaultNotes tables", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a", testVault);
 
@@ -258,8 +256,8 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   test("WHEN sqlite init is done multiple times THEN subsequent inits don't affect DB state", async () => {
     // Run twice:
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a", testVault);
 
@@ -272,16 +270,10 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   test("WHEN a new note is added to file system THEN the new note is added to NoteProps and VaultNotes tables", async () => {
     // Set the initial DB state:
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     // Now a second note is added 'offline', and the DB gets initialized again:
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a", testVault);
     await validateNotePropInDB(db, "b", testVault);
@@ -296,15 +288,14 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   test("WHEN many new notes are added to file system THEN all the new notes are added to NoteProps and VaultNotes tables", async () => {
     // Set the initial DB state:
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     // Now multiple notes are added 'offline', and the DB gets initialized again:
     await parseAllNoteFilesForSqlite(
       ["a.md", "b.md", "c.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -326,8 +317,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "wikilink-a.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -379,8 +369,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["wikilink-to-self.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "wikilink-to-self", testVault);
@@ -414,8 +403,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "noteref-a.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     await validateNotePropInDB(db, "a", testVault);
     await validateNotePropInDB(db, "noteref-a", testVault);
@@ -449,7 +437,6 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       testVault,
       db,
       testDir,
-      {},
       true // enableLinkCandidates
     );
 
@@ -484,8 +471,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "unresolved-wikilink.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -518,21 +504,14 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   test("WHEN a note with an unresolved wikilink is added AND the wikilink is later resolved THEN the entry in the links table has source and sinks properly populated", async () => {
     // Set the initial DB state. Wikilink-a is unresolved.
-    await parseAllNoteFilesForSqlite(
-      ["wikilink-a.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["wikilink-a.md"], testVault, db, testDir);
 
     // Now it gets resolved since a got added.
     await parseAllNoteFilesForSqlite(
       ["a.md", "wikilink-a.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -585,8 +564,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResult.isOk()).toBeTruthy();
@@ -618,8 +596,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -659,8 +636,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["root.md", "a.md", "b.md", "c.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "root", testVault);
@@ -707,8 +683,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResult.isOk()).toBeTruthy();
@@ -763,8 +738,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResult.isOk()).toBeTruthy();
@@ -837,8 +811,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResult.isOk()).toBeTruthy();
@@ -848,8 +821,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResultTwo.isOk()).toBeTruthy();
@@ -892,8 +864,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.ch1.gch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResult.isOk()).toBeTruthy();
@@ -903,8 +874,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       [],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(parseResultTwo.isOk()).toBeTruthy();
@@ -920,7 +890,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
 
   // Note Update Tests:
   test("WHEN a note is modified THEN the new note state is reflected in the NoteProps table", async () => {
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     // Now modify the note:
     await NoteTestUtilsV4.createNote({
@@ -931,7 +901,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     });
 
     // Initialize again:
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     // The updated state should be in the DB:
     const result = await validateNotePropInDB(db, "a", testVault);
@@ -952,8 +922,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "b.md", "wikilink-b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Now modify the note to change the wikilink from 'b' to 'a':
@@ -969,8 +938,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "b.md", "wikilink-b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -1013,8 +981,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "b.md", "wikilink-b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Now modify the note to remove the wikilink:
@@ -1030,8 +997,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "b.md", "wikilink-b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     await validateNotePropInDB(db, "a", testVault);
@@ -1054,13 +1020,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN many new notes are modified THEN the all the new note states are reflected in the DB", async () => {
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     // Now modify the notes:
     await NoteTestUtilsV4.createNote({
@@ -1077,13 +1037,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     });
 
     // Initialize again:
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     // The updated state should be in the DB:
     const result = await validateNotePropInDB(db, "a", testVault);
@@ -1096,16 +1050,10 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   // Deletion Tests
   test("WHEN a note has been deleted THEN all references to that note are deleted from the DB", async () => {
     // Set the initial DB state:
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     // 'Delete' Note B
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a", testVault);
 
@@ -1124,12 +1072,11 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Now 'delete' the child note a.ch1.md
-    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a", testVault);
 
@@ -1155,12 +1102,11 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Now 'delete' the parent note a.md
-    await parseAllNoteFilesForSqlite(["a.ch1.md"], testVault, db, testDir, {});
+    await parseAllNoteFilesForSqlite(["a.ch1.md"], testVault, db, testDir);
 
     await validateNotePropInDB(db, "a.ch1", testVault);
 
@@ -1181,20 +1127,13 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   });
 
   test("WHEN all notes have been deleted THEN initialization still succeeds and the database is empty apart from the Vaults Table", async () => {
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     const response = await parseAllNoteFilesForSqlite(
       [],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     expect(response.isOk()).toBeTruthy();
@@ -1219,13 +1158,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
   // Tests for more complicated scenarios:
   test("WHEN a combo of adds, updates, and deletes have happened THEN the DB state is updated correctly", async () => {
     // Set the initial DB state:
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "b.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "b.md"], testVault, db, testDir);
 
     // Now modify note A:
     await NoteTestUtilsV4.createNote({
@@ -1236,13 +1169,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
     });
 
     // 'Delete' Note B, Add Note C, modify Note A:
-    await parseAllNoteFilesForSqlite(
-      ["a.md", "c.md"],
-      testVault,
-      db,
-      testDir,
-      {}
-    );
+    await parseAllNoteFilesForSqlite(["a.md", "c.md"], testVault, db, testDir);
 
     // Validate 'A' is modified
     const result = await validateNotePropInDB(db, "a", testVault);
@@ -1277,8 +1204,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "wikilink-a.md", "root.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Now change A's ID:
@@ -1297,8 +1223,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "wikilink-a.md", "root.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
 
     // Validate 'A' is modified
@@ -1375,8 +1300,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md", "a.ch1.md", "wikilink-a.md", "root.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     expect(parseResult.isOk()).toBeTruthy();
 
@@ -1384,8 +1308,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
     expect(parseResult2.isOk()).toBeTruthy();
 
@@ -1492,8 +1415,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["cross-vault-link.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
     expect(parseResultVault2.isOk()).toBeTruthy();
 
@@ -1501,8 +1423,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     expect(parseResult.isOk()).toBeTruthy();
 
@@ -1553,8 +1474,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["b.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     expect(parseResult.isOk()).toBeTruthy();
 
@@ -1563,8 +1483,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["cross-vault-link.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
     expect(parseResultVault2.isOk()).toBeTruthy();
 
@@ -1618,8 +1537,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["cross-vault-link-with-vault-qualifier.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
     expect(parseResultVault2.isOk()).toBeTruthy();
 
@@ -1628,8 +1546,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     expect(parseResultVault1.isOk()).toBeTruthy();
 
@@ -1638,8 +1555,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md"],
       testVaultThree,
       db,
-      path.join(testDir, testVaultThree.fsPath),
-      {}
+      path.join(testDir, testVaultThree.fsPath)
     );
     expect(parseResultVault3.isOk()).toBeTruthy();
 
@@ -1705,8 +1621,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["cross-vault-link-ambiguous.md", "a.md"],
       testVaultTwo,
       db,
-      path.join(testDir, testVaultTwo.fsPath),
-      {}
+      path.join(testDir, testVaultTwo.fsPath)
     );
 
     expect(parseResultVault2.isOk()).toBeTruthy();
@@ -1715,8 +1630,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md"],
       testVault,
       db,
-      testDir,
-      {}
+      testDir
     );
     expect(parseResult.isOk()).toBeTruthy();
 
@@ -1724,8 +1638,7 @@ describe("GIVEN a sqlite store about to be initialized", () => {
       ["a.md"],
       testVaultThree,
       db,
-      path.join(testDir, testVaultThree.fsPath),
-      {}
+      path.join(testDir, testVaultThree.fsPath)
     );
 
     expect(parseResultVault3.isOk()).toBeTruthy();

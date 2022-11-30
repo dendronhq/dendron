@@ -1,5 +1,12 @@
-import { DVault, INoteStore, NoteStore, URI } from "@dendronhq/common-all";
 import {
+  DEngineClient,
+  DVault,
+  INoteStore,
+  NoteStore,
+  URI,
+} from "@dendronhq/common-all";
+import {
+  DendronEngineClient,
   NodeJSFileStore,
   SqliteDbFactory,
   SqliteMetadataStore,
@@ -8,7 +15,8 @@ import { runAllNoteStoreTests } from "../../../noteStore.common";
 
 async function createNoteStoreUsingSqliteMetadataStore(
   wsRoot: string,
-  vaults: DVault[]
+  vaults: DVault[],
+  engine: DEngineClient
 ): Promise<INoteStore<string>> {
   const fileStore = new NodeJSFileStore();
 
@@ -17,7 +25,8 @@ async function createNoteStoreUsingSqliteMetadataStore(
     vaults,
     fileStore,
     // "/Users/jyeung/code/dendron/dendron/dendron.test4.db"
-    ":memory:" // This special DB name tells sqlite to create the db in-memory
+    ":memory:", // This special DB name tells sqlite to create the db in-memory,
+    (engine as DendronEngineClient).logger
   );
 
   if (dbResult.isErr()) {

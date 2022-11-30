@@ -1,4 +1,6 @@
 import fs from "fs-extra";
+import os from "os";
+import { axios, Time, ErrorUtils } from "@dendronhq/common-all";
 // @ts-ignore
 import lighthouse from "lighthouse";
 // @ts-ignore
@@ -20,7 +22,6 @@ const metricFilter = [
   "first-contentful-paint",
   "speed-index",
   "interactive",
-  "server-response-time",
 ];
 
 const validTypes = ["csv", "html", "json"] as const;
@@ -46,7 +47,6 @@ type Reports = {
 };
 
 type LighthouseResult = RunnerResult["lhr"];
-// type AuditResult = LighthouseResult['audits']['x']
 type AuditConfig = {
   port: number;
   url: string;
@@ -111,16 +111,18 @@ async function playAudit(auditConfig: AuditConfig): Promise<AuditReport> {
 
   const median = computeMedianRun(results) as LighthouseResult;
 
-  Object.entries(reports.formats ?? {}).forEach(async ([key, value]) => {
-    if (value) {
-      await getReport(
-        median,
-        reports.directory,
-        reports.name,
-        key as ValidTypes
-      );
-    }
-  });
+  await Promise.all(
+    Object.entries(reports.formats ?? {}).map(async ([key, value]) => {
+      if (value) {
+        await getReport(
+          median,
+          reports.directory,
+          reports.name,
+          key as ValidTypes
+        );
+      }
+    })
+  );
 
   const result = {
     vital: {
@@ -133,14 +135,51 @@ async function playAudit(auditConfig: AuditConfig): Promise<AuditReport> {
 
   const data = Object.entries(audits)
     .filter(([key]) => metricFilter.includes(key))
-    .map(([_, value]) => {
-      return {
-        metric: value.title,
-        value: `${Math.round(value.numericValue as number)} ${
-          value.numericUnit
-        }`,
-      };
+    .map(([key, value]) => {
+      return [key, Math.round(value.numericValue as number)] as const;
     });
+
+  if (!process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_API_KEY === "") {
+    console.log("No airtable api key");
+  }
+
+  if (process.env.AIRTABLE_API_KEY) {
+    const headers = {
+      Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    };
+
+    const report = {
+      records: [
+        {
+          fields: {
+            name: reports.name,
+            date: Time.now().toLocaleString(),
+            commitHash: process.env.GITHUB_SHA,
+            githubRef: process.env.GITHUB_REF,
+            os: os.platform(),
+            ...Object.fromEntries(data),
+          },
+        },
+      ],
+    };
+
+    log("Send report..", report);
+
+    try {
+      await axios.post(
+        `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/WebPerformanceData`,
+        report,
+        { headers }
+      );
+    } catch (error) {
+      if (ErrorUtils.isAxiosError(error)) {
+        console.log(error.response);
+      }
+    }
+
+    log("Send report done.");
+  }
 
   log(data);
 

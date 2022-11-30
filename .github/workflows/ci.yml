@@ -198,6 +198,11 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          GITHUB_SHA: $GITHUB_SHA
+          GITHUB_REF: $GITHUB_REF
         run: yarn ci:test:template
 
       - name: Upload Playwright test results

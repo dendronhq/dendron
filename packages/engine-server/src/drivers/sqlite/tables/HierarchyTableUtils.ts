@@ -5,7 +5,7 @@ import { SqliteError } from "../SqliteError";
 import { SqliteQueryUtils } from "../SqliteQueryUtils";
 
 export class HierarchyTableRow {
-  constructor(public parentId: string, public childId: string) {}
+  constructor(public parent: string, public child: string) {}
 }
 
 export class HierarchyTableUtils {
@@ -41,7 +41,7 @@ export class HierarchyTableUtils {
   ): ResultAsync<null, SqliteError> {
     const sql = `
     INSERT OR IGNORE INTO Hierarchy (parent, child)
-    VALUES ('${row.parentId}', '${row.childId}')`;
+    VALUES ('${row.parent}', '${row.child}')`;
 
     return SqliteQueryUtils.run(db, sql);
   }
@@ -55,7 +55,7 @@ export class HierarchyTableUtils {
     }
 
     const values = rows
-      .map((row) => `('${row.parentId}', '${row.childId}')`)
+      .map((row) => `('${row.parent}', '${row.child}')`)
       .join(",");
 
     const sql = `
@@ -132,5 +132,34 @@ export class HierarchyTableUtils {
         return null;
       }
     });
+  }
+
+  /**
+   * Given a domain,
+   * recursively grab all descendants of the domain
+   * until we run out
+   *
+   * return all (parent, child) pairs
+   *
+   * more on recursive CTEs: https://www.sqlite.org/lang_with.html
+   */
+  public static getAllInDomain(
+    db: Database,
+    domainId: string
+  ): ResultAsync<HierarchyTableRow[], SqliteError> {
+    const sql = [
+      `WITH RECURSIVE "cte_hierarchy" (parent, child) AS (`, // 1. create a view (cte)
+      `  SELECT h.parent, h.child`, // 2. select a root note to anchor to. this is the domain note
+      `  FROM "Hierarchy" h`,
+      `  WHERE h.parent = "${domainId}"`, // 3. at this point cte_hierarchy has one row queued
+      `  UNION ALL`, // UNION ALL assuming we don't have dupes in the hierarchy table
+      `  SELECT h.parent, h.child`,
+      `  FROM "Hierarchy" h`, // 4. we are going to join the hierarchy table
+      `  JOIN "cte_hierarchy" c ON c.child = h.parent`, // 5. to the cte until we run out of children
+      `)`,
+      `SELECT * FROM "cte_hierarchy"`, // 6. select everything from the created view.
+    ].join("\n");
+
+    return SqliteQueryUtils.all(db, sql);
   }
 }

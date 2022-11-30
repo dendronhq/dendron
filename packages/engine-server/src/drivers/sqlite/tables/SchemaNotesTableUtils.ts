@@ -50,4 +50,14 @@ export class SchemaNotesTableUtils {
       return e as SqliteError;
     });
   }
+
+  static getByNoteId(db: Database, key: string) {
+    const sql = [
+      `SELECT *`,
+      `FROM SchemaNotes`,
+      `WHERE SchemaNotes.noteId = ${key}`,
+    ].join("\n");
+
+    return SqliteQueryUtils.all(db, sql);
+  }
 }

@@ -1,25 +1,34 @@
 import {
   DendronError,
+  DLink,
+  DLogger,
   DVault,
   ERROR_SEVERITY,
   ERROR_STATUS,
   FindNoteOpts,
   IDataStore,
   IDendronError,
+  IFileStore,
+  isNotUndefined,
+  NoteDictsUtils,
+  NoteProps,
   NotePropsMeta,
   QueryNotesOpts,
   RespV3,
+  SchemaUtils,
   StatusCodes,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { err, errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
+import { SqliteDbFactory } from "./SqliteDbFactory";
 import {
   HierarchyTableRow,
   HierarchyTableUtils,
   LinksTableUtils,
   LinkType,
   NotePropsFtsTableUtils,
+  NotePropsTableRow,
   NotePropsTableUtils,
   VaultNotesTableRow,
   VaultNotesTableUtils,
@@ -29,6 +38,94 @@ import { SchemaNotesTableUtils } from "./tables/SchemaNotesTableUtils";
 
 export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
   constructor(private _db: Database, private _vaults: DVault[]) {}
+
+  /**
+   * Goes through all domains and recursively apply schemas.
+   */
+  async initSchema(fileStore: IFileStore, wsRoot: string, logger: DLogger) {
+    // TODO: move this out of SqliteDbFactory
+    // (or move this whole thing to parseAllNoteFilesForSqlite)
+    const schemaResult = await SqliteDbFactory.initSchema(
+      this._vaults,
+      wsRoot,
+      fileStore,
+      logger
+    );
+    if (schemaResult.isErr()) {
+      throw schemaResult.error;
+    }
+    const schemas = schemaResult.value;
+    const rootNotesResult = await this.query({ qs: "", originalQS: "" });
+    if (rootNotesResult.isErr()) {
+      throw rootNotesResult.error;
+    }
+    const rootNotes = rootNotesResult.value;
+    const rootNoteIds = rootNotes.map((rootNoteMeta) => {
+      return rootNoteMeta.id;
+    });
+
+    // TODO: break this down
+    await Promise.all(
+      rootNoteIds.map(async (rootId) => {
+        const rootNoteResp = await this.get(rootId);
+        if (rootNoteResp.error) {
+          throw rootNoteResp.error;
+        } else {
+          const domainIds = rootNoteResp.data.children;
+          const allNoteIdsInDomains = _.flatten(
+            await Promise.all(
+              domainIds.map(async (domainId) => {
+                const getAllInDomainResult =
+                  await HierarchyTableUtils.getAllInDomain(this._db, domainId);
+                if (getAllInDomainResult.isErr()) {
+                  throw getAllInDomainResult.error;
+                }
+                const allInDomainRows = getAllInDomainResult.value;
+                return [domainId].concat(
+                  allInDomainRows.map((row) => {
+                    return row.child;
+                  })
+                );
+              })
+            )
+          );
+          // this is too expensive
+          // we can probably create NoteDicts from just the query
+          const allNotesInDomains = (
+            await Promise.all(
+              allNoteIdsInDomains.map(async (id) => {
+                return (await this.get(id)).data;
+              })
+            )
+          ).filter(isNotUndefined) as NoteProps[];
+          const domainNotes = allNotesInDomains.filter((note) => {
+            return !note.fname.includes(".");
+          });
+
+          const dicts = NoteDictsUtils.createNoteDicts(allNotesInDomains);
+          domainNotes.forEach((domainNote) => {
+            SchemaUtils.matchDomain(domainNote, dicts.notesById, schemas);
+          });
+          const notesWithSchema = allNotesInDomains.filter((note) => {
+            return note.schema !== undefined;
+          });
+
+          // do we actually need to filter it here?
+          // is INSERT OR IGNORE more expensive than a filter?
+          await Promise.all(
+            notesWithSchema.map(async (note) => {
+              await SchemaNotesTableUtils.insert(this._db, {
+                noteId: note.id,
+                ...note.schema!, // TODO:
+              });
+            })
+          );
+
+          return allNoteIdsInDomains;
+        }
+      })
+    );
+  }
 
   dispose() {
     this._db.close();
@@ -75,22 +172,41 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
       }
     });
 
+    const getSchemaResult = SchemaNotesTableUtils.getByNoteId(
+      this._db,
+      key
+    ).map((row) => _.omit(row, "noteId"));
+
     return ResultAsync.combineWithAllErrors([
       getNotePropsResult,
       getDLinksResult,
       getChildrenResult,
       getParentResult,
       getVaultResult,
+      getSchemaResult,
     ]).andThen((results) => {
-      const row = results[0];
+      // need to do this here because neverthrow doesn't know what to do
+      // when the array length is over 5.
+      // neverthrow caps the combine-able array size to 5 to prevent
+      // infinite recursion in type inferring with no straightforward way modify the cap.
+      const _results = results as [
+        NotePropsTableRow,
+        DLink[],
+        string[],
+        string | null,
+        DVault,
+        { schemaId: string; moduleId: string }
+      ];
+      const row = _results[0];
 
       if (!row) {
         return errAsync(new Error(`Unable to find NoteProps for id ${key}`));
       }
-      const links = results[1];
-      const children = results[2];
-      const parent = results[3];
-      const vault = results[4];
+      const links = _results[1];
+      const children = _results[2];
+      const parent = _results[3];
+      const vault = _results[4];
+      const schema = _results[5];
 
       const data: NotePropsMeta = {
         parent,
@@ -112,6 +228,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         data: {},
         type: "note",
         vault,
+        schema,
       };
 
       return okAsync(data);

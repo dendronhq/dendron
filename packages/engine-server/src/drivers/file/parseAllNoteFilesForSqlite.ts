@@ -7,13 +7,10 @@ import {
   DVault,
   genHash,
   genUUID,
-  NoteDictsUtils,
   NoteProps,
   NotePropsMeta,
   NoteUtils,
   Position,
-  SchemaModuleDict,
-  SchemaUtils,
   string2Note,
   Time,
 } from "@dendronhq/common-all";
@@ -65,7 +62,7 @@ export async function parseAllNoteFilesForSqlite(
   vault: DVault,
   db: Database,
   root: string,
-  schemas: SchemaModuleDict,
+  // schemas: SchemaModuleDict,
   enableLinkCandidates: boolean = false,
   logger?: DLogger
 ): Promise<Result<null, any>> {
@@ -158,12 +155,13 @@ export async function parseAllNoteFilesForSqlite(
   }
 
   // Schemas - only needs to be processed for added notes.
-  const dicts = NoteDictsUtils.createNoteDicts(addedNotes);
-  const domains = addedNotes.filter((note) => !note.fname.includes("."));
-
-  domains.map((domain) => {
-    SchemaUtils.matchDomain(domain, dicts.notesById, schemas);
-  });
+  // const dicts = NoteDictsUtils.createNoteDicts(addedNotes);
+  // const domains = addedNotes.filter(
+  //   (note) => !note.fname.includes(".") && note.fname !== "root"
+  // );
+  // domains.map((domain) => {
+  //   SchemaUtils.matchDomain(domain, dicts.notesById, schemas);
+  // });
 
   const allNotesToProcess = addedNotes.concat(updatedNotes);
 

@@ -32,7 +32,7 @@ export const CONSTANTS = {
   DENDRON_DELIMETER: "dendron://",
   DENDRON_USER_FILE: ".dendron.user",
   DENDRON_CACHE_FILE: ".dendron.cache.json",
-  DENDRON_DB_FILE: "dendron.metadata.db",
+  DENDRON_DB_FILE: ".dendron.metadata.db",
   DENDRON_ID: ".dendron.uuid",
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
   DENDRON_TELEMETRY: ".dendron.telemetry",

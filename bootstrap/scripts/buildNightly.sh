@@ -12,7 +12,7 @@ echo "building... upgrade: patch, endpoint: local build environment: $SCRIPT_BUI
 
 DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
 
-TARGET='--extensionTarget $1'
+TARGET="--extensionTarget $1"
 if [ "$PARAMS" = "none" ]; then
   TARGET=''
 fi

@@ -30,7 +30,6 @@ export class SqliteQueryUtils {
 
           reject(err.message);
         } else {
-          // TODO: Switch to debug.
           logger?.info(
             `Executed SqliteQueryUtils.run() in ${getDurationMilliseconds(
               start
@@ -48,8 +47,8 @@ export class SqliteQueryUtils {
   }
 
   /**
-   * Runs Database.get() method of sqlite3 and packages the result in an
-   * awaitable ResultAsync
+   * Runs Database.get() method of sqlite3 and packages the result (first row)
+   * in an awaitable ResultAsync
    * @param db
    * @param sql
    * @param logger
@@ -75,9 +74,8 @@ export class SqliteQueryUtils {
 
           reject(err.message);
         } else {
-          // TODO: Switch to debug.
           logger?.info(
-            `Executed sqliteGet() query in ${getDurationMilliseconds(
+            `Executed SqliteQueryUtils.get() query in ${getDurationMilliseconds(
               start
             )} ms. Query String: ${sql.slice(0, 1000)}`
           );
@@ -93,8 +91,8 @@ export class SqliteQueryUtils {
   }
 
   /**
-   * Runs Database.all() method of sqlite3 and packages the result in an
-   * awaitable ResultAsync
+   * Runs Database.all() method of sqlite3 and packages the result (array of
+   * rows) in an awaitable ResultAsync
    * @param db
    * @param sql
    * @param logger
@@ -111,7 +109,7 @@ export class SqliteQueryUtils {
       db.all(sql, (err, rows) => {
         if (err) {
           logger?.error(
-            `sqliteGet() failed with error message ${
+            `SqliteQueryUtils.all() failed with error message ${
               err.message
             } in ${getDurationMilliseconds(
               start
@@ -120,9 +118,8 @@ export class SqliteQueryUtils {
 
           reject(err.message);
         } else {
-          // TODO: Switch to debug.
           logger?.info(
-            `Executed sqliteGet() query in ${getDurationMilliseconds(
+            `Executed SqliteQueryUtils.all() query in ${getDurationMilliseconds(
               start
             )} ms. Query String: ${sql.slice(0, 1000)}`
           );
@@ -142,6 +139,8 @@ export class SqliteQueryUtils {
 
     if (errorString === "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed") {
       type = SqliteErrorType.ForeignKeyConstraintViolation;
+    } else if (errorString.includes("syntax error")) {
+      type = SqliteErrorType.InvalidQuerySyntax;
     }
 
     return {

@@ -7,16 +7,13 @@ FOO_PID=$!
 echo "$FOO_PID"
 sleep 10
 
-# SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
+SCRIPT_BUILD_ENV=${BUILD_ENV:-local}
 echo "building... upgrade: patch, endpoint: local build environment: $SCRIPT_BUILD_ENV"
 
 DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
 
 TARGET='--extensionTarget $1'
-
-SCRIPT_PARAMS=${PARAMS:-true}
-
-if [ $SCRIPT_PARAMS = "none" ]; then
+if [ "$PARAMS" = "none" ]; then
   TARGET=''
 fi
 

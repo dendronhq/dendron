@@ -14,8 +14,6 @@ export type ConfigServiceOpts = {
   // i.e. only pass it in for NodeJSFileStore
   homeDir: URI | undefined;
   fileStore: IFileStore;
-  // this is strictly for testing purposes.
-  forceNew?: boolean;
 };
 
 export class ConfigService {
@@ -35,7 +33,7 @@ export class ConfigService {
   /** static */
 
   static instance(opts?: ConfigServiceOpts) {
-    if (_.isUndefined(this._singleton) || opts?.forceNew) {
+    if (_.isUndefined(this._singleton)) {
       if (ConfigService.isConfigServiceOpts(opts)) {
         this._singleton = new ConfigService(opts);
       } else {
@@ -192,7 +190,6 @@ export class ConfigService {
    */
   private readWithOverrides(wsRoot: URI) {
     return this.searchOverride(wsRoot)
-      .andThen(ConfigUtils.validateLocalConfig)
       .andThen((override) => {
         return this.readWithDefaults(wsRoot).map((config) => {
           return ConfigUtils.mergeConfig(config, override);
@@ -232,7 +229,8 @@ export class ConfigService {
           .orElse(() => okAsync(""));
       })
       .andThen(YamlUtils.fromStr)
-      .andThen(ConfigUtils.parsePartial);
+      .andThen(ConfigUtils.parsePartial)
+      .andThen(ConfigUtils.validateLocalConfig);
   }
 
   /**

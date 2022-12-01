@@ -210,10 +210,10 @@ export async function setupLegacyWorkspace(
   }
   await fs.ensureDir(wsRoot);
   if (copts.workspaceType === WorkspaceType.CODE) stubWorkspaceFile(wsRoot);
+  ConfigService._singleton = undefined;
   ConfigService.instance({
     homeDir: URI.file(os.homedir()),
     fileStore: new NodeJSFileStore(),
-    forceNew: true,
   });
   setupCodeConfiguration(opts);
 
@@ -282,10 +282,10 @@ export async function setupLegacyWorkspaceMulti(
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   new StateService(opts.ctx!); // eslint-disable-line no-new
+  ConfigService._singleton = undefined;
   ConfigService.instance({
     homeDir: URI.file(os.homedir()),
     fileStore: new NodeJSFileStore(),
-    forceNew: true,
   });
   setupCodeConfiguration(opts);
 

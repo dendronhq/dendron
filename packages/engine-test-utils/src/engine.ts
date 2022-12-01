@@ -161,10 +161,10 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
+  ConfigService._singleton = undefined;
   ConfigService.instance({
     homeDir: URI.file(os.homedir()),
     fileStore: new NodeJSFileStore(),
-    forceNew: true,
   });
   await ConfigService.instance().createConfig(URI.file(wsRoot));
   // create dendron.code-workspace

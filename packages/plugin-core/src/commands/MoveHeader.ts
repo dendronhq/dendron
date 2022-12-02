@@ -18,8 +18,10 @@ import {
   NoteQuickInput,
   NoteUtils,
   VaultUtils,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig, file2Note, vault2Path } from "@dendronhq/common-server";
+import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
 import {
   MDUtilsV5,
@@ -99,23 +101,22 @@ export class MoveHeaderCommand extends BasicCommand<
     severity: ERROR_SEVERITY.MINOR,
   });
 
-  private getProc = (engine: IEngineAPIService, note: NoteProps) => {
+  private getProc = (note: NoteProps, config: DendronConfig) => {
     return MDUtilsV5.procRemarkFull({
       noteToRender: note,
       fname: note.fname,
       vault: note.vault,
       dest: DendronASTDest.MD_DENDRON,
-      config: DConfig.readConfigSync(engine.wsRoot),
+      config,
     });
   };
 
   /**
    * Helper for {@link MoveHeaderCommand.gatherInputs}
    * Validates and processes inputs to be passed for further action
-   * @param engine
    * @returns {}
    */
-  private async validateAndProcessInput(engine: IEngineAPIService): Promise<{
+  private async validateAndProcessInput(config: DendronConfig): Promise<{
     proc: Processor;
     origin: NoteProps;
     targetHeader: Heading;
@@ -136,7 +137,7 @@ export class MoveHeaderCommand extends BasicCommand<
     }
 
     // parse selection and get the target header node
-    const proc = this.getProc(engine, maybeNote);
+    const proc = this.getProc(maybeNote, config);
 
     // TODO: shoudl account for line number
     const bodyAST: DendronASTNode = proc.parse(
@@ -213,7 +214,8 @@ export class MoveHeaderCommand extends BasicCommand<
   }) {
     const { engine, quickpick, selectedItems } = opts;
     const vault =
-      (quickpick.vault as DVault) || PickerUtilsV2.getVaultForOpenEditor();
+      (quickpick.vault as DVault) ||
+      (await PickerUtilsV2.getVaultForOpenEditor());
     let dest: NoteProps | undefined;
     if (_.isUndefined(selectedItems)) {
       dest = undefined;
@@ -241,8 +243,18 @@ export class MoveHeaderCommand extends BasicCommand<
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     // validate and process input
     const engine = ExtensionProvider.getEngine();
+    const { wsRoot } = engine;
+
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+
     const { proc, origin, targetHeader, targetHeaderIndex } =
-      await this.validateAndProcessInput(engine);
+      await this.validateAndProcessInput(config);
 
     // extract nodes that need to be moved
     const originTree = proc.parse(origin.body);
@@ -262,7 +274,9 @@ export class MoveHeaderCommand extends BasicCommand<
       vaultSelectCanToggle: false,
     };
     const lc =
-      ExtensionProvider.getExtension().lookupControllerFactory.create(lcOpts);
+      await ExtensionProvider.getExtension().lookupControllerFactory.create(
+        lcOpts
+      );
     return new Promise((resolve) => {
       let disposable: Disposable;
       NoteLookupProviderUtils.subscribe({
@@ -372,7 +386,9 @@ export class MoveHeaderCommand extends BasicCommand<
     const fsPath = location.uri.fsPath;
     const fname = NoteUtils.normalizeFname(path.basename(fsPath));
 
-    const vault = ExtensionProvider.getWSUtils().getVaultFromUri(location.uri);
+    const vault = await ExtensionProvider.getWSUtils().getVaultFromUri(
+      location.uri
+    );
     return (await engine.findNotes({ fname, vault }))[0];
   }
 
@@ -483,6 +499,7 @@ export class MoveHeaderCommand extends BasicCommand<
     foundReferences: FoundRefT[],
     anchorNamesToUpdate: string[],
     engine: IEngineAPIService,
+    config: DendronConfig,
     origin: NoteProps,
     dest: NoteProps
   ): Promise<NoteChangeEntry[]> {
@@ -496,7 +513,6 @@ export class MoveHeaderCommand extends BasicCommand<
           .map((ref) => this.getNoteByLocation(ref.location, engine))
       )
     ).filter(isNotUndefined);
-    const config = DConfig.readConfigSync(engine.wsRoot);
 
     await asyncLoopOneAtATime(refsToProcess, async (note) => {
       try {
@@ -574,6 +590,8 @@ export class MoveHeaderCommand extends BasicCommand<
     const ctx = "MoveHeaderCommand";
     this.L.info({ ctx, opts });
     const { origin, nodesToMove, engine } = opts;
+    const { wsRoot } = engine;
+
     const dest = opts.dest as NoteProps;
 
     if (_.isUndefined(dest)) {
@@ -607,10 +625,20 @@ export class MoveHeaderCommand extends BasicCommand<
       modifiedOriginContent
     );
     const foundReferences = await findReferences(origin.fname);
+
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+
     const updated = await this.updateReferences(
       foundReferences,
       anchorNamesToUpdate,
       engine,
+      config,
       origin,
       dest
     );

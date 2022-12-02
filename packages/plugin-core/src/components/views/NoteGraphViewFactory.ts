@@ -89,7 +89,7 @@ export class NoteGraphPanelFactory {
         const ctx = "ShowNoteGraph:onDidReceiveMessage";
         Logger.debug({ ctx, msgType: msg.type });
         const createStub = ConfigUtils.getWorkspace(
-          this._ext.getDWorkspace().config
+          await this._ext.getDWorkspace().config
         ).graph.createStub;
         switch (msg.type) {
           case GraphViewMessageEnum.onSelect: {
@@ -274,7 +274,10 @@ export class NoteGraphPanelFactory {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
-    const { wsRoot, vaults } = this._ext.getDWorkspace();
+    const ws = this._ext.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
+
     if (
       !WorkspaceUtils.isPathInWorkspace({ wsRoot, vaults, fpath: uri.fsPath })
     ) {

@@ -63,6 +63,7 @@ suite(DENDRON_COMMANDS.SEED_ADD.key, function seedAddTests() {
   });
 });
 
+// TODO: fix test (ConfigStore)
 suite(DENDRON_COMMANDS.SEED_REMOVE.key, function seedRemoveTests() {
   const ctx = setupBeforeAfter(this, {});
 

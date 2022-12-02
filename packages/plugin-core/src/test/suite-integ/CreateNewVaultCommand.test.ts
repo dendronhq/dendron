@@ -1,11 +1,13 @@
 import {
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   DendronConfig,
   FOLDERS,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, readYAMLAsync, vault2Path } from "@dendronhq/common-server";
+import { readYAMLAsync, vault2Path } from "@dendronhq/common-server";
 import { checkVaults } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import { before, describe } from "mocha";
@@ -38,7 +40,7 @@ suite("CreateNewVault Command", function () {
           sinon.stub(cmd, "gatherDestinationFolder").resolves(vpath);
           await cmd.run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
 
           expect(vaultsAfter.length).toEqual(2);
           expect(
@@ -111,7 +113,9 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -131,7 +135,9 @@ describe("GIVEN Create existing vault command is run with self contained vaults 
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

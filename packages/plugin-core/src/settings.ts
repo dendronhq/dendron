@@ -44,7 +44,9 @@ export class WorkspaceConfig extends EngineWorkspaceConfig {
     const ctx = "WorkspaceConfig:update";
     const src = ExtensionProvider.getWorkspaceConfig();
     const changes = await Settings.upgrade(src, _SETTINGS);
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const vpath = pathForVaultRoot({ wsRoot, vault: vaults[0] });
     const vscodeDir = path.join(vpath, ".vscode");
     const snippetChanges = await Snippets.upgradeOrCreate(vscodeDir);

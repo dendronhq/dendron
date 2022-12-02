@@ -305,7 +305,7 @@ const NOTES = {
     },
     {
       preSetupHook: async ({ wsRoot, vaults }) => {
-        TestConfigUtils.withConfig(
+        await TestConfigUtils.withConfig(
           (config) => {
             ConfigUtils.setWorkspaceProp(config, "maxNoteLength", 10);
             return config;

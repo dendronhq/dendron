@@ -38,7 +38,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
 
   async gatherInputs(opts: CommandInput): Promise<CommandOpts | undefined> {
     const extension = ExtensionProvider.getExtension();
-    const config = extension.getDWorkspace().config;
+    const config = await extension.getDWorkspace().config;
     const insertNoteLinkConfig = ConfigUtils.getCommands(config).insertNoteLink;
     const aliasModeConfig = insertNoteLinkConfig.aliasMode;
     const multiSelectConfig = insertNoteLinkConfig.enableMultiSelect;
@@ -47,7 +47,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
       multiSelect: multiSelectConfig || false,
       aliasMode: aliasModeConfig || "none",
     });
-    const lc = extension.lookupControllerFactory.create({
+    const lc = await extension.lookupControllerFactory.create({
       nodeType: "note",
       disableVaultSelection: true,
       extraButtons: [MultiSelectBtn.create({ pressed: copts.multiSelect })],

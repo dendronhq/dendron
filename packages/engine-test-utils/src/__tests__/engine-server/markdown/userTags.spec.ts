@@ -1,5 +1,4 @@
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTTypes,
@@ -19,6 +18,7 @@ import {
   createProcTests,
   ProcTests,
 } from "./utils";
+import { ConfigService, URI } from "@dendronhq/common-all";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
@@ -140,11 +140,14 @@ describe("user tags", () => {
     const SIMPLE = createProcTests({
       name: "simple",
       setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(userTag);
         return { resp };
@@ -188,11 +191,14 @@ describe("user tags", () => {
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
       setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(
           "[@dendronhq](https://twitter.com/dendronhq)"
@@ -219,14 +225,17 @@ describe("user tags", () => {
   describe("WHEN disabled in config", () => {
     test("THEN user tags don't get parsed or processed", async () => {
       await runEngineTestV5(
-        async ({ engine, wsRoot, vaults }) => {
+        async ({ engine, vaults, wsRoot }) => {
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           const proc = MDUtilsV5.procRehypeFull(
             {
               noteToRender: (
                 await engine.findNotesMeta({ fname: "root", vault: vaults[0] })
               )[0]!,
               vault: vaults[0],
-              config: DConfig.readConfigSync(wsRoot),
+              config,
               fname: "root",
             },
             {}
@@ -238,7 +247,7 @@ describe("user tags", () => {
         {
           expect,
           preSetupHook: async ({ wsRoot }) => {
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 config.workspace!.enableUserTags = false;
                 return config;

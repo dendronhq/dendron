@@ -38,13 +38,13 @@ export class CreateScratchNoteCommand extends BasicCommand<
     this.extension = ext;
   }
 
-  createLookupController(): ILookupControllerV3 {
+  async createLookupController(): Promise<ILookupControllerV3> {
     const commandConfig = ConfigUtils.getCommands(
-      this.extension.getDWorkspace().config
+      await this.extension.getDWorkspace().config
     );
     const confirmVaultOnCreate = commandConfig.lookup.note.confirmVaultOnCreate;
     const vaultButtonPressed =
-      VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
+      await VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: !confirmVaultOnCreate,
@@ -57,7 +57,9 @@ export class CreateScratchNoteCommand extends BasicCommand<
       ],
       title: "Create Scratch Note",
     };
-    const controller = this.extension.lookupControllerFactory.create(opts);
+    const controller = await this.extension.lookupControllerFactory.create(
+      opts
+    );
     return controller;
   }
 
@@ -65,7 +67,7 @@ export class CreateScratchNoteCommand extends BasicCommand<
     const ctx = "CreateScratchNote";
     Logger.info({ ctx, msg: "enter" });
     const lookupCmd = new NoteLookupCommand();
-    lookupCmd.controller = this.createLookupController();
+    lookupCmd.controller = await this.createLookupController();
     await lookupCmd.run(opts);
 
     // TODO: remove after 1-2 weeks.

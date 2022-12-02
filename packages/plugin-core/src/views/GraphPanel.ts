@@ -196,7 +196,7 @@ export class GraphPanel implements vscode.WebviewViewProvider {
     const ctx = "GraphPanel(side):onDidReceiveMessage";
     Logger.info({ ctx, data: msg });
     const createStub = ConfigUtils.getWorkspace(
-      this._ext.getDWorkspace().config
+      await this._ext.getDWorkspace().config
     ).graph.createStub;
     switch (msg.type) {
       case GraphViewMessageEnum.onSelect: {
@@ -297,7 +297,9 @@ export class GraphPanel implements vscode.WebviewViewProvider {
       return;
     }
     const ctx = "GraphPanel(side):openTextDocument";
-    const { wsRoot, vaults } = this._ext.getDWorkspace();
+    const ws = this._ext.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (
       !WorkspaceUtils.isPathInWorkspace({
         wsRoot,

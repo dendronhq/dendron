@@ -1,26 +1,34 @@
-import { DConfig, readYAML, writeYAML } from "@dendronhq/common-server";
-import { DendronConfig } from "@dendronhq/common-all";
+import { ConfigService, DendronConfig, URI } from "@dendronhq/common-all";
 
 export class TestConfigUtils {
-  static getConfig = (opts: { wsRoot: string }) => {
-    const configPath = DConfig.configPath(opts.wsRoot);
-    const config = readYAML(configPath) as DendronConfig;
+  static getConfig = async (opts: { wsRoot: string }) => {
+    const config = (
+      await ConfigService.instance().readConfig(URI.file(opts.wsRoot))
+    )._unsafeUnwrap();
     return config;
   };
 
-  static withConfig = (
+  static withConfig = async (
     func: (config: DendronConfig) => DendronConfig,
     opts: { wsRoot: string }
   ) => {
-    const config = TestConfigUtils.getConfig(opts);
+    const config = await TestConfigUtils.getConfig(opts);
 
     const newConfig = func(config);
-    TestConfigUtils.writeConfig({ config: newConfig, wsRoot: opts.wsRoot });
+    await TestConfigUtils.writeConfig({
+      wsRoot: opts.wsRoot,
+      config: newConfig,
+    });
     return newConfig;
   };
 
-  static writeConfig = (opts: { config: DendronConfig; wsRoot: string }) => {
-    const configPath = DConfig.configPath(opts.wsRoot);
-    return writeYAML(configPath, opts.config);
+  static writeConfig = async (opts: {
+    config: DendronConfig;
+    wsRoot: string;
+  }) => {
+    await ConfigService.instance().writeConfig(
+      URI.file(opts.wsRoot),
+      opts.config
+    );
   };
 }

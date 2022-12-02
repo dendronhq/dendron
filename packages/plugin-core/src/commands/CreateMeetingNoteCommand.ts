@@ -5,7 +5,7 @@ import {
   SchemaToken,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { DConfig, vault2Path } from "@dendronhq/common-server";
 import * as fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
@@ -38,7 +38,9 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
    */
   constructor(ext: IDendronExtension, noConfirm?: boolean) {
     const initTrait = () => {
-      const config = ExtensionProvider.getDWorkspace().config;
+      // TODO: remove this once we figure out how we want to proceed with trait methods being sync.
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const config = DConfig.readConfigSync(wsRoot);
       return new MeetingNote(config, ext, noConfirm ?? false);
     };
 
@@ -73,7 +75,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
    */
   private async makeSchemaFileIfNotExisting(): Promise<boolean> {
     const vaultPath = vault2Path({
-      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      vault: await PickerUtilsV2.getVaultForOpenEditor(),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
@@ -143,7 +145,7 @@ export class CreateMeetingNoteCommand extends CreateNoteWithTraitCommand {
         fname: CreateMeetingNoteCommand.MEETING_TEMPLATE_FNAME,
       });
 
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const vaultPath = vault2Path({
       vault,
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,

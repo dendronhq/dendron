@@ -12,34 +12,43 @@ import { ResultUtils } from "../ResultUtils";
 
 export class ConfigStore implements IConfigStore {
   private _fileStore: IFileStore;
-  private _wsRoot: URI;
   private _homeDir: URI | undefined;
 
-  get configPath(): URI {
-    return Utils.joinPath(this._wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  configPath(wsRoot: URI): URI {
+    return Utils.joinPath(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
-  constructor(fileStore: IFileStore, wsRoot: URI, homeDir: URI | undefined) {
+  configOverridePath(wsRoot: URI, scope: "workspace" | "global") {
+    const root = scope === "workspace" ? wsRoot : this._homeDir;
+    if (root) {
+      return Utils.joinPath(root, CONSTANTS.DENDRON_LOCAL_CONFIG_FILE);
+    } else {
+      return undefined;
+    }
+  }
+
+  constructor(fileStore: IFileStore, homeDir: URI | undefined) {
     this._fileStore = fileStore;
-    this._wsRoot = wsRoot;
     this._homeDir = homeDir;
   }
 
-  createConfig(defaults?: DeepPartial<DendronConfig>) {
+  createConfig(wsRoot: URI, defaults?: DeepPartial<DendronConfig>) {
     const config: DendronConfig = ConfigUtils.genLatestConfig(defaults);
 
     return YamlUtils.toStr(config)
-      .asyncAndThen((configDump) => this.writeToFS(this.configPath, configDump))
+      .asyncAndThen((configDump) =>
+        this.writeToFS(this.configPath(wsRoot), configDump)
+      )
       .map(() => config);
   }
 
-  readConfig() {
-    return this.readFromFS(this.configPath)
-      .andThen(YamlUtils.fromStr)
+  readConfig(wsRoot: URI) {
+    return this.readFromFS(this.configPath(wsRoot))
+      .andThen((str) => YamlUtils.fromStr(str, true))
       .andThen(ConfigUtils.parsePartial);
   }
 
-  readOverride(mode: "workspace" | "global") {
+  readOverride(wsRoot: URI, mode: "workspace" | "global") {
     const doRead = (path: URI) => {
       const readPath = Utils.joinPath(
         path,
@@ -49,7 +58,7 @@ export class ConfigStore implements IConfigStore {
     };
 
     if (mode === "workspace") {
-      return doRead(this._wsRoot);
+      return doRead(wsRoot);
     } else if (this._homeDir) {
       return doRead(this._homeDir);
     } else {
@@ -61,10 +70,31 @@ export class ConfigStore implements IConfigStore {
     }
   }
 
-  writeConfig(payload: DendronConfig) {
+  writeConfig(wsRoot: URI, payload: DendronConfig) {
     return YamlUtils.toStr(payload)
-      .asyncAndThen((endPayload) => this.writeToFS(this.configPath, endPayload))
+      .asyncAndThen((endPayload) =>
+        this.writeToFS(this.configPath(wsRoot), endPayload)
+      )
       .map(() => payload);
+  }
+
+  writeOverride(
+    wsRoot: URI,
+    config: DeepPartial<DendronConfig>,
+    mode: "workspace" | "global"
+  ) {
+    return YamlUtils.toStr(config).asyncAndThen((content) => {
+      const writePath = this.configOverridePath(wsRoot, mode);
+      if (writePath) {
+        return this.writeToFS(writePath, content);
+      } else {
+        return errAsync(
+          new DendronError({
+            message: "global override not supported with current file store.",
+          })
+        );
+      }
+    });
   }
 
   /** helpers */

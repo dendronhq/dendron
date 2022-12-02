@@ -23,10 +23,11 @@ describe("VaultCLICommand", () => {
           engine,
           cmd,
         });
+        if (vault) vaults.unshift(vault);
         await checkVaults(
           {
             wsRoot,
-            vaults: [vault].concat(vaults),
+            vaults,
           },
           expect
         );

@@ -22,7 +22,7 @@ import os from "os";
 import path from "path";
 import { BackupKeyEnum, BackupService } from "./backup";
 import { DConfigLegacy } from "./oneoff/ConfigCompat";
-import { readYAML, writeYAML, writeYAMLAsync, readString } from "./files";
+import { readYAML, readString } from "./files";
 
 export enum LocalConfigScope {
   WORKSPACE = "WORKSPACE",
@@ -31,24 +31,24 @@ export enum LocalConfigScope {
 
 let _dendronConfig: DendronConfig | undefined;
 
+/**
+ * @deprecated
+ */
 export class DConfig {
-  static createSync({
-    wsRoot,
-    defaults,
-  }: {
-    wsRoot: string;
-    defaults?: DeepPartial<DendronConfig>;
-  }) {
-    const configPath = DConfig.configPath(wsRoot);
-    const config: DendronConfig = ConfigUtils.genLatestConfig(defaults);
-    writeYAML(configPath, config);
-    return config;
-  }
-
+  /**
+   * @deprecated
+   * Use {@link ConfigService.configPath} instead
+   * e.g.) const configPath = ConfigService.instance().configPath(URI.file(wsRoot))
+   */
   static configPath(configRoot: string): string {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
+  /**
+   * @deprecated
+   * use {@link ConfigService.configOverridePath} instead
+   * e.g.) const overridePath = ConfigService.instance().configOverridePath(URI.file(wsRoot), "workspace")
+   */
   static configOverridePath(wsRoot: string, scope: LocalConfigScope): string {
     const configPath =
       scope === LocalConfigScope.GLOBAL ? os.homedir() : wsRoot;
@@ -56,48 +56,19 @@ export class DConfig {
   }
 
   /**
-   * Get without filling in defaults
-   * @param wsRoot
+   * @deprecated
+   * This will be moved to a more suitable location in the near future
    */
-  static getRaw(wsRoot: string, overwriteDuplcate?: boolean) {
-    const configPath = DConfig.configPath(wsRoot);
-    const config = readYAML(
-      configPath,
-      overwriteDuplcate ?? false
-    ) as Partial<DendronConfig>;
-    return config;
-  }
-
-  static getOrCreate(
-    dendronRoot: string,
-    defaults?: DeepPartial<DendronConfig>
-  ): DendronConfig {
-    const configPath = DConfig.configPath(dendronRoot);
-    // Need merge here to recursively merge nested configs
-    let config: DendronConfig = _.merge(
-      ConfigUtils.genDefaultConfig(),
-      defaults
-    );
-    if (!fs.existsSync(configPath)) {
-      writeYAML(configPath, config);
-    } else {
-      config = {
-        ...config,
-        ...readYAML(configPath),
-      } as DendronConfig;
-    }
-    return config;
-  }
-
   static getSiteIndex(sconfig: DendronPublishingConfig): string {
     const { siteIndex, siteHierarchies } = sconfig;
     return siteIndex || siteHierarchies[0];
   }
 
   /**
+   * @deprecated
    * fill in defaults
+   * This will be moved to a more suitable location in the near future
    */
-
   static cleanPublishingConfig(
     config: DendronPublishingConfig
   ): CleanDendronPublishingConfig {
@@ -149,6 +120,10 @@ export class DConfig {
     };
   }
 
+  /**
+   * @deprecated
+   * This will be moved to a more suitable location in the near future
+   */
   static setCleanPublishingConfig(opts: {
     config: DendronConfig;
     cleanConfig: DendronPublishingConfig;
@@ -158,6 +133,12 @@ export class DConfig {
   }
 
   /**
+   * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.searchOverride} instead
+   * e.g.)
+   * searchOverrideResult = await ConfigService.instance().searchOverride(URI.file(wsRoot))
+   *
    * See if a local config file is present
    */
   static searchLocalConfigSync(wsRoot: string): RespV3<DendronConfig> {
@@ -187,6 +168,12 @@ export class DConfig {
   }
 
   /**
+   * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.readConfig} instead
+   * e.g.)
+   * const readResult = await ConfigService.instance().readConfig(URI.file(wsRoot), { applyOverride: false });
+   *
    * Read configuration
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -218,6 +205,12 @@ export class DConfig {
   }
 
   /**
+   * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigService.readConfig} instead
+   * e.g.)
+   * const readResult = await ConfigService.instance().readConfig(URI.file(wsRoot));
+   *
    * Read config and merge with local config
    * @param wsRoot
    * @param useCache: If true, read from cache instead of file system
@@ -262,32 +255,11 @@ export class DConfig {
     };
   }
 
-  static writeConfig({
-    wsRoot,
-    config,
-  }: {
-    wsRoot: string;
-    config: DendronConfig;
-  }): Promise<void> {
-    _dendronConfig = config;
-    const configPath = DConfig.configPath(wsRoot);
-    return writeYAMLAsync(configPath, config);
-  }
-
-  static writeLocalConfig({
-    wsRoot,
-    config,
-    configScope,
-  }: {
-    wsRoot: string;
-    config: DeepPartial<DendronConfig>;
-    configScope: LocalConfigScope;
-  }): Promise<void> {
-    const configPath = DConfig.configOverridePath(wsRoot, configScope);
-    return writeYAMLAsync(configPath, config);
-  }
-
   /**
+   * @deprecated should be removed when we roll out engine v3
+   *
+   * Use {@link ConfigUtils.validateLocalConfig} instead
+   *
    * Sanity check local config properties
    */
   static validateLocalConfig({
@@ -312,6 +284,7 @@ export class DConfig {
   }
 
   /**
+   * @deprecated TODO: move to ConfigService
    * Create a backup of dendron.yml with an optional custom infix string.
    * e.g.) createBackup(wsRoot, "foo") will result in a backup file name
    * `dendron.yyyy.MM.dd.HHmmssS.foo.yml`

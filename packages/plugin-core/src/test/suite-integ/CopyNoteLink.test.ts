@@ -44,7 +44,9 @@ suite("CopyNoteLink", function () {
     },
     () => {
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "foo.md"
@@ -55,45 +57,49 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
-        const testNote = NoteUtils.create({
-          fname: "foo",
-          vault: vaults[0],
-        });
-        // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
-        const disposable = vscode.workspace.onDidSaveTextDocument(
-          (textDocument) => {
-            testAssertsInsideCallback(() => {
-              expect(
-                textDocument.getText().includes("id: barbar")
-              ).toBeTruthy();
-              disposable.dispose();
-            }, done);
-          }
-        );
-
-        ExtensionProvider.getWSUtils()
-          .openNote(testNote)
-          .then(async (editor) => {
-            editor
-              .edit(async (editBuilder) => {
-                // Replace id of frontmatter
-                const startPos = new vscode.Position(1, 4);
-                const endPos = new vscode.Position(1, 7);
-
-                editBuilder.replace(
-                  new vscode.Range(startPos, endPos),
-                  "barbar"
-                );
-              })
-              .then(async () => {
-                copyNoteLinkCommand.run();
-              });
+        const vaults = ExtensionProvider.getDWorkspace().vaults;
+        vaults.then((vaults) => {
+          const testNote = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
           });
+          // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+          const disposable = vscode.workspace.onDidSaveTextDocument(
+            (textDocument) => {
+              testAssertsInsideCallback(() => {
+                expect(
+                  textDocument.getText().includes("id: barbar")
+                ).toBeTruthy();
+                disposable.dispose();
+              }, done);
+            }
+          );
+
+          ExtensionProvider.getWSUtils()
+            .openNote(testNote)
+            .then(async (editor) => {
+              editor
+                .edit(async (editBuilder) => {
+                  // Replace id of frontmatter
+                  const startPos = new vscode.Position(1, 4);
+                  const endPos = new vscode.Position(1, 7);
+
+                  editBuilder.replace(
+                    new vscode.Range(startPos, endPos),
+                    "barbar"
+                  );
+                })
+                .then(async () => {
+                  copyNoteLinkCommand.run();
+                });
+            });
+        });
       });
 
       test("WHEN the editor is selecting a header, THEN CopyNoteLink should return a link with that header", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "testHeader",
           vault: vaults[0],
@@ -112,7 +118,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting a header with unicode characters, THEN CopyNoteLink should return a link with that header", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "testUnicode",
           vault: vaults[0],
@@ -133,7 +141,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting an anchor, THEN CopyNoteLink should return a link with that anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const noteWithTarget =
           await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -165,7 +175,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting a block anchor, THEN CopyNoteLink should return a link with that block anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note =
           await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -192,7 +204,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting a footnote, THEN CopyNoteLink should not confuse it for a block anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "testFootnote",
           vault: vaults[0],
@@ -221,7 +235,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the note has a block anchor target, THEN CopyNoteLink should generate block anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note =
           await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -249,7 +265,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting a header of a tag note, THEN CopyNoteLink should return a link with that header", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const noteWithLink = await NoteTestUtilsV4.createNoteWithEngine({
           fname: "tags.foo.bar",
           vault: vaults[0],
@@ -280,7 +298,9 @@ suite("CopyNoteLink", function () {
     },
     () => {
       test("THEN CopyNoteLink should only return a link without a note alias", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "foo.md"
@@ -303,7 +323,9 @@ suite("CopyNoteLink", function () {
     },
     () => {
       test("WHEN the editor is on a saved file, THEN CopyNoteLink should return link with title and fname of engine note", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "foo.md"
@@ -314,45 +336,49 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is on a dirty file, THEN CopyNoteLink should return undefined and cause an onDidSaveTextDocument to be fired", (done) => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
-        const testNote = NoteUtils.create({
-          fname: "foo",
-          vault: vaults[0],
-        });
-        // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
-        const disposable = vscode.workspace.onDidSaveTextDocument(
-          (textDocument) => {
-            testAssertsInsideCallback(() => {
-              expect(
-                textDocument.getText().includes("id: barbar")
-              ).toBeTruthy();
-              disposable.dispose();
-            }, done);
-          }
-        );
-
-        ExtensionProvider.getWSUtils()
-          .openNote(testNote)
-          .then(async (editor) => {
-            editor
-              .edit(async (editBuilder) => {
-                // Replace id of frontmatter
-                const startPos = new vscode.Position(1, 4);
-                const endPos = new vscode.Position(1, 7);
-
-                editBuilder.replace(
-                  new vscode.Range(startPos, endPos),
-                  "barbar"
-                );
-              })
-              .then(async () => {
-                copyNoteLinkCommand.run();
-              });
+        const vaults = ExtensionProvider.getDWorkspace().vaults;
+        vaults.then((vaults) => {
+          const testNote = NoteUtils.create({
+            fname: "foo",
+            vault: vaults[0],
           });
+          // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+          const disposable = vscode.workspace.onDidSaveTextDocument(
+            (textDocument) => {
+              testAssertsInsideCallback(() => {
+                expect(
+                  textDocument.getText().includes("id: barbar")
+                ).toBeTruthy();
+                disposable.dispose();
+              }, done);
+            }
+          );
+
+          ExtensionProvider.getWSUtils()
+            .openNote(testNote)
+            .then(async (editor) => {
+              editor
+                .edit(async (editBuilder) => {
+                  // Replace id of frontmatter
+                  const startPos = new vscode.Position(1, 4);
+                  const endPos = new vscode.Position(1, 7);
+
+                  editBuilder.replace(
+                    new vscode.Range(startPos, endPos),
+                    "barbar"
+                  );
+                })
+                .then(async () => {
+                  copyNoteLinkCommand.run();
+                });
+            });
+        });
       });
 
       test("WHEN the editor is selecting an anchor, THEN CopyNoteLink should return a link with that anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const noteWithTarget =
           await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -395,7 +421,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the editor is selecting a block anchor, THEN CopyNoteLink should return a link with that block anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note =
           await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -424,7 +452,9 @@ suite("CopyNoteLink", function () {
       });
 
       test("WHEN the note has a block anchor target, THEN CopyNoteLink should generate block anchor", async () => {
-        const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note =
           await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.createWithEngine({
             wsRoot,
@@ -482,7 +512,9 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file is in assets", () => {
       test("THEN creates a link using assets", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const dirPath = path.join(
           wsRoot,
           VaultUtils.getRelPath(vaults[0]),
@@ -502,7 +534,9 @@ suite("CopyNoteLink", function () {
 
     describe("AND the file is in a vault, but not in assets", () => {
       test("THEN creates a link from root", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         const fsPath = path.join(path.join(wsRoot, vaultPath), "test.rs");
         await fs.writeFile(fsPath, "let x = 123;");

@@ -45,7 +45,9 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto note", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = vaults[0];
           const note = (await engine.getNoteMeta("foo")).data!;
           const { note: out } = (await createGoToNoteCmd().run({
@@ -70,7 +72,9 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN get note", async () => {
-          const { vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = vaults[0];
           const note = (await engine.findNotesMeta({ fname: "foo", vault }))[0];
           expect(_.pick(note, ["fname", "stub"])).toEqual({
@@ -98,7 +102,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN note created", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           const { note: out } = (await createGoToNoteCmd().run({
             qs: "foo.ch2",
@@ -142,7 +146,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN note is not created, and error toast is displayed", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           const cmd = createGoToNoteCmd();
           const errorSpy = sinon.spy(
@@ -176,8 +180,9 @@ suite("GotoNote", function () {
       () => {
         test("THEN note is created", async () => {
           const cmd = createGoToNoteCmd();
-          const engine = ExtensionProvider.getEngine();
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const originNote = (await engine.getNote("origin")).data;
           const out = await cmd.run({
             originNote,
@@ -216,7 +221,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN apply template", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -241,7 +246,7 @@ suite("GotoNote", function () {
       () => {
         test("THEN new note uses that template", async () => {
           // Template is in vault 1. Note is in vault 2
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[1];
           await createGoToNoteCmd().run({
             qs: "bar.ch1",
@@ -283,7 +288,7 @@ suite("GotoNote", function () {
 
         test("AND user picks from prompted vault, THEN template body gets applied to new note", async () => {
           // Try to create note in vault 3
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[2];
           // Pick vault 2
           showQuickPick.onFirstCall().returns(
@@ -342,7 +347,7 @@ suite("GotoNote", function () {
       () => {
         test("WHEN schema template uses xvault notation, THEN correct template body gets applied to new note", async () => {
           // Try to create note in vault 3
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[2];
           await createGoToNoteCmd().run({
             qs: "food.ch2",
@@ -367,7 +372,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto anchor", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",
@@ -399,7 +404,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto ehader", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "target-note",
@@ -428,7 +433,7 @@ suite("GotoNote", function () {
       },
       () => {
         test("THEN goto anchor", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const vault = vaults[0];
           await createGoToNoteCmd().run({
             qs: "alpha",
@@ -494,7 +499,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced by hashtag", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -530,7 +536,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced by usertag", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -570,7 +577,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -604,7 +612,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -639,7 +648,8 @@ suite("GotoNote", function () {
         () => {
           test("THEN go to note referenced in frontmatter", async () => {
             const extension = ExtensionProvider.getExtension();
-            const { vaults } = extension.getEngine();
+            const ws = ExtensionProvider.getDWorkspace();
+            const vaults = await ws.vaults;
             const promptVaultStub = sinon
               .stub(PickerUtilsV2, "promptVault")
               .returns(Promise.resolve(vaults[1]));
@@ -910,7 +920,9 @@ suite("GotoNote", function () {
     describe("GIVEN non-note files", () => {
       describeMultiWS("WHEN used on a link to a non-note file", { ctx }, () => {
         before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           await fs.writeFile(
             path.join(wsRoot, "test.txt"),
             "Et voluptatem autem sunt."
@@ -930,7 +942,9 @@ suite("GotoNote", function () {
         });
 
         test("THEN opens the non-note file", async () => {
-          const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const note = await NoteTestUtilsV4.createNoteWithEngine({
             wsRoot,
             vault: vaults[0],
@@ -952,8 +966,9 @@ suite("GotoNote", function () {
 
         describe("AND the link doesn't include a slash", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -978,8 +993,9 @@ suite("GotoNote", function () {
 
         describe("AND the link starts with assets", () => {
           before(async () => {
-            const { vaults, wsRoot, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1008,8 +1024,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1053,8 +1070,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1099,8 +1117,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],
@@ -1137,7 +1156,9 @@ suite("GotoNote", function () {
         const notename = "test.note";
         let openWithDefaultApp: sinon.SinonStub<[string], Promise<void>>;
         before(async () => {
-          const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const note = await NoteTestUtilsV4.createNoteWithEngine({
             wsRoot,
             vault: vaults[0],
@@ -1173,8 +1194,9 @@ suite("GotoNote", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults, engine } =
-              ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot, engine } = ws;
+            const vaults = await ws.vaults;
             const note = await NoteTestUtilsV4.createNoteWithEngine({
               wsRoot,
               vault: vaults[0],

@@ -1,14 +1,16 @@
 import {
+  ConfigService,
   ContextualUIEvents,
   DVault,
   ErrorUtils,
   NoteProps,
   NoteUtils,
+  URI,
   VaultUtils,
   WorkspaceOpts,
   WorkspaceType,
 } from "@dendronhq/common-all";
-import { DConfig, file2Note } from "@dendronhq/common-server";
+import { file2Note } from "@dendronhq/common-server";
 import {
   EngineFileWatcher,
   EngineUtils,
@@ -110,7 +112,9 @@ export class FileWatcher {
 
     try {
       this.L.debug({ ctx, fsPath, msg: "pre-add-to-engine" });
-      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,
@@ -130,12 +134,18 @@ export class FileWatcher {
         delete note["schemaStub"];
         //TODO recognise vscode's create new file menu option to create a note.
       }
-
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(engine.wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       await EngineUtils.refreshNoteLinksAndAnchors({
         note,
         fmChangeOnly: false,
         engine,
-        config: DConfig.readConfigSync(engine.wsRoot),
+        config,
       });
       await engine.writeNote(note, { metaOnly: true });
     } catch (err: any) {
@@ -172,7 +182,9 @@ export class FileWatcher {
       return;
     }
     try {
-      const { vaults, engine, wsRoot } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine, wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vault = VaultUtils.getVaultByFilePath({
         vaults,
         fsPath,

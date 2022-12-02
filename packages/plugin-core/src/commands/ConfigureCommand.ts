@@ -1,5 +1,4 @@
-import { DConfig } from "@dendronhq/common-server";
-import { Uri } from "vscode";
+import { ConfigService, URI } from "@dendronhq/common-all";
 import { DENDRON_COMMANDS } from "../constants";
 import { IDendronExtension } from "../dendronExtensionInterface";
 import { VSCodeUtils } from "../vsCodeUtils";
@@ -23,10 +22,9 @@ export class ConfigureCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute() {
-    const dendronRoot = this._ext.getDWorkspace().wsRoot;
-    const configPath = DConfig.configPath(dendronRoot);
-    const uri = Uri.file(configPath);
-    await VSCodeUtils.openFileInEditor(uri);
+    const { wsRoot } = this._ext.getDWorkspace();
+    const configPath = ConfigService.instance().configPath(URI.file(wsRoot));
+    await VSCodeUtils.openFileInEditor(configPath);
     return;
   }
 }

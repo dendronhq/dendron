@@ -62,7 +62,7 @@ export class DWorkspace {
 
   async initEngine({ port }: { port: number }) {
     const { wsRoot, vaults } = this;
-    const dendronEngine = DendronEngineClient.create({
+    const dendronEngine = await DendronEngineClient.create({
       port,
       ws: wsRoot,
       vaults,

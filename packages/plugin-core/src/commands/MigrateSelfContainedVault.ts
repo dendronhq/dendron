@@ -44,11 +44,9 @@ export class MigrateSelfContainedVaultCommand extends BasicCommand<
   async gatherInputs(opts?: CommandOpts): Promise<CommandOpts | undefined> {
     if (opts === undefined) opts = {};
     if (opts.vault === undefined) {
-      const nonSCVaults = this.extension
-        .getDWorkspace()
-        .vaults.filter(
-          (vault) => !VaultUtils.isSelfContained(vault) && !vault.seed
-        );
+      const nonSCVaults = (await this.extension.getDWorkspace().vaults).filter(
+        (vault) => !VaultUtils.isSelfContained(vault) && !vault.seed
+      );
       if (nonSCVaults.length === 0) {
         throw new DendronError({
           message:

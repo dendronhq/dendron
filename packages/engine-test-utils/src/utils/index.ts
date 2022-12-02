@@ -1,15 +1,14 @@
 import {
-  ConfigUtils,
   CONSTANTS,
-  DendronConfig,
   VaultUtils,
   WorkspaceFolderRaw,
   WorkspaceOpts,
   WorkspaceSettings,
   WorkspaceType,
   normalizeUnixPath,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig, readYAML } from "@dendronhq/common-server";
 import { AssertUtils } from "@dendronhq/common-test-utils";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -64,7 +63,7 @@ export async function checkFile(
     expect(body).toMatchSnapshot();
   }
   await checkString(body, ...match);
-  return !nomatch || (await checkNotInString(body, ...nomatch));
+  return !nomatch || checkNotInString(body, ...nomatch);
 }
 
 export async function checkNotInString(body: string, ...nomatch: string[]) {
@@ -98,9 +97,12 @@ const getWorkspaceFolders = (wsRoot: string) => {
 
 export async function checkVaults(opts: WorkspaceOpts, expect: any) {
   const { wsRoot, vaults } = opts;
-  const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as DendronConfig;
-  const vaultsConfig = ConfigUtils.getVaults(config);
+  const vaultsConfig = (
+    await ConfigService.instance().getConfig(
+      URI.file(wsRoot),
+      "workspace.vaults"
+    )
+  )._unsafeUnwrap();
   expect(_.sortBy(vaultsConfig, ["fsPath", "workspace"])).toEqual(
     _.sortBy(vaults, ["fsPath", "workspace"])
   );

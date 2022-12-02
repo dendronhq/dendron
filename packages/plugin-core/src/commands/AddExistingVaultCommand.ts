@@ -11,9 +11,10 @@ import {
   VaultUtils,
   WorkspaceEvents,
   DendronConfig,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   GitUtils,
   pathForVaultRoot,
   simpleGit,
@@ -259,7 +260,7 @@ export class AddExistingVaultCommand extends BasicCommand<
     }
     const sourceType = sourceTypeSelected.label;
 
-    const { config } = this._ext.getDWorkspace();
+    const config = await this._ext.getDWorkspace().config;
     if (config.dev?.enableSelfContainedVaults) {
       return this.gatherVaultSelfContained(sourceType);
     } else {
@@ -422,8 +423,15 @@ export class AddExistingVaultCommand extends BasicCommand<
           path.join(vaultRootPath, CONSTANTS.DENDRON_CONFIG_FILE)
         )
       ) {
-        const vaultConfig = DConfig.getRaw(vaultRootPath) as DendronConfig;
-        if (ConfigUtils.getVaults(vaultConfig)?.length > 1) {
+        const configReadResult = await ConfigService.instance().readRaw(
+          URI.file(vaultRootPath)
+        );
+        if (configReadResult.isErr()) {
+          throw configReadResult.error;
+        }
+        const config = configReadResult.value as DendronConfig;
+
+        if (ConfigUtils.getVaults(config)?.length > 1) {
           await AnalyticsUtils.trackForNextRun(
             WorkspaceEvents.TransitiveDepsWarningShow
           );

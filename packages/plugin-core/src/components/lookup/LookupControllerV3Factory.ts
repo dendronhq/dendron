@@ -22,8 +22,10 @@ export class LookupControllerV3Factory implements ILookupControllerV3Factory {
     this.extension = extension;
   }
 
-  create(opts?: LookupControllerV3CreateOpts): ILookupControllerV3 {
-    const { vaults } = this.extension.getDWorkspace();
+  async create(
+    opts?: LookupControllerV3CreateOpts
+  ): Promise<ILookupControllerV3> {
+    const vaults = await this.extension.getDWorkspace().vaults;
 
     // disable vault selection if explicitly requested or we are looking at schemas
     const disableVaultSelection =

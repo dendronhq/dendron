@@ -243,7 +243,9 @@ suite("onAccept", () => {
         await VSCodeUtils.closeAllEditors();
         const cmd = new NoteLookupCommand();
         const { provider } = await cmd.gatherInputs();
-        const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = await NoteTestUtilsV4.createNote({
           vault: vaults[0],
           wsRoot,

@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   DEngineClient,
   DNodeUtils,
   DWorkspaceV2,
@@ -7,8 +8,8 @@ import {
   NoteUtils,
   ReducedDEngine,
   RespV3,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
@@ -91,7 +92,7 @@ export class GoToSiblingCommand extends BasicCommand<
     engine: DEngineClient,
     fname: string
   ): Promise<NotePropsMeta | null> {
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const hitNotes = await engine.findNotesMeta({ fname, vault });
     return hitNotes.length !== 0 ? hitNotes[0] : null;
   }
@@ -106,8 +107,14 @@ export class GoToSiblingCommand extends BasicCommand<
 
     // Check the date format for journal note. Only when date format of journal notes is default,
     // navigate chronologically
-    const config = DConfig.readConfigSync(wsRoot);
-    const dateFormat = config.workspace.journal.dateFormat;
+    const configGetResult = await ConfigService.instance().getConfig(
+      URI.file(wsRoot),
+      "workspace.journal.dateFormat"
+    );
+    if (configGetResult.isErr()) {
+      throw configGetResult.error;
+    }
+    const dateFormat = configGetResult.value;
     return dateFormat === "y.MM.dd";
   }
 

@@ -79,14 +79,14 @@ async function createAssetsInVault({
   await fs.ensureFile(path.join(assetsDir, "foo.jpg"));
 }
 
-const setupConfig = ({
+const setupConfig = async ({
   wsRoot,
   siteConfig,
 }: {
   wsRoot: string;
   siteConfig?: Partial<DendronPublishingConfig>;
 }) => {
-  TestConfigUtils.withConfig(
+  await TestConfigUtils.withConfig(
     (config) => {
       ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
       const mergedPublishingConfig = _.merge(
@@ -123,7 +123,7 @@ describe("GIVEN NextExport pod", () => {
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   copyAssets: true,
@@ -147,16 +147,13 @@ describe("GIVEN NextExport pod", () => {
           {
             expect,
             preSetupHook: async (opts) => {
-              const wsRoot = opts.wsRoot;
               await ENGINE_HOOKS.setupRefs(opts);
               await createAssetsInVault({
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
-              setupConfig({
-                ...opts,
-              });
-              TestConfigUtils.withConfig(
+              await setupConfig(opts);
+              await TestConfigUtils.withConfig(
                 (config) => {
                   config.dev = {
                     ...config.dev,
@@ -164,7 +161,7 @@ describe("GIVEN NextExport pod", () => {
                   };
                   return config;
                 },
-                { wsRoot }
+                { wsRoot: opts.wsRoot }
               );
             },
           }
@@ -191,21 +188,20 @@ describe("GIVEN NextExport pod", () => {
           {
             expect,
             preSetupHook: async (opts) => {
-              const wsRoot = opts.wsRoot;
               await ENGINE_HOOKS.setupNoteRefRecursive(opts);
               await createAssetsInVault({
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
 
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   copyAssets: true,
                 },
               });
 
-              TestConfigUtils.withConfig(
+              await TestConfigUtils.withConfig(
                 (config) => {
                   config.dev = {
                     ...config.dev,
@@ -213,7 +209,7 @@ describe("GIVEN NextExport pod", () => {
                   };
                   return config;
                 },
-                { wsRoot }
+                { wsRoot: opts.wsRoot }
               );
             },
           }
@@ -241,7 +237,7 @@ describe("GIVEN NextExport pod", () => {
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   copyAssets: false,
@@ -301,7 +297,7 @@ describe("GIVEN NextExport pod", () => {
                 wsRoot: opts.wsRoot,
                 vault: opts.vaults[0],
               });
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   siteBanner: "custom",
@@ -324,7 +320,7 @@ describe("GIVEN NextExport pod", () => {
             expect,
             preSetupHook: async (opts) => {
               await ENGINE_HOOKS.setupBasic(opts);
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   siteBanner: "custom",
@@ -359,7 +355,7 @@ describe("GIVEN NextExport pod", () => {
                 "logo.png"
               );
               await fs.ensureFile(path.join(opts.wsRoot, logoPath));
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   logoPath,
@@ -394,7 +390,7 @@ describe("GIVEN NextExport pod", () => {
                 "assets",
                 "logo.png"
               );
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   logoPath,
@@ -422,7 +418,7 @@ describe("GIVEN NextExport pod", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            setupConfig(opts);
+            await setupConfig(opts);
           },
         }
       );
@@ -454,7 +450,7 @@ describe("GIVEN NextExport pod", () => {
                   return note;
                 }
               );
-              TestConfigUtils.withConfig(
+              await TestConfigUtils.withConfig(
                 (config) => {
                   const vaults = ConfigUtils.getVaults(config);
                   const vault2 = vaults.find((ent) => ent.fsPath === "vault2");
@@ -505,7 +501,7 @@ describe("GIVEN nextjs export", () => {
         expect,
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setPublishProp(config, "siteUrl", "https://foo.com");
               return config;
@@ -538,7 +534,7 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(
                   config,
@@ -576,7 +572,7 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(
                   config,
@@ -622,7 +618,7 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(
                   config,
@@ -667,7 +663,7 @@ describe("GIVEN nextjs export", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setGithubProp(config, "cname", "11ty.dendron.so");
                 return config;
@@ -692,7 +688,7 @@ describe("GIVEN nextjs export", () => {
             expect,
             preSetupHook: async (opts) => {
               await ENGINE_HOOKS.setupBasic(opts);
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   sidebarPath: false,
@@ -715,7 +711,7 @@ describe("GIVEN nextjs export", () => {
             expect,
             preSetupHook: async (opts) => {
               await ENGINE_HOOKS.setupBasic(opts);
-              setupConfig({
+              await setupConfig({
                 ...opts,
                 siteConfig: {
                   sidebarPath: "./non-existend-file.js",
@@ -789,7 +785,7 @@ describe("GIVEN nextjs export", () => {
                 "![[public.subnote-2]]",
               ].join("\n"),
             });
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
                   "public",
@@ -801,7 +797,7 @@ describe("GIVEN nextjs export", () => {
                 };
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }
@@ -845,7 +841,7 @@ describe("GIVEN nextjs export", () => {
                 "![[public]]",
               ].join("\n"),
             });
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
                 config.dev = {
@@ -854,7 +850,7 @@ describe("GIVEN nextjs export", () => {
                 };
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }
@@ -890,7 +886,7 @@ describe("GIVEN nextjs export", () => {
               wsRoot,
               body: ["public content", "![[public]]"].join("\n"),
             });
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
                   "public",
@@ -906,7 +902,7 @@ describe("GIVEN nextjs export", () => {
                 };
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }
@@ -973,7 +969,7 @@ describe("GIVEN nextjs export", () => {
               wsRoot,
               body: ["Level five"].join("\n"),
             });
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 config.dev = {
                   ...config.dev,
@@ -982,7 +978,7 @@ describe("GIVEN nextjs export", () => {
                 ConfigUtils.setPublishProp(config, "siteUrl", "example.com");
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }
@@ -1036,7 +1032,7 @@ describe("GIVEN nextjs export", () => {
               body: ["one"].join("\n"),
             });
 
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
                   "public",
@@ -1052,7 +1048,7 @@ describe("GIVEN nextjs export", () => {
                 };
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }
@@ -1109,7 +1105,7 @@ describe("GIVEN nextjs export", () => {
               body: ["one", "![[private#anchor2]]"].join("\n"),
             });
 
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
                   "public",
@@ -1125,7 +1121,7 @@ describe("GIVEN nextjs export", () => {
                 };
                 return config;
               },
-              { wsRoot }
+              { wsRoot: opts.wsRoot }
             );
           },
         }

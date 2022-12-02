@@ -1,18 +1,16 @@
 import {
+  ConfigService,
+  DendronConfig,
   DNodeUtils,
   DVault,
   FOLDERS,
   genUUIDInsecure,
   NoteProps,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  cleanFileName,
-  DConfig,
-  readMD,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   DendronASTNode,
@@ -478,13 +476,20 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
           //notes in same level with note
           const noteDirlevel = note.fname.split(".").length;
           const siblingNotes = hDict[noteDirlevel];
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(wsRoot)
+          );
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const dendronConfig = configReadResult.value;
           const proc = MDUtilsV5.procRemarkFull({
             noteToRender: note,
             fname: note.fname,
             vault: note.vault,
             vaults: engine.vaults,
             dest: DendronASTDest.MD_DENDRON,
-            config: DConfig.readConfigSync(engine.wsRoot),
+            config: dendronConfig,
             wsRoot: engine.wsRoot,
           });
 
@@ -557,7 +562,13 @@ export class MarkdownPublishPod extends PublishPod<MarkdownPublishPodConfig> {
       engine.vaults
     );
 
-    const rawConfig = DConfig.readConfigSync(engine.wsRoot);
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadRawResult.isErr()) {
+      throw configReadRawResult.error;
+    }
+    const rawConfig = configReadRawResult.value as DendronConfig;
 
     let remark = MDUtilsV5.procRemarkFull({
       noteToRender: note,

@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   ConfigUtils,
   DateTime,
   debounceAsyncUntilComplete,
@@ -13,8 +14,8 @@ import {
   NotePropsMeta,
   NoteUtils,
   ProcFlavor,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import {
   DecorationHashTag,
   DecorationTaskNote,
@@ -282,7 +283,13 @@ export async function updateDecorations(editor: TextEditor): Promise<{
   try {
     const ctx = "updateDecorations";
     const engine = ExtensionProvider.getEngine();
-    const config = DConfig.readConfigSync(engine.wsRoot, true);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     if (ConfigUtils.getWorkspace(config).enableEditorDecorations === false) {
       // Explicitly disabled, stop here.
       return {};

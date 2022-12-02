@@ -17,7 +17,9 @@ suite("GoogleDocsExportPodCommand", function () {
         const cmd = new GoogleDocsExportPodCommand(
           ExtensionProvider.getExtension()
         );
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const notePath = path.join(
           vault2Path({ vault: vaults[0], wsRoot }),
           "root.md"

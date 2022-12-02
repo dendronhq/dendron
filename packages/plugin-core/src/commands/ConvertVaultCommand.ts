@@ -36,7 +36,7 @@ export class ConvertVaultCommand extends BasicCommand<
   }
 
   async gatherVault(): Promise<DVault | undefined> {
-    const { vaults } = this._ext.getDWorkspace();
+    const vaults = await this._ext.getDWorkspace().vaults;
     return (
       await VSCodeUtils.showQuickPick(
         vaults.map((ent) => ({
@@ -155,7 +155,9 @@ export class ConvertVaultCommand extends BasicCommand<
       }
     }
 
-    if (this._ext.getDWorkspace().config.dev?.enableSelfContainedVaults) {
+    if (
+      (await this._ext.getDWorkspace().config).dev?.enableSelfContainedVaults
+    ) {
       // If self contained vaults are enabled, we'll move the vault into the
       // `dependencies` folder. We should ask the user if they are okay with us
       // moving the folder.

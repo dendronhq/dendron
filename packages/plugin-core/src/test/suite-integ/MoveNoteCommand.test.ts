@@ -112,7 +112,9 @@ suite("MoveNoteCommand", function () {
         },
         () => {
           test("THEN correct results", async () => {
-            const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot } = ws;
+            const vaults = await ws.vaults;
             const engineMock = createEngine({ wsRoot, vaults });
             const results = await testFunc({
               engine: engineMock,
@@ -136,7 +138,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN correct results ", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
@@ -208,7 +212,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN update hashtags correctly", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
         await extension.wsUtils.openNote(tagNote);
         const cmd = new MoveNoteCommand(extension);
@@ -258,7 +264,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN  turns links to hashtags", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
         await extension.wsUtils.openNote(tagNote);
         const cmd = new MoveNoteCommand(extension);
@@ -308,7 +316,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN turns hashtags into regular links", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const extension = ExtensionProvider.getExtension();
         await extension.wsUtils.openNote(tagNote);
         const cmd = new MoveNoteCommand(extension);
@@ -348,7 +358,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN note moved correctly", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vaultFrom = vaults[0];
         const vaultTo = vaults[0];
         const fooNote = (
@@ -409,7 +421,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const ext = ExtensionProvider.getExtension();
         const vault1 = vaults[0];
         const vault2 = vaults[0];
@@ -458,7 +472,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const fooNote = (
@@ -529,7 +545,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const vault3 = vaults[2];
@@ -626,7 +644,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
         const fooNote = (
@@ -727,7 +747,9 @@ suite("MoveNoteCommand", function () {
     },
     () => {
       test("THEN do right thing", async () => {
-        const { vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault1 = vaults[0];
         const fooNote = (
           await engine.findNotes({ fname: "foo", vault: vault1 })
@@ -735,9 +757,11 @@ suite("MoveNoteCommand", function () {
 
         await WSUtils.openNote(fooNote);
         const lc =
-          ExtensionProvider.getExtension().lookupControllerFactory.create({
-            nodeType: "note",
-          });
+          await ExtensionProvider.getExtension().lookupControllerFactory.create(
+            {
+              nodeType: "note",
+            }
+          );
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"

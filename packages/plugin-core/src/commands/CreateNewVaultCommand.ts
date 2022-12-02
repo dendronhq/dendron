@@ -84,7 +84,7 @@ export class CreateNewVaultCommand extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
-    const { config } = this._ext.getDWorkspace();
+    const config = await this._ext.getDWorkspace().config;
     if (config.dev?.enableSelfContainedVaults) {
       return this.gatherVaultSelfContained();
     } else {

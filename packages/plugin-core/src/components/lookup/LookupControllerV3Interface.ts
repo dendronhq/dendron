@@ -86,7 +86,7 @@ export interface ILookupControllerV3 {
 }
 
 export interface ILookupControllerV3Factory {
-  create(opts?: LookupControllerV3CreateOpts): ILookupControllerV3;
+  create(opts?: LookupControllerV3CreateOpts): Promise<ILookupControllerV3>;
 }
 
 export type LookupControllerV3CreateOpts = {

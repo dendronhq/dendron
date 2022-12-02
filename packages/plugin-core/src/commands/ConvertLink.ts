@@ -132,7 +132,7 @@ export class ConvertLinkCommand extends BasicCommand<
       vaultSelectCanToggle: false,
     };
     const extension = ExtensionProvider.getExtension();
-    const lc = extension.lookupControllerFactory.create(lcOpts);
+    const lc = await extension.lookupControllerFactory.create(lcOpts);
     const provider = extension.noteLookupProviderFactory.create(this.key, {
       allowNewNote: false,
       noHidePickerOnAccept: false,
@@ -344,7 +344,7 @@ export class ConvertLinkCommand extends BasicCommand<
     }
     const targetVault = vaultName
       ? VaultUtils.getVaultByName({ vaults, vname: vaultName })
-      : WSUtils.getVaultFromDocument(document);
+      : await WSUtils.getVaultFromDocument(document);
 
     if (targetVault === undefined) {
       throw ConvertLinkCommand.noVaultError();

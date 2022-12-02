@@ -196,7 +196,7 @@ export class NoteLookupCommand extends BaseCommand<
     const extension = ExtensionProvider.getExtension();
     const start = process.hrtime();
     const ws = extension.getDWorkspace();
-    const lookupConfig = ConfigUtils.getCommands(ws.config).lookup;
+    const lookupConfig = ConfigUtils.getCommands(await ws.config).lookup;
     const noteLookupConfig = lookupConfig.note;
     let selectionType;
     switch (noteLookupConfig.selectionMode) {
@@ -230,7 +230,7 @@ export class NoteLookupCommand extends BaseCommand<
         copts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt;
     } else {
       vaultButtonPressed =
-        VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
+        await VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     }
 
     const ctx = "NoteLookupCommand:gatherInput";
@@ -238,7 +238,7 @@ export class NoteLookupCommand extends BaseCommand<
     // initialize controller and provider
     const disableVaultSelection = !confirmVaultOnCreate;
     if (_.isUndefined(this._controller)) {
-      this._controller = extension.lookupControllerFactory.create({
+      this._controller = await extension.lookupControllerFactory.create({
         nodeType: "note",
         disableVaultSelection,
         vaultButtonPressed,
@@ -412,8 +412,10 @@ export class NoteLookupCommand extends BaseCommand<
       const extension = ExtensionProvider.getExtension();
       const ws = extension.getDWorkspace();
 
-      const journalDateFormat = ConfigUtils.getJournal(ws.config).dateFormat;
-
+      const journalDateFormat = ConfigUtils.getJournal(
+        await ws.config
+      ).dateFormat;
+      const config = await ws.config;
       const out = await Promise.all(
         selected.map((item) => {
           // If we're in journal mode, then apply title and trait overrides
@@ -431,9 +433,7 @@ export class NoteLookupCommand extends BaseCommand<
             if (journalModifiedTitle) {
               item.title = journalModifiedTitle;
 
-              const journalTrait = new JournalNote(
-                ExtensionProvider.getDWorkspace().config
-              );
+              const journalTrait = new JournalNote(config);
               if (item.traits) {
                 item.traits.push(journalTrait.id);
               } else {
@@ -441,7 +441,7 @@ export class NoteLookupCommand extends BaseCommand<
               }
             }
           } else if (
-            ConfigUtils.getWorkspace(ws.config).enableFullHierarchyNoteTitle
+            ConfigUtils.getWorkspace(config).enableFullHierarchyNoteTitle
           ) {
             item.title = NoteUtils.genTitleFromFullFname(item.fname);
           }
@@ -715,7 +715,7 @@ export class NoteLookupCommand extends BaseCommand<
     // Try to get the default vault value.
     let vault: DVault | undefined = picker.vault
       ? picker.vault
-      : PickerUtilsV2.getVaultForOpenEditor();
+      : await PickerUtilsV2.getVaultForOpenEditor();
 
     // If our current context does not have vault or if our current context vault
     // already has a matching file name we want to ask the user for a different vault.

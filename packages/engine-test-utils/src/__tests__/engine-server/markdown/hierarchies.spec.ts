@@ -1,13 +1,14 @@
 import {
+  ConfigService,
   DendronConfig,
   NoteDictsUtils,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   getParsingDependencyDicts,
@@ -38,8 +39,10 @@ describe("hierarchies", () => {
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
   const BASIC = createProcTests({
     name: "BASIC",
-    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
-      const config = DConfig.readConfigSync(wsRoot);
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       config.publishing.enableHierarchyDisplay = true;
       const noteToRender = (
         await engine.findNotes({ fname: "foo", vault: vaults[0] })
@@ -93,8 +96,10 @@ describe("hierarchies", () => {
 
   const NO_HIERARCHY = createProcTests({
     name: "NO_HIERARCHY",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const rawConfig = DConfig.readConfigSync(engine.wsRoot);
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const rawConfig = (
+        await ConfigService.instance().readRaw(URI.file(wsRoot))
+      )._unsafeUnwrap() as DendronConfig;
       const config: DendronConfig = {
         ...rawConfig,
         publishing: {
@@ -139,8 +144,10 @@ describe("hierarchies", () => {
 
   const NO_HIERARCHY_VIA_FM = createProcTests({
     name: "NO_HIERARCHY_VIA_FM",
-    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
-      const config = DConfig.readConfigSync(wsRoot);
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV5.procRemarkFull({
           noteToRender: (await engine.getNote("foo")).data!,
@@ -187,8 +194,10 @@ describe("hierarchies", () => {
 
   const DIFF_HIERARCHY_TITLE = createProcTests({
     name: "DIFF_HIERARCHY_TITLE",
-    setupFunc: async ({ engine, vaults, extra }) => {
-      const rawConfig = DConfig.readConfigSync(engine.wsRoot);
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const rawConfig = (
+        await ConfigService.instance().readRaw(URI.file(wsRoot))
+      )._unsafeUnwrap() as DendronConfig;
       const config: DendronConfig = {
         ...rawConfig,
         publishing: {
@@ -240,8 +249,10 @@ describe("hierarchies", () => {
 
   const SKIP_LEVELS = createProcTests({
     name: "SKIP_LEVELS",
-    setupFunc: async ({ engine, wsRoot, vaults, extra }) => {
-      const config = DConfig.readConfigSync(wsRoot);
+    setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       const noteToRender = (
         await engine.findNotes({ fname: "daily", vault: vaults[0] })
       )[0];

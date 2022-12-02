@@ -17,11 +17,13 @@ import {
   FOLDERS,
   DendronConfig,
   VaultUtils,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import { DConfig, pathForVaultRoot } from "@dendronhq/common-server";
+import { pathForVaultRoot } from "@dendronhq/common-server";
 
 function stubMigrateQuickPick(
   vaultSelect: string,
@@ -70,7 +72,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault should not have migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultNotMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -93,7 +97,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
 
         showErrorMessage = sinon.stub(window, "showErrorMessage");
         reloadWindow = sinon.stub(VSCodeUtils, "reloadWindow");
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         showQuickPick = stubMigrateQuickPick(
           VaultUtils.getName(vaults[0]),
           MigrateVaultContinueOption.cancel
@@ -112,7 +116,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault should not have migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultNotMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -189,7 +195,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );
@@ -212,14 +218,18 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
       });
 
       test("THEN the logoPath is updated to account for the moved asset", async () => {
-        const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const config = await ws.config;
         const logoPath = ConfigUtils.getPublishing(config).logoPath;
         expect(logoPath).toBeTruthy();
         // If the logoPath was not updated, then we won't find the asset file there
@@ -229,7 +239,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the git folders/files are handled correctly", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await fs.pathExists(
             path.join(pathForVaultRoot({ vault: vaults[0], wsRoot }), ".git")
@@ -277,7 +289,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );
@@ -300,7 +312,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -316,7 +330,7 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
 
       before(async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         const cmd = new MigrateSelfContainedVaultCommand(
           ExtensionProvider.getExtension()
         );
@@ -339,7 +353,9 @@ suite("GIVEN the MigrateSelfContainedVault command", () => {
       });
 
       test("THEN the vault is migrated", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         expect(
           await verifyVaultHasMigrated({ wsRoot, vault: vaults[0] })
         ).toBeTruthy();
@@ -367,7 +383,9 @@ async function verifyVaultNotMigrated({
   const notesFolder = path.join(vaultFolder, FOLDERS.NOTES);
   expect(await fs.pathExists(notesFolder)).toBeFalsy();
   // and the vault should NOT be marked as self contained in the config
-  const config = DConfig.getRaw(wsRoot) as DendronConfig;
+  const config = (
+    await ConfigService.instance().readRaw(URI.file(wsRoot))
+  )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath
   );
@@ -402,7 +420,9 @@ async function verifyVaultHasMigrated({
   // and there should be no notes outside the notes folder
   expect(await fs.pathExists(path.join(vaultFolder, "root.md"))).toBeFalsy();
   // and the vault should be marked as self contained in the config
-  const config = DConfig.getRaw(wsRoot) as DendronConfig;
+  const config = (
+    await ConfigService.instance().readRaw(URI.file(wsRoot))
+  )._unsafeUnwrap() as DendronConfig;
   const newVault = ConfigUtils.getVaults(config).find(
     (newVault) => newVault.fsPath === vault.fsPath
   );

@@ -33,8 +33,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     this.extension = extension;
   }
 
-  getVaultFromPath(fsPath: string): DVault {
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+  async getVaultFromPath(fsPath: string): Promise<DVault> {
+    const { wsRoot } = this.extension.getDWorkspace();
+    const vaults = await this.extension.getDWorkspace().vaults;
     return VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
@@ -47,7 +48,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     const fname = path.basename(fsPath, ".md");
     let vault: DVault;
     try {
-      vault = this.getVaultFromPath(fsPath);
+      vault = await this.getVaultFromPath(fsPath);
     } catch (err) {
       // No vault
       return undefined;
@@ -69,8 +70,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     return WS_UTILS;
   }
 
-  getVaultFromUri(fileUri: vscode.Uri): DVault {
-    const { vaults } = this.extension.getDWorkspace();
+  async getVaultFromUri(fileUri: vscode.Uri): Promise<DVault> {
+    const vaults = await this.extension.getDWorkspace().vaults;
+
     const vault = VaultUtils.getVaultByFilePath({
       fsPath: fileUri.fsPath,
       vaults,
@@ -85,7 +87,7 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     const fname = path.basename(txtPath, ".md");
     let vault: DVault;
     try {
-      vault = this.getVaultFromDocument(document);
+      vault = await this.getVaultFromDocument(document);
     } catch (err) {
       // No vault
       return undefined;
@@ -152,9 +154,11 @@ export class WSUtilsV2 implements IWSUtilsV2 {
     };
   }
 
-  getVaultFromDocument(document: vscode.TextDocument) {
+  async getVaultFromDocument(document: vscode.TextDocument) {
     const txtPath = document.uri.fsPath;
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const vault = VaultUtils.getVaultByFilePath({
       wsRoot,
       vaults,
@@ -166,7 +170,9 @@ export class WSUtilsV2 implements IWSUtilsV2 {
   async tryGetNoteFromDocument(
     document: vscode.TextDocument
   ): Promise<NoteProps | undefined> {
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (
       !WorkspaceUtils.isPathInWorkspace({
         wsRoot,

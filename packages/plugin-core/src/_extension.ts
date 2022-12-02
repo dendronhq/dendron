@@ -1,6 +1,7 @@
 import "reflect-metadata"; // This needs to be the topmost import for tsyringe to work
 
 import {
+  ConfigService,
   CONSTANTS,
   DWorkspaceV2,
   getStage,
@@ -11,6 +12,7 @@ import {
   GRAPH_THEME_TEST,
   InstallStatus,
   isDisposable,
+  URI,
   VSCodeEvents,
   WorkspaceEvents,
 } from "@dendronhq/common-all";
@@ -23,6 +25,7 @@ import {
 import {
   HistoryService,
   MetadataService,
+  NodeJSFileStore,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import * as Sentry from "@sentry/node";
@@ -311,6 +314,10 @@ export async function _activate(
       if (!maybeWsRoot) {
         return false;
       }
+      ConfigService.instance({
+        homeDir: URI.file(os.homedir()),
+        fileStore: new NodeJSFileStore(),
+      });
       const resp = await activator.init({
         ext: ws,
         context,
@@ -324,9 +331,9 @@ export async function _activate(
       // setup extension container
       setupLocalExtContainer({
         wsRoot: maybeWsRoot,
-        vaults: wsImpl.vaults,
+        vaults: await wsImpl.vaults,
         engine: resp.data.engine,
-        config: resp.data.workspace.config,
+        config: await resp.data.workspace.config,
         context,
       });
 
@@ -371,7 +378,7 @@ export async function _activate(
         ctx: ctx + ":postSetupWorkspace",
         platform,
         extensions,
-        vaults: wsImpl.vaults,
+        vaults: await wsImpl.vaults,
       });
 
       // --- Start Initializating the Engine
@@ -468,11 +475,9 @@ export async function _activate(
         action: "activate",
       });
       // If automaticallyShowPreview = true, display preview panel on start up
+      const config = await ws.workspaceService?.config;
       const note = await WSUtils.getActiveNote();
-      if (
-        note &&
-        ws.workspaceService?.config.preview?.automaticallyShowPreview
-      ) {
+      if (note && config && config.preview?.automaticallyShowPreview) {
         await PreviewPanelFactory.create().show(note);
       }
       StartupUtils.showUninstallMarkdownLinksExtensionMessage();

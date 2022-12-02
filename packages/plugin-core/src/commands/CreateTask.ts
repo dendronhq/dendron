@@ -37,7 +37,8 @@ export class CreateTaskCommand extends BasicCommand<
     const ctx = "CreateTask";
 
     Logger.info({ ctx, msg: "enter", opts });
-    const { config } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const config = await ws.config;
     const { createTaskSelectionType, addBehavior } =
       ConfigUtils.getTask(config);
 

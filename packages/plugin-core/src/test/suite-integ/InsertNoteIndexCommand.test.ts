@@ -89,8 +89,8 @@ suite("InsertNoteIndex", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ wsRoot, engine }) => {
-          TestConfigUtils.withConfig(
+        onInit: async ({ engine, wsRoot }) => {
+          await TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setWorkspaceProp(
                 config,
@@ -131,8 +131,8 @@ suite("InsertNoteIndex", function () {
         preSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({ wsRoot, engine }) => {
-          TestConfigUtils.withConfig(
+        onInit: async ({ engine, wsRoot }) => {
+          await TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setCommandsProp(config, "insertNoteIndex", {
                 enableMarker: true,

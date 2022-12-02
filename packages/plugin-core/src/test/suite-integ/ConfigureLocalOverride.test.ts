@@ -1,4 +1,4 @@
-import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
+import { LocalConfigScope } from "@dendronhq/common-server";
 import { TestEngineUtils } from "@dendronhq/engine-test-utils";
 import { describe, beforeEach, afterEach } from "mocha";
 import { ConfigureLocalOverride } from "../../commands/ConfigureLocalOverride";
@@ -7,6 +7,7 @@ import { VSCodeUtils } from "../../vsCodeUtils";
 import { expect } from "../testUtilsv2";
 import { describeSingleWS } from "../testUtilsV3";
 import { SinonStub } from "sinon";
+import { ConfigService, URI } from "@dendronhq/common-all";
 
 suite("ConfigureLocalOverrideCommand", function () {
   let homeDirStub: SinonStub;
@@ -27,10 +28,9 @@ suite("ConfigureLocalOverrideCommand", function () {
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.toLowerCase()
         ).toEqual(
-          DConfig.configOverridePath(
-            wsRoot,
-            LocalConfigScope.GLOBAL
-          ).toLowerCase()
+          ConfigService.instance()
+            .configOverridePath(URI.file(wsRoot), "global")
+            ?.fsPath.toLowerCase()
         );
       });
     });
@@ -50,10 +50,9 @@ suite("ConfigureLocalOverrideCommand", function () {
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.toLowerCase()
         ).toEqual(
-          DConfig.configOverridePath(
-            wsRoot,
-            LocalConfigScope.WORKSPACE
-          ).toLowerCase()
+          ConfigService.instance()
+            .configOverridePath(URI.file(wsRoot), "workspace")
+            ?.fsPath.toLowerCase()
         );
       });
     });

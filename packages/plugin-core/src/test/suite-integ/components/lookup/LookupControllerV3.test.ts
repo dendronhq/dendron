@@ -95,7 +95,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
             allowNewNote: true,
           });
 
-          controller.prepareQuickPick({
+          await controller.prepareQuickPick({
             placeholder: "foo",
             provider,
             initialValue: "foo",
@@ -130,7 +130,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
             allowNewNote: true,
           });
 
-          controller.prepareQuickPick({
+          await controller.prepareQuickPick({
             placeholder: "foo",
             provider,
             initialValue: "foo",
@@ -165,7 +165,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
             allowNewNote: true,
           });
 
-          controller.prepareQuickPick({
+          await controller.prepareQuickPick({
             placeholder: "foo",
             provider,
             initialValue: "foo",
@@ -238,7 +238,7 @@ describe(`GIVEN a LookupControllerV3`, () => {
             allowNewNote: true,
           });
 
-          controller.prepareQuickPick({
+          await controller.prepareQuickPick({
             placeholder: "foo",
             provider,
             initialValue: "foo",

@@ -1,12 +1,14 @@
 import {
+  ConfigService,
   ConfigureUIMessage,
   ConfigureUIMessageEnum,
   DendronEditorViewKey,
   getWebEditorViewEntry,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { ConfigureCommand } from "../../commands/ConfigureCommand";
+import { ExtensionProvider } from "../../ExtensionProvider";
 import { WebViewUtils } from "../../views/utils";
 import { DendronExtension } from "../../workspace";
 
@@ -40,10 +42,15 @@ export class ConfigureUIPanelFactory {
             case ConfigureUIMessageEnum.onUpdateConfig:
               {
                 const { config } = msg.data;
-                await DConfig.writeConfig({
-                  wsRoot: ext.getDWorkspace().wsRoot,
-                  config,
-                });
+                const { wsRoot } = ExtensionProvider.getDWorkspace();
+                const configWriteResult =
+                  await ConfigService.instance().writeConfig(
+                    URI.file(wsRoot),
+                    config
+                  );
+                if (configWriteResult.isErr()) {
+                  throw configWriteResult.error;
+                }
               }
               break;
             case ConfigureUIMessageEnum.openDendronConfigYaml: {

@@ -1,14 +1,15 @@
 import {
   assertUnreachable,
   BacklinkPanelSortOrder,
+  ConfigService,
   DateFormatUtil,
   DendronASTDest,
   EngineEventEmitter,
   NoteUtils,
   ProcFlavor,
+  URI,
   VSCodeEvents,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import { MDUtilsV5 } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
@@ -531,6 +532,14 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
     ref: FoundRefT,
     linesOfContext: number
   ): Promise<string> {
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const proc = MDUtilsV5.procRemarkFull(
       {
         noteToRender: ref.note,
@@ -550,10 +559,7 @@ _updated: ${DateFormatUtil.formatDate(noteProps.updated)}_`
             },
           },
         },
-        config: DConfig.readConfigSync(
-          ExtensionProvider.getDWorkspace().wsRoot,
-          true
-        ),
+        config,
       },
       {
         flavor: ProcFlavor.BACKLINKS_PANEL_HOVER,

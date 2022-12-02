@@ -66,7 +66,9 @@ export class ExportPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (!wsRoot) {
       throw Error("ws root not defined");
     }

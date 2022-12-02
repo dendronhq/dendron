@@ -153,7 +153,7 @@ export class ProviderAcceptHooks {
     selectedItems,
   }): Promise<RespV2<OldNewLocation>> => {
     // setup vars
-    const oldVault = PickerUtilsV2.getVaultForOpenEditor();
+    const oldVault = await PickerUtilsV2.getVaultForOpenEditor();
     const newVault = quickpick.vault ? quickpick.vault : oldVault;
     const engine = ExtensionProvider.getEngine();
 
@@ -194,7 +194,7 @@ export class ProviderAcceptHooks {
   static NewLocationHook: OnAcceptHook = async ({
     quickpick,
   }): Promise<RespV2<NewLocation>> => {
-    const activeEditorVault = PickerUtilsV2.getVaultForOpenEditor();
+    const activeEditorVault = await PickerUtilsV2.getVaultForOpenEditor();
     const newVault = quickpick.vault ? quickpick.vault : activeEditorVault;
 
     const data = {
@@ -336,9 +336,11 @@ export class PickerUtilsV2 {
    * Defaults to first vault if current note is not part of a vault
    * @returns
    */
-  static getVaultForOpenEditor(fsPath?: string): DVault {
+  static async getVaultForOpenEditor(fsPath?: string): Promise<DVault> {
     const ctx = "getVaultForOpenEditor";
-    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
 
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
@@ -364,11 +366,6 @@ export class PickerUtilsV2 {
     // TODO: remove
     Logger.info({ ctx, msg: "exit", vault });
     return vault;
-  }
-
-  /** @deprecated use `getVaultForOpenEditor` instead, this function no longer prompts anything. */
-  static getOrPromptVaultForOpenEditor(): DVault {
-    return PickerUtilsV2.getVaultForOpenEditor();
   }
 
   static getQueryUpToLastDot = (query: string) => {
@@ -497,7 +494,9 @@ export class PickerUtilsV2 {
   public static async promptVault(
     overrides?: VaultPickerItem[] | DVault[]
   ): Promise<DVault | undefined> {
-    const { vaults: wsVaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const wsVaults = await ws.vaults;
+
     const pickerOverrides = isDVaultArray(overrides)
       ? overrides.map((value) => {
           return { vault: value, label: VaultUtils.getName(value) };

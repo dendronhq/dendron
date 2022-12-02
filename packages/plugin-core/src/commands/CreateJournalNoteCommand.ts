@@ -33,13 +33,13 @@ export class CreateJournalNoteCommand extends BasicCommand<
     this.extension = ext;
   }
 
-  createLookupController(): ILookupControllerV3 {
+  async createLookupController(): Promise<ILookupControllerV3> {
     const commandConfig = ConfigUtils.getCommands(
-      this.extension.getDWorkspace().config
+      await this.extension.getDWorkspace().config
     );
     const confirmVaultOnCreate = commandConfig.lookup.note.confirmVaultOnCreate;
     const vaultButtonPressed =
-      VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
+      await VaultSelectionModeConfigUtils.shouldAlwaysPromptVaultSelection();
     const opts: LookupControllerV3CreateOpts = {
       nodeType: "note",
       disableVaultSelection: !confirmVaultOnCreate,
@@ -51,7 +51,9 @@ export class CreateJournalNoteCommand extends BasicCommand<
       ],
       title: "Create Journal Note",
     };
-    const controller = this.extension.lookupControllerFactory.create(opts);
+    const controller = await this.extension.lookupControllerFactory.create(
+      opts
+    );
     return controller;
   }
 
@@ -59,7 +61,7 @@ export class CreateJournalNoteCommand extends BasicCommand<
     const ctx = "CreateJournalNote";
     Logger.info({ ctx, msg: "enter" });
     const lookupCmd = new NoteLookupCommand();
-    lookupCmd.controller = this.createLookupController();
+    lookupCmd.controller = await this.createLookupController();
     await lookupCmd.run(opts);
   }
 }

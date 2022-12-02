@@ -1,6 +1,7 @@
 import { launchv2, ServerUtils } from "@dendronhq/api-server";
 import {
   ConfigEvents,
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   CURRENT_AB_TESTS,
@@ -13,7 +14,6 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
   getDurationMilliseconds,
   SegmentClient,
 } from "@dendronhq/common-server";
@@ -47,7 +47,7 @@ async function startServerProcess(): Promise<{
   subprocess?: ExecaChildProcess;
 }> {
   const { nextServerUrl, nextStaticRoot, engineServerPort } =
-    ExtensionProvider.getDWorkspace().config.dev || {};
+    (await ExtensionProvider.getDWorkspace().config).dev || {};
   // const ctx = "startServer";
   const maybePort =
     ExtensionProvider.getExtension()
@@ -321,12 +321,9 @@ export class ExtensionUtils {
   }) {
     const engine = ext.getEngine();
     const workspace = ext.getDWorkspace();
-    const {
-      wsRoot,
-      vaults,
-      type: workspaceType,
-      config: dendronConfig,
-    } = workspace;
+    const { wsRoot, type: workspaceType } = workspace;
+    const vaults = await workspace.vaults;
+    const dendronConfig = await workspace.config;
     const notes = await engine.findNotesMeta({ excludeStub: false });
     let numNotes = notes.length;
 
@@ -515,12 +512,15 @@ export class ExtensionUtils {
       _.set(trackProps, "ageOfCodeInstallInWeeks", ageOfCodeInstallInWeeks);
     }
 
-    const maybeLocalConfig = DConfig.searchLocalConfigSync(wsRoot);
-    if (maybeLocalConfig.data) {
+    const searchOverrideResult = await ConfigService.instance().searchOverride(
+      URI.file(wsRoot)
+    );
+    if (searchOverrideResult.isOk()) {
+      const overrideConfig = searchOverrideResult.value;
       trackProps.hasLocalConfig = true;
-      if (maybeLocalConfig.data.workspace.vaults) {
+      if (overrideConfig.workspace?.vaults) {
         trackProps.numLocalConfigVaults =
-          maybeLocalConfig.data.workspace.vaults.length;
+          overrideConfig.workspace.vaults.length;
       }
     }
 

@@ -17,7 +17,9 @@ describeSingleWS(
   },
   () => {
     test("THEN codespace url is copied to the clipboard", async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       sinon
         .stub(GitUtils, "getGitProviderOwnerAndRepository")
         .resolves(["dendronhq", "dendron"]);

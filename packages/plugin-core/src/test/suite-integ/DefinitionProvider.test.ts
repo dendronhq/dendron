@@ -210,7 +210,9 @@ suite("DefinitionProvider", function () {
     },
     () => {
       test("THEN provide correct definitions", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = (await engine.getNoteMeta("alpha")).data!;
         const editor = await WSUtils.openNote(note);
 
@@ -241,7 +243,9 @@ suite("DefinitionProvider", function () {
     },
     () => {
       test("THEN provide correct definitions", async () => {
-        const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = (await engine.getNoteMeta("alpha")).data!;
         const editor = await WSUtils.openNote(note);
 
@@ -354,7 +358,9 @@ suite("DefinitionProvider", function () {
       });
 
       test("THEN finds the correct definiton for that file", async () => {
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],
@@ -395,7 +401,9 @@ suite("DefinitionProvider", function () {
         const openWithDefaultApp = sinon
           .stub(PluginFileUtils, "openWithDefaultApp")
           .resolves();
-        const { vaults, wsRoot, engine } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
         const note = await NoteTestUtilsV4.createNoteWithEngine({
           wsRoot,
           vault: vaults[0],

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { URI } from "vscode-uri";
-import { ConfigReadOpts, ConfigStore, IFileStore } from "../store";
+import { ConfigStore, IFileStore } from "../store";
 import { errAsync, okAsync } from "neverthrow";
 import { DendronConfig, DendronConfigValue, DVault } from "../types";
 import { ConfigUtils, DeepPartial } from "../utils";
@@ -9,7 +9,6 @@ import * as YamlUtils from "../yaml";
 import { DConfigLegacy } from "../oneoff/ConfigCompat";
 
 export type ConfigServiceOpts = {
-  wsRoot: URI;
   // the home directory.
   // do not pass in home directory if the file store implementation has no concept of home directory.
   // i.e. only pass it in for NodeJSFileStore
@@ -19,13 +18,16 @@ export type ConfigServiceOpts = {
 
 export class ConfigService {
   static _singleton: undefined | ConfigService;
-  public wsRoot;
   public homeDir;
   private _configStore: ConfigStore;
   private _fileStore: IFileStore;
 
-  get configPath(): URI {
-    return this._configStore.configPath;
+  configPath(wsRoot: URI): URI {
+    return this._configStore.configPath(wsRoot);
+  }
+
+  configOverridePath(wsRoot: URI, scope: "workspace" | "global") {
+    return this._configStore.configOverridePath(wsRoot, scope);
   }
 
   /** static */
@@ -47,19 +49,14 @@ export class ConfigService {
     opts?: ConfigServiceOpts
   ): opts is ConfigServiceOpts {
     if (opts === undefined) return false;
-    if (opts.wsRoot === undefined || opts.fileStore === undefined) return false;
+    if (opts.fileStore === undefined) return false;
     return true;
   }
 
   constructor(opts: ConfigServiceOpts) {
-    this.wsRoot = opts.wsRoot;
     this.homeDir = opts.homeDir;
     this._fileStore = opts.fileStore;
-    this._configStore = new ConfigStore(
-      this._fileStore,
-      this.wsRoot,
-      this.homeDir
-    );
+    this._configStore = new ConfigStore(this._fileStore, this.homeDir);
   }
 
   /** public */
@@ -69,16 +66,16 @@ export class ConfigService {
    * @param defaults partial DendronConfig that holds desired default values
    * @returns created config
    */
-  createConfig(defaults?: DeepPartial<DendronConfig>) {
-    return this._configStore.createConfig(defaults);
+  createConfig(wsRoot: URI, defaults?: DeepPartial<DendronConfig>) {
+    return this._configStore.createConfig(wsRoot, defaults);
   }
 
   /**
    * read config from dendron.yml without any modifications
    * @returns Partial<DendronConfig>
    */
-  readRaw() {
-    return this._configStore.readConfig();
+  readRaw(wsRoot: URI) {
+    return this._configStore.readConfig(wsRoot);
   }
 
   /**
@@ -86,12 +83,17 @@ export class ConfigService {
    * @param opts applyOverride?
    * @returns DendronConfig
    */
-  readConfig(opts?: ConfigReadOpts) {
+  readConfig(
+    wsRoot: URI,
+    opts?: {
+      applyOverride?: boolean;
+    }
+  ) {
     const { applyOverride } = _.defaults(opts, { applyOverride: true });
     if (!applyOverride) {
-      return this.readWithDefaults();
+      return this.readWithDefaults(wsRoot);
     } else {
-      return this.readWithOverrides();
+      return this.readWithOverrides(wsRoot);
     }
   }
 
@@ -100,9 +102,9 @@ export class ConfigService {
    * @param payload DendronConfig
    * @returns cleaned DendronConfig that was written
    */
-  writeConfig(payload: DendronConfig) {
-    return this.cleanWritePayload(payload).andThen((payload) => {
-      return this._configStore.writeConfig(payload);
+  writeConfig(wsRoot: URI, payload: DendronConfig) {
+    return this.cleanWritePayload(wsRoot, payload).andThen((payload) => {
+      return this._configStore.writeConfig(wsRoot, payload);
     });
   }
 
@@ -112,8 +114,14 @@ export class ConfigService {
    * @param opts applyOverride?
    * @returns value of key
    */
-  getConfig(key: string, opts?: ConfigReadOpts) {
-    return this.readConfig(opts).map((config) => _.get(config, key));
+  getConfig(
+    wsRoot: URI,
+    key: string,
+    opts?: {
+      applyOverride?: boolean;
+    }
+  ) {
+    return this.readConfig(wsRoot, opts).map((config) => _.get(config, key));
   }
 
   /**
@@ -126,11 +134,11 @@ export class ConfigService {
    * @param value value to use for update of key
    * @returns value of key before update
    */
-  updateConfig(key: string, value: DendronConfigValue) {
-    return this.readConfig().andThen((config) => {
+  updateConfig(wsRoot: URI, key: string, value: DendronConfigValue) {
+    return this.readConfig(wsRoot).andThen((config) => {
       const prevValue = _.get(config, key);
       const updatedConfig = _.set(config, key, value);
-      return this.writeConfig(updatedConfig).map(() => prevValue);
+      return this.writeConfig(wsRoot, updatedConfig).map(() => prevValue);
     });
   }
 
@@ -140,15 +148,23 @@ export class ConfigService {
    * @param key key of DendronConfig
    * @returns value of key before deletion
    */
-  deleteConfig(key: string) {
-    return this.readConfig().andThen((config) => {
+  deleteConfig(wsRoot: URI, key: string) {
+    return this.readConfig(wsRoot).andThen((config) => {
       const prevValue = _.get(config, key);
       if (prevValue === undefined) {
         return errAsync(new DendronError({ message: `${key} does not exist` }));
       }
       _.unset(config, key);
-      return this.writeConfig(config).map(() => prevValue);
+      return this.writeConfig(wsRoot, config).map(() => prevValue);
     });
+  }
+
+  writeOverride(
+    wsRoot: URI,
+    config: DeepPartial<DendronConfig>,
+    mode: "workspace" | "global"
+  ) {
+    return this._configStore.writeOverride(wsRoot, config, mode);
   }
 
   /** helpers */
@@ -158,8 +174,8 @@ export class ConfigService {
    * If raw config is v4, convert to v5 config before applying defaults
    * @returns DendronConfig
    */
-  private readWithDefaults() {
-    return this.readRaw().andThen((rawConfig) => {
+  private readWithDefaults(wsRoot: URI) {
+    return this.readRaw(wsRoot).andThen((rawConfig) => {
       const cleanConfig = DConfigLegacy.configIsV4(rawConfig)
         ? DConfigLegacy.v4ToV5(rawConfig)
         : _.defaultsDeep(rawConfig, ConfigUtils.genDefaultConfig());
@@ -172,15 +188,16 @@ export class ConfigService {
    * if override isn't found, identical to {@link ConfigService.readWithDefaults}
    * @returns DendronConfig
    */
-  private readWithOverrides() {
-    return this.searchOverride()
-      .orElse(() => this.readWithDefaults())
-      .andThen(ConfigUtils.validateLocalConfig)
-      .andThen((override) =>
-        this.readWithDefaults().map((config) =>
-          ConfigUtils.mergeConfig(config, override)
-        )
-      );
+  private readWithOverrides(wsRoot: URI) {
+    return this.searchOverride(wsRoot)
+      .andThen((override) => {
+        return this.readWithDefaults(wsRoot).map((config) => {
+          return ConfigUtils.mergeConfig(config, override);
+        });
+      })
+      .orElse(() => {
+        return this.readWithDefaults(wsRoot);
+      });
   }
 
   /**
@@ -190,8 +207,8 @@ export class ConfigService {
    * @param payload write payload
    * @returns cleaned payload
    */
-  private cleanWritePayload(payload: DendronConfig) {
-    return this.searchOverride()
+  private cleanWritePayload(wsRoot: URI, payload: DendronConfig) {
+    return this.searchOverride(wsRoot)
       .andThen((overrideConfig) => {
         return this.excludeOverrideVaults(payload, overrideConfig);
       })
@@ -203,16 +220,17 @@ export class ConfigService {
    * workspace override config takes precedence.
    * @returns override config
    */
-  private searchOverride() {
+  searchOverride(wsRoot: URI) {
     return this._configStore
-      .readOverride("workspace")
+      .readOverride(wsRoot, "workspace")
       .orElse(() => {
         return this._configStore
-          .readOverride("global")
+          .readOverride(wsRoot, "global")
           .orElse(() => okAsync(""));
       })
       .andThen(YamlUtils.fromStr)
-      .andThen(ConfigUtils.parsePartial);
+      .andThen(ConfigUtils.parsePartial)
+      .andThen(ConfigUtils.validateLocalConfig);
   }
 
   /**

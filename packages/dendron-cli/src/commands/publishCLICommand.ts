@@ -1,11 +1,13 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
   DendronError,
   DendronPublishingConfig,
   error2PlainObject,
   getStage,
   Stage,
+  URI,
 } from "@dendronhq/common-all";
 import { SiteUtils } from "@dendronhq/engine-server";
 import {
@@ -26,7 +28,7 @@ import { SetupEngineCLIOpts } from "./utils";
 import prompts from "prompts";
 import fs from "fs-extra";
 import ora from "ora";
-import { DConfig, GitUtils } from "@dendronhq/common-server";
+import { GitUtils } from "@dendronhq/common-server";
 
 type CommandCLIOpts = {
   cmd: PublishCommands;
@@ -265,7 +267,13 @@ export class PublishCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     opts.config.overrides = overrides || {};
 
     // if no siteUrl set, override with localhost
-    const config = DConfig.readConfigSync(opts.engine.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(opts.engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      return { error: configReadResult.error };
+    }
+    const config = configReadResult.value;
     const publishingConfig = ConfigUtils.getPublishing(config);
     if (stage !== "prod") {
       if (!publishingConfig.siteUrl && !overrides?.siteUrl) {

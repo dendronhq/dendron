@@ -109,7 +109,9 @@ export class CalendarView implements vscode.WebviewViewProvider {
       return;
     }
     const ctx = "CalendarView:openTextDocument";
-    const { wsRoot, vaults } = this._extension.getDWorkspace();
+    const ws = this._extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     if (
       !WorkspaceUtils.isPathInWorkspace({
         wsRoot,

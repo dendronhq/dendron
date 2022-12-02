@@ -9,7 +9,7 @@ import {
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { DConfig, vault2Path } from "@dendronhq/common-server";
 import { MetadataService } from "@dendronhq/engine-server";
 import * as fs from "fs-extra";
 import _ from "lodash";
@@ -38,7 +38,9 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
 
   constructor(ext: IDendronExtension) {
     const initTrait = () => {
-      const config = ExtensionProvider.getDWorkspace().config;
+      // TODO: remove this once we figure out how we want to proceed with trait methods being sync.
+      const { wsRoot } = ExtensionProvider.getDWorkspace();
+      const config = DConfig.readConfigSync(wsRoot);
       return new JournalNote(config);
     };
     super(ext, "dendron.journal", initTrait);
@@ -47,7 +49,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
   }
 
   override async execute(opts: CommandOpts): Promise<CreateDailyJournalData> {
-    const config = this._extension.getDWorkspace().config;
+    const config = await this._extension.getDWorkspace().config;
     const journalConfig = ConfigUtils.getJournal(config);
     const maybeDailyVault = journalConfig.dailyVault;
     const vault = maybeDailyVault
@@ -116,7 +118,7 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
         })
       : undefined;
     const vaultPath = vault2Path({
-      vault: maybeVault || PickerUtilsV2.getVaultForOpenEditor(),
+      vault: maybeVault || (await PickerUtilsV2.getVaultForOpenEditor()),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 
@@ -198,9 +200,9 @@ export class CreateDailyJournalCommand extends CreateNoteWithTraitCommand {
           vname: journalConfig.dailyVault,
         })
       : undefined;
-    const vault = maybeVault || PickerUtilsV2.getVaultForOpenEditor();
+    const vault = maybeVault || (await PickerUtilsV2.getVaultForOpenEditor());
     const vaultPath = vault2Path({
-      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      vault: await PickerUtilsV2.getVaultForOpenEditor(),
       wsRoot: ExtensionProvider.getDWorkspace().wsRoot,
     });
 

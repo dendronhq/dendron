@@ -52,7 +52,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
 
   async gatherInputs(): Promise<CommandInput> {
     const extension = ExtensionProvider.getExtension();
-    const lc = extension.lookupControllerFactory.create({
+    const lc = await extension.lookupControllerFactory.create({
       nodeType: "note",
       title: "Rename note",
     });
@@ -103,7 +103,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts> {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const oldUri: Uri = editor.document.uri;
-    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const move = inputs.move[0];
     const fname = move.newLoc.fname;
     const { wsRoot } = ExtensionProvider.getDWorkspace();

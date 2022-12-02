@@ -13,7 +13,9 @@ export class SchemaPickerUtils {
   }: {
     picker: DendronQuickPickerV2;
   }) {
-    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = ws;
+    const vaults = await ws.vaults;
     const resp = await engine.querySchema(picker.value);
     if (resp.data && resp.data.length > 0) {
       const node = SchemaUtils.getModuleRoot(resp.data[0]);
@@ -45,7 +47,9 @@ export class SchemaPickerUtils {
     const ctx = "SchemaPickerUtils:fetchPickerResults";
     const start = process.hrtime();
     const { picker, qs } = opts;
-    const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { engine, wsRoot } = ws;
+    const vaults = await ws.vaults;
     const resp = await engine.querySchema(qs);
     let nodes: SchemaProps[] = [];
     if (resp.data) {

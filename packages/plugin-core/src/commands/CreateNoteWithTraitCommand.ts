@@ -164,7 +164,7 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
     if (this.trait.OnCreate?.setVault) {
       try {
         const vaultName = this.trait.OnCreate.setVault();
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         vault = vaults.find((vault) => VaultUtils.getName(vault) === vaultName);
         if (!vault) {
           VSCodeUtils.showMessage(
@@ -181,9 +181,9 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       vault = opts.vaultOverride;
       if (!opts.vaultOverride) {
         const selectionMode =
-          VaultSelectionModeConfigUtils.getVaultSelectionMode();
+          await VaultSelectionModeConfigUtils.getVaultSelectionMode();
 
-        const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+        const currentVault = await PickerUtilsV2.getVaultForOpenEditor();
         const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({
           vault: currentVault,
           fname,
@@ -289,14 +289,13 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
   private async getNoteNameFromLookup(
     initialValue?: string
   ): Promise<string | undefined> {
+    const lookupCreateOpts: LookupControllerV3CreateOpts = {
+      nodeType: "note",
+      disableVaultSelection: true,
+    };
+    const extension = ExtensionProvider.getExtension();
+    const lc = await extension.lookupControllerFactory.create(lookupCreateOpts);
     return new Promise<string | undefined>((resolve) => {
-      const lookupCreateOpts: LookupControllerV3CreateOpts = {
-        nodeType: "note",
-        disableVaultSelection: true,
-      };
-      const extension = ExtensionProvider.getExtension();
-      const lc = extension.lookupControllerFactory.create(lookupCreateOpts);
-
       const provider = extension.noteLookupProviderFactory.create(
         "createNoteWithTrait",
         {

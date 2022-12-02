@@ -1,5 +1,6 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
   genUUIDInsecure,
   isBlockAnchor,
@@ -7,9 +8,10 @@ import {
   NoteChangeEntry,
   NotePropsMeta,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, isInsidePath } from "@dendronhq/common-server";
+import { isInsidePath } from "@dendronhq/common-server";
 import { AnchorUtils } from "@dendronhq/unified";
 import _ from "lodash";
 import path from "path";
@@ -58,7 +60,7 @@ export class CopyNoteLinkCommand
   }
 
   private async getUserLinkAnchorPreference(): Promise<"line" | "block"> {
-    const { config } = this.extension.getDWorkspace();
+    const config = await this.extension.getDWorkspace().config;
     let anchorType = ConfigUtils.getNonNoteLinkAnchorType(config);
     if (anchorType === "prompt") {
       // The preferred anchor type is not set, so ask the user if they want line numbers or block anchors
@@ -93,7 +95,9 @@ export class CopyNoteLinkCommand
   }
 
   private async createNonNoteFileLink(editor: TextEditor) {
-    const { wsRoot, vaults } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     let { fsPath } = editor.document.uri;
     // Find it relative to wsRoot
     fsPath = path.relative(wsRoot, fsPath);
@@ -156,7 +160,15 @@ export class CopyNoteLinkCommand
       doEndAnchor: false,
     });
 
-    const config = DConfig.readConfigSync(engine.wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      window.showErrorMessage(configReadResult.error.message);
+      return;
+    }
+    const config = configReadResult.value;
+
     const aliasMode = ConfigUtils.getAliasMode(config);
 
     return {
@@ -168,7 +180,7 @@ export class CopyNoteLinkCommand
               value: anchor,
               type: isBlockAnchor(anchor) ? "blockAnchor" : "header",
             },
-        useVaultPrefix: DendronClientUtilsV2.shouldUseVaultPrefix(engine),
+        useVaultPrefix: await DendronClientUtilsV2.shouldUseVaultPrefix(engine),
         alias: { mode: aliasMode },
       }),
       anchor,
@@ -190,7 +202,7 @@ export class CopyNoteLinkCommand
     const editor = VSCodeUtils.getActiveTextEditor()!;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
     const engine = this.extension.getEngine();
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
 
     if (editor.document.isDirty) {
       this._onEngineNoteStateChangedDisposable = this.extension
@@ -241,6 +253,7 @@ export class CopyNoteLinkCommand
     let anchor;
     if (note) {
       const out = await this.createNoteLink(editor, note);
+      if (out === undefined) return;
       link = out.link;
       anchor = out.anchor;
       type = "note";

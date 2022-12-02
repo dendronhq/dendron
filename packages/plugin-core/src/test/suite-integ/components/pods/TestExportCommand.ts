@@ -27,8 +27,9 @@ export class TestExportPodCommand extends BaseExportPodCommand<
   static mockedSelector: HierarchySelector = {
     getHierarchy(): Promise<{ hierarchy: string; vault: DVault } | undefined> {
       return new Promise<{ hierarchy: string; vault: DVault } | undefined>(
-        (resolve) => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+        // eslint-disable-next-line no-async-promise-executor
+        async (resolve) => {
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           resolve({ hierarchy: "foo", vault: vaults[0] });
         }
       );

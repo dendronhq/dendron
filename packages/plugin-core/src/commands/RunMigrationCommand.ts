@@ -71,7 +71,8 @@ export class RunMigrationCommand extends BasicCommand<
       (migration) => migration.version === version
     );
     const ws = this.extension.getDWorkspace();
-    const { wsRoot, config } = ws;
+    const { wsRoot } = ws;
+    const config = await ws.config;
     const wsService = new WorkspaceService({ wsRoot });
 
     const wsConfig =

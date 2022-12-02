@@ -211,7 +211,7 @@ export class DeleteCommand extends InputArgCommand<CommandOpts, CommandOutput> {
       const trimEnd = mode === "note" ? ".md" : ".schema.yml";
       const fname = path.basename(fsPath, trimEnd);
       if (mode === "note") {
-        const vault = PickerUtilsV2.getVaultForOpenEditor(fsPath);
+        const vault = await PickerUtilsV2.getVaultForOpenEditor(fsPath);
         const note = (await engine.findNotesMeta({ fname, vault }))[0];
         const out = await this.deleteNote({ note, opts, engine, ctx });
         return out;

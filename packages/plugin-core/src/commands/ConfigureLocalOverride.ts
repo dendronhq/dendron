@@ -1,4 +1,5 @@
-import { DConfig, LocalConfigScope } from "@dendronhq/common-server";
+import { ConfigService, URI } from "@dendronhq/common-all";
+import { LocalConfigScope } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import { Uri } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -39,12 +40,25 @@ export class ConfigureLocalOverride extends BasicCommand<
     }
 
     const dendronRoot = this._ext.getDWorkspace().wsRoot;
-    const configPath = DConfig.configOverridePath(dendronRoot, configScope);
+
+    const configOverridePath = ConfigService.instance().configOverridePath(
+      URI.file(dendronRoot),
+      configScope.toLowerCase() as "workspace" | "global"
+    );
+
+    if (!configOverridePath) {
+      VSCodeUtils.showMessage(
+        MessageSeverity.INFO,
+        "Global scope is not supported in this environment.",
+        {}
+      );
+      return;
+    }
 
     /* If the config file doesn't exist, create one */
-    await fs.ensureFile(configPath);
+    await fs.ensureFile(configOverridePath.fsPath);
 
-    const uri = Uri.file(configPath);
+    const uri = Uri.file(configOverridePath.fsPath);
     // What happens if the file doesn't exist
     await VSCodeUtils.openFileInEditor(uri);
 

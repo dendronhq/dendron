@@ -74,14 +74,13 @@ export class PublishPodCommand extends BaseCommand<
   async execute(opts: CommandOpts) {
     const { podChoice, config, noteByName } = opts;
 
-    const {
-      engine,
-      wsRoot,
-      config: dendronConfig,
-      vaults,
-    } = this.extension.getDWorkspace();
+    const ws = this.extension.getDWorkspace();
+    const { wsRoot, engine } = ws;
+    const dendronConfig = await ws.config;
+    const vaults = await ws.vaults;
+
     const pod = new podChoice.podClass() as PublishPod; // eslint-disable-line new-cap
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const utilityMethods = {
       showMessage,
     };

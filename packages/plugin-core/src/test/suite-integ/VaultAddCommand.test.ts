@@ -9,10 +9,10 @@ import {
   SchemaUtils,
   VaultUtils,
   WorkspaceType,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
-  DConfig,
-  LocalConfigScope,
   note2File,
   readYAMLAsync,
   schemaModuleOpts2File,
@@ -58,7 +58,9 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("WHEN running VaultAdd", { timeout: 1e6 }, () => {
       test("THEN add vault to config", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const remoteDir = tmpDir().name;
 
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
@@ -111,7 +113,9 @@ suite("VaultAddCommand", function () {
 
     describeSingleWS("WHEN add vault inside workspace", {}, () => {
       test("THEN workspace vault is added", async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         const { wsRoot: remoteDir } = await setupWS({
           vaults: [{ fsPath: "vault1" }],
           asRemote: true,
@@ -132,7 +136,9 @@ suite("VaultAddCommand", function () {
         await cmd.run();
         const gitIgnoreInsideVault = path.join(wsRoot, wsName, ".gitignore");
 
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const workspaces = ConfigUtils.getWorkspace(config).workspaces;
         expect(workspaces).toEqual({
           [wsName]: {
@@ -176,7 +182,9 @@ suite("VaultAddCommand", function () {
       {},
       () => {
         test("THEN do right thing", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           // create remote repo
           const remoteDir = tmpDir().name;
           const vaultPath = "vault";
@@ -200,7 +208,9 @@ suite("VaultAddCommand", function () {
           });
           await cmd.run();
 
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           const workspaces = ConfigUtils.getWorkspace(config).workspaces;
           expect(workspaces).toEqual({
             [wsName]: {
@@ -298,7 +308,7 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           await checkVaults(
             {
               wsRoot,
@@ -337,7 +347,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
 
           expect(vaultsAfter.length).toEqual(2);
           expect(
@@ -370,7 +380,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath });
           await new VaultAddCommand().run();
 
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           expect(
             await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
           ).toEqual([
@@ -402,7 +412,7 @@ suite("VaultAddCommand", function () {
           const vpath = tmpDir().name;
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          const vaultsAfter = ExtensionProvider.getDWorkspace().vaults;
+          const vaultsAfter = await ExtensionProvider.getDWorkspace().vaults;
           expect(
             await fs.readdir(vault2Path({ vault: vaultsAfter[1], wsRoot }))
           ).toEqual([
@@ -458,35 +468,40 @@ describe("GIVEN a workspace with local override", function () {
         const schema = SchemaUtils.createRootModule({ vault });
         await schemaModuleOpts2File(schema, vault.fsPath, "root");
         // add it to workspace override
-        const overridePath = DConfig.configOverridePath(
-          wsRoot,
-          LocalConfigScope.WORKSPACE
+        const overridePath = ConfigService.instance().configOverridePath(
+          URI.file(wsRoot),
+          "workspace"
         );
         const overridePayload = {
           workspace: {
             vaults: [{ fsPath: "vault2" }],
           },
         };
-        writeYAML(overridePath, overridePayload);
+        writeYAML(overridePath!.fsPath, overridePayload);
       },
     },
     () => {
       this.beforeEach(beforeHook);
       test("locally overriden vault is not merged into config", async () => {
         const vaultPath = "vaultRemote";
-        const { wsRoot, config: preRunConfigWithOverride } =
-          ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
         const gitIgnore = path.join(wsRoot, ".gitignore");
         const remoteDir = tmpDir().name;
 
         await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
         await fs.writeFile(gitIgnore, vaultPath);
 
+        const preRunConfigWithOverride = await ws.config;
         // the config that has local override should have two vaults
         expect(preRunConfigWithOverride.workspace.vaults.length).toEqual(2);
 
         // dendron.yml should have one vault;
-        const preRunConfig = DConfig.readConfigSync(wsRoot);
+        const preRunConfig = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot), {
+            applyOverride: false,
+          })
+        )._unsafeUnwrap();
         expect(preRunConfig.workspace.vaults.length).toEqual(1);
         const cmd = new VaultAddCommand();
         stubVaultInput({
@@ -498,11 +513,15 @@ describe("GIVEN a workspace with local override", function () {
         });
         await cmd.run();
         // dendron.yml should now have two vault
-        const postRunConfig = DConfig.readConfigSync(wsRoot);
+        const postRunConfig = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot), {
+            applyOverride: false,
+          })
+        )._unsafeUnwrap();
         expect(postRunConfig.workspace.vaults.length).toEqual(2);
         // config + override should have three vaults
         const postRunConfigWithOverride =
-          ExtensionProvider.getDWorkspace().config;
+          await ExtensionProvider.getDWorkspace().config;
         expect(postRunConfigWithOverride.workspace.vaults.length).toEqual(3);
       });
     }
@@ -546,7 +565,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -566,7 +587,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -617,7 +640,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -634,7 +659,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -718,7 +745,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -735,7 +764,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -799,7 +830,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
         test("THEN the vault was added to the workspace config correctly", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
             vname: vaultName,
@@ -815,7 +848,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
         test("THEN the notes in this vault are accessible", async () => {
           // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
           await new ReloadIndexCommand().run();
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = VaultUtils.getVaultByName({
             vaults,
             vname: vaultName,
@@ -869,7 +904,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
@@ -887,8 +924,10 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
+        )._unsafeUnwrap();
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
         );
@@ -938,7 +977,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -956,7 +997,9 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

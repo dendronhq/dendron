@@ -1,4 +1,6 @@
 import {
+  ConfigService,
+  DLogger,
   DVault,
   NoteProps,
   NoteUtils,
@@ -7,7 +9,6 @@ import {
   URI,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, DLogger } from "@dendronhq/common-server";
 import { EngineUtils, WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -21,6 +22,7 @@ import { Logger } from "../../logger";
 import { ITextDocumentService } from "../ITextDocumentService";
 import { EditorUtils } from "../../utils/EditorUtils";
 import { inject, injectable } from "tsyringe";
+import { ExtensionProvider } from "../../ExtensionProvider";
 
 /**
  * This service keeps client state note state synchronized with the engine
@@ -79,11 +81,19 @@ export class TextDocumentService implements ITextDocumentService {
         keepBackLinks: true,
       },
     });
+    const { wsRoot } = ExtensionProvider.getDWorkspace();
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     await EngineUtils.refreshNoteLinksAndAnchors({
       note,
       fmChangeOnly,
       engine: this.engine,
-      config: DConfig.readConfigSync(this.wsRoot.fsPath),
+      config,
     });
 
     this.L.debug({ ctx, fname: note.fname, msg: "exit" });

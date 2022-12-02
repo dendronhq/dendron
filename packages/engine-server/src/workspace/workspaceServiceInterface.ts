@@ -26,7 +26,7 @@ export type SyncActionResult = {
 };
 
 export interface IWorkspaceService {
-  get config(): DendronConfig;
+  get config(): PromiseLike<DendronConfig>;
 
   commitAndAddAll(opts: { engine: DEngineClient }): Promise<SyncActionResult[]>;
 

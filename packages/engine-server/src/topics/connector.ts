@@ -5,11 +5,12 @@ import {
   DVault,
   Time,
   ConfigUtils,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createFileWatcher,
   createLogger,
-  DConfig,
   DLogger,
 } from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
@@ -68,7 +69,7 @@ export class EngineConnector {
     return this._ENGINE_CONNECTOR;
   }
 
-  static getOrCreate({
+  static async getOrCreate({
     wsRoot,
     logger,
     force,
@@ -78,15 +79,30 @@ export class EngineConnector {
     force?: boolean;
   }) {
     if (!this._ENGINE_CONNECTOR || force) {
-      return new EngineConnector({ wsRoot, logger });
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
+      return new EngineConnector({ wsRoot, logger, config });
     }
     return this._ENGINE_CONNECTOR;
   }
 
-  constructor({ wsRoot, logger }: { wsRoot: string; logger?: DLogger }) {
+  constructor({
+    wsRoot,
+    logger,
+    config,
+  }: {
+    wsRoot: string;
+    logger?: DLogger;
+    config: DendronConfig;
+  }) {
     this.wsRoot = wsRoot;
     this.logger = logger || createLogger("connector");
-    this.config = DConfig.getOrCreate(wsRoot);
+    this.config = config;
     EngineConnector._ENGINE_CONNECTOR = this;
     this.initialized = false;
   }
@@ -147,7 +163,7 @@ export class EngineConnector {
     const ctx = "EngineConnector:tryToConnect";
     this.logger.info({ ctx, port, msg: "enter" });
     const { wsRoot, vaults } = this;
-    const dendronEngine = DendronEngineClient.create({
+    const dendronEngine = await DendronEngineClient.create({
       port,
       ws: wsRoot,
       vaults,

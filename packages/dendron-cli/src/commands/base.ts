@@ -6,16 +6,22 @@ import {
   RuntimeUtils,
   DENDRON_EMOJIS,
   ConfigUtils,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  DConfig,
   getDurationMilliseconds,
   SegmentClient,
   TelemetryStatus,
 } from "@dendronhq/common-server";
-import { MIGRATION_ENTRIES, WorkspaceUtils } from "@dendronhq/engine-server";
+import {
+  MIGRATION_ENTRIES,
+  NodeJSFileStore,
+  WorkspaceUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
+import { homedir } from "os";
 import yargs from "yargs";
 import { CLIAnalyticsUtils } from "../utils/analytics";
 import { CLIUtils } from "../utils/cli";
@@ -111,8 +117,14 @@ export abstract class CLICommand<
   async validateConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
 
-    // we shouldn't use ConfigUtils.getProp for cases when `version` doesn't exist.
-    const configVersion = DConfig.getRaw(wsRoot).version;
+    const configReadRawResult = await ConfigService.instance().readRaw(
+      URI.file(wsRoot)
+    );
+    if (configReadRawResult.isErr()) {
+      this.print(configReadRawResult.error.message);
+      process.exit();
+    }
+    const configVersion = configReadRawResult.value.version;
     const clientVersion = CLIUtils.getClientVersion();
     let validationResp;
     try {
@@ -220,6 +232,10 @@ export abstract class CLICommand<
         args.wsRoot = configPath;
       }
     }
+    ConfigService.instance({
+      homeDir: URI.file(homedir()),
+      fileStore: new NodeJSFileStore(),
+    });
     if (args.quiet) {
       this.opts.quiet = true;
     }

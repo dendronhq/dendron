@@ -43,7 +43,7 @@ export class SchemaSyncService implements ISchemaSyncService {
 
     const parsedSchema = await schemaParser.parse(
       [path.basename(uri.fsPath)],
-      this.extension.wsUtils.getVaultFromUri(uri)
+      await this.extension.wsUtils.getVaultFromUri(uri)
     );
 
     if (_.isEmpty(parsedSchema.errors)) {

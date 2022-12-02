@@ -28,7 +28,9 @@ suite("CreateNoteWithTraitCommand tests", () => {
         });
 
         test(`THEN expect the title to have been modified AND have the foo template applied`, async () => {
-          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
 
           const testTrait = new TestTrait("foo");
 
@@ -68,7 +70,9 @@ suite("CreateNoteWithTraitCommand tests", () => {
           expect(props?.body).toEqual("foo body");
         });
         test(`WHEN cross vault template is given, THEN correct template should be applied`, async () => {
-          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const testTrait = new TestTrait("dendron://vault1/bar");
           const mockExtension = new MockDendronExtension({
             engine,
@@ -107,7 +111,9 @@ suite("CreateNoteWithTraitCommand tests", () => {
         });
 
         test(`WHEN setVault is implemented, a new note should be created in the specified vault`, async () => {
-          const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine, wsRoot } = ws;
+          const vaults = await ws.vaults;
           const testTrait = new TestTrait("dendron://vault1/bar");
           testTrait.OnCreate.setVault = () => VaultUtils.getName(vaults[2]);
           const mockExtension = new MockDendronExtension({

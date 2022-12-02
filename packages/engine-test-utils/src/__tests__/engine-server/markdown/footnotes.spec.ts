@@ -1,4 +1,4 @@
-import { DConfig } from "@dendronhq/common-server";
+import { ConfigService, URI } from "@dendronhq/common-all";
 import {
   AssertUtils,
   NoteTestUtilsV4,
@@ -13,11 +13,14 @@ describe("footnotes", () => {
   const BASIC = createProcTests({
     name: "basic",
     setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        config: DConfig.readConfigSync(wsRoot),
+        config,
       });
       const resp = await proc2.process(
         [
@@ -58,11 +61,14 @@ describe("footnotes", () => {
   const UNUSED = createProcTests({
     name: "unused footnote",
     setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        config: DConfig.readConfigSync(wsRoot),
+        config,
       });
       const resp = await proc2.process(
         [
@@ -100,11 +106,14 @@ describe("footnotes", () => {
   const WITH_LINK = createProcTests({
     name: "footnote containing link",
     setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        config: DConfig.readConfigSync(wsRoot),
+        config,
       });
       const resp = await proc2.process(
         [
@@ -177,11 +186,14 @@ describe("footnotes", () => {
         ].join("\n"),
       });
 
+      const config = (
+        await ConfigService.instance().readConfig(URI.file(wsRoot))
+      )._unsafeUnwrap();
       const proc2 = await createProcForTest({
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        config: DConfig.readConfigSync(wsRoot),
+        config,
         parsingDependenciesByNoteProps: [target],
       });
       const resp = await proc2.process(

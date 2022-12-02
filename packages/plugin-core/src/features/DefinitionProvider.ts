@@ -1,11 +1,13 @@
 import {
   Awaited,
+  ConfigService,
   ConfigUtils,
   DVault,
   NoteUtils,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { DConfig, findNonNoteFile } from "@dendronhq/common-server";
+import { findNonNoteFile } from "@dendronhq/common-server";
 import * as Sentry from "@sentry/node";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
@@ -22,7 +24,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     fpath: string;
     vault?: DVault;
   }) {
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const file = await findNonNoteFile({
       fpath,
       vaults: vault ? [vault] : vaults,
@@ -39,7 +43,15 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     refAtPos: NonNullable<Awaited<ReturnType<typeof getReferenceAtPosition>>>
   ) {
     const wsRoot = ExtensionProvider.getDWorkspace().wsRoot;
-    const config = DConfig.readConfigSync(wsRoot);
+
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+
     const noAutoCreateOnDefinition =
       !ConfigUtils.getWorkspace(config).enableAutoCreateOnDefinition;
     if (noAutoCreateOnDefinition) {
@@ -75,7 +87,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
         return;
       }
 
-      const { wsRoot, vaults, engine } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot, engine } = ws;
+      const vaults = await ws.vaults;
       const refAtPos = await getReferenceAtPosition({
         document,
         position,

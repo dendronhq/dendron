@@ -2,9 +2,10 @@ import {
   DendronError,
   DendronConfig,
   RespV3,
+  ConfigService,
   WorkspaceRequest,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { MemoryStore } from "../store/memoryStore";
 import { getWSEngine } from "../utils";
 
@@ -23,7 +24,13 @@ export class ConfigController {
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     try {
-      return { data: DConfig.readConfigSync(engine.wsRoot) };
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(engine.wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      return { data: configReadResult.value };
     } catch (err) {
       return {
         error: new DendronError({ message: JSON.stringify(err) }),

@@ -145,7 +145,6 @@ export class MarkdownExportPodCommand extends BaseExportPodCommand<
     return new MarkdownExportPodV2({
       podConfig: config,
       engine: this.extension.getEngine(),
-      dendronConfig: this.extension.getDWorkspace().config,
     });
   }
 

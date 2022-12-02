@@ -108,11 +108,13 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtils.uri2Fname(editor.document.uri);
-    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    const vault = await PickerUtilsV2.getVaultForOpenEditor();
     const { engine } = ExtensionProvider.getDWorkspace();
     const note = (await engine.findNotesMeta({ fname, vault }))[0];
     if (note) {
-      const useVaultPrefix = DendronClientUtilsV2.shouldUseVaultPrefix(engine);
+      const useVaultPrefix = await DendronClientUtilsV2.shouldUseVaultPrefix(
+        engine
+      );
       const link = await this.buildLink({
         note,
         useVaultPrefix,

@@ -9,8 +9,7 @@ import { before } from "mocha";
 suite("ConfigureCommand", function () {
   describeSingleWS("WHEN run", {}, () => {
     before(async () => {
-      const ext = ExtensionProvider.getExtension();
-      await new ConfigureCommand(ext).run();
+      await new ConfigureCommand(ExtensionProvider.getExtension()).run();
     });
 
     test("THEN opens the configuration file", () => {
@@ -29,8 +28,7 @@ suite("ConfigureCommand", function () {
     },
     () => {
       before(async () => {
-        const ext = ExtensionProvider.getExtension();
-        await new ConfigureCommand(ext).run();
+        await new ConfigureCommand(ExtensionProvider.getExtension()).run();
       });
 
       test("THEN opens the configuration file", () => {

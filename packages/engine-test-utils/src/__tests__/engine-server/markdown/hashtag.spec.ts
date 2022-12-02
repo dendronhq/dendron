@@ -12,10 +12,12 @@ import {
 } from "@dendronhq/unified";
 import _ from "lodash";
 import {
+  ConfigService,
   ConfigUtils,
   NoteDictsUtils,
   NoteProps,
   ProcFlavor,
+  URI,
 } from "@dendronhq/common-all";
 import { runEngineTestV5 } from "../../../engine";
 import { ENGINE_HOOKS } from "../../../presets";
@@ -30,7 +32,6 @@ import {
 import { TestConfigUtils } from "../../..";
 import { TestUnifiedUtils } from "../../../utils";
 import { getOpts, runTestCases } from "./v5/utils";
-import { DConfig } from "@dendronhq/common-server";
 
 const { getDescendantNode } = TestUnifiedUtils;
 
@@ -193,12 +194,12 @@ describe("hashtag", () => {
               vault,
               wsRoot,
             });
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "assetsPrefix", "/foo");
                 return config;
               },
-              { wsRoot: opts.wsRoot }
+              { wsRoot }
             );
           },
         })
@@ -208,11 +209,14 @@ describe("hashtag", () => {
     const SIMPLE = createProcTests({
       name: "simple",
       setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(hashtag);
         return { resp };
@@ -259,11 +263,14 @@ describe("hashtag", () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#color`);
             await checkVFile(
@@ -289,11 +296,14 @@ describe("hashtag", () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#color #uncolored`);
             await checkVFile(
@@ -316,7 +326,7 @@ describe("hashtag", () => {
                 wsRoot,
                 vault: vaults[0],
               });
-              TestConfigUtils.withConfig(
+              await TestConfigUtils.withConfig(
                 (config) => {
                   ConfigUtils.setPublishProp(
                     config,
@@ -336,11 +346,14 @@ describe("hashtag", () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -366,11 +379,14 @@ describe("hashtag", () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -401,11 +417,14 @@ describe("hashtag", () => {
         let note: NoteProps;
         await runEngineTestV5(
           async ({ engine, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = await createProcForTest({
               engine,
               dest: DendronASTDest.HTML,
               vault: note.vault,
-              config: DConfig.readConfigSync(wsRoot),
+              config,
             });
             const resp = await proc.process(`#parent.color`);
             await checkVFile(
@@ -437,11 +456,14 @@ describe("hashtag", () => {
     const INSIDE_LINK = createProcTests({
       name: "inside a link",
       setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const proc2 = await createProcForTest({
           engine,
           dest: extra.dest,
           vault: vaults[0],
-          config: DConfig.readConfigSync(wsRoot),
+          config,
         });
         const resp = await proc2.process(
           "[#dendron](https://twitter.com/hashtag/dendron)"
@@ -464,7 +486,10 @@ describe("hashtag", () => {
     describe("WHEN disabled in config", () => {
       test("THEN hashtags don't get parsed or processed", async () => {
         await runEngineTestV5(
-          async ({ engine, wsRoot, vaults }) => {
+          async ({ engine, vaults, wsRoot }) => {
+            const config = (
+              await ConfigService.instance().readConfig(URI.file(wsRoot))
+            )._unsafeUnwrap();
             const proc = MDUtilsV5.procRehypeFull(
               {
                 noteToRender: (
@@ -474,7 +499,7 @@ describe("hashtag", () => {
                   })
                 )[0]!,
                 vault: vaults[0],
-                config: DConfig.readConfigSync(wsRoot),
+                config,
                 fname: "root",
               },
               {}
@@ -486,7 +511,7 @@ describe("hashtag", () => {
           {
             expect,
             preSetupHook: async ({ wsRoot }) => {
-              TestConfigUtils.withConfig(
+              await TestConfigUtils.withConfig(
                 (config) => {
                   ConfigUtils.setWorkspaceProp(config, "enableHashTags", false);
                   return config;

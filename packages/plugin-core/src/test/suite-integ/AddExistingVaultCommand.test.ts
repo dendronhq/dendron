@@ -4,13 +4,10 @@ import {
   FOLDERS,
   VaultUtils,
   DendronConfig,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  readYAML,
-  readYAMLAsync,
-  tmpDir,
-} from "@dendronhq/common-server";
+import { readYAMLAsync, tmpDir } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { checkVaults, GitTestUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -46,7 +43,9 @@ suite("AddExistingVaultCommand", function () {
           sinon.stub(vscode.commands, "executeCommand").resolves({});
         });
         test("THEN add vault, workspace to the config", async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const remoteDir = tmpDir().name;
           await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           const gitIgnore = path.join(wsRoot, ".gitignore");
@@ -65,9 +64,10 @@ suite("AddExistingVaultCommand", function () {
             })
           );
           await cmd.run();
-          const configPath = DConfig.configPath(wsRoot);
-          const configRaw = readYAML(configPath) as DendronConfig;
-          const workspaces = ConfigUtils.getWorkspace(configRaw).workspaces;
+          const rawConfig = (
+            await ConfigService.instance().readRaw(URI.file(wsRoot))
+          )._unsafeUnwrap() as DendronConfig;
+          const workspaces = ConfigUtils.getWorkspace(rawConfig).workspaces;
           expect(workspaces).toEqual({
             [vname]: {
               remote: {
@@ -144,7 +144,9 @@ suite("AddExistingVaultCommand", function () {
 
         test("THEN the vault was added to the workspace config correctly", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
             vname: vaultName,
@@ -192,7 +194,9 @@ suite("AddExistingVaultCommand", function () {
 
         test("THEN the vault was added to the workspace config correctly", async () => {
           const { wsRoot } = ExtensionProvider.getDWorkspace();
-          const config = DConfig.getOrCreate(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           const vault = VaultUtils.getVaultByName({
             vaults: ConfigUtils.getVaults(config),
             vname: vaultName,
@@ -204,7 +208,9 @@ suite("AddExistingVaultCommand", function () {
         test("THEN the notes in this vault are accessible", async () => {
           // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
           await new ReloadIndexCommand().run();
-          const { engine, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { engine } = ws;
+          const vaults = await ws.vaults;
           const vault = VaultUtils.getVaultByName({
             vaults,
             vname: vaultName,
@@ -274,7 +280,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -335,7 +343,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -354,7 +364,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -411,7 +423,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
           vname: vaultName,
@@ -428,7 +442,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,
@@ -483,9 +499,11 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       });
 
       test("THEN the vault was added to the workspace config correctly", async () => {
-        await new ReloadIndexCommand().run();
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        await new ReloadIndexCommand().run();
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
@@ -503,8 +521,10 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(engine.wsRoot))
+        )._unsafeUnwrap();
         const vault = ConfigUtils.getVaults(config).find(
           (vault) => vault.workspace === vaultName
         );
@@ -560,7 +580,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
 
       test("THEN the vault was added to the workspace config correctly", async () => {
         const { wsRoot } = ExtensionProvider.getDWorkspace();
-        const config = DConfig.getOrCreate(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         expect(ConfigUtils.getVaults(config).length).toEqual(2);
         const vault = VaultUtils.getVaultByName({
           vaults: ConfigUtils.getVaults(config),
@@ -578,7 +600,9 @@ describe("GIVEN Add Existing Vault Command is run with self contained vaults ena
       test("THEN the notes in this vault are accessible", async () => {
         // Since we mock the reload window, need to reload index here to pick up the notes in the new vault
         await new ReloadIndexCommand().run();
-        const { engine, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine } = ws;
+        const vaults = await ws.vaults;
         const vault = VaultUtils.getVaultByName({
           vaults,
           vname: vaultName,

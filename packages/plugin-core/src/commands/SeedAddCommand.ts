@@ -1,6 +1,7 @@
 import {
   DendronError,
   ERROR_SEVERITY,
+  isNotUndefined,
   SEED_REGISTRY,
 } from "@dendronhq/common-all";
 import { SeedSvcResp } from "@dendronhq/engine-server";
@@ -26,17 +27,22 @@ export class SeedAddCommand extends SeedCommandBase<
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     // Don't allow users to add a seed that has already been added:
-    const qpItems: vscode.QuickPickItem[] = Object.keys(SEED_REGISTRY)
-      .filter((key) => !this.getSeedSvc().isSeedInWorkspace(key))
-      .map((key) => {
-        const value = SEED_REGISTRY[key];
+    const seedItems = await Promise.all(
+      Object.keys(SEED_REGISTRY).map(async (key) => {
+        const inWorkspace = await this.getSeedSvc().isSeedInWorkspace(key);
+        if (inWorkspace) return undefined;
+        return key;
+      })
+    );
+    const qpItems = seedItems.filter(isNotUndefined).map((key) => {
+      const value = SEED_REGISTRY[key];
 
-        return {
-          label: key,
-          description: value?.description,
-          detail: value?.site?.url,
-        };
-      });
+      return {
+        label: key,
+        description: value?.description,
+        detail: value?.site?.url,
+      };
+    });
 
     const selected = vscode.window.showQuickPick(qpItems).then((value) => {
       if (!value) {
@@ -49,7 +55,7 @@ export class SeedAddCommand extends SeedCommandBase<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    if (this.getSeedSvc().isSeedInWorkspace(_opts.seedId)) {
+    if (await this.getSeedSvc().isSeedInWorkspace(_opts.seedId)) {
       return {
         error: new DendronError({
           message: "seed already added to workspace",

@@ -99,7 +99,7 @@ describe("engine", () => {
       initHooks: true,
       preSetupHook: async ({ wsRoot }) => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
-        TestConfigUtils.withConfig(
+        await TestConfigUtils.withConfig(
           (config) => {
             const hooks: DHookDict = {
               onCreate: [
@@ -143,7 +143,7 @@ describe("engine", () => {
       preSetupHook: async ({ wsRoot }) => {
         writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
         writeJSHook({ wsRoot, fname: "goodbye", canary: "goodbye" });
-        TestConfigUtils.withConfig(
+        await TestConfigUtils.withConfig(
           (config) => {
             const hooks: DHookDict = {
               onCreate: [
@@ -194,7 +194,7 @@ describe("engine", () => {
           path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
           "hello"
         );
-        TestConfigUtils.withConfig(
+        await TestConfigUtils.withConfig(
           (config) => {
             const hooks: DHookDict = {
               onCreate: [
@@ -242,7 +242,7 @@ describe("engine", () => {
           "content.js"
         );
         fs.writeFileSync(hookPath, axiosHookPayload);
-        TestConfigUtils.withConfig(
+        await TestConfigUtils.withConfig(
           (config) => {
             const hooks: DHookDict = {
               onCreate: [
@@ -295,7 +295,7 @@ describe("engine", () => {
             path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
             "hello"
           );
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               const hooks: DHookDict = {
                 onCreate: [
@@ -341,7 +341,7 @@ describe("engine", () => {
         createEngine: createEngineFromServer,
         preSetupHook: async ({ wsRoot }) => {
           writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               const hooks: DHookDict = {
                 onCreate: [
@@ -376,7 +376,7 @@ describe("remote engine", () => {
         expect,
         createEngine: createEngineFromServer,
         preSetupHook: async ({ wsRoot }) => {
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               const hooks: DHookDict = {
                 onCreate: [
@@ -422,7 +422,7 @@ describe("remote engine", () => {
             fname: "hello",
             hookPayload: TestHookUtils.genBadJsHookPayload(),
           });
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               const hooks: DHookDict = {
                 onCreate: [

@@ -11,6 +11,8 @@ import {
   WorkspaceSettings,
   CleanDendronPublishingConfig,
   genDefaultPublishingConfig,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   DConfig,
@@ -30,6 +32,7 @@ import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
   createEngineV3,
+  NodeJSFileStore,
   WorkspaceConfig,
   WorkspaceService,
 } from "@dendronhq/engine-server";
@@ -84,7 +87,7 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
  */
 export async function createEngineV3FromEngine(opts: WorkspaceOpts) {
   return {
-    engine: createEngineV3(opts) as DEngineClient,
+    engine: await createEngineV3(opts),
     port: undefined,
     server: undefined,
   };
@@ -158,10 +161,15 @@ export async function setupWS(opts: {
 }) {
   const wsRoot = opts.wsRoot || tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
-  ws.createConfig();
+  ConfigService._singleton = undefined;
+  ConfigService.instance({
+    homeDir: URI.file(os.homedir()),
+    fileStore: new NodeJSFileStore(),
+  });
+  await ConfigService.instance().createConfig(URI.file(wsRoot));
   // create dendron.code-workspace
   WorkspaceConfig.write(wsRoot, opts.vaults);
-  let config = ws.config;
+  let config = await ws.config;
   let vaults = await Promise.all(
     opts.vaults.map(async (vault) => {
       await ws.createVault({ vault, config, updateConfig: false });

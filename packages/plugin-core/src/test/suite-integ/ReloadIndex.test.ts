@@ -1,4 +1,4 @@
-import { DConfig, vault2Path } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -10,7 +10,7 @@ import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
 import { test, before } from "mocha";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { VaultUtils } from "@dendronhq/common-all";
+import { ConfigService, URI, VaultUtils } from "@dendronhq/common-all";
 import { MessageItem, window } from "vscode";
 import sinon from "sinon";
 import { VSCodeUtils } from "../../vsCodeUtils";
@@ -20,7 +20,9 @@ suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files are missing", {}, () => {
     let rootFiles: string[] = [];
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
       rootFiles = [
         path.join(vaultDir, "root.md"),
@@ -41,7 +43,9 @@ suite("GIVEN ReloadIndex", function () {
   describeSingleWS("WHEN root files exist", {}, () => {
     let rootFiles: string[] = [];
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
       rootFiles = [
         path.join(vaultDir, "root.md"),
@@ -76,7 +80,9 @@ suite("GIVEN ReloadIndex", function () {
       Parameters<typeof VSCodeUtils["showMessage"]>
     >;
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       await NoteTestUtilsV4.createNote({
         fname: firstNote,
         vault: vaults[0],
@@ -99,7 +105,7 @@ suite("GIVEN ReloadIndex", function () {
     });
 
     test("THEN warns that there are notes with duplicated IDs", async () => {
-      const { vaults } = ExtensionProvider.getDWorkspace();
+      const vaults = await ExtensionProvider.getDWorkspace().vaults;
       expect(showMessage.callCount).toEqual(1);
       expect(showMessage.firstCall.args[1].includes(firstNote)).toBeTruthy();
       expect(showMessage.firstCall.args[1].includes(secondNote)).toBeTruthy();
@@ -121,7 +127,9 @@ suite("GIVEN ReloadIndex", function () {
         Parameters<typeof VSCodeUtils["showMessage"]>
       >;
       before(async () => {
-        const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+        const ws = ExtensionProvider.getDWorkspace();
+        const { wsRoot } = ws;
+        const vaults = await ws.vaults;
         await NoteTestUtilsV4.createNote({
           fname: firstNote,
           vault: vaults[0],
@@ -154,7 +162,7 @@ suite("GIVEN ReloadIndex", function () {
       });
 
       test("THEN warns multiple times that there are notes with duplicated IDs", async () => {
-        const { vaults } = ExtensionProvider.getDWorkspace();
+        const vaults = await ExtensionProvider.getDWorkspace().vaults;
         expect(showMessage.callCount).toEqual(2);
         expect(showMessage.getCall(0).args[1].includes(firstNote)).toBeTruthy();
         expect(
@@ -176,14 +184,16 @@ suite("GIVEN ReloadIndex", function () {
 
   describeMultiWS("WHEN there is a single vault missing", {}, () => {
     before(async () => {
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const vaultPath = vault2Path({ vault: vaults[0], wsRoot });
       await fs.rm(vaultPath, { recursive: true, maxRetries: 2 });
     });
 
     test("THEN other vaults are still loaded", async () => {
       const engine = await new ReloadIndexCommand().run();
-      const { vaults } = ExtensionProvider.getDWorkspace();
+      const vaults = await ExtensionProvider.getDWorkspace().vaults;
       expect(engine).toBeTruthy();
       const allNotes = await engine?.findNotesMeta({ fname: "root" });
 
@@ -201,15 +211,23 @@ suite("GIVEN ReloadIndex", function () {
     {
       selfContained: true,
       postSetupHook: async ({ wsRoot }) => {
-        const config = DConfig.getOrCreate(wsRoot);
-        expect(config.workspace.vaults.length).toEqual(1);
-        delete config.workspace.vaults[0].selfContained;
-        await DConfig.writeConfig({ wsRoot, config });
+        const vaults = (
+          await ConfigService.instance().getConfig(
+            URI.file(wsRoot),
+            "workspace.vaults"
+          )
+        )._unsafeUnwrap();
+        expect(vaults.length).toEqual(1);
+        delete vaults[0].selfContained;
+        await ConfigService.instance().updateConfig(
+          URI.file(wsRoot),
+          "workspace.vaults",
+          vaults
+        );
       },
     },
     () => {
       test("THEN it prompts to fix the config", async () => {
-        const { wsRoot } = ExtensionProvider.getDWorkspace();
         sinon
           .stub(window, "showWarningMessage")
           // Cast needed because sinon doesn't get which overload we're stubbing
@@ -223,7 +241,10 @@ suite("GIVEN ReloadIndex", function () {
         // Should reload window after fixing so the plugin picks up new vault config
         expect(reloadWindow.calledOnce).toBeTruthy();
         // The config should be updated to mark the vault as self contained
-        const configAfter = DConfig.getOrCreate(wsRoot);
+        const { wsRoot } = ExtensionProvider.getDWorkspace();
+        const configAfter = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         expect(configAfter.workspace.vaults[0].selfContained).toBeTruthy();
       });
     }

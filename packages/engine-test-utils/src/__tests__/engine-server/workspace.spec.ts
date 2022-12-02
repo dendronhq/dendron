@@ -1,11 +1,13 @@
 import {
+  ConfigService,
   ConfigUtils,
   CONSTANTS,
   DVault,
   FOLDERS,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   SeedService,
@@ -196,7 +198,9 @@ describe("WorkspaceService", () => {
           );
           await GitTestUtils.addRepoToWorkspace(tmp);
           // Add the created self contained vault into the workspace config without actually cloning the folder
-          const config = DConfig.readConfigSync(wsRoot);
+          const config = (
+            await ConfigService.instance().readConfig(URI.file(wsRoot))
+          )._unsafeUnwrap();
           config.workspace.vaults?.push({
             fsPath: vaultFsPath,
             name: vaultName,
@@ -205,7 +209,7 @@ describe("WorkspaceService", () => {
               url: tmp,
             },
           });
-          await DConfig.writeConfig({ wsRoot, config });
+          await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
 
           // Run the workspace initialization, workspace service should discover the missing vault and clone it
           const wsService = new WorkspaceService({ wsRoot });
@@ -259,7 +263,9 @@ describe("WorkspaceService", () => {
       async ({ wsRoot }) => {
         const root = tmpDir().name;
         await GitTestUtils.createRepoWithReadme(root);
-        const config = DConfig.readConfigSync(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
 
         const vaultsConfig = ConfigUtils.getVaults(config);
 
@@ -272,7 +278,7 @@ describe("WorkspaceService", () => {
         });
         ConfigUtils.setVaults(config, vaultsConfig);
         ConfigUtils.setWorkspaceProp(config, "enableRemoteVaultInit", false);
-        await DConfig.writeConfig({ wsRoot, config });
+        await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
         const ws = new WorkspaceService({ wsRoot });
         const didClone = await ws.initialize({
           onSyncVaultsProgress: () => {},

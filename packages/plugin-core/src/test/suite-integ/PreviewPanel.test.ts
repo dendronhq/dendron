@@ -17,7 +17,9 @@ async function makeTestNote({
   body: string;
   genRandomId?: boolean;
 }): Promise<NoteProps> {
-  const { engine, wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+  const ws = ExtensionProvider.getDWorkspace();
+  const { engine, wsRoot } = ws;
+  const vaults = await ws.vaults;
   const note = await NoteTestUtilsV4.createNoteWithEngine({
     engine,
     wsRoot,
@@ -38,7 +40,9 @@ suite("GIVEN PreviewPanel", function () {
   describeSingleWS("WHEN opening a note", {}, () => {
     let previewPanel: PreviewPanel;
     before(async () => {
-      const { engine, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { engine } = ws;
+      const vaults = await ws.vaults;
       const note = (
         await engine.findNotes({ fname: "root", vault: vaults[0] })
       )[0];
@@ -66,7 +70,7 @@ suite("GIVEN PreviewPanel", function () {
     describe("and note has images", () => {
       describe("AND image starts with a forward slash", () => {
         test("THEN URL is correctly rewritten", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const note = await makeTestNote({
             previewPanel,
             body: "![](/assets/image.png)",
@@ -90,7 +94,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND image starts without a forward slash", () => {
         test("THEN URL is correctly rewritten", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const note = await makeTestNote({
             previewPanel,
             body: "![](assets/image.png)",
@@ -114,7 +118,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND image URI is encoded", () => {
         test("THEN URL is correctly rewritten", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           const note = await makeTestNote({
             previewPanel,
             body: "![](assets/Pasted%20image%20%CE%B1.png)",
@@ -176,7 +180,7 @@ suite("GIVEN PreviewPanel", function () {
 
       describe("AND the note is updated", () => {
         test("THEN the output also updates", async () => {
-          const { vaults } = ExtensionProvider.getDWorkspace();
+          const vaults = await ExtensionProvider.getDWorkspace().vaults;
           let note = await makeTestNote({
             previewPanel,
             body: `![](https://org-dendron-public-assets.s3.amazonaws.com/images/rfc-35-template-1.png)`,

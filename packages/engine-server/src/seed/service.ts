@@ -9,8 +9,10 @@ import {
   WorkspaceType,
   ConfigUtils,
   SeedVault,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig, simpleGit, writeYAML } from "@dendronhq/common-server";
+import { simpleGit, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -91,7 +93,13 @@ export class SeedService {
     // workspace that is open is the one being modified in addSeedMetadata(), VS
     // Code will reload the current window and the seed cloning may not execute.
     if (!metaOnly) {
-      seedPath = await this.cloneSeed({ seed: seedOrError });
+      try {
+        seedPath = await this.cloneSeed({ seed: seedOrError });
+      } catch (err: any) {
+        return {
+          error: err,
+        };
+      }
     }
     await this.addSeedMetadata({
       seed: seedOrError,
@@ -118,7 +126,13 @@ export class SeedService {
     onUpdatedWorkspace?: () => Promise<void>;
   }) {
     const ws = new WorkspaceService({ wsRoot });
-    const config = DConfig.readConfigSync(wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const id = SeedUtils.getSeedId({ ...seed });
 
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};
@@ -178,7 +192,7 @@ export class SeedService {
           wsRoot,
           createCodeWorkspace: true,
         });
-        const config = ws.config;
+        const config = await ws.config;
         await ws.createVault({
           vault: { fsPath: "vault" },
           updateWorkspace: true,
@@ -190,13 +204,19 @@ export class SeedService {
         break;
       }
       case SeedInitMode.CONVERT_WORKSPACE: {
-        const { error } = SeedUtils.validateWorkspaceSeedConversion({ wsRoot });
+        const { error } = await SeedUtils.validateWorkspaceSeedConversion({
+          wsRoot,
+        });
         if (error) {
           return {
             error,
           };
         }
-        const config = WorkspaceService.getOrCreateConfig(wsRoot);
+        const configResult = await WorkspaceService.getOrCreateConfig(wsRoot);
+        if (configResult.isErr()) {
+          return { error: configResult.error };
+        }
+        const config = configResult.value;
         const vaults = ConfigUtils.getVaults(config);
         const vaultPath = VaultUtils.getRelPath(vaults[0]);
         seed.root = vaultPath;
@@ -228,7 +248,11 @@ export class SeedService {
     onUpdatingWorkspace?: () => Promise<void>;
     onUpdatedWorkspace?: () => Promise<void>;
   }): Promise<SeedSvcResp> {
-    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
+    const configResult = await WorkspaceService.getOrCreateConfig(this.wsRoot);
+    if (configResult.isErr()) {
+      return { error: configResult.error };
+    }
+    const config = configResult.value;
 
     const seeds = ConfigUtils.getWorkspace(config).seeds;
     if (!_.has(seeds, id)) {
@@ -273,7 +297,7 @@ export class SeedService {
     const ws = new WorkspaceService({ wsRoot: this.wsRoot });
 
     // remove seed entry
-    const config = ws.config;
+    const config = await ws.config;
     const seeds = ConfigUtils.getWorkspace(config).seeds || {};
     delete seeds[SeedUtils.getSeedId(seed)];
     ConfigUtils.setWorkspaceProp(config, "seeds", seeds);
@@ -291,19 +315,27 @@ export class SeedService {
     ws.dispose();
   }
 
-  isSeedInWorkspace(id: string): boolean {
-    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
+  async isSeedInWorkspace(id: string): Promise<boolean> {
+    const configResult = await WorkspaceService.getOrCreateConfig(this.wsRoot);
+    if (configResult.isErr()) {
+      throw configResult.error;
+    }
+    const config = configResult.value;
     const vaults = ConfigUtils.getVaults(config);
     return undefined !== vaults.find((vault) => vault.seed === id);
   }
 
-  getSeedVaultsInWorkspace(): SeedVault[] {
-    const config = WorkspaceService.getOrCreateConfig(this.wsRoot);
+  async getSeedVaultsInWorkspace(): Promise<SeedVault[]> {
+    const configResult = await WorkspaceService.getOrCreateConfig(this.wsRoot);
+    if (configResult.isErr()) {
+      throw configResult.error;
+    }
+    const config = configResult.value;
     const vaults = ConfigUtils.getVaults(config);
     return vaults.filter(VaultUtils.isSeed);
   }
 
-  getSeedsInWorkspace(): string[] {
-    return this.getSeedVaultsInWorkspace().map((vault) => vault.seed!);
+  async getSeedsInWorkspace(): Promise<string[]> {
+    return (await this.getSeedVaultsInWorkspace()).map((vault) => vault.seed!);
   }
 }

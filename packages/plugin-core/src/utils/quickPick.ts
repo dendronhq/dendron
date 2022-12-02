@@ -48,7 +48,7 @@ export class QuickPickUtil {
                 )
               ).data
             : undefined,
-          vaults: workspace.vaults,
+          vaults: await workspace.vaults,
         });
       })
     );

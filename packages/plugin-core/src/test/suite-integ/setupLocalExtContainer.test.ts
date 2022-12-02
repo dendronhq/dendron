@@ -21,7 +21,10 @@ suite(
       { timeout: 1e6 },
       () => {
         test("THEN valid objects are returned without exceptions", async () => {
-          const { vaults, wsRoot, config } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
+          const config = await ws.config;
           const engine = ExtensionProvider.getEngine() as EngineAPIService;
           setupLocalExtContainer({
             wsRoot,

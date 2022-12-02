@@ -129,7 +129,9 @@ export class ReloadIndexCommand extends BasicCommand<
     engine: IEngineAPIService;
   }) {
     const ctx = "checkAndPromptForMisconfiguredSelfContainedVaults";
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const doctor = new DoctorService();
     const vaultsToFix = await doctor.findMisconfiguredSelfContainedVaults(
       wsRoot,

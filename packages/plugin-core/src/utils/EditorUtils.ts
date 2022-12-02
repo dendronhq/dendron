@@ -1,4 +1,5 @@
 import {
+  ConfigService,
   DECORATION_TYPES,
   DendronError,
   DEngineClient,
@@ -6,8 +7,8 @@ import {
   DVault,
   genUUIDInsecure,
   NoteProps,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import { Heading } from "@dendronhq/engine-server";
 import {
   AnchorUtils,
@@ -238,6 +239,13 @@ export class EditorUtils {
     engine: DEngineClient;
   }): Promise<boolean> {
     const line = editor.document.lineAt(selection.start.line).text;
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(engine.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     const proc = MDUtilsV5.procRemarkParse(
       { mode: ProcMode.FULL },
       {
@@ -245,7 +253,7 @@ export class EditorUtils {
         dest: DendronASTDest.MD_DENDRON,
         vault: note.vault,
         fname: note.fname,
-        config: DConfig.readConfigSync(engine.wsRoot),
+        config,
       }
     );
     const parsedLine = proc.parse(line);
@@ -288,7 +296,9 @@ export class EditorUtils {
       return;
     const currentLine = editor.document.lineAt(selection.start.line).text;
     if (!currentLine) return;
-    const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     const reference = await getReferenceAtPosition({
       document: editor.document,
       position: selection.start,

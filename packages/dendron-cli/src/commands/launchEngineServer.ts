@@ -76,8 +76,9 @@ export class LaunchEngineServerCommand extends CLICommand<
     });
     const wsRoot = resolvePath(args.wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
-    const { dev } = ws.config;
-    const vaults = ConfigUtils.getVaults(ws.config);
+    const config = await ws.config;
+    const { dev } = config;
+    const vaults = ConfigUtils.getVaults(config);
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
 
     // launches engine server in a separate process
@@ -97,7 +98,7 @@ export class LaunchEngineServerCommand extends CLICommand<
     if (!noWritePort) {
       EngineUtils.writeEnginePortForCLI({ port: _port, wsRoot });
     }
-    const engine = DendronEngineClient.create({
+    const engine = await DendronEngineClient.create({
       port: _port,
       vaults,
       ws: wsRoot,

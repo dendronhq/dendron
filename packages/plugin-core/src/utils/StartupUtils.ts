@@ -1,17 +1,20 @@
 import {
   ConfigEvents,
+  ConfigService,
   ConfigUtils,
   ConfirmStatus,
+  CONSTANTS,
   DendronConfig,
   ExtensionEvents,
   InstallStatus,
   MigrationEvents,
   SurveyEvents,
   Time,
+  URI,
   VSCodeEvents,
   WorkspaceSettings,
 } from "@dendronhq/common-all";
-import { DConfig, readMD } from "@dendronhq/common-server";
+import { readMD } from "@dendronhq/common-server";
 import {
   DEPRECATED_PATHS,
   DoctorActionsEnum,
@@ -37,6 +40,9 @@ import { AnalyticsUtils } from "./analytics";
 // import { ConfigMigrationUtils } from "./ConfigMigration";
 import semver from "semver";
 import os from "os";
+import fs from "fs-extra";
+import path from "path";
+import YAML from "js-yaml";
 
 export class StartupUtils {
   static shouldShowManualUpgradeMessage({
@@ -140,10 +146,10 @@ export class StartupUtils {
     }
   }
 
-  static showDuplicateConfigEntryMessageIfNecessary(opts: {
+  static async showDuplicateConfigEntryMessageIfNecessary(opts: {
     ext: IDendronExtension;
   }) {
-    const message = StartupUtils.getDuplicateKeysMessage(opts);
+    const message = await StartupUtils.getDuplicateKeysMessage(opts.ext);
     if (message !== undefined) {
       StartupUtils.showDuplicateConfigEntryMessage({
         ...opts,
@@ -152,18 +158,19 @@ export class StartupUtils {
     }
   }
 
-  static getDuplicateKeysMessage(opts: { ext: IDendronExtension }) {
-    const wsRoot = opts.ext.getDWorkspace().wsRoot;
+  static async getDuplicateKeysMessage(ext: IDendronExtension) {
+    const { wsRoot } = ext.getDWorkspace();
     try {
-      DConfig.getRaw(wsRoot);
-    } catch (error: any) {
-      if (
-        error.name === "YAMLException" &&
-        error.reason === "duplicated mapping key"
-      ) {
-        return error.message;
-      }
+      const content = await fs.readFile(
+        path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE),
+        { encoding: "utf-8" }
+      );
+      YAML.load(content);
+    } catch (err: any) {
+      return err.message;
     }
+
+    return;
   }
 
   static showDuplicateConfigEntryMessage(opts: {
@@ -184,8 +191,10 @@ export class StartupUtils {
               status: ConfirmStatus.accepted,
             }
           );
-          const wsRoot = opts.ext.getDWorkspace().wsRoot;
-          const configPath = DConfig.configPath(wsRoot);
+          const { wsRoot } = ExtensionProvider.getDWorkspace();
+          const configPath = ConfigService.instance()
+            .configPath(URI.file(wsRoot))
+            .toString();
           const configUri = vscode.Uri.file(configPath);
 
           const message = opts.message;
@@ -242,22 +251,28 @@ export class StartupUtils {
       });
   }
 
-  static showDeprecatedConfigMessageIfNecessary(opts: {
+  static async showDeprecatedConfigMessageIfNecessary(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
   }) {
-    if (StartupUtils.shouldDisplayDeprecatedConfigMessage(opts)) {
+    if (await StartupUtils.shouldDisplayDeprecatedConfigMessage(opts)) {
       StartupUtils.showDeprecatedConfigMessage({ ext: opts.ext });
     }
   }
 
-  static shouldDisplayDeprecatedConfigMessage(opts: {
+  static async shouldDisplayDeprecatedConfigMessage(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
-  }): boolean {
+  }): Promise<boolean> {
+    const { wsRoot } = opts.ext.getDWorkspace();
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
-      const wsRoot = opts.ext.getDWorkspace().wsRoot;
-      const rawConfig = DConfig.getRaw(wsRoot);
+      const configReadRawResult = await ConfigService.instance().readRaw(
+        URI.file(wsRoot)
+      );
+      if (configReadRawResult.isErr()) {
+        return false;
+      }
+      const rawConfig = configReadRawResult.value;
       const pathsToDelete = ConfigUtils.detectDeprecatedConfigs({
         config: rawConfig,
         deprecatedPaths: DEPRECATED_PATHS,
@@ -293,22 +308,29 @@ export class StartupUtils {
       });
   }
 
-  static showMissingDefaultConfigMessageIfNecessary(opts: {
+  static async showMissingDefaultConfigMessageIfNecessary(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
   }) {
-    if (StartupUtils.shouldDisplayMissingDefaultConfigMessage(opts)) {
+    if (await StartupUtils.shouldDisplayMissingDefaultConfigMessage(opts)) {
       StartupUtils.showMissingDefaultConfigMessage({ ext: opts.ext });
     }
   }
 
-  static shouldDisplayMissingDefaultConfigMessage(opts: {
+  static async shouldDisplayMissingDefaultConfigMessage(opts: {
     ext: IDendronExtension;
     extensionInstallStatus: InstallStatus;
-  }): boolean {
+  }): Promise<boolean> {
+    const { wsRoot } = opts.ext.getDWorkspace();
     if (opts.extensionInstallStatus === InstallStatus.UPGRADED) {
-      const wsRoot = opts.ext.getDWorkspace().wsRoot;
-      const rawConfig = DConfig.getRaw(wsRoot);
+      const configReadRawResult = await ConfigService.instance().readRaw(
+        URI.file(wsRoot)
+      );
+      if (configReadRawResult.isErr()) {
+        return false;
+      }
+      const rawConfig = configReadRawResult.value;
+
       const out = ConfigUtils.detectMissingDefaults({ config: rawConfig });
       return out !== undefined && out.needsBackfill;
     } else {

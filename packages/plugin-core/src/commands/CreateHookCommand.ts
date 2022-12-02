@@ -1,5 +1,10 @@
-import { DendronError, DHookType, IDendronError } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
+import {
+  ConfigService,
+  DendronError,
+  DHookType,
+  IDendronError,
+  URI,
+} from "@dendronhq/common-all";
 import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
@@ -66,8 +71,17 @@ export class CreateHookCommand extends BasicCommand<
       return { error };
     }
     fs.writeFileSync(scriptPath, hookTemplate);
-    const config = HookUtils.addToConfig({
-      config: DConfig.readConfigSync(wsRoot),
+
+    const configService = ConfigService.instance();
+    const configReadResult = await configService.readConfig(URI.file(wsRoot));
+    if (configReadResult.isErr()) {
+      const error = configReadResult.error;
+      this.L.error(error);
+      return { error };
+    }
+    const config = configReadResult.value;
+    const configWritePayload = HookUtils.addToConfig({
+      config,
       hookEntry: {
         id: hookName,
         pattern: hookFilter,
@@ -75,7 +89,16 @@ export class CreateHookCommand extends BasicCommand<
       },
       hookType: DHookType.onCreate,
     });
-    await DConfig.writeConfig({ wsRoot, config });
+    const configWriteResult = await configService.writeConfig(
+      URI.file(wsRoot),
+      configWritePayload
+    );
+    if (configWriteResult.isErr()) {
+      const error = configWriteResult.error;
+      this.L.error(error);
+      return { error };
+    }
+
     await VSCodeUtils.openFileInEditor(Uri.file(scriptPath));
     return;
   }

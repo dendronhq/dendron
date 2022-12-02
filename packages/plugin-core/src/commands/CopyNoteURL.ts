@@ -40,7 +40,7 @@ export class CopyNoteURLCommand extends BasicCommand<
   }
 
   async execute() {
-    const { config } = this.extension.getDWorkspace();
+    const config = await this.extension.getDWorkspace().config;
     const publishingConfig = ConfigUtils.getPublishing(config);
     const urlRoot =
       publishingConfig.siteUrl ||
@@ -53,7 +53,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       window.showErrorMessage("no active document found");
       return;
     }
-    const vault = WSUtils.getVaultFromDocument(maybeTextEditor.document);
+    const vault = await WSUtils.getVaultFromDocument(maybeTextEditor.document);
 
     const note = await WSUtils.getNoteFromDocument(maybeTextEditor.document);
     if (_.isUndefined(note)) {

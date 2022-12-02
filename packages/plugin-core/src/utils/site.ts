@@ -1,10 +1,11 @@
 import {
   assertUnreachable,
+  ConfigService,
   ConfigUtils,
   DendronPublishingConfig,
   getStage,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import {
   NextjsExportConfig,
   NextjsExportPod,
@@ -20,15 +21,6 @@ import { ProgressLocation, window } from "vscode";
 import { ExportPodCommand } from "../commands/ExportPod";
 import { ExtensionProvider } from "../ExtensionProvider";
 import { VSCodeUtils } from "../vsCodeUtils";
-
-export const getSiteRootDirPath = () => {
-  const ws = ExtensionProvider.getDWorkspace();
-  const wsRoot = ws.wsRoot;
-  const config = ws.config;
-  const siteRootDir = ConfigUtils.getPublishing(config).siteRootDir;
-  const sitePath = path.join(wsRoot, siteRootDir);
-  return sitePath;
-};
 
 export class NextJSPublishUtils {
   static async prepareNextJSExportPod() {
@@ -63,8 +55,15 @@ export class NextJSPublishUtils {
       enrichedOpts = { podChoice, config: podConfig };
     }
     if (getStage() !== "prod") {
-      const config = DConfig.readConfigSync(wsRoot);
+      const configReadResult = await ConfigService.instance().readConfig(
+        URI.file(wsRoot)
+      );
+      if (configReadResult.isErr()) {
+        throw configReadResult.error;
+      }
+      const config = configReadResult.value;
       const publishingConfig = ConfigUtils.getPublishing(config);
+
       if (enrichedOpts?.config && !publishingConfig.siteUrl) {
         _.set(
           enrichedOpts.config.overrides as Partial<DendronPublishingConfig>,

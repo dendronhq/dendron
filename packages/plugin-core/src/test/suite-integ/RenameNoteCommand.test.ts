@@ -9,7 +9,9 @@ suite("RenameNoteCommand", function () {
   describeMultiWS("GIVEN note with invalid hierarchy", {}, () => {
     test("WHEN renamed to valid hierarchy THEN renamed properly", async () => {
       const extension = ExtensionProvider.getExtension();
-      const { vaults, wsRoot } = extension.getDWorkspace();
+      const ws = extension.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       const engine = extension.getEngine();
 
       const invalidNote = await NoteTestUtilsV4.createNoteWithEngine({
@@ -69,7 +71,10 @@ suite("RenameNoteCommand", function () {
   describeMultiWS("GIVEN a note with reference to user note", {}, () => {
     test("WHEN renamed THEN note ref should not break", async () => {
       const extension = ExtensionProvider.getExtension();
-      const { vaults, wsRoot } = extension.getDWorkspace();
+      const ws = extension.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
+
       const engine = extension.getEngine();
       const oldNote = await NoteTestUtilsV4.createNoteWithEngine({
         fname: "user.one",

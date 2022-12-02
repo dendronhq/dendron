@@ -90,10 +90,13 @@ describe("WHEN enableHierarchyDisplay is set to true", () => {
 describe("WHEN enableHierarchyDisplay is set to false", () => {
   const preSetupHook = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    TestConfigUtils.withConfig((config) => {
-      config.publishing!.enableHierarchyDisplay = false;
-      return config;
-    }, opts);
+    await TestConfigUtils.withConfig(
+      (config) => {
+        config.publishing!.enableHierarchyDisplay = false;
+        return config;
+      },
+      { wsRoot: opts.wsRoot }
+    );
   };
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
   runTestCases(
@@ -121,10 +124,13 @@ describe("WHEN enableHierarchyDisplay is set to false", () => {
 describe("WHEN hierarchyDisplayTitle is set to 'Better Children' ", () => {
   const preSetupHook = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    TestConfigUtils.withConfig((config) => {
-      config.publishing!.hierarchyDisplayTitle = "Better Children";
-      return config;
-    }, opts);
+    await TestConfigUtils.withConfig(
+      (config) => {
+        config.publishing!.hierarchyDisplayTitle = "Better Children";
+        return config;
+      },
+      { wsRoot: opts.wsRoot }
+    );
   };
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
   runTestCases(

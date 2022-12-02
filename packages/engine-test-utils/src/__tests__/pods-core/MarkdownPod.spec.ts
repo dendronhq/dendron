@@ -1,5 +1,11 @@
-import { ConfigUtils, VaultUtils, WorkspaceOpts } from "@dendronhq/common-all";
-import { DConfig, tmpDir, vault2Path } from "@dendronhq/common-server";
+import {
+  ConfigService,
+  ConfigUtils,
+  URI,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   FileTestUtils,
   NoteTestUtilsV4,
@@ -152,7 +158,7 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        const config = TestConfigUtils.withConfig(
+        const config = await TestConfigUtils.withConfig(
           (config) => {
             const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setProp(
@@ -166,9 +172,7 @@ describe("markdown publish pod", () => {
             ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
             return defaultConfig;
           },
-          {
-            wsRoot,
-          }
+          { wsRoot }
         );
         const resp = await pod.execute({
           engine,
@@ -195,7 +199,7 @@ describe("markdown publish pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownPublishPod();
         const vaultName = VaultUtils.getName(vaults[0]);
-        const config = TestConfigUtils.withConfig(
+        const config = await TestConfigUtils.withConfig(
           (config) => {
             const defaultConfig = ConfigUtils.genDefaultConfig();
             ConfigUtils.setWorkspaceProp(
@@ -214,9 +218,7 @@ describe("markdown publish pod", () => {
             ConfigUtils.setVaults(defaultConfig, ConfigUtils.getVaults(config));
             return defaultConfig;
           },
-          {
-            wsRoot,
-          }
+          { wsRoot }
         );
 
         const resp = await pod.execute({
@@ -253,7 +255,9 @@ describe("markdown publish pod", () => {
           },
         });
         const seedId = TestSeedUtils.defaultSeedId();
-        const config = DConfig.readConfigSync(wsRoot);
+        const config = (
+          await ConfigService.instance().readConfig(URI.file(wsRoot))
+        )._unsafeUnwrap();
         const vaultsConfig = ConfigUtils.getVaults(config);
         engine.vaults = vaultsConfig;
         const vault = VaultUtils.getVaultByName({

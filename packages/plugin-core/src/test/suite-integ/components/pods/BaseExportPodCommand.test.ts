@@ -40,7 +40,9 @@ suite("BaseExportPodCommand", function () {
           const cmd = new TestExportPodCommand(
             ExtensionProvider.getExtension()
           );
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
 
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
@@ -60,41 +62,43 @@ suite("BaseExportPodCommand", function () {
             ExtensionProvider.getExtension()
           );
 
-          const { vaults } = ExtensionProvider.getDWorkspace();
-          const testNote = NoteUtils.create({
-            fname: "foo",
-            vault: vaults[0],
-          });
-          const textToAppend = "BaseExportPodCommand testing";
-          // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
-          const disposable = vscode.workspace.onDidSaveTextDocument(
-            (textDocument) => {
-              testAssertsInsideCallback(() => {
-                expect(
-                  textDocument.getText().includes(textToAppend)
-                ).toBeTruthy();
-                expect(textDocument.fileName.endsWith("foo.md")).toBeTruthy();
-                disposable.dispose();
-                cmd.dispose();
-              }, done);
-            }
-          );
-
-          ExtensionProvider.getWSUtils()
-            .openNote(testNote)
-            .then(async (editor) => {
-              editor
-                .edit(async (editBuilder) => {
-                  const line = editor.document.getText().split("\n").length;
-                  editBuilder.insert(
-                    new vscode.Position(line, 0),
-                    textToAppend
-                  );
-                })
-                .then(async () => {
-                  cmd.run();
-                });
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const testNote = NoteUtils.create({
+              fname: "foo",
+              vault: vaults[0],
             });
+            const textToAppend = "BaseExportPodCommand testing";
+            // onEngineNoteStateChanged is not being triggered by save so test to make sure that save is being triggered instead
+            const disposable = vscode.workspace.onDidSaveTextDocument(
+              (textDocument) => {
+                testAssertsInsideCallback(() => {
+                  expect(
+                    textDocument.getText().includes(textToAppend)
+                  ).toBeTruthy();
+                  expect(textDocument.fileName.endsWith("foo.md")).toBeTruthy();
+                  disposable.dispose();
+                  cmd.dispose();
+                }, done);
+              }
+            );
+
+            ExtensionProvider.getWSUtils()
+              .openNote(testNote)
+              .then(async (editor) => {
+                editor
+                  .edit(async (editBuilder) => {
+                    const line = editor.document.getText().split("\n").length;
+                    editBuilder.insert(
+                      new vscode.Position(line, 0),
+                      textToAppend
+                    );
+                  })
+                  .then(async () => {
+                    cmd.run();
+                  });
+              });
+          });
         });
 
         test("AND note is clean, THEN a onDidSaveTextDocument should not be fired", (done) => {
@@ -102,25 +106,27 @@ suite("BaseExportPodCommand", function () {
             ExtensionProvider.getExtension()
           );
 
-          const { vaults } = ExtensionProvider.getDWorkspace();
-          const testNote = NoteUtils.create({
-            fname: "foo",
-            vault: vaults[0],
-          });
-          const disposable = vscode.workspace.onDidSaveTextDocument(() => {
-            assert(false, "Callback not expected");
-          });
-
-          ExtensionProvider.getWSUtils()
-            .openNote(testNote)
-            .then(async () => {
-              cmd.run();
+          const vaults = ExtensionProvider.getDWorkspace().vaults;
+          vaults.then((vaults) => {
+            const testNote = NoteUtils.create({
+              fname: "foo",
+              vault: vaults[0],
+            });
+            const disposable = vscode.workspace.onDidSaveTextDocument(() => {
+              assert(false, "Callback not expected");
             });
 
-          // Small sleep to ensure callback doesn't fire.
-          waitInMilliseconds(10).then(async () => {
-            disposable.dispose();
-            done();
+            ExtensionProvider.getWSUtils()
+              .openNote(testNote)
+              .then(async () => {
+                cmd.run();
+              });
+
+            // Small sleep to ensure callback doesn't fire.
+            waitInMilliseconds(10).then(async () => {
+              disposable.dispose();
+              done();
+            });
           });
         });
       }
@@ -279,7 +285,9 @@ suite("BaseExportPodCommand", function () {
           const cmd = new TestExportPodCommand(
             ExtensionProvider.getExtension()
           );
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const notePath = path.join(
             vault2Path({ vault: vaults[0], wsRoot }),
             "root.md"

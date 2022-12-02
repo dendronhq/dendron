@@ -58,7 +58,7 @@ describe("GIVEN image link", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setPublishProp(
                 config,
@@ -97,7 +97,7 @@ describe("GIVEN image link", () => {
         },
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               ConfigUtils.setPublishProp(
                 config,

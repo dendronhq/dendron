@@ -1196,7 +1196,9 @@ suite("GIVEN ReferenceHoverProvider", function () {
 
       describeMultiWS("GIVEN link to non-existent note", {}, () => {
         before(async () => {
-          const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+          const ws = ExtensionProvider.getDWorkspace();
+          const { wsRoot } = ws;
+          const vaults = await ws.vaults;
           const note = await NoteTestUtilsV4.createNote({
             vault: vaults[0],
             wsRoot,
@@ -1253,7 +1255,9 @@ suite("GIVEN ReferenceHoverProvider", function () {
         { ctx },
         () => {
           before(async () => {
-            const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+            const ws = ExtensionProvider.getDWorkspace();
+            const { wsRoot } = ws;
+            const vaults = await ws.vaults;
             await fs.writeFile(
               path.join(wsRoot, "test.txt"),
               "Et nam velit laboriosam."

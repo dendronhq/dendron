@@ -3,8 +3,10 @@ import {
   DendronConfig,
   VaultUtils,
   WorkspaceOpts,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
-import { DConfig, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import {
   FileTestUtils,
   NoteTestUtilsV4,
@@ -31,11 +33,17 @@ const setupPod = async (setupOpts: {
   publishConfigOverride?: Partial<DendronConfig["publishing"]>;
 }) => {
   const { opts, fname, podConfigOpts } = setupOpts;
-  const config = DConfig.readConfigSync(opts.engine.wsRoot);
+  const config = (
+    await ConfigService.instance().readConfig(URI.file(opts.engine.wsRoot))
+  )._unsafeUnwrap();
   if (config.publishing) {
     config.publishing.siteUrl = "https://foo.com";
   }
   _.mergeWith(config.publishing, setupOpts.publishConfigOverride);
+  await ConfigService.instance().writeConfig(
+    URI.file(opts.engine.wsRoot),
+    config
+  );
   const podConfig: RunnableMarkdownV2PodConfig = {
     exportScope: PodExportScope.Note,
     destination: "clipboard",
@@ -45,7 +53,6 @@ const setupPod = async (setupOpts: {
   const pod = new MarkdownExportPodV2({
     podConfig,
     engine: opts.engine,
-    dendronConfig: config,
   });
   const props = (
     await opts.engine.findNotes({ fname, vault: opts.vaults[0] })
@@ -543,7 +550,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
 
             const props = (
@@ -588,7 +594,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({
               excludeStub: true,
@@ -619,7 +624,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);
@@ -656,7 +660,6 @@ describe("GIVEN a Markdown Export Pod with a particular config", () => {
             const pod = new MarkdownExportPodV2({
               podConfig,
               engine: opts.engine,
-              dendronConfig: opts.dendronConfig!,
             });
             const notes = await opts.engine.findNotes({ excludeStub: true });
             await pod.exportNotes(notes);

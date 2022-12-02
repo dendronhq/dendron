@@ -1,15 +1,14 @@
 import {
+  ConfigService,
   DendronConfig,
   DendronError,
   DEngineClient,
   DVault,
   DWorkspaceV2,
+  URI,
   WorkspaceType,
-  ConfigUtils,
 } from "@dendronhq/common-all";
-import { DConfig } from "@dendronhq/common-server";
 import * as vscode from "vscode";
-import { Logger } from "../logger";
 
 export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
   public wsRoot: string;
@@ -32,20 +31,20 @@ export abstract class DendronBaseWorkspace implements DWorkspaceV2 {
     this.assetUri = assetUri;
   }
 
-  // TODO: optimize to not read every time
-  get config(): DendronConfig {
-    const { data, error } = DConfig.readConfigAndApplyLocalOverrideSync(
-      this.wsRoot
-    );
-    if (error) {
-      Logger.error({ error });
-    }
-    return data;
+  get config(): PromiseLike<DendronConfig> {
+    return ConfigService.instance()
+      .readConfig(URI.file(this.wsRoot))
+      .then((res) => {
+        if (res.isErr()) {
+          throw res.error;
+        }
+        return res.value;
+      });
   }
 
   // TODO: optimize to not read every time
-  get vaults(): DVault[] {
-    return ConfigUtils.getVaults(this.config);
+  get vaults(): PromiseLike<DVault[]> {
+    return this.config.then((config) => config.workspace.vaults);
   }
 
   get engine(): DEngineClient {

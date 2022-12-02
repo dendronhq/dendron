@@ -20,7 +20,9 @@ export default class ReferenceProvider implements vscode.ReferenceProvider {
         return null;
       }
 
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
       // provide reference to header if selection is header.
       const header = EditorUtils.getHeaderAt({ document, position });
       if (!_.isUndefined(header)) {

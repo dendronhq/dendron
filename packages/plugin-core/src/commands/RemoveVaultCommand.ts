@@ -29,8 +29,9 @@ export class RemoveVaultCommand extends BasicCommand<
     super();
   }
   async gatherInputs(opts?: CommandOpts): Promise<any> {
-    const { vaults } = this._ext.getDWorkspace();
-    const { wsRoot } = this._ext.getDWorkspace();
+    const ws = this._ext.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     /**
      * check added for contextual-ui. If the args are passed to the gather inputs,
      * there is no need to show quickpick to select a vault

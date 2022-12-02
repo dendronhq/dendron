@@ -16,6 +16,8 @@ import {
   WorkspaceOpts,
   WorkspaceSettings,
   WorkspaceType,
+  ConfigService,
+  URI,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
@@ -37,6 +39,8 @@ import {
   DendronEngineClient,
   Git,
   HistoryService,
+  NodeJSFileStore,
+  WorkspaceService,
   WorkspaceUtils,
 } from "@dendronhq/engine-server";
 import {
@@ -144,12 +148,20 @@ export class EditorUtils {
   }
 }
 
+/**
+ * @deprecated
+ */
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
   const config = readYAML(configPath) as DendronConfig;
   return config;
 };
 
+/**
+ * @deprecated: this will be removed with the deprecation of DConfig.
+ * Consider writing tests with {@link describeMultiWS} or {@link describeSingleWS}
+ * and use `modConfigCb` to modify configs
+ */
 export const withConfig = (
   func: (config: DendronConfig) => DendronConfig,
   opts: { wsRoot: string }
@@ -161,6 +173,9 @@ export const withConfig = (
   return newConfig;
 };
 
+/**
+ * @deprecated
+ */
 export const writeConfig = (opts: {
   config: DendronConfig;
   wsRoot: string;
@@ -195,6 +210,11 @@ export async function setupLegacyWorkspace(
   }
   await fs.ensureDir(wsRoot);
   if (copts.workspaceType === WorkspaceType.CODE) stubWorkspaceFile(wsRoot);
+  ConfigService._singleton = undefined;
+  ConfigService.instance({
+    homeDir: URI.file(os.homedir()),
+    fileStore: new NodeJSFileStore(),
+  });
   setupCodeConfiguration(opts);
 
   await copts.preSetupHook({
@@ -216,11 +236,15 @@ export async function setupLegacyWorkspace(
   stubWorkspaceFolders(wsRoot, vaults);
 
   // update config
-  let config = DConfig.getOrCreate(wsRoot);
-  if (isNotUndefined(copts.modConfigCb)) {
-    config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+  const configResult = await WorkspaceService.getOrCreateConfig(wsRoot);
+  if (configResult.isErr()) {
+    throw configResult.error;
   }
-  await DConfig.writeConfig({ wsRoot, config });
+  let config = configResult.value;
+  if (isNotUndefined(copts.modConfigCb)) {
+    config = await TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+  }
+  await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
 
   await copts.postSetupHook({
     wsRoot,
@@ -258,7 +282,13 @@ export async function setupLegacyWorkspaceMulti(
 
   const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   new StateService(opts.ctx!); // eslint-disable-line no-new
+  ConfigService._singleton = undefined;
+  ConfigService.instance({
+    homeDir: URI.file(os.homedir()),
+    fileStore: new NodeJSFileStore(),
+  });
   setupCodeConfiguration(opts);
+
   if (copts.workspaceType === WorkspaceType.CODE) {
     stubWorkspace({ wsRoot, vaults });
 
@@ -292,12 +322,22 @@ export async function setupLegacyWorkspaceMulti(
   }
 
   // update config
-  let config = DConfig.getOrCreate(wsRoot);
+  let config: DendronConfig;
+  const configReadResult = await ConfigService.instance().readConfig(
+    URI.file(wsRoot)
+  );
+  if (configReadResult.isErr()) {
+    config = (
+      await ConfigService.instance().createConfig(URI.file(wsRoot))
+    )._unsafeUnwrap();
+  } else {
+    config = configReadResult.value;
+  }
   if (isNotUndefined(copts.modConfigCb)) {
-    config = TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
+    config = await TestConfigUtils.withConfig(copts.modConfigCb, { wsRoot });
   }
   ConfigUtils.setVaults(config, vaults);
-  await DConfig.writeConfig({ wsRoot, config });
+  await ConfigService.instance().writeConfig(URI.file(wsRoot), config);
   await postSetupHook({
     wsRoot,
     vaults,

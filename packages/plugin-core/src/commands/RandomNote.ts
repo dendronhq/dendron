@@ -26,7 +26,9 @@ export class RandomNoteCommand extends BasicCommand<
   }
 
   async execute(_opts: CommandOpts): Promise<CommandOutput> {
-    const { engine, config } = this._ext.getDWorkspace();
+    const ws = this._ext.getDWorkspace();
+    const { engine } = ws;
+    const config = await ws.config;
 
     // If no pattern is specified for include, then include all notes for the search set.
     const randomNoteConfig = ConfigUtils.getCommands(config).randomNote;

@@ -22,12 +22,9 @@ import {
   DefaultSidebar,
   NoteDicts,
   NoteDictsUtils,
+  ConfigService,
 } from "@dendronhq/common-all";
-import {
-  DConfig,
-  simpleGit,
-  SimpleGitResetMode,
-} from "@dendronhq/common-server";
+import { simpleGit, SimpleGitResetMode } from "@dendronhq/common-server";
 import { execa, SiteUtils } from "@dendronhq/engine-server";
 import {
   getParsingDependencyDicts,
@@ -498,7 +495,13 @@ export class NextjsExportPod extends ExportPod<NextjsExportConfig> {
     const { dest, engine, wsRoot, config: podConfig } = opts;
     const podDstDir = path.join(dest.fsPath, "data");
     fs.ensureDirSync(podDstDir);
-    const config = DConfig.readConfigSync(wsRoot);
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
 
     const siteConfig = getSiteConfig({
       config,

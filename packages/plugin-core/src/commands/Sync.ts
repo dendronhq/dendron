@@ -1,8 +1,10 @@
 import {
   ConfigEvents,
+  ConfigService,
   ConfigUtils,
   DendronError,
   ERROR_SEVERITY,
+  URI,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { DConfig } from "@dendronhq/common-server";
@@ -31,7 +33,7 @@ export async function detectOutOfDateSeeds({
   wsRoot: string;
   seedSvc: SeedService;
 }) {
-  const seedVaults = seedSvc.getSeedVaultsInWorkspace();
+  const seedVaults = await seedSvc.getSeedVaultsInWorkspace();
   await Promise.all(
     seedVaults.map(async (seedVault) => {
       const id = seedVault.seed;
@@ -64,13 +66,30 @@ export async function detectOutOfDateSeeds({
           await AnalyticsUtils.trackForNextRun(
             ConfigEvents.OutdatedSeedVaultMessageAccept
           );
+          // TODO: move `BackupService` to common-all, add `.createBackup` to `ConfigService`
           await DConfig.createBackup(wsRoot, "update-seed");
-          const config = DConfig.getOrCreate(wsRoot);
+
+          const configReadResult = await ConfigService.instance().readConfig(
+            URI.file(wsRoot)
+          );
+          if (configReadResult.isErr()) {
+            throw configReadResult.error;
+          }
+          const config = configReadResult.value;
+
           ConfigUtils.updateVault(config, seedVault, (vault) => {
             vault.fsPath = info.root;
             return vault;
           });
-          await DConfig.writeConfig({ wsRoot, config });
+
+          const configWriteResult = await ConfigService.instance().writeConfig(
+            URI.file(wsRoot),
+            config
+          );
+          if (configWriteResult.isErr()) {
+            throw configWriteResult.error;
+          }
+
           VSCodeUtils.reloadWindow();
         }
       }

@@ -1,5 +1,6 @@
 import {
   DefaultMap,
+  DendronConfig,
   DWorkspaceV2,
   WorkspaceSettings,
   WorkspaceType,
@@ -100,9 +101,11 @@ export interface IDendronExtension {
   getWorkspaceSettingOrDefault({
     wsConfigKey,
     dendronConfigKey,
+    dendronConfig,
   }: {
     wsConfigKey: keyof DendronWorkspaceSettings;
     dendronConfigKey: string;
+    dendronConfig: DendronConfig;
   }): any;
 
   setupViews(context: vscode.ExtensionContext): Promise<void>;

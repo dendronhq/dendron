@@ -1422,7 +1422,7 @@ export class RemarkUtils {
     note: NoteProps,
     changes: NoteChangeEntry[],
     engine: DEngineClient,
-    dendronConfig: DendronConfig
+    config: DendronConfig
   ) {
     const prevNote = { ...note };
     // eslint-disable-next-line func-names
@@ -1446,11 +1446,11 @@ export class RemarkUtils {
             await engine.findNotesMeta({ fname: linkNode.value, vault })
           )[0];
           if (existingNote) {
-            const publishingConfig = ConfigUtils.getPublishing(dendronConfig);
+            const publishingConfig = ConfigUtils.getPublishing(config);
             const urlRoot = publishingConfig.siteUrl || "";
             const { vault } = existingNote;
             linkNode.value = RemarkUtils.getNoteUrl({
-              config: dendronConfig,
+              config,
               note: existingNote,
               vault,
               urlRoot,

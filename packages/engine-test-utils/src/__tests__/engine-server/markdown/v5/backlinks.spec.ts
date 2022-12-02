@@ -42,10 +42,13 @@ describe("GIVEN dendron.yml default", () => {
   describe("WHEN enableBackLinks = false", () => {
     const setup = async (opts: WorkspaceOpts) => {
       await ENGINE_HOOKS.setupLinks(opts);
-      TestConfigUtils.withConfig((config) => {
-        config.publishing!.enableBackLinks = false;
-        return config;
-      }, opts);
+      await TestConfigUtils.withConfig(
+        (config) => {
+          config.publishing!.enableBackLinks = false;
+          return config;
+        },
+        { wsRoot: opts.wsRoot }
+      );
     };
 
     describe("AND WHEN no note override", () => {
@@ -168,9 +171,8 @@ describe("GIVEN dendron.yml default", () => {
             },
           },
           preSetupHook: async (opts) => {
-            const { wsRoot } = opts;
             await ENGINE_HOOKS.setupLinks(opts);
-            TestConfigUtils.withConfig(
+            await TestConfigUtils.withConfig(
               (config) => {
                 ConfigUtils.setPublishProp(config, "siteHierarchies", [
                   "alpha",
@@ -183,9 +185,7 @@ describe("GIVEN dendron.yml default", () => {
                 ConfigUtils.setPublishProp(config, "siteIndex", "alpha");
                 return config;
               },
-              {
-                wsRoot,
-              }
+              { wsRoot: opts.wsRoot }
             );
           },
         })
@@ -227,7 +227,7 @@ describe("GIVEN dendron.yml default", () => {
         preSetupHook: async (opts: any) => {
           await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
 
-          TestConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               const vaults = ConfigUtils.getVaults(config);
               const bvault = vaults.find((ent: any) => ent.fsPath === "vault2");

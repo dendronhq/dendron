@@ -211,7 +211,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
               schema: ent.schema
                 ? (await engine.getSchema(ent.schema.moduleId)).data
                 : undefined,
-              vaults: ws.vaults,
+              vaults: await ws.vaults,
             });
           })
         );

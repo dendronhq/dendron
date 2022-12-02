@@ -49,8 +49,11 @@ import {
   WriteNoteResp,
   WriteSchemaResp,
   QueryNotesResp,
+  ConfigService,
+  DendronConfig,
+  URI,
 } from "@dendronhq/common-all";
-import { createLogger, DConfig, DLogger } from "@dendronhq/common-server";
+import { createLogger, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import {
@@ -80,7 +83,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
   public logger: DLogger;
   public hooks: DHookDict;
 
-  static create({
+  static async create({
     port,
     vaults,
     ws,
@@ -98,7 +101,14 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       apiPath: "api",
       logger,
     });
-    return new DendronEngineClient({ api, vaults, ws, history });
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(ws)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+    return new DendronEngineClient({ api, vaults, ws, history, config });
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
@@ -115,10 +125,12 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     ws,
     history,
     logger,
+    config,
   }: {
     api: DendronAPI;
     history?: HistoryService;
     logger?: DLogger;
+    config: DendronConfig;
   } & DendronEngineClientOpts) {
     this.api = api;
     this.notes = {};
@@ -128,7 +140,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     this.ws = ws;
     this.history = history;
     this.logger = logger || createLogger();
-    const config = DConfig.readConfigSync(ws);
     this.fuseEngine = new FuseEngine({
       fuzzThreshold: ConfigUtils.getLookup(config).note.fuzzThreshold,
     });
@@ -327,8 +338,14 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     const { qs, onlyDirectChildren, vault, originalQS } = opts;
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     let noteProps: NoteProps[];
-    const config = DConfig.readConfigSync(this.wsRoot);
 
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
     if (config.workspace.metadataStore === "sqlite") {
       try {
         const resp = await SQLiteMetadataStore.search(qs);

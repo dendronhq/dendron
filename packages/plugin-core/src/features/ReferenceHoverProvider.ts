@@ -34,9 +34,11 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     refAtPos: NonNullable<getReferenceAtPositionResp>;
     vault?: DVault;
   }): Promise<string | MarkdownString> {
-    const { wsRoot, config } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const config = await ws.config;
     const vpath = vault2Path({
-      vault: PickerUtilsV2.getVaultForOpenEditor(),
+      vault: await PickerUtilsV2.getVaultForOpenEditor(),
       wsRoot,
     });
     const fullPath = path.join(vpath, refAtPos.ref);
@@ -103,7 +105,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
     refAtPos: NonNullable<getReferenceAtPositionResp>,
     vault?: DVault
   ) {
-    const { vaults, wsRoot } = ExtensionProvider.getDWorkspace();
+    const ws = ExtensionProvider.getDWorkspace();
+    const { wsRoot } = ws;
+    const vaults = await ws.vaults;
     // This could be a non-note file
     // Could be a non-note file link
     const nonNoteFile = await findNonNoteFile({
@@ -128,7 +132,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         return null;
       }
 
-      const { wsRoot, vaults } = ExtensionProvider.getDWorkspace();
+      const ws = ExtensionProvider.getDWorkspace();
+      const { wsRoot } = ws;
+      const vaults = await ws.vaults;
 
       const refAtPos = await getReferenceAtPosition({
         document,
@@ -181,7 +187,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         );
       } else if (maybeNotes.length > 1) {
         // If there are multiple notes with this fname, default to one that's in the same vault first.
-        const currentVault = PickerUtilsV2.getVaultForOpenEditor();
+        const currentVault = await PickerUtilsV2.getVaultForOpenEditor();
         const sameVaultNote = _.filter(maybeNotes, (note) =>
           VaultUtils.isEqual(note.vault, currentVault, engine.wsRoot)
         )[0];

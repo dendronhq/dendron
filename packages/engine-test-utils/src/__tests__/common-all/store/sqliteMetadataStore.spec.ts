@@ -34,6 +34,11 @@ async function createNoteStoreUsingSqliteMetadataStore(
   }
 
   const metadataStore = new SqliteMetadataStore(dbResult.value, vaults);
+  await metadataStore.initSchema(
+    fileStore,
+    wsRoot,
+    (engine as DendronEngineClient).logger
+  );
 
   return new NoteStore(fileStore, metadataStore, URI.file(wsRoot));
 }

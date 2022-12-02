@@ -37,6 +37,7 @@ export function runAllNoteStoreTests(
   bulkWriteMetadataTest(noteStoreFactory);
   deleteRootNoteTest(noteStoreFactory);
   getNoteWithAbsolutePathVault(noteStoreFactory);
+  getNoteWithSchemaTest(noteStoreFactory);
 }
 
 function findAndFindMetadataTest(
@@ -746,4 +747,49 @@ function getNoteWithAbsolutePathVault(
       );
     }
   );
+}
+
+function getNoteWithSchemaTest(
+  noteStoreFactory: (
+    wsRoot: string,
+    vaults: DVault[],
+    engine: DEngineClient
+  ) => Promise<INoteStore<string>>
+) {
+  test("WHEN getting a note with schema, THEN the resulting NoteProps has correct `schema` property populated", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
+        const ch1Metadata = (await noteStore.getMetadata("bar.ch1")).data;
+        const ch2Metadata = (await noteStore.getMetadata("bar.ch2")).data;
+        expect(ch1Metadata?.schema).toEqual({
+          moduleId: "bar",
+          schemaId: "ch1",
+        });
+        expect(ch2Metadata?.schema).toEqual({
+          moduleId: "bar",
+          schemaId: "ch2",
+        });
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await ENGINE_HOOKS.setupSchemaPreseet(opts);
+          await NoteTestUtilsV4.createNote({
+            fname: "bar.ch1",
+            body: "",
+            vault: vaults[0],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "bar.ch2",
+            body: "",
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      }
+    );
+  });
 }

@@ -8,7 +8,7 @@ import {
   getJSONString,
   getSQLBoolean,
   getSQLValueString,
-} from "../SqliteUtils";
+} from "../SqliteTypeUtils";
 
 export class NotePropsTableRow {
   constructor(

@@ -112,69 +112,7 @@ export class LookupController {
       new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
     );
 
-    const journalBtn = this.lookupUtils.getButtonFromArray(
-      LookupNoteTypeEnum.journal,
-      qp.buttons
-    );
-    if (journalBtn) {
-      this._disposables.push(
-        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
-          switch (prevValue) {
-            case LookupNoteTypeEnum.journal:
-              if (journalBtn)
-                this.lookupUtils.onJournalButtonToggled(
-                  false,
-                  qp,
-                  initialValue
-                );
-              break;
-            default:
-              break;
-          }
-
-          switch (newValue) {
-            case LookupNoteTypeEnum.journal:
-              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
-              break;
-            case LookupNoteTypeEnum.none:
-              break;
-            default:
-          }
-        })
-      );
-    }
-
-    const directChildBtn = this.lookupUtils.getButton(
-      "directChildOnly",
-      qp.buttons
-    );
-    if (directChildBtn) {
-      this._disposables.push(
-        this.viewModel.isApplyDirectChildFilter.bind(async (newValue) => {
-          const items = await opts.provider.provideItems({
-            pickerValue: qp.value,
-            showDirectChildrenOnly: newValue,
-            workspaceState: {
-              vaults: this.vaults,
-              schemas: {},
-            },
-          });
-          qp.items = items;
-        })
-      );
-    }
-
-    const vaultSelectionBtn = this.lookupUtils.getButton(
-      "selectVault",
-      qp.buttons
-    );
-    if (vaultSelectionBtn) {
-      this._disposables.push(
-        this.viewModel.vaultSelectionMode.bind(async (newValue) => {
-          this.viewModel.vaultSelectionMode.value = newValue;
-        })
-      );
-    }
+    this.setupViewModelCallbacks(qp, initialValue, opts);
 
     this.initializeViewStateFromButtons(qp.buttons);
 
@@ -469,5 +407,87 @@ export class LookupController {
     if (_.isUndefined(bubbleUpCreateNew)) bubbleUpCreateNew = true;
 
     return noSpecialQueryChars && noExactMatches && bubbleUpCreateNew;
+  }
+
+  private setupViewModelCallbacks(
+    qp: DendronWebQuickPick<NoteQuickInputV2>,
+    initialValue: string | undefined,
+    opts: LookupControllerCreateOpts
+  ) {
+    const journalBtn = this.lookupUtils.getButtonFromArray(
+      LookupNoteTypeEnum.journal,
+      qp.buttons
+    );
+    if (journalBtn) {
+      this._disposables.push(
+        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
+          switch (prevValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn)
+                this.lookupUtils.onJournalButtonToggled(
+                  false,
+                  qp,
+                  initialValue
+                );
+              break;
+            default:
+              break;
+          }
+
+          switch (newValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
+              break;
+            case LookupNoteTypeEnum.none:
+              break;
+            default:
+          }
+        })
+      );
+    }
+
+    const directChildBtn = this.lookupUtils.getButton(
+      "directChildOnly",
+      qp.buttons
+    );
+    if (directChildBtn) {
+      this._disposables.push(
+        this.viewModel.isApplyDirectChildFilter.bind(async (newValue) => {
+          const items = await opts.provider.provideItems({
+            pickerValue: qp.value,
+            showDirectChildrenOnly: newValue,
+            workspaceState: {
+              vaults: this.vaults,
+              schemas: {},
+            },
+          });
+          qp.items = items;
+        })
+      );
+    }
+
+    const vaultSelectionBtn = this.lookupUtils.getButton(
+      "selectVault",
+      qp.buttons
+    );
+    if (vaultSelectionBtn) {
+      this._disposables.push(
+        this.viewModel.vaultSelectionMode.bind(async (newValue) => {
+          this.viewModel.vaultSelectionMode.value = newValue;
+        })
+      );
+    }
+
+    const multiSelectBtn = this.lookupUtils.getButton(
+      "multiSelect",
+      qp.buttons
+    );
+    if (multiSelectBtn) {
+      this._disposables.push(
+        this.viewModel.isMultiSelectEnabled.bind(async (newValue) => {
+          qp.canSelectMany = newValue;
+        })
+      );
+    }
   }
 }

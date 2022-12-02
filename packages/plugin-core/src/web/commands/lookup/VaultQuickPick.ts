@@ -58,7 +58,7 @@ export class VaultQuickPick {
    * @param
    * @returns
    */
-  private async getVaultRecommendations({
+  async getVaultRecommendations({
     vault,
     vaults,
     fname,
@@ -185,7 +185,7 @@ export class VaultQuickPick {
     return vaultSuggestions;
   }
 
-  private async promptVault(
+  async promptVault(
     pickerItems: VaultPickerItem[]
   ): Promise<DVault | undefined> {
     const items = pickerItems.map((ent) => ({

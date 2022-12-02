@@ -53,6 +53,9 @@ export type LookupControllerCreateOpts = QuickPickOptions & {
    *  Defaults to true. */
   vaultSelectCanToggle?: boolean;
   vaultSelectionMode?: VaultSelectionMode;
+  nodeType?: "note" | "schema";
+  //default true
+  allowCreateNew?: boolean;
 };
 
 export type LookupAcceptPayload = {
@@ -96,13 +99,14 @@ export class LookupController {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
     const qp = this.createQuickPick({
-      title: "Lookup Note",
+      title: opts.title || "Lookup Note",
       buttons: opts.buttons,
       provider: opts.provider,
       initialValue,
       noteType: opts.noteType,
       vaultButtonPressed: opts.vaultButtonPressed,
       disableVaultSelection: opts.disableVaultSelection,
+      allowCreateNew: opts.allowCreateNew,
     });
     this._disposables.push(
       new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
@@ -160,18 +164,17 @@ export class LookupController {
       );
     }
 
-    // Do we need this in any scenario?
-    // const vaultSelectionBtn = this.lookupUtils.getButton(
-    //   "selectVault",
-    //   qp.buttons
-    // );
-    // if (vaultSelectionBtn) {
-    //   this._disposables.push(
-    //     this.viewModel.vaultSelectionMode.bind(async (newValue) => {
-    //       this.viewModel.vaultSelectionMode.value = newValue;
-    //     })
-    //   );
-    // }
+    const vaultSelectionBtn = this.lookupUtils.getButton(
+      "selectVault",
+      qp.buttons
+    );
+    if (vaultSelectionBtn) {
+      this._disposables.push(
+        this.viewModel.vaultSelectionMode.bind(async (newValue) => {
+          this.viewModel.vaultSelectionMode.value = newValue;
+        })
+      );
+    }
 
     this.initializeViewStateFromButtons(qp.buttons);
 
@@ -316,7 +319,11 @@ export class LookupController {
         },
       });
 
-      const modifiedItems = this.addCreateNewOptionIfNecessary(newInput, items);
+      const modifiedItems = this.addCreateNewOptionIfNecessary(
+        newInput,
+        items,
+        opts.allowCreateNew
+      );
       qp.items = modifiedItems;
     });
     qp.ignoreFocusOut = true;
@@ -359,7 +366,8 @@ export class LookupController {
 
   private addCreateNewOptionIfNecessary(
     queryOrig: string,
-    items: NoteQuickInputV2[]
+    items: NoteQuickInputV2[],
+    allowCreateNew: boolean = true
   ): NoteQuickInputV2[] {
     // if new notes are allowed and we didn't get a perfect match, append `Create New` option
     // to picker results
@@ -385,7 +393,8 @@ export class LookupController {
       // !picker.canSelectMany &&
       // when you create lookup from selection, new note is not valid
       // !transformedQuery.wasMadeFromWikiLink &&
-      vaultsHaveSpaceForExactMatch;
+      vaultsHaveSpaceForExactMatch &&
+      allowCreateNew;
 
     if (shouldAddCreateNew) {
       const entryCreateNew = this.createNewNoteQPItem({

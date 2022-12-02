@@ -2,7 +2,7 @@ import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
 import { SqliteQueryUtils } from "../SqliteQueryUtils";
-import { getSQLValueString } from "../SQLiteUtils";
+import { getSQLValueString } from "../SqliteUtils";
 
 export class SchemaNotesTableRow {
   constructor(

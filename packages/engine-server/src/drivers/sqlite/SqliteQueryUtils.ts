@@ -18,8 +18,8 @@ export class SqliteQueryUtils {
     const start = process.hrtime();
 
     const prom = new Promise<null>((resolve, reject) => {
-      db.run(sql, (err: any) => {
-        if (err.code === "SQLITE_ERROR") {
+      db.run(sql, (err) => {
+        if (err) {
           logger?.error(
             `SqliteQueryUtils.run() failed with error message ${
               err.message

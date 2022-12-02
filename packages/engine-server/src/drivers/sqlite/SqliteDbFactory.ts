@@ -4,20 +4,14 @@ import {
   DLogger,
   DVault,
   errAsync,
-  ERROR_SEVERITY,
-  ERROR_STATUS,
   IDendronError,
   IFileStore,
   isNotNull,
   isNotUndefined,
   okAsync,
-  RespWithOptError,
-  Result,
   ResultAsync,
   ResultUtils,
   SchemaModuleDict,
-  SchemaModuleProps,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";

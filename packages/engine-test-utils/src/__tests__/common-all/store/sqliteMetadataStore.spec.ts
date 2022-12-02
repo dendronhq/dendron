@@ -11,7 +11,7 @@ import {
   SqliteDbFactory,
   SqliteMetadataStore,
 } from "@dendronhq/engine-server";
-import { runAllNoteStoreTests } from "../../../noteStore.common";
+import { runAllNoteStoreTestsForSqlite } from "../../../noteStore.common";
 
 async function createNoteStoreUsingSqliteMetadataStore(
   wsRoot: string,
@@ -44,5 +44,5 @@ async function createNoteStoreUsingSqliteMetadataStore(
 }
 
 describe("GIVEN a NoteStore containing a SQLiteMetadataStore internally", () => {
-  runAllNoteStoreTests(createNoteStoreUsingSqliteMetadataStore);
+  runAllNoteStoreTestsForSqlite(createNoteStoreUsingSqliteMetadataStore);
 });

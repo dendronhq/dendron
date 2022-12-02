@@ -37,6 +37,16 @@ export function runAllNoteStoreTests(
   bulkWriteMetadataTest(noteStoreFactory);
   deleteRootNoteTest(noteStoreFactory);
   getNoteWithAbsolutePathVault(noteStoreFactory);
+}
+
+export function runAllNoteStoreTestsForSqlite(
+  noteStoreFactory: (
+    wsRoot: string,
+    vaults: DVault[],
+    engine: DEngineClient
+  ) => Promise<INoteStore<string>>
+) {
+  runAllNoteStoreTests(noteStoreFactory);
   getNoteWithSchemaTest(noteStoreFactory);
 }
 

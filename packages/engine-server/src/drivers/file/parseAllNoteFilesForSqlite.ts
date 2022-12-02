@@ -54,7 +54,6 @@ import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
  * vaults, call this function multiple times, once for each vault.
  * @param db
  * @param root
- * @param schemas
  * @param enableLinkCandidates
  * @returns
  */
@@ -63,7 +62,6 @@ export async function parseAllNoteFilesForSqlite(
   vault: DVault,
   db: Database,
   root: string,
-  // schemas: SchemaModuleDict,
   enableLinkCandidates: boolean = false,
   logger?: DLogger
 ): Promise<Result<null, any>> {

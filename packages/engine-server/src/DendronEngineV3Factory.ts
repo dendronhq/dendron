@@ -75,6 +75,9 @@ export class DendronEngineV3Factory {
       schemaMetadataStore,
       URI.parse(wsRoot)
     );
+
+    // this step is here because we are still relying one fuse engine on some parts.
+    // this can be removed once we completely remove fuse.
     const bulkWriteSchemaOpts = Object.values(schemas).map((schema) => {
       return { key: schema.root.id, schema };
     });

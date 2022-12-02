@@ -45,13 +45,13 @@ export class SqliteDbFactory {
    * @param dbFilePath - path of the db file. Use :memory: to use an in-memory database
    * @returns
    */
-  public static async createInitializedDB(
+  public static createInitializedDB(
     wsRoot: string,
     vaults: DVault[],
     fileStore: IFileStore,
     dbFilePath: string,
     logger: DLogger
-  ): Promise<Result<Database, Error>> {
+  ): ResultAsync<Database, Error> {
     return SqliteDbFactory.createEmptyDB(dbFilePath).andThen((db) => {
       const results = ResultAsync.combine(
         // Initialize Each Vault
@@ -67,12 +67,12 @@ export class SqliteDbFactory {
               return e;
             }
           ).map((maybeFiles) => {
+            // And parse them
             return parseAllNoteFilesForSqlite(
               maybeFiles.data!,
               vault,
               db,
               vaultPath,
-              // schemaDict,
               false,
               logger
             );
@@ -180,70 +180,5 @@ export class SqliteDbFactory {
     } else {
       return okAsync(schemaDict);
     }
-  }
-
-  static async readAllSchema(
-    vaults: DVault[],
-    wsRoot: string,
-    fileStore: IFileStore,
-    logger: DLogger
-  ): Promise<RespWithOptError<SchemaModuleProps[]>> {
-    const ctx = "DEngine:initSchema";
-    logger.info({ ctx, msg: "enter" });
-    let errorList: IDendronError[] = [];
-
-    const schemaResponses: RespWithOptError<SchemaModuleProps[]>[] =
-      await Promise.all(
-        vaults.map(async (vault) => {
-          const vpath = vault2Path({ vault, wsRoot });
-          // Get list of files from filesystem
-          const maybeFiles = await fileStore.readDir({
-            root: URI.file(vpath),
-            include: ["*.schema.yml"],
-          });
-          if (maybeFiles.error || maybeFiles.data.length === 0) {
-            // Keep initializing other vaults
-            return {
-              error: new DendronCompositeError([
-                new DendronError({
-                  message: `Unable to get schemas for vault ${VaultUtils.getName(
-                    vault
-                  )}`,
-                  status: ERROR_STATUS.NO_SCHEMA_FOUND,
-                  severity: ERROR_SEVERITY.MINOR,
-                  payload: maybeFiles.error,
-                }),
-              ]),
-              data: [],
-            };
-          }
-          const schemaFiles = maybeFiles.data.map((entry) => entry.toString());
-          logger.info({ ctx, schemaFiles });
-          const { schemas, errors } = await new SchemaParser({
-            wsRoot,
-            logger,
-          }).parse(schemaFiles, vault);
-
-          if (errors) {
-            errorList = errorList.concat(errors);
-          }
-          return {
-            data: schemas,
-            error: _.isNull(errors)
-              ? undefined
-              : new DendronCompositeError(errors),
-          };
-        })
-      );
-    const errors = schemaResponses
-      .flatMap((response) => response.error)
-      .filter(isNotUndefined);
-
-    return {
-      error: errors.length > 0 ? new DendronCompositeError(errors) : undefined,
-      data: schemaResponses
-        .flatMap((response) => response.data)
-        .filter(isNotUndefined),
-    };
   }
 }

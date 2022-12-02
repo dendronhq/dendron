@@ -64,7 +64,21 @@ export class DendronEngineV3Factory {
     }
 
     const sqliteMetadataStore = new SqliteMetadataStore(dbResult.value, vaults);
-    await sqliteMetadataStore.initSchema(fileStore, wsRoot, LOGGER);
+    const schemas = await sqliteMetadataStore.initSchema(
+      fileStore,
+      wsRoot,
+      LOGGER
+    );
+    const schemaMetadataStore = new SchemaMetadataStore(fuseEngine);
+    const schemaStore = new SchemaStore(
+      fileStore,
+      schemaMetadataStore,
+      URI.parse(wsRoot)
+    );
+    const bulkWriteSchemaOpts = Object.values(schemas).map((schema) => {
+      return { key: schema.root.id, schema };
+    });
+    await schemaStore.bulkWriteMetadata(bulkWriteSchemaOpts);
 
     return new DendronEngineV3({
       wsRoot,
@@ -74,11 +88,7 @@ export class DendronEngineV3Factory {
         sqliteMetadataStore,
         URI.file(wsRoot)
       ),
-      schemaStore: new SchemaStore(
-        fileStore,
-        new SchemaMetadataStore(fuseEngine),
-        URI.parse(wsRoot)
-      ),
+      schemaStore,
       fileStore,
       logger: LOGGER,
       config,

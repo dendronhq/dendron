@@ -43,8 +43,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
    * Goes through all domains and recursively apply schemas.
    */
   async initSchema(fileStore: IFileStore, wsRoot: string, logger: DLogger) {
-    // TODO: move this out of SqliteDbFactory
-    // (or move this whole thing to parseAllNoteFilesForSqlite)
+    // this whole thing to parseAllNoteFilesForSqlite / SqliteDbFactory
     const schemaResult = await SqliteDbFactory.initSchema(
       this._vaults,
       wsRoot,
@@ -125,6 +124,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         }
       })
     );
+    return schemas;
   }
 
   dispose() {
@@ -228,7 +228,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
         data: {},
         type: "note",
         vault,
-        schema,
+        schema: _.isEmpty(schema) ? undefined : schema,
       };
 
       return okAsync(data);

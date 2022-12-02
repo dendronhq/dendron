@@ -55,9 +55,9 @@ export class SchemaNotesTableUtils {
     const sql = [
       `SELECT *`,
       `FROM SchemaNotes`,
-      `WHERE SchemaNotes.noteId = ${key}`,
+      `WHERE SchemaNotes.noteId = "${key}"`,
     ].join("\n");
 
-    return SqliteQueryUtils.all(db, sql);
+    return SqliteQueryUtils.get(db, sql);
   }
 }

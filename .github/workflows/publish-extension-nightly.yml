@@ -99,6 +99,7 @@ jobs:
     if: github.repository_owner == 'dendronhq'
     timeout-minutes: 60
     environment: plugin-production
+    needs: general-build
 
     strategy:
       fail-fast: false

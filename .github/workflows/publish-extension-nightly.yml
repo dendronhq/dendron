@@ -99,6 +99,7 @@ jobs:
     if: github.repository_owner == 'dendronhq'
     timeout-minutes: 60
     environment: plugin-production
+    # need to order the jobs at the moment due to a bug in VSCode. Refer to https://github.com/microsoft/vscode-vsce/issues/785 for more details.
     needs: general-build
 
     strategy:

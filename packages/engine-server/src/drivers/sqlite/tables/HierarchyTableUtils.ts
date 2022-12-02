@@ -2,7 +2,7 @@ import { DNodePointer } from "@dendronhq/common-all";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "../SQLiteUtils";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
 
 export class HierarchyTableRow {
   constructor(public parentId: string, public childId: string) {}
@@ -26,12 +26,12 @@ export class HierarchyTableUtils {
 
     const idx2 = `CREATE INDEX IF NOT EXISTS idx_Links_sink ON Hierarchy (child)`;
 
-    return executeSqlWithVoidResult(db, sql)
+    return SqliteQueryUtils.run(db, sql)
       .andThen(() => {
-        return executeSqlWithVoidResult(db, idx);
+        return SqliteQueryUtils.run(db, idx);
       })
       .andThen(() => {
-        return executeSqlWithVoidResult(db, idx2);
+        return SqliteQueryUtils.run(db, idx2);
       });
   }
 
@@ -43,7 +43,7 @@ export class HierarchyTableUtils {
     INSERT OR IGNORE INTO Hierarchy (parent, child)
     VALUES ('${row.parentId}', '${row.childId}')`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   public static bulkInsert(
@@ -62,7 +62,7 @@ export class HierarchyTableUtils {
     INSERT OR IGNORE Hierarchy (parent, child)
     VALUES ${values}`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   public static insertWithParentAsFname(
@@ -101,7 +101,7 @@ export class HierarchyTableUtils {
       JOIN VaultNotes ON VaultNotes.noteId = NoteProps.id
       WHERE VaultNotes.vaultId = T.vaultId`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   public static getChildren(
@@ -112,20 +112,9 @@ export class HierarchyTableUtils {
     SELECT child FROM Hierarchy
     WHERE parent = '${noteId}'`;
 
-    const prom = new Promise<DNodePointer[]>((resolve, reject) => {
-      db.all(childrenSql, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        }
-
-        const children = rows.map((row) => row.child) as DNodePointer[];
-        resolve(children);
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.all(db, childrenSql).map(
+      (rows) => rows.map((row) => row.child) as DNodePointer[]
+    );
   }
 
   public static getParent(
@@ -136,22 +125,12 @@ export class HierarchyTableUtils {
     SELECT parent FROM Hierarchy
     where child = '${noteId}'`;
 
-    const prom = new Promise<DNodePointer | null>((resolve, reject) => {
-      db.get(parentSql, (err, row) => {
-        if (err) {
-          reject(err.message);
-        }
-
-        if (row && row.parent) {
-          resolve(row.parent);
-        } else {
-          resolve(null);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
+    return SqliteQueryUtils.get(db, parentSql).map((row) => {
+      if (row && row.parent) {
+        return row.parent;
+      } else {
+        return null;
+      }
     });
   }
 }

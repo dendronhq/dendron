@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "../SQLiteUtils";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
 
 /**
  * FTS5 Virtual Table for Full-Text-Search over fname column in NoteProps. This
@@ -38,18 +38,18 @@ export class NotePropsFtsTableUtils {
 
     const sql5 = `INSERT INTO NoteProps_fts(NoteProps_fts) VALUES('rebuild');`;
 
-    return executeSqlWithVoidResult(db, sql)
+    return SqliteQueryUtils.run(db, sql)
       .andThen(() => {
-        return executeSqlWithVoidResult(db, sql2);
+        return SqliteQueryUtils.run(db, sql2);
       })
       .andThen(() => {
-        return executeSqlWithVoidResult(db, sql3);
+        return SqliteQueryUtils.run(db, sql3);
       })
       .andThen(() => {
-        return executeSqlWithVoidResult(db, sql4);
+        return SqliteQueryUtils.run(db, sql4);
       })
       .andThen(() => {
-        return executeSqlWithVoidResult(db, sql5);
+        return SqliteQueryUtils.run(db, sql5);
       });
   }
 
@@ -67,19 +67,9 @@ export class NotePropsFtsTableUtils {
 
     const sql = `SELECT id FROM NoteProps_fts WHERE fname MATCH 'NEAR(${query})'`;
 
-    const prom = new Promise<string[]>((resolve, reject) => {
-      db.all(sql, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        } else {
-          resolve(rows.map((row) => row.id));
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.all(db, sql).map((rows) =>
+      rows.map((row) => row.id)
+    );
   }
 
   /**

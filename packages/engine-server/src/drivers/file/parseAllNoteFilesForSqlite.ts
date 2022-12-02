@@ -33,13 +33,13 @@ import path from "path";
 import { Database } from "sqlite3";
 import { Parent } from "unist";
 import {
-  executeSqlWithVoidResult,
   HierarchyTableUtils,
   VaultNotesTableRow,
   VaultNotesTableUtils,
   VaultsTableUtils,
 } from "../sqlite";
 import { SqliteError } from "../sqlite/SqliteError";
+import { SqliteQueryUtils } from "../sqlite/SqliteQueryUtils";
 import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTableUtils";
 import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTableUtils";
 import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
@@ -317,19 +317,9 @@ function getAddedFiles(
     AND NoteProps.stub = 0
     `;
 
-  const prom = new Promise<string[]>((resolve, reject) => {
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows.map((row) => row.fname));
-      }
-    });
-  });
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  });
+  return SqliteQueryUtils.all(db, sql).map((rows) =>
+    rows.map((row) => row.fname)
+  );
 }
 
 function getUpdatedFiles(
@@ -352,19 +342,7 @@ function getUpdatedFiles(
     JOIN NoteProps ON T.fname = NoteProps.fname AND hash != contentHash
     `;
 
-  const prom = new Promise<any[]>((resolve, reject) => {
-    db.all(sql, (err, rows) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  }).andThen((updatedRows) => {
+  return SqliteQueryUtils.all(db, sql).andThen((updatedRows) => {
     if (updatedRows.length === 0) {
       return ResultAsync.fromPromise(Promise.resolve([]), (e) => {
         return e as SqliteError;
@@ -382,19 +360,9 @@ function getUpdatedFiles(
       JOIN VaultNotes ON T.Id = VaultNotes.noteId
       WHERE vaultId = ${vaultId}`;
 
-    const prom = new Promise<any[]>((resolve, reject) => {
-      db.all(sql2, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        } else {
-          resolve(rows.map((row) => row.fname));
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.all(db, sql2).map((rows) =>
+      rows.map((row) => row.fname)
+    );
   });
 }
 
@@ -615,21 +583,10 @@ function processReplacedStubs(
     JOIN T ON T.fname = NoteProps.fname AND NoteProps.stub = 1
     JOIN VaultNotes ON NoteProps.Id = VaultNotes.noteId AND VaultNotes.vaultId = ${vaultId}`;
 
-  const prom = new Promise<{ stubId: string; newId: string }[]>(
-    (resolve, reject) => {
-      db.all(sql1, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        } else {
-          resolve(rows);
-        }
-      });
-    }
-  );
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  }).andThen((replacedStubs) => {
+  return SqliteQueryUtils.all<{ stubId: string; newId: string }>(
+    db,
+    sql1
+  ).andThen((replacedStubs) => {
     // If no stubs are being replaced, nothing needs to be done.
     if (replacedStubs.length === 0) {
       return okAsync(null);
@@ -648,7 +605,7 @@ function processReplacedStubs(
       FROM T
       WHERE T.oldId = Hierarchy.parent`;
 
-    return executeSqlWithVoidResult(db, sql2).andThen(() => {
+    return SqliteQueryUtils.run(db, sql2).andThen(() => {
       const values = replacedStubs.map((d) => `('${d.stubId}')`).join(",");
 
       // Finally, delete any replaced stubs from NoteProps:
@@ -663,7 +620,7 @@ function processReplacedStubs(
           WHERE T.oldId = NoteProps.id
         );`;
 
-      return executeSqlWithVoidResult(db, sql3);
+      return SqliteQueryUtils.run(db, sql3);
     });
   });
 }
@@ -720,19 +677,8 @@ function addAncestorStubs(
     JOIN NoteProps ON noteId = id
     WHERE vaultId = ${vaultId}`;
 
-  const prom = new Promise<string[]>((resolve, reject) => {
-    db.all(sql1, (err, rows) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows.map((row) => row.fname));
-      }
-    });
-  });
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  })
+  return SqliteQueryUtils.all(db, sql1)
+    .map((rows) => rows.map((row) => row.fname))
     .andThen((stubsToAdd) => {
       // If all potentialStubNames already exist as real notes (or previously
       // created stubs), nothing needs to be done.
@@ -758,7 +704,7 @@ function addAncestorStubs(
         (VALUES ${stubInsertionValues})
         SELECT T.id, T.fname, T.title, 1 FROM T -- 1 here means stub = true`;
 
-      return executeSqlWithVoidResult(db, sql2).map(() => stubProps);
+      return SqliteQueryUtils.run(db, sql2).map(() => stubProps);
     })
     .andThen((stubProps) => {
       if (stubProps.length === 0) {
@@ -818,7 +764,7 @@ function purgeDBForUpdatedNotesWithChangedNoteId(
       AND Outer.id = NoteProps.id
     )`;
 
-  return executeSqlWithVoidResult(db, sql);
+  return SqliteQueryUtils.run(db, sql);
 }
 
 /**
@@ -854,7 +800,7 @@ function updateLinksForChangedNoteId(
   ) AS UpdatedIds
   WHERE Links.sink = UpdatedIds.oldId`;
 
-  return executeSqlWithVoidResult(db, sql);
+  return SqliteQueryUtils.run(db, sql);
 }
 
 function deleteRemovedFilesFromDB(
@@ -876,7 +822,7 @@ function deleteRemovedFilesFromDB(
       AND Outer.id = NoteProps.id
     )`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   } else {
     const values = remainingFiles.map((fname) => `('${fname}')`).join(",");
 
@@ -904,7 +850,7 @@ function deleteRemovedFilesFromDB(
       )`;
   }
 
-  return executeSqlWithVoidResult(db, sql);
+  return SqliteQueryUtils.run(db, sql);
 }
 
 function deleteLinksForUpdatedNotes(
@@ -928,5 +874,5 @@ function deleteLinksForUpdatedNotes(
       WHERE VaultId = ${vaultId}
       AND Links.source = Outer.source
     )`;
-  return executeSqlWithVoidResult(db, sql);
+  return SqliteQueryUtils.run(db, sql);
 }

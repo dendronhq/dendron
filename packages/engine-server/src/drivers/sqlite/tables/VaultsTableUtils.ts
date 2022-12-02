@@ -1,7 +1,7 @@
-import { ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
-import { SqliteError } from "../SqliteError";
-import { executeSqlWithVoidResult } from "../SQLiteUtils";
+import { SqliteError, SqliteErrorType } from "../SqliteError";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
 
 export class VaultsTableRow {
   constructor(public id: number, public name: string, public fsPath: string) {}
@@ -19,8 +19,8 @@ export class VaultsTableUtils {
     const sqlIndex = `
     CREATE UNIQUE INDEX IF NOT EXISTS idx_vaults_fsPath ON Vaults ('fsPath')`;
 
-    return executeSqlWithVoidResult(db, sql).andThen(() => {
-      return executeSqlWithVoidResult(db, sqlIndex);
+    return SqliteQueryUtils.run(db, sql).andThen(() => {
+      return SqliteQueryUtils.run(db, sqlIndex);
     });
   }
 
@@ -32,20 +32,17 @@ export class VaultsTableUtils {
       SELECT id FROM Vaults
       WHERE fsPath = '${fsPath}'`;
 
-    const prom = new Promise<number>((resolve, reject) => {
-      db.get(sql, (err, row) => {
-        if (err) {
-          reject(err.message);
-        } else if (row) {
-          resolve(row.id);
-        } else {
-          reject(new Error(`No vault with fsPath ${fsPath} found.`));
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
+    return SqliteQueryUtils.get(db, sql).andThen((row) => {
+      if (!row) {
+        const err: SqliteError = {
+          type: SqliteErrorType.NoResults,
+          query: sql,
+          name: SqliteErrorType.NoResults,
+          message: `No vault with fsPath ${fsPath} found.`,
+        };
+        return errAsync(err);
+      }
+      return okAsync(row.id as number);
     });
   }
 
@@ -60,6 +57,6 @@ export class VaultsTableUtils {
         '${row.fsPath}'
       );`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 }

@@ -8,7 +8,7 @@ import { vault2Path } from "@dendronhq/common-server";
 import { Database } from "sqlite3";
 import { URI } from "vscode-uri";
 import { parseAllNoteFilesForSqlite } from "../file";
-import { executeSqlWithVoidResult } from "./SQLiteUtils";
+import { SqliteQueryUtils } from "./SqliteQueryUtils";
 import { HierarchyTableUtils, VaultsTableUtils } from "./tables";
 import { LinksTableUtils } from "./tables/LinksTableUtils";
 import { NotePropsFtsTableUtils } from "./tables/NotePropsFtsTableUtils";
@@ -107,7 +107,7 @@ export class SqliteDbFactory {
             SchemaNotesTableUtils.createTable(db),
             NotePropsFtsTableUtils.createTable(db),
             // Enable Foreign Key relationships:
-            executeSqlWithVoidResult(db, "PRAGMA foreign_keys = ON"),
+            SqliteQueryUtils.run(db, "PRAGMA foreign_keys = ON"),
           ]);
         })
         .map(() => {

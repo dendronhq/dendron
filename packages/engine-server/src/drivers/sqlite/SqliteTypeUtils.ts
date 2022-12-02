@@ -1,6 +1,4 @@
-import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
-import { SqliteError } from "./SqliteError";
 
 export function getIntegerString(value: number | undefined | null): string {
   if (value) {
@@ -25,25 +23,6 @@ export function getSQLValueString(value: string | null | undefined): string {
 
 export function getSQLBoolean(value: boolean | undefined): string {
   return value ? "1" : "0";
-}
-
-export function executeSqlWithVoidResult(
-  db: Database,
-  sql: string
-): ResultAsync<null, SqliteError> {
-  const prom = new Promise<null>((resolve, reject) => {
-    db.run(sql, (err) => {
-      if (err) {
-        reject(err.message);
-      } else {
-        resolve(null);
-      }
-    });
-  });
-
-  return ResultAsync.fromPromise(prom, (e) => {
-    return e as SqliteError;
-  });
 }
 
 export async function enableForeignKeys(db: Database) {

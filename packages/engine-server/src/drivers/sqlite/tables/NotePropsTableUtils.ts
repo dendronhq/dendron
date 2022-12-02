@@ -1,14 +1,14 @@
 import { NotePropsMeta } from "@dendronhq/common-all";
-import { ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
-import { SqliteError } from "../SqliteError";
+import { SqliteError, SqliteErrorType } from "../SqliteError";
+import { SqliteQueryUtils } from "../SqliteQueryUtils";
 import {
-  executeSqlWithVoidResult,
   getIntegerString,
   getJSONString,
   getSQLBoolean,
   getSQLValueString,
-} from "../SQLiteUtils";
+} from "../SqliteTypeUtils";
 
 export class NotePropsTableRow {
   constructor(
@@ -53,8 +53,8 @@ export class NotePropsTableUtils {
 
     const idx = `CREATE INDEX IF NOT EXISTS idx_NoteProps_fname ON NoteProps (fname)`;
 
-    return executeSqlWithVoidResult(db, sql).andThen(() => {
-      return executeSqlWithVoidResult(db, idx);
+    return SqliteQueryUtils.run(db, sql).andThen(() => {
+      return SqliteQueryUtils.run(db, idx);
     });
   }
 
@@ -62,29 +62,16 @@ export class NotePropsTableUtils {
    * Get a row by the note id
    * @param db
    * @param id
-   * @returns
+   * @returns ResultAsync containing the NotePropsTableRow if it exists,
+   * otherwise null if a row with the id doesn't exist.
    */
   public static getById(
     db: Database,
     id: string
-  ): ResultAsync<NotePropsTableRow, SqliteError> {
+  ): ResultAsync<NotePropsTableRow | null, SqliteError> {
     const sql = `SELECT * FROM NoteProps WHERE id = '${id}'`;
 
-    const prom = new Promise<NotePropsTableRow>((resolve, reject) => {
-      db.get(sql, (err, row) => {
-        if (err) {
-          reject(err.message);
-        } else if (!row) {
-          reject(new Error(`No row with id ${id} found`));
-        } else {
-          resolve(row as NotePropsTableRow);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.get(db, sql).map((row) => row ?? null);
   }
 
   /**
@@ -99,20 +86,17 @@ export class NotePropsTableUtils {
   ): ResultAsync<NotePropsTableRow[], SqliteError> {
     const sql = `SELECT * FROM NoteProps WHERE fname = '${fname}'`;
 
-    const prom = new Promise<NotePropsTableRow[]>((resolve, reject) => {
-      db.all(sql, (err, rows) => {
-        if (err) {
-          reject(err.message);
-        } else if (!rows) {
-          reject(new Error(`No rows with fname ${fname} found`));
-        } else {
-          resolve(rows as NotePropsTableRow[]);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
+    return SqliteQueryUtils.all(db, sql).andThen((rows) => {
+      if (!rows) {
+        const err: SqliteError = {
+          type: SqliteErrorType.NoResults,
+          query: sql,
+          name: SqliteErrorType.NoResults,
+          message: `No rows with fname ${fname} found`,
+        };
+        return errAsync(err);
+      }
+      return okAsync(rows as NotePropsTableRow[]);
     });
   }
 
@@ -128,21 +112,9 @@ export class NotePropsTableUtils {
       WHERE fname = '${fname}'
       AND VaultNotes.vaultId = ${vaultId}`;
 
-    const prom = new Promise<string | null>((resolve, reject) => {
-      db.get(sql, (err, row) => {
-        if (err) {
-          reject(err.message);
-        } else if (!row) {
-          resolve(null);
-        } else {
-          resolve(row.contentHash as string);
-        }
-      });
-    });
-
-    return ResultAsync.fromPromise(prom, (e) => {
-      return e as SqliteError;
-    });
+    return SqliteQueryUtils.get(db, sql).map((row) =>
+      row ? row.contentHash : null
+    );
   }
 
   /**
@@ -157,7 +129,7 @@ export class NotePropsTableUtils {
   ): ResultAsync<null, SqliteError> {
     const sql = this.getSQLInsertString(row);
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   public static delete(
@@ -167,7 +139,7 @@ export class NotePropsTableUtils {
     const sql = `DELETE FROM NoteProps
     WHERE id = '${key}'`;
 
-    return executeSqlWithVoidResult(db, sql);
+    return SqliteQueryUtils.run(db, sql);
   }
 
   private static getSQLInsertString(props: NotePropsMeta): string {

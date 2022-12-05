@@ -152,6 +152,8 @@ jobs:
         run: yarn ci:test:plugin-web
 
   test-playwright:
+    environment: plugin-development
+
     timeout-minutes: 15
 
     runs-on: ubuntu-latest

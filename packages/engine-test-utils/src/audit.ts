@@ -1,6 +1,14 @@
-import fs from "fs-extra";
 import os from "os";
-import { axios, Time, ErrorUtils } from "@dendronhq/common-all";
+import {
+  axios,
+  Time,
+  DendronError,
+  ERROR_SEVERITY,
+  ErrorUtils,
+  fromThrowable,
+  errAsync,
+} from "@dendronhq/common-all";
+import { mkDir, writeFile } from "@dendronhq/common-server";
 // @ts-ignore
 import lighthouse from "lighthouse";
 // @ts-ignore
@@ -65,7 +73,18 @@ type AuditReport = {
   };
 };
 
-async function getReport(
+const generateLighthouseReport = fromThrowable<
+  (lhr: LighthouseResult, type: ValidTypes) => any,
+  DendronError
+>(ReportGenerator.generateReport, (error) => {
+  return new DendronError({
+    message: `Cannot generate lighthouse report`,
+    severity: ERROR_SEVERITY.FATAL,
+    ...(error instanceof Error && { innerError: error }),
+  });
+});
+
+function generateReport(
   lhr: LighthouseResult,
   dir: string,
   name: string,
@@ -74,11 +93,19 @@ async function getReport(
   name = name.substring(0, name.lastIndexOf(".")) || name;
 
   if (validTypes.includes(type)) {
-    const reportBody = ReportGenerator.generateReport(lhr, type);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(`${dir}/${name}.${type}`, reportBody);
+    return mkDir(dir, { recursive: true })
+      .andThen(() => {
+        return generateLighthouseReport(lhr, type);
+      })
+      .andThen((report) => {
+        return writeFile(`${dir}/${name}.${type}`, report).map(() => report);
+      });
   } else {
-    console.log(`Invalid report type specified: ${type} Skipping Reports...)`);
+    return errAsync(
+      new DendronError({
+        message: `Invalid report type specified: ${type} Skipping Reports...)`,
+      })
+    );
   }
 }
 
@@ -114,11 +141,20 @@ async function playAudit(auditConfig: AuditConfig): Promise<AuditReport> {
   await Promise.all(
     Object.entries(reports.formats ?? {}).map(async ([key, value]) => {
       if (value) {
-        await getReport(
+        const result = await generateReport(
           median,
           reports.directory,
           reports.name,
           key as ValidTypes
+        );
+
+        result.match(
+          (_report) => {
+            // console.log(report);
+          },
+          (_error) => {
+            // console.log(error);
+          }
         );
       }
     })
@@ -138,10 +174,6 @@ async function playAudit(auditConfig: AuditConfig): Promise<AuditReport> {
     .map(([key, value]) => {
       return [key, Math.round(value.numericValue as number)] as const;
     });
-
-  if (!process.env.AIRTABLE_API_KEY || process.env.AIRTABLE_API_KEY === "") {
-    console.log("No airtable api key");
-  }
 
   if (process.env.AIRTABLE_API_KEY) {
     const headers = {

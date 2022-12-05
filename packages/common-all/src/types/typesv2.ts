@@ -107,7 +107,10 @@ export type NoteQuickInput = NoteProps & {
  * A reduced version of NoteQuickInput that only keeps the props necessary for
  * lookup quick pick items
  */
-export type NoteQuickInputV2 = Pick<NoteProps, "fname" | "vault" | "schema"> & {
+export type NoteQuickInputV2 = Pick<
+  NoteProps,
+  "fname" | "vault" | "schema" | "stub"
+> & {
   label: string;
   detail?: string;
   alwaysShow?: boolean;

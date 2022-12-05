@@ -6,7 +6,10 @@ import {
   ConfigUtils,
   DendronConfig,
   getJournalTitle,
+  NoteProps,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
@@ -57,6 +60,10 @@ export class NoteLookupCmd {
 
     await Promise.all(
       result.items.map(async (value) => {
+        let newNote: NoteProps | undefined;
+        if (value.stub) {
+          newNote = this.prepareStubItem(value);
+        }
         if (value.label === "Create New") {
           isNew = true;
           let title;
@@ -66,7 +73,7 @@ export class NoteLookupCmd {
             ).dateFormat;
             title = getJournalTitle(value.fname, journalDateFormat);
           }
-          const newNote = NoteUtils.create({
+          newNote = NoteUtils.create({
             fname: value.fname,
             vault: value.vault,
             title,
@@ -93,6 +100,8 @@ export class NoteLookupCmd {
           //   },
           // });
           // note = _.merge(newNote, overrides || {});
+        }
+        if (newNote) {
           const res = await this.engine.writeNote(newNote);
 
           if (res.error) {
@@ -116,5 +125,10 @@ export class NoteLookupCmd {
     );
 
     this._analytics.track(VSCodeEvents.NoteLookup_Accept, { isNew });
+  }
+
+  prepareStubItem(value: NoteQuickInputV2) {
+    const props = _.omit(value, "label", "detail", "alwaysShow", "stub");
+    return props as NoteProps;
   }
 }

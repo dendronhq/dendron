@@ -67,7 +67,6 @@ export class VaultQuickPick {
     vaults: DVault[];
     fname: string;
   }): Promise<VaultPickerItem[]> {
-    // TODO: Filter out any vaults where a note with that fname already exists.
     let vaultSuggestions: VaultPickerItem[] = [];
 
     // Only 1 vault, no other options to choose from:
@@ -172,14 +171,22 @@ export class VaultQuickPick {
       allVaults = _.filter(allVaults, (v) => {
         return !_.isEqual(v, vault);
       });
-      // TODO: this isn't right. Sometimes vaultSuggestion already has
-      // the value that we are trying to push. This leads to duplicate entries
       allVaults.forEach((wsVault) => {
         vaultSuggestions.push({
           vault: wsVault,
           label: VaultUtils.getName(wsVault),
         });
       });
+    }
+    // Filter out any vaults where a note with that fname already exists.
+    const vaultsWithMatchingFile = new Set(
+      (await this._engine.findNotesMeta({ fname })).map((n) => n.vault.fsPath)
+    );
+    if (vaultsWithMatchingFile.size > 0) {
+      // Available vaults are vaults that do not have the desired file name.
+      vaultSuggestions = vaultSuggestions.filter(
+        (v) => !vaultsWithMatchingFile.has(v.vault.fsPath)
+      );
     }
 
     return vaultSuggestions;

@@ -160,7 +160,7 @@ export class HierarchyTableUtils {
       `    h.parentId,`,
       `    h.childId,`,
       `    1,`, // root note depth. starting from 1
-      `    32,`, // arbitrarily set maximum hierarchy depth. we can extend this support the worst case by setting it to (SELECT COUNT(*) FROM "Hierarchy")
+      `    32`, // arbitrarily set maximum hierarchy depth. we can extend this support the worst case by setting it to (SELECT COUNT(*) FROM "Hierarchy")
       `  FROM "Hierarchy" h`,
       `  WHERE h.parentId = "${nodeId}"`,
       // UNION ALL assuming we don't have dupes in the hierarchy table.

@@ -756,9 +756,9 @@ function processReplacedStubs(
       WITH T(oldId, newId) AS
       (VALUES ${values})
       UPDATE Hierarchy
-      SET parent = T.newId
+      SET parentId = T.newId
       FROM T
-      WHERE T.oldId = Hierarchy.parent`;
+      WHERE T.oldId = Hierarchy.parentId`;
 
     return SqliteQueryUtils.run(db, sql2, logger).andThen(() => {
       const values = replacedStubs.map((d) => `('${d.stubId}')`).join(",");

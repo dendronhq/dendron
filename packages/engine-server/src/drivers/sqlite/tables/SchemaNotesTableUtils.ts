@@ -51,6 +51,11 @@ export class SchemaNotesTableUtils {
     });
   }
 
+  static truncate(db: Database): ResultAsync<null, SqliteError> {
+    const sql = `DELETE FROM SchemaNotes`;
+    return SqliteQueryUtils.run(db, sql);
+  }
+
   static getByNoteId(db: Database, key: string) {
     const sql = [
       `SELECT *`,

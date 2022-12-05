@@ -43,7 +43,7 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
    * Goes through all domains and recursively apply schemas.
    */
   async initSchema(fileStore: IFileStore, wsRoot: string, logger: DLogger) {
-    // this whole thing to parseAllNoteFilesForSqlite / SqliteDbFactory
+    // TODO: move this whole thing to parseAllNoteFilesForSqlite / SqliteDbFactory
     const schemaResult = await SqliteDbFactory.initSchema(
       this._vaults,
       wsRoot,
@@ -71,21 +71,27 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
           throw rootNoteResp.error;
         } else {
           const domainIds = rootNoteResp.data.children;
-          const allNoteIdsInDomains = _.flatten(
-            await Promise.all(
-              domainIds.map(async (domainId) => {
-                const getAllInDomainResult =
-                  await HierarchyTableUtils.getAllInDomain(this._db, domainId);
-                if (getAllInDomainResult.isErr()) {
-                  throw getAllInDomainResult.error;
-                }
-                const allInDomainRows = getAllInDomainResult.value;
-                return [domainId].concat(
-                  allInDomainRows.map((row) => {
-                    return row.child;
-                  })
-                );
-              })
+          const allNoteIdsInDomains = _.uniq(
+            _.flatten(
+              await Promise.all(
+                domainIds.map(async (domainId) => {
+                  const getAllInDomainResult =
+                    await HierarchyTableUtils.getAllDescendants(
+                      this._db,
+                      domainId,
+                      logger
+                    );
+                  if (getAllInDomainResult.isErr()) {
+                    throw getAllInDomainResult.error;
+                  }
+                  const allInDomainRows = getAllInDomainResult.value;
+                  return [domainId].concat(
+                    allInDomainRows.map((row) => {
+                      return row.childId;
+                    })
+                  );
+                })
+              )
             )
           );
           // this is too expensive
@@ -109,13 +115,17 @@ export class SqliteMetadataStore implements IDataStore<string, NotePropsMeta> {
             return note.schema !== undefined;
           });
 
+          // we wipe out note -> schema mapping (SchemaNotes table) since this changes every session
+          // because of automatically generated schemas
+          await SchemaNotesTableUtils.truncate(this._db);
+
           // do we actually need to filter it here?
           // is INSERT OR IGNORE more expensive than a filter?
           await Promise.all(
             notesWithSchema.map(async (note) => {
               await SchemaNotesTableUtils.insert(this._db, {
                 noteId: note.id,
-                ...note.schema!, // TODO:
+                ...note.schema!,
               });
             })
           );

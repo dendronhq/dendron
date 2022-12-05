@@ -53,7 +53,6 @@ export type LookupControllerCreateOpts = QuickPickOptions & {
    *  Defaults to true. */
   vaultSelectCanToggle?: boolean;
   vaultSelectionMode?: VaultSelectionMode;
-  nodeType?: "note" | "schema";
   //default true
   allowCreateNew?: boolean;
 };
@@ -98,16 +97,11 @@ export class LookupController {
     if (!initialValue) {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
-    const qp = this.createQuickPick({
-      title: opts.title || "Lookup Note",
-      buttons: opts.buttons,
-      provider: opts.provider,
+    opts = _.defaults(opts, {
       initialValue,
-      noteType: opts.noteType,
-      vaultButtonPressed: opts.vaultButtonPressed,
-      disableVaultSelection: opts.disableVaultSelection,
-      allowCreateNew: opts.allowCreateNew,
+      title: "Lookup Note",
     });
+    const qp = this.createQuickPick(opts);
     this._disposables.push(
       new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
     );

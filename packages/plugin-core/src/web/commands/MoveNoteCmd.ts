@@ -22,13 +22,16 @@ import { MultiSelectBtn } from "../../components/lookup/buttons";
 import { DENDRON_COMMANDS } from "../../constants";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
 import {
+  LookupAcceptPayload,
   LookupController,
   LookupControllerCreateOpts,
 } from "./lookup/LookupController";
 import { VaultQuickPick } from "./lookup/VaultQuickPick";
 import { Utils } from "vscode-uri";
+import { ProceedCancel, QuickPickUtils } from "./lookup/QuickPickUtils";
+import path from "path";
 
-//const md = _md();
+const md = _md();
 
 export type CommandOutput = {
   changed: NoteChangeEntry[];
@@ -58,10 +61,9 @@ export class MoveNoteCmd {
     @inject("wsRoot") private wsRoot: URI
   ) {}
 
-  async run() {
+  async run(): Promise<{ changed: NoteChangeEntry[] }> {
     const moveNoteOpts: LookupControllerCreateOpts = {
       provider: this.provider,
-      nodeType: "note",
       disableVaultSelection: false,
       vaultSelectCanToggle: false,
       buttons: [MultiSelectBtn.create({ pressed: false })],
@@ -70,39 +72,35 @@ export class MoveNoteCmd {
       canPickMany: true,
     };
     const data = await this.controller.showLookup(moveNoteOpts);
-    if (!data?.items) return "no items selected";
+    if (!data?.items) {
+      window.showWarningMessage(
+        "Move note cancelled. No note selected to move."
+      );
+      return { changed: [] };
+    }
 
-    //const move = getDesiredMoves(data);
     const vaultPicker = new VaultQuickPick(this.engine);
     const vaultSuggestions = await vaultPicker.getVaultRecommendations({
       vault: data.items[0].vault,
       vaults: this.vaults,
       fname: data.items[0].fname,
     });
-    const newLocation = await vaultPicker.promptVault(vaultSuggestions);
-    if (!newLocation) return "no vault selected";
-    const moves: RenameNoteOpts[] = [
-      {
-        oldLoc: {
-          fname: data.items[0].fname,
-          vaultName: VaultUtils.getName(data.items[0].vault),
-        },
-        newLoc: {
-          fname: data.items[0].fname,
-          vaultName: VaultUtils.getName(newLocation),
-        },
-      },
-    ];
+    const newVault = await vaultPicker.promptVault(vaultSuggestions);
+    if (!newVault) {
+      window.showErrorMessage("Move note cancelled. No vault selected");
+      return { changed: [] };
+    }
+    const moves = getDesiredMoves(data, newVault);
 
-    // if (isMultiMove(opts.moves)) {
-    //   await this.showMultiMovePreview(opts.moves);
-    //   const result = await QuickPickUtils.showProceedCancel();
+    if (isMultiMove(moves)) {
+      await this.showMultiMovePreview(moves);
+      const result = await QuickPickUtils.showProceedCancel();
 
-    //   if (result !== ProceedCancel.PROCEED) {
-    //     window.showInformationMessage("cancelled");
-    //     return { changed: [] };
-    //   }
-    // }
+      if (result !== ProceedCancel.PROCEED) {
+        window.showInformationMessage("cancelled");
+        return { changed: [] };
+      }
+    }
 
     const changed = await window.withProgress(
       {
@@ -116,11 +114,10 @@ export class MoveNoteCmd {
       }
     );
 
-    if (isMultiMove(moves)) {
-      // During bulk move we will only open a single file that was moved to avoid
-      // cluttering user tabs with all moved files.
-      await closeCurrentFileOpenMovedFile(this.wsRoot, moves[0], this.vaults);
-    }
+    // During bulk move we will only open a single file that was moved to avoid
+    // cluttering user tabs with all moved files.
+    await closeCurrentFileOpenMovedFile(this.wsRoot, moves[0], this.vaults);
+
     return { changed };
   }
 
@@ -137,65 +134,68 @@ export class MoveNoteCmd {
       // We need to wait for a rename to finish before triggering another rename
       // eslint-disable-next-line no-await-in-loop
       const changes = await engine.renameNote(move);
-
-      allChanges.push(...(changes.data as NoteChangeEntry[]));
+      if (changes.error) {
+        window.showErrorMessage(changes.error.message);
+      } else {
+        allChanges.push(...(changes.data as NoteChangeEntry[]));
+      }
     }
 
     return allChanges;
   }
 
-  // private async showMultiMovePreview(moves: RenameNoteOpts[]) {
-  //   // All the moves when doing bulk-move will have the same destination vault.
-  //   const destVault = moves[0].newLoc.vaultName;
+  private async showMultiMovePreview(moves: RenameNoteOpts[]) {
+    // All the moves when doing bulk-move will have the same destination vault.
+    const destVault = moves[0].newLoc.vaultName;
 
-  //   const contentLines = [
-  //     "# Move notes preview",
-  //     "",
-  //     `## The following files will be moved to vault: ${destVault}`,
-  //   ];
+    const contentLines = [
+      "# Move notes preview",
+      "",
+      `## The following files will be moved to vault: ${destVault}`,
+    ];
 
-  //   const necessaryMoves = moves.filter((m) => isMoveNecessary(m));
-  //   const movesBySourceVaultName = _.groupBy(
-  //     necessaryMoves,
-  //     "oldLoc.vaultName"
-  //   );
+    const necessaryMoves = moves.filter((m) => isMoveNecessary(m));
+    const movesBySourceVaultName = _.groupBy(
+      necessaryMoves,
+      "oldLoc.vaultName"
+    );
 
-  //   function formatRowFileName(move: RenameNoteOpts) {
-  //     return `| ${path.basename(move.oldLoc.fname)} |`;
-  //   }
+    function formatRowFileName(move: RenameNoteOpts) {
+      return `| ${path.basename(move.oldLoc.fname)} |`;
+    }
 
-  //   _.forEach(
-  //     movesBySourceVaultName,
-  //     (moves: RenameNoteOpts[], sourceVault: string) => {
-  //       contentLines.push(`| From vault: ${sourceVault} to ${destVault} |`);
-  //       contentLines.push(`|------------------------|`);
-  //       moves.forEach((move) => {
-  //         contentLines.push(formatRowFileName(move));
-  //       });
-  //       contentLines.push("---");
-  //     }
-  //   );
+    _.forEach(
+      movesBySourceVaultName,
+      (moves: RenameNoteOpts[], sourceVault: string) => {
+        contentLines.push(`| From vault: ${sourceVault} to ${destVault} |`);
+        contentLines.push(`|------------------------|`);
+        moves.forEach((move) => {
+          contentLines.push(formatRowFileName(move));
+        });
+        contentLines.push("---");
+      }
+    );
 
-  //   // When we are doing multi select move we don't support renaming file name
-  //   // functionality hence the files that do not require a move must have
-  //   // been attempted to be moved into the vault that they are already are.
-  //   const sameVaultMoves = moves.filter((m) => !isMoveNecessary(m));
-  //   if (sameVaultMoves.length) {
-  //     contentLines.push(`|The following are already in vault: ${destVault}|`);
-  //     contentLines.push(`|-----------------------------------------------|`);
-  //     sameVaultMoves.forEach((m) => {
-  //       contentLines.push(formatRowFileName(m));
-  //     });
-  //   }
+    // When we are doing multi select move we don't support renaming file name
+    // functionality hence the files that do not require a move must have
+    // been attempted to be moved into the vault that they are already are.
+    const sameVaultMoves = moves.filter((m) => !isMoveNecessary(m));
+    if (sameVaultMoves.length) {
+      contentLines.push(`|The following are already in vault: ${destVault}|`);
+      contentLines.push(`|-----------------------------------------------|`);
+      sameVaultMoves.forEach((m) => {
+        contentLines.push(formatRowFileName(m));
+      });
+    }
 
-  //   const panel = window.createWebviewPanel(
-  //     "noteMovePreview", // Identifies the type of the webview. Used internally
-  //     "Move Notes Preview", // Title of the panel displayed to the user
-  //     ViewColumn.One, // Editor column to show the new webview panel in.
-  //     {} // Webview options. More on these later.
-  //   );
-  //   panel.webview.html = md.render(contentLines.join("\n"));
-  // }
+    const panel = window.createWebviewPanel(
+      "noteMovePreview", // Identifies the type of the webview. Used internally
+      "Move Notes Preview", // Title of the panel displayed to the user
+      ViewColumn.One, // Editor column to show the new webview panel in.
+      {} // Webview options. More on these later.
+    );
+    panel.webview.html = md.render(contentLines.join("\n"));
+  }
 }
 
 async function closeCurrentFileOpenMovedFile(
@@ -240,52 +240,23 @@ async function openFileInEditor(
   return editor;
 }
 
-// async function oldNewLocationHook(data: LookupAcceptPayload) {
-//   // setup vars
-//   const oldVault = PickerUtilsV2.getVaultForOpenEditor();
-//   const newVault = quickpick.vault ? quickpick.vault : oldVault;
-//   const engine = ExtensionProvider.getEngine();
+function getDesiredMoves(
+  data: LookupAcceptPayload,
+  newLocation: DVault
+): RenameNoteOpts[] {
+  const newVaultName = VaultUtils.getName(newLocation);
 
-//   // get old note
-//   const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-//   const oldUri: Uri = editor.document.uri;
-//   const oldFname = DNodeUtils.fname(oldUri.fsPath);
-
-//   const selectedItem = selectedItems[0];
-//   const fname = PickerUtilsV2.isCreateNewNotePickedForSingle(selectedItem)
-//     ? quickpick.value
-//     : selectedItem.fname;
-
-//   // get new note
-//   const newNote = (await engine.findNotesMeta({ fname, vault: newVault }))[0];
-//   const isStub = newNote?.stub;
-//   if (newNote && !isStub) {
-//     const vaultName = VaultUtils.getName(newVault);
-//     const errMsg = `${vaultName}/${quickpick.value} exists`;
-//     window.showErrorMessage(errMsg);
-//     return {
-//       error: new DendronError({ message: errMsg }),
-//     };
-//   }
-//   const data: RenameNoteOpts = {
-//     oldLoc: {
-//       fname: oldFname,
-//       vaultName: VaultUtils.getName(oldVault),
-//     },
-//     newLoc: {
-//       fname: quickpick.value,
-//       vaultName: VaultUtils.getName(newVault),
-//     },
-//   };
-//   return { data, error: null };
-// }
-
-// async function getDesiredMoves(data: LookupAcceptPayload) {
-//   if (data.items.length === 1) {
-//     return "";
-//   } else if (data.items.length > 1) {
-//     return "";
-//   } else {
-//     return "no items selected";
-//   }
-// }
+  return data.items.map((item) => {
+    const renameOpt: RenameNoteOpts = {
+      oldLoc: {
+        fname: item.fname,
+        vaultName: VaultUtils.getName(item.vault),
+      },
+      newLoc: {
+        fname: item.fname,
+        vaultName: newVaultName,
+      },
+    };
+    return renameOpt;
+  });
+}

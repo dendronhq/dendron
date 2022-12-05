@@ -40,7 +40,6 @@ import { SqliteError } from "../sqlite/SqliteError";
 import { SqliteQueryUtils } from "../sqlite/SqliteQueryUtils";
 import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTableUtils";
 import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTableUtils";
-import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
 
 /**
  * Given the files in a particular vault, process all of them to update the
@@ -534,13 +533,15 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
     new VaultNotesTableRow(vaultIdResp.value, note.id)
   );
 
-  if (note.schema) {
-    await SchemaNotesTableUtils.insert(db, {
-      noteId: note.id,
-      moduleId: note.schema.moduleId,
-      schemaId: note.schema.schemaId,
-    });
-  }
+  // at this point we don't have schema yet.
+  // TODO: enable this once we move schema init logic
+  // if (note.schema) {
+  //   await SchemaNotesTableUtils.insert(db, {
+  //     noteId: note.id,
+  //     moduleId: note.schema.moduleId,
+  //     schemaId: note.schema.schemaId,
+  //   });
+  // }
 }
 
 function processParentLinks(

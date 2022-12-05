@@ -85,6 +85,12 @@ export class MoveNoteCmd {
       vaults: this.vaults,
       fname: data.items[0].fname,
     });
+    if (vaultSuggestions.length === 0) {
+      window.showErrorMessage(
+        `No available vaults for moving note. Each vault already has a note with filename ${data.items[0].fname}`
+      );
+      return { changed: [] };
+    }
     const newVault = await vaultPicker.promptVault(vaultSuggestions);
     if (!newVault) {
       window.showErrorMessage("Move note cancelled. No vault selected");

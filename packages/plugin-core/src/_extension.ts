@@ -156,6 +156,12 @@ export async function _activate(
     workspaceFolders: workspaceFolders?.map((fd) => fd.uri.fsPath),
   });
 
+  // Config service instantiation as early as possible
+  ConfigService.instance({
+    homeDir: URI.file(os.homedir()),
+    fileStore: new NodeJSFileStore(),
+  });
+
   // At this point, the segment client has not been created yet.
   // We need to check here if the uuid has been set for future references
   // because the Segment client constructor will go ahead and create one if it doesn't exist.
@@ -314,10 +320,6 @@ export async function _activate(
       if (!maybeWsRoot) {
         return false;
       }
-      ConfigService.instance({
-        homeDir: URI.file(os.homedir()),
-        fileStore: new NodeJSFileStore(),
-      });
       const resp = await activator.init({
         ext: ws,
         context,

@@ -54,12 +54,6 @@ export type DendronDevConfig = {
    * False (Default) -> Continue to use engine v3 as backend
    */
   enableEngineV3?: boolean;
-
-  /**
-   * Uses SQLite as the metadata engine (the non-Prisma version). enableEngineV3
-   * must also be set to true for this to work.
-   */
-  useSqlite?: boolean;
   /**
    * Feature flag to enable note references
    */

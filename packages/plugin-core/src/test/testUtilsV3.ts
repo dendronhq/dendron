@@ -484,11 +484,6 @@ export const stubVaultInput = (opts: {
   return;
 };
 
-export function runTestCaseButSkipForWindows() {
-  const runTest = os.platform() === "win32" ? test.skip : test;
-  return runTest;
-}
-
 export function runTestButSkipForWindows() {
   const runTest = os.platform() === "win32" ? describe.skip : describe;
   return runTest;

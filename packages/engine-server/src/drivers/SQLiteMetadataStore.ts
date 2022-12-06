@@ -33,7 +33,6 @@ export type NoteIndexLightProps = {
   foo: string;
 };
 
-// This version of SQLiteMetadataStore is Prisma Based
 export class SQLiteMetadataStore implements IDataStore<string, NotePropsMeta> {
   public status: "loading" | "ready";
 

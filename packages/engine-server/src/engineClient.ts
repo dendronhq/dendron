@@ -56,7 +56,7 @@ import _ from "lodash";
 import {
   NoteIndexLightProps,
   SQLiteMetadataStore,
-} from "./drivers/PrismaSQLiteMetadataStore";
+} from "./drivers/SQLiteMetadataStore";
 import { HistoryService } from "./history";
 import { EngineUtils } from "./utils";
 
@@ -167,13 +167,7 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
       };
     }
     if (!resp.data) {
-      // TODO SQLite - sqlite impl doesn't return data from init; eventually no
-      // implementations should. To converge later
-      if (this._config.dev?.useSqlite) {
-        return {} as DEngineInitResp;
-      } else {
-        throw new DendronError({ message: "no data" });
-      }
+      throw new DendronError({ message: "no data" });
     }
     const { notes, config } = resp.data;
     this._config = config;
@@ -328,7 +322,6 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
     let noteProps: NoteProps[];
     const config = DConfig.readConfigSync(this.wsRoot);
-
     if (config.workspace.metadataStore === "sqlite") {
       try {
         const resp = await SQLiteMetadataStore.search(qs);

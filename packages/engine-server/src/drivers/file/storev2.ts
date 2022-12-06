@@ -73,7 +73,7 @@ import { NotesFileSystemCache } from "../../cache";
 import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { InMemoryNoteCache } from "../../util/inMemoryNoteCache";
 import { EngineUtils } from "../../utils";
-import { SQLiteMetadataStore } from "../PrismaSQLiteMetadataStore";
+import { SQLiteMetadataStore } from "../SQLiteMetadataStore";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
 

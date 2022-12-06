@@ -348,7 +348,7 @@ export function processSidebar(
 
   return sidebarResult
     .andThen((sidebar) => Result.combine(sidebar.map(safeProcessItem)))
-    .map((x: any) => x.flat());
+    .map((x) => x.flat());
 }
 
 export function parseSidebarConfig(
@@ -388,7 +388,6 @@ export function parseSidebarConfig(
           );
       }
     });
-    // @ts-ignore
     return Result.combine(resultList);
   }
 

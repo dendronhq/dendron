@@ -29,7 +29,6 @@ export type CreateNoteOptsV4 = {
   fname: string;
   body?: string;
   props?: Partial<Omit<NoteProps, "vault" | "fname" | "body" | "custom">>;
-  id?: string;
   genRandomId?: boolean;
   noWrite?: boolean;
   custom?: any;
@@ -158,16 +157,10 @@ export class NoteTestUtilsV4 {
     /**
      * Make sure snapshots stay consistent
      */
-    let id = opts.id;
-
-    if (!id) {
-      id = genRandomId ? genUUID() : fname;
-    }
-
     const defaultOpts = {
       created: 1,
       updated: 1,
-      id,
+      id: genRandomId ? genUUID() : fname,
     };
 
     const note = NoteUtils.create({
@@ -179,7 +172,6 @@ export class NoteTestUtilsV4 {
       body,
       stub,
     });
-
     if (!noWrite && !stub) {
       await note2File({ note, vault, wsRoot });
     }

@@ -7,7 +7,8 @@ import { DVault } from "../types/DVault";
 import { genHash } from "../utils";
 
 /**
- * Convert a string to a set of NoteProps
+ * NOTE: Temporarily duplicated from common-server/filesv2.ts to get Dendron Web
+ * Extension working
  * @param calculateHash - when set, add `contentHash` property to the note
  *  Default: false
  * @returns

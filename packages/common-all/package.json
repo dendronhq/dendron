@@ -46,7 +46,7 @@
     "luxon": "^1.25.0",
     "minimatch": "5.1.0",
     "nanoid": "^3.1.23",
-    "neverthrow": "^5.1.0",
+    "neverthrow": "^5.0.0",
     "normalize-path": "^3.0.0",
     "qs": "^6.10.1",
     "semver": "^7.3.2",

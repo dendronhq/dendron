@@ -4,14 +4,13 @@ module.exports = {
     browser: true,
     es6: true,
     jest: true,
-    jasmine: true,
   },
   extends: [
     "plugin:react/recommended",
     "airbnb",
     "airbnb/hooks",
     "prettier",
-    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
   ],
   globals: {
     Atomics: "readonly",
@@ -21,7 +20,7 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     // tsconfigRootDir: __dirname,
-    // project: ["./tsconfig.json"], // diabled because we run into OOM. see https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-1153418862 for why
+    // project: ["./tsconfig.json"], // diabled because we run into OOM. see https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-1153418862 for why 
   },
   plugins: ["@typescript-eslint", "jest"],
   rules: {
@@ -117,8 +116,8 @@ module.exports = {
         ],
       },
     ],
-    "react/require-default-props": "off", // sometimes the default value is undefined so that's fine..."
-    "react/no-array-index-key": "off", // sometimes you don't care about the issues or they don't apply
+    'react/require-default-props': 'off', // sometimes the default value is undefined so that's fine..."
+    'react/no-array-index-key': 'off', // sometimes you don't care about the issues or they don't apply
     // used for redux toolkit
     "no-param-reassign": "off",
     "max-classes-per-file": "off",
@@ -132,7 +131,5 @@ module.exports = {
     "prettier/prettier": "off",
     "import/no-unresolved": "off",
     "import/extensions": "off",
-    "no-empty-function": "off",
-    "no-useless-constructor": "off",
   },
 };

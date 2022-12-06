@@ -81,7 +81,7 @@ type AuditConfig = {
   reports?: Partial<Reports>;
   formFactor: "desktop" | "mobile";
   disableLogs?: boolean;
-  filePath: string | FilePathsMap;
+  filePath?: string | FilePathsMap;
 };
 
 type Audit = {

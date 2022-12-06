@@ -1,4 +1,5 @@
 import os from "os";
+import _ from "lodash";
 import {
   axios,
   Time,
@@ -10,7 +11,7 @@ import {
   okAsync,
   AxiosError,
 } from "@dendronhq/common-all";
-import { mkDir, writeFile } from "@dendronhq/common-server";
+import { mkDir, writeFile, GitUtils } from "@dendronhq/common-server";
 // @ts-ignore
 import sizeLimit from "size-limit";
 // @ts-ignore
@@ -88,6 +89,7 @@ type Audit = {
   commitHash: string | undefined;
   githubRef: string | undefined;
   os: string;
+  pkgPath: string;
   vital: {
     [key in VitalsMetrics]?: {
       value: number | string;
@@ -258,6 +260,7 @@ async function playAudit(auditConfig: AuditConfig) {
   const port = auditConfig.port;
   const runs = auditConfig.runs ?? 5;
   const reports = { ...defaultReports, ...auditConfig.reports };
+  const gitRootPath = await GitUtils.getGitRoot("");
   const filePathsMap =
     typeof auditConfig.filePath === "string"
       ? { [auditConfig.filePath]: [auditConfig.filePath] }
@@ -297,6 +300,7 @@ async function playAudit(auditConfig: AuditConfig) {
         commitHash: process.env.GITHUB_SHA,
         githubRef: process.env.GITHUB_REF,
         os: os.platform(),
+        pkgPath: process.cwd().replace(gitRootPath ?? "", ""),
         vital,
         size,
       };

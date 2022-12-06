@@ -22,7 +22,7 @@ export class VaultUtilsV2 {
     if (vault.seed) {
       return ["seeds", vault.seed, vault.fsPath];
     }
-    return vault.fsPath;
+    return [vault.fsPath];
   }
 
   // TODO: Add Tests

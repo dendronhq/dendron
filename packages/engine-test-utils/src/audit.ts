@@ -1,5 +1,6 @@
 import os from "os";
 import _ from "lodash";
+import path from "path";
 import {
   axios,
   Time,
@@ -11,7 +12,7 @@ import {
   okAsync,
   AxiosError,
 } from "@dendronhq/common-all";
-import { mkDir, writeFile, GitUtils } from "@dendronhq/common-server";
+import { readJson, mkDir, writeFile, GitUtils } from "@dendronhq/common-server";
 // @ts-ignore
 import sizeLimit from "size-limit";
 // @ts-ignore
@@ -127,6 +128,30 @@ const computeMedianRun = fromThrowable<
     ...(error instanceof Error && { innerError: error }),
   });
 });
+
+function getNextJsFilePaths() {
+  const nextjsPath = `${process.cwd()}/.next`;
+  return readJson(`${nextjsPath}/build-manifest.json`).map((anyJson) => {
+    const filePathsMap =
+      anyJson && typeof anyJson === "object" && "pages" in anyJson
+        ? (anyJson.pages as FilePathsMap)
+        : {};
+    const result: FilePathsMap = Object.fromEntries(
+      Object.entries(filePathsMap).map(([name, paths]) => {
+        return [
+          name,
+          paths
+            .filter((p) => {
+              const extName = path.extname(p);
+              return extName === ".js";
+            })
+            .map((p) => `${nextjsPath}/${p}`),
+        ];
+      })
+    );
+    return result;
+  });
+}
 
 function generateReport(
   lhr: LighthouseResult,
@@ -261,10 +286,12 @@ async function playAudit(auditConfig: AuditConfig) {
   const runs = auditConfig.runs ?? 5;
   const reports = { ...defaultReports, ...auditConfig.reports };
   const gitRootPath = await GitUtils.getGitRoot("");
-  const filePathsMap =
-    typeof auditConfig.filePath === "string"
+  const filePathsMap = {
+    ...(await getNextJsFilePaths().unwrapOr({})),
+    ...(typeof auditConfig.filePath === "string"
       ? { [auditConfig.filePath]: [auditConfig.filePath] }
-      : auditConfig.filePath;
+      : auditConfig.filePath),
+  };
 
   const lighthouseResult = await computeVitals(
     url,
@@ -273,6 +300,7 @@ async function playAudit(auditConfig: AuditConfig) {
     auditConfig,
     log
   );
+
   const result = await lighthouseResult
     .asyncAndThen((medianLhr) => {
       return generateReports(medianLhr, reports).map(() => medianLhr);

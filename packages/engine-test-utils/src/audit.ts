@@ -286,6 +286,7 @@ async function playAudit(auditConfig: AuditConfig) {
   const runs = auditConfig.runs ?? 5;
   const reports = { ...defaultReports, ...auditConfig.reports };
   const gitRootPath = await GitUtils.getGitRoot("");
+  const pkgPath = process.cwd().replace(gitRootPath ?? "", "");
   const filePathsMap = {
     ...(await getNextJsFilePaths().unwrapOr({})),
     ...(typeof auditConfig.filePath === "string"
@@ -323,12 +324,12 @@ async function playAudit(auditConfig: AuditConfig) {
           })
       );
       const audit: Audit = {
-        name: reports.name,
+        name: new Date().toISOString().replace(/:/g, "_"),
         date: Time.now().toLocaleString(),
         commitHash: process.env.GITHUB_SHA,
         githubRef: process.env.GITHUB_REF,
         os: os.platform(),
-        pkgPath: process.cwd().replace(gitRootPath ?? "", ""),
+        pkgPath,
         vital,
         size,
       };

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.119.0 (2022-12-06)
+
+
+### Bug Fixes
+
+* preview not rendering ([208c9eb](https://github.com/dendronhq/dendron/commit/208c9eb74da28a180535603bd9ff54feb932e2ed))
+
+
+
+
+
 # 0.118.0 (2022-11-22)
 
 

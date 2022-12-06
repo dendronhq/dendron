@@ -18,7 +18,7 @@ import filePlugin from "@size-limit/file";
 // @ts-ignore
 import webpackPlugin from "@size-limit/webpack";
 // @ts-ignore
-// import timePlugin from "@size-limit/time";
+import timePlugin from "@size-limit/time";
 // @ts-ignore
 import lighthouse from "lighthouse";
 // @ts-ignore
@@ -31,7 +31,7 @@ import lighthouseMobileConfig from "lighthouse/lighthouse-core/config/lr-mobile-
 import ReportGenerator from "lighthouse/report/generator/report-generator";
 import type { RunnerResult, Flags } from "lighthouse/types/externs";
 
-const sizeMetrics = ["size"] as const;
+const sizeMetrics = ["size", "time", "runTime", "loadTime"] as const;
 const vitalsMetrics = [
   // core web vitals
   "cumulative-layout-shift",
@@ -174,7 +174,7 @@ function computeSizes(filePathsMap: FilePathsMap) {
       { [key in SizeMetrics]?: number }[],
       DendronError
     >(
-      sizeLimit([filePlugin, webpackPlugin /*timePlugin*/], filePaths),
+      sizeLimit([filePlugin, webpackPlugin, timePlugin], filePaths),
       (error: unknown) => {
         return new DendronError({
           message: `Unable to measure sizes`,
@@ -188,6 +188,18 @@ function computeSizes(filePathsMap: FilePathsMap) {
           size: {
             value: result.size,
             unit: "byte",
+          },
+          time: {
+            value: result.time,
+            unit: "millisecond",
+          },
+          runTime: {
+            value: result.runTime,
+            unit: "millisecond",
+          },
+          loadTime: {
+            value: result.loadTime,
+            unit: "millisecond",
           },
         },
       } as Audit["size"];
@@ -242,7 +254,6 @@ async function computeVitals(
 
 async function playAudit(auditConfig: AuditConfig) {
   const log = auditConfig.disableLogs ? () => {} : console.log; // eslint-disable-line no-console
-
   const url = auditConfig.url;
   const port = auditConfig.port;
   const runs = auditConfig.runs ?? 5;
@@ -280,7 +291,6 @@ async function playAudit(auditConfig: AuditConfig) {
             ] as const;
           })
       );
-
       const audit: Audit = {
         name: reports.name,
         date: Time.now().toLocaleString(),
@@ -298,7 +308,6 @@ async function playAudit(auditConfig: AuditConfig) {
           Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
           "Content-Type": "application/json",
         };
-
         const { vital, size, ...rest } = audit;
         const report = {
           records: [
@@ -311,9 +320,7 @@ async function playAudit(auditConfig: AuditConfig) {
             },
           ],
         };
-
         log("Sending report..", report);
-
         return ResultAsync.fromPromise(
           axios.post(
             `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/WebPerformanceData`,

@@ -33,7 +33,8 @@ import lighthouseMobileConfig from "lighthouse/lighthouse-core/config/lr-mobile-
 import ReportGenerator from "lighthouse/report/generator/report-generator";
 import type { RunnerResult, Flags } from "lighthouse/types/externs";
 
-const sizeMetrics = ["size", "time", "runTime", "loadTime"] as const;
+const sizeMetrics = ["size"] as const;
+const timeMetrics = ["time", "runTime", "loadTime"] as const;
 const vitalsMetrics = [
   // core web vitals
   "cumulative-layout-shift",
@@ -44,6 +45,7 @@ const vitalsMetrics = [
   "speed-index",
   "interactive",
 ] as const;
+type TimeMetrics = typeof timeMetrics[number];
 type SizeMetrics = typeof sizeMetrics[number];
 type VitalsMetrics = typeof vitalsMetrics[number];
 
@@ -100,7 +102,7 @@ type Audit = {
   };
   size: {
     [name: string]: {
-      [key in SizeMetrics]?: {
+      [key in SizeMetrics | TimeMetrics]?: {
         value: number | string;
         unit: string | undefined;
         description: string | undefined;
@@ -200,7 +202,7 @@ function generateReports(medianLhr: LighthouseResult, reports: Reports) {
 function computeSizes(filePathsMap: FilePathsMap) {
   const resultList = Object.entries(filePathsMap).map(([name, filePaths]) => {
     return ResultAsync.fromPromise<
-      { [key in SizeMetrics]?: number }[],
+      { [key in SizeMetrics | TimeMetrics]?: number }[],
       DendronError
     >(
       sizeLimit([filePlugin, webpackPlugin, timePlugin], filePaths),
@@ -244,11 +246,19 @@ function computeSizes(filePathsMap: FilePathsMap) {
             },
           }),
         },
-      } as Audit["size"];
+      };
     });
   });
   return ResultAsync.combine(resultList) as ResultAsync<
-    Audit["size"],
+    {
+      [name: string]: {
+        [key in SizeMetrics | TimeMetrics]?: {
+          value: number | string;
+          unit: string | undefined;
+          description: string | undefined;
+        };
+      };
+    },
     DendronError
   >;
 }

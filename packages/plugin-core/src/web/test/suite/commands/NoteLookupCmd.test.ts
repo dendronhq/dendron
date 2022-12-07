@@ -14,17 +14,15 @@ import {
   LookupController,
 } from "../../../commands/lookup/LookupController";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
-import { getWorkspaceConfig } from "../../../injection-providers/getWorkspaceConfig";
-import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
+import { getConfig } from "../../helpers/setupTestEngineContainer";
 
 require("mocha/mocha");
 
 suite("GIVEN a NoteLookupCmd", () => {
   test("WHEN the user selects nothing THEN nothing is written to the engine", async () => {
-    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
+    const wsRoot = vscode.Uri.file("tmp");
 
-    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
-    const config = await getWorkspaceConfig(wsRoot);
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
@@ -60,9 +58,8 @@ suite("GIVEN a NoteLookupCmd", () => {
   });
 
   test("WHEN the user selects a note THEN that note is opened", async () => {
-    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
-    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
-    const config = await getWorkspaceConfig(wsRoot);
+    const wsRoot = vscode.Uri.file("tmp");
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
@@ -110,9 +107,8 @@ suite("GIVEN a NoteLookupCmd", () => {
   });
 
   test("WHEN Create New is selected THEN a new note is written", async () => {
-    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
-    await WorkspaceHelpers.createTestYAMLConfigFile(wsRoot, {});
-    const config = await getWorkspaceConfig(wsRoot);
+    const wsRoot = vscode.Uri.file("tmp");
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {

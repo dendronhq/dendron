@@ -56,7 +56,7 @@ const defaultReports: Reports = {
     html: false,
     json: true,
   },
-  name: `lighthouse-${new Date().toISOString().replace(/:/g, "_")}`,
+  name: new Date().toISOString().replace(/:/g, "_"),
   directory: `${process.cwd()}/.audit`,
 };
 

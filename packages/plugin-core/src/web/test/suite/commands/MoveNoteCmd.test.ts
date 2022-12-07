@@ -161,8 +161,6 @@ suite("WHEN Move note command is run", () => {
         "No available vaults for moving note. Each vault already has a note with filename foo.one"
     );
     assert(result.changed.length === 0);
-
-    sinon.restore();
   });
   test("WHEN no items selected to move THEN result should be an empty array", async () => {
     const mockNoteProvider = stubInterface<ILookupProvider>();

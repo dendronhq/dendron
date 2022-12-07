@@ -341,9 +341,7 @@ async function playAudit(auditConfig: AuditConfig) {
         vital,
         size,
       };
-      return audit;
-    })
-    .andThen((audit) => {
+
       if (process.env.AIRTABLE_API_KEY) {
         const headers = {
           Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
@@ -384,11 +382,8 @@ async function playAudit(auditConfig: AuditConfig) {
           return audit;
         });
       }
-      return okAsync(audit);
-    })
-    .map((audit) => {
       log(JSON.stringify(audit, null, 2));
-      return audit;
+      return okAsync(audit);
     });
 
   if (result.isErr()) {

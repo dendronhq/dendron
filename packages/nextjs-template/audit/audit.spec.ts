@@ -16,7 +16,7 @@ test.describe("GIVEN AUDIT, WHEN shared chrome instance, ", () => {
       url,
       port: 9222,
       options: {},
-      reports: { formats: { json: true }, directory: ".dendron.lighthouse" },
+      reports: { directory: ".dendron-audit" },
       formFactor: "desktop",
     });
     await context.close();

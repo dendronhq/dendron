@@ -2341,6 +2341,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "jeremy-whitman",
+      "name": "jeremy-whitman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/96663669?v=4",
+      "profile": "https://github.com/jeremy-whitman",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

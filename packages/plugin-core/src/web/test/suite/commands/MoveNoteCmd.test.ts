@@ -2,7 +2,6 @@ import { DVault, NoteQuickInput, ReducedDEngine } from "@dendronhq/common-all";
 import { stubInterface } from "ts-sinon";
 import { ILookupProvider } from "../../../commands/lookup/ILookupProvider";
 import { MoveNoteCmd } from "../../../commands/MoveNoteCmd";
-import * as vscode from "vscode";
 import {
   LookupAcceptPayload,
   LookupController,
@@ -15,6 +14,7 @@ import {
   QuickPickUtils,
 } from "../../../commands/lookup/QuickPickUtils";
 import { createNote } from "../../helpers/setupTestEngineContainer";
+import { WorkspaceHelpers } from "../../helpers/WorkspaceHelpers";
 
 function getVaults(): DVault[] {
   const vaults: DVault[] = [{ fsPath: "vault1" }, { fsPath: "vault2" }];
@@ -26,7 +26,7 @@ suite("WHEN Move note command is run", () => {
   test("WHEN move note from vault1 to vault2 THEN move successfully", async () => {
     const mockNoteProvider = stubInterface<ILookupProvider>();
     const mockEngine = stubInterface<ReducedDEngine>();
-    const wsRoot = vscode.Uri.file("tmp");
+    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
@@ -68,7 +68,7 @@ suite("WHEN Move note command is run", () => {
   test("WHEN multiple notes are moved from vault1 to vault2 THEN the desired moves has correct data", async () => {
     const mockNoteProvider = stubInterface<ILookupProvider>();
     const mockEngine = stubInterface<ReducedDEngine>();
-    const wsRoot = vscode.Uri.file("tmp");
+    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
@@ -120,7 +120,7 @@ suite("WHEN Move note command is run", () => {
   test("WHEN all vaults already have a note selected to move THEN show error message to user", async () => {
     const mockNoteProvider = stubInterface<ILookupProvider>();
     const mockEngine = stubInterface<ReducedDEngine>();
-    const wsRoot = vscode.Uri.file("tmp");
+    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
@@ -137,11 +137,13 @@ suite("WHEN Move note command is run", () => {
       fname: "foo.one",
       vault: vaults[0],
       wsRoot,
+      noWrite: false,
     });
     const note2 = await createNote({
       fname: "foo.one",
       vault: vaults[1],
       wsRoot,
+      noWrite: false,
     });
     mockEngine.queryNotes.resolves([]);
     mockEngine.findNotesMeta.resolves([note1, note2]);
@@ -165,7 +167,7 @@ suite("WHEN Move note command is run", () => {
   test("WHEN no items selected to move THEN result should be an empty array", async () => {
     const mockNoteProvider = stubInterface<ILookupProvider>();
     const mockEngine = stubInterface<ReducedDEngine>();
-    const wsRoot = vscode.Uri.file("tmp");
+    const wsRoot = await WorkspaceHelpers.getWSRootForTest();
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);

@@ -45,6 +45,7 @@ const vitalsMetrics = [
   "speed-index",
   "interactive",
 ] as const;
+
 type TimeMetrics = typeof timeMetrics[number];
 type SizeMetrics = typeof sizeMetrics[number];
 type VitalsMetrics = typeof vitalsMetrics[number];
@@ -270,7 +271,7 @@ async function computeVitals(
   auditConfig: AuditConfig,
   log: (...args: any[]) => void
 ) {
-  const results: Array<LighthouseResult> = [];
+  const results: ResultAsync<LighthouseResult, DendronError>[] = [];
   for (let index = 1; index <= runs; index += 1) {
     /* eslint-disable no-await-in-loop -- should run in serie */
     const result = await ResultAsync.fromPromise<RunnerResult, DendronError>(
@@ -294,17 +295,19 @@ async function computeVitals(
           ...(error instanceof Error && { innerError: error }),
         });
       }
-    );
+    ).map(({ lhr }) => lhr);
 
     log(`Lighthouse run #${index}`);
 
-    results.push(result._unsafeUnwrap().lhr);
+    // @ts-ignore -- remove when https://github.com/supermacro/neverthrow/issues/434 is fixed
+    results.push(result);
   }
 
-  return computeMedianRun(results);
+  // @ts-ignore -- remove when https://github.com/supermacro/neverthrow/issues/434 is fixed
+  return ResultAsync.combine(results).andThen((r) => computeMedianRun(r));
 }
 
-async function playAudit(auditConfig: AuditConfig) {
+export async function playAudit(auditConfig: AuditConfig) {
   const log = auditConfig.disableLogs ? () => {} : console.log; // eslint-disable-line no-console
   const url = auditConfig.url;
   const port = auditConfig.port;
@@ -409,5 +412,3 @@ async function playAudit(auditConfig: AuditConfig) {
   }
   return result;
 }
-
-export { playAudit };

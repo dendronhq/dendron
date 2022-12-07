@@ -94,14 +94,14 @@ type Audit = {
   githubRef: string | undefined;
   os: string;
   pkgPath: string;
-  vital: {
+  vitals: {
     [key in VitalsMetrics]?: {
       value: number | string;
       unit: string | undefined;
       description: string | undefined;
     };
   };
-  size: {
+  sizes: {
     [name: string]: {
       [key in SizeMetrics | TimeMetrics]?: {
         value: number | string;
@@ -335,10 +335,10 @@ export async function playAudit(auditConfig: AuditConfig) {
       return generateReports(medianLhr, reports).map(() => medianLhr);
     })
     .andThen((medianLhr) => {
-      return computeSizes(filePathsMap).map((size) => ({ size, medianLhr }));
+      return computeSizes(filePathsMap).map((sizes) => ({ sizes, medianLhr }));
     })
-    .map(({ size, medianLhr }) => {
-      const vital = Object.fromEntries(
+    .map(({ sizes, medianLhr }) => {
+      const vitals = Object.fromEntries(
         Object.entries(medianLhr.audits)
           .filter(([key]) => vitalsMetrics.includes(key as VitalsMetrics))
           .map(([key, value]) => {
@@ -359,8 +359,8 @@ export async function playAudit(auditConfig: AuditConfig) {
         githubRef: process.env.GITHUB_REF,
         os: os.platform(),
         pkgPath,
-        vital,
-        size,
+        vitals,
+        sizes,
       };
 
       if (process.env.AIRTABLE_API_KEY) {
@@ -368,13 +368,13 @@ export async function playAudit(auditConfig: AuditConfig) {
           Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
           "Content-Type": "application/json",
         };
-        const { vital, size, ...rest } = audit;
+        const { vitals, sizes, ...rest } = audit;
         const report = {
           records: [
             {
               fields: {
-                vital: JSON.stringify(vital, null, 2),
-                size: JSON.stringify(size, null, 2),
+                vitals: JSON.stringify(vitals, null, 2),
+                sizes: JSON.stringify(sizes, null, 2),
                 ...rest,
               },
             },

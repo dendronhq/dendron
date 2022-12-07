@@ -37,6 +37,10 @@ export type CommandOutput = {
   changed: NoteChangeEntry[];
 };
 
+export type MoveNoteOpts = {
+  closeAndOpenFile: boolean;
+};
+
 function isMultiMove(moves: RenameNoteOpts[]) {
   return moves.length > 1;
 }
@@ -61,7 +65,8 @@ export class MoveNoteCmd {
     @inject("wsRoot") private wsRoot: URI
   ) {}
 
-  async run(): Promise<{ changed: NoteChangeEntry[] }> {
+  async run(opts?: MoveNoteOpts): Promise<{ changed: NoteChangeEntry[] }> {
+    opts = _.defaults(opts, { closeAndOpenFile: true });
     const moveNoteOpts: LookupControllerCreateOpts = {
       provider: this.provider,
       disableVaultSelection: false,
@@ -96,7 +101,7 @@ export class MoveNoteCmd {
       window.showErrorMessage("Move note cancelled. No vault selected");
       return { changed: [] };
     }
-    const moves = getDesiredMoves(data, newVault);
+    const moves = this.getDesiredMoves(data, newVault);
 
     if (isMultiMove(moves)) {
       await this.showMultiMovePreview(moves);
@@ -122,7 +127,8 @@ export class MoveNoteCmd {
 
     // During bulk move we will only open a single file that was moved to avoid
     // cluttering user tabs with all moved files.
-    await closeCurrentFileOpenMovedFile(this.wsRoot, moves[0], this.vaults);
+    if (opts?.closeAndOpenFile)
+      await closeCurrentFileOpenMovedFile(this.wsRoot, moves[0], this.vaults);
 
     return { changed };
   }
@@ -202,6 +208,27 @@ export class MoveNoteCmd {
     );
     panel.webview.html = md.render(contentLines.join("\n"));
   }
+
+  getDesiredMoves(
+    data: LookupAcceptPayload,
+    newLocation: DVault
+  ): RenameNoteOpts[] {
+    const newVaultName = VaultUtils.getName(newLocation);
+
+    return data.items.map((item) => {
+      const renameOpt: RenameNoteOpts = {
+        oldLoc: {
+          fname: item.fname,
+          vaultName: VaultUtils.getName(item.vault),
+        },
+        newLoc: {
+          fname: item.fname,
+          vaultName: newVaultName,
+        },
+      };
+      return renameOpt;
+    });
+  }
 }
 
 async function closeCurrentFileOpenMovedFile(
@@ -244,25 +271,4 @@ async function openFileInEditor(
   }
 
   return editor;
-}
-
-function getDesiredMoves(
-  data: LookupAcceptPayload,
-  newLocation: DVault
-): RenameNoteOpts[] {
-  const newVaultName = VaultUtils.getName(newLocation);
-
-  return data.items.map((item) => {
-    const renameOpt: RenameNoteOpts = {
-      oldLoc: {
-        fname: item.fname,
-        vaultName: VaultUtils.getName(item.vault),
-      },
-      newLoc: {
-        fname: item.fname,
-        vaultName: newVaultName,
-      },
-    };
-    return renameOpt;
-  });
 }

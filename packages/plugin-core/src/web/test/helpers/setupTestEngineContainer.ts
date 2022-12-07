@@ -157,7 +157,7 @@ type CreateNoteOptsV4 = {
   stub?: boolean;
 };
 
-async function createNote(opts: CreateNoteOptsV4) {
+export async function createNote(opts: CreateNoteOptsV4) {
   const {
     fname,
     vault,

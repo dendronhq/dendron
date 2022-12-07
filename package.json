@@ -53,7 +53,7 @@
     "typedoc-plugin-markdown": "^3.13.6",
     "verdaccio": "^5.1.3",
     "verdaccio-auth-memory": "^10.0.1",
-    "vsce": "^2.10.0"
+    "vsce": "^2.15.0"
   },
   "scripts": {
     "setup": "yarn && yarn bootstrap:bootstrap && yarn bootstrap:build && yarn setup:cli",
@@ -101,7 +101,7 @@
     "ci:test:cli": "yarn test:cli",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
     "ci:test:plugin-web": "npx lerna run compile-web --scope @dendronhq/plugin-core && npx lerna run test-in-browser --scope @dendronhq/plugin-core",
-    "ci:test:plugin-perf":"npx lerna run perf-test --scope @dendronhq/plugin-core",
+    "ci:test:plugin-perf": "npx lerna run perf-test --scope @dendronhq/plugin-core",
     "ci:test:template": "yarn --cwd packages/nextjs-template run test",
     "ci:test:template:docker": "docker run -it --rm --ipc=host -v \"$(pwd):/test\" -u \"$(id -u ${USER}):$(id -g ${USER})\" mcr.microsoft.com/playwright:v1.26.0-focal /bin/bash -c 'cd /test; npx playwright install; yarn ci:test:template $([ \"$0\" = \"/bin/bash\" ] || ([ \"$#\" = 0 ] && echo \"$0\" || echo \"$0 $@\"))'",
     "template:build": "yarn --cwd packages/nextjs-template run build",

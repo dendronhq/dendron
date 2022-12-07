@@ -25,7 +25,7 @@ export class SqliteQueryUtils {
               err.message
             } in ${getDurationMilliseconds(
               start
-            )} ms. Query String: ${sql.slice(0, 1000)}`
+            )} ms. Query String: ${SqliteQueryUtils.formatQueryString(sql)}`
           );
 
           reject(err.message);
@@ -33,7 +33,7 @@ export class SqliteQueryUtils {
           logger?.info(
             `Executed SqliteQueryUtils.run() in ${getDurationMilliseconds(
               start
-            )} ms. Query String: ${sql.slice(0, 1000)}`
+            )} ms. Query String: ${SqliteQueryUtils.formatQueryString(sql)}`
           );
 
           resolve(null);
@@ -69,7 +69,7 @@ export class SqliteQueryUtils {
               err.message
             } in ${getDurationMilliseconds(
               start
-            )} ms. Query String: ${sql.slice(0, 1000)}`
+            )} ms. Query String: ${SqliteQueryUtils.formatQueryString(sql)}`
           );
 
           reject(err.message);
@@ -77,7 +77,7 @@ export class SqliteQueryUtils {
           logger?.info(
             `Executed SqliteQueryUtils.get() query in ${getDurationMilliseconds(
               start
-            )} ms. Query String: ${sql.slice(0, 1000)}`
+            )} ms. Query String: ${SqliteQueryUtils.formatQueryString(sql)}`
           );
 
           resolve(row);
@@ -121,7 +121,7 @@ export class SqliteQueryUtils {
           logger?.info(
             `Executed SqliteQueryUtils.all() query in ${getDurationMilliseconds(
               start
-            )} ms. Query String: ${sql.slice(0, 1000)}`
+            )} ms. Query String: ${SqliteQueryUtils.formatQueryString(sql)}`
           );
 
           resolve(rows);
@@ -134,7 +134,10 @@ export class SqliteQueryUtils {
     });
   }
 
-  static getSqliteError(errorString: string, sqlQuery: string): SqliteError {
+  private static getSqliteError(
+    errorString: string,
+    sqlQuery: string
+  ): SqliteError {
     let type: SqliteErrorType = SqliteErrorType.Unknown;
 
     if (errorString === "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed") {
@@ -149,5 +152,15 @@ export class SqliteQueryUtils {
       message: errorString,
       name: type,
     };
+  }
+
+  private static formatQueryString(sql: string): string {
+    const CHAR_LIMIT = 1000;
+
+    if (sql.length <= CHAR_LIMIT) {
+      return sql;
+    }
+
+    return [sql.slice(0, 500), sql.slice(-500)].join("...");
   }
 }

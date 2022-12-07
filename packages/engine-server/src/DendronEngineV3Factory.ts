@@ -54,7 +54,8 @@ export class DendronEngineV3Factory {
       wsRoot,
       ConfigUtils.getVaults(config),
       fileStore,
-      dbFilePath
+      dbFilePath,
+      logger
     );
 
     if (dbResult.isErr()) {

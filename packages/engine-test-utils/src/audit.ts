@@ -95,6 +95,7 @@ type Audit = {
     [key in VitalsMetrics]?: {
       value: number | string;
       unit: string | undefined;
+      description: string | undefined;
     };
   };
   size: {
@@ -102,6 +103,7 @@ type Audit = {
       [key in SizeMetrics]?: {
         value: number | string;
         unit: string | undefined;
+        description: string | undefined;
       };
     };
   };
@@ -216,24 +218,29 @@ function computeSizes(filePathsMap: FilePathsMap) {
             size: {
               value: result.size,
               unit: "byte",
+              description: "Gzipped",
             },
           }),
           ...("time" in result && {
             time: {
               value: result.time,
               unit: "second",
+              description: "run time + load time",
             },
           }),
           ...("runTime" in result && {
             runTime: {
               value: result.runTime,
               unit: "second",
+              description:
+                "Time which was spent for both event groups (scriptParseCompile and scriptEvaluation). See https://github.com/mbalabash/estimo#fields-description",
             },
           }),
           ...("loadTime" in result && {
             loadTime: {
               value: result.loadTime,
               unit: "second",
+              description: "Load time based on a slow 3g network",
             },
           }),
         },
@@ -327,6 +334,7 @@ async function playAudit(auditConfig: AuditConfig) {
               {
                 value: value.numericValue,
                 unit: value.numericUnit,
+                description: value.description,
               },
             ] as const;
           })

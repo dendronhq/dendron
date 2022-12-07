@@ -212,22 +212,30 @@ function computeSizes(filePathsMap: FilePathsMap) {
     ).map(([result]) => {
       return {
         [name]: {
-          size: {
-            value: result.size,
-            unit: "byte",
-          },
-          time: {
-            value: result.time,
-            unit: "millisecond",
-          },
-          runTime: {
-            value: result.runTime,
-            unit: "millisecond",
-          },
-          loadTime: {
-            value: result.loadTime,
-            unit: "millisecond",
-          },
+          ...("size" in result && {
+            size: {
+              value: result.size,
+              unit: "byte",
+            },
+          }),
+          ...("time" in result && {
+            time: {
+              value: result.time,
+              unit: "second",
+            },
+          }),
+          ...("runTime" in result && {
+            runTime: {
+              value: result.runTime,
+              unit: "second",
+            },
+          }),
+          ...("loadTime" in result && {
+            loadTime: {
+              value: result.loadTime,
+              unit: "second",
+            },
+          }),
         },
       } as Audit["size"];
     });

@@ -7,13 +7,10 @@ import {
   DVault,
   genHash,
   genUUID,
-  NoteDictsUtils,
   NoteProps,
   NotePropsMeta,
   NoteUtils,
   Position,
-  SchemaModuleDict,
-  SchemaUtils,
   string2Note,
   Time,
 } from "@dendronhq/common-all";
@@ -43,7 +40,6 @@ import { SqliteError } from "../sqlite/SqliteError";
 import { SqliteQueryUtils } from "../sqlite/SqliteQueryUtils";
 import { LinksTableUtils, LinkType } from "../sqlite/tables/LinksTableUtils";
 import { NotePropsTableUtils } from "../sqlite/tables/NotePropsTableUtils";
-import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
 
 /**
  * Given the files in a particular vault, process all of them to update the
@@ -57,7 +53,6 @@ import { SchemaNotesTableUtils } from "../sqlite/tables/SchemaNotesTableUtils";
  * vaults, call this function multiple times, once for each vault.
  * @param db
  * @param root
- * @param schemas
  * @param enableLinkCandidates
  * @returns
  */
@@ -66,7 +61,6 @@ export async function parseAllNoteFilesForSqlite(
   vault: DVault,
   db: Database,
   root: string,
-  schemas: SchemaModuleDict,
   enableLinkCandidates: boolean = false,
   logger?: DLogger
 ): Promise<Result<null, any>> {
@@ -217,12 +211,13 @@ export async function parseAllNoteFilesForSqlite(
   });
 
   // Schemas - only needs to be processed for added notes.
-  const dicts = NoteDictsUtils.createNoteDicts(addedNotes);
-  const domains = addedNotes.filter((note) => !note.fname.includes("."));
-
-  domains.map((domain) => {
-    SchemaUtils.matchDomain(domain, dicts.notesById, schemas);
-  });
+  // const dicts = NoteDictsUtils.createNoteDicts(addedNotes);
+  // const domains = addedNotes.filter(
+  //   (note) => !note.fname.includes(".") && note.fname !== "root"
+  // );
+  // domains.map((domain) => {
+  //   SchemaUtils.matchDomain(domain, dicts.notesById, schemas);
+  // });
 
   const allNotesToProcess = addedNotes.concat(updatedNotes);
 
@@ -538,13 +533,15 @@ async function processNoteProps(note: NotePropsMeta, db: Database) {
     new VaultNotesTableRow(vaultIdResp.value, note.id)
   );
 
-  if (note.schema) {
-    await SchemaNotesTableUtils.insert(db, {
-      noteId: note.id,
-      moduleId: note.schema.moduleId,
-      schemaId: note.schema.schemaId,
-    });
-  }
+  // at this point we don't have schema yet.
+  // TODO: enable this once we move schema init logic
+  // if (note.schema) {
+  //   await SchemaNotesTableUtils.insert(db, {
+  //     noteId: note.id,
+  //     moduleId: note.schema.moduleId,
+  //     schemaId: note.schema.schemaId,
+  //   });
+  // }
 }
 
 function processParentLinks(
@@ -759,9 +756,9 @@ function processReplacedStubs(
       WITH T(oldId, newId) AS
       (VALUES ${values})
       UPDATE Hierarchy
-      SET parent = T.newId
+      SET parentId = T.newId
       FROM T
-      WHERE T.oldId = Hierarchy.parent`;
+      WHERE T.oldId = Hierarchy.parentId`;
 
     return SqliteQueryUtils.run(db, sql2, logger).andThen(() => {
       const values = replacedStubs.map((d) => `('${d.stubId}')`).join(",");

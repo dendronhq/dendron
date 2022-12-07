@@ -1,4 +1,5 @@
 import {
+  DEngineClient,
   DVault,
   ERROR_STATUS,
   INoteStore,
@@ -20,7 +21,8 @@ import os from "os";
 export function runAllNoteStoreTests(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   findAndFindMetadataTest(noteStoreFactory);
@@ -37,16 +39,28 @@ export function runAllNoteStoreTests(
   getNoteWithAbsolutePathVault(noteStoreFactory);
 }
 
+export function runAllNoteStoreTestsForSqlite(
+  noteStoreFactory: (
+    wsRoot: string,
+    vaults: DVault[],
+    engine: DEngineClient
+  ) => Promise<INoteStore<string>>
+) {
+  runAllNoteStoreTests(noteStoreFactory);
+  getNoteWithSchemaTest(noteStoreFactory);
+}
+
 function findAndFindMetadataTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN workspace contains notes, THEN find and findMetadata should return correct notes", async () => {
     await runEngineTestV5(
       async ({ vaults, wsRoot, engine }) => {
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
 
         const engineNotes = await engine.findNotesMeta({ excludeStub: false });
         await Promise.all(
@@ -135,13 +149,14 @@ function findAndFindMetadataTest(
 function queryMetadataTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN workspace contains notes, THEN queryMetadata should return correct notes", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults, engine }) => {
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
 
         const engineNotes = await engine.findNotesMeta({ excludeStub: false });
         await Promise.all(
@@ -196,14 +211,15 @@ function queryMetadataTest(
 function retrieveSameNoteTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing a note, THEN get, getMetadata, and queryMetadata should retrieve same note", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
 
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
@@ -260,15 +276,16 @@ function retrieveSameNoteTest(
 function stubNoteTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing a stub note, THEN get and getMetadata should retrieve same note", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "",
@@ -325,15 +342,16 @@ function stubNoteTest(
 function getDeletedNoteTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing and deleting a note, THEN get should return CONTENT_NOT_FOUND", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -384,15 +402,16 @@ function getDeletedNoteTest(
 function updateNoteTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing a note, THEN subsequent writes should update note", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -438,15 +457,16 @@ function updateNoteTest(
 function writeSameFnameTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing a note with the same fname, THEN content hash should change", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -488,15 +508,16 @@ function writeSameFnameTest(
 function writeMismatchKeyTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing a note with a mismatched key, THEN error should be returned", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -518,15 +539,16 @@ function writeMismatchKeyTest(
 function retrieveMetadataOnlyTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN writing and getting metadata, THEN only metadata should be retrieved", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar",
           body: "note body",
@@ -583,15 +605,16 @@ function retrieveMetadataOnlyTest(
 function bulkWriteMetadataTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN bulk writing metadata, THEN all metadata should be retrievable", async () => {
     await runEngineTestV5(
-      async ({ vaults, wsRoot }) => {
+      async ({ vaults, wsRoot, engine }) => {
         const vault = vaults[0];
 
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const newNote = await NoteTestUtilsV4.createNote({
           fname: "foobar123",
           body: "note body",
@@ -642,13 +665,14 @@ function bulkWriteMetadataTest(
 function deleteRootNoteTest(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   test("WHEN deleting a root note, THEN error should return and be CANT_DELETE_ROOT", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults, engine }) => {
-        const noteStore = await noteStoreFactory(wsRoot, vaults);
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
         const engineNotes = await engine.findNotesMeta({ excludeStub: false });
         await Promise.all(
           engineNotes.map(async (noteMeta) => {
@@ -674,7 +698,8 @@ function deleteRootNoteTest(
 function getNoteWithAbsolutePathVault(
   noteStoreFactory: (
     wsRoot: string,
-    vaults: DVault[]
+    vaults: DVault[],
+    engine: DEngineClient
   ) => Promise<INoteStore<string>>
 ) {
   const wsRoot = tmpDir().name;
@@ -702,7 +727,8 @@ function getNoteWithAbsolutePathVault(
         async ({ wsRoot, engine }) => {
           const noteStore = await noteStoreFactory(
             wsRoot,
-            vaultsWithAbsoluteFsPath
+            vaultsWithAbsoluteFsPath,
+            engine
           );
           const engineNotes = await engine.findNotesMeta({
             excludeStub: false,
@@ -731,4 +757,49 @@ function getNoteWithAbsolutePathVault(
       );
     }
   );
+}
+
+function getNoteWithSchemaTest(
+  noteStoreFactory: (
+    wsRoot: string,
+    vaults: DVault[],
+    engine: DEngineClient
+  ) => Promise<INoteStore<string>>
+) {
+  test("WHEN getting a note with schema, THEN the resulting NoteProps has correct `schema` property populated", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const noteStore = await noteStoreFactory(wsRoot, vaults, engine);
+        const ch1Metadata = (await noteStore.getMetadata("bar.ch1")).data;
+        const ch2Metadata = (await noteStore.getMetadata("bar.ch2")).data;
+        expect(ch1Metadata?.schema).toEqual({
+          moduleId: "bar",
+          schemaId: "ch1",
+        });
+        expect(ch2Metadata?.schema).toEqual({
+          moduleId: "bar",
+          schemaId: "ch2",
+        });
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          const { wsRoot, vaults } = opts;
+          await ENGINE_HOOKS.setupSchemaPreseet(opts);
+          await NoteTestUtilsV4.createNote({
+            fname: "bar.ch1",
+            body: "",
+            vault: vaults[0],
+            wsRoot,
+          });
+          await NoteTestUtilsV4.createNote({
+            fname: "bar.ch2",
+            body: "",
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+      }
+    );
+  });
 }

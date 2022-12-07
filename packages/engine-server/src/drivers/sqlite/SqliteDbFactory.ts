@@ -1,13 +1,23 @@
 import {
+  DendronCompositeError,
+  DendronError,
   DLogger,
   DVault,
+  errAsync,
+  IDendronError,
   IFileStore,
+  isNotNull,
+  isNotUndefined,
+  okAsync,
   ResultAsync,
+  ResultUtils,
+  SchemaModuleDict,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import _ from "lodash";
 import { Database } from "sqlite3";
 import { URI } from "vscode-uri";
-import { parseAllNoteFilesForSqlite } from "../file";
+import { parseAllNoteFilesForSqlite, SchemaParser } from "../file";
 import { SqliteQueryUtils } from "./SqliteQueryUtils";
 import { HierarchyTableUtils, VaultsTableUtils } from "./tables";
 import { LinksTableUtils } from "./tables/LinksTableUtils";
@@ -34,7 +44,7 @@ export class SqliteDbFactory {
     vaults: DVault[],
     fileStore: IFileStore,
     dbFilePath: string,
-    logger?: DLogger
+    logger: DLogger
   ): ResultAsync<Database, Error> {
     return SqliteDbFactory.createEmptyDB(dbFilePath).andThen((db) => {
       const results = ResultAsync.combine(
@@ -57,14 +67,12 @@ export class SqliteDbFactory {
               vault,
               db,
               vaultPath,
-              {}, // TODO: Add in schemaModuleDict
               false,
               logger
             );
           });
         })
       );
-
       return results.map(() => {
         return db;
       });
@@ -114,5 +122,57 @@ export class SqliteDbFactory {
           return db;
         });
     });
+  }
+
+  static initSchema(
+    vaults: DVault[],
+    wsRoot: string,
+    fileStore: IFileStore,
+    logger: DLogger
+  ): ResultAsync<SchemaModuleDict, IDendronError> {
+    const schemaParser = new SchemaParser({
+      wsRoot,
+      logger,
+    });
+    const schemaDict: SchemaModuleDict = {};
+    let errors: DendronError[] = [];
+    ResultAsync.combineWithAllErrors(
+      vaults.map((vault) => {
+        const vaultPath = vault2Path({ vault, wsRoot });
+        return ResultUtils.PromiseRespV3ToResultAsync(
+          fileStore.readDir({
+            root: URI.file(vaultPath),
+            include: ["*.schema.yml"],
+          })
+        ).andThen<Awaited<ReturnType<SchemaParser["parse"]>>, never>(
+          (schemaFiles) => {
+            const out = ResultAsync.fromSafePromise(
+              schemaParser.parse(schemaFiles, vault)
+            );
+            return out;
+          }
+        );
+      })
+    ).map((res) => {
+      const schemaResponses = res as Awaited<
+        ReturnType<SchemaParser["parse"]>
+      >[];
+      errors = schemaResponses
+        .flatMap((response) => response.errors)
+        .filter(isNotNull);
+      const schemas = schemaResponses
+        .flatMap((response) => response.schemas)
+        .filter(isNotUndefined);
+
+      schemas.forEach((schema) => {
+        schemaDict[schema.root.id] = schema;
+      });
+    });
+
+    if (errors.length > 0) {
+      return errAsync(new DendronCompositeError(errors));
+    } else {
+      return okAsync(schemaDict);
+    }
   }
 }

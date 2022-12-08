@@ -74,7 +74,7 @@ suite("GIVEN SetupWorkspace Command", function () {
   let homeDirStub: SinonStub;
   let userConfigDirStub: SinonStub;
   let wsFoldersStub: SinonStub;
-  this.timeout(6 * 1000);
+  this.timeout(8 * 1000);
 
   let ctx: ExtensionContext;
   beforeEach(async () => {
@@ -96,7 +96,7 @@ suite("GIVEN SetupWorkspace Command", function () {
     wsFoldersStub.restore();
   });
   describe("WHEN initializing a CODE workspace", function () {
-    this.timeout(6 * 1000);
+    this.timeout(8 * 1000);
 
     describe("AND workspace has not been set up yet", () => {
       test("THEN Dendon does not activate", async () => {
@@ -332,7 +332,7 @@ suite("GIVEN SetupWorkspace Command", function () {
   });
 
   describe("WHEN initializing a NATIVE workspace", function () {
-    this.timeout(6 * 1000);
+    this.timeout(8 * 1000);
 
     test("not active, initial create ws", async () => {
       const wsRoot = tmpDir().name;

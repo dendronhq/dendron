@@ -41,6 +41,7 @@ suite("MoveSelectionToCommand", function () {
             genRandomId: true,
           });
         },
+        timeout: 3e3,
       },
       () => {
         test("THEN selection is moved to destination, selection is replaced, and backlinks are updated", async () => {

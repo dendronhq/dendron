@@ -10,7 +10,7 @@ import { NoteTestUtilsV4, SinonStubbedFn } from "@dendronhq/common-test-utils";
 import { TaskStatusCommand } from "../../commands/TaskStatus";
 
 suite("GIVEN TaskStatus", function () {
-  this.timeout(5e3);
+  this.timeout(8e3);
 
   describeSingleWS("WHEN a link to a task note is selected", {}, () => {
     let taskNote: NoteProps;
@@ -248,7 +248,7 @@ suite("GIVEN TaskStatus", function () {
       });
     });
 
-    describeMultiWS("AND no note is open", {}, () => {
+    describeMultiWS("AND no note is open", { timeout: 1e6 }, () => {
       let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
       before(async () => {
         const extension = ExtensionProvider.getExtension();

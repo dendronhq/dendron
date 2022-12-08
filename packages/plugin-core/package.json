@@ -1549,7 +1549,7 @@
     "ts-node": "^8.10.2",
     "ts-sinon": "^2.0.2",
     "tsyringe": "^4.7.0",
-    "vsce": "^2.10.0",
+    "vsce": "2.15.0",
     "webpack": "^5.56.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-cli": "^4.8.0",

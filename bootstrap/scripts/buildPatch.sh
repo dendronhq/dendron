@@ -27,6 +27,11 @@ if [ $SCRIPT_BUILD_ENV = "ci" ]; then
   DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
 fi
 
+TARGET="--extensionTarget $1"
+if [ "$PARAMS" = "none" ]; then
+  TARGET=''
+fi
+
 EXT_TYPE=dendron
 if [ $SCRIPT_EXT_TYPE = "nightly" ]; then
   EXT_TYPE=nightly
@@ -36,10 +41,10 @@ if [ $SCRIPT_EXT_TYPE = "enterprise" ]; then
 fi
 
 if [ -z $FAST ]; then
-	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --extensionType $EXT_TYPE
+	LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --extensionType $EXT_TYPE $TARGET
 else
 	echo "running fast mode..."
-	SKIP_SENTRY=1 LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --fast --extensionType $EXT_TYPE
+	SKIP_SENTRY=1 LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType $UPGRADE_TYPE --publishEndpoint $PUBLISH_ENDPOINT --fast --extensionType $EXT_TYPE $TARGET
 fi
 
 if [ $PUBLISH_ENDPOINT = "local" ]; then

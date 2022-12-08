@@ -11,6 +11,22 @@ jobs:
     environment: plugin-production
     strategy:
       fail-fast: true
+      matrix:
+        include:
+          - platform: win32
+            arch: x64
+          - platform: win32
+            arch: ia32
+          - platform: linux
+            arch: x64
+          - platform: linux
+            arch: arm64
+          - platform: darwin
+            arch: x64
+          - platform: darwin
+            arch: arm64
+          - platform: general
+            arch: general
 
     timeout-minutes: 30
 
@@ -44,6 +60,7 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
           echo "NPM_TOKEN=${{ secrets.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
+          echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Configure NPM
         run: |
@@ -51,6 +68,17 @@ jobs:
 
       - name: Yarn Setup
         run: yarn setup
+
+      - name: Download SQLite Binary
+        run: |
+          if [ ${{ matrix.platform }} == linux ]; then
+            yarn download-sqlite-binary --target_arch=${{ matrix.arch }}
+          elif [ ${{ matrix.platform }} != general ]; then
+            yarn download-sqlite-binary --target_arch=${{ matrix.arch }} --target_platform=${{ matrix.platform }} --target_libc=unknown
+          else 
+            echo "Skipping SQLite binary install for general build."
+          fi
+        working-directory: ./packages/plugin-core
 
       - name: Update schema file
         run: yarn gen:data
@@ -64,7 +92,11 @@ jobs:
         run: |
           echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          yarn build:minor:remote:ci
+          if [ ${{ matrix.platform }} == general ]; then
+            yarn build:minor:remote:ci:noparam
+          else 
+            yarn build:minor:remote:ci ${{ env.PUBLISHING_TARGET }}
+          fi
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

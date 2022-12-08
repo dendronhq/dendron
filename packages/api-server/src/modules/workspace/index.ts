@@ -35,16 +35,15 @@ export class WorkspaceController {
     const ctx = "WorkspaceController:init";
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });
+    ConfigService.instance({
+      homeDir: URI.file(homedir()),
+      fileStore: new NodeJSFileStore(),
+    });
     // until we roll out engine v3 as default, we can't remove this line.
     // TODO: remove once `enableEngineV3` is deprecated.
     const config = DConfig.readConfigSync(uri);
     let engine;
     if (config.dev?.enableEngineV3) {
-      // possibly the earliest point we can instantiate `ConfigService`
-      ConfigService.instance({
-        homeDir: URI.file(homedir()),
-        fileStore: new NodeJSFileStore(),
-      });
       if (config.dev?.useSqlite) {
         engine = await DendronEngineV3Factory.createWithSqliteStore({
           wsRoot: uri,

@@ -868,7 +868,7 @@ describe("GIVEN VaultAddCommand with self contained vaults enabled", function ()
 
   describeSingleWS(
     "WHEN creating and adding a remote workspace vault",
-    { modConfigCb: enableSelfCOntainedVaults },
+    { modConfigCb: enableSelfCOntainedVaults, timeout: 5e3 },
     () => {
       let vaultName: string;
       let remoteDir: string;

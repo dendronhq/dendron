@@ -2,6 +2,9 @@ import {
   DNodeUtils,
   DVault,
   FuseEngine,
+  LookupNoteType,
+  LookupNoteTypeEnum,
+  LookupSelectionTypeEnum,
   NoteLookupUtils,
   NoteQuickInputV2,
   type ReducedDEngine,
@@ -9,20 +12,49 @@ import {
 import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
-import { Event, QuickPick, QuickPickOptions } from "vscode";
+import { Event, QuickPickOptions } from "vscode";
 import { Utils } from "vscode-uri";
 import { DendronContext } from "../../../constants";
 import { AutoCompleter } from "../../../utils/autoCompleter";
 import { WSUtilsWeb } from "../../utils/WSUtils";
 import { type ILookupProvider } from "./ILookupProvider";
 import { VaultQuickPick } from "./VaultQuickPick";
+import {
+  DirectChildFilterBtn,
+  JournalBtn,
+  VaultSelectButton,
+} from "../../../components/lookup/buttons";
+import { DendronBtn } from "../../../components/lookup/ButtonTypes";
+import { TwoWayBinding } from "../../../utils/TwoWayBinding";
+import { ILookupViewModel } from "../../../components/lookup/LookupViewModel";
+import {
+  DendronWebQuickPick,
+  VaultSelectionMode,
+} from "../../../components/lookup/types";
+import { LookupQuickPickView } from "./LookupQuickPickView";
+import { NoteLookupUtilsWeb } from "../../utils/NoteLookupUtilsWeb";
 
 const CREATE_NEW_LABEL = "Create New";
 
-export type LookupQuickpickFactoryCreateOpts = QuickPickOptions & {
+export type LookupControllerCreateOpts = QuickPickOptions & {
   provider: ILookupProvider;
-  buttons?: vscode.QuickInputButton[];
+  buttons?: DendronBtn[];
   initialValue?: string;
+  noteType?: LookupNoteType;
+  /**
+   * When true, don't enable vault selection
+   */
+  disableVaultSelection?: boolean;
+  /* if vault selection isn't disabled,
+   * press button on init if true
+   */
+  vaultButtonPressed?: boolean;
+  /** If vault selection isn't disabled, allow choosing the mode of selection.
+   *  Defaults to true. */
+  vaultSelectCanToggle?: boolean;
+  vaultSelectionMode?: VaultSelectionMode;
+  //default true
+  allowCreateNew?: boolean;
 };
 
 export type LookupAcceptPayload = {
@@ -31,28 +63,52 @@ export type LookupAcceptPayload = {
 };
 
 @injectable()
-export class LookupQuickpickFactory {
+export class LookupController {
+  private viewModel: ILookupViewModel;
+  private _disposables: vscode.Disposable[] = [];
   constructor(
     @inject("ReducedDEngine") private _engine: ReducedDEngine,
     @inject("vaults") private vaults: DVault[],
     @inject("AutoCompleteEvent") private tabAutoCompleteEvent: Event<void>,
-    private wsUtils: WSUtilsWeb
-  ) {}
+    private wsUtils: WSUtilsWeb,
+    private lookupUtils: NoteLookupUtilsWeb
+  ) {
+    this.viewModel = {
+      selectionState: new TwoWayBinding<LookupSelectionTypeEnum>(
+        LookupSelectionTypeEnum.none
+      ),
+      vaultSelectionMode: new TwoWayBinding<VaultSelectionMode>(
+        VaultSelectionMode.auto
+      ),
+      isMultiSelectEnabled: new TwoWayBinding<boolean>(false),
+      isCopyNoteLinkEnabled: new TwoWayBinding<boolean>(false),
+      isApplyDirectChildFilter: new TwoWayBinding<boolean>(false),
+      nameModifierMode: new TwoWayBinding<LookupNoteTypeEnum>(
+        LookupNoteTypeEnum.none
+      ),
+      isSplitHorizontally: new TwoWayBinding<boolean>(false),
+    };
+  }
 
   public showLookup(
-    opts: LookupQuickpickFactoryCreateOpts
+    opts: LookupControllerCreateOpts
   ): Promise<LookupAcceptPayload | undefined> {
     let initialValue = opts?.initialValue;
     if (!initialValue) {
       initialValue = this.getInitialValueBasedOnActiveNote();
     }
-
-    const qp = this.create({
-      title: "Lookup Note",
-      buttons: [],
-      provider: opts.provider,
+    opts = _.defaults(opts, {
       initialValue,
+      title: "Lookup Note",
     });
+    const qp = this.createQuickPick(opts);
+    this._disposables.push(
+      new LookupQuickPickView(qp, this.viewModel, this.lookupUtils)
+    );
+
+    this.setupViewModelCallbacks(qp, initialValue, opts);
+
+    this.initializeViewStateFromButtons(qp.buttons);
 
     this.tabAutoCompleteEvent(() => {
       qp.value = AutoCompleter.getAutoCompletedValue(qp);
@@ -90,6 +146,7 @@ export class LookupQuickpickFactory {
               fname: value.items[0].fname,
               vault: currentNote?.vault ?? this.vaults[0],
               vaults: this.vaults,
+              vaultSelectionMode: this.viewModel.vaultSelectionMode.value,
             });
 
             if (!vault) {
@@ -117,60 +174,92 @@ export class LookupQuickpickFactory {
         DendronContext.NOTE_LOOK_UP_ACTIVE,
         false
       );
+      this._disposables.forEach((disposable) => disposable.dispose());
     });
     return lookupPromise;
   }
 
-  create(opts: LookupQuickpickFactoryCreateOpts): QuickPick<NoteQuickInputV2> {
-    const qp = vscode.window.createQuickPick<NoteQuickInputV2>();
+  public isJournalButtonPressed(): boolean {
+    return this.viewModel.nameModifierMode.value === LookupNoteTypeEnum.journal;
+  }
 
+  createQuickPick(
+    opts: LookupControllerCreateOpts
+  ): DendronWebQuickPick<NoteQuickInputV2> {
+    const qp = vscode.window.createQuickPick<NoteQuickInputV2>();
     let initialized = false; // Not really sure why this is needed. For some reason onDidChangeValue seems to get called before I think the callback is set up.
 
     qp.title = opts.title;
-    qp.buttons = opts.buttons ?? [];
 
     // We slice the postfix off until the first dot to show all results at the same
     // level so that when a user types `foo.one`, they will see all results in `foo.*`
     const initialQueryValue = NoteLookupUtils.getQsForCurrentLevel(
       opts.initialValue ?? ""
     );
+    if (!opts.buttons) {
+      opts.buttons = [
+        JournalBtn.create({
+          pressed: opts.noteType === LookupNoteTypeEnum.journal,
+        }),
+        DirectChildFilterBtn.create(),
+      ];
+    }
 
+    // start: multi vault selection check
+    const isMultiVault = this.vaults.length > 1 && !opts.disableVaultSelection;
+    const maybeVaultSelectButtonPressed = _.isUndefined(
+      opts?.vaultButtonPressed
+    )
+      ? isMultiVault
+      : isMultiVault && opts!.vaultButtonPressed;
+    if (isMultiVault) {
+      opts.buttons.push(
+        VaultSelectButton.create({
+          pressed: maybeVaultSelectButtonPressed,
+          canToggle: opts?.vaultSelectCanToggle,
+        })
+      );
+    }
+    qp.buttons = opts.buttons ?? [];
+    // --- end: multi vault selection check
     qp.value = opts.initialValue ?? "";
 
     opts.provider
       .provideItems({
         pickerValue: initialQueryValue,
-        showDirectChildrenOnly: false,
+        showDirectChildrenOnly: this.viewModel.isApplyDirectChildFilter.value,
         workspaceState: {
           vaults: this.vaults,
           schemas: {},
         },
       })
       .then((initialItems) => {
-        if (initialItems) {
+        if (initialItems && !qp.items.length) {
           qp.items = initialItems;
-          initialized = true;
         }
+        initialized = true;
       });
 
     qp.onDidChangeValue(async (newInput) => {
-      if (!initialized) {
-        return;
-      }
+      if (!initialized && !opts.noteType) return;
       const items = await opts.provider!.provideItems({
         pickerValue: newInput,
-        showDirectChildrenOnly: false,
+        showDirectChildrenOnly: this.viewModel.isApplyDirectChildFilter.value,
         workspaceState: {
           vaults: this.vaults,
           schemas: {},
         },
       });
 
-      const modifiedItems = this.addCreateNewOptionIfNecessary(newInput, items);
+      const modifiedItems = this.addCreateNewOptionIfNecessary(
+        newInput,
+        items,
+        opts.allowCreateNew
+      );
       qp.items = modifiedItems;
     });
-
-    return qp;
+    qp.ignoreFocusOut = true;
+    return qp as DendronWebQuickPick<NoteQuickInputV2>;
   }
 
   private getInitialValueBasedOnActiveNote() {
@@ -180,9 +269,37 @@ export class LookupQuickpickFactory {
     return initialValue;
   }
 
+  private initializeViewStateFromButtons(buttons: DendronBtn[]) {
+    if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.scratch, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.scratch;
+    } else if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.journal, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.journal;
+    } else if (
+      this.lookupUtils.getButtonFromArray(LookupNoteTypeEnum.task, buttons)
+        ?.pressed
+    ) {
+      this.viewModel.nameModifierMode.value = LookupNoteTypeEnum.task;
+    }
+    this.viewModel.isApplyDirectChildFilter.value =
+      !!this.lookupUtils.getButtonFromArray("directChildOnly", buttons)
+        ?.pressed;
+
+    this.viewModel.vaultSelectionMode.value =
+      this.lookupUtils.getButtonFromArray("selectVault", buttons)?.pressed
+        ? VaultSelectionMode.alwaysPrompt
+        : VaultSelectionMode.smart;
+  }
+
   private addCreateNewOptionIfNecessary(
     queryOrig: string,
-    items: NoteQuickInputV2[]
+    items: NoteQuickInputV2[],
+    allowCreateNew: boolean = true
   ): NoteQuickInputV2[] {
     // if new notes are allowed and we didn't get a perfect match, append `Create New` option
     // to picker results
@@ -208,7 +325,8 @@ export class LookupQuickpickFactory {
       // !picker.canSelectMany &&
       // when you create lookup from selection, new note is not valid
       // !transformedQuery.wasMadeFromWikiLink &&
-      vaultsHaveSpaceForExactMatch;
+      vaultsHaveSpaceForExactMatch &&
+      allowCreateNew;
 
     if (shouldAddCreateNew) {
       const entryCreateNew = this.createNewNoteQPItem({
@@ -283,5 +401,87 @@ export class LookupQuickpickFactory {
     if (_.isUndefined(bubbleUpCreateNew)) bubbleUpCreateNew = true;
 
     return noSpecialQueryChars && noExactMatches && bubbleUpCreateNew;
+  }
+
+  private setupViewModelCallbacks(
+    qp: DendronWebQuickPick<NoteQuickInputV2>,
+    initialValue: string | undefined,
+    opts: LookupControllerCreateOpts
+  ) {
+    const journalBtn = this.lookupUtils.getButtonFromArray(
+      LookupNoteTypeEnum.journal,
+      qp.buttons
+    );
+    if (journalBtn) {
+      this._disposables.push(
+        this.viewModel.nameModifierMode.bind(async (newValue, prevValue) => {
+          switch (prevValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn)
+                this.lookupUtils.onJournalButtonToggled(
+                  false,
+                  qp,
+                  initialValue
+                );
+              break;
+            default:
+              break;
+          }
+
+          switch (newValue) {
+            case LookupNoteTypeEnum.journal:
+              if (journalBtn) this.lookupUtils.onJournalButtonToggled(true, qp);
+              break;
+            case LookupNoteTypeEnum.none:
+              break;
+            default:
+          }
+        })
+      );
+    }
+
+    const directChildBtn = this.lookupUtils.getButton(
+      "directChildOnly",
+      qp.buttons
+    );
+    if (directChildBtn) {
+      this._disposables.push(
+        this.viewModel.isApplyDirectChildFilter.bind(async (newValue) => {
+          const items = await opts.provider.provideItems({
+            pickerValue: qp.value,
+            showDirectChildrenOnly: newValue,
+            workspaceState: {
+              vaults: this.vaults,
+              schemas: {},
+            },
+          });
+          qp.items = items;
+        })
+      );
+    }
+
+    const vaultSelectionBtn = this.lookupUtils.getButton(
+      "selectVault",
+      qp.buttons
+    );
+    if (vaultSelectionBtn) {
+      this._disposables.push(
+        this.viewModel.vaultSelectionMode.bind(async (newValue) => {
+          this.viewModel.vaultSelectionMode.value = newValue;
+        })
+      );
+    }
+
+    const multiSelectBtn = this.lookupUtils.getButton(
+      "multiSelect",
+      qp.buttons
+    );
+    if (multiSelectBtn) {
+      this._disposables.push(
+        this.viewModel.isMultiSelectEnabled.bind(async (newValue) => {
+          qp.canSelectMany = newValue;
+        })
+      );
+    }
   }
 }

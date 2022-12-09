@@ -5,7 +5,7 @@ import {
   DVault,
   NoteQuickInput,
 } from "@dendronhq/common-all";
-import { QuickPick, TextEditor, Uri } from "vscode";
+import { QuickPick, QuickPickItem, TextEditor, Uri } from "vscode";
 import { DendronBtn } from "./ButtonTypes";
 
 export type FilterQuickPickFunction = (
@@ -117,6 +117,10 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
    * TODO: should be required
    */
   showNote?: (uri: Uri) => Promise<TextEditor>;
+};
+
+export type DendronWebQuickPick<T extends QuickPickItem> = QuickPick<T> & {
+  buttons: DendronBtn[];
 };
 
 export enum VaultSelectionMode {

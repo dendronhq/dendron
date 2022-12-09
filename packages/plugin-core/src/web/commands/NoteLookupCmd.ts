@@ -3,32 +3,54 @@ import {
   NoteUtils,
   VaultUtils,
   VSCodeEvents,
+  ConfigUtils,
+  DendronConfig,
+  getJournalTitle,
+  NoteProps,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import { inject, injectable } from "tsyringe";
 import * as vscode from "vscode";
 import { URI, Utils } from "vscode-uri";
+import { VaultSelectionMode } from "../../components/lookup/types";
 import { DENDRON_COMMANDS } from "../../constants";
 import { type ITelemetryClient } from "../../telemetry/common/ITelemetryClient";
 import { type ILookupProvider } from "./lookup/ILookupProvider";
-import { LookupQuickpickFactory } from "./lookup/LookupQuickpickFactory";
+import {
+  LookupController,
+  LookupControllerCreateOpts,
+} from "./lookup/LookupController";
 
 @injectable()
 export class NoteLookupCmd {
   constructor(
-    private factory: LookupQuickpickFactory,
+    private factory: LookupController,
     @inject("wsRoot") private wsRoot: URI,
     @inject("ReducedDEngine")
     private engine: ReducedDEngine,
     @inject("NoteProvider") private noteProvider: ILookupProvider,
-    @inject("ITelemetryClient") private _analytics: ITelemetryClient
+    @inject("ITelemetryClient") private _analytics: ITelemetryClient,
+    @inject("DendronConfig") private config: DendronConfig
   ) {}
 
-  public async run() {
+  public async run(_opts?: LookupControllerCreateOpts) {
     this._analytics.track(DENDRON_COMMANDS.LOOKUP_NOTE.key);
-
-    const result = await this.factory.showLookup({
+    const opts = _opts || {
       provider: this.noteProvider,
-    });
+    };
+    const lookupConfig = ConfigUtils.getCommands(this.config).lookup;
+    const noteLookupConfig = lookupConfig.note;
+    if (opts?.vaultSelectionMode) {
+      opts.vaultButtonPressed =
+        opts.vaultSelectionMode === VaultSelectionMode.alwaysPrompt;
+    } else {
+      const vaultSelectionMode = noteLookupConfig.vaultSelectionModeOnCreate;
+      opts.vaultButtonPressed = vaultSelectionMode === "alwaysPrompt";
+    }
+    opts.disableVaultSelection = !noteLookupConfig.confirmVaultOnCreate;
+
+    const result = await this.factory.showLookup(opts);
 
     if (!result) {
       return;
@@ -38,11 +60,23 @@ export class NoteLookupCmd {
 
     await Promise.all(
       result.items.map(async (value) => {
+        let newNote: NoteProps | undefined;
+        if (value.stub) {
+          newNote = this.prepareStubItem(value);
+        }
         if (value.label === "Create New") {
           isNew = true;
-          const newNote = NoteUtils.create({
+          let title;
+          if (this.factory.isJournalButtonPressed()) {
+            const journalDateFormat = ConfigUtils.getJournal(
+              this.config
+            ).dateFormat;
+            title = getJournalTitle(value.fname, journalDateFormat);
+          }
+          newNote = NoteUtils.create({
             fname: value.fname,
             vault: value.vault,
+            title,
           });
 
           // TODO: Add Schema and Template functionality
@@ -66,6 +100,8 @@ export class NoteLookupCmd {
           //   },
           // });
           // note = _.merge(newNote, overrides || {});
+        }
+        if (newNote) {
           const res = await this.engine.writeNote(newNote);
 
           if (res.error) {
@@ -89,5 +125,10 @@ export class NoteLookupCmd {
     );
 
     this._analytics.track(VSCodeEvents.NoteLookup_Accept, { isNew });
+  }
+
+  prepareStubItem(value: NoteQuickInputV2) {
+    const props = _.omit(value, "label", "detail", "alwaysShow", "stub");
+    return props as NoteProps;
   }
 }

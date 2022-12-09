@@ -157,7 +157,7 @@ type CreateNoteOptsV4 = {
   stub?: boolean;
 };
 
-async function createNote(opts: CreateNoteOptsV4) {
+export async function createNote(opts: CreateNoteOptsV4) {
   const {
     fname,
     vault,
@@ -193,7 +193,7 @@ async function createNote(opts: CreateNoteOptsV4) {
   return note;
 }
 
-function getConfig(): DendronConfig {
+export function getConfig(): DendronConfig {
   const pubConfig: DendronPublishingConfig = {
     copyAssets: false,
     siteHierarchies: [],

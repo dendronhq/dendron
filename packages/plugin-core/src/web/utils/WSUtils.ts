@@ -6,8 +6,10 @@ import {
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import { inject, injectable } from "tsyringe";
-import vscode from "vscode";
+import vscode, { window } from "vscode";
 import { URI, Utils } from "vscode-uri";
+
+export const UNKNOWN_ERROR_MSG = `You found a bug! We didn't think this could happen but you proved us wrong. Please file the bug here -->  https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= We will put our best bug exterminators on this right away!`;
 
 @injectable()
 export class WSUtilsWeb {
@@ -73,5 +75,13 @@ export class WSUtilsWeb {
       VaultUtils.getRelPath(vault),
       fname + ".md"
     );
+  }
+
+  public getVaultForOpenEditor(): DVault {
+    const activeDocument = window.activeTextEditor?.document;
+    if (!activeDocument) {
+      return this.vaults[0];
+    }
+    return this.getVaultFromDocument(activeDocument);
   }
 }

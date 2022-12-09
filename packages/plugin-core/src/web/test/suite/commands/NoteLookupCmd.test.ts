@@ -11,9 +11,10 @@ import { DummyTelemetryClient } from "../../../../telemetry/common/DummyTelemetr
 import { ILookupProvider } from "../../../commands/lookup/ILookupProvider";
 import {
   LookupAcceptPayload,
-  LookupQuickpickFactory,
-} from "../../../commands/lookup/LookupQuickpickFactory";
+  LookupController,
+} from "../../../commands/lookup/LookupController";
 import { NoteLookupCmd } from "../../../commands/NoteLookupCmd";
+import { getConfig } from "../../helpers/setupTestEngineContainer";
 
 require("mocha/mocha");
 
@@ -21,13 +22,14 @@ suite("GIVEN a NoteLookupCmd", () => {
   test("WHEN the user selects nothing THEN nothing is written to the engine", async () => {
     const wsRoot = vscode.Uri.file("tmp");
 
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+    } as unknown as LookupController;
 
     const showLookupFake = sinon.fake.resolves(undefined);
     sinon.replace(factory, "showLookup", showLookupFake);
@@ -42,7 +44,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();
@@ -56,14 +59,14 @@ suite("GIVEN a NoteLookupCmd", () => {
 
   test("WHEN the user selects a note THEN that note is opened", async () => {
     const wsRoot = vscode.Uri.file("tmp");
-
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+    } as unknown as LookupController;
 
     const vault: DVault = {
       selfContained: true,
@@ -89,7 +92,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();
@@ -104,14 +108,15 @@ suite("GIVEN a NoteLookupCmd", () => {
 
   test("WHEN Create New is selected THEN a new note is written", async () => {
     const wsRoot = vscode.Uri.file("tmp");
-
+    const config = getConfig();
     const mockNoteProvider = stubInterface<ILookupProvider>();
 
     const factory = {
       showLookup: () => {
         return Promise.resolve(0);
       },
-    } as unknown as LookupQuickpickFactory;
+      isJournalButtonPressed: () => false,
+    } as unknown as LookupController;
 
     const vault: DVault = {
       selfContained: true,
@@ -123,7 +128,6 @@ suite("GIVEN a NoteLookupCmd", () => {
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
     sinon.replace(factory, "showLookup", showLookupFake);
-
     const openTextDocumentFake = sinon.fake.resolves(undefined);
     sinon.replace(vscode.workspace, "openTextDocument", openTextDocumentFake);
 
@@ -139,7 +143,8 @@ suite("GIVEN a NoteLookupCmd", () => {
       wsRoot,
       mockEngine,
       mockNoteProvider,
-      new DummyTelemetryClient()
+      new DummyTelemetryClient(),
+      config
     );
 
     await cmd.run();

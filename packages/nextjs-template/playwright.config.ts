@@ -27,10 +27,10 @@ const config: PlaywrightTestConfig = {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
     },
-    // {
-    //   name: "audit",
-    //   testDir: "./audit",
-    // },
+    {
+      name: "audit",
+      testDir: "./audit",
+    },
   ],
 };
 export default config;

@@ -1,7 +1,7 @@
 import {
   DNodeUtils,
   NoteLookupUtils,
-  NoteQuickInput,
+  NoteQuickInputV2,
   NoteUtils,
   SchemaModuleProps,
   SchemaUtils,
@@ -205,13 +205,11 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
         );
         picker.items = await Promise.all(
           nodes.map(async (ent) => {
-            return DNodeUtils.enhancePropForQuickInputV3({
-              wsRoot: this._extension.getDWorkspace().wsRoot,
+            return DNodeUtils.enhancePropForQuickInputV4({
               props: ent,
               schema: ent.schema
                 ? (await engine.getSchema(ent.schema.moduleId)).data
                 : undefined,
-              vaults: await ws.vaults,
             });
           })
         );
@@ -219,7 +217,7 @@ export class SchemaLookupProvider implements ILookupProviderV3 {
       }
 
       // initialize with current picker items without default items present
-      const items: NoteQuickInput[] = [...picker.items];
+      const items: NoteQuickInputV2[] = [...picker.items];
       let updatedItems = PickerUtilsV2.filterDefaultItems(items);
       if (token?.isCancellationRequested) {
         return;

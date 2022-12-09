@@ -125,6 +125,15 @@ export interface INoteStore<K> extends Disposable {
   rename(oldLoc: DNoteLoc, newLoc: DNoteLoc): Promise<RespV3<K>>;
 
   /**
+   * Query NoteProps by criteria. Differs from find in that this supports full-text fuzzy search
+   * on note properties.
+   *
+   * @param opts: NoteProps criteria
+   * @return List of NoteProps that matches criteria
+   */
+  query(opts: QueryNotesOpts): ResultAsync<NoteProps[], IDendronError>;
+
+  /**
    * Query NoteProps metadata by criteria. Differs from find in that this supports full-text fuzzy search
    * on note properties.
    * TODO: consider replacing findMetadata altogether

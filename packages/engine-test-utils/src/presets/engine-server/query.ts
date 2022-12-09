@@ -176,6 +176,39 @@ const NOTES = {
       preSetupHook: setupBasic,
     }
   ),
+  NOTE_META_QUERY: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
+      const data = await engine.queryNotesMeta({
+        qs: fname,
+        originalQS: fname,
+        vault,
+      });
+      const expectedNote = (
+        await engine.findNotesMeta({
+          fname,
+          vault,
+        })
+      )[0];
+      return [
+        {
+          actual: data ? data[0] : undefined,
+          expected: expectedNote,
+        },
+        {
+          actual: data ? data[0].schema : undefined,
+          expected: {
+            moduleId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,
+            schemaId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,
+          },
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
 };
 export const ENGINE_QUERY_PRESETS = {
   NOTES,

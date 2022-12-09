@@ -1,6 +1,6 @@
 import {
   DVault,
-  NoteQuickInput,
+  NoteQuickInputV2,
   type ReducedDEngine,
 } from "@dendronhq/common-all";
 import assert from "assert";
@@ -73,7 +73,7 @@ suite("GIVEN a NoteLookupCmd", () => {
       fsPath: "path",
     };
     const lookupReturn: LookupAcceptPayload = {
-      items: [{ fname: "foo", vault } as NoteQuickInput],
+      items: [{ fname: "foo", vault } as NoteQuickInputV2],
     };
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
@@ -123,7 +123,7 @@ suite("GIVEN a NoteLookupCmd", () => {
       fsPath: "path",
     };
     const lookupReturn: LookupAcceptPayload = {
-      items: [{ fname: "foo", vault, label: "Create New" } as NoteQuickInput],
+      items: [{ fname: "foo", vault, label: "Create New" } as NoteQuickInputV2],
     };
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);

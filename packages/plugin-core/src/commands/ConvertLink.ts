@@ -1,7 +1,7 @@
 import {
   assertUnreachable,
   DendronError,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -234,7 +234,7 @@ export class ConvertLinkCommand extends BasicCommand<
           break;
         }
         text = NoteUtils.createWikiLink({
-          note: resp?.selectedItems[0] as NoteProps,
+          note: resp?.selectedItems[0] as NotePropsMeta,
           alias: { mode: "title" },
         });
         break;

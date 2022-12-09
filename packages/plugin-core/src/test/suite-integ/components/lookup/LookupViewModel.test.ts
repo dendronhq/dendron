@@ -1,7 +1,7 @@
 import {
-  DNodePropsQuickInputV2,
   LookupNoteTypeEnum,
   LookupSelectionTypeEnum,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { after, before, describe, it } from "mocha";
@@ -39,7 +39,7 @@ const isButtonPressed = function (type: ButtonType, buttons: DendronBtn[]) {
 
 describe(`GIVEN a LookupV3QuickPick`, () => {
   const qp =
-    vscode.window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
+    vscode.window.createQuickPick<NoteQuickInputV2>() as DendronQuickPickerV2;
 
   qp.buttons = [
     VaultSelectButton.create({ pressed: false }),

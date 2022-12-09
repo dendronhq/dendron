@@ -5,8 +5,8 @@ import {
   DNodeUtils,
   LabelUtils,
   NoteLookupUtils,
-  NoteProps,
-  NoteQuickInput,
+  NotePropsMeta,
+  NoteQuickInputV2,
   TransformedQueryString,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
@@ -78,7 +78,7 @@ export class NotePickerUtils {
   }: {
     fname: string;
     detail: string;
-  }): DNodePropsQuickInputV2 {
+  }): NoteQuickInputV2 {
     const props = DNodeUtils.create({
       id: CREATE_NEW_LABEL,
       fname,
@@ -132,7 +132,7 @@ export class NotePickerUtils {
     return initialValue;
   }
 
-  static getSelection(picker: DendronQuickPickerV2): NoteQuickInput[] {
+  static getSelection(picker: DendronQuickPickerV2): NoteQuickInputV2[] {
     return [...picker.selectedItems];
   }
 
@@ -141,19 +141,14 @@ export class NotePickerUtils {
   }: {
     engine: DEngineClient;
   }) => {
-    const ws = ExtensionProvider.getDWorkspace();
-    const { wsRoot } = ws;
-    const vaults = await ws.vaults;
     const nodes = await NoteLookupUtils.fetchRootResultsFromEngine(engine);
     return Promise.all(
       nodes.map(async (ent) => {
-        return DNodeUtils.enhancePropForQuickInput({
-          wsRoot,
+        return DNodeUtils.enhancePropForQuickInputV4({
           props: ent,
           schema: ent.schema
             ? (await engine.getSchema(ent.schema.moduleId)).data
             : undefined,
-          vaults,
         });
       })
     );
@@ -190,19 +185,14 @@ export class NotePickerUtils {
   }
 
   private static async enhanceNoteForQuickInput(input: {
-    note: NoteProps;
+    note: NotePropsMeta;
     engine: DEngineClient;
   }) {
-    const ws = ExtensionProvider.getDWorkspace();
-    const { wsRoot } = ws;
-    const vaults = await ws.vaults;
-    return DNodeUtils.enhancePropForQuickInputV3({
-      wsRoot,
+    return DNodeUtils.enhancePropForQuickInputV4({
       props: input.note,
       schema: input.note.schema
         ? (await input.engine.getSchema(input.note.schema.moduleId)).data
         : undefined,
-      vaults,
     });
   }
 
@@ -214,13 +204,11 @@ export class NotePickerUtils {
     const ctx = "createPickerItemsFromEngine";
     const start = process.hrtime();
     const { picker, transformedQuery, originalQS } = opts;
-    const ws = ExtensionProvider.getDWorkspace();
-    const { engine, wsRoot } = ws;
-    const vaults = await ws.vaults;
+    const { engine } = ExtensionProvider.getDWorkspace();
     // if we are doing a query, reset pagination options
     PickerUtilsV2.resetPaginationOpts(picker);
 
-    let nodes = await engine.queryNotes({
+    let nodes = await engine.queryNotesMeta({
       qs: transformedQuery.queryString,
       onlyDirectChildren: transformedQuery.onlyDirectChildren,
       originalQS,
@@ -245,15 +233,13 @@ export class NotePickerUtils {
     }
     const updatedItems = await Promise.all(
       nodes.map(async (ent) =>
-        DNodeUtils.enhancePropForQuickInputV3({
-          wsRoot,
+        DNodeUtils.enhancePropForQuickInputV4({
           props: ent,
           schema: ent.schema
             ? (
                 await engine.getSchema(ent.schema.moduleId)
               ).data
             : undefined,
-          vaults,
           alwaysShow: picker.alwaysShowAll,
         })
       )

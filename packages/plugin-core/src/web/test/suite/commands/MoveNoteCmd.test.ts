@@ -1,4 +1,8 @@
-import { DVault, NoteQuickInput, ReducedDEngine } from "@dendronhq/common-all";
+import {
+  DVault,
+  NoteQuickInputV2,
+  ReducedDEngine,
+} from "@dendronhq/common-all";
 import { stubInterface } from "ts-sinon";
 import { ILookupProvider } from "../../../commands/lookup/ILookupProvider";
 import { MoveNoteCmd } from "../../../commands/MoveNoteCmd";
@@ -34,13 +38,13 @@ suite("WHEN Move note command is run", () => {
     } as unknown as LookupController;
     const vaults = getVaults();
     const lookupReturn: LookupAcceptPayload = {
-      items: [{ fname: "foo.one", vault: vaults[0] } as NoteQuickInput],
+      items: [{ fname: "foo.one", vault: vaults[0] } as NoteQuickInputV2],
     };
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
     sinon.replace(factory, "showLookup", showLookupFake);
     mockEngine.renameNote.resolves({ data: [] });
-    mockEngine.queryNotes.resolves([]);
+    mockEngine.queryNotesMeta.resolves([]);
     mockEngine.findNotesMeta.resolves([]);
     sinon.stub(window, "showQuickPick").resolves({ vault: vaults[1] } as any);
 
@@ -77,15 +81,15 @@ suite("WHEN Move note command is run", () => {
     const vaults = getVaults();
     const lookupReturn: LookupAcceptPayload = {
       items: [
-        { fname: "foo.one", vault: vaults[0] } as NoteQuickInput,
-        { fname: "foo.two", vault: vaults[0] } as NoteQuickInput,
+        { fname: "foo.one", vault: vaults[0] } as NoteQuickInputV2,
+        { fname: "foo.two", vault: vaults[0] } as NoteQuickInputV2,
       ],
     };
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
     sinon.replace(factory, "showLookup", showLookupFake);
     mockEngine.renameNote.resolves({ data: [] });
-    mockEngine.queryNotes.resolves([]);
+    mockEngine.queryNotesMeta.resolves([]);
     mockEngine.findNotesMeta.resolves([]);
     sinon.stub(window, "showQuickPick").resolves({ vault: vaults[1] } as any);
 
@@ -128,7 +132,7 @@ suite("WHEN Move note command is run", () => {
     } as unknown as LookupController;
     const vaults = getVaults();
     const lookupReturn: LookupAcceptPayload = {
-      items: [{ fname: "foo.one", vault: vaults[0] } as NoteQuickInput],
+      items: [{ fname: "foo.one", vault: vaults[0] } as NoteQuickInputV2],
     };
 
     const showLookupFake = sinon.fake.resolves(lookupReturn);
@@ -145,7 +149,7 @@ suite("WHEN Move note command is run", () => {
       wsRoot,
       noWrite: true,
     });
-    mockEngine.queryNotes.resolves([]);
+    mockEngine.queryNotesMeta.resolves([]);
     mockEngine.findNotesMeta.resolves([note1, note2]);
     const windowSpy = sinon.spy(window, "showErrorMessage");
     const moveNoteCmd = new MoveNoteCmd(

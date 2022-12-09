@@ -226,7 +226,7 @@ export type SchemaTemplate = {
   type: "snippet" | "note";
 };
 
-export type SchemaProps = DNodeProps<SchemaData>;
+export type SchemaProps = Omit<DNodeProps<SchemaData>, "body">;
 /**
  * Interface for a Dendron Note
  */

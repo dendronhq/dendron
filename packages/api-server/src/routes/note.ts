@@ -128,6 +128,16 @@ router.get(
   })
 );
 
+router.get(
+  "/queryMeta",
+  asyncHandler(async (req: Request, res: Response) => {
+    const resp = await NoteController.instance().queryMeta(
+      req.query as unknown as NoteQueryRequest
+    );
+    ExpressUtils.setResponse(res, { data: resp });
+  })
+);
+
 router.post(
   "/find",
   asyncHandler(async (req: Request, res: Response<RespV3<FindNotesResp>>) => {

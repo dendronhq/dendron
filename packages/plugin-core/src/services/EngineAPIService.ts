@@ -30,6 +30,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsMeta,
+  QueryNotesMetaResp,
   QueryNotesOpts,
   QueryNotesResp,
   QuerySchemaResp,
@@ -252,6 +253,10 @@ export class EngineAPIService
 
   queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
     return this._internalEngine.queryNotes(opts);
+  }
+
+  queryNotesMeta(opts: QueryNotesOpts): Promise<QueryNotesMetaResp> {
+    return this._internalEngine.queryNotesMeta(opts);
   }
 
   renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp> {

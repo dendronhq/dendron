@@ -234,7 +234,21 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       switch (cmd) {
         case NoteCommands.LOOKUP: {
           const query = checkQuery(opts);
-          const notes = await NoteLookupUtils.lookup({ qsRaw: query, engine });
+          const notePropsMeta = await NoteLookupUtils.lookup({
+            qsRaw: query,
+            engine,
+          });
+          const noteIds = notePropsMeta.map((note) => note.id);
+          const noteResp = await engine.bulkGetNotes(noteIds);
+          if (noteResp.error) {
+            return {
+              error: ErrorFactory.create404Error({
+                url: query,
+              }),
+              data: undefined,
+            };
+          }
+          const notes = noteResp.data;
           const resp = await formatNotes({
             output,
             notes,

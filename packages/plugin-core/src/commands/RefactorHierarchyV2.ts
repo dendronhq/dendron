@@ -1,10 +1,10 @@
 import {
   DEngineClient,
   DNodeProps,
-  DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
   extractNoteChangeEntryCounts,
+  NoteQuickInputV2,
   NoteUtils,
   RefactoringCommandUsedPayload,
   StatisticsUtils,
@@ -70,7 +70,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     label: "Entire Workspace",
     detail: "Scope refactor to entire workspace",
     alwaysShow: true,
-  } as DNodePropsQuickInputV2;
+  } as NoteQuickInputV2;
 
   async promptScope(): Promise<NoteLookupProviderSuccessResp | undefined> {
     // see if we have a selection that contains wikilinks

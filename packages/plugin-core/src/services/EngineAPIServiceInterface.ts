@@ -22,6 +22,7 @@ import {
   GetNoteResp,
   GetSchemaResp,
   NoteProps,
+  QueryNotesMetaResp,
   QueryNotesOpts,
   QueryNotesResp,
   QuerySchemaResp,
@@ -94,6 +95,8 @@ export interface IEngineAPIService {
   querySchema(qs: string): Promise<QuerySchemaResp>;
 
   queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp>;
+
+  queryNotesMeta: (opts: QueryNotesOpts) => Promise<QueryNotesMetaResp>;
 
   renameNote(opts: RenameNoteOpts): Promise<RenameNoteResp>;
 

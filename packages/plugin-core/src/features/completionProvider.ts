@@ -10,7 +10,6 @@ import {
   LINK_NAME,
   LINK_NAME_NO_SPACES,
   NoteLookupUtils,
-  NoteProps,
   NotePropsMeta,
   TAGS_HIERARCHY,
   URI,
@@ -109,11 +108,11 @@ async function noteToCompletionItem({
   insertTextTransform,
   sortTextTransform,
 }: {
-  note: NoteProps;
+  note: NotePropsMeta;
   range: Range;
-  lblTransform?: (note: NoteProps) => string;
-  insertTextTransform?: (note: NoteProps) => Promise<string>;
-  sortTextTransform?: (note: NoteProps) => string | undefined;
+  lblTransform?: (note: NotePropsMeta) => string;
+  insertTextTransform?: (note: NotePropsMeta) => Promise<string>;
+  sortTextTransform?: (note: NotePropsMeta) => string | undefined;
 }): Promise<CompletionItem> {
   const label = lblTransform ? lblTransform(note) : note.fname;
   const insertText = insertTextTransform
@@ -275,7 +274,7 @@ export const provideCompletionItems = sentryReportingCallback(
       } else {
         qsRaw = "";
       }
-      const insertTextTransform = async (note: NoteProps) => {
+      const insertTextTransform = async (note: NotePropsMeta) => {
         let resp = note.fname;
         if (found?.groups?.noBracket !== undefined) {
           resp += "]]";

@@ -149,9 +149,21 @@ export class NoteMetadataStore implements INoteMetadataStore {
   query(
     opts: QueryNotesOpts
   ): ResultAsync<NotePropsMeta[], DendronError<StatusCodes | undefined>> {
-    const items = this._fuseEngine.queryNote({
+    const { vault } = opts;
+    let results = this._fuseEngine.queryNote({
       ...opts,
-    }) as NotePropsMeta[];
+    });
+    if (vault) {
+      // Need to ignore this because the engine stringifies this property, so the types are incorrect.
+      // @ts-ignore
+      if (vault?.selfContained === "true" || vault?.selfContained === "false") {
+        vault.selfContained = vault.selfContained === "true";
+      }
+      results = results.filter((ent) => {
+        return VaultUtils.isEqualV2(ent.vault, vault);
+      });
+    }
+    const items = results.map((result) => this._noteMetadataById[result.id]);
     return ResultAsync.fromSafePromise(Promise.resolve(items));
   }
 }

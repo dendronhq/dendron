@@ -12,12 +12,12 @@ import {
   LookupSelectionTypeEnum,
   NoteChangeEntry,
   NoteProps,
-  NoteQuickInput,
   NoteUtils,
   TaskNoteUtils,
   VSRange,
   deleteTextRange,
   ConfigService,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import { HistoryService, WorkspaceUtils } from "@dendronhq/engine-server";
 import { LinkUtils } from "@dendronhq/unified";
@@ -371,7 +371,7 @@ export class LookupControllerV3 implements ILookupControllerV3 {
           this.quickPick.showDirectChildrenOnly = newValue;
 
           if (newValue) {
-            this.quickPick.filterMiddleware = (items: NoteQuickInput[]) =>
+            this.quickPick.filterMiddleware = (items: NoteQuickInputV2[]) =>
               items;
           } else {
             this.quickPick.filterMiddleware = undefined;

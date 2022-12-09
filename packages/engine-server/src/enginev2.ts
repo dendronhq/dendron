@@ -62,6 +62,7 @@ import {
   isNotUndefined,
   ConfigService,
   URI,
+  QueryNotesMetaResp,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -468,6 +469,10 @@ export class DendronEngineV2 implements DEngine {
       });
     }
     return notes;
+  }
+
+  async queryNotesMeta(opts: QueryNotesOpts): Promise<QueryNotesMetaResp> {
+    return this.queryNotes(opts);
   }
 
   async renderNote({

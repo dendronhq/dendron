@@ -21,6 +21,7 @@ import {
   NoteChangeEntry,
   NoteProps,
   NotePropsMeta,
+  QueryNotesMetaResp,
   QueryNotesOpts,
   QueryNotesResp,
   ReducedDEngine,
@@ -45,6 +46,8 @@ export abstract class EngineV3Base implements ReducedDEngine {
   protected logger;
   public vaults;
   public wsRoot;
+  // TODO: Make configurable
+  API_MAX_LIMIT = 100;
 
   constructor(opts: {
     noteStore: INoteStore<string>;
@@ -301,43 +304,43 @@ export abstract class EngineV3Base implements ReducedDEngine {
     };
   }
 
+  /**
+   * See {@link DEngine.queryNotes}
+   */
   async queryNotes(opts: QueryNotesOpts): Promise<QueryNotesResp> {
-    // const ctx = "Engine:queryNotes";
-    const { vault } = opts;
-    const MAX_LIMIT = 100;
-
-    // Need to ignore this because the engine stringifies this property, so the types are incorrect.
-    // @ts-ignore
-    if (vault?.selfContained === "true" || vault?.selfContained === "false")
-      vault.selfContained = vault.selfContained === "true";
-    const response = await this.noteStore.queryMetadata(opts);
+    const response = await this.noteStore.query(opts);
     if (response.isErr()) {
-      // TODO: need to return an error
-      return [];
-    }
-    let items = response.value;
-    if (items.length === 0) {
-      return [];
-    }
-
-    if (!_.isUndefined(vault)) {
-      items = items.filter((ent) => {
-        return VaultUtils.isEqual(vault, ent.vault, this.wsRoot);
+      throw new DendronError({
+        message: "Error querying for notes with opts: " + opts,
+        innerError: response.error,
       });
     }
 
-    // TODO: Support actual pagination if needed. For now, cap results
-    if (items.length > MAX_LIMIT) {
-      items = items.slice(0, MAX_LIMIT);
+    let items = response.value;
+    if (items.length > this.API_MAX_LIMIT) {
+      items = items.slice(0, this.API_MAX_LIMIT);
     }
+    return items;
+  }
 
-    const notes = await this.noteStore.bulkGet(items.map((ent) => ent.id));
-
-    const modifiedNotes = notes
-      .filter((ent) => _.isUndefined(ent.error))
-      .map((resp) => resp.data!);
-
-    return modifiedNotes;
+  /**
+   * See {@link DEngine.queryNotesMeta}
+   */
+  async queryNotesMeta(opts: QueryNotesOpts): Promise<QueryNotesMetaResp> {
+    const response = await this.noteStore.queryMetadata(opts);
+    if (response.isErr()) {
+      throw new DendronError({
+        message: "Error querying for notes with opts: " + opts,
+        innerError: response.error,
+      });
+    }
+    let items = response.value;
+    // We should cap number of results sent over through the api,
+    // otherwise it degrades performance
+    if (items.length > this.API_MAX_LIMIT) {
+      items = items.slice(0, this.API_MAX_LIMIT);
+    }
+    return items;
   }
 
   /**

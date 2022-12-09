@@ -15,11 +15,11 @@ import {
   isNotUndefined,
   NoteChangeEntry,
   NoteProps,
-  NoteQuickInput,
   NoteUtils,
   VaultUtils,
   ConfigService,
   URI,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { Heading, HistoryEvent, Node } from "@dendronhq/engine-server";
@@ -210,7 +210,7 @@ export class MoveHeaderCommand extends BasicCommand<
   async prepareDestination(opts: {
     engine: IEngineAPIService;
     quickpick: DendronQuickPickerV2;
-    selectedItems: readonly NoteQuickInput[];
+    selectedItems: readonly NoteQuickInputV2[];
   }) {
     const { engine, quickpick, selectedItems } = opts;
     const vault =
@@ -234,7 +234,12 @@ export class MoveHeaderCommand extends BasicCommand<
           dest = maybeNote;
         }
       } else {
-        dest = selected as NoteProps;
+        const resp = await engine.getNote(selected.id);
+        if (resp.error) {
+          this.L.error({ error: resp.error });
+          return;
+        }
+        dest = resp.data;
       }
     }
     return dest;

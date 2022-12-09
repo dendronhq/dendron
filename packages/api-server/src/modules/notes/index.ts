@@ -3,6 +3,7 @@ import {
   EngineInfoResp,
   EngineRenameNoteRequest,
   NoteQueryRequest,
+  QueryNotesMetaResp,
   QueryNotesResp,
   RenameNoteResp,
   RenderNoteOpts,
@@ -37,6 +38,16 @@ export class NoteController {
       ? await getWSEngine({ ws })
       : MemoryStore.instance().getEngine();
     return engine.queryNotes(opts.opts);
+  }
+
+  async queryMeta({
+    ws,
+    ...opts
+  }: NoteQueryRequest): Promise<QueryNotesMetaResp> {
+    const engine = ws
+      ? await getWSEngine({ ws })
+      : MemoryStore.instance().getEngine();
+    return engine.queryNotesMeta(opts.opts);
   }
 
   async info(): Promise<EngineInfoResp> {

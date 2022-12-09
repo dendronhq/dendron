@@ -1,9 +1,8 @@
 import { DendronQuickPickerV2 } from "./types";
 import { CancellationToken, CancellationTokenSource } from "vscode";
 import {
-  DNodePropsQuickInputV2,
   InvalidFilenameReason,
-  NoteQuickInput,
+  NoteQuickInputV2,
   RespV2,
   SchemaQuickInput,
 } from "@dendronhq/common-all";
@@ -17,7 +16,7 @@ export type ILookupProviderV3 = {
     quickpick: DendronQuickPickerV2;
     cancellationToken: CancellationTokenSource;
   }): any;
-  shouldRejectItem?: (opts: { item: NoteQuickInput }) =>
+  shouldRejectItem?: (opts: { item: NoteQuickInputV2 }) =>
     | {
         shouldReject: true;
         reason: InvalidFilenameReason;
@@ -71,12 +70,12 @@ export type ILookupProviderOptsV3 = {
    * This will always be shown at the top
    * when (and only when) nothing is queried.
    */
-  extraItems?: DNodePropsQuickInputV2[];
-  preAcceptValidators?: ((selectedItems: NoteQuickInput[]) => boolean)[];
+  extraItems?: NoteQuickInputV2[];
+  preAcceptValidators?: ((selectedItems: NoteQuickInputV2[]) => boolean)[];
 };
 
 export type NoteLookupProviderSuccessResp<T = never> = {
-  selectedItems: readonly NoteQuickInput[];
+  selectedItems: readonly NoteQuickInputV2[];
   onAcceptHookResp: T[];
   cancel?: boolean;
 };
@@ -92,5 +91,5 @@ export type SchemaLookupProviderSuccessResp<T = never> = {
 
 export type OnAcceptHook = (opts: {
   quickpick: DendronQuickPickerV2;
-  selectedItems: NoteQuickInput[];
+  selectedItems: NoteQuickInputV2[];
 }) => Promise<RespV2<any>>;

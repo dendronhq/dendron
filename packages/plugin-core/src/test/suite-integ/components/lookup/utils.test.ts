@@ -2,7 +2,7 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DNodePropsQuickInputV2,
   NoteLookupUtils,
-  NoteProps,
+  NotePropsMeta,
   TransformedQueryString,
 } from "@dendronhq/common-all";
 import { filterPickerResults } from "../../../../components/lookup/utils";
@@ -167,7 +167,7 @@ describe(`filterPickerResults`, () => {
 
   pickerValue = "h1.v1";
   describe(`WHEN dot splitting is used by the query. pickerValue: '${pickerValue}'`, () => {
-    let results: NoteProps[];
+    let results: NotePropsMeta[];
 
     beforeEach(async () => {
       const inputs = [
@@ -211,7 +211,7 @@ describe(`filterPickerResults`, () => {
 
   pickerValue = "h1.v1 GG";
   describe(`WHEN dot splitting with additional tokens are used by the query. pickerValue: '${pickerValue}'`, () => {
-    let results: NoteProps[];
+    let results: NotePropsMeta[];
 
     beforeEach(async () => {
       const inputs = [

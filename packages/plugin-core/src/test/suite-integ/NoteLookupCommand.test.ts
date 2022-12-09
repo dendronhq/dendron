@@ -1,6 +1,5 @@
 import {
   ConfigUtils,
-  DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
   DendronConfig,
@@ -8,13 +7,13 @@ import {
   LookupSelectionModeEnum,
   LookupSelectionTypeEnum,
   NoteProps,
-  NoteQuickInput,
   SchemaTemplate,
   SchemaUtils,
   Time,
   VaultUtils,
   ConfigService,
   URI,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -63,7 +62,6 @@ import {
 } from "../../components/lookup/utils";
 import { CONFIG } from "../../constants";
 import { ExtensionProvider } from "../../ExtensionProvider";
-import { StateService } from "../../services/stateService";
 import { clipboard } from "../../utils";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { DendronExtension } from "../../workspace";
@@ -129,7 +127,7 @@ function expectCreateNew({
   item,
   fname,
 }: {
-  item: DNodePropsQuickInputV2;
+  item: NoteQuickInputV2;
   fname?: string;
 }) {
   if (item.label !== CREATE_NEW_LABEL) {
@@ -2620,7 +2618,7 @@ suite("NoteLookupCommand", function () {
               vaults,
             });
           })
-        )) as NoteQuickInput[];
+        )) as NoteQuickInputV2[];
 
         const runOpts = {
           multiSelect: true,
@@ -2832,8 +2830,7 @@ suite("NoteLookupCommand", function () {
 suite("stateService", function () {
   let homeDirStub: SinonStub;
   const ctx: vscode.ExtensionContext = setupBeforeAfter(this, {
-    beforeHook: async (ctx) => {
-      new StateService(ctx);
+    beforeHook: async () => {
       await resetCodeWorkspace();
       homeDirStub = TestEngineUtils.mockHomeDir();
     },

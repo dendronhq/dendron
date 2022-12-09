@@ -52,6 +52,7 @@ import {
   ConfigService,
   DendronConfig,
   URI,
+  QueryNotesMetaResp,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -367,6 +368,59 @@ export class DendronEngineClient implements DEngineClient, EngineEventEmitter {
     } else if (this._config.dev?.enableEngineV3) {
       noteProps = (
         await this.api.noteQuery({
+          opts,
+          ws: this.wsRoot,
+        })
+      ).data!;
+    } else {
+      noteIndexProps = this.fuseEngine.queryNote({
+        qs,
+        onlyDirectChildren,
+        originalQS,
+      });
+      noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
+      // TODO: hack
+      if (!_.isUndefined(vault)) {
+        noteProps = noteProps.filter((ent) =>
+          VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
+        );
+      }
+    }
+    return noteProps;
+  }
+
+  async queryNotesMeta(opts: QueryNotesOpts): Promise<QueryNotesMetaResp> {
+    const { qs, onlyDirectChildren, vault, originalQS } = opts;
+    let noteIndexProps: NoteIndexProps[] | NoteIndexLightProps[];
+    let noteProps: NotePropsMeta[];
+    const configReadResult = await ConfigService.instance().readConfig(
+      URI.file(this.wsRoot)
+    );
+    if (configReadResult.isErr()) {
+      throw configReadResult.error;
+    }
+    const config = configReadResult.value;
+    if (config.workspace.metadataStore === "sqlite") {
+      try {
+        const resp = await SQLiteMetadataStore.search(qs);
+        noteIndexProps = resp.hits;
+        noteProps = noteIndexProps.map((ent) => this.notes[ent.id]);
+        // TODO: hack
+        if (!_.isUndefined(vault)) {
+          noteProps = noteProps.filter((ent) =>
+            VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
+          );
+        }
+        this.logger.debug({ ctx: "queryNote", query: resp.query });
+      } catch (err) {
+        fs.appendFileSync("/tmp/out.log", "ERROR: unable to query note", {
+          encoding: "utf8",
+        });
+        noteProps = [];
+      }
+    } else if (this._config.dev?.enableEngineV3) {
+      noteProps = (
+        await this.api.noteQueryMeta({
           opts,
           ws: this.wsRoot,
         })

@@ -562,7 +562,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
   },
   MOVE_SELECTION_TO: {
     key: "dendron.moveSelectionTo",
@@ -655,9 +655,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       args: {
         noteType: "journal",
       },
-      when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+      when: `${DendronContext.PLUGIN_ACTIVE}`,
     },
-    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
+    when: `${DendronContext.PLUGIN_ACTIVE}`,
   },
   CREATE_SCRATCH: {
     key: "dendron.createScratchNote",

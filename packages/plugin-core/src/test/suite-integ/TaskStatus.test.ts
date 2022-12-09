@@ -12,58 +12,64 @@ import { TaskStatusCommand } from "../../commands/TaskStatus";
 suite("GIVEN TaskStatus", function () {
   this.timeout(8e3);
 
-  describeSingleWS("WHEN a link to a task note is selected", {}, () => {
-    let taskNote: NoteProps;
-    let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
-    before(async () => {
-      const ws = ExtensionProvider.getDWorkspace();
-      const { engine, wsRoot } = ws;
-      const vaults = await ws.vaults;
-      const extension = ExtensionProvider.getExtension();
-      showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
-        label: "y",
-      });
-      taskNote = await NoteTestUtilsV4.createNoteWithEngine({
-        engine,
-        fname: "task.test",
-        vault: vaults[0],
-        wsRoot,
-        body: "",
-        custom: {
-          status: "",
-        },
-      });
-      const currentNote = await NoteTestUtilsV4.createNoteWithEngine({
-        engine,
-        fname: "base",
-        vault: vaults[0],
-        wsRoot,
-        body: "[[task.test]]",
-      });
-      const editor = await ExtensionProvider.getWSUtils().openNote(currentNote);
-      editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
-
-      const cmd = new TaskStatusCommand(extension);
-      await cmd.run();
-    });
-    after(() => {
-      showQuickPick.restore();
-    });
-
-    test("THEN prompts for the status", () => {
-      expect(showQuickPick.calledOnce).toBeTruthy();
-    });
-    test("THEN updates the task status", async () => {
-      const { engine } = ExtensionProvider.getDWorkspace();
-      const task = (
-        await engine.findNotesMeta({
+  describeSingleWS(
+    "WHEN a link to a task note is selected",
+    { timeout: 1e6 },
+    () => {
+      let taskNote: NoteProps;
+      let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;
+      before(async () => {
+        const ws = ExtensionProvider.getDWorkspace();
+        const { engine, wsRoot } = ws;
+        const vaults = await ws.vaults;
+        const extension = ExtensionProvider.getExtension();
+        showQuickPick = sinon.stub(VSCodeUtils, "showQuickPick").resolves({
+          label: "y",
+        });
+        taskNote = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
           fname: "task.test",
-          vault: taskNote.vault,
-        })
-      )[0];
-      expect(task?.custom.status === "y");
-    });
-  });
+          vault: vaults[0],
+          wsRoot,
+          body: "",
+          custom: {
+            status: "",
+          },
+        });
+        const currentNote = await NoteTestUtilsV4.createNoteWithEngine({
+          engine,
+          fname: "base",
+          vault: vaults[0],
+          wsRoot,
+          body: "[[task.test]]",
+        });
+        const editor = await ExtensionProvider.getWSUtils().openNote(
+          currentNote
+        );
+        editor.selection = LocationTestUtils.getPresetWikiLinkSelection();
+
+        const cmd = new TaskStatusCommand(extension);
+        await cmd.run();
+      });
+      after(() => {
+        showQuickPick.restore();
+      });
+
+      test("THEN prompts for the status", () => {
+        expect(showQuickPick.calledOnce).toBeTruthy();
+      });
+      test("THEN updates the task status", async () => {
+        const { engine } = ExtensionProvider.getDWorkspace();
+        const task = (
+          await engine.findNotesMeta({
+            fname: "task.test",
+            vault: taskNote.vault,
+          })
+        )[0];
+        expect(task?.custom.status === "y");
+      });
+    }
+  );
 
   describeSingleWS("WHEN a broken link is selected", {}, () => {
     let showQuickPick: SinonStubbedFn<typeof VSCodeUtils["showQuickPick"]>;

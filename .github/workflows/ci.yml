@@ -213,4 +213,3 @@ jobs:
         with:
           name: playwright-report
           path: ./packages/nextjs-template/playwright-report/
-          retention-days: 30

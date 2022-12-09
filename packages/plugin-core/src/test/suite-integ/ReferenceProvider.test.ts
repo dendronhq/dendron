@@ -190,6 +190,7 @@ suite("GIVEN ReferenceProvider", function () {
     test("with multiple vaults", (done) => {
       let noteWithTarget1: NoteProps;
       let noteWithTarget2: NoteProps;
+      this.timeout(5000);
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {

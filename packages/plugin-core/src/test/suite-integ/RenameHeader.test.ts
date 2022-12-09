@@ -43,7 +43,7 @@ async function checkFile({
 
 suite("RenameNote", function () {
   const ctx = setupBeforeAfter(this, {});
-
+  this.timeout(5000);
   let target: NoteProps;
   describeMultiWS(
     "GIVEN a note, and another note that references it",

@@ -50,6 +50,7 @@ suite("RenameProvider", function () {
           body: ["[[dendron://vault1/target]]"].join("\n"),
         });
       },
+      timeout: 5e3,
     },
     () => {
       beforeEach(async () => {

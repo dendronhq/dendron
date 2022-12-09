@@ -3,14 +3,14 @@ import {
   DNodeProps,
   NoteProps,
   DVault,
-  NoteQuickInput,
+  NoteQuickInputV2,
 } from "@dendronhq/common-all";
 import { QuickPick, QuickPickItem, TextEditor, Uri } from "vscode";
 import { DendronBtn } from "./ButtonTypes";
 
 export type FilterQuickPickFunction = (
-  items: NoteQuickInput[]
-) => NoteQuickInput[];
+  items: NoteQuickInputV2[]
+) => NoteQuickInputV2[];
 type ModifyPickerValueFunc = (value?: string) => {
   noteName: string;
   prefix: string;
@@ -32,7 +32,7 @@ export enum DendronQuickPickState {
   PENDING_NEXT_PICK = "PENDING_NEXT_PICK",
 }
 
-export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
+export type DendronQuickPickItemV2 = QuickPick<NoteQuickInputV2>;
 export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   // --- Private State
   _justActivated?: boolean;
@@ -72,7 +72,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   // pagiation
   offset?: number;
   moreResults?: boolean;
-  allResults?: DNodeProps[];
+  allResults?: Omit<DNodeProps, "body">[];
   /**
    * Should VSCode managing sorting of results?
    * Supported in VSCode but not added to the type definition files, see https://github.com/microsoft/vscode/issues/73904#issuecomment-680298036

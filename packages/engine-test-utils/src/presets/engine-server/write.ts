@@ -860,9 +860,8 @@ const NOTES_MULTI = {
     ];
   }),
   NEW_DOMAIN_WITH_FULL_PATH_VAULT: new TestPresetEntryV4(
-    async ({ wsRoot, vaults, engine }) => {
+    async ({ vaults, engine }) => {
       const vault = { ...vaults[1] };
-      vault.fsPath = path.join(wsRoot, vault.fsPath);
       const noteNew = NoteUtils.create({
         id: "bar",
         fname: "bar",

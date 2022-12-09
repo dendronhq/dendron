@@ -12,7 +12,7 @@ import {
   LookupSelectionType,
   LookupSelectionTypeEnum,
   NoteProps,
-  NoteQuickInput,
+  NoteQuickInputV2,
   NoteUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
@@ -103,7 +103,7 @@ type CommandGatherOutput = {
  * Passed into execute command
  */
 export type CommandOpts = {
-  selectedItems: readonly NoteQuickInput[];
+  selectedItems: readonly NoteQuickInputV2[];
   /** source of the command. Added for contextual UI analytics. */
   source?: string;
 } & CommandGatherOutput;
@@ -394,7 +394,7 @@ export class NoteLookupCommand extends BaseCommand<
   }: Pick<
     CommandOpts,
     "selectedItems" | "quickpick"
-  >): readonly NoteQuickInput[] {
+  >): readonly NoteQuickInputV2[] {
     const { canSelectMany } = quickpick;
     return canSelectMany ? selectedItems : selectedItems.slice(0, 1);
   }
@@ -481,7 +481,7 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async acceptItem(
-    item: NoteQuickInput
+    item: NoteQuickInputV2
   ): Promise<OnDidAcceptReturn | undefined> {
     let result: Promise<OnDidAcceptReturn | undefined>;
     const start = process.hrtime();
@@ -513,11 +513,17 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async acceptExistingItem(
-    item: NoteQuickInput
+    item: NoteQuickInputV2
   ): Promise<OnDidAcceptReturn | undefined> {
     const picker = this.controller.quickPick;
     const uri = node2Uri(item);
-    const originalNoteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
+    const engine = ExtensionProvider.getEngine();
+    const resp = await engine.getNote(item.id);
+    if (resp.error) {
+      Logger.error({ error: resp.error });
+      return;
+    }
+    const originalNoteFromItem = resp.data;
     const originalNoteDeepCopy = _.cloneDeep(originalNoteFromItem);
 
     if (picker.selectionProcessFunc !== undefined) {
@@ -526,13 +532,12 @@ export class NoteLookupCommand extends BaseCommand<
       );
       if (processedNode !== undefined) {
         if (!_.isEqual(originalNoteFromItem, processedNode)) {
-          const engine = ExtensionProvider.getEngine();
           await engine.writeNote(processedNode);
         }
         return { uri, node: processedNode };
       }
     }
-    return { uri, node: item };
+    return { uri, node: originalNoteFromItem };
   }
 
   /**
@@ -542,12 +547,15 @@ export class NoteLookupCommand extends BaseCommand<
    * and applies schema if there is one that matches
    */
   async prepareStubItem(opts: {
-    item: NoteQuickInput;
+    item: NoteQuickInputV2;
     engine: IEngineAPIService;
   }): Promise<NoteProps> {
     const { item, engine } = opts;
 
-    const noteFromItem = PickerUtilsV2.noteQuickInputToNote(item);
+    const noteFromItem = {
+      ..._.omit(item, "label", "detail", "alwaysShow"),
+      body: "",
+    };
     const preparedNote = await NoteUtils.updateStubWithSchema({
       stubNote: noteFromItem,
       engine,
@@ -556,7 +564,7 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async acceptNewItem(
-    item: NoteQuickInput
+    item: NoteQuickInputV2
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewItem";
     const picker = this.controller.quickPick;
@@ -633,19 +641,18 @@ export class NoteLookupCommand extends BaseCommand<
   }
 
   async acceptNewWithTemplateItem(
-    item: NoteQuickInput
+    item: NoteQuickInputV2
   ): Promise<OnDidAcceptReturn | undefined> {
     const ctx = "acceptNewWithTemplateItem";
     const picker = this.controller.quickPick;
     const fname = this.getFNameForNewItem(item);
 
     const engine = ExtensionProvider.getEngine();
-    let nodeNew: NoteProps = item;
     const vault = await this.getVaultForNewNote({ fname, picker });
     if (vault === undefined) {
       return;
     }
-    nodeNew = NoteUtils.create({
+    let nodeNew: NoteProps = NoteUtils.create({
       fname,
       vault,
       title: item.title,
@@ -690,7 +697,7 @@ export class NoteLookupCommand extends BaseCommand<
    *
    * Added to quickly fix the journal names not being created properly.
    */
-  private getFNameForNewItem(item: NoteQuickInput) {
+  private getFNameForNewItem(item: NoteQuickInputV2) {
     if (this.isJournalButtonPressed()) {
       return PickerUtilsV2.getValue(this.controller.quickPick);
     } else {

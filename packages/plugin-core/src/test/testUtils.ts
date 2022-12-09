@@ -1,4 +1,4 @@
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import { NoteQuickInputV2 } from "@dendronhq/common-all";
 import {
   HistoryEvent,
   HistoryEventAction,
@@ -39,7 +39,7 @@ export function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
 
 type QuickPickOpts = Partial<{
   value: string;
-  selectedItems: DNodePropsQuickInputV2[];
+  selectedItems: NoteQuickInputV2[];
   canSelectMany: boolean;
   buttons: DendronBtn[];
 }>;
@@ -50,7 +50,7 @@ export function createMockQuickPick({
   canSelectMany,
   buttons,
 }: QuickPickOpts): DendronQuickPickerV2 {
-  const qp = vscode.window.createQuickPick<DNodePropsQuickInputV2>();
+  const qp = vscode.window.createQuickPick<NoteQuickInputV2>();
   if (value) {
     qp.value = value;
   }

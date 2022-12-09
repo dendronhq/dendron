@@ -13,21 +13,17 @@ export class SchemaPickerUtils {
   }: {
     picker: DendronQuickPickerV2;
   }) {
-    const ws = ExtensionProvider.getDWorkspace();
-    const { engine, wsRoot } = ws;
-    const vaults = await ws.vaults;
+    const { engine } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(picker.value);
     if (resp.data && resp.data.length > 0) {
       const node = SchemaUtils.getModuleRoot(resp.data[0]);
       if (node.fname === picker.value) {
         return [
-          DNodeUtils.enhancePropForQuickInputV3({
-            wsRoot,
+          DNodeUtils.enhancePropForQuickInputV4({
             props: node,
             schema: node.schema
               ? (await engine.getSchema(node.schema.moduleId)).data
               : undefined,
-            vaults,
           }),
         ];
       }
@@ -47,9 +43,7 @@ export class SchemaPickerUtils {
     const ctx = "SchemaPickerUtils:fetchPickerResults";
     const start = process.hrtime();
     const { picker, qs } = opts;
-    const ws = ExtensionProvider.getDWorkspace();
-    const { engine, wsRoot } = ws;
-    const vaults = await ws.vaults;
+    const { engine } = ExtensionProvider.getDWorkspace();
     const resp = await engine.querySchema(qs);
     let nodes: SchemaProps[] = [];
     if (resp.data) {
@@ -66,15 +60,13 @@ export class SchemaPickerUtils {
     }
     const updatedItems = await Promise.all(
       nodes.map(async (ent) =>
-        DNodeUtils.enhancePropForQuickInputV3({
-          wsRoot,
+        DNodeUtils.enhancePropForQuickInputV4({
           props: ent,
           schema: ent.schema
             ? (
                 await engine.getSchema(ent.schema.moduleId)
               ).data
             : undefined,
-          vaults,
           alwaysShow: picker.alwaysShowAll,
         })
       )

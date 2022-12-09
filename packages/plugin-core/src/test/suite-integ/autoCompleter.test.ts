@@ -3,7 +3,7 @@ import { describe, it } from "mocha";
 import { expect } from "../expect";
 import { VSCodeUtils } from "../../vsCodeUtils";
 import { TestNoteFactory } from "@dendronhq/common-test-utils";
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import { NoteQuickInputV2 } from "@dendronhq/common-all";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
 
 const LANGUAGE_FNAMES = [
@@ -27,7 +27,7 @@ describe(`Auto Completer tests.`, () => {
     describe(`WHEN we are at the first value of dropdown`, () => {
       it("THEN we should do partial completion", async () => {
         const quickPick =
-          VSCodeUtils.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
+          VSCodeUtils.createQuickPick<NoteQuickInputV2>() as DendronQuickPickerV2;
         const items = await noteFactory.createNoteInputWithFNames(
           LANGUAGE_FNAMES
         );
@@ -51,7 +51,7 @@ describe(`Auto Completer tests.`, () => {
           "languages.with-data.make-sense",
         ];
         const quickPick =
-          VSCodeUtils.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
+          VSCodeUtils.createQuickPick<NoteQuickInputV2>() as DendronQuickPickerV2;
         const items = await noteFactory.createNoteInputWithFNames(fnames);
 
         quickPick.items = items;
@@ -67,7 +67,7 @@ describe(`Auto Completer tests.`, () => {
     describe(`WHEN we are at subsequent value of dropdown`, () => {
       it("THEN we should do full completion", async () => {
         const quickPick =
-          VSCodeUtils.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
+          VSCodeUtils.createQuickPick<NoteQuickInputV2>() as DendronQuickPickerV2;
         const items = await noteFactory.createNoteInputWithFNames(
           LANGUAGE_FNAMES
         );

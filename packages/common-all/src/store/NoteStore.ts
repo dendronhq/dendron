@@ -269,6 +269,24 @@ export class NoteStore implements INoteStore<string> {
   }
 
   /**
+   * See {@link INoteStore.query}
+   */
+  query(
+    opts: QueryNotesOpts
+  ): ResultAsync<NoteProps[], IDendronError<StatusCodes | undefined>> {
+    const result = this._metadataStore
+      .query(opts)
+      .map((items) => {
+        return this.bulkGet(items.map((ent) => ent.id));
+      })
+      .map((responses) =>
+        responses.map((resp) => resp.data).filter(isNotUndefined)
+      );
+
+    return result;
+  }
+
+  /**
    * See {@link INoteStore.queryMetadata}
    */
   queryMetadata(

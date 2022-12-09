@@ -2,7 +2,7 @@ import {
   ConfigUtils,
   InsertNoteLinkAliasMode,
   InsertNoteLinkAliasModeEnum,
-  NoteProps,
+  NotePropsMeta,
   NoteUtils,
 } from "@dendronhq/common-all";
 import { HistoryEvent } from "@dendronhq/engine-server";
@@ -25,7 +25,7 @@ type CommandInput = {
 };
 
 type CommandOpts = {
-  notes: readonly NoteProps[];
+  notes: readonly NotePropsMeta[];
 } & CommandInput;
 type CommandOutput = CommandOpts;
 
@@ -91,7 +91,7 @@ export class InsertNoteLinkCommand extends BasicCommand<
     });
   }
 
-  async promptForAlias(note: NoteProps) {
+  async promptForAlias(note: NotePropsMeta) {
     const value = await VSCodeUtils.showInputBox({
       prompt: `Alias for note link of ${note.fname}. Leave blank to skip aliasing.`,
       ignoreFocusOut: true,

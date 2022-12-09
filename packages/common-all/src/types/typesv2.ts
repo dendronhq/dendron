@@ -87,7 +87,7 @@ export type SchemaRaw = Pick<SchemaProps, "id"> &
     Pick<DNodeProps, "children">
   >;
 
-export type SchemaOpts = Omit<DNodeOpts<SchemaData>, "type" | "id"> & {
+export type SchemaOpts = Omit<DNodeOpts<SchemaData>, "type" | "id" | "body"> & {
   id: string;
 };
 export type NoteOpts = Omit<DNodeOpts, "type">;
@@ -97,20 +97,12 @@ export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
   detail?: string;
   alwaysShow?: boolean;
 };
-export type NoteQuickInput = NoteProps & {
-  label: string;
-  detail?: string;
-  alwaysShow?: boolean;
-};
 
 /**
  * A reduced version of NoteQuickInput that only keeps the props necessary for
  * lookup quick pick items
  */
-export type NoteQuickInputV2 = Pick<
-  NoteProps,
-  "fname" | "vault" | "schema" | "stub"
-> & {
+export type NoteQuickInputV2 = NotePropsMeta & {
   label: string;
   detail?: string;
   alwaysShow?: boolean;
@@ -381,6 +373,7 @@ export type BulkWriteNotesResp = RespWithOptError<NoteChangeEntry[]>;
 export type UpdateNoteResp = RespV2<NoteChangeEntry[]>; // TODO: remove
 export type DeleteNoteResp = RespV3<NoteChangeEntry[]>;
 export type QueryNotesResp = NoteProps[];
+export type QueryNotesMetaResp = NotePropsMeta[];
 export type RenameNoteResp = RespV3<NoteChangeEntry[]>;
 export type EngineInfoResp = RespV3<{
   version: string;
@@ -509,9 +502,13 @@ export type DEngine = DCommonProps &
     getSchema: (id: string) => Promise<GetSchemaResp>;
     querySchema: (qs: string) => Promise<QuerySchemaResp>;
     /**
-     * Query for NoteProps from fuse engine
+     * Query for NoteProps
      */
     queryNotes: (opts: QueryNotesOpts) => Promise<QueryNotesResp>;
+    /**
+     * Query for NotePropsMeta
+     */
+    queryNotesMeta: (opts: QueryNotesOpts) => Promise<QueryNotesMetaResp>;
     /**
      * Rename note from old DNoteLoc to new DNoteLoc. New note keeps original id
      */

@@ -172,7 +172,7 @@ async function getRecursiveNoteDependencies(
   // the all notes that match the wildcard pattern.
   await Promise.all(
     wildCards.map(async (data) => {
-      const resp = await engine.queryNotes({
+      const resp = await engine.queryNotesMeta({
         qs: data.fname,
         originalQS: data.fname,
         // vault: data.vaultName

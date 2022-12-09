@@ -5,7 +5,7 @@ import {
   LookupEvents,
   NoteLookupUtils,
   NoteProps,
-  NoteQuickInput,
+  NoteQuickInputV2,
   NoteUtils,
   SchemaUtils,
   VSCodeEvents,
@@ -119,7 +119,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return;
   }
 
-  shouldRejectItem(opts: { item: NoteQuickInput }):
+  shouldRejectItem(opts: { item: NoteQuickInputV2 }):
     | {
         shouldReject: true;
         reason: InvalidFilenameReason;
@@ -334,7 +334,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       }
 
       // initialize with current picker items without default items present
-      const items: NoteQuickInput[] = [...picker.items];
+      const items: NoteQuickInputV2[] = [...picker.items];
       let updatedItems = PickerUtilsV2.filterDefaultItems(items);
       if (token?.isCancellationRequested) {
         return;

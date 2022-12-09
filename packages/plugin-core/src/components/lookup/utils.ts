@@ -2,14 +2,14 @@
 import {
   DendronError,
   DEngineClient,
-  DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
   DNoteLoc,
   DVault,
   FuseEngine,
   NoteProps,
-  NoteQuickInput,
+  NotePropsMeta,
+  NoteQuickInputV2,
   OrderedMatcher,
   RenameNoteOpts,
   RespV2,
@@ -87,7 +87,7 @@ export function createMoreResults(): DNodePropsQuickInputV2 {
   };
 }
 
-export function node2Uri(node: DNodeProps): Uri {
+export function node2Uri(node: NotePropsMeta): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
   const { wsRoot } = ExtensionProvider.getDWorkspace();
@@ -219,7 +219,7 @@ export class PickerUtilsV2 {
       }
     );
     const quickPick =
-      window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
+      window.createQuickPick<NoteQuickInputV2>() as DendronQuickPickerV2;
     quickPick.title = title;
     quickPick.state = DendronQuickPickState.IDLE;
     quickPick.nonInteractive = opts.nonInteractive;
@@ -260,77 +260,19 @@ export class PickerUtilsV2 {
     return quickPick;
   }
 
-  static createDendronQuickPickItem(
-    opts: DNodePropsQuickInputV2
-  ): DNodePropsQuickInputV2 {
-    return {
-      ...opts,
-    };
-  }
-
-  static createDendronQuickPickItemFromNote(
-    opts: NoteProps
-  ): DNodePropsQuickInputV2 {
-    return {
-      ...opts,
-      label: opts.fname,
-    };
-  }
-
   static getValue(picker: DendronQuickPickerV2) {
     return picker.value;
   }
 
-  static getSelection(picker: DendronQuickPickerV2): DNodePropsQuickInputV2[] {
-    return [...picker.selectedItems];
-  }
-
-  static filterCreateNewItem = (
-    items: DNodePropsQuickInputV2[]
-  ): DNodePropsQuickInputV2[] => {
-    return _.reject(items, { label: CREATE_NEW_LABEL });
-  };
-
   static filterDefaultItems = (
-    items: DNodePropsQuickInputV2[]
-  ): DNodePropsQuickInputV2[] => {
+    items: NoteQuickInputV2[]
+  ): NoteQuickInputV2[] => {
     return _.reject(
       items,
       (ent) =>
         ent.label === CREATE_NEW_LABEL || ent.label === MORE_RESULTS_LABEL
     );
   };
-
-  /**
-   * Reject all items that are over a given level
-   * @param items
-   * @param lvl
-   */
-  static filterByDepth = (
-    items: DNodePropsQuickInputV2[],
-    depth: number
-  ): DNodePropsQuickInputV2[] => {
-    return _.reject(items, (ent) => {
-      return DNodeUtils.getDepth(ent) > depth;
-    });
-  };
-
-  /** Reject all items that are stubs */
-  static filterNonStubs(
-    items: DNodePropsQuickInputV2[]
-  ): DNodePropsQuickInputV2[] {
-    return _.filter(items, (ent) => {
-      return !ent.stub;
-    });
-  }
-
-  static getFnameForOpenEditor(): string | undefined {
-    const activeEditor = VSCodeUtils.getActiveTextEditor();
-    if (activeEditor) {
-      return path.basename(activeEditor.document.fileName, ".md");
-    }
-    return;
-  }
 
   /**
    * Defaults to first vault if current note is not part of a vault
@@ -386,7 +328,7 @@ export class PickerUtilsV2 {
   static hasNextPicker = (
     quickpick: DendronQuickPickerV2,
     opts: {
-      selectedItems: readonly DNodePropsQuickInputV2[];
+      selectedItems: readonly NoteQuickInputV2[];
       providerId: string;
     }
   ): quickpick is Required<DendronQuickPickerV2> => {
@@ -400,7 +342,7 @@ export class PickerUtilsV2 {
     );
   };
 
-  static isCreateNewNotePickedForSingle(node: DNodePropsQuickInputV2): boolean {
+  static isCreateNewNotePickedForSingle(node: NoteQuickInputV2): boolean {
     if (!node) {
       return true;
     }
@@ -415,7 +357,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isCreateNewNotePicked(node: DNodePropsQuickInputV2): boolean {
+  static isCreateNewNotePicked(node: NoteQuickInputV2): boolean {
     if (!node) {
       return true;
     }
@@ -430,9 +372,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isCreateNewNoteWithTemplatePicked(
-    node: DNodePropsQuickInputV2
-  ): boolean {
+  static isCreateNewNoteWithTemplatePicked(node: NoteQuickInputV2): boolean {
     return (
       this.isCreateNewNotePicked(node) &&
       node.detail === CREATE_NEW_NOTE_WITH_TEMPLATE_DETAIL
@@ -546,7 +486,7 @@ export class PickerUtilsV2 {
 
     const domain = fname.split(".").slice(0, -1);
     const newQs = domain.join(".");
-    const queryResponse = await engine.queryNotes({
+    const queryResponse = await engine.queryNotesMeta({
       qs: newQs,
       originalQS: newQs,
     });
@@ -658,11 +598,6 @@ export class PickerUtilsV2 {
     delete picker.offset;
     delete picker.allResults;
   }
-
-  static noteQuickInputToNote(item: NoteQuickInput): NoteProps {
-    const props: NoteProps = _.omit(item, "label", "detail", "alwaysShow");
-    return props;
-  }
 }
 
 function countDots(subStr: string) {
@@ -671,7 +606,7 @@ function countDots(subStr: string) {
 
 function sortForQueryEndingWithDot(
   transformedQuery: TransformedQueryString,
-  itemsToFilter: NoteProps[]
+  itemsToFilter: NotePropsMeta[]
 ) {
   const lowercaseQuery = transformedQuery.originalQuery.toLowerCase();
 
@@ -748,9 +683,9 @@ export const filterPickerResults = ({
   itemsToFilter,
   transformedQuery,
 }: {
-  itemsToFilter: NoteProps[];
+  itemsToFilter: NotePropsMeta[];
   transformedQuery: TransformedQueryString;
-}): NoteProps[] => {
+}): NotePropsMeta[] => {
   // If we have specific vault name within the query then keep only those results
   // that match the specific vault name.
   if (transformedQuery.vaultName) {

@@ -12,6 +12,7 @@ import {
   FindNotesMetaResp,
   GetNoteMetaResp,
   GetNoteResp,
+  QueryNotesMetaResp,
   QueryNotesOpts,
   RenameNoteOpts,
   SchemaModuleProps,
@@ -440,6 +441,14 @@ export class DendronAPI extends API {
   noteQuery(req: NoteQueryRequest): Promise<RespV3<QueryNotesResp>> {
     return this._makeRequest({
       path: "note/query",
+      method: "get",
+      qs: req,
+    });
+  }
+
+  noteQueryMeta(req: NoteQueryRequest): Promise<RespV3<QueryNotesMetaResp>> {
+    return this._makeRequest({
+      path: "note/queryMeta",
       method: "get",
       qs: req,
     });

@@ -76,7 +76,7 @@ export class VaultQuickPick {
 
     const domain = fname.split(".").slice(0, -1);
     const newQs = domain.join(".");
-    const queryResponse = await this._engine.queryNotes({
+    const queryResponse = await this._engine.queryNotesMeta({
       qs: newQs,
       originalQS: newQs,
     });

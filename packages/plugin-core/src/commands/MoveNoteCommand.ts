@@ -215,10 +215,13 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         items = [];
       }
     } else {
-      const notes = data.selectedItems.map(
-        (item): NoteProps => _.omit(item, ["label", "detail", "alwaysShow"])
-      );
-      items = notes;
+      const noteIds = data.selectedItems.map((item) => item.id);
+      const resp = await engine.bulkGetNotes(noteIds);
+      if (resp.error) {
+        this.L.error({ ctx, error: resp.error });
+        return;
+      }
+      items = resp.data;
     }
 
     const basicStats = StatisticsUtils.getBasicStatsFromNotes(items);

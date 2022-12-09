@@ -185,7 +185,7 @@ export class DNodeUtils {
    * @returns
    */
   static enhancePropForQuickInputV4(opts: {
-    props: NoteProps;
+    props: NotePropsMeta;
     schema?: SchemaModuleProps;
     alwaysShow?: boolean;
   }): NoteQuickInputV2 {
@@ -285,7 +285,7 @@ export class DNodeUtils {
     return _.omit(props, blacklist);
   }
 
-  static getDepth(node: DNodeProps): number {
+  static getDepth(node: NotePropsMeta): number {
     return this.getFNameDepth(node.fname);
   }
 
@@ -407,7 +407,7 @@ export class NoteUtils {
   }
 
   static addSchema(opts: {
-    note: NoteProps;
+    note: NotePropsMeta;
     schemaModule: SchemaModuleProps;
     schema: SchemaProps;
   }) {
@@ -601,7 +601,10 @@ export class NoteUtils {
     });
   }
 
-  static genSchemaDesc(note: NoteProps, schemaMod?: SchemaModuleProps): string {
+  static genSchemaDesc(
+    note: NotePropsMeta,
+    schemaMod?: SchemaModuleProps
+  ): string {
     const prefixParts = [];
     if (note.title !== note.fname) {
       prefixParts.push(note.title);
@@ -1342,30 +1345,6 @@ export class SchemaUtils {
     };
   }
 
-  static enhanceForQuickInput({
-    props,
-    vaults,
-  }: {
-    props: SchemaModuleProps;
-    vaults: DVault[];
-  }): DNodePropsQuickInputV2 {
-    const vaultSuffix =
-      vaults.length > 1
-        ? ` (${path.basename(props.vault?.fsPath as string)})`
-        : "";
-    const label = DNodeUtils.isRoot(props.root) ? "root" : props.root.id;
-    const detail = props.root.desc;
-    const out = {
-      ...props.root,
-      fname: props.fname,
-      label,
-      detail,
-      description: vaultSuffix,
-      vault: props.vault,
-    };
-    return out;
-  }
-
   static getModuleRoot(
     module: SchemaModuleOpts | SchemaModuleProps
   ): SchemaProps {
@@ -1451,7 +1430,7 @@ export class SchemaUtils {
     note,
     engine,
   }: {
-    note: NoteProps;
+    note: NotePropsMeta;
     engine: DEngineClient;
   }) {
     if (note.schema) {

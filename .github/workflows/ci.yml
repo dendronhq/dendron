@@ -205,10 +205,12 @@ jobs:
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
           GITHUB_SHA: $GITHUB_SHA
           GITHUB_REF: $GITHUB_REF
-        run: yarn ci:test:template
+        run: yarn ci:test:template --reporter=html
 
       - name: Upload Playwright test results
         uses: actions/upload-artifact@v3
+        if: always()
         with:
-          name: test-artifact
-          path: ./packages/nextjs-template/test-results/
+          name: playwright-report
+          path: ./packages/nextjs-template/playwright-report/
+          retention-days: 30

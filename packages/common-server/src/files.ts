@@ -1,4 +1,4 @@
-import fs, { Dirent } from "fs-extra";
+import fs, { Dirent, Mode } from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
 import _ from "lodash";
@@ -225,6 +225,29 @@ const readFileSync = fromThrowable(fs.readFileSync, (error) => {
 
 export function readString(path: string) {
   return readFileSync(path, "utf8") as Result<string, DendronError>;
+}
+
+export function mkDir(
+  path: fs.PathLike,
+  options: Mode | fs.MakeDirectoryOptions | null
+) {
+  return fromPromise(fs.mkdir(path, options), (error: unknown) => {
+    return new DendronError({
+      message: `Unable to create ${path}`,
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
+}
+
+export function writeFile(file: fs.PathLike, data: any) {
+  return fromPromise(fs.writeFile(file, data), (error: unknown) => {
+    return new DendronError({
+      message: `Unable to write ${path}`,
+      severity: ERROR_SEVERITY.FATAL,
+      ...(error instanceof Error && { innerError: error }),
+    });
+  });
 }
 
 export function readJson(path: string) {

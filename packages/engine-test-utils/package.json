@@ -57,16 +57,21 @@
     "@dendronhq/pods-core": "^0.119.0",
     "@dendronhq/unified": "^0.119.0",
     "@reduxjs/toolkit": "^1.6.0",
+    "@size-limit/file": "^8.1.0",
+    "@size-limit/time": "^8.1.0",
+    "@size-limit/webpack": "^8.1.0",
     "@types/sinon": "^9.0.9",
     "cross-env": "^7.0.3",
     "fs-extra": "^9.0.1",
     "jest": "^28.1.0",
     "jest-mock-extended": "^2.0.7",
+    "lighthouse": "^9.6.8",
     "lodash": "^4.17.20",
     "prompts": "^2.4.2",
     "react": "^17.0.2",
     "react-redux": "^7.2.4",
     "react-test-renderer": "^17.0.2",
-    "sinon": "^9.2.1"
+    "sinon": "^9.2.1",
+    "size-limit": "^8.1.0"
   }
 }

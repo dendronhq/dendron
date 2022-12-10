@@ -1,7 +1,7 @@
 import { DendronError, Stage } from "@dendronhq/common-all";
 import { RewriteFrames } from "@sentry/integrations";
 import * as Sentry from "@sentry/node";
-import { CaptureContext } from "@sentry/types";
+import { NodeOptions } from "@sentry/node/types";
 import _ from "lodash";
 
 // Extracted to make testing easy
@@ -58,7 +58,7 @@ export function initializeSentry({
   const dsn =
     "https://bc206b31a30a4595a2efb31e8cc0c04e@o949501.ingest.sentry.io/5898219";
 
-  const initialScope: CaptureContext = {};
+  const initialScope: NodeOptions["initialScope"] = {};
   if (sessionId) {
     initialScope.tags = { sessionId };
   }

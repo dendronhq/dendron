@@ -152,6 +152,8 @@ jobs:
         run: yarn ci:test:plugin-web
 
   test-playwright:
+    environment: plugin-development
+
     timeout-minutes: 15
 
     runs-on: ubuntu-latest
@@ -198,10 +200,16 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: yarn ci:test:template
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          GITHUB_SHA: $GITHUB_SHA
+          GITHUB_REF: $GITHUB_REF
+        run: yarn ci:test:template --reporter=html
 
       - name: Upload Playwright test results
         uses: actions/upload-artifact@v3
+        if: always()
         with:
-          name: test-artifact
-          path: ./packages/nextjs-template/test-results/
+          name: playwright-report
+          path: ./packages/nextjs-template/playwright-report/

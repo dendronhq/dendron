@@ -158,6 +158,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    container:
+      image: mcr.microsoft.com/playwright:v1.28.0-focal
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v3

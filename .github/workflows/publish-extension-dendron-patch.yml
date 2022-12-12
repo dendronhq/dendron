@@ -95,7 +95,7 @@ jobs:
           if [ ${{ matrix.platform }} == general ]; then
             yarn build:patch:remote:ci:noparam
           else 
-            yarn build:patch:remote:ci ${{ env.PUBLISHING_TARGET }}
+            yarn build:patch:local:ci ${{ env.PUBLISHING_TARGET }}
           fi
 
       - name: Upload VSIX Artifact

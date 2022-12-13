@@ -1458,7 +1458,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     latestUpdated: number;
     visitedIds: Set<string>;
   }): Promise<boolean> {
-    if (note.updated > latestUpdated) {
+    if (note && note.updated > latestUpdated) {
       return false;
     }
 
@@ -1469,8 +1469,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
     } else {
       visitedIds.add(note.id);
     }
-
-    const linkedRefNotes = await Promise.all(
+    let linkedRefNotes = await Promise.all(
       note.links
         .filter((link) => link.type === "ref")
         .filter((link) => link.to && link.to.fname)
@@ -1493,6 +1492,7 @@ export class DendronEngineV3 extends EngineV3Base implements DEngine {
           )[0];
         })
     );
+    linkedRefNotes = linkedRefNotes.filter((linkedNote) => !!linkedNote);
 
     for (const linkedNote of linkedRefNotes) {
       // Recurse into each child reference linked note.

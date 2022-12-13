@@ -1,6 +1,5 @@
-import { DLogger } from "@dendronhq/common-all";
+import { DLogger, ResultAsync } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
-import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError, SqliteErrorType } from "./SqliteError";
 

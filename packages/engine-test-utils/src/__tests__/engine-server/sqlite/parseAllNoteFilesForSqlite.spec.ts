@@ -1,4 +1,4 @@
-import { DVault, NoteUtils, Position } from "@dendronhq/common-all";
+import { DVault, NoteUtils, Position, Ok } from "@dendronhq/common-all";
 import { note2File, tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
@@ -12,7 +12,6 @@ import {
   VaultsTableUtils,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import { Ok } from "neverthrow";
 import path from "path";
 import { Database } from "sqlite3";
 import {

@@ -13,6 +13,11 @@ import {
   Position,
   string2Note,
   Time,
+  err,
+  ok,
+  okAsync,
+  Result,
+  ResultAsync,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import {
@@ -26,7 +31,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import { Text } from "mdast";
-import { err, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import path from "path";
 import { Database } from "sqlite3";
 import { Parent } from "unist";
@@ -945,7 +949,7 @@ function updateLinksForChangedNoteId(
   const sql = `
   UPDATE Links
   SET sink = UpdatedIds.newId
-  FROM 
+  FROM
   (
     WITH T(fname, id) AS
       (VALUES ${values})
@@ -992,10 +996,10 @@ function deleteRemovedFilesFromDB(
       DELETE FROM NoteProps AS Outer
       WHERE EXISTS
       (
-        WITH T(fname) as 
+        WITH T(fname) as
         (VALUES ${values})
         SELECT NoteProps.id
-        FROM 
+        FROM
         (SELECT fname
         FROM NoteProps
         EXCEPT
@@ -1024,7 +1028,7 @@ function deleteLinksForUpdatedNotes(
     DELETE FROM Links AS Outer
     WHERE EXISTS
     (
-      WITH T(fname) as 
+      WITH T(fname) as
       (VALUES ${values})
       SELECT Links.source, NoteProps.fname, VaultNotes.vaultId, Links.linkType
       FROM T

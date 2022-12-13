@@ -1,4 +1,4 @@
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "@dendronhq/common-all";
 import { Database } from "sqlite3";
 import { SqliteError, SqliteErrorType } from "../SqliteError";
 import { SqliteQueryUtils } from "../SqliteQueryUtils";

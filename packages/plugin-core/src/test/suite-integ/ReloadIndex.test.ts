@@ -225,6 +225,7 @@ suite("GIVEN ReloadIndex", function () {
           vaults
         );
       },
+      timeout: 5e3,
     },
     () => {
       test("THEN it prompts to fix the config", async () => {

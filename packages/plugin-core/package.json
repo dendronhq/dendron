@@ -711,7 +711,7 @@
         },
         {
           "command": "dendron.moveNote",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.moveSelectionTo",
@@ -759,7 +759,7 @@
         },
         {
           "command": "dendron.createJournalNote",
-          "when": "dendron:pluginActive && shellExecutionSupported"
+          "when": "dendron:pluginActive"
         },
         {
           "command": "dendron.createScratchNote",
@@ -1404,7 +1404,7 @@
         "args": {
           "noteType": "journal"
         },
-        "when": "dendron:pluginActive && shellExecutionSupported"
+        "when": "dendron:pluginActive"
       },
       {
         "command": "dendron.createScratchNote",

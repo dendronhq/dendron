@@ -128,6 +128,7 @@ suite("DoctorCommandTest", function () {
           },
         });
       },
+      timeout: 5e3,
     },
     () => {
       test("THEN fix id", async () => {
@@ -408,7 +409,7 @@ suite("CREATE_MISSING_LINKED_NOTES", function () {
         await ENGINE_HOOKS.setupBasic(opts);
       },
       // this test can take up to 3s to run
-      timeout: 3e3,
+      timeout: 5e3,
     },
     () => {
       test("THEN fix all links", async () => {

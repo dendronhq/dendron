@@ -71,7 +71,7 @@ suite("PreviewLinkHandler", () => {
           },
         });
       },
-      timeout: 5e3,
+      timeout: 8e3,
     },
     () => {
       let note: NotePropsMeta;

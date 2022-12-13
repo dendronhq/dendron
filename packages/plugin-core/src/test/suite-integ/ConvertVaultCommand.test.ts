@@ -120,6 +120,7 @@ suite("GIVEN ConvertVaultCommand", function () {
         config.dev = { enableSelfContainedVaults: true };
         return config;
       },
+      timeout: 5e3,
     },
     () => {
       let remote: string;

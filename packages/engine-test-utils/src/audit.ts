@@ -104,7 +104,7 @@ type Audit = {
   sizes: {
     [name: string]: {
       [key in SizeMetrics | TimeMetrics]?: {
-        value: number | string;
+        value: number | undefined;
         unit: string | undefined;
         description: string | undefined;
       };
@@ -250,18 +250,11 @@ function computeSizes(filePathsMap: FilePathsMap) {
       };
     });
   });
-  return ResultAsync.combine(resultList) as ResultAsync<
-    {
-      [name: string]: {
-        [key in SizeMetrics | TimeMetrics]?: {
-          value: number | string;
-          unit: string | undefined;
-          description: string | undefined;
-        };
-      };
-    },
-    DendronError
-  >;
+  return ResultAsync.combine(resultList).map((result) => {
+    return result.reduce((accum, current) => {
+      return { ...accum, ...current };
+    });
+  });
 }
 
 async function computeVitals(
@@ -352,6 +345,7 @@ export async function playAudit(auditConfig: AuditConfig) {
             ] as const;
           })
       );
+
       const audit: Audit = {
         name: new Date().toISOString().replace(/:/g, "_"),
         date: Time.now().toLocaleString(),

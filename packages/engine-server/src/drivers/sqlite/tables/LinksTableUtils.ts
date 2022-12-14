@@ -1,6 +1,5 @@
-import { DLink, NotePropsMeta } from "@dendronhq/common-all";
+import { DLink, NotePropsMeta, ResultAsync } from "@dendronhq/common-all";
 import _ from "lodash";
-import { ResultAsync } from "neverthrow";
 import { Database } from "sqlite3";
 import { SqliteError } from "../SqliteError";
 import { SqliteQueryUtils } from "../SqliteQueryUtils";
@@ -97,7 +96,7 @@ export class LinksTableUtils {
 
     const sql = `
       INSERT OR IGNORE INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
-      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS 
+      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS
       (VALUES ${values})
       SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
       LEFT OUTER JOIN NoteProps ON T.fname = NoteProps.fname`;
@@ -124,7 +123,7 @@ export class LinksTableUtils {
 
     const sql = `
       INSERT OR IGNORE INTO Links (source, sink, linkType, sinkFname, sinkVaultName, payload)
-      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS 
+      WITH T(source, fname, linkType, sinkFname, sinkVaultName, payload) AS
       (VALUES ${values})
       SELECT T.source, NoteProps.id, T.linkType, T.sinkFname, T.sinkVaultName, T.payload FROM T
       JOIN NoteProps ON T.fname = NoteProps.fname`;
@@ -230,7 +229,7 @@ export class LinksTableUtils {
     const sql = `
     UPDATE Links
     SET sink = AddedNotes.newId
-    FROM 
+    FROM
     (
       WITH T(fname, id, vaultName) AS
         (VALUES ${values})

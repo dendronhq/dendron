@@ -343,7 +343,7 @@ export abstract class BaseExportPodCommand<
     });
   }
 
-  private async getPropsForNoteScope(): Promise<DNodeProps[] | undefined> {
+  async getPropsForNoteScope(): Promise<DNodeProps[] | undefined> {
     //TODO: Switch this to a lookup controller, allow multiselect
     const fsPath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!fsPath) {

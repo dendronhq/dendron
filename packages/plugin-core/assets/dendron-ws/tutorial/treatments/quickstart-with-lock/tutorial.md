@@ -79,7 +79,7 @@ Depending on your needs, here are some common next steps:
 
 - I want to **start writing**: [Create a daily journal note](command:dendron.createDailyJournalNote) ([docs](https://wiki.dendron.so/notes/ogIUqY5VDCJP28G3cAJhd))
 
-- I want to **use templates**: Use the [Appy Template](https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6) command to apply [templates](https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2) to existing notes
+- I want to **use templates**: Use the [Apply Template](https://wiki.dendron.so/notes/ftohqknticu6bw4cfmzskq6) command to apply [templates](https://wiki.dendron.so/notes/861cbdf8-102e-4633-9933-1f3d74df53d2) to existing notes
 
 - I want to do a **longer tutorial**: Check out our [5min tutorial to explore more of Dendron's functionality](https://wiki.dendron.so/notes/678c77d9-ef2c-4537-97b5-64556d6337f1/)
 

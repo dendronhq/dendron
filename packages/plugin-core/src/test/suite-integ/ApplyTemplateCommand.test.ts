@@ -7,6 +7,8 @@ import { ExtensionProvider } from "../../ExtensionProvider";
 import { WSUtilsV2 } from "../../WSUtilsV2";
 import { expect } from "../testUtilsv2";
 import { describeMultiWS, describeSingleWS } from "../testUtilsV3";
+import * as vscode from "vscode";
+import { QuickPickTemplateSelector } from "../../components/lookup/QuickPickTemplateSelector";
 
 // these tests can run longer than the default 2s timeout;
 const timeout = 5e3;
@@ -48,6 +50,15 @@ function createTemplateNote({ body, custom }: { body: string; custom?: any }) {
   });
 }
 
+async function prepareTemplateTest(targetNote?: NoteProps) {
+  const ext = ExtensionProvider.getExtension();
+  const engine = ext.getEngine();
+  const note = targetNote || (await engine.getNote("foo")).data!;
+  // note needs to be open, otherwise, command will throw an error
+  await WSUtilsV2.instance().openNote(note);
+  return note;
+}
+
 async function runTemplateTest({
   templateNote,
   targetNote: _targetNote,
@@ -55,11 +66,7 @@ async function runTemplateTest({
   templateNote: NoteProps;
   targetNote?: NoteProps;
 }) {
-  const ext = ExtensionProvider.getExtension();
-  const engine = ext.getEngine();
-  const targetNote = _targetNote || (await engine.getNote("foo")).data!;
-  // note needs to be open, otherwise, command will throw an error
-  await WSUtilsV2.instance().openNote(targetNote);
+  const targetNote = await prepareTemplateTest(_targetNote);
   const { updatedTargetNote } = await executeTemplateApply({
     templateNote,
     targetNote,
@@ -141,6 +148,31 @@ suite("ApplyTemplate", function () {
             match: ["hello john"],
           })
         ).toBeTruthy();
+      });
+    }
+  );
+
+  describeMultiWS(
+    "WHEN ApplyTemplate run with no template found",
+    {
+      preSetupHook: basicPreset,
+      timeout: 1e6,
+    },
+    () => {
+      test("THEN show error message about missing template", async () => {
+        sinon
+          .stub(QuickPickTemplateSelector.prototype, "getTemplate")
+          .resolves(undefined);
+        const windowSpy = sinon.spy(vscode.window, "showErrorMessage");
+
+        await prepareTemplateTest();
+
+        const cmd = new ApplyTemplateCommand();
+        const resp = await cmd.run();
+
+        expect(resp).toBeFalsy();
+        expect(windowSpy.calledOnce).toBeTruthy();
+        expect(windowSpy.firstCall.args[0]).toEqual("Template not found");
       });
     }
   );

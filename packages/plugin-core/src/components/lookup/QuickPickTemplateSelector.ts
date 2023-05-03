@@ -53,8 +53,14 @@ export class QuickPickTemplateSelector {
           const data = event.data;
           if (data.cancel) {
             resolve(undefined);
+          } else if (
+            // equivalent to no template found
+            data.selectedItems.length === 1 &&
+            data.selectedItems[0]?.children.length === 0
+          ) {
+            resolve(undefined);
           } else {
-            const templateNote = event.data.selectedItems[0] as NoteProps;
+            const templateNote = data.selectedItems[0] as NoteProps;
             resolve(templateNote);
           }
           NoteLookupProviderUtils.cleanup({

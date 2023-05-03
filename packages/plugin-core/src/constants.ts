@@ -1040,11 +1040,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Doctor`,
     when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
   },
-  DUMP_STATE: {
-    key: "dendron.dev.dumpState",
-    title: `${CMD_PREFIX} Dump State`,
-    when: `${DendronContext.PLUGIN_ACTIVE} && shellExecutionSupported`,
-  },
   DEV_TRIGGER: {
     key: "dendron.dev.devTrigger",
     title: `${CMD_PREFIX}Dev: Dev Trigger`,

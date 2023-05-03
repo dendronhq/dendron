@@ -587,10 +587,6 @@
         "title": "Dendron: Doctor"
       },
       {
-        "command": "dendron.dev.dumpState",
-        "title": "Dendron: Dump State"
-      },
-      {
         "command": "dendron.dev.devTrigger",
         "title": "Dendron:Dev: Dev Trigger"
       },
@@ -1007,10 +1003,6 @@
         },
         {
           "command": "dendron.dev.doctor",
-          "when": "dendron:pluginActive && shellExecutionSupported"
-        },
-        {
-          "command": "dendron.dev.dumpState",
           "when": "dendron:pluginActive && shellExecutionSupported"
         },
         {

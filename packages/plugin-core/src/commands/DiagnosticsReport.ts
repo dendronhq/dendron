@@ -42,7 +42,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
     }
 
     const ext = ExtensionProvider.getExtension();
-    const config = (await ext.getDWorkspace().config).toString();
+    const config = await ext.getDWorkspace().config;
     const port = ext.port;
 
     let wsFile: string;
@@ -63,7 +63,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       "# Server Logs",
       serverLastLines,
       "# Dendron Config",
-      config,
+      JSON.stringify(config, null, 2),
       "# Port",
       port,
       "# Workspace File",

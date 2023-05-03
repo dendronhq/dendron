@@ -20,6 +20,7 @@ import {
   GoogleDocsV2PodConfig,
   isRunnableGoogleDocsV2PodConfig,
   JSONSchemaType,
+  PodExportScope,
   PodUtils,
   PodV2Types,
   RunnableGoogleDocsV2PodConfig,
@@ -125,7 +126,9 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       return;
     }
 
-    let parentFolderId = opts?.parentFolderId;
+    let parentFolderId =
+      opts?.parentFolderId ||
+      (await this.getFolderIdFromNoteMetadata(opts?.exportScope));
     if (_.isUndefined(parentFolderId)) {
       /** refreshes token if token has already expired */
       if (Time.now().toSeconds() > expirationTime) {
@@ -211,6 +214,19 @@ export class GoogleDocsExportPodCommand extends BaseExportPodCommand<
       this.L.error(stringifyError(err));
       return { root: "root" };
     }
+  }
+
+  async getFolderIdFromNoteMetadata(exportScope?: PodExportScope) {
+    if (
+      exportScope &&
+      exportScope !== PodExportScope.Note &&
+      exportScope !== PodExportScope.Selection
+    )
+      return undefined;
+
+    const note = await this.getPropsForNoteScope();
+    if (!note || note?.length === 0) return undefined;
+    return note[0].custom.parentFolderId;
   }
 
   /**

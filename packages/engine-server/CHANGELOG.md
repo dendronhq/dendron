@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.120.0 (2023-05-04)
+
+
+### Reverts
+
+* Revert "chore: publish minor" ([0257859](https://github.com/dendronhq/dendron/commit/0257859c78c06d5680f992e912180020cb5852d3))
+
+
+
+
+
 # 0.119.0 (2022-12-06)
 
 

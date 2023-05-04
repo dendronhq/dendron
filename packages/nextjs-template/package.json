@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/nextjs-template",
-  "version": "0.120.0",
+  "version": "0.121.0",
   "license": "Apache-2.0",
   "private": true,
   "repository": {
@@ -24,8 +24,8 @@
     "test:skipbuild": "SKIP_BUILD=1 yarn test"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.120.0",
-    "@dendronhq/common-frontend": "^0.120.0",
+    "@dendronhq/common-all": "^0.121.0",
+    "@dendronhq/common-frontend": "^0.121.0",
     "@giscus/react": "^2.2.0",
     "antd": "^4.15.5",
     "fs-extra": "^10.0.0",

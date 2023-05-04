@@ -96,7 +96,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           if [ ${{ matrix.platform }} == general ]; then
-            yarn build:minor:remote:ci:noparam
+            yarn build:minor:local:ci:noparam
           else 
             yarn build:minor:local:ci ${{ env.PUBLISHING_TARGET }}
           fi
@@ -121,9 +121,6 @@ jobs:
           path: ${{ env.VSIX_RELATIVE_PATH }}
           if-no-files-found: error
 
-      - name: Push Branch Commits to Github
-        run: git push -u origin HEAD
-
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCODE_PUBLISH_PWD }}
@@ -135,6 +132,10 @@ jobs:
           OVSX_PAT: ${{ secrets.VSCODIUM_PUBLISH_PWD }}
         working-directory: ./packages/plugin-core
         run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
+
+      - name: Push Branch Commits to Github
+        if: matrix.platform == 'general'
+        run: git push -u origin HEAD
 
       - name: Tag Release on Github
         if: matrix.platform == 'general'

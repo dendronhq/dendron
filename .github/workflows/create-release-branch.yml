@@ -7,8 +7,9 @@ name: Create Release Branch
 # every-other-week, but POSIX syntax has limited support for that. We can just
 # have the job fail every other week because the branch already exists.
 on:
-  schedule:
-    - cron: "0 19 * * 3"
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 19 * * 3"
 
 jobs:
   build:

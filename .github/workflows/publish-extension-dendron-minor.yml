@@ -91,7 +91,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           if [ ${{ matrix.platform }} == general ]; then
-            yarn build:minor:remote:ci:noparam
+            yarn build:minor:local:ci:noparam
           else 
             yarn build:minor:local:ci ${{ env.PUBLISHING_TARGET }}
           fi
@@ -108,7 +108,6 @@ jobs:
             echo "error: expected 1 .vsix file, found $vsixCount"
             exit 1
           fi
-
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

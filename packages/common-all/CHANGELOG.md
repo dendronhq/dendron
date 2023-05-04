@@ -3,32 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [0.120.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.120.0) (2023-05-03)
-
-
-### Bug Fixes
-
-* **publish:** display full breadcrumb path for sidebar excluded notes ([#3742](https://github.com/dendronhq/dendron/issues/3742)) ([28ce7ec](https://github.com/dendronhq/dendron/commit/28ce7ec968ee0d1810786f2e1ce15ee9102e545a))
-* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
-* **refactor:** correctly handle reference updates after move selection to ([#3767](https://github.com/dendronhq/dendron/issues/3767)) ([97ae0d0](https://github.com/dendronhq/dendron/commit/97ae0d088111cbbfe87624eff7b0f96cbe7f17f9))
-* **sync:** next js export pod fix on engine v3 ([#3751](https://github.com/dendronhq/dendron/issues/3751)) ([4dfa58d](https://github.com/dendronhq/dendron/commit/4dfa58d52d91fdc0101d2da44feac3d2470fb0cc))
-* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
-* **workspace:** Correctly read and apply local override config in engine v3 ([#3781](https://github.com/dendronhq/dendron/issues/3781)) ([8b17dd0](https://github.com/dendronhq/dendron/commit/8b17dd0d72af892e972922d7729751f98f2245ad))
-* correctly add quickpick label highlight functionality ([#3700](https://github.com/dendronhq/dendron/issues/3700)) ([f6eecbb](https://github.com/dendronhq/dendron/commit/f6eecbb7fe750720b0b892babd18a1a098c01ddd))
-* window path slash ([#3755](https://github.com/dendronhq/dendron/issues/3755)) ([d8a41a1](https://github.com/dendronhq/dendron/commit/d8a41a1d8ea71b5d95aca937bd7f7d8ae454bffc))
-* **workspace:** custom color decoration for hashtags ([#3637](https://github.com/dendronhq/dendron/issues/3637)) ([1d41270](https://github.com/dendronhq/dendron/commit/1d412701791b4d5018f41c5dabdee759a968649c))
-* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
-
-
-### Features Dendron
-
-* add lookup buttons in web ([#3850](https://github.com/dendronhq/dendron/issues/3850)) ([25451a1](https://github.com/dendronhq/dendron/commit/25451a1de11f38bcb5473766a9a6e5d4074bc1e6))
-* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
-
-
-
-
-
 # 0.119.0 (2022-12-06)
 
 

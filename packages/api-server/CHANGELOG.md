@@ -3,25 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [0.120.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.120.0) (2023-05-04)
-
-
-### Bug Fixes
-
-* instantiate config service as early as possible to avoid timing issue ([#3839](https://github.com/dendronhq/dendron/issues/3839)) ([5400e6c](https://github.com/dendronhq/dendron/commit/5400e6c67588f114544b94b79ed5383308eddfb7))
-* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
-* **sync:** next js export pod fix on engine v3 ([#3751](https://github.com/dendronhq/dendron/issues/3751)) ([4dfa58d](https://github.com/dendronhq/dendron/commit/4dfa58d52d91fdc0101d2da44feac3d2470fb0cc))
-* **workspace:** completionProvider and other bulk operations for engine v3 ([#3747](https://github.com/dendronhq/dendron/issues/3747)) ([e401a7e](https://github.com/dendronhq/dendron/commit/e401a7eb0256d66495d0782ca9bbbf87a16d8779))
-
-
-### Reverts
-
-* Revert "chore: publish minor" ([3ddd3f3](https://github.com/dendronhq/dendron/commit/3ddd3f3a45bb28da8bbfe6ac4b09940349b88cac))
-
-
-
-
-
 # 0.119.0 (2022-12-06)
 
 

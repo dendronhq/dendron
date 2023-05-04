@@ -33,6 +33,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Canary
+        if: matrix.platform == 'general'
+        run: |
+          echo "BOND: running from general"
+
       - name: Gather environment data
         run: |
           node --version
@@ -91,7 +96,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           if [ ${{ matrix.platform }} == general ]; then
-            yarn build:minor:local:ci:noparam
+            yarn build:minor:remote:ci:noparam
           else 
             yarn build:minor:local:ci ${{ env.PUBLISHING_TARGET }}
           fi
@@ -132,12 +137,14 @@ jobs:
         run: yarn deploy:ovsx:vsix ${{ env.VSIX_FILE_NAME }}
 
       - name: Tag Release on Github
+        if: matrix.platform == 'general'
         run: |
           git tag $DENDRON_RELEASE_VERSION
           git push origin $DENDRON_RELEASE_VERSION
 
       - name: Raise Pull Request back to master
         uses: repo-sync/pull-request@v2
+        if: matrix.platform == 'general'
         with:
           destination_branch: "master"
           github_token: ${{ secrets.GITHUB_TOKEN }}

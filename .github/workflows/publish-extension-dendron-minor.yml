@@ -90,13 +90,25 @@ jobs:
           NPM_PWD: ${{ secrets.NPM_PWD }}
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
-          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
           if [ ${{ matrix.platform }} == general ]; then
             yarn build:minor:remote:ci:noparam
           else 
             yarn build:minor:local:ci ${{ env.PUBLISHING_TARGET }}
           fi
+
+      - name: Check for VSIX
+        run: |
+          vsixCount=`ls ./packages/plugin-core/*.vsix | wc -l | awk '{print $1}'`
+          if [ $vsixCount = 1 ]; then
+            vsix=$(ls ./packages/plugin-core/*.vsix | tail -1)
+            echo "found a single .vsix file named $vsix" 
+            echo "VSIX_FILE_NAME=$(basename $vsix)" >> $GITHUB_ENV
+            echo "VSIX_RELATIVE_PATH=$vsix" >> $GITHUB_ENV
+            else
+            echo "error: expected 1 .vsix file, found $vsixCount"
+            exit 1
+          fi
+
 
       - name: Upload VSIX Artifact
         uses: actions/upload-artifact@v2

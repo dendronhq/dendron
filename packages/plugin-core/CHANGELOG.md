@@ -3,6 +3,53 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.120.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.120.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* appy to apply in tutorial ([#3894](https://github.com/dendronhq/dendron/issues/3894)) ([5da5cf6](https://github.com/dendronhq/dendron/commit/5da5cf687793123093cfdf3becfb4368a4e42daf))
+* autocomplete properly fills out value if user manually selected an item ([#3787](https://github.com/dendronhq/dendron/issues/3787)) ([f684c91](https://github.com/dendronhq/dendron/commit/f684c91561ba1db7b50e11932998a32153843e86))
+* diagnostic report should print out config ([2925250](https://github.com/dendronhq/dendron/commit/292525061607729ccc55e3189d8d085568ca454a))
+* gdoc parent folder prompt issue ([#3871](https://github.com/dendronhq/dendron/issues/3871)) ([badaa0e](https://github.com/dendronhq/dendron/commit/badaa0ebf7395e141caba8ea65d3409c9ad051af))
+* instantiate config service as early as possible to avoid timing issue ([#3839](https://github.com/dendronhq/dendron/issues/3839)) ([5400e6c](https://github.com/dendronhq/dendron/commit/5400e6c67588f114544b94b79ed5383308eddfb7))
+* **build:** build errors in web classes from bad merge ([3d9e9b3](https://github.com/dendronhq/dendron/commit/3d9e9b312f03278a4a95f0fde17ae129f54a8eb3))
+* **commands:** lookup sometimes omits last keystrokes in new note when under load ([#3671](https://github.com/dendronhq/dendron/issues/3671)) ([9eac312](https://github.com/dendronhq/dendron/commit/9eac312c86e12f0743027765ebb8ab5ad04e117e))
+* **lookup:** cancel note creation during "Create Note with Template" if template was not selected ([#3645](https://github.com/dendronhq/dendron/issues/3645)) ([5f1b1e7](https://github.com/dendronhq/dendron/commit/5f1b1e7749459fc87dee717b784c36605e675906))
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **refactor:** correctly handle reference updates after move selection to ([#3767](https://github.com/dendronhq/dendron/issues/3767)) ([97ae0d0](https://github.com/dendronhq/dendron/commit/97ae0d088111cbbfe87624eff7b0f96cbe7f17f9))
+* **sync:** needless modified notes after workspace sync ([#3768](https://github.com/dendronhq/dendron/issues/3768)) ([19bba6d](https://github.com/dendronhq/dendron/commit/19bba6d6ef1671b39354ff676db5ffc1eef0fc0a))
+* **views:** calendar view broken after theme toggle ([#3765](https://github.com/dendronhq/dendron/issues/3765)) ([3553670](https://github.com/dendronhq/dendron/commit/355367059275172a91aa87944615df17c2cb876d))
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* **workspace:** Correctly handle deleted notes in editor when checking for duplicate entries ([#3719](https://github.com/dendronhq/dendron/issues/3719)) ([390b19a](https://github.com/dendronhq/dendron/commit/390b19a179d20a6e1ac8b273a2fe8754cf6dc1c6))
+* **workspace:** correctly populate backlink when creating new note using go to note ([#3769](https://github.com/dendronhq/dendron/issues/3769)) ([8e12309](https://github.com/dendronhq/dendron/commit/8e12309f06ada103e7cf45edeb332f0c704ae978))
+* **workspace:** Disallow note creation through go to note if filename is invalid ([#3551](https://github.com/dendronhq/dendron/issues/3551)) ([cd337ab](https://github.com/dendronhq/dendron/commit/cd337ab479ec70b7e5897e74f332374a30dae7a8))
+* **workspace:** duplicate vaults prompt with go to note command ([#3711](https://github.com/dendronhq/dendron/issues/3711)) ([bf26771](https://github.com/dendronhq/dendron/commit/bf26771122601737544cb09a179e9cdb717e602b))
+* **workspace:** go to definition for wikilink with header ([#3632](https://github.com/dendronhq/dendron/issues/3632)) ([9a74123](https://github.com/dendronhq/dendron/commit/9a74123fe475add288f319d3ce85040f38e725e1))
+* **workspace:** rename note breaks noteref for user hierarchy ([#3782](https://github.com/dendronhq/dendron/issues/3782)) ([053b949](https://github.com/dendronhq/dendron/commit/053b9492cf1c4c88346210718b3a0c26bec43d05))
+* correctly add quickpick label highlight functionality ([#3700](https://github.com/dendronhq/dendron/issues/3700)) ([f6eecbb](https://github.com/dendronhq/dendron/commit/f6eecbb7fe750720b0b892babd18a1a098c01ddd))
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* regression in apply template command ([#3623](https://github.com/dendronhq/dendron/issues/3623)) ([16cc85e](https://github.com/dendronhq/dendron/commit/16cc85e6352e21b3035c7834fdea4be56d7943a0))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* add lookup buttons in web ([#3850](https://github.com/dendronhq/dendron/issues/3850)) ([25451a1](https://github.com/dendronhq/dendron/commit/25451a1de11f38bcb5473766a9a6e5d4074bc1e6))
+* **lookup:** Add `Create New with Template` label to note lookup ([#3563](https://github.com/dendronhq/dendron/issues/3563)) ([11adc60](https://github.com/dendronhq/dendron/commit/11adc6033b47f6d04ad0a9181e9f307bacb580ab))
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+### Reverts
+
+* Revert "chore: publish minor" ([3ddd3f3](https://github.com/dendronhq/dendron/commit/3ddd3f3a45bb28da8bbfe6ac4b09940349b88cac))
+
+
+
+
+
 # 0.119.0 (2022-12-06)
 
 

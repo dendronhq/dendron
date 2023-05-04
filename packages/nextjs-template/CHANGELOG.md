@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.120.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.120.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **internal:** correct reading of error tack ([#3647](https://github.com/dendronhq/dendron/issues/3647)) ([45a8c09](https://github.com/dendronhq/dendron/commit/45a8c09e53132a231ebe5b607bd272caf325860c))
+* **publish:** correct hashtag parsing ([#3708](https://github.com/dendronhq/dendron/issues/3708)) ([2c0f188](https://github.com/dendronhq/dendron/commit/2c0f1880d7a0162927c9b1d5916c398647191b85))
+* **publish:** display full breadcrumb path for sidebar excluded notes ([#3742](https://github.com/dendronhq/dendron/issues/3742)) ([28ce7ec](https://github.com/dendronhq/dendron/commit/28ce7ec968ee0d1810786f2e1ce15ee9102e545a))
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+* **publish:** make safe access to iframe ([#3707](https://github.com/dendronhq/dendron/issues/3707)) ([b8198d4](https://github.com/dendronhq/dendron/commit/b8198d4090ed03172628a405fcf4ef315d153a03))
+* **publish:** make sure `nextjs-template` uses bugfree next version ([#3756](https://github.com/dendronhq/dendron/issues/3756)) ([65e9178](https://github.com/dendronhq/dendron/commit/65e917830036604e9d241fdc34b0a5ee623f497f))
+* **publish:** prevent "Table of content" overflowing container ([#3624](https://github.com/dendronhq/dendron/issues/3624)) ([a3c7eb4](https://github.com/dendronhq/dendron/commit/a3c7eb4333e18a2008447f84e5a8055ae6c3d705))
+* **publish:** runtime error on undefined dendron config ([#3688](https://github.com/dendronhq/dendron/issues/3688)) ([9e4b420](https://github.com/dendronhq/dendron/commit/9e4b420787d5af5d8150dc9b839d5099a3d7906d))
+* **publish:** weird breadcumbs display ([#3689](https://github.com/dendronhq/dendron/issues/3689)) ([35e0e67](https://github.com/dendronhq/dendron/commit/35e0e6730129d246e2ff515fb6c8b190abf7b157)), closes [/ant.design/changelog#4](https://github.com//ant.design/changelog/issues/4)
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* render favicon when assetPrefix is set ([#3571](https://github.com/dendronhq/dendron/issues/3571)) ([5a24a9e](https://github.com/dendronhq/dendron/commit/5a24a9e9e137e3fb8ca19d55a7260d90fbfa6e41))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* click into "empty area" on sidebar submenuitem ([#3523](https://github.com/dendronhq/dendron/issues/3523)) ([82bda25](https://github.com/dendronhq/dendron/commit/82bda25a591106ef6d9710aa0cad9988f7c6c5db))
+
+
+### Features Dendron
+
+* **internal:** web performance harness ([#3817](https://github.com/dendronhq/dendron/issues/3817)) ([ba6780e](https://github.com/dendronhq/dendron/commit/ba6780ea1c7de42300166e6f1e2983e9216de79b))
+
+
+### Reverts
+
+* Revert "chore: publish minor" ([3ddd3f3](https://github.com/dendronhq/dendron/commit/3ddd3f3a45bb28da8bbfe6ac4b09940349b88cac))
+
+
+
+
+
 # 0.119.0 (2022-12-06)
 
 

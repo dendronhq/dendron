@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.120.0](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.120.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **views:** apply preview theme's backgroundColor ([#3552](https://github.com/dendronhq/dendron/issues/3552)) ([7842c15](https://github.com/dendronhq/dendron/commit/7842c15a00bf568bbe4f7f1d577f3e5436d557d9))
+
+
+### Features Dendron
+
+* **internal:** web performance harness ([#3817](https://github.com/dendronhq/dendron/issues/3817)) ([ba6780e](https://github.com/dendronhq/dendron/commit/ba6780ea1c7de42300166e6f1e2983e9216de79b))
+
+
+### Reverts
+
+* Revert "chore: publish minor" ([3ddd3f3](https://github.com/dendronhq/dendron/commit/3ddd3f3a45bb28da8bbfe6ac4b09940349b88cac))
+
+
+
+
+
 # 0.119.0 (2022-12-06)
 
 

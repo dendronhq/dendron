@@ -33,11 +33,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Canary
-        if: matrix.platform == 'general'
-        run: |
-          echo "BOND: running from general"
-
       - name: Gather environment data
         run: |
           node --version

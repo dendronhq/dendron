@@ -144,6 +144,10 @@ export class BuildUtils {
   static installPluginDependencies() {
     // remove root package.json before installing locally
     fs.removeSync(path.join(this.getLernaRoot(), "package.json"));
+    // todo: check version
+    $(`yarn info @dendronhq/api-server`, {
+      cwd: this.getPluginRootPath(),
+    });
     return $(`yarn install --no-lockfile --update-checksums`, {
       cwd: this.getPluginRootPath(),
     });

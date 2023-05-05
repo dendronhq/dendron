@@ -62,9 +62,9 @@ jobs:
           echo "NPM_TOKEN=${{ secrets.NPM_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
-      - name: Configure NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+      # - name: Configure NPM
+      #   run: |
+      #     echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
 
       - name: Yarn Setup
         run: yarn setup
@@ -82,6 +82,12 @@ jobs:
 
       - name: Update schema file
         run: yarn gen:data
+
+      - name: Set Up Yarn Local Registry
+        run: yarn config set registry http://localhost:4873
+
+      - name: Set Up NPM Local Registry
+        run: npm set registry http://localhost:4873/
 
       - name: Build the VSIX and Publish to NPM Registry
         env:

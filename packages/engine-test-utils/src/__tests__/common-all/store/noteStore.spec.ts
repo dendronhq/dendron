@@ -526,11 +526,7 @@ describe("GIVEN NoteStore", () => {
         async ({ wsRoot, engine }) => {
           const noteStore = new NoteStore(
             new NodeJSFileStore(),
-            new NoteMetadataStore(
-              new FuseEngine({
-                fuzzThreshold: 0.2,
-              })
-            ),
+            new NoteMetadataStore(),
             URI.file(wsRoot)
           );
           const engineNotes = await engine.findNotesMeta({

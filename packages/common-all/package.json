@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.123.0",
+  "version": "0.123.1",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -33,6 +33,7 @@
     "watch": "yarn compile --watch"
   },
   "dependencies": {
+    "@swc/helpers": "^0.3.2",
     "axios": "^0.21.4",
     "dropbox": "^4.0.30",
     "fast-levenshtein": "^3.0.0",
@@ -53,8 +54,7 @@
     "title": "^3.4.4",
     "vscode-uri": "^3.0.3",
     "zod": "3.19.1",
-    "zod-validation-error": "^0.1.1",
-    "@swc/helpers": "^0.3.2"
+    "zod-validation-error": "^0.1.1"
   },
   "devDependencies": {
     "@types/fast-levenshtein": "^0.0.2",

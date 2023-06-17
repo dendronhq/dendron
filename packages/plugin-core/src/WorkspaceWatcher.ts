@@ -38,6 +38,9 @@ import { TextDocumentService } from "./services/node/TextDocumentService";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
+import * as vscode from "vscode";
+import fs from "fs";
+import { main } from "./commands/Refactor";
 
 const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
@@ -345,6 +348,7 @@ export class WorkspaceWatcher {
       return resolve(changes);
     });
     event.waitUntil(promise);
+
     return { changes };
   }
 
@@ -354,6 +358,43 @@ export class WorkspaceWatcher {
       document,
       "onDidSaveNote"
     );
+
+    const fname = path.basename(document.uri.fsPath, ".md");
+    const engine = this._extension.getEngine();
+    const config = this._extension.getDWorkspace().config;
+    const { enablePersistentHistory, mainVault } = ConfigUtils.getProp(
+      config,
+      "workspace"
+    );
+
+    if (enablePersistentHistory && mainVault) {
+      const date = Time.now().toFormat("y.MM.dd");
+      const historyFile = `dendron.hist.${date}`;
+      const minuteAndSecond = Time.now().toFormat("mm:ss");
+      // check if file exists
+      // format line
+      const maybeVault = engine.vaults.find(
+        (vault) => vault.name === mainVault
+      );
+      if (!maybeVault) {
+        Logger.error({
+          ctx: "onWillSaveNote",
+          msg: `could not find vault for history file. vault: ${mainVault}`,
+        });
+      } else {
+        const line = `- ${date}T${minuteAndSecond} : [[${fname}]]`;
+        const base = maybeVault.fsPath;
+        const fpath = path.join(base, historyFile);
+        Logger.info({
+          ctx: "onDidSaveNote",
+          fpath,
+          line,
+          msg: "writing to history file",
+        });
+      }
+
+      // get location of note
+    }
   }
 
   /** Do not use this function, please go to `WindowWatcher.onFirstOpen() instead.`

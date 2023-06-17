@@ -25,6 +25,8 @@ commands:
   templateHierarchy: template
 workspace:
   dendronVersion: 0.83.0
+  enablePersistentHistory: true
+  mainVault: vault2
   vaults:
     - fsPath: dependencies/localhost/vault3
       selfContained: true

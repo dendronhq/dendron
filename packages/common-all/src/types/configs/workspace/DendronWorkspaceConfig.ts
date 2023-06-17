@@ -40,6 +40,8 @@ export type DendronWorkspaceConfig = {
   feedback?: boolean;
   apiEndpoint?: string;
   metadataStore?: "sqlite" | "json";
+  enablePersistentHistory?: boolean;
+  mainVault?: string;
 };
 
 export type DendronSeedEntry = {
@@ -69,5 +71,6 @@ export function genDefaultWorkspaceConfig(): DendronWorkspaceConfig {
     maxPreviewsCached: 10,
     maxNoteLength: 204800,
     enableFullHierarchyNoteTitle: false,
+    enablePersistentHistory: false,
   };
 }

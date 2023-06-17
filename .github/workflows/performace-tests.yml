@@ -1,11 +1,6 @@
 name: performance testing
 
 on:
-  push:
-    branches:
-      - release/*
-      - early-seed/*
-
   workflow_dispatch:
 
 env:

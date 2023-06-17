@@ -9,7 +9,7 @@
     "url": "https://accounts.dendron.so/account/subscribe"
   },
   "engines": {
-    "vscode": "^1.62.0"
+    "vscode": "^1.77.0"
   },
   "categories": [
     "Other"
@@ -1563,7 +1563,7 @@
     "@dendronhq/pods-core": "^0.123.1",
     "@sentry/integrations": "7.11.1",
     "@sentry/node": "7.11.1",
-    "@types/vscode": "1.62.0",
+    "@types/vscode": "1.77.0",
     "browserify": "17.0.0",
     "cross-path-sort": "1.0.0",
     "execa": "4.0.2",

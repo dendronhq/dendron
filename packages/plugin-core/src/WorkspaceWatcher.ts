@@ -13,6 +13,7 @@ import { file2Note, vault2Path } from "@dendronhq/common-server";
 import { WorkspaceUtils } from "@dendronhq/engine-server";
 import { RemarkUtils } from "@dendronhq/unified";
 import * as Sentry from "@sentry/node";
+import fs from "fs";
 import _ from "lodash";
 import path from "path";
 import {
@@ -33,14 +34,11 @@ import {
 import { DoctorUtils } from "./components/doctor/utils";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { Logger } from "./logger";
-import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { TextDocumentService } from "./services/node/TextDocumentService";
+import { ISchemaSyncService } from "./services/SchemaSyncServiceInterface";
 import { AnalyticsUtils, sentryReportingCallback } from "./utils/analytics";
 import { VSCodeUtils } from "./vsCodeUtils";
 import { WindowWatcher } from "./windowWatcher";
-import * as vscode from "vscode";
-import fs from "fs";
-import { main } from "./commands/Refactor";
 
 const MOVE_CURSOR_PAST_FRONTMATTER_DELAY = 50; /* ms */
 
@@ -367,14 +365,18 @@ export class WorkspaceWatcher {
       "workspace"
     );
 
-    if (enablePersistentHistory && mainVault) {
+    if (
+      enablePersistentHistory &&
+      mainVault &&
+      !fname.startsWith("dendron.hist")
+    ) {
       const date = Time.now().toFormat("y.MM.dd");
       const historyFile = `dendron.hist.${date}`;
-      const minuteAndSecond = Time.now().toFormat("mm:ss");
+      const minuteAndSecond = Time.now().toFormat("MM-dd-y HH:mm");
       // check if file exists
       // format line
       const maybeVault = engine.vaults.find(
-        (vault) => vault.name === mainVault
+        (vault) => VaultUtils.getName(vault) === mainVault
       );
       if (!maybeVault) {
         Logger.error({
@@ -382,18 +384,24 @@ export class WorkspaceWatcher {
           msg: `could not find vault for history file. vault: ${mainVault}`,
         });
       } else {
-        const line = `- ${date}T${minuteAndSecond} : [[${fname}]]`;
+        const line = `- ${minuteAndSecond} : [[${fname}]]`;
         const base = maybeVault.fsPath;
-        const fpath = path.join(base, historyFile);
+        const fpath = path.join(engine.wsRoot, base, historyFile);
         Logger.info({
           ctx: "onDidSaveNote",
           fpath,
           line,
           msg: "writing to history file",
         });
+        if (!fs.existsSync(fpath)) {
+          const note = NoteUtils.create({
+            fname: historyFile,
+            vault: maybeVault,
+          });
+          await engine.writeNote(note, { runHooks: false });
+        }
+        fs.appendFileSync(fpath + ".md", "\n" + line);
       }
-
-      // get location of note
     }
   }
 

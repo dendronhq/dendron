@@ -14,11 +14,11 @@ jobs:
   build:
     # Don't run this job outside of the Dendronhq organization https://github.com/prisma/prisma/issues/3539#issuecomment-690260573
     if: github.repository_owner == 'dendronhq'
-    timeout-minutes: 60
+  
     environment: plugin-production
 
-    strategy:
-      fail-fast: false
+    timeout-minutes: 30
+
     runs-on: ubuntu-latest
 
     steps:
@@ -34,12 +34,12 @@ jobs:
           git config --global user.email github-actions@github.com
 
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 14.x
 
       - name: Yarn Setup
         run: yarn setup
@@ -60,18 +60,10 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> $GITHUB_ENV
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
-          echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
-      - name: Build the VSIX and Publish to NPM Registry
-        env:
-          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
-          NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
-          NPM_PWD: ${{ secrets.NPM_PWD }}
-          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Build the VSIX
         run: |
-          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
-          yarn build:minor:remote:ci
+          yarn build:patch:local:ci:nightly
 
       - name: Check for VSIX
         run: |

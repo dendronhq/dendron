@@ -13,7 +13,7 @@ echo "building... upgrade: patch, endpoint: local build environment: $SCRIPT_BUI
 
 DENDRON_CLI=./packages/dendron-cli/lib/bin/dendron-cli.js
 
-LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType patch --publishEndpoint local --extensionType nightly --extensionTarget $1
+LOG_LEVEL=info $DENDRON_CLI dev build --upgradeType patch --publishEndpoint local --extensionType nightly 
 
 echo "closing verdaccio - killing "
 kill $FOO_PID

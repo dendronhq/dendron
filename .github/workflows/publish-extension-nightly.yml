@@ -19,21 +19,6 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: win32
-            arch: x64
-          - platform: win32
-            arch: ia32
-          - platform: linux
-            arch: x64
-          - platform: linux
-            arch: arm64
-          - platform: darwin
-            arch: x64
-          - platform: darwin
-            arch: arm64
-
     runs-on: ubuntu-latest
 
     steps:
@@ -59,15 +44,6 @@ jobs:
       - name: Yarn Setup
         run: yarn setup
 
-      - name: Download SQLite Binary
-        run: |
-          if [ ${{ matrix.platform }} == linux ]; then
-            yarn download-sqlite-binary --target_arch=${{ matrix.arch }}
-            else
-            yarn download-sqlite-binary --target_arch=${{ matrix.arch }} --target_platform=${{ matrix.platform }} --target_libc=unknown
-          fi
-        working-directory: ./packages/plugin-core
-
       - name: Update schema file
         run: yarn gen:data
 
@@ -86,9 +62,16 @@ jobs:
           echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
           echo "PUBLISHING_TARGET=${{ matrix.platform }}-${{ matrix.arch }}" >> $GITHUB_ENV
 
-      - name: Build the VSIX
+      - name: Build the VSIX and Publish to NPM Registry
+        env:
+          NPM_EMAIL: ${{ secrets.NPM_EMAIL }}
+          NPM_USERNAME: ${{ secrets.NPM_USERNAME }}
+          NPM_PWD: ${{ secrets.NPM_PWD }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
-          yarn build:patch:local:ci:nightly ${{ env.PUBLISHING_TARGET }}
+          echo "VSIX_FILE_NAME=dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          echo "VSIX_RELATIVE_PATH=./packages/plugin-core/dendron-${{ env.DENDRON_RELEASE_VERSION }}.vsix" >> $GITHUB_ENV
+          yarn build:minor:remote:ci
 
       - name: Check for VSIX
         run: |

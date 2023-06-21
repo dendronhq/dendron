@@ -224,4 +224,12 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Storage engine for metadata",
     desc: "values: sqlite|json",
   },
+  enablePersistentHistory: {
+    label: "Enable Persistent History",
+    desc: "Enable storing history of notes saved to a separate file",
+  },
+  mainVault: {
+    label: "Main Vault",
+    desc: "Main vault",
+  },
 };

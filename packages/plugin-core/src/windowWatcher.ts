@@ -55,13 +55,6 @@ export class WindowWatcher {
         })
       )
     );
-    this._extension.addDisposable(
-      window.onDidChangeActiveTextEditor(
-        this.onDidChangeActiveTextEditor,
-        this,
-        context.subscriptions
-      )
-    );
 
     if (this._extension.getDWorkspace().config.workspace.enablePerfMode) {
       Logger.info({
@@ -70,6 +63,14 @@ export class WindowWatcher {
       });
       return;
     }
+
+    this._extension.addDisposable(
+      window.onDidChangeActiveTextEditor(
+        this.onDidChangeActiveTextEditor,
+        this,
+        context.subscriptions
+      )
+    );
     this._extension.addDisposable(
       window.onDidChangeTextEditorVisibleRanges(
         this.onDidChangeTextEditorVisibleRanges,

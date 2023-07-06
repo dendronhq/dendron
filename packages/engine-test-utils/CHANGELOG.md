@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.123.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.2) (2023-07-06)
+
+
+### Bug Fixes
+
+* tests ([25abd3b](https://github.com/dendronhq/dendron/commit/25abd3bc379557298bb6b3b50151bbbc6fe9f53e))
+* **workspace:** Correctly read and apply local override config in engine v3 ([#3781](https://github.com/dendronhq/dendron/issues/3781)) ([e14e2c0](https://github.com/dendronhq/dendron/commit/e14e2c061f255815dd1747ea4a7e71116116f100))
+
+
+
+# 0.117.0 (2022-11-08)
+
+
+### Bug Fixes
+
+* **markdown:** same page header links ([#3543](https://github.com/dendronhq/dendron/issues/3543)) ([559a5f6](https://github.com/dendronhq/dendron/commit/559a5f610e12763dbc715f364316544579346f9f))
+* **preview:** task notes inside of note references should render correctly ([#3640](https://github.com/dendronhq/dendron/issues/3640)) ([513354b](https://github.com/dendronhq/dendron/commit/513354bbd5405b79ace5b69d4d4874885eb3a5af))
+* **publish:** display headings pleasantly when containing non-textonly content types  ([#3525](https://github.com/dendronhq/dendron/issues/3525)) ([2a0707d](https://github.com/dendronhq/dendron/commit/2a0707d5303f8d24e9c5f15244c25a843a1bd63d))
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **views:** remove schema icon from tree view and published sidebar ([#3620](https://github.com/dendronhq/dendron/issues/3620)) ([a23ae07](https://github.com/dendronhq/dendron/commit/a23ae078359b9be07ca6e82e454bee4f96af3766))
+* **workspace:** autocomplete for usertags and hashtags ([#3610](https://github.com/dendronhq/dendron/issues/3610)) ([d25b6bb](https://github.com/dendronhq/dendron/commit/d25b6bb15d58b042365567c2f9f9668a1f4a242e))
+* **workspace:** custom color decoration for hashtags ([#3637](https://github.com/dendronhq/dendron/issues/3637)) ([1d41270](https://github.com/dendronhq/dendron/commit/1d412701791b4d5018f41c5dabdee759a968649c))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+
+
+
 ## [0.123.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.1) (2023-06-11)
 
 

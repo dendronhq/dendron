@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-frontend",
-  "version": "0.123.1",
+  "version": "0.123.2",
   "description": "common-frontend",
   "license": "GPLv3",
   "repository": {
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@aws-amplify/core": "^4.0.2",
-    "@dendronhq/common-all": "^0.123.1",
+    "@dendronhq/common-all": "^0.123.2",
     "@reduxjs/toolkit": "^1.5.1",
     "lodash": "^4.17.20",
     "querystring": "^0.2.1",

@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.123.3](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.3) (2023-07-06)
+
+
+### Bug Fixes
+
+* **workspace:** Correctly read and apply local override config in engine v3 ([#3781](https://github.com/dendronhq/dendron/issues/3781)) ([e14e2c0](https://github.com/dendronhq/dendron/commit/e14e2c061f255815dd1747ea4a7e71116116f100))
+* **workspace:** rename note breaks noteref for user hierarchy ([#3782](https://github.com/dendronhq/dendron/issues/3782)) ([e181a2c](https://github.com/dendronhq/dendron/commit/e181a2c18c9f5d0be71e442c8d513e970443aaf1))
+
+
+
+# 0.117.0 (2022-11-08)
+
+
+### Bug Fixes
+
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **workspace:** convert local vault to remote ([#3685](https://github.com/dendronhq/dendron/issues/3685)) ([f64cafa](https://github.com/dendronhq/dendron/commit/f64cafa5df6e20fab189355e13e88c693e6f1fda))
+* **workspace:** duplicate note entries in lookup bar ([#3725](https://github.com/dendronhq/dendron/issues/3725)) ([9ce6d53](https://github.com/dendronhq/dendron/commit/9ce6d532bc0b09323f36e1aa25c4f39b0ea61221))
+* correctly update dendron.yml when adding / deleting vaults ([#3588](https://github.com/dendronhq/dendron/issues/3588)) ([60f3652](https://github.com/dendronhq/dendron/commit/60f3652ded43355c479c2e47538732ebb49c0c23))
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **workspace:** engine init with note candidates enabled ([#3585](https://github.com/dendronhq/dendron/issues/3585)) ([59597b4](https://github.com/dendronhq/dendron/commit/59597b476fd4b46d5b1c9a5d950af2c8e2dc15b1))
+* **workspace:** Update backlinks after engine updates ([#3535](https://github.com/dendronhq/dendron/issues/3535)) ([a945f2d](https://github.com/dendronhq/dendron/commit/a945f2dd28c9aa0fb3feedc1bb21ea6f7a6aac32))
+
+
+
+
+
 ## [0.123.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.2) (2023-07-06)
 
 

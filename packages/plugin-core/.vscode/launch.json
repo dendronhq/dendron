@@ -29,41 +29,41 @@
         "LOG_LEVEL": "debug"
       }
     },
-    {
-      "name": "Run Web Extension in VS Code",
-      "type": "pwa-extensionHost",
-      "debugWebWorkerHost": true,
-      "request": "launch",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionDevelopmentKind=web"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/dist/web/**/*.js"
-      ],
-      "preLaunchTask": "npm: watch-web"
-    },
-    {
-      "name": "Plugin Web Extension Tests in VS Code",
-      "type": "extensionHost",
-      "debugWebWorkerHost": true,
-      "request": "launch",
-      "webRoot": "${workspaceFolder}/plugin-core/src",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionDevelopmentKind=web",
-        "--extensionTestsPath=${workspaceFolder}/dist/web/test/suite/index"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/dist/web/**/*.js"
-      ],
-      "preLaunchTask": "npm: watch-web",
-      "sourceMapPathOverrides": {
-        "*": "${webRoot}/*"
-      }
-    },
+    // {
+    //   "name": "Run Web Extension in VS Code",
+    //   "type": "pwa-extensionHost",
+    //   "debugWebWorkerHost": true,
+    //   "request": "launch",
+    //   "args": [
+    //     "--disable-extensions",
+    //     "--extensionDevelopmentPath=${workspaceFolder}",
+    //     "--extensionDevelopmentKind=web"
+    //   ],
+    //   "outFiles": [
+    //     "${workspaceFolder}/dist/web/**/*.js"
+    //   ],
+    //   "preLaunchTask": "npm: watch-web"
+    // },
+    // {
+    //   "name": "Plugin Web Extension Tests in VS Code",
+    //   "type": "extensionHost",
+    //   "debugWebWorkerHost": true,
+    //   "request": "launch",
+    //   "webRoot": "${workspaceFolder}/plugin-core/src",
+    //   "args": [
+    //     "--disable-extensions",
+    //     "--extensionDevelopmentPath=${workspaceFolder}",
+    //     "--extensionDevelopmentKind=web",
+    //     "--extensionTestsPath=${workspaceFolder}/dist/web/test/suite/index"
+    //   ],
+    //   "outFiles": [
+    //     "${workspaceFolder}/dist/web/**/*.js"
+    //   ],
+    //   "preLaunchTask": "npm: watch-web",
+    //   "sourceMapPathOverrides": {
+    //     "*": "${webRoot}/*"
+    //   }
+    // },
     {
       "name": "Run Extension - webpack",
       "type": "extensionHost",
@@ -147,28 +147,28 @@
         "${workspaceFolder}/out/src/test/**/*.js"
       ]
     },
-    {
-      "name": "Run Performance Test - File",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/src/test/perf-test/index"
-      ],
-      "env": {
-        "STAGE": "test",
-        "TEST_TO_RUN": "${fileBasenameNoExtension}"
-      },
-      "skipFiles": [
-        "<node_internals>/**/*.js",
-        "${workspaceFolder}/**/node_modules/mocha/**/*.js",
-        "**/extensionHostProcess.js"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/out/src/test/**/*.js"
-      ]
-    },
+    // {
+    //   "name": "Run Performance Test - File",
+    //   "type": "extensionHost",
+    //   "request": "launch",
+    //   "runtimeExecutable": "${execPath}",
+    //   "args": [
+    //     "--disable-extensions",
+    //     "--extensionDevelopmentPath=${workspaceFolder}",
+    //     "--extensionTestsPath=${workspaceFolder}/out/src/test/perf-test/index"
+    //   ],
+    //   "env": {
+    //     "STAGE": "test",
+    //     "TEST_TO_RUN": "${fileBasenameNoExtension}"
+    //   },
+    //   "skipFiles": [
+    //     "<node_internals>/**/*.js",
+    //     "${workspaceFolder}/**/node_modules/mocha/**/*.js",
+    //     "**/extensionHostProcess.js"
+    //   ],
+    //   "outFiles": [
+    //     "${workspaceFolder}/out/src/test/**/*.js"
+    //   ]
+    // },
   ]
 }

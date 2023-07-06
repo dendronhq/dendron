@@ -582,7 +582,7 @@ export class DendronExtension implements IDendronExtension {
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       this.getEngine(),
-      config
+      config,
     );
 
     const backlinkTreeView = vscode.window.createTreeView(

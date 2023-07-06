@@ -235,5 +235,5 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
   enablePerfMode: {
     label: "Enable Performance Mode",
     desc: "Performance mode turns off features like backlink refresh to improve performance",
-  },
+  }
 };

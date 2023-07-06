@@ -232,4 +232,8 @@ export const WORKSPACE: DendronConfigEntryCollection<DendronWorkspaceConfig> = {
     label: "Main Vault",
     desc: "Main vault",
   },
+  enablePerfMode: {
+    label: "Enable Performance Mode",
+    desc: "Performance mode turns off features like backlink refresh to improve performance",
+  },
 };

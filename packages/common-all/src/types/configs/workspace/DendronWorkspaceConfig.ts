@@ -42,6 +42,7 @@ export type DendronWorkspaceConfig = {
   metadataStore?: "sqlite" | "json";
   enablePersistentHistory?: boolean;
   mainVault?: string;
+  enablePerfMode?: boolean;
 };
 
 export type DendronSeedEntry = {

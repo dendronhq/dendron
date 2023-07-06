@@ -62,6 +62,14 @@ export class WindowWatcher {
         context.subscriptions
       )
     );
+
+    if (this._extension.getDWorkspace().config.workspace.enablePerfMode) {
+      Logger.info({
+        ctx: "WindowWatcher:activate",
+        msg: "perf mode enabled, not adding onDidChangeTextEditorVisibleRanges",
+      });
+      return;
+    }
     this._extension.addDisposable(
       window.onDidChangeTextEditorVisibleRanges(
         this.onDidChangeTextEditorVisibleRanges,

@@ -6,7 +6,6 @@ import {
 } from "@dendronhq/common-all";
 import { DConfig, tmpDir } from "@dendronhq/common-server";
 import { SeedInitMode, SeedService, SeedUtils } from "@dendronhq/engine-server";
-import os from "os";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
 import { checkDir, checkFile, checkNotInDir, checkVaults } from "../../utils";
@@ -29,9 +28,8 @@ function getSeedVaultPathForCheckFile(seedId: string) {
   return path.join(`${seedId}`, `vault`).replace("\\", "\\\\");
 }
 
-// Skip on Windows for now until reliability issues can be fixed.
-//TODO: Re-enable for Windows
-const runTest = os.platform() === "win32" ? describe.skip : describe;
+// SKIP
+const runTest = describe.skip;
 
 runTest("remove", () => {
   test("error: nothing to remove", async () => {

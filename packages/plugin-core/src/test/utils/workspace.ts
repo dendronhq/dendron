@@ -90,6 +90,7 @@ export class WorkspaceTestUtils {
         enableRemoteVaultInit: true,
         enableUserTags: true,
         enableHashTags: true,
+        enablePersistentHistory: false,
         workspaceVaultSyncMode: "noCommit",
         enableAutoFoldFrontmatter: false,
         enableEditorDecorations: true,

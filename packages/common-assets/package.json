@@ -1,7 +1,7 @@
 {
   "name": "@dendronhq/common-assets",
   "private": true,
-  "version": "0.124.0",
+  "version": "0.123.1",
   "main": "index.js",
   "license": "GPLv3",
   "scripts": {

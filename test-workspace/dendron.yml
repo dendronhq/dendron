@@ -53,6 +53,7 @@ workspace:
   enableRemoteVaultInit: true
   workspaceVaultSyncMode: noCommit
   enableAutoFoldFrontmatter: false
+  enablePerfMode: true
   maxPreviewsCached: 10
   maxNoteLength: 204800
   task:

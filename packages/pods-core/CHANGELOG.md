@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.123.3](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.3) (2023-07-06)
+
+
+
+# 0.117.0 (2022-11-08)
+
+
+### Bug Fixes
+
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+
+
+
+## [0.123.2](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.2) (2023-07-06)
+
+
+
+# 0.117.0 (2022-11-08)
+
+
+### Bug Fixes
+
+* **publishing:** links don't show as private after nextJS export ([#3716](https://github.com/dendronhq/dendron/issues/3716)) ([e6704ac](https://github.com/dendronhq/dendron/commit/e6704ac132924229012a9bd46ae1ab3942d586df)), closes [#3714](https://github.com/dendronhq/dendron/issues/3714) [#3707](https://github.com/dendronhq/dendron/issues/3707) [#3708](https://github.com/dendronhq/dendron/issues/3708)
+* **sync:** next js export pod error ([#3539](https://github.com/dendronhq/dendron/issues/3539)) ([bf62753](https://github.com/dendronhq/dendron/commit/bf62753af19a58ee08d98ff11542f22f1df25fab))
+* **workspace:** wikilinks appear broken + pod fixes ([#3532](https://github.com/dendronhq/dendron/issues/3532)) ([74f91e2](https://github.com/dendronhq/dendron/commit/74f91e26f5f9bad25059cf160ac54bbb2f816eca))
+
+
+### Features Dendron
+
+* **workspace:** copy as command ([#3544](https://github.com/dendronhq/dendron/issues/3544)) ([4f77dfa](https://github.com/dendronhq/dendron/commit/4f77dfa8a42dc3d80582193f8b0804b8b0fa9657))
+
+
+
+
+
 ## [0.123.1](https://github.com/dendronhq/dendron/compare/v0.112.1...v0.123.1) (2023-06-11)
 
 

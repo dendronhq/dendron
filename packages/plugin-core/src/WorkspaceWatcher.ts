@@ -124,14 +124,6 @@ export class WorkspaceWatcher {
     );
 
     this._extension.addDisposable(
-      workspace.onDidChangeTextDocument(
-        this._quickDebouncedOnDidChangeTextDocument,
-        this,
-        context.subscriptions
-      )
-    );
-
-    this._extension.addDisposable(
       workspace.onDidSaveTextDocument(
         this.onDidSaveTextDocument,
         this,
@@ -176,6 +168,18 @@ export class WorkspaceWatcher {
             this.onFirstOpen(editor);
           }
         }),
+        this,
+        context.subscriptions
+      )
+    );
+
+    if (this._extension.getDWorkspace().config.workspace.enablePerfMode) {
+      return;
+    }
+
+    this._extension.addDisposable(
+      workspace.onDidChangeTextDocument(
+        this._quickDebouncedOnDidChangeTextDocument,
         this,
         context.subscriptions
       )

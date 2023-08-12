@@ -37,7 +37,7 @@ const getRootChildrenBacklinks = async (sortOrder?: BacklinkPanelSortOrder) => {
   const mockEvents = new MockEngineEvents();
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
     mockEvents,
-    ExtensionProvider.getDWorkspace().config.dev?.enableLinkCandidates
+    ExtensionProvider.getDWorkspace().config
   );
 
   if (sortOrder) {
@@ -676,9 +676,7 @@ suite("BacklinksTreeDataProvider", function () {
         mockEvents = new MockEngineEvents();
         backlinksTreeDataProvider = new BacklinksTreeDataProvider(
           mockEvents,
-          DConfig.readConfigSync(
-            ExtensionProvider.getDWorkspace().wsRoot
-          ).dev?.enableLinkCandidates
+          DConfig.readConfigSync(ExtensionProvider.getDWorkspace().wsRoot)
         );
 
         updateSortOrder = sinon

@@ -578,10 +578,11 @@ export class DendronExtension implements IDendronExtension {
   private setupBacklinkTreeView() {
     const ctx = "setupBacklinkTreeView";
     Logger.info({ ctx, msg: "init:backlinks" });
+    const config = this.getDWorkspace().config;
 
     const backlinksTreeDataProvider = new BacklinksTreeDataProvider(
       this.getEngine(),
-      this.getDWorkspace().config.dev?.enableLinkCandidates
+      config,
     );
 
     const backlinkTreeView = vscode.window.createTreeView(

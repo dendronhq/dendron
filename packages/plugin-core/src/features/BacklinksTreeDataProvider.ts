@@ -3,6 +3,7 @@ import {
   BacklinkPanelSortOrder,
   DateFormatUtil,
   DendronASTDest,
+  DendronConfig,
   EngineEventEmitter,
   NoteUtils,
   ProcFlavor,
@@ -66,11 +67,8 @@ export default class BacklinksTreeDataProvider
    * @param engineEvents - specifies when note state has been changed on the
    * engine
    */
-  constructor(
-    engineEvents: EngineEventEmitter,
-    isLinkCandidateEnabled: boolean | undefined
-  ) {
-    this._isLinkCandidateEnabled = isLinkCandidateEnabled;
+  constructor(engineEvents: EngineEventEmitter, config: DendronConfig) {
+    this._isLinkCandidateEnabled = config.dev?.enableLinkCandidates;
 
     // Set default sort order to use last updated
     this.sortOrder =
@@ -83,6 +81,16 @@ export default class BacklinksTreeDataProvider
 
     this.onDidChangeTreeData = this._onDidChangeTreeDataEmitter.event;
     this._engineEvents = engineEvents;
+
+    if (config.workspace.enablePerfMode) {
+      const ctx = "BacklinksTreeDataProvider.cons";
+      Logger.info({
+        ctx,
+        msg: "perf mode enabled, not subscribing to backlink updates",
+      });
+      return;
+    }
+
     this.setupSubscriptions();
   }
 
@@ -337,6 +345,7 @@ export default class BacklinksTreeDataProvider
 
     let pathsSorted: string[];
     if (sortOrder === BacklinkPanelSortOrder.PathNames) {
+      // @ts-ignore
       pathsSorted = this.shallowFirstPathSort(referencesByPath);
     } else if (sortOrder === BacklinkPanelSortOrder.LastUpdated) {
       pathsSorted = Object.keys(referencesByPath).sort((p1, p2) => {

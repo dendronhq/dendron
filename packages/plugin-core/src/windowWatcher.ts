@@ -7,7 +7,6 @@ import { WorkspaceUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Duration } from "luxon";
 import { TextEditor, TextEditorVisibleRangesChangeEvent, window } from "vscode";
-import { DoctorUtils } from "./components/doctor/utils";
 import { PreviewProxy } from "./components/views/PreviewProxy";
 import { IDendronExtension } from "./dendronExtensionInterface";
 import { ExtensionProvider } from "./ExtensionProvider";
@@ -55,6 +54,7 @@ export class WindowWatcher {
         })
       )
     );
+
     this._extension.addDisposable(
       window.onDidChangeActiveTextEditor(
         this.onDidChangeActiveTextEditor,
@@ -83,13 +83,6 @@ export class WindowWatcher {
       ) {
         return;
       }
-
-      // check and prompt duplicate warning.
-      DoctorUtils.findDuplicateNoteAndPromptIfNecessary(
-        editor.document,
-        "onDidChangeActiveTextEditor"
-      );
-
       // TODO: changing this to `this._extension.wsUtils.` will fails some tests that
       // mock the extension. Change once that is fixed.
       const note = await ExtensionProvider.getWSUtils().getNoteFromDocument(
@@ -168,6 +161,7 @@ export class WindowWatcher {
       // Decorations only render the visible portions of the screen, so they
       // need to be re-rendered when the user scrolls around
       this.triggerUpdateDecorations(editor);
+
       if (
         editor.document.uri.fsPath ===
           window.activeTextEditor?.document.uri.fsPath &&

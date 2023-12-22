@@ -19,7 +19,7 @@ describe("GIVEN a Notion export pod", () => {
           const vaultName = VaultUtils.getName(vaults[0]);
           pod.createPagesInNotion = jest.fn();
           pod.getAllNotionPages = jest.fn();
-          pod.convertMdToNotionBlock = jest.fn();
+          NotionExportPod.convertMdToNotionBlock = jest.fn();
           await pod.execute({
             engine,
             vaults,
@@ -32,7 +32,7 @@ describe("GIVEN a Notion export pod", () => {
             utilityMethods,
           });
           expect(pod.createPagesInNotion).toHaveBeenCalledTimes(1);
-          expect(pod.convertMdToNotionBlock).toHaveBeenCalledTimes(1);
+          expect(NotionExportPod.convertMdToNotionBlock).toHaveBeenCalledTimes(1);
         },
         {
           expect,

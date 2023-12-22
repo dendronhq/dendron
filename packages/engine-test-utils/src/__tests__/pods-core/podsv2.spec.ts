@@ -19,6 +19,7 @@ import {
   RunnableGoogleDocsV2PodConfig,
   RunnableNotionV2PodConfig,
   RunnableJSONV2PodConfig,
+  NotionExportPod,
 } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -471,7 +472,7 @@ describe("GIVEN a Notion Export Pod with a particular config", () => {
             ],
             errors: [],
           };
-          pod.convertMdToNotionBlock = jest.fn();
+          NotionExportPod.convertMdToNotionBlock = jest.fn();
           pod.createPagesInNotion = jest.fn().mockResolvedValue(response);
           const result = await pod.exportNotes([props]);
           const entCreate = result.data?.created!;

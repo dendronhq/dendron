@@ -196,7 +196,7 @@ There are a variety of ways to connect with Dendron devs, contributors, and othe
 
 Dendron wouldn't be what it is today without help from the wonderful gardeners 👨‍🌾👩‍🌾
 
-If you would like to contribute (docs, code, finance, or advocacy), you can find instructions to do so [here](https://wiki.dendron.so/notes/125c990b-6fe7-4ada-a65f-44cbde8b33f0.html).
+If you would like to contribute (docs, code, finance, or advocacy), you can find instructions to do so [here](https://wiki.dendron.so/notes/125c990b-6fe7-4ada-a65f-44cbde8b33f0.html). For setup of local development environment run `./setup.sh` which automates the setup.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->

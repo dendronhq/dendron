@@ -1,4 +1,7 @@
 import {
+  asyncLoop,
+  asyncRetry,
+  Deferred,
   DendronCompositeError,
   DendronError,
   DEngineClient,
@@ -7,7 +10,6 @@ import {
   ResponseUtil,
   RespV2,
 } from "@dendronhq/common-all";
-import { markdownToBlocks } from "@instantish/martian";
 import { JSONSchemaType } from "ajv";
 import { RateLimiter } from "limiter";
 import _ from "lodash";
@@ -15,6 +17,7 @@ import {
   Client,
   ConfigFileUtils,
   ExportPodV2,
+  NotionExportPod,
   NotionV2PodConfig,
   RunnableNotionV2PodConfig,
 } from "../../..";
@@ -50,8 +53,7 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
 
   async exportNotes(notes: NoteProps[]): Promise<NotionExportReturnType> {
     const { parentPageId } = this._config;
-    const blockPagesArray = this.convertMdToNotionBlock(notes, parentPageId);
-    const { data, errors } = await this.createPagesInNotion(blockPagesArray);
+    const { data, errors } = await this.createPagesInNotion(notes, parentPageId);
     const createdNotes = data.filter(
       (ent): ent is NotionFields => !_.isUndefined(ent)
     );
@@ -71,34 +73,11 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
   }
 
   /**
-   * Method to convert markdown to Notion Block
-   */
-  convertMdToNotionBlock = (notes: NoteProps[], parentPageId: string) => {
-    const notionBlock = notes.map((note) => {
-      const children = markdownToBlocks(note.body);
-      return {
-        dendronId: note.id,
-        block: {
-          parent: {
-            page_id: parentPageId,
-          },
-          properties: {
-            title: {
-              title: [{ type: "text", text: { content: note.title } }],
-            },
-          },
-          children,
-        },
-      };
-    });
-    return notionBlock;
-  };
-
-  /**
    * Method to create pages in Notion
    */
   createPagesInNotion = async (
-    blockPagesArray: any
+    notes: NoteProps[],
+    parentPageId: string,
   ): Promise<{
     data: NotionFields[];
     errors: IDendronError[];
@@ -106,23 +85,35 @@ export class NotionExportPodV2 implements ExportPodV2<NotionExportReturnType> {
     const notion = new Client({
       auth: this._config.apiKey,
     });
-    const errors: IDendronError[] = [];
-    const out: NotionFields[] = await Promise.all(
-      blockPagesArray.map(async (ent: any) => {
-        // @ts-ignore
-        await limiter.removeTokens(1);
-        try {
-          const response = await notion.pages.create(ent.block);
-          return {
-            notionId: response.id,
-            dendronId: ent.dendronId,
-          };
-        } catch (error) {
-          errors.push(error as DendronError);
-          return;
-        }
-      })
+
+    const keyMap = Object.fromEntries(
+      notes.map(note => [
+        note.parent ?? "undefined",
+        note.parent ? new Deferred<string>() : new Deferred<string>(parentPageId)
+      ])
     );
+
+    const errors: IDendronError[] = [];
+    const out: NotionFields[] = await asyncLoop(notes, async (note: NoteProps) => {
+      const parentId = await keyMap[note.parent ?? "undefined"].promise;
+      const blockPage = NotionExportPod.convertMdToNotionBlock(note, parentId);
+
+      return asyncRetry(
+        async () => {
+          await limiter.removeTokens(1);
+          const page = await notion.pages.create(blockPage);
+          keyMap[note.id]?.resolve(page.id);
+          return {
+            notionId: page.id,
+            dendronId: note.id,
+          }
+        },
+        (error) => {
+          keyMap[note.id]?.reject(`Failed to export the note title:'${note.title}' - id:${note.id}.`);
+          errors.push(error as DendronError);
+        });
+    });
+
     return {
       data: out,
       errors,

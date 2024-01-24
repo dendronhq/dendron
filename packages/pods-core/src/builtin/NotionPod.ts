@@ -1,10 +1,12 @@
 import {
   asyncLoop,
+  asyncRetry,
+  Deferred,
   DendronError,
   ERROR_SEVERITY,
   NoteProps,
 } from "@dendronhq/common-all";
-import { markdownToBlocks } from "@instantish/martian";
+import { markdownToBlocks } from "@tryfabric/martian";
 import type {
   Page,
   TitlePropertyValue,
@@ -53,28 +55,48 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
    * Method to create pages in Notion
    */
   createPagesInNotion = (
-    blockPagesArray: any,
-    notion: Client
+    notes: NoteProps[],
+    notion: Client,
+    parentPageId: string,
   ): Promise<any[]> => {
-    return asyncLoop(blockPagesArray, async (block: any) => {
-      await limiter.removeTokens(1);
-      try {
-        await notion.pages.create(block);
-      } catch (error) {
-        throw new DendronError({
-          message: "Failed to export all the notes. " + JSON.stringify(error),
-          severity: ERROR_SEVERITY.MINOR,
+    const keyMap = Object.fromEntries(
+      notes.map(note => [
+        note.parent ?? "undefined", 
+        note.parent ? new Deferred<string>() : new Deferred<string>(parentPageId)
+      ])
+    );
+
+    return asyncLoop(notes, async (note: NoteProps) => {
+      const parentId = await keyMap[note.parent ?? "undefined"].promise;
+      const blockPage = NotionExportPod.convertMdToNotionBlock(note, parentId);
+
+      await asyncRetry(
+        async () => {
+          await limiter.removeTokens(1);
+
+          const page = await notion.pages.create(blockPage);
+
+          keyMap[note.id]?.resolve(page.id);
+
+          return {
+            notionId: page.id,
+            dendronId: note.id,
+          }
+        },
+        (error) => {
+          keyMap[note.id]?.reject(`Failed to export the note title:'${note.title}' - id:${note.id}.`);
+          throw new DendronError({
+            message: `Failed to export the note title:'${note.title}' - id:${note.id} - content: ${JSON.stringify(blockPage)}` + JSON.stringify(error),
+            severity: ERROR_SEVERITY.MINOR,
+          });
         });
-      }
     });
   };
 
   /**
    * Method to convert markdown to Notion Block
    */
-  convertMdToNotionBlock = (notes: NoteProps[], pageId: string) => {
-    const notionBlock = notes.map((note) => {
-      const children = markdownToBlocks(note.body);
+  public static convertMdToNotionBlock = (note: NoteProps, pageId: string): any => {
       return {
         parent: {
           page_id: pageId,
@@ -84,10 +106,8 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
             title: [{ type: "text", text: { content: note.title } }],
           },
         },
-        children,
+        children: markdownToBlocks(note.body),
       };
-    });
-    return notionBlock;
   };
 
   /**
@@ -159,8 +179,7 @@ export class NotionExportPod extends ExportPod<NotionExportConfig> {
       return { notes: [] };
     }
     const pageId = pagesMap[selectedPage];
-    const blockPagesArray = this.convertMdToNotionBlock(notes, pageId);
-    await this.createPagesInNotion(blockPagesArray, notion);
+    await this.createPagesInNotion(notes, notion, pageId);
     return { notes };
   }
 }

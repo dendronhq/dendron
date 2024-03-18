@@ -1,7 +1,7 @@
 {
     "name": "@dendronhq/<%= name %>",
     "description": "",
-    "license": "GPLv3",
+    "license": "Apache 2.0",
     "repository": {
       "type": "git",
       "url": "ssh://git@github.com/dendronhq/dendron.git",
@@ -35,4 +35,3 @@
       "preset": "ts-jest"
     }
   }
-  

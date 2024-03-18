@@ -2,7 +2,7 @@
   "name": "@dendronhq/unified",
   "version": "0.124.0",
   "description": "Unified parser utilities for Dendron",
-  "license": "GPLv3",
+  "license": "Apache 2.0",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",

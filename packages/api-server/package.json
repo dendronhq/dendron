@@ -2,7 +2,7 @@
   "name": "@dendronhq/api-server",
   "version": "0.124.0",
   "description": "",
-  "license": "GPLv3",
+  "license": "Apache 2.0",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",

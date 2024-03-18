@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.124.0",
   "main": "index.js",
-  "license": "GPLv3",
+  "license": "Apache 2.0",
   "scripts": {
     "watch": "echo nop",
     "build": "node scripts/buildStyles.js && gulp less js",

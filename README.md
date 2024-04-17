@@ -529,8 +529,10 @@ If you would like to contribute (docs, code, finance, or advocacy), you can find
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. We welcome community contributions and pull requests. See the [Dendron development guide](https://docs.dendron.so/notes/3489b652-cd0e-4ac8-a734-08094dc043eb/) for information on how to set up a development environment and submit code.
 
+
+
 ## License
 
-Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
+Dendron is distributed under the Apache License, Version 2.0.
 
 See [LICENSE](https://github.com/dendronhq/dendron/blob/master/LICENSE.md) and [NOTICE](https://github.com/dendronhq/dendron/blob/master/NOTICE.md) for more information.

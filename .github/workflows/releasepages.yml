@@ -1,0 +1,28 @@
+# Releasepages.dev Changelog Generator
+# Repository: dendronhq/dendron
+# Generated: 2025-06-01T21:30:19.547Z
+name: Generate Changelog
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+jobs:
+  generate-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Get recent commits
+        id: get-commits
+        run: |
+          echo "hash<SEP>message<SEP>author<SEP>date" > commits.csv
+          git log -10 --pretty=format:"%H<SEP>%s%n%b<SEP>%an<SEP>%ad<END>" --date=iso >> commits.csv
+          COMMITS=$(cat commits.csv)
+      
+      - name: Send to Releasepages
+        run: |
+          curl -X POST             -H "Content-Type: text/plain"             -H "X-Releasepages-Secret: ${SECRET_KEY}"             -H "X-Repository: ${GITHUB_REPOSITORY}"             --data-binary @commits.csv             https://www.releasepages.dev/api/webhooks/github
+        env:
+          SECRET_KEY: ${{ secrets.RELEASEPAGES_SECRET_KEY }}

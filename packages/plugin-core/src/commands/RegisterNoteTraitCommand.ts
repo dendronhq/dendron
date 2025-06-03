@@ -85,6 +85,15 @@ module.exports = {
     // setTemplate: () => {
     //   return "root";
     // },
+    /**
+     * Specify the vault in which a new note is created.
+     * This method is optional, uncomment out
+     * the lines below if you want to specify the vault.
+     * @returns the name of the desired vault.
+     */
+    // setVault: () => {
+    //   return "vault";
+    // },
   },
 };
 `;

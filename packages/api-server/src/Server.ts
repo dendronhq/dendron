@@ -47,7 +47,26 @@ export function appModule({
   const ctx = "appModule:start";
   const logger = getLogger();
   const app = express();
-  app.use(cors());
+  // This server listens on localhost with no authentication: the only thing
+  // standing between a workspace's notes/assets and any web page the user
+  // happens to have open is the browser's own same-origin policy. `cors()`
+  // with no options reflects whatever Origin a request sends, which hands
+  // that protection away - any site could fetch() this server's routes
+  // cross-origin and read the response. Only allow the known local Next.js
+  // preview origin (when configured) plus requests with no Origin header at
+  // all (same-origin browser requests, and non-browser clients like the
+  // extension host itself never send one).
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || origin === nextServerUrl) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error("Not allowed by CORS"));
+      },
+    })
+  );
   app.use(express.json({ limit: "500mb" }));
   app.use(express.urlencoded({ extended: true }));
   if (logPath !== "stdout") {
